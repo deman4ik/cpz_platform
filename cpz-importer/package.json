@@ -1,0 +1,25 @@
+{
+  "name": "cpz-importer",
+  "version": "1.0.0",
+  "description": "Cryptuoso data importer",
+  "main": "index.js",
+  "dependencies": {
+    "ccxt": "^1.14.163",
+    "durable-functions": "0.0.3",
+    "moment": "^2.22.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "prettier": "^1.13.5"
+  },
+  "scripts": {
+    "storage": "azurite -l storage",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dmitry Shatalov",
+  "license": "ISC"
+}
