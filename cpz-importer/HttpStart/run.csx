@@ -2,6 +2,7 @@
 #r "Newtonsoft.Json"
 
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 
 public static async Task<HttpResponseMessage> Run(
