@@ -4,8 +4,10 @@
   "description": "Cryptuoso data importer",
   "main": "index.js",
   "dependencies": {
+    "base-64": "^0.1.0",
     "ccxt": "^1.14.163",
     "durable-functions": "0.0.3",
+    "graphql-request": "^1.6.0",
     "moment": "^2.22.2"
   },
   "devDependencies": {

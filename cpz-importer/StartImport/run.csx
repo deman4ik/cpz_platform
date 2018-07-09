@@ -20,20 +20,20 @@ public static async Task Run(DurableOrchestrationContext context, ILogger log)
         firstRetryInterval: TimeSpan.FromMilliseconds(timeout),
         maxNumberOfAttempts: 5);
     // Вызов функции загрузки свечей
-    var result = await context.CallActivityWithRetryAsync<JObject>("LoadOHLC", retryOptions, JsonConvert.SerializeObject(input));
-    //TODO: Сохранение результата в БД
-    var data = result["data"];
+    var loadResult = await context.CallActivityWithRetryAsync<JObject>("LoadOHLC", retryOptions, JsonConvert.SerializeObject(input));
+    // Вызов функции сохранения свечей
+    var saveResult = await context.CallActivityWithRetryAsync<JObject>("SaveOHLC", retryOptions, JsonConvert.SerializeObject(loadResult));
     // Установка текущего статуса
     context.SetCustomStatus(new
     {
-        totalDuration = (double)result["status"]["totalDuration"],
-        completedDuration = (double)result["status"]["completedDuration"],
-        leftDuration = (double)result["status"]["leftDuration"],
-        percent = (double)result["status"]["percent"]
+        totalDuration = (double)loadResult["status"]["totalDuration"],
+        completedDuration = (double)loadResult["status"]["completedDuration"],
+        leftDuration = (double)loadResult["status"]["leftDuration"],
+        percent = (double)loadResult["status"]["percent"]
     });
 
     // Параметры нового запроса на импорт
-    var next = result["next"];
+    var next = loadResult["next"];
     // Если параметры заданы
     if (next != null)
     {

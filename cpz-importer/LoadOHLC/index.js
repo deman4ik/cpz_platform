@@ -74,6 +74,7 @@ async function LoadOHLC(context, input) {
       };
       // Результат выполнения
       const result = {
+        input, // старые параметры запроса
         next, // новые параметры запроса, если необходимо
         status, // текущий статус выполнения задачи
         data: candles // полученные данные
