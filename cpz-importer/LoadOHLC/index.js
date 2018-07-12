@@ -1,6 +1,6 @@
 const moment = require("moment");
 const ccxt = require("ccxt");
-
+const HttpsProxyAgent = require("https-proxy-agent");
 // Общий объект бирж для текущего инстанса
 const exchanges = {};
 
@@ -11,8 +11,13 @@ async function LoadOHLC(context, input) {
     // Есть ли нужная биржа в общем объекте
     if (!Object.prototype.hasOwnProperty.call(exchanges, input.exchange)) {
       // Если нет добавляем
+      let agent;
+      if (input.proxy) {
+        agent = new HttpsProxyAgent(input.proxy);
+      }
       exchanges[input.exchange] = new ccxt[input.exchange]({
-        enableRateLimit: true
+        // enableRateLimit: true,
+        agent
       });
     }
 
