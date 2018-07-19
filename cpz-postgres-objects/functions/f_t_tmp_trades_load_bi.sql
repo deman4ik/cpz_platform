@@ -10,11 +10,11 @@ BEGIN
     return null;
   end if;
 
-  rTR.entry_date := to_date(NEW.entry_date,'MM/DD/YYYY');
+  rTR.entry_date := to_date(NEW.entry_date,'DD/MM/YYYY');
   if NEW.exit_date = 'Open' then
     rTR.exit_date := null;
   else
-    rTR.exit_date := to_date(NEW.exit_date,'MM/DD/YYYY');
+    rTR.exit_date := to_date(NEW.exit_date,'DD/MM/YYYY');
   end if;
 
   rTR.action := NEW.position;
