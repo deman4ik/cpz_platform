@@ -8,11 +8,11 @@ BEGIN
   ELSE
     IF (lower(NEW.action) = 'long' or lower(NEW.action) = 'buy') THEN
       NEW.action := 'buy';
-    ELSE
-      IF (NEW.action != 'buy' and NEW.action != 'sell') THEN
-        RAISE EXCEPTION '20101: trade_roundtrips.action must be buy|sell';
-      END IF;
     END IF;
+  END IF;
+
+  IF (NEW.action != 'buy' and NEW.action != 'sell') THEN
+    RAISE EXCEPTION '20101: trade_roundtrips.action must be buy|sell (got: %s)',NEW.action;
   END IF;
 
   IF (NEW.entry_balance IS NULL) THEN

@@ -33,3 +33,6 @@ comment on column trade_roundtrips.entry_balance is '= entry_price * quantity';
 comment on column trade_roundtrips.exit_balance is '= exit_price * quantity';
 COMMENT ON COLUMN trade_roundtrips.historic IS '1 - uploaded historic data, not generated';
 comment on table "cpz-platform".trade_roundtrips is E'@omit create,update,delete';
+
+ALTER TABLE trade_roundtrips
+ ADD CONSTRAINT c_trade_roundtrips_uk2 UNIQUE (robot, action, entry_date, entry_price);
