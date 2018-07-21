@@ -34,12 +34,14 @@ BEGIN
     date_time,
     robot,
     action,
-    price
+    price,
+    signal_type
   ) values (
     rSIGNAL.date_time,
     rSIGNAL.robot,
     rSIGNAL.action,
-    rSIGNAL.price
+    rSIGNAL.price,
+    rSIGNAL.signal_type
   );
   --on conflict do nothing;
 
