@@ -5,13 +5,14 @@ as $$
 DECLARE
   rSIGNAL signals%ROWTYPE;
 BEGIN
+  new.alert_time := replace(new.alert_time,'/','.');
 
-  rSIGNAL.date_time := to_date(new.alert_time,'MM/DD/YYYY');
+  rSIGNAL.date_time := to_date(new.alert_time,'DD.MM.YYYY');
   rSIGNAL.action := new.action;
   rSIGNAL.signal_type := new.order_type;
   rSIGNAL.signal_name := new.signal_name;
   if rSIGNAL.action not in ('Buy','Sell','Short','Cover') then
-    RAISE EXCEPTION '20101: tmp_signal_load.action must be: Buy, Sell, Short, Cover';
+    RAISE EXCEPTION '20101: tmp_signal_load.action must be: Buy, Sell, Short, Cover (got: %s)', NEW.action;
   end if;
 
   NEW.price := replace(new.price, ',', '.');
@@ -33,12 +34,14 @@ BEGIN
     date_time,
     robot,
     action,
-    price
+    price,
+    signal_type
   ) values (
     rSIGNAL.date_time,
     rSIGNAL.robot,
     rSIGNAL.action,
-    rSIGNAL.price
+    rSIGNAL.price,
+    rSIGNAL.signal_type
   );
   --on conflict do nothing;
 

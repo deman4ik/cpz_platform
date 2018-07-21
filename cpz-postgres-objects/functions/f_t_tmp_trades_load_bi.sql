@@ -4,22 +4,34 @@ language plpgsql
 as $$
 DECLARE
   rTR trade_roundtrips%ROWTYPE;
-
 BEGIN
+
   if NEW.position is null and NEW.symbol is null then
     return null;
   end if;
 
-  rTR.entry_date := to_date(NEW.entry_date,'DD/MM/YYYY');
+  new.entry_date := replace(new.entry_date,'/','.');
+  new.exit_date  := replace(new.exit_date,'/','.');
+
+  rTR.entry_date := to_date(NEW.entry_date,'DD.MM.YYYY');
   if NEW.exit_date = 'Open' then
     rTR.exit_date := null;
   else
-    rTR.exit_date := to_date(NEW.exit_date,'DD/MM/YYYY');
+    rTR.exit_date := to_date(NEW.exit_date,'DD.MM.YYYY');
   end if;
 
-  rTR.action := NEW.position;
-  if rTR.action not in ('Buy','Sell','Short','Long') then
-    RAISE EXCEPTION '20101: tmp_trades_load.position must be: Buy, Sell, Short, Long';
+  rTR.action := trim(NEW.position);
+  if lower(rTR.action) not in ('buy','sell','short','long') then
+    RAISE EXCEPTION '20101: tmp_trades_load.position must be: Buy, Sell, Short, Long (got: %s)', NEW.position;
+  else
+    if (lower(rTR.action) = 'short' or lower(rTR.action) = 'sell') then
+        rTR.action := 'sell';
+    else
+      if (lower(rTR.action) = 'long' or lower(rTR.action) = 'buy') then
+        rTR.action := 'buy';
+      end if;
+    end if;
+
   end if;
 
   NEW.entry_price := replace(NEW.entry_price, ',', '.');
@@ -27,7 +39,7 @@ BEGIN
   NEW.profit_$    := replace(NEW.profit_$,    ',', '.');
 
 
-  rTR.entry_price :=  regexp_replace(NEW.entry_price, '[^\d.-]', '', 'g'); -- not digits and not minus
+  rTR.entry_price :=  regexp_replace(NEW.entry_price, '[^\d.-]', '', 'g'); -- удаляем не цифры и не минус
   rTR.profit$     :=  regexp_replace(NEW.profit_$,    '[^\d.-]', '', 'g');
   if NEW.exit_price = 'Open' or NEW.exit_price = '' then
     rTR.exit_price := null;
@@ -51,34 +63,34 @@ BEGIN
   rTR.bars_held := NEW.bars_held;
   rTR.historic := 1; -- imported, but not generated from running robot
 
-  -- only for last year: checking if open round exists
-  if rTR.exit_date is not null and to_char(now(),'yyyy') = to_char(rTR.entry_date,'yyyy')  then
+
+  -- trying to find opened trade
+  rTR.id := null;
+  if rTR.exit_date is not null then
     BEGIN
       select id
       into strict rTR.id
-      from trade_roundtrips
-      where
-          robot = rTR.robot
-      and entry_date = rTR.entry_date
-      and entry_price = rTR.entry_price
-      and action = rTR.action
-      and exit_date is null
-      and exit_price is null;
+      from trade_roundtrips t
+      where t.exit_date is null
+        and t.entry_price = rTR.entry_price
+        and t.entry_date  = rTR.entry_date
+        and t.action = rTR.action
+        and t.robot = rTR.robot;
 
+      update trade_roundtrips
+        set exit_date  = rTR.exit_date,
+            exit_price = rTR.exit_price,
+            bars_held  = rTR.bars_held,
+            profit$    = rTR.profit$
+        where id = rTR.id;
       EXCEPTION
-      WHEN NO_DATA_FOUND THEN
+      WHEN NO_DATA_FOUND
+        THEN
           null;
     END;
   end if;
 
-  if rTR.id is not null then
-    update trade_roundtrips
-      set exit_date = rTR.exit_date,
-          exit_price = rTR.exit_price,
-          bars_held = rTR.bars_held,
-          profit$ = rTR.profit$
-    where id = rTR.id;
-  else
+  if rTR.id is null then
     insert into trade_roundtrips (
       robot,
       quantity,
@@ -102,7 +114,8 @@ BEGIN
       rTR.profit$,
       rTR.historic
     );
-  --on conflict do nothing;
+    --on conflict do nothing; -- ignore dup val on index
+  end if;
 
   RETURN NEW;
 END;
