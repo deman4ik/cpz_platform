@@ -4,7 +4,7 @@ language plpgsql
 as $$
 DECLARE
 BEGIN
-  refresh materialized view mv_candles_timeframe60;
+  refresh materialized view CONCURRENTLY mv_candles_timeframe60;
   return true;
 END;
 $$;
