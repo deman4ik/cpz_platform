@@ -72,7 +72,7 @@ BEGIN
       into strict rTR.id
       from trade_roundtrips t
       where t.exit_date is null
-        and t.entry_price = rTR.entry_price
+        and round(t.entry_price,2) = round(rTR.entry_price,2)
         and t.entry_date  = rTR.entry_date
         and t.action = rTR.action
         and t.robot = rTR.robot;
