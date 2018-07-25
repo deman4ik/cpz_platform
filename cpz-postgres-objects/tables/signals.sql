@@ -13,3 +13,6 @@ CREATE TABLE signals
 CREATE UNIQUE INDEX c_signals_pk ON signals (id);
 COMMENT ON COLUMN signals.action IS 'Buy | Sell | Short | Cover';
 comment on table "cpz-platform".signals is E'@omit create,update,delete';
+
+ALTER TABLE signals
+  ADD CONSTRAINT c_signals_uk UNIQUE (robot, date_time, action, price, signal_type);
