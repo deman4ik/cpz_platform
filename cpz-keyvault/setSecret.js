@@ -8,11 +8,11 @@ const vaultUri = process.env.VAULT;
 /**
  * Сохранение секрета в хранилище
  *
- * @param {string} secretName имя
  * @param {string} secretValue значение
- * @returns {string} версия
+ * @param {string} secretName имя
+ * @returns {json} идентификатор
  */
-const setSecret = async (secretName, secretValue) => {
+const setSecret = async (secretValue, secretName) => {
   try {
     const keyVaultClient = await getClient(clientId, secret);
     const result = await keyVaultClient.setSecret(
@@ -21,7 +21,7 @@ const setSecret = async (secretName, secretValue) => {
       secretValue
     );
     const secretId = KeyVault.parseSecretIdentifier(result.id);
-    return secretId.version;
+    return secretId;
   } catch (err) {
     console.log(err);
     return new Error(`Can't set secret\n${err}`);

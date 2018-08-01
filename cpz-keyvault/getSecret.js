@@ -11,7 +11,7 @@ const vaultUri = process.env.VAULT;
  * @param {string} secretVersion версия
  * @returns {string}
  */
-const getSecret = async (secretName, secretVersion) => {
+const getSecret = async (secretName, secretVersion = "") => {
   try {
     const keyVaultClient = await getClient(clientId, secret);
     const result = await keyVaultClient.getSecret(
