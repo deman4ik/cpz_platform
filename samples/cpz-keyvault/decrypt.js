@@ -1,8 +1,8 @@
 const getClient = require("./client");
 
-const clientId = process.env.READ_CLIENT_ID; // service principal
-const secret = process.env.READ_APPLICATION_SECRET;
-const vaultUri = process.env.VAULT;
+const CLIENT_ID = process.env.READ_CLIENT_ID; // service principal
+const SECRET = process.env.READ_APPLICATION_SECRET;
+const VAULT_URI = process.env.VAULT;
 
 /**
  * Разшифровка сообщения
@@ -14,10 +14,10 @@ const vaultUri = process.env.VAULT;
  */
 const decrypt = async (value, keyName, keyVersion = "") => {
   try {
-    const keyVaultClient = await getClient(clientId, secret);
+    const keyVaultClient = await getClient(CLIENT_ID, SECRET);
 
     const result = await keyVaultClient.decrypt(
-      vaultUri,
+      VAULT_URI,
       keyName,
       keyVersion,
       "RSA-OAEP",

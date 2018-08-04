@@ -1,9 +1,9 @@
 const KeyVault = require("azure-keyvault");
 const getClient = require("./client");
 
-const clientId = process.env.WRITE_CLIENT_ID; // service principal
-const secret = process.env.WRITE_APPLICATION_SECRET;
-const vaultUri = process.env.VAULT;
+const CLIENT_ID = process.env.WRITE_CLIENT_ID; // service principal
+const SECRET = process.env.WRITE_APPLICATION_SECRET;
+const VAULT_URI = process.env.VAULT;
 
 /**
  * Сохранение секрета в хранилище
@@ -14,9 +14,9 @@ const vaultUri = process.env.VAULT;
  */
 const setSecret = async (secretValue, secretName) => {
   try {
-    const keyVaultClient = await getClient(clientId, secret);
+    const keyVaultClient = await getClient(CLIENT_ID, SECRET);
     const result = await keyVaultClient.setSecret(
-      vaultUri,
+      VAULT_URI,
       secretName,
       secretValue
     );

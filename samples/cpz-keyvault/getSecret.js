@@ -1,8 +1,8 @@
 const getClient = require("./client");
 
-const clientId = process.env.READ_CLIENT_ID; // service principal
-const secret = process.env.READ_APPLICATION_SECRET;
-const vaultUri = process.env.VAULT;
+const CLIENT_ID = process.env.READ_CLIENT_ID; // service principal
+const SECRET = process.env.READ_APPLICATION_SECRET;
+const VAULT_URI = process.env.VAULT;
 
 /**
  * Считывание секрета из хранилища
@@ -13,9 +13,9 @@ const vaultUri = process.env.VAULT;
  */
 const getSecret = async (secretName, secretVersion = "") => {
   try {
-    const keyVaultClient = await getClient(clientId, secret);
+    const keyVaultClient = await getClient(CLIENT_ID, SECRET);
     const result = await keyVaultClient.getSecret(
-      vaultUri,
+      VAULT_URI,
       secretName,
       secretVersion
     );
