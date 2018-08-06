@@ -26,7 +26,7 @@ public static IActionResult Run(HttpRequest req, ILogger log)
 
     log.Info($"C# HTTP trigger function begun");
             string response = string.Empty;
-            const string CustomTopicEvent = "CPZ.Ticks.TickReceivedEvent";
+            const string CustomTopicEvent = "CPZ.Ticks.NewTick";
 
             string requestContent = await req.Content.ReadAsStringAsync();
             log.Info($"Received events: {requestContent}");
@@ -37,25 +37,28 @@ public static IActionResult Run(HttpRequest req, ILogger log)
 
             foreach (EventGridEvent eventGridEvent in eventGridEvents)
             {
+                // Если пришел запрос на валидацию 
                 if (eventGridEvent.Data is SubscriptionValidationEventData)
                 {
                     var eventData = (SubscriptionValidationEventData)eventGridEvent.Data;
                     log.Info($"Got SubscriptionValidation event data, validationCode: {eventData.ValidationCode},  validationUrl: {eventData.ValidationUrl}, topic: {eventGridEvent.Topic}");
-                    // Do any additional validation (as required) such as validating that the Azure resource ID of the topic matches
-                    // the expected topic and then return back the below response
+                    // TODO: any additional validation (as required) such as validating that the Azure resource ID of the topic matches
+                    // TODO: the expected topic and then return back the below response
                     var responseData = new SubscriptionValidationResponse()
                     {
                         ValidationResponse = eventData.ValidationCode
                     };
-
+                    // Возвращаем полученный код валидации
                     return req.CreateResponse(HttpStatusCode.OK, responseData);
                 }
+                // Если пришел запрос с нужным форматом данных
                 else if (eventGridEvent.Data is CPZTicksReceivedEventData)
                 {
+                    // Считываем данные
                     var eventData = (CPZTicksReceivedEventData)eventGridEvent.Data;
                     log.Info($"Got CPZTicksReceived event data, price {eventData.Price}");
                 }
             }
-
+            // При успехе всегда возвращаем 200
             return req.CreateResponse(HttpStatusCode.OK, response);
 }
