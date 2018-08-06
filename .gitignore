@@ -3,3 +3,7 @@
 ################################################################################
 
 /cpz-marketWatcher/.vs
+/.vs/VSWorkspaceState.json
+/cpz-marketWatcher/CPZMarketWatcher/DataProviders
+/cpz-marketWatcher/CPZMarketWatcher/README.md
+/.vs/slnx.sqlite-journal
