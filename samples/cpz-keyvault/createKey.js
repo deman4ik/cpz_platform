@@ -1,9 +1,9 @@
 const KeyVault = require("azure-keyvault");
 const getClient = require("./client");
 
-const clientId = process.env.WRITE_CLIENT_ID; // service principal
-const secret = process.env.WRITE_APPLICATION_SECRET;
-const vaultUri = process.env.VAULT;
+const CLIENT_ID = process.env.WRITE_CLIENT_ID; // service principal
+const SECRET = process.env.WRITE_APPLICATION_SECRET;
+const VAULT_URI = process.env.VAULT;
 
 /**
  * Создание нового ключа
@@ -13,7 +13,7 @@ const vaultUri = process.env.VAULT;
  */
 const createKey = async keyName => {
   try {
-    const keyVaultClient = await getClient(clientId, secret);
+    const keyVaultClient = await getClient(CLIENT_ID, SECRET);
 
     const keyOperations = ["encrypt", "decrypt"];
     const keyOptions = {
@@ -22,7 +22,7 @@ const createKey = async keyName => {
     };
 
     const result = await keyVaultClient.createKey(
-      vaultUri,
+      VAULT_URI,
       keyName,
       "RSA",
       keyOptions

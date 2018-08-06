@@ -1,9 +1,3 @@
-﻿################################################################################
-# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
-################################################################################
-
-/cpz-marketWatcher/.vs
-/.vs/VSWorkspaceState.json
-/cpz-marketWatcher/CPZMarketWatcher/DataProviders
-/cpz-marketWatcher/CPZMarketWatcher/README.md
-/.vs/slnx.sqlite-journal
+.vs
+.vscode
+.DS_Store
