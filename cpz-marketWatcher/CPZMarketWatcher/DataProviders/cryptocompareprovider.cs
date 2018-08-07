@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using CPZMarketWatcher.Models;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using CPZMarketWatcher.Models;
 using Newtonsoft.Json;
 using SuperSocket.ClientEngine;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using WebSocket4Net;
 using WebSocket = WebSocket4Net.WebSocket;
 using WebSocketState = WebSocket4Net.WebSocketState;
@@ -21,11 +16,11 @@ namespace CPZMarketWatcher.DataProviders
     /// <summary>
     /// поставщик данных cryptocompare
     /// </summary>
-    public class CryptoCompareProvaider : AbstractDataProvider
+    public class CryptoCompareProvider : AbstractDataProvider
     {
-        public CryptoCompareProvaider(string name) : base(name)
+        public CryptoCompareProvider(string name) : base(name)
         {
-            
+
         }
 
         private WebSocket _webSocket;
@@ -33,7 +28,7 @@ namespace CPZMarketWatcher.DataProviders
         /// <summary>
         /// список бумаг на которые уже подписаны
         /// </summary>
-        public List<StartImportQuery> SubscribedPairs = new List<StartImportQuery>();
+        public override List<StartImportQuery> SubscribedPairs { get; set; } = new List<StartImportQuery>();
 
         /// <summary>
         /// проверить был ли такой запрос
@@ -43,7 +38,7 @@ namespace CPZMarketWatcher.DataProviders
         private bool CheckSubscription(StartImportQuery newQuery)
         {
             var needQuery = SubscribedPairs.Find(q =>
-                q.Exchange == newQuery.Exchange && 
+                q.Exchange == newQuery.Exchange &&
                 q.Baseq == newQuery.Baseq &&
                 q.Quote == newQuery.Quote);
 
@@ -78,7 +73,7 @@ namespace CPZMarketWatcher.DataProviders
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
 
         /// <summary>
@@ -102,7 +97,7 @@ namespace CPZMarketWatcher.DataProviders
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
 
         private static readonly HttpClient client = new HttpClient();
@@ -164,7 +159,7 @@ namespace CPZMarketWatcher.DataProviders
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
 
         /// <summary>
@@ -211,14 +206,14 @@ namespace CPZMarketWatcher.DataProviders
 
             for (int i = 0; i < needQueries.Count; i++)
             {
-                if (i != needQueries.Count-1)
+                if (i != needQueries.Count - 1)
                 {
                     pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Baseq}~{needQueries[i].Quote}\",";
                 }
                 else
                 {
                     pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Baseq}~{needQueries[i].Quote}\"]}}]";
-                }               
+                }
             }
             return pattern;
         }
@@ -239,24 +234,24 @@ namespace CPZMarketWatcher.DataProviders
 
             Task.Run(async () =>
             {
-                while (!token.IsCancellationRequested )
+                while (!token.IsCancellationRequested)
                 {
                     await Task.Delay(pingInterval, token);
 
                     if (_webSocket.State == WebSocketState.Open)
                     {
                         _webSocket.Send(Ping);
-                    }                    
-                }                
+                    }
+                }
             }, token);
         }
 
         private readonly DateTime _timeStart = new DateTime(1970, 01, 01);
-          
+
         private readonly object _newTradeLocker = new object();
 
         private Trade _newTrade = new Trade();
-        
+
         private void ResOnMessageReceived(object sender, MessageReceivedEventArgs messageReceivedEventArgs)
         {
             try
@@ -283,7 +278,7 @@ namespace CPZMarketWatcher.DataProviders
                             _newTrade.Volume = values[6];
                             _newTrade.Price = values[7];
 
-                            Debug.WriteLine($"Биржа: {_newTrade.Exchange} Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");                            
+                            Debug.WriteLine($"Биржа: {_newTrade.Exchange} Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                         }
                     }
                 }
@@ -325,7 +320,7 @@ namespace CPZMarketWatcher.DataProviders
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
 
         /// <summary>
@@ -338,10 +333,10 @@ namespace CPZMarketWatcher.DataProviders
             Debug.WriteLine("Соединение закрыто, переподключаемся" + DateTime.Now);
 #endif
             Task.Run(async () =>
-             {
-                 await Task.Delay(5000);
-                 RestartReceivingData();
-             });
+            {
+                await Task.Delay(5000);
+                RestartReceivingData();
+            });
         }
 
         private void ResOnError(object sender, ErrorEventArgs errorEventArgs)

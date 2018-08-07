@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CPZMarketWatcher.DataProviders;
 using CPZMarketWatcher.Models;
 
-namespace CPZMarketWatcher.Servises
+namespace CPZMarketWatcher.Services
 {
     /// <summary>
     /// управляющий поставщиками данных
@@ -37,7 +37,7 @@ namespace CPZMarketWatcher.Servises
             return await Task.Run(() =>
             {
                 provider = AllRunningProviders.Find(prov => prov.Name == uniqName);
-           
+
                 if (provider != null)
                 {
                     return provider;
@@ -53,7 +53,7 @@ namespace CPZMarketWatcher.Servises
                 }
 
                 return null;
-            });            
+            });
         }
 
         /// <summary>
@@ -62,11 +62,79 @@ namespace CPZMarketWatcher.Servises
         public async Task SubscribeNewPaperAsync(StartImportQuery queryMsg)
         {
             AbstractDataProvider needProvider = await GetProviderAsync(queryMsg.NameProvider, queryMsg.TypeDataProvider);
-            
+
             needProvider.StartReceivingData(queryMsg);
         }
 
-    }
+        /// <summary>
+        /// получить информацию обо всех активных поставщиках
+        /// </summary>
+        /// <returns>список активных поставщиков</returns>
+        public List<ProviderInfo> TakeAllActiveProviders()
+        {
+            try
+            {
+                var allProviders = new List<ProviderInfo>();
 
-    
+                foreach (var abstractDataProvider in AllRunningProviders)
+                {
+                    var runningPairs = new List<string>();
+
+                    foreach (var startImportQuery in abstractDataProvider.SubscribedPairs)
+                    {
+                        runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Baseq}-{startImportQuery.Quote}");
+                    }
+
+                    allProviders.Add(new ProviderInfo()
+                    {
+                        Name = abstractDataProvider.Name,
+                        RunningPairs = runningPairs
+                    });
+                }
+
+                return allProviders;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// получить информацию о поставщике по имени
+        /// </summary>
+        /// <param name="name">имя нужного поставщика</param>
+        /// <returns></returns>
+        public ProviderInfo TakeActiveProviderByName(string name)
+        {
+            try
+            {
+                var needProvider = AllRunningProviders.Find(provider => provider.Name == name);
+
+                if (needProvider == null)
+                {
+                    return null;
+                }
+
+                var runningPairs = new List<string>();
+
+                foreach (var startImportQuery in needProvider.SubscribedPairs)
+                {
+                    runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Baseq}-{startImportQuery.Quote}");
+                }
+
+                return new ProviderInfo()
+                {
+                    Name = needProvider.Name,
+                    RunningPairs = runningPairs
+                };
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+    }
 }

@@ -7,10 +7,10 @@ namespace CPZMarketWatcher.Models
 {
     public class SubMsg
     {
-        public string sid { get; set; }
-        public List<object> upgrades { get; set; }
-        public int pingInterval { get; set; }
-        public int pingTimeout { get; set; }
+        public string Sid { get; set; }
+        public List<object> Upgrades { get; set; }
+        public int PingInterval { get; set; }
+        public int PingTimeout { get; set; }
     }
 
 }

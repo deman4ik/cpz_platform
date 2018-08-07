@@ -1,8 +1,5 @@
-﻿using System;
+﻿using CPZMarketWatcher.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CPZMarketWatcher.Models;
 
 namespace CPZMarketWatcher.DataProviders
 {
@@ -20,8 +17,10 @@ namespace CPZMarketWatcher.DataProviders
         {
             Name = name;
         }
-        
+
+        public abstract List<StartImportQuery> SubscribedPairs { get; set; }
+
         public abstract void StartReceivingData(StartImportQuery subscribe);
-      
+
     }
 }

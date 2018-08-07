@@ -11,8 +11,9 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/values",
+      "launchUrl": "api/import",
       "environmentVariables": {
+        "API_KEY": "test",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

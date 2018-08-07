@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CPZMarketWatcher.DataProviders;
-using CPZMarketWatcher.Models;
-using CPZMarketWatcher.Servises;
-using Microsoft.AspNetCore.Http;
+﻿using CPZMarketWatcher.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using CPZMarketWatcher.Services;
 
 namespace CPZMarketWatcher.Controllers
 {
@@ -21,37 +16,49 @@ namespace CPZMarketWatcher.Controllers
             _manager = manager;
         }
 
-        // GET: api/import
+        /// <summary>
+        /// получить информацию обо всех активных поставщиках
+        /// </summary>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public JsonResult Get()
         {
-            return new string[] { "Hello", "Import" };
+            var allProvidersInfo = _manager.TakeAllActiveProviders();
+
+            return Json(allProvidersInfo);
         }
 
-        // GET: api/import/5
+        /// <summary>
+        /// получить информацию о конкретном поставщике
+        /// </summary>
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public JsonResult Get(string id)
         {
-            return "value";
+            var needProvider = _manager.TakeActiveProviderByName(id);
+
+            if (needProvider != null)
+            {
+                return Json(needProvider);
+            }
+            return Json("Not found");
         }
-        
-        // POST: api/import
+
+        /// <summary>
+        /// запустить импорт данных
+        /// </summary>
         [HttpPost]
         public async Task Post([FromBody]StartImportQuery query)
         {
             var res = query;
-            
+
             await _manager.SubscribeNewPaperAsync(query);
-            
-                       
         }
-        
+
         // PUT: api/import/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)
         {
         }
-        
+
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(int id)
