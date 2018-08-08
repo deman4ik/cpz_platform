@@ -27,7 +27,7 @@ namespace CPZMarketWatcher.Models
         public string Response { get; set; }
         public int Type { get; set; }
         public bool Aggregated { get; set; }
-        public List<Candle> AllCandles { get; set; }
+        public List<Candle> Data { get; set; }
         public int TimeTo { get; set; }
         public int TimeFrom { get; set; }
         public bool FirstValueInArray { get; set; }

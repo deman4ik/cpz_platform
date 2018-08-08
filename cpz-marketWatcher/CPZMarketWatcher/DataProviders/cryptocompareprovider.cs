@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.EventGrid;
+using Microsoft.Azure.EventGrid.Models;
+using Newtonsoft.Json.Linq;
 using WebSocket4Net;
 using WebSocket = WebSocket4Net.WebSocket;
 using WebSocketState = WebSocket4Net.WebSocketState;
@@ -20,9 +23,16 @@ namespace CPZMarketWatcher.DataProviders
     {
         public CryptoCompareProvider(string name) : base(name)
         {
-             _tokenSource = new CancellationTokenSource();
+            _tokenSource = new CancellationTokenSource();
 
             _token = _tokenSource.Token;
+
+            _topicHostname = new Uri(_topicEndpoint).Host;
+
+            // Формирование объекта прав доступа к сервису
+            var topicCredentials = new TopicCredentials(_topicKey);
+
+            _eventGridClient = new EventGridClient(topicCredentials);
         }
 
         private readonly CancellationTokenSource _tokenSource;
@@ -105,6 +115,8 @@ namespace CPZMarketWatcher.DataProviders
                 _allTokenSources.Clear();
 
                 _webSocket.Dispose();
+
+                _eventGridClient.Dispose();
             }
             catch (Exception e)
             {
@@ -148,24 +160,39 @@ namespace CPZMarketWatcher.DataProviders
         {
             try
             {
+                // создаем новый токен отмены
                 var tokenSource = new CancellationTokenSource();
 
                 var token = tokenSource.Token;
 
                 _allTokenSources.Add($"{queryStr.Exchange}_{queryStr.Baseq}_{queryStr.Quote}", tokenSource);
 
+                // запускаем задачу по скачиванию свечей
                 await Task.Run(async () =>
                 {
-                    int countNeedCandles = 10000;
+                    int countNeedCandles = 10;
+
+                    string exchange = queryStr.Exchange;
+
+                    string baseq = queryStr.Baseq;
+
+                    string quote = queryStr.Quote;
+
                     while (!token.IsCancellationRequested)
                     {
-                        var url =
-                            $"https://min-api.cryptocompare.com/data/histominute?fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}";
+                        var url = $"https://min-api.cryptocompare.com/data/histominute?fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}";
 
                         var stringCandles = await client.GetStringAsync(url);
 
-                        var res = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
+                        //var candles = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
+
+                        var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
+
+                        // отправляем полученные свечи дальше
+                        await SendCandles(exchange, baseq, quote, candles.Data);
+
                         Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote}");
+
                         await Task.Delay(60000, token);
 
                         countNeedCandles = 1;
@@ -334,42 +361,16 @@ namespace CPZMarketWatcher.DataProviders
 
         private readonly DateTime _timeStart = new DateTime(1970, 01, 01);
 
-        private readonly object _newTradeLocker = new object();
+        //private readonly object _newTradeLocker = new object();
 
         private Trade _newTrade = new Trade();
 
-        private void ResOnMessageReceived(object sender, MessageReceivedEventArgs messageReceivedEventArgs)
+        private async void ResOnMessageReceived(object sender, MessageReceivedEventArgs messageReceivedEventArgs)
         {
             try
             {
-                lock (_newTradeLocker)
-                {
-                    var msg = messageReceivedEventArgs.Message;
-
-                    // 42["m","0~Poloniex~ETH~USD~1~10142529~1532959301~0.0021795~459.23427236~1.00090109~1f"]
-                    if (msg.Contains("42[\"m\",\"0~"))
-                    {
-                        var subString = msg.Substring(10);
-
-                        var values = subString.Split('~');
-
-                        if (values.Length > 3)
-                        {
-                            _newTrade.Exchange = values[0];
-                            _newTrade.Baseq = values[1];
-                            _newTrade.Quote = values[2];
-                            _newTrade.Side = values[3] == "1" ? "sell" : "buy";
-                            _newTrade.TradeId = values[4];
-                            _newTrade.Time = _timeStart + TimeSpan.FromSeconds(Convert.ToDouble(values[5]));
-                            _newTrade.Volume = values[6];
-                            _newTrade.Price = values[7];
-
-                            Debug.WriteLine($"Биржа: {_newTrade.Exchange} Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
-                        }
-                    }
-                }
-                #region Async
-                //await Task.Run(() =>
+                #region Sync
+                //lock (_newTradeLocker)
                 //{
                 //    var msg = messageReceivedEventArgs.Message;
 
@@ -391,15 +392,46 @@ namespace CPZMarketWatcher.DataProviders
                 //            _newTrade.Volume = values[6];
                 //            _newTrade.Price = values[7];
 
-                //            if (_newTrade.Baseq == "BTC" && _newTrade.Quote == "USD" && _newTrade.Exchange == "Bitfinex")
-                //            {
-                //                Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
-                //            }
+                //            SendTick(_newTrade);
+
+                //            Debug.WriteLine($"Биржа: {_newTrade.Exchange} Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                 //        }
                 //    }
+                //}
 
-                //    //Thread.CurrentThread.ManagedThreadId);
-                //}, _cancellationToken).ConfigureAwait(false);
+
+                #endregion
+
+                #region Async
+                await Task.Run(async () =>
+                {
+                    var msg = messageReceivedEventArgs.Message;
+
+                    // 42["m","0~Poloniex~ETH~USD~1~10142529~1532959301~0.0021795~459.23427236~1.00090109~1f"]
+                    if (msg.Contains("42[\"m\",\"0~"))
+                    {
+                        var subString = msg.Substring(10);
+
+                        var values = subString.Split('~');
+
+                        if (values.Length > 3)
+                        {
+                            _newTrade.Exchange = values[0];
+                            _newTrade.Baseq = values[1];
+                            _newTrade.Quote = values[2];
+                            _newTrade.Side = values[3] == "1" ? "sell" : "buy";
+                            _newTrade.TradeId = values[4];
+                            _newTrade.Time = _timeStart + TimeSpan.FromSeconds(Convert.ToDouble(values[5]));
+                            _newTrade.Volume = values[6];
+                            _newTrade.Price = values[7];
+
+                            await SendTick(_newTrade);
+                           
+                            Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
+                        }
+                    }
+                    
+                }).ConfigureAwait(false);
                 #endregion
             }
             catch (Exception e)
@@ -433,6 +465,111 @@ namespace CPZMarketWatcher.DataProviders
         private void ResOnOpened(object sender, EventArgs eventArgs)
         {
             Debug.WriteLine("Connected " + DateTime.Now);
+        }
+
+        /// <summary>
+        /// конечная точка доступа
+        /// </summary>
+        private readonly string _topicEndpoint = Environment.GetEnvironmentVariable("EG_TOPIC_ENDPOINT");
+
+        /// <summary>
+        /// ключ доступа
+        /// </summary>
+        private readonly string _topicKey = Environment.GetEnvironmentVariable("EG_TOPIC_KEY");
+
+        /// <summary>
+        /// Адрес темы EventGrid
+        /// </summary>
+        readonly string _topicHostname;
+
+        /// <summary>
+        /// Клиент EventGrid
+        /// </summary>
+        readonly EventGridClient _eventGridClient;
+
+        /// <summary>
+        /// отправить тик в eventGrid
+        /// </summary>
+        /// <param name="trade">тик</param>
+        private async Task SendTick(Trade trade)
+        {
+            List<EventGridEvent> eventsList = new List<EventGridEvent>();
+
+            for (int i = 0; i < 1; i++)
+            {
+                // Формируем данные
+                dynamic data = new JObject();
+                
+                data.exchange = trade.Exchange;
+                data.baseq = trade.Baseq;
+                data.quote = trade.Quote;
+                data.side = trade.Side;
+                data.tradeId = trade.TradeId;
+                data.time = trade.Time;
+                data.volume = trade.Volume;
+                data.price = trade.Price;
+
+                // Создаем новое событие
+                eventsList.Add(new EventGridEvent()
+                {
+                    Id = Guid.NewGuid().ToString(), // уникальный идентификатор
+                    Subject = $"{trade.Exchange}#{trade.Baseq}/{trade.Quote}", // тема события
+                    DataVersion = "1.0", // версия данных
+                    EventType = "CPZ.Ticks.NewTick", // тип события
+                    Data = data, // данные события
+                    EventTime = DateTime.Now // время формирования события
+                });
+            }
+            
+            // Отправка событий в тему
+            await _eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
+            
+#if DEBUG
+            //Debug.Write("Published events to Event Grid.");
+#endif
+        }
+
+        /// <summary>
+        /// отправить свечи в eventGrid
+        /// </summary>
+        private async Task SendCandles(string exchange, string baseq, string quote, List<Candle> candles)
+        {
+            List<EventGridEvent> eventsList = new List<EventGridEvent>();
+
+            for (int i = 0; i < candles.Count; i++)
+            {
+                // Формируем данные
+                dynamic data = new JObject();
+
+                data.exchange = exchange;
+                data.baseq = baseq;
+                data.quote = quote;
+                data.time = candles[i].Time;
+                data.open = candles[i].Open;
+                data.close = candles[i].Close;
+                data.high = candles[i].High;
+                data.low = candles[i].Low;
+                data.volumeInBaseq = candles[i].Volumefrom;
+                data.volumeInQuote = candles[i].Volumeto;
+
+                // Создаем новое событие
+                eventsList.Add(new EventGridEvent()
+                {
+                    Id = Guid.NewGuid().ToString(), // уникальный идентификатор
+                    Subject = $"{exchange}#{baseq}/{quote}", // тема события
+                    DataVersion = "1.0", // версия данных
+                    EventType = "CPZ.Ticks.NewCandles", // тип события
+                    Data = data, // данные события
+                    EventTime = DateTime.Now // время формирования события
+                });
+            }
+
+            // Отправка событий в тему
+            await _eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
+
+#if DEBUG
+            Debug.Write($"Свечи пары {baseq}/{quote} отправленны");
+#endif
         }
     }
 }
