@@ -12,5 +12,40 @@
 * `DateFrom` - не используется
 * `DateTo` - не используется
 * `Timeframe` - не используется
+
+Пример запроса: 
+1) строка подключения:
+http://localhost:50527/api/import
+
+2) заголовки:      
+ 
+         User-Agent: Fiddler
+         Host: localhost:50527
+         Content-Length: 224
+         Content-Type: application/json
+         Key: test
+
+3) тело:
+
+        {
+        "nameProvider":"FirstCompare",
+        "typeDataProvider":"CryptoCompare",
+        "exchange": "Bitfinex",
+        "baseq" : "BTC" ,
+        "quote": "USD",
+        "dateFrom": "2018-03-19T10:00:00Z",
+        "dateTo": "2018-03-29T10:00:00Z",
+        "timeframe": "5"
+        }
+
+**GET** запрос позволяет получить все запущенные поставщики и пары на них
+
+**PUT** позволяет отписаться от уже не нужных данных, строка запроса, заголовки и тело те же самые что и при POST запросе.
+
+**DELETE** принимает имя поставщика, закрывает на нем прием всех данных и удаляет его.
+
+пример: `http://localhost:50527/api/import/<providerName>`
+        
+        
       
 
