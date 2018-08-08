@@ -8,7 +8,7 @@ namespace CPZMarketWatcher.Models
     /// <summary>
     /// описывает запрос подключения к бирже и получение данных
     /// </summary>
-    public class StartImportQuery
+    public class OrderToProvider
     {
         /// <summary>
         /// имя поставщика

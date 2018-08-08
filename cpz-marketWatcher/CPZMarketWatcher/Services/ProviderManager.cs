@@ -59,7 +59,7 @@ namespace CPZMarketWatcher.Services
         /// <summary>
         /// подписаться на получение данных
         /// </summary>
-        public async Task SubscribeNewPaperAsync(StartImportQuery queryMsg)
+        public async Task SubscribeNewPaperAsync(OrderToProvider queryMsg)
         {
             AbstractDataProvider needProvider = await GetProviderAsync(queryMsg.NameProvider, queryMsg.TypeDataProvider);
 
@@ -134,6 +134,38 @@ namespace CPZMarketWatcher.Services
             {
                 Debug.WriteLine(e);
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// отписаться от получения данных по конкретной бумаге
+        /// </summary>
+        /// <param name="queryMsg"></param>
+        public void UnsubscribePair(OrderToProvider queryMsg)
+        {
+            var needProvider = AllRunningProviders.Find(prov => prov.Name == queryMsg.NameProvider);
+
+            if (needProvider != null)
+            {
+                needProvider.UnsubscribePair(queryMsg);
+            }
+        }
+
+        /// <summary>
+        /// удалить провайдера
+        /// </summary>
+        /// <param name="name"></param>
+        public void RemoveProvider(string name)
+        {
+            var needProvider = AllRunningProviders.Find(prov => prov.Name == name);
+
+            if (needProvider != null)
+            {
+                needProvider.StopReceivingData();
+
+                AllRunningProviders.Remove(needProvider);
+
+                needProvider = null;
             }
         }
     }

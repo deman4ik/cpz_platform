@@ -18,9 +18,13 @@ namespace CPZMarketWatcher.DataProviders
             Name = name;
         }
 
-        public abstract List<StartImportQuery> SubscribedPairs { get; set; }
+        public abstract List<OrderToProvider> SubscribedPairs { get; set; }
 
-        public abstract void StartReceivingData(StartImportQuery subscribe);
+        public abstract void StartReceivingData(OrderToProvider subscribe);
+
+        public abstract void StopReceivingData();
+
+        public abstract void UnsubscribePair(OrderToProvider subscribe);
 
     }
 }

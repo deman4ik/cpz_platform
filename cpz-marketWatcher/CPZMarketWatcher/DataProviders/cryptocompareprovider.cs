@@ -20,22 +20,30 @@ namespace CPZMarketWatcher.DataProviders
     {
         public CryptoCompareProvider(string name) : base(name)
         {
+             _tokenSource = new CancellationTokenSource();
 
+            _token = _tokenSource.Token;
         }
+
+        private readonly CancellationTokenSource _tokenSource;
+
+        private CancellationToken _token;
 
         private WebSocket _webSocket;
 
         /// <summary>
         /// список бумаг на которые уже подписаны
         /// </summary>
-        public override List<StartImportQuery> SubscribedPairs { get; set; } = new List<StartImportQuery>();
+        public override List<OrderToProvider> SubscribedPairs { get; set; } = new List<OrderToProvider>();
+
+        private Dictionary<string, CancellationTokenSource> _allTokenSources = new Dictionary<string, CancellationTokenSource>();
 
         /// <summary>
         /// проверить был ли такой запрос
         /// </summary>       
         /// <param name="newQuery">запрос на получение данных</param>
         /// <returns></returns>
-        private bool CheckSubscription(StartImportQuery newQuery)
+        private bool CheckSubscription(OrderToProvider newQuery)
         {
             var needQuery = SubscribedPairs.Find(q =>
                 q.Exchange == newQuery.Exchange &&
@@ -44,7 +52,6 @@ namespace CPZMarketWatcher.DataProviders
 
             if (needQuery == null)
             {
-                SubscribedPairs.Add(newQuery);
                 return false;
             }
             return true;
@@ -54,20 +61,50 @@ namespace CPZMarketWatcher.DataProviders
         /// запустить получение данных
         /// </summary>
         /// <param name="subscribe"></param>
-        public override async void StartReceivingData(StartImportQuery subscribe)
+        public override async void StartReceivingData(OrderToProvider subscribe)
         {
             try
             {
                 if (!CheckSubscription(subscribe))
                 {
+                    SubscribedPairs.Add(subscribe);
                     // генерируем строку подписки согласно полученному запросу
-                    var queryStr = GenerateQueryStringTrades(subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
+                    var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
 
                     // подписываемся
                     await SubscribeTrades(queryStr);
 
                     await StartCandleLoad(subscribe);
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// остановить получение данных
+        /// </summary>
+        public override void StopReceivingData()
+        {
+            try
+            {
+                _tokenSource.Cancel();
+                _tokenSource.Dispose();
+
+                foreach (var cancellationTokenSource in _allTokenSources)
+                {
+                    cancellationTokenSource.Value.Cancel();
+                    cancellationTokenSource.Value.Dispose();
+                }
+
+                SubscribedPairs.Clear();
+
+                _allTokenSources.Clear();
+
+                _webSocket.Dispose();
             }
             catch (Exception e)
             {
@@ -107,24 +144,43 @@ namespace CPZMarketWatcher.DataProviders
         /// </summary>
         /// <param name="queryStr"></param>
         /// <returns></returns>
-        private async Task StartCandleLoad(StartImportQuery queryStr)
+        private async Task StartCandleLoad(OrderToProvider queryStr)
         {
-            await Task.Run(async () =>
+            try
             {
-                int countNeedCandles = 10000;
-                while (true)
+                var tokenSource = new CancellationTokenSource();
+
+                var token = tokenSource.Token;
+
+                _allTokenSources.Add($"{queryStr.Exchange}_{queryStr.Baseq}_{queryStr.Quote}", tokenSource);
+
+                await Task.Run(async () =>
                 {
-                    var url = $"https://min-api.cryptocompare.com/data/histominute?fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}";
+                    int countNeedCandles = 10000;
+                    while (!token.IsCancellationRequested)
+                    {
+                        var url =
+                            $"https://min-api.cryptocompare.com/data/histominute?fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}";
 
-                    var stringCandles = await client.GetStringAsync(url);
+                        var stringCandles = await client.GetStringAsync(url);
 
-                    var res = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
-                    Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote}");
-                    await Task.Delay(60000);
+                        var res = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
+                        Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote}");
+                        await Task.Delay(60000, token);
 
-                    countNeedCandles = 1;
-                }
-            });
+                        countNeedCandles = 1;
+                    }
+                }, token);
+            }
+            catch (TaskCanceledException e)
+            {
+                Debug.WriteLine(e);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }            
         }
 
         /// <summary>
@@ -163,6 +219,42 @@ namespace CPZMarketWatcher.DataProviders
         }
 
         /// <summary>
+        /// отписаться от получения данных
+        /// </summary>
+        public override void UnsubscribePair(OrderToProvider subscribe)
+        {
+            try
+            {
+                if (CheckSubscription(subscribe))
+                {
+                    // генерируем строку отписки согласно полученному запросу
+                    var queryStr = GenerateQueryStringTrades("SubRemove", subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
+
+                    _webSocket.Send(queryStr);
+
+                    var key = $"{subscribe.Exchange}_{subscribe.Baseq}_{subscribe.Quote}";
+
+                    // находим токен отмены для этого инструмента
+                    var needToken = _allTokenSources[key];
+
+                    if (needToken != null)
+                    {
+                        needToken.Cancel();
+                        needToken.Dispose();
+                    }
+
+                    SubscribedPairs.Remove(subscribe);
+
+                    _allTokenSources.Remove(key);
+                }                
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+        /// <summary>
         /// создать новое подключение
         /// </summary>
         /// <returns></returns>
@@ -190,9 +282,9 @@ namespace CPZMarketWatcher.DataProviders
         /// сгененрировать строку запроса трейдов
         /// </summary>
         /// <returns></returns>
-        private string GenerateQueryStringTrades(string exchange, string baseq, string quote) // шаблон "42[\"SubAdd\",{\"subs\":[\"0~Bitfinex~BTC~USD\"]}]"
+        private string GenerateQueryStringTrades(string act, string exchange, string baseq, string quote) // шаблон "42[\"SubAdd\",{\"subs\":[\"0~Bitfinex~BTC~USD\"]}]"
         {
-            return $"42[\"SubAdd\",{{\"subs\":[\"0~{exchange}~{baseq}~{quote}\"]}}]";
+            return $"42[\"{act}\",{{\"subs\":[\"0~{exchange}~{baseq}~{quote}\"]}}]";
         }
 
         /// <summary>
@@ -200,7 +292,7 @@ namespace CPZMarketWatcher.DataProviders
         /// </summary>
         /// <param name="needQueries"></param>
         /// <returns></returns>
-        private string GenerateQueryStringTrades(List<StartImportQuery> needQueries)
+        private string GenerateQueryStringTrades(List<OrderToProvider> needQueries)
         {
             string pattern = $"42[\"SubAdd\",{{\"subs\":[";
 
@@ -218,8 +310,6 @@ namespace CPZMarketWatcher.DataProviders
             return pattern;
         }
 
-        private CancellationTokenSource _tokenSource;
-
         private const string Ping = "42[\"ping\",{}]";
 
         /// <summary>
@@ -228,22 +318,18 @@ namespace CPZMarketWatcher.DataProviders
         /// <param name="pingInterval"></param>
         private void StartPinger(int pingInterval)
         {
-            _tokenSource = new CancellationTokenSource();
-
-            CancellationToken token = _tokenSource.Token;
-
             Task.Run(async () =>
             {
-                while (!token.IsCancellationRequested)
+                while (!_token.IsCancellationRequested)
                 {
-                    await Task.Delay(pingInterval, token);
+                    await Task.Delay(pingInterval, _token);
 
                     if (_webSocket.State == WebSocketState.Open)
                     {
                         _webSocket.Send(Ping);
                     }
                 }
-            }, token);
+            }, _token);
         }
 
         private readonly DateTime _timeStart = new DateTime(1970, 01, 01);

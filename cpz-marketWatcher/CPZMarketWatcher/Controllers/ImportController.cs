@@ -46,7 +46,7 @@ namespace CPZMarketWatcher.Controllers
         /// запустить импорт данных
         /// </summary>
         [HttpPost]
-        public async Task Post([FromBody]StartImportQuery query)
+        public async Task Post([FromBody]OrderToProvider query)
         {
             var res = query;
 
@@ -54,15 +54,17 @@ namespace CPZMarketWatcher.Controllers
         }
 
         // PUT: api/import/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        [HttpPut]
+        public void Put([FromBody]OrderToProvider query)
         {
+            _manager.UnsubscribePair(query);
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(string id)
         {
+            _manager.RemoveProvider(id);
         }
     }
 }
