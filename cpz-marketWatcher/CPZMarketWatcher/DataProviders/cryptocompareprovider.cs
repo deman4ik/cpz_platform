@@ -4,6 +4,8 @@ using SuperSocket.ClientEngine;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -149,8 +151,6 @@ namespace CPZMarketWatcher.DataProviders
             }
         }
 
-        private static readonly HttpClient client = new HttpClient();
-
         /// <summary>
         /// запустить получение свечек
         /// </summary>
@@ -167,37 +167,44 @@ namespace CPZMarketWatcher.DataProviders
 
                 _allTokenSources.Add($"{queryStr.Exchange}_{queryStr.Baseq}_{queryStr.Quote}", tokenSource);
 
-                // запускаем задачу по скачиванию свечей
-                await Task.Run(async () =>
+                var webProxy = new WebProxy(new Uri(queryStr.Proxy));
+
+                using (var httpClientHandler = new HttpClientHandler { Proxy = webProxy })
+                using (HttpClient client = new HttpClient(httpClientHandler))
                 {
-                    int countNeedCandles = 10;
-
-                    string exchange = queryStr.Exchange;
-
-                    string baseq = queryStr.Baseq;
-
-                    string quote = queryStr.Quote;
-
-                    while (!token.IsCancellationRequested)
+                    // запускаем задачу по скачиванию свечей
+                    await Task.Run(async () =>
                     {
-                        var url = $"https://min-api.cryptocompare.com/data/histominute?fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}";
+                        int countNeedCandles = 10;
 
-                        var stringCandles = await client.GetStringAsync(url);
+                        string exchange = queryStr.Exchange;
 
-                        //var candles = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
+                        string baseq = queryStr.Baseq;
 
-                        var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
+                        string quote = queryStr.Quote;
 
-                        // отправляем полученные свечи дальше
-                        await SendCandles(exchange, baseq, quote, candles.Data);
+                        while (!token.IsCancellationRequested)
+                        {
+                            var url = $"https://min-api.cryptocompare.com/data/histominute?&fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}&e={queryStr.Exchange}";
 
-                        Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote}");
+                            var stringCandles = await client.GetStringAsync(url);
 
-                        await Task.Delay(60000, token);
+                            //var candles = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
 
-                        countNeedCandles = 1;
-                    }
-                }, token);
+                            var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
+
+                            // отправляем полученные свечи дальше
+                            // await SendCandles(exchange, baseq, quote, candles.Data);
+
+                            Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
+                                            $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01)+ TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))} ");
+
+                            await Task.Delay(10000, token);
+
+                            countNeedCandles = 1;
+                        }
+                    }, token);
+                }
             }
             catch (TaskCanceledException e)
             {
@@ -425,9 +432,9 @@ namespace CPZMarketWatcher.DataProviders
                             _newTrade.Volume = values[6];
                             _newTrade.Price = values[7];
 
-                            await SendTick(_newTrade);
+                            //await SendTick(_newTrade);
                            
-                            Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
+                            //Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                         }
                     }
                     

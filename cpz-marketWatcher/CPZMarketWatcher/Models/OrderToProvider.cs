@@ -54,5 +54,10 @@ namespace CPZMarketWatcher.Models
         /// таймфрейм
         /// </summary>
         public int Timeframe { get; set; }
+
+        /// <summary>
+        /// адрес прокси
+        /// </summary>
+        public string Proxy { get; set; }
     }
 }

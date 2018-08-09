@@ -1,4 +1,6 @@
-﻿using CPZMarketWatcher.Models;
+﻿using System;
+using System.Diagnostics;
+using CPZMarketWatcher.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using CPZMarketWatcher.Services;
@@ -48,18 +50,30 @@ namespace CPZMarketWatcher.Controllers
         [HttpPost]
         public async Task Post([FromBody]OrderToProvider query)
         {
-            if (query.ActionType == ActionType.Subscribe)
+            try
             {
-                await _manager.SubscribeNewPaperAsync(query);
+                if (query != null)
+                {
+                    if (query.ActionType == ActionType.Subscribe)
+                    {
+                        await _manager.SubscribeNewPaperAsync(query);
+                    }
+                    else if (query.ActionType == ActionType.Unsubscribe)
+                    {
+                        _manager.UnsubscribePair(query);
+                    }
+                    else
+                    {
+                        _manager.RemoveProvider(query.NameProvider);
+                    }
+                }
             }
-            else if (query.ActionType == ActionType.Unsubscribe)
+            catch (Exception e)
             {
-                _manager.UnsubscribePair(query);
+                Debug.WriteLine(e);
+                throw;
             }
-            else
-            {
-                _manager.RemoveProvider(query.NameProvider);
-            }
+            
         }        
     }
 }
