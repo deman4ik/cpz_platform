@@ -184,25 +184,41 @@ namespace CPZMarketWatcher.DataProviders
 
                         string quote = queryStr.Quote;
 
+                        var lastTimeUpdate = DateTime.Now.Minute;
+
+                        bool flag = true;
+
                         while (!token.IsCancellationRequested)
                         {
-                            var url = $"https://min-api.cryptocompare.com/data/histominute?&fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}&e={queryStr.Exchange}";
+                            var now = DateTime.Now;
 
-                            var stringCandles = await client.GetStringAsync(url);
+                            if (now.Second >= 0 && now.Second <= 10)
+                            {
+                                if (lastTimeUpdate != now.Minute || flag)
+                                {
+                                    var url = $"https://min-api.cryptocompare.com/data/histominute?&fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}&e={queryStr.Exchange}";
 
-                            //var candles = JsonConvert.DeserializeAnonymousType(stringCandles, new Candles());
+                                    var stringCandles = await client.GetStringAsync(url);
 
-                            var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
+                                    var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
 
-                            // отправляем полученные свечи дальше
-                            await SendCandles(exchange, baseq, quote, candles.Data);
+                                    // отправляем полученные свечи дальше
+                                    await SendCandles(exchange, baseq, quote, candles.Data);
 
-                            Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
-                                            $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01)+ TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))} ");
+                                    flag = false;
 
-                            await Task.Delay(60000, token);
+                                    lastTimeUpdate = DateTime.Now.Minute;
 
-                            countNeedCandles = 1;
+                                    countNeedCandles = 1;
+
+                                    Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
+                                                    $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))}" +
+                                                    $"    {DateTime.Now.Second} ");
+                                }
+                                
+                            }
+                           
+                            await Task.Delay(5000, token);                            
                         }
                     }, token);
                 }
@@ -583,7 +599,7 @@ namespace CPZMarketWatcher.DataProviders
             await _eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
 
 #if DEBUG
-            Debug.Write($"Свечи пары {baseq}/{quote} отправленны");
+            //Debug.Write($"Свечи пары {baseq}/{quote} отправленны");
 #endif
         }
     }
