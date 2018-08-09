@@ -48,23 +48,18 @@ namespace CPZMarketWatcher.Controllers
         [HttpPost]
         public async Task Post([FromBody]OrderToProvider query)
         {
-            var res = query;
-
-            await _manager.SubscribeNewPaperAsync(query);
-        }
-
-        // PUT: api/import/5
-        [HttpPut]
-        public void Put([FromBody]OrderToProvider query)
-        {
-            _manager.UnsubscribePair(query);
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(string id)
-        {
-            _manager.RemoveProvider(id);
-        }
+            if (query.ActionType == ActionType.Subscribe)
+            {
+                await _manager.SubscribeNewPaperAsync(query);
+            }
+            else if (query.ActionType == ActionType.Unsubscribe)
+            {
+                _manager.UnsubscribePair(query);
+            }
+            else
+            {
+                _manager.RemoveProvider(query.NameProvider);
+            }
+        }        
     }
 }

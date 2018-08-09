@@ -9,4 +9,11 @@ namespace CPZMarketWatcher.Models
     {
         CryptoCompare,
     }
+
+    public enum ActionType
+    {
+        Subscribe,
+        Unsubscribe,
+        Remove,
+    }
 }
