@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
 using Newtonsoft.Json.Linq;
+using SuperSocket.ClientEngine.Proxy;
 using WebSocket4Net;
 using WebSocket = WebSocket4Net.WebSocket;
 using WebSocketState = WebSocket4Net.WebSocketState;
@@ -84,7 +85,7 @@ namespace CPZMarketWatcher.DataProviders
                     var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
 
                     // подписываемся
-                    await SubscribeTrades(queryStr);
+                    await SubscribeTrades(queryStr, subscribe.Proxy);
 
                     await StartCandleLoad(subscribe);
                 }
@@ -167,15 +168,15 @@ namespace CPZMarketWatcher.DataProviders
 
                 _allTokenSources.Add($"{queryStr.Exchange}_{queryStr.Baseq}_{queryStr.Quote}", tokenSource);
 
-                var webProxy = new WebProxy(new Uri(queryStr.Proxy));
+                var webProxy = queryStr.Proxy != null ? new WebProxy(new Uri("http://" + queryStr.Proxy)) : null;
 
                 using (var httpClientHandler = new HttpClientHandler { Proxy = webProxy })
-                using (HttpClient client = new HttpClient(httpClientHandler))
+                using (HttpClient client = queryStr.Proxy != null ? new HttpClient(httpClientHandler) : new HttpClient())
                 {
                     // запускаем задачу по скачиванию свечей
                     await Task.Run(async () =>
                     {
-                        int countNeedCandles = 10;
+                        int countNeedCandles = 100;
 
                         string exchange = queryStr.Exchange;
 
@@ -194,12 +195,12 @@ namespace CPZMarketWatcher.DataProviders
                             var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
 
                             // отправляем полученные свечи дальше
-                            // await SendCandles(exchange, baseq, quote, candles.Data);
+                            await SendCandles(exchange, baseq, quote, candles.Data);
 
                             Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
                                             $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01)+ TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))} ");
 
-                            await Task.Delay(10000, token);
+                            await Task.Delay(60000, token);
 
                             countNeedCandles = 1;
                         }
@@ -225,15 +226,13 @@ namespace CPZMarketWatcher.DataProviders
         /// <summary>
         /// подписаться на получение данных
         /// </summary>
-        /// <param name="queryStr"></param>
-        /// <returns></returns>
-        private async Task SubscribeTrades(string queryStr)
+        private async Task SubscribeTrades(string queryStr, string proxy)
         {
             try
             {
                 if (_webSocket == null)
                 {
-                    var result = await CreateWebSocketStream();
+                    var result = await CreateWebSocketStream(proxy);
 
                     if (result)
                     {
@@ -292,12 +291,21 @@ namespace CPZMarketWatcher.DataProviders
         /// создать новое подключение
         /// </summary>
         /// <returns></returns>
-        private async Task<bool> CreateWebSocketStream()
+        private async Task<bool> CreateWebSocketStream(string proxyAddress)
         {
             try
             {
                 _webSocket = new WebSocket(StreamUrl);
 
+                if (proxyAddress != null)
+                {
+                    var partsProxy = proxyAddress.Split(':');
+
+                    var proxy = new HttpConnectProxy(new IPEndPoint(IPAddress.Parse(partsProxy[0]), Convert.ToInt32(partsProxy[1])));
+
+                    _webSocket.Proxy = proxy;
+                }
+                
                 _webSocket.Opened += ResOnOpened;
                 _webSocket.Error += ResOnError;
                 _webSocket.MessageReceived += ResOnMessageReceived;
@@ -432,7 +440,7 @@ namespace CPZMarketWatcher.DataProviders
                             _newTrade.Volume = values[6];
                             _newTrade.Price = values[7];
 
-                            //await SendTick(_newTrade);
+                            await SendTick(_newTrade);
                            
                             //Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                         }
