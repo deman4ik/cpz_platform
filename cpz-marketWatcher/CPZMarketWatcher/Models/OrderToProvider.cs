@@ -40,20 +40,20 @@ namespace CPZMarketWatcher.Models
         /// </summary>
         public string Quote { get; set; }
 
-        /// <summary>
-        /// дата и время начала загрузки в формате UTC ( 2018-03-19T10:00:00Z)
-        /// </summary>
-        public DateTime DateFrom { get; set; }
+        ///// <summary>
+        ///// дата и время начала загрузки в формате UTC ( 2018-03-19T10:00:00Z)
+        ///// </summary>
+        //public DateTime DateFrom { get; set; }
 
-        /// <summary>
-        /// дата и время окончания загрузки в формате UTC
-        /// </summary>
-        public DateTime DateTo { get; set; }
+        ///// <summary>
+        ///// дата и время окончания загрузки в формате UTC
+        ///// </summary>
+        //public DateTime DateTo { get; set; }
 
-        /// <summary>
-        /// таймфрейм
-        /// </summary>
-        public int Timeframe { get; set; }
+        ///// <summary>
+        ///// таймфрейм
+        ///// </summary>
+        //public int Timeframe { get; set; }
 
         /// <summary>
         /// адрес прокси
