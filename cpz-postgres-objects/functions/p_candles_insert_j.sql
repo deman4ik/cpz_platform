@@ -58,3 +58,5 @@ BEGIN
 END;
 $$;
 
+-- for PostGraphile GraphQL
+COMMENT ON FUNCTION p_candles_insert_j ( j json ) IS E'| Param | Type |\n| ---- |---- |\n| start | int4 |\n| open | number |\n| high | number |\n| low | number |\n| close | number |\n| volume | number |\n| trades | int4|\n| vwp | number |\n| currency | varchar |\n| asset | varchar|\n| exchange | varchar |';
