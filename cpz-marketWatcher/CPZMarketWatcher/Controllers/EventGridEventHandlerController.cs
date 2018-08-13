@@ -36,16 +36,16 @@ namespace CPZMarketWatcher.Controllers
                 eventGridSubscriber.AddOrUpdateCustomEventMapping(customTopicEvent, typeof(OrderToProvider));
                 EventGridEvent[] eventGridEvents = eventGridSubscriber.DeserializeEventGridEvents(request.ToString());
 
-                foreach (EventGridEvent eventGridEvent in eventGridEvents)
+                var queryKey = HttpContext.Request.Query["key"];
+
+                var secretKey = Environment.GetEnvironmentVariable("API_KEY");
+
+                if (!string.IsNullOrEmpty(queryKey) && queryKey == secretKey)
                 {
-                    // Если пришел запрос на валидацию 
-                    if (eventGridEvent.EventType == EventGridEventTypes.SubscriptionValidationEvent)
+                    foreach (EventGridEvent eventGridEvent in eventGridEvents)
                     {
-                        var secretKey = Environment.GetEnvironmentVariable("API_KEY");
-
-                        var queryKey = HttpContext.Request.Query["key"];
-
-                        if (!string.IsNullOrEmpty(queryKey) && queryKey == secretKey)
+                        // Если пришел запрос на валидацию 
+                        if (eventGridEvent.EventType == EventGridEventTypes.SubscriptionValidationEvent)
                         {
                             var eventData = (SubscriptionValidationEventData)eventGridEvent.Data;
 
@@ -57,33 +57,35 @@ namespace CPZMarketWatcher.Controllers
                             // Возвращаем полученный код валидации
                             return new JObject(responseData);
                         }
+                        else
+                        {
+                            // Считываем данные
+                            var eventData = (OrderToProvider)eventGridEvent.Data;
 
-                        return new JObject(new HttpResponseMessage(HttpStatusCode.Forbidden));
-                    }
-                    else
-                    {
-                        // Считываем данные
-                        var eventData = (OrderToProvider)eventGridEvent.Data;
-
-                        // Если пришел запрос на запуск новой пары
-                        if (eventGridEvent.EventType == EventGridEventTypes.Subscribe)
-                        {
-                            await _manager.SubscribeNewPaperAsync(eventData);
-                        }
-                        // Если пришел запрос на остановку получения данных по определенной паре
-                        else if (eventGridEvent.EventType == EventGridEventTypes.Unsubscribe)
-                        {
-                            _manager.UnsubscribePair(eventData);
-                        }
-                        // Если пришел запрос на остановку поставщика
-                        else if (eventGridEvent.EventType == EventGridEventTypes.Stop)
-                        {
-                            _manager.RemoveProvider(eventData.NameProvider);
+                            // Если пришел запрос на запуск новой пары
+                            if (eventGridEvent.EventType == EventGridEventTypes.Subscribe)
+                            {
+                                await _manager.SubscribeNewPaperAsync(eventData);
+                            }
+                            // Если пришел запрос на остановку получения данных по определенной паре
+                            else if (eventGridEvent.EventType == EventGridEventTypes.Unsubscribe)
+                            {
+                                _manager.UnsubscribePair(eventData);
+                            }
+                            // Если пришел запрос на остановку поставщика
+                            else if (eventGridEvent.EventType == EventGridEventTypes.Stop)
+                            {
+                                _manager.RemoveProvider(eventData.NameProvider);
+                            }
                         }
                     }
+
+                    return new JObject(new HttpResponseMessage(HttpStatusCode.OK));
                 }
-
-                return new JObject(new HttpResponseMessage(HttpStatusCode.OK));
+                else
+                {
+                    return new JObject(new HttpResponseMessage(HttpStatusCode.Forbidden));
+                }
             }
             catch (Exception e)
             {
@@ -91,6 +93,6 @@ namespace CPZMarketWatcher.Controllers
                 throw;
             }
             
-        }
+        }        
     }
 }
