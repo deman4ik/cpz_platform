@@ -15,5 +15,5 @@ namespace CPZMarketWatcher.Models
         Subscribe,
         Unsubscribe,
         Remove,
-    }
+    }    
 }

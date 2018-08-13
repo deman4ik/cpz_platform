@@ -203,7 +203,7 @@ namespace CPZMarketWatcher.DataProviders
                                     var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
 
                                     // отправляем полученные свечи дальше
-                                    await SendCandles(exchange, baseq, quote, candles.Data);
+                                    //await SendCandles(exchange, baseq, quote, candles.Data);
 
                                     flag = false;
 
@@ -456,7 +456,7 @@ namespace CPZMarketWatcher.DataProviders
                             _newTrade.Volume = values[6];
                             _newTrade.Price = values[7];
 
-                            await SendTick(_newTrade);
+                            //await SendTick(_newTrade);
                            
                             //Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                         }

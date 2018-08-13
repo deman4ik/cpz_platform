@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using CPZMarketWatcher.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using CPZMarketWatcher.Services;
 
 namespace CPZMarketWatcher
 {
@@ -37,26 +37,33 @@ namespace CPZMarketWatcher
 
             string key;
 
-            // проверяем наличие ключа  в запросе
+            //проверяем наличие ключа в запросе
             app.Use(async (context, next) =>
             {
-                // получаем ключ из запроса
-                key = context.Request.Headers["key"];
-
-                if (key != privateKey)
+                // если используется первый апи, тогда проверяем ключ в заголовках
+                if (context.Request.Path == "/api/import")
                 {
-                    await context.Response.WriteAsync("Invalid key!");
+                    // получаем ключ из запроса
+                    key = context.Request.Headers["key"];
+
+                    if (string.IsNullOrEmpty(key) || key != privateKey)
+                    {
+                        await context.Response.WriteAsync("Invalid key!");
+                    }
+                    else
+                    {
+                        await next.Invoke();
+                    }
                 }
                 else
                 {
                     await next.Invoke();
-                }                
+                }
+
             });
 
             app.UseMvc();
-            
-        }
-              
+        }     
     }
 }
 
