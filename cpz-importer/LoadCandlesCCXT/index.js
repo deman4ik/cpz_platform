@@ -1,12 +1,14 @@
 const moment = require("moment");
 const ccxt = require("ccxt");
 const HttpsProxyAgent = require("https-proxy-agent");
+const { durationMinutes, completedPercent } = require("../utils");
+
 // Общий объект бирж для текущего инстанса
 const exchanges = {};
 
-async function LoadOHLC(context, input) {
+async function LoadCandlesCCXT(context, input) {
   try {
-    context.log("LoadOHLC");
+    context.log("LoadCandlesCCXT");
     context.log(input);
     // Есть ли нужная биржа в общем объекте
     if (!Object.prototype.hasOwnProperty.call(exchanges, input.exchange)) {
@@ -16,7 +18,7 @@ async function LoadOHLC(context, input) {
         agent = new HttpsProxyAgent(input.proxy);
       }
       exchanges[input.exchange] = new ccxt[input.exchange]({
-        // enableRateLimit: true,
+        enableRateLimit: true,
         agent
       });
     }
@@ -24,16 +26,16 @@ async function LoadOHLC(context, input) {
     // Символ
     const symbol = `${input.baseq}/${input.quote}`;
     // Запрашиваем исторические свечи
-    const candles = await exchanges[input.exchange].fetchOHLCV(
+    const response = await exchanges[input.exchange].fetchOHLCV(
       symbol,
       input.timeframe,
       +moment(input.dateFrom)
     );
     // Если есть результат
-    if (candles && candles.length > 0) {
+    if (response && response.length > 0) {
       let next;
       // Последняя загруженная свеча
-      const lastCandle = candles[candles.length - 1];
+      const lastCandle = response[response.length - 1];
       // Дата начала импорта
       const startDate = input.startDate || input.dateFrom;
       // Дата последней загруженный свечи
@@ -42,26 +44,20 @@ async function LoadOHLC(context, input) {
       const { dateTo } = input;
       // Всего минут
       const totalDuration =
-        input.totalDuration ||
-        moment.duration(moment(dateTo).diff(moment(startDate))).asMinutes();
+        input.totalDuration || durationMinutes(startDate, dateTo);
       // Осталось минут
-      let leftDuration = moment
-        .duration(moment(dateTo).diff(lastDate))
-        .asMinutes();
-      // Не может быть меньше нуля
-      leftDuration = leftDuration > 0 ? leftDuration : 0;
+      const leftDuration = durationMinutes(lastDate, dateTo);
       // Загружено минут
       const completedDuration = totalDuration - leftDuration;
       // Процент выполнения
-      let percent = (completedDuration / totalDuration) * 100;
-      // Не может быть больше 100
-      percent = percent <= 100 ? percent : 100;
+      const percent = completedPercent(completedDuration, totalDuration);
+
       // Если дата конца импорта больше чем дата последней загруженной свечи
       if (moment(dateTo).isAfter(lastDate)) {
         // Формируем параметры нового запроса на импорт
         next = {
           ...input,
-          timeout: exchanges[input.exchange].rateLimit + 10000,
+          timeout: exchanges[input.exchange].rateLimit,
           startDate,
           completedDuration,
           totalDuration,
@@ -77,12 +73,13 @@ async function LoadOHLC(context, input) {
         leftDuration,
         percent
       };
+      /* TODO: time в unix */
       // Результат выполнения
       const result = {
         input, // старые параметры запроса
         next, // новые параметры запроса, если необходимо
         status, // текущий статус выполнения задачи
-        data: candles // полученные данные
+        data: response // полученные данные
       };
       return result;
     }
@@ -93,4 +90,4 @@ async function LoadOHLC(context, input) {
   throw new Error("Error loading OHLC");
 }
 
-module.exports = LoadOHLC;
+module.exports = LoadCandlesCCXT;

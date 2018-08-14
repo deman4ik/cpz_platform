@@ -5,22 +5,25 @@
   "main": "index.js",
   "dependencies": {
     "base-64": "^0.1.0",
-    "ccxt": "^1.14.163",
+    "ccxt": "^1.17.122",
     "cloudscraper": "^1.5.0",
     "durable-functions": "0.0.3",
-    "graphql-request": "^1.6.0",
+    "graphql-request": "^1.8.2",
     "https-proxy-agent": "^2.2.1",
     "moment": "^2.22.2",
-    "node-fetch": "^2.1.2"
+    "node-fetch": "^2.2.0"
   },
   "devDependencies": {
+    "ansicolor": "^1.1.76",
+    "as-table": "^1.0.36",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-import": "^2.12.0",
-    "eslint-plugin-prettier": "^2.6.0",
-    "prettier": "^1.13.5",
-    "jest": "^23.4.0"
+    "eslint-config-prettier": "^2.10.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "jest": "^23.5.0",
+    "ololog": "^1.1.111",
+    "prettier": "^1.14.2"
   },
   "scripts": {
     "storage": "azurite -l storage",

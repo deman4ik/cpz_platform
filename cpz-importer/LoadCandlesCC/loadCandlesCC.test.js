@@ -1,4 +1,4 @@
-const loadHistoHourCC = require("./index");
+const LoadCandlesCC = require("./index");
 
 const context = {
   log: console.log
@@ -14,6 +14,6 @@ test("return result", async () => {
     timeout: "100",
     proxy: "http://173.68.185.170:80"
   };
-  const result = await loadHistoHourCC(context, input);
+  const result = await LoadCandlesCC(context, input);
   expect(result).toBeDefined();
 });

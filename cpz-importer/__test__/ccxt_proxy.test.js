@@ -1,18 +1,35 @@
 const ccxt = require("ccxt");
 const HttpsProxyAgent = require("https-proxy-agent");
+const cloudscraper = require("cloudscraper");
+
+const scrapeCloudflareHttpHeaderCookie = url =>
+  new Promise((resolve, reject) =>
+    cloudscraper.get(url, (error, response, body) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(response.request.headers);
+      }
+    })
+  );
 
 const input = {
   exchange: "",
-  proxy: "http://localhost:3323/"
+  proxy: "http://localhost:8118/"
 };
 
 const loadMarkets = async prms => {
   try {
     const agent = new HttpsProxyAgent(prms.proxy);
     const exchange = new ccxt[prms.exchange]({
+      //  verbose: true,
       // enableRateLimit: true,
+      // proxy: "https://crossorigin.me/",
       agent
     });
+    exchange.headers = await scrapeCloudflareHttpHeaderCookie(
+      exchange.urls.www
+    );
     const result = await exchange.loadMarkets();
     // console.log(result);
     return result;

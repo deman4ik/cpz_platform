@@ -1,151 +1,104 @@
-const fetch = require("node-fetch");
-
 const baseUrl = "https://min-api.cryptocompare.com/data/";
 
-function dateToTimestamp(date) {
-  if (!(date instanceof Date))
-    throw new Error("timestamp must be an instance of Date.");
-  return Math.floor(date.getTime() / 1000);
-}
-
-function fetchJSON(url) {
-  // TODO: Передавать параметры запроса: прокси, загаловки и т.п.
-  return fetch(url)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`${res.status} ${res.statusText}`);
-      }
-      return res.json();
-    })
-    .then(body => {
-      if (body.Response === "Error") throw body.Message;
-      return body;
-    });
-}
-
 function coinList() {
-  const url = `${baseUrl}all/coinlist`;
-  return fetchJSON(url);
+  return `${baseUrl}all/coinlist`;
 }
 
 function exchangeList() {
-  const url = `${baseUrl}all/exchanges`;
-  return fetchJSON(url);
+  return `${baseUrl}all/exchanges`;
 }
 
-function price(fsym, tsyms, options) {
-  options = options || {};
-  let url = `${baseUrl}price?fsym=${fsym}&tsyms=${tsyms}`;
+function price(options) {
+  let url = `${baseUrl}price?fsym=${options.fsym}&tsyms=${options.tsyms}`;
   if (options.exchanges) url += `&e=${options.exchanges}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
-  return fetchJSON(url);
+  return url;
 }
 
-function priceMulti(fsyms, tsyms, options) {
-  options = options || {};
-  let url = `${baseUrl}pricemulti?fsyms=${fsyms}&tsyms=${tsyms}`;
+function priceMulti(options) {
+  let url = `${baseUrl}pricemulti?fsyms=${options.fsyms}&tsyms=${
+    options.tsyms
+  }`;
   if (options.exchanges) url += `&e=${options.exchanges}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
-  return fetchJSON(url);
+  return url;
 }
 
-function priceFull(fsyms, tsyms, options) {
-  options = options || {};
-  let url = `${baseUrl}pricemultifull?fsyms=${fsyms}&tsyms=${tsyms}`;
+function priceFull(options) {
+  let url = `${baseUrl}pricemultifull?fsyms=${options.fsyms}&tsyms=${
+    options.tsyms
+  }`;
   if (options.exchanges) url += `&e=${options.exchanges}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
-  // We want the RAW data, not the DISPLAY data:
-  return fetchJSON(url).then(result => result.RAW);
+  return url;
 }
 
-function priceHistorical(fsym, tsyms, time, options) {
-  options = options || {};
-  time = dateToTimestamp(time);
-  let url = `${baseUrl}pricehistorical?fsym=${fsym}&tsyms=${tsyms}&ts=${time}`;
+function priceHistorical(options) {
+  let url = `${baseUrl}pricehistorical?fsym=${options.fsym}&tsyms=${
+    options.tsyms
+  }&ts=${options.time}`;
   if (options.exchanges) url += `&e=${options.exchanges}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
-  // The API returns json with an extra layer of nesting, so remove it
-  return fetchJSON(url).then(result => result[fsym]);
+  return url;
 }
 
-function generateAvg(fsym, tsym, e, tryConversion) {
-  let url = `${baseUrl}generateAvg?fsym=${fsym}&tsym=${tsym}&e=${e}`;
-  if (tryConversion === false) url += "&tryConversion=false";
-  return fetchJSON(url).then(result => result.RAW);
+function generateAvg(options) {
+  let url = `${baseUrl}generateAvg?fsym=${options.fsym}&tsym=${
+    options.tsym
+  }&e=${options.e}`;
+  if (options.tryConversion === false) url += "&tryConversion=false";
+  return url;
 }
 
-function topPairs(fsym, limit) {
-  let url = `${baseUrl}top/pairs?fsym=${fsym}`;
-  if (limit) url += `&limit=${limit}`;
-  return fetchJSON(url).then(result => result.Data);
+function topPairs(options) {
+  let url = `${baseUrl}top/pairs?fsym=${options.fsym}`;
+  if (options.limit) url += `&limit=${options.limit}`;
+  return url;
 }
 
-function topExchanges(fsym, tsym, limit) {
-  let url = `${baseUrl}top/exchanges?fsym=${fsym}&tsym=${tsym}`;
-  if (limit) url += `&limit=${limit}`;
-  return fetchJSON(url).then(result => result.Data);
+function topExchanges(options) {
+  let url = `${baseUrl}top/exchanges?fsym=${options.fsym}&tsym=${options.tsym}`;
+  if (options.limit) url += `&limit=${options.limit}`;
+  return url;
 }
 
-function topExchangesFull(fsym, tsym, limit) {
-  let url = `${baseUrl}top/exchanges/full?fsym=${fsym}&tsym=${tsym}`;
-  if (limit) url += `&limit=${limit}`;
-  return fetchJSON(url).then(result => result.Data);
+function topExchangesFull(options) {
+  let url = `${baseUrl}top/exchanges/full?fsym=${options.fsym}&tsym=${
+    options.tsym
+  }`;
+  if (options.limit) url += `&limit=${options.limit}`;
+  return url;
 }
 
-function histoDay(fsym, tsym, options) {
-  options = options || {};
-  if (options.timestamp) options.timestamp = dateToTimestamp(options.timestamp);
-  let url = `${baseUrl}histoday?fsym=${fsym}&tsym=${tsym}`;
+function histoDay(options) {
+  let url = `${baseUrl}histoday?fsym=${options.fsym}&tsym=${options.tsym}`;
   if (options.exchange) url += `&e=${options.exchange}`;
   if (options.limit === "none") url += "&allData=true";
   else if (options.limit) url += `&limit=${options.limit}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
   if (options.aggregate) url += `&aggregate=${options.aggregate}`;
   if (options.timestamp) url += `&toTs=${options.timestamp}`;
-  return fetchJSON(url);
+  return url;
 }
 
-function histoDayData(fsym, tsym, options) {
-  return histoDay(fsym, tsym, options).then(result => result.Data);
-}
-
-function histoHour(fsym, tsym, options) {
-  options = options || {};
-  if (options.timestamp) options.timestamp = dateToTimestamp(options.timestamp);
-  let url = `${baseUrl}histohour?fsym=${fsym}&tsym=${tsym}`;
+function histoHour(options) {
+  let url = `${baseUrl}histohour?fsym=${options.fsym}&tsym=${options.tsym}`;
   if (options.exchange) url += `&e=${options.exchange}`;
   if (options.limit) url += `&limit=${options.limit}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
   if (options.aggregate) url += `&aggregate=${options.aggregate}`;
   if (options.timestamp) url += `&toTs=${options.timestamp}`;
-  return fetchJSON(url);
+  return url;
 }
 
-function histoHourData(fsym, tsym, options) {
-  return histoHour(fsym, tsym, options).then(result => result.Data);
-}
-
-function histoHourData(fsym, tsym, options) {
-  options = options || {};
-  if (options.timestamp) options.timestamp = dateToTimestamp(options.timestamp);
-  let url = `${baseUrl}histohour?fsym=${fsym}&tsym=${tsym}`;
+function histoMinute(options) {
+  let url = `${baseUrl}histominute?fsym=${options.fsym}&tsym=${options.tsym}`;
   if (options.exchange) url += `&e=${options.exchange}`;
   if (options.limit) url += `&limit=${options.limit}`;
   if (options.tryConversion === false) url += "&tryConversion=false";
   if (options.aggregate) url += `&aggregate=${options.aggregate}`;
   if (options.timestamp) url += `&toTs=${options.timestamp}`;
-  return fetchJSON(url).then(result => result.Data);
-}
-function histoMinute(fsym, tsym, options) {
-  options = options || {};
-  if (options.timestamp) options.timestamp = dateToTimestamp(options.timestamp);
-  let url = `${baseUrl}histominute?fsym=${fsym}&tsym=${tsym}`;
-  if (options.exchange) url += `&e=${options.exchange}`;
-  if (options.limit) url += `&limit=${options.limit}`;
-  if (options.tryConversion === false) url += "&tryConversion=false";
-  if (options.aggregate) url += `&aggregate=${options.aggregate}`;
-  if (options.timestamp) url += `&toTs=${options.timestamp}`;
-  return fetchJSON(url).then(result => result.Data);
+  return url;
 }
 
 module.exports = {
@@ -160,8 +113,6 @@ module.exports = {
   topExchanges,
   topExchangesFull,
   histoDay,
-  histoDayData,
   histoHour,
-  histoHourData,
   histoMinute
 };

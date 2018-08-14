@@ -1,16 +1,56 @@
 const moment = require("moment");
-const cc = require("../utils/cryptocompare");
+const fetch = require("node-fetch");
+const HttpsProxyAgent = require("https-proxy-agent");
+const { histoDay, histoHour, histoMinute } = require("../utils/cryptocompare");
+const { durationMinutes, completedPercent } = require("../utils");
 
-async function LoadHistoHourCC(context, input) {
+function fetchJSON(url, agent) {
+  return fetch(url, { agent })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    })
+    .then(body => {
+      if (body.Response === "Error") throw body.Message;
+      return body;
+    });
+}
+
+async function LoadCandlesCC(context, input) {
   try {
-    context.log("LoadHour");
+    context.log("LoadCandlesCC");
     context.log(input);
 
-    // Запрашиваем исторические свечи
-    const response = await cc.histoHour(input.baseq, input.quote, {
+    let agent;
+    if (input.proxy) {
+      agent = new HttpsProxyAgent(input.proxy);
+    }
+
+    const options = {
+      fsym: input.baseq,
+      tsym: input.quote,
       exchange: input.exchange,
-      timestamp: moment(input.dateTo).toDate()
-    });
+      limit: input.limit || 500,
+      timestamp: moment(input.dateTo).unix()
+    };
+    let url;
+    // Запрашиваем исторические свечи
+    switch (input.timeframe) {
+      case "1m":
+        url = histoMinute(options);
+        break;
+      case "1h":
+        url = histoHour(options);
+        break;
+      case "1d":
+        url = histoDay(options);
+        break;
+      default:
+        throw new Error("Unknown timeframe. Must be: '1m', '1h', '1d'.");
+    }
+    const response = await fetchJSON(url, agent);
     // Если есть результат
     if (response && response.Data.length > 0) {
       let next;
@@ -20,10 +60,10 @@ async function LoadHistoHourCC(context, input) {
         .utc()
         .format();
 
-      const timeTo = moment
+      /* const timeTo = moment
         .unix(response.TimeTo)
         .utc()
-        .format();
+        .format(); */
       // Дата начала импорта
       const endDate = input.endDate || input.dateTo;
       // Дата первой загруженный свечи
@@ -32,20 +72,14 @@ async function LoadHistoHourCC(context, input) {
       const { dateFrom } = input;
       // Всего минут
       const totalDuration =
-        input.totalDuration ||
-        moment.duration(moment(endDate).diff(moment(dateFrom))).asMinutes();
+        input.totalDuration || durationMinutes(dateFrom, endDate);
       // Осталось минут
-      let leftDuration = moment
-        .duration(moment(lastDate).diff(dateFrom))
-        .asMinutes();
-      // Не может быть меньше нуля
-      leftDuration = leftDuration > 0 ? leftDuration : 0;
+      const leftDuration = durationMinutes(dateFrom, lastDate, true);
       // Загружено минут
       const completedDuration = totalDuration - leftDuration;
       // Процент выполнения
-      let percent = (completedDuration / totalDuration) * 100;
-      // Не может быть больше 100
-      percent = percent <= 100 ? percent : 100;
+      const percent = completedPercent(completedDuration, totalDuration);
+
       // Если дата начала импорта раньше чем дата первой загруженной свечи
       if (moment(dateFrom).isBefore(lastDate)) {
         // Формируем параметры нового запроса на импорт
@@ -67,12 +101,21 @@ async function LoadHistoHourCC(context, input) {
         leftDuration,
         percent
       };
+      /* Преобразуем объект в массив */
+      const data = response.Data.map(item => [
+        item.time,
+        item.open,
+        item.high,
+        item.low,
+        item.close,
+        item.volumefrom
+      ]);
       // Результат выполнения
       const result = {
         input, // старые параметры запроса
         next, // новые параметры запроса, если необходимо
         status, // текущий статус выполнения задачи
-        data: response.Data // полученные данные
+        data // полученные данные
       };
       context.log(result);
       return result;
@@ -84,4 +127,4 @@ async function LoadHistoHourCC(context, input) {
   throw new Error("Error loading HistoHourCC");
 }
 
-module.exports = LoadHistoHourCC;
+module.exports = LoadCandlesCC;
