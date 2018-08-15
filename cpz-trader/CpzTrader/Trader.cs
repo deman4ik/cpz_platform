@@ -11,6 +11,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.EventGrid;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SubscriptionValidationResponse = Microsoft.Azure.WebJobs.Extensions.EventGrid.SubscriptionValidationResponse;
@@ -33,7 +35,7 @@ namespace CpzTrader
             var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
             
             // выполняем бизнес логику согласно данным из сигнала
-            await context.CallActivityAsync<string>("Trader_Buy", newSignal);
+            await context.CallActivityAsync<NewSignal>("Trader_Buy", newSignal);
 
             // обновляем clientInfo
 
@@ -42,15 +44,15 @@ namespace CpzTrader
         }
 
         [FunctionName("Trader_Buy")]
-        public static string Buy([ActivityTrigger] string name, TraceWriter log)
+        public static string Buy([ActivityTrigger] NewSignal signal, TraceWriter log)
         {
-            return $"Hello {name}!";
+            return $"Hello {signal.AdvisorName}!";
         }
 
         [FunctionName("Trader_Sell")]
-        public static string Sell([ActivityTrigger] string name, TraceWriter log)
+        public static string Sell([ActivityTrigger] NewSignal signal, TraceWriter log)
         {
-            return $"Hello {name}!";
+            return $"Hello {signal.AdvisorName}!";
         }
 
 
@@ -107,16 +109,16 @@ namespace CpzTrader
 
                         List<Client> clients = GetClientsInfo(eventData.AdvisorName);
 
-                        List<Task<string>> parallelTraders = new List<Task<string>>();
-
+                        // для каждого клиента запускаем своего проторговщика и сохраняем его идентификатор у клиента
                         foreach (var client in clients)
                         {
                             Task<string> traderTask = starter.StartNewAsync("Trader", client);
-                            client.TraderId = traderTask;
-                            parallelTraders.Add(traderTask);
+
+                            client.TraderId = traderTask.Result;                            
                         }
 
-                        await Task.WhenAll(parallelTraders);
+                        // сохраняем обновленных клиентов в таблицу
+                        await SaveClientsInfoDb(clients);                      
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
@@ -125,13 +127,15 @@ namespace CpzTrader
                     {
                         var eventData = dataObject.ToObject<NewSignal>();
 
-                        List<Client> clients = GetClientsInfo(eventData.AdvisorName);
+                        // получаем из базы клиентов с айдишниками трейдеров
+                        TableQuerySegment<Client> clients = GetClientsInfoFromDb(eventData.AdvisorName).Result;
 
                         List<Task> parallelSignals = new List<Task>();
 
+                        // асинхронно отправляем сигнал всем проторговщикам
                         foreach (var client in clients)
                         {
-                            var parallelSignal = starter.RaiseEventAsync(client.TraderId.Result, "NewSignal", eventData);
+                            var parallelSignal = starter.RaiseEventAsync(client.TraderId, "NewSignal", eventData);
                             
                             parallelSignals.Add(parallelSignal);
                         }
@@ -151,25 +155,90 @@ namespace CpzTrader
         }
 
         /// <summary>
-        /// заглушка симулирующая обращение к БД за информацией о клиентах и их ключах
+        /// инициализирует тестовых клиентов
         /// </summary>
         /// <param name="advisorName">имя советника</param>
-        /// <returns></returns>
         private static List<Client> GetClientsInfo(string advisorName)
         {
             List<Client> _clients = new List<Client>();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 3; i++)
             {
-                _clients.Add(new Client()
+                _clients.Add(new Client(Guid.NewGuid().ToString(), advisorName)
                 {
-                    UniqId = i.ToString(),
-                    AdvisorName = advisorName,
+                    //UniqId = i.ToString(),
+                    //AdvisorName = advisorName,
                     PublicKey = "pubKey"+ i,
                     PrivateKey = "prKey" + i
                 });               
             }
             return _clients;
+        }
+
+        /// <summary>
+        /// сохранить информацию о клиентах в базе
+        /// </summary>
+        /// <param name="clients">список клиентов</param>
+        private static async Task SaveClientsInfoDb(List<Client> clients)
+        {
+            try
+            {
+                // подключаемся к локальному хранилищу
+                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+
+                // создаем объект для работы с таблицами
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                // получаем нужную таблицу
+                var table = cloudTableClient.GetTableReference("clientsinfo");
+
+                // если она еще не существует - создаем
+                var res = table.CreateIfNotExistsAsync().Result;
+
+                TableBatchOperation batchOperation = new TableBatchOperation();
+
+                // сохраняем пачкой клиентов в таблице
+                foreach (var client in clients)
+                {
+                    batchOperation.Insert(client);
+                }
+
+                await table.ExecuteBatchAsync(batchOperation);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }            
+        }
+
+        /// <summary>
+        /// получить из базы клиентов по имени советника
+        /// </summary>
+        /// <param name="advisorName"></param>
+        /// <returns></returns>
+        private static async Task<TableQuerySegment<Client>> GetClientsInfoFromDb(string advisorName)
+        {
+            try
+            {
+                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                var table = cloudTableClient.GetTableReference("clientsinfo");
+
+                // формируем фильтр, чтобы получить клиентов для нужного робота
+                TableQuery<Client> query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
+
+                var result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }            
         }
     }
 }
