@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Pipes;
@@ -22,24 +22,24 @@ namespace CpzTrader
     public static class Trader
     {
         /// <summary>
-        /// трейдер-оркестратор, обрабатывает торговую логику отдельного клиента
+        /// С‚СЂРµР№РґРµСЂ-РѕСЂРєРµСЃС‚СЂР°С‚РѕСЂ, РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ С‚РѕСЂРіРѕРІСѓСЋ Р»РѕРіРёРєСѓ РѕС‚РґРµР»СЊРЅРѕРіРѕ РєР»РёРµРЅС‚Р°
         /// </summary>
         [FunctionName("Trader")]
         public static async Task RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            // получаем данные о клиенте аккаунт которого будем обрабатывать
+            // РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ Рѕ РєР»РёРµРЅС‚Рµ Р°РєРєР°СѓРЅС‚ РєРѕС‚РѕСЂРѕРіРѕ Р±СѓРґРµРј РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ
             var clientInfo = context.GetInput<Client>();
 
-            // ждем дальнейших указаний
+            // Р¶РґРµРј РґР°Р»СЊРЅРµР№С€РёС… СѓРєР°Р·Р°РЅРёР№
             var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
             
-            // выполняем бизнес логику согласно данным из сигнала
+            // РІС‹РїРѕР»РЅСЏРµРј Р±РёР·РЅРµСЃ Р»РѕРіРёРєСѓ СЃРѕРіР»Р°СЃРЅРѕ РґР°РЅРЅС‹Рј РёР· СЃРёРіРЅР°Р»Р°
             await context.CallActivityAsync<NewSignal>("Trader_Buy", newSignal);
 
-            // обновляем clientInfo
+            // РѕР±РЅРѕРІР»СЏРµРј clientInfo
 
-            // переходим на следующую итерацию, передавая себе текущее состояние
+            // РїРµСЂРµС…РѕРґРёРј РЅР° СЃР»РµРґСѓСЋС‰СѓСЋ РёС‚РµСЂР°С†РёСЋ, РїРµСЂРµРґР°РІР°СЏ СЃРµР±Рµ С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
             context.ContinueAsNew(clientInfo);            
         }
 
@@ -57,7 +57,7 @@ namespace CpzTrader
 
 
         /// <summary>
-        /// обработчик событий пришедших от советника
+        /// РѕР±СЂР°Р±РѕС‚С‡РёРє СЃРѕР±С‹С‚РёР№ РїСЂРёС€РµРґС€РёС… РѕС‚ СЃРѕРІРµС‚РЅРёРєР°
         /// </summary>
         [FunctionName("Trader_HttpStart")]
         public static async Task<HttpResponseMessage> HttpStart(
@@ -67,13 +67,13 @@ namespace CpzTrader
         {
             try
             {
-                // событие валидации подписки
+                // СЃРѕР±С‹С‚РёРµ РІР°Р»РёРґР°С†РёРё РїРѕРґРїРёСЃРєРё
                 const string subscriptionValidationEvent = "Microsoft.EventGrid.SubscriptionValidationEvent";
 
-                // событие запуска проторговщиков
+                // СЃРѕР±С‹С‚РёРµ Р·Р°РїСѓСЃРєР° РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєРѕРІ
                 const string cpzTasksTraderStart = "CPZ.Tasks.Trader.Start";
 
-                // событие появления нового сигнала
+                // СЃРѕР±С‹С‚РёРµ РїРѕСЏРІР»РµРЅРёСЏ РЅРѕРІРѕРіРѕ СЃРёРіРЅР°Р»Р°
                 const string cpzSignalsNewSignal = "CPZ.Signals.NewSignal";
                 
 
@@ -85,8 +85,8 @@ namespace CpzTrader
                 {
                     JObject dataObject = eventGridEvent.Data as JObject;
 
-                    // В зависимости от типа события выполняем определенную логику
-                    // валидация
+                    // Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° СЃРѕР±С‹С‚РёСЏ РІС‹РїРѕР»РЅСЏРµРј РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ Р»РѕРіРёРєСѓ
+                    // РІР°Р»РёРґР°С†РёСЏ
                     if (string.Equals(eventGridEvent.EventType, subscriptionValidationEvent, StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<SubscriptionValidationEventData>();
@@ -95,21 +95,21 @@ namespace CpzTrader
 
                         responseData.ValidationResponse = eventData.ValidationCode;
 
-                        Debug.WriteLine("Событие валидации обработано!");
+                        Debug.WriteLine("РЎРѕР±С‹С‚РёРµ РІР°Р»РёРґР°С†РёРё РѕР±СЂР°Р±РѕС‚Р°РЅРѕ!");
                         
                         return new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(JsonConvert.SerializeObject(responseData))
                         };
                     }
-                    // запуск проторговщиков
+                    // Р·Р°РїСѓСЃРє РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєРѕРІ
                     else if (string.Equals(eventGridEvent.EventType, cpzTasksTraderStart, StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<StartNewTraderData>();
 
                         List<Client> clients = GetClientsInfo(eventData.AdvisorName);
 
-                        // для каждого клиента запускаем своего проторговщика и сохраняем его идентификатор у клиента
+                        // РґР»СЏ РєР°Р¶РґРѕРіРѕ РєР»РёРµРЅС‚Р° Р·Р°РїСѓСЃРєР°РµРј СЃРІРѕРµРіРѕ РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР° Рё СЃРѕС…СЂР°РЅСЏРµРј РµРіРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Сѓ РєР»РёРµРЅС‚Р°
                         foreach (var client in clients)
                         {
                             Task<string> traderTask = starter.StartNewAsync("Trader", client);
@@ -117,22 +117,22 @@ namespace CpzTrader
                             client.TraderId = traderTask.Result;                            
                         }
 
-                        // сохраняем обновленных клиентов в таблицу
+                        // СЃРѕС…СЂР°РЅСЏРµРј РѕР±РЅРѕРІР»РµРЅРЅС‹С… РєР»РёРµРЅС‚РѕРІ РІ С‚Р°Р±Р»РёС†Сѓ
                         await SaveClientsInfoDb(clients);                      
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
-                    // новый сигнал
+                    // РЅРѕРІС‹Р№ СЃРёРіРЅР°Р»
                     else if (string.Equals(eventGridEvent.EventType, cpzSignalsNewSignal, StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<NewSignal>();
 
-                        // получаем из базы клиентов с айдишниками трейдеров
+                        // РїРѕР»СѓС‡Р°РµРј РёР· Р±Р°Р·С‹ РєР»РёРµРЅС‚РѕРІ СЃ Р°Р№РґРёС€РЅРёРєР°РјРё С‚СЂРµР№РґРµСЂРѕРІ
                         TableQuerySegment<Client> clients = GetClientsInfoFromDb(eventData.AdvisorName).Result;
 
                         List<Task> parallelSignals = new List<Task>();
 
-                        // асинхронно отправляем сигнал всем проторговщикам
+                        // Р°СЃРёРЅС…СЂРѕРЅРЅРѕ РѕС‚РїСЂР°РІР»СЏРµРј СЃРёРіРЅР°Р» РІСЃРµРј РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј
                         foreach (var client in clients)
                         {
                             var parallelSignal = starter.RaiseEventAsync(client.TraderId, "NewSignal", eventData);
@@ -155,9 +155,9 @@ namespace CpzTrader
         }
 
         /// <summary>
-        /// инициализирует тестовых клиентов
+        /// РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ С‚РµСЃС‚РѕРІС‹С… РєР»РёРµРЅС‚РѕРІ
         /// </summary>
-        /// <param name="advisorName">имя советника</param>
+        /// <param name="advisorName">РёРјСЏ СЃРѕРІРµС‚РЅРёРєР°</param>
         private static List<Client> GetClientsInfo(string advisorName)
         {
             List<Client> _clients = new List<Client>();
@@ -176,28 +176,28 @@ namespace CpzTrader
         }
 
         /// <summary>
-        /// сохранить информацию о клиентах в базе
+        /// СЃРѕС…СЂР°РЅРёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РєР»РёРµРЅС‚Р°С… РІ Р±Р°Р·Рµ
         /// </summary>
-        /// <param name="clients">список клиентов</param>
+        /// <param name="clients">СЃРїРёСЃРѕРє РєР»РёРµРЅС‚РѕРІ</param>
         private static async Task SaveClientsInfoDb(List<Client> clients)
         {
             try
             {
-                // подключаемся к локальному хранилищу
+                // РїРѕРґРєР»СЋС‡Р°РµРјСЃСЏ Рє Р»РѕРєР°Р»СЊРЅРѕРјСѓ С…СЂР°РЅРёР»РёС‰Сѓ
                 var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
 
-                // создаем объект для работы с таблицами
+                // СЃРѕР·РґР°РµРј РѕР±СЉРµРєС‚ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ С‚Р°Р±Р»РёС†Р°РјРё
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
-                // получаем нужную таблицу
+                // РїРѕР»СѓС‡Р°РµРј РЅСѓР¶РЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ
                 var table = cloudTableClient.GetTableReference("clientsinfo");
 
-                // если она еще не существует - создаем
+                // РµСЃР»Рё РѕРЅР° РµС‰Рµ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ - СЃРѕР·РґР°РµРј
                 var res = table.CreateIfNotExistsAsync().Result;
 
                 TableBatchOperation batchOperation = new TableBatchOperation();
 
-                // сохраняем пачкой клиентов в таблице
+                // СЃРѕС…СЂР°РЅСЏРµРј РїР°С‡РєРѕР№ РєР»РёРµРЅС‚РѕРІ РІ С‚Р°Р±Р»РёС†Рµ
                 foreach (var client in clients)
                 {
                     batchOperation.Insert(client);
@@ -213,7 +213,7 @@ namespace CpzTrader
         }
 
         /// <summary>
-        /// получить из базы клиентов по имени советника
+        /// РїРѕР»СѓС‡РёС‚СЊ РёР· Р±Р°Р·С‹ РєР»РёРµРЅС‚РѕРІ РїРѕ РёРјРµРЅРё СЃРѕРІРµС‚РЅРёРєР°
         /// </summary>
         /// <param name="advisorName"></param>
         /// <returns></returns>
@@ -227,7 +227,7 @@ namespace CpzTrader
 
                 var table = cloudTableClient.GetTableReference("clientsinfo");
 
-                // формируем фильтр, чтобы получить клиентов для нужного робота
+                // С„РѕСЂРјРёСЂСѓРµРј С„РёР»СЊС‚СЂ, С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РєР»РёРµРЅС‚РѕРІ РґР»СЏ РЅСѓР¶РЅРѕРіРѕ СЂРѕР±РѕС‚Р°
                 TableQuery<Client> query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
 
                 var result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
