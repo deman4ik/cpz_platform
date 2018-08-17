@@ -21,7 +21,10 @@
     "eslint-config-prettier": "^2.10.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-prettier": "^2.6.2",
+    "gulp": "^3.9.1",
+    "gulp-zip": "^4.2.0",
     "jest": "^23.5.0",
+    "minimist": "^1.2.0",
     "ololog": "^1.1.111",
     "prettier": "^1.14.2"
   },
