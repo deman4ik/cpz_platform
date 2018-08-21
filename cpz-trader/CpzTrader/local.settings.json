@@ -4,8 +4,5 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
     "StorageConnectionString": "UseDevelopmentStorage=true"
-    //"Host": {
-    //  "LocalHttpPort": 8888
-    //}
   }
 }

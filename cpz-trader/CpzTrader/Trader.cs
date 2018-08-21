@@ -28,33 +28,96 @@ namespace CpzTrader
         public static async Task RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            // получаем данные о клиенте аккаунт которого будем обрабатывать
-            var clientInfo = context.GetInput<Client>();
+            try
+            {
+                // получаем данные о клиенте аккаунт которого будем обрабатывать
+                var clientInfo = context.GetInput<Client>();
 
-            // ждем дальнейших указаний
-            var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
-            
-            // выполняем бизнес логику согласно данным из сигнала
-            await context.CallActivityAsync<NewSignal>("Trader_Buy", newSignal);
+                // ждем дальнейших указаний
+                var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
 
-            // обновляем clientInfo
+                if (!clientInfo.IsEmulation)
+                {
+                    // реальная торговля
 
-            // переходим на следующую итерацию, передавая себе текущее состояние
-            context.ContinueAsNew(clientInfo);            
+                    // выполняем бизнес логику согласно данным из сигнала
+                    //await context.CallActivityAsync<NewSignal>("Trader_Buy", newSignal);
+
+                    using (HttpClient httpClient = new HttpClient())
+                    {
+                        var url = "http://localhost:7077/api/HttpTriggerJS";
+                        var resl = await httpClient.PostAsJsonAsync(url, newSignal);
+
+                    }
+                }
+                else // эмуляция торговли
+                {                    
+                    var action = newSignal.Action;
+
+                    if (action == ActionType.Opening)
+                    {
+                        Position newPosition = new Position();
+
+                        var openOrder = Emulator.SendOrder(newSignal, clientInfo);
+
+                        newPosition.OpenOrders.Add(openOrder);
+
+                        newPosition.State = newSignal.Type == OrderType.Limit ? PositionState.Opening : PositionState.Open;
+
+                        clientInfo.AllPositions.Add(newPosition);
+                    }
+                    else if(action == ActionType.Open)
+                    {
+                        var needPosition = clientInfo.AllPositions[clientInfo.AllPositions.Count - 1];
+
+                        var needOrder = needPosition.GetNeedOpenOrder(newSignal.NumberOrderInRobot);
+
+                        if(needOrder != null)
+                        {
+                            needOrder.State = OrderState.Done;
+                        }
+
+                        needPosition.State = PositionState.Open;
+
+                    }
+                    else if (action == ActionType.Closing)
+                    {
+                        var needPosition = clientInfo.AllPositions[clientInfo.AllPositions.Count - 1];
+
+                        var closeOrder = Emulator.SendOrder(newSignal, clientInfo);
+
+                        needPosition.CloseOrders.Add(closeOrder);
+
+                        needPosition.State = newSignal.Type == OrderType.Limit ? PositionState.Closing : PositionState.Close;
+                    }
+                    else if(action == ActionType.Close)
+                    {
+                        var needPosition = clientInfo.AllPositions[clientInfo.AllPositions.Count - 1];
+
+                        var needOrder = needPosition.GetNeedOpenOrder(newSignal.NumberOrderInRobot);
+
+                        if (needOrder != null)
+                        {
+                            needOrder.State = OrderState.Done;
+                        }
+
+                        needPosition.State = PositionState.Close;
+                    }                    
+                }
+
+                // обновляем информацию о клиенте в базе
+                await UpdateClientInfoAsync(clientInfo);
+
+                // переходим на следующую итерацию, передавая себе текущее состояние
+                context.ContinueAsNew(clientInfo);
+
+            }
+            catch (Exception e)
+            {
+                await SendLogMessageAsync(e.Message);
+                throw;
+            }
         }
-
-        [FunctionName("Trader_Buy")]
-        public static string Buy([ActivityTrigger] NewSignal signal, TraceWriter log)
-        {
-            return $"Hello {signal.AdvisorName}!";
-        }
-
-        [FunctionName("Trader_Sell")]
-        public static string Sell([ActivityTrigger] NewSignal signal, TraceWriter log)
-        {
-            return $"Hello {signal.AdvisorName}!";
-        }
-
 
         /// <summary>
         /// обработчик событий пришедших от советника
@@ -75,7 +138,7 @@ namespace CpzTrader
 
                 // событие появления нового сигнала
                 const string cpzSignalsNewSignal = "CPZ.Signals.NewSignal";
-                
+
 
                 string requestContent = await req.Content.ReadAsStringAsync();
 
@@ -112,13 +175,13 @@ namespace CpzTrader
                         // для каждого клиента запускаем своего проторговщика и сохраняем его идентификатор у клиента
                         foreach (var client in clients)
                         {
-                            Task<string> traderTask = starter.StartNewAsync("Trader", client);
+                            string traderTask = await starter.StartNewAsync("Trader", client);
 
-                            client.TraderId = traderTask.Result;                            
+                            client.TraderId = traderTask;                            
                         }
 
                         // сохраняем обновленных клиентов в таблицу
-                        await SaveClientsInfoDb(clients);                      
+                        await SaveClientsInfoDbAsync(clients);                      
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
@@ -128,20 +191,23 @@ namespace CpzTrader
                         var eventData = dataObject.ToObject<NewSignal>();
 
                         // получаем из базы клиентов с айдишниками трейдеров
-                        TableQuerySegment<Client> clients = GetClientsInfoFromDb(eventData.AdvisorName).Result;
+                        TableQuerySegment<Client> clients = await GetClientsInfoFromDbAsync(eventData.AdvisorName);
 
                         List<Task> parallelSignals = new List<Task>();
 
-                        // асинхронно отправляем сигнал всем проторговщикам
-                        foreach (var client in clients)
+                        if(clients != null)
                         {
-                            var parallelSignal = starter.RaiseEventAsync(client.TraderId, "NewSignal", eventData);
-                            
-                            parallelSignals.Add(parallelSignal);
+                            // асинхронно отправляем сигнал всем проторговщикам
+                            foreach (Client client in clients)
+                            {
+                                var parallelSignal = starter.RaiseEventAsync(client.TraderId, "NewSignal", eventData);
+
+                                parallelSignals.Add(parallelSignal);
+                            }
+
+                            await Task.WhenAll(parallelSignals);
                         }
-
-                        await Task.WhenAll(parallelSignals);
-
+                        
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }                    
                 }
@@ -149,10 +215,12 @@ namespace CpzTrader
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e);
+                await SendLogMessageAsync(e.Message);
                 throw;
             }            
         }
+
+        #region Работа с базой данных
 
         /// <summary>
         /// инициализирует тестовых клиентов
@@ -162,9 +230,9 @@ namespace CpzTrader
         {
             List<Client> _clients = new List<Client>();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
-                _clients.Add(new Client(Guid.NewGuid().ToString(), advisorName)
+                _clients.Add(new Client(i.ToString(), advisorName)
                 {
                     //UniqId = i.ToString(),
                     //AdvisorName = advisorName,
@@ -179,7 +247,7 @@ namespace CpzTrader
         /// сохранить информацию о клиентах в базе
         /// </summary>
         /// <param name="clients">список клиентов</param>
-        private static async Task SaveClientsInfoDb(List<Client> clients)
+        private static async Task SaveClientsInfoDbAsync<T>(List<T> clients)  where T: ITableEntity
         {
             try
             {
@@ -197,7 +265,7 @@ namespace CpzTrader
 
                 TableBatchOperation batchOperation = new TableBatchOperation();
 
-                // сохраняем пачкой клиентов в таблице
+                // сохраняем пачкой элементы в таблице
                 foreach (var client in clients)
                 {
                     batchOperation.Insert(client);
@@ -209,7 +277,7 @@ namespace CpzTrader
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
 
         /// <summary>
@@ -217,7 +285,7 @@ namespace CpzTrader
         /// </summary>
         /// <param name="advisorName"></param>
         /// <returns></returns>
-        private static async Task<TableQuerySegment<Client>> GetClientsInfoFromDb(string advisorName)
+        private static async Task<TableQuerySegment<Client>> GetClientsInfoFromDbAsync(string advisorName)
         {
             try
             {
@@ -228,17 +296,51 @@ namespace CpzTrader
                 var table = cloudTableClient.GetTableReference("clientsinfo");
 
                 // формируем фильтр, чтобы получить клиентов для нужного робота
-                TableQuery<Client> query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
+                var query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
 
-                var result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
+                TableQuerySegment<Client> result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
                 return result;
+
             }
+            catch(StorageException e)
+            {
+                Debug.WriteLine(e);
+                return null;
+            }
+
             catch (Exception e)
             {
                 Debug.WriteLine(e);
                 throw;
-            }            
+            }
         }
+
+        /// <summary>
+        /// обновить запись о клиенте в базе
+        /// </summary>
+        private static async Task<bool> UpdateClientInfoAsync(Client client)
+        {
+
+
+            return false;
+        }
+
+        #endregion
+
+        #region логирование
+
+        /// <summary>
+        /// отправляет сообщения в лог
+        /// </summary>
+        public static async Task SendLogMessageAsync(string message)
+        {
+            await Task.Run(async () =>
+            {
+                Debug.WriteLine(message);
+                await Task.Delay(1);
+            });
+        }
+        #endregion
     }
 }

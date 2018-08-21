@@ -9,7 +9,7 @@ namespace CpzTrader.Models
     /// <summary>
     /// описывает данные клиента, подписанного на робота
     /// </summary>
-    class Client : TableEntity
+    public class Client : TableEntity
     {
         public Client(string uniqId, string advisorName)
         {
@@ -18,6 +18,14 @@ namespace CpzTrader.Models
         }
 
         public Client(){}
+
+        public bool IsEmulation { get; set; }
+
+        public EmulatorSettings EmulatorSettings { get; set; }
+
+        public List<Position> AllPositions { get; set; }
+
+        public decimal Volume { get; set; }
 
         //public string UniqId { get; set; }
 
