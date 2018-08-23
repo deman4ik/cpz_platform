@@ -39,11 +39,6 @@ namespace CpzTrader.Models
         public decimal Price { get; set; }
 
         /// <summary>
-        /// объем
-        /// </summary>
-        public decimal Volume { get; set; }
-
-        /// <summary>
         /// тип сделки - по рынку или лимиткой
         /// </summary>
         public OrderType Type { get; set; }
@@ -52,6 +47,11 @@ namespace CpzTrader.Models
         /// номер ордера в роботе
         /// </summary>
         public string NumberOrderInRobot { get; set; }
+
+        /// <summary>
+        /// номер позиции в роботе
+        /// </summary>
+        public string NumberPositionInRobot { get; set; }
 
     }
 }

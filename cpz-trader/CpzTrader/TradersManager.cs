@@ -19,31 +19,31 @@ namespace CpzTrader
 {
     public static class TradersManager
     {
-        [FunctionName("StartTrader")]
-        public static async Task Run([EventGridTrigger]EventGridEvent eventGridEvent,
-            [OrchestrationClient] DurableOrchestrationClient client)
-        {
-            if (eventGridEvent.EventType == "CPZ.Tasks.Trader.Start")
-            {
-                var id = await client.StartNewAsync("Trader", eventGridEvent.Data);
-            }
-        }
+        //[FunctionName("StartTrader")]
+        //public static async Task Run([EventGridTrigger]EventGridEvent eventGridEvent,
+        //    [OrchestrationClient] DurableOrchestrationClient client)
+        //{
+        //    if (eventGridEvent.EventType == "CPZ.Tasks.Trader.Start")
+        //    {
+        //        var id = await client.StartNewAsync("Trader", eventGridEvent.Data);
+        //    }
+        //}
 
-        public static async Task<HttpResponseMessage> Run(
-        HttpRequestMessage req,
-        DurableOrchestrationClient starter,
-        string functionName,
-        ILogger log)
-        {
-            // Function input comes from the request content.
-            dynamic eventData = await req.Content.ReadAsAsync<object>();
-            string instanceId = await starter.StartNewAsync(functionName, eventData);
+        //public static async Task<HttpResponseMessage> Run(
+        //HttpRequestMessage req,
+        //DurableOrchestrationClient starter,
+        //string functionName,
+        //ILogger log)
+        //{
+        //    // Function input comes from the request content.
+        //    dynamic eventData = await req.Content.ReadAsAsync<object>();
+        //    string instanceId = await starter.StartNewAsync(functionName, eventData);
 
-            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
+        //    log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 
-            var res = starter.CreateCheckStatusResponse(req, instanceId);
-            res.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(10));
-            return res;
-        }
+        //    var res = starter.CreateCheckStatusResponse(req, instanceId);
+        //    res.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(10));
+        //    return res;
+        //}
     }
 }

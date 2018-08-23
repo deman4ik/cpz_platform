@@ -15,6 +15,7 @@ namespace CpzTrader.Models
         {
             this.RowKey = uniqId;
             this.PartitionKey = advisorName;
+            AllPositions = new List<Position>();
         }
 
         public Client(){}
@@ -36,5 +37,13 @@ namespace CpzTrader.Models
         public string PrivateKey { get; set; }
 
         public string TraderId { get; set; }
+
+        public int CountPositions { get; set; }
+        
+        // test data
+        public int CountOpenOrders { get; set; }
+
+        // test data
+        public int CountCloseOrders { get; set; }
     }
 }

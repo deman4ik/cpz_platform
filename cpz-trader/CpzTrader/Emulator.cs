@@ -17,10 +17,11 @@ namespace CpzTrader
         {
             Order newOrder = new Order()
             {
+                NumberInRobot = signal.NumberOrderInRobot,
                 Symbol = signal.Baseq + "-" + signal.Quote,
                 Price = signal.Price,
                 Time = DateTime.UtcNow,
-                Volume = signal.Volume,
+                Volume = client.Volume,
                 State = signal.Type == OrderType.Limit ? OrderState.Activ : OrderState.Done,
             };
 

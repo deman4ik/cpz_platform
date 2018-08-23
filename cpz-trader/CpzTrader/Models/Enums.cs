@@ -28,6 +28,8 @@ namespace CpzTrader.Models
         /// закрыта
         /// </summary>
         Close,
+
+        Canceled
     }
 
     /// <summary>
@@ -90,6 +92,11 @@ namespace CpzTrader.Models
         /// <summary>
         /// позиция закрылась
         /// </summary>
-        Close
+        Close,
+
+        /// <summary>
+        /// отменить
+        /// </summary>
+        Cancel,
     }
 }

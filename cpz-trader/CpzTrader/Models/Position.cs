@@ -6,6 +6,19 @@ namespace CpzTrader.Models
 {
     public class Position
     {
+        public Position()
+        {
+            OpenOrders = new List<Order>();
+
+            CloseOrders = new List<Order>();
+
+        }
+
+        /// <summary>
+        /// номер позиции в роботе
+        /// </summary>
+        public string NumberPositionInRobot { get; set; }
+
         /// <summary>
         /// ордера открывшие позицию
         /// </summary>
@@ -26,11 +39,16 @@ namespace CpzTrader.Models
         /// </summary>
         /// <param name="numberOrder">номер ордера в роботе</param>
         /// <returns></returns>
-        public Order GetNeedOpenOrder(string numberOrder)
+        public Order GetNeedOrder(string numberOrder)
         {
-            var needPrder = OpenOrders.Find(order => order.NumberInRobot == numberOrder);
+            var needOrder = OpenOrders.Find(order => order.NumberInRobot == numberOrder);
 
-            return needPrder;
+            if(needOrder == null)
+            {
+                needOrder = CloseOrders.Find(order => order.NumberInRobot == numberOrder);
+            }
+
+            return needOrder;
         }
 
         /// <summary>
