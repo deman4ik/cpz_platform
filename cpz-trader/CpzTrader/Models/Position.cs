@@ -35,7 +35,7 @@ namespace CpzTrader.Models
         public PositionState State { get; set; }
 
         /// <summary>
-        /// найти открывающий ордер по номеру
+        /// найти ордер по номеру
         /// </summary>
         /// <param name="numberOrder">номер ордера в роботе</param>
         /// <returns></returns>
@@ -50,18 +50,5 @@ namespace CpzTrader.Models
 
             return needOrder;
         }
-
-        /// <summary>
-        /// найти закрывающий ордер по номеру
-        /// </summary>
-        /// <param name="numberOrder">номер ордера в роботе</param>
-        /// <returns></returns>
-        public Order GetNeedCloseOrder(string numberOrder)
-        {
-            var needPrder = CloseOrders.Find(order => order.NumberInRobot == numberOrder);
-
-            return needPrder;
-        }
-
     }
 }

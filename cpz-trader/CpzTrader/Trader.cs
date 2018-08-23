@@ -74,10 +74,13 @@ namespace CpzTrader
                 else // эмуляция торговли
                 {                    
                     var action = newSignal.Action;
-                       
+
+                    // находим позицию для которой пришел сигнал
+                    var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
+
                     // если сигнал на открытие новой позиции
-                    if (action == ActionType.Opening)
-                    {
+                    if (needPosition == null)
+                    {                        
                         // создаем ее
                         Position newPosition = new Position();
 
@@ -88,88 +91,51 @@ namespace CpzTrader
 
                         newPosition.OpenOrders.Add(openOrder);
 
-                        // изменяем состояние в зависимости от тиа ордера, если лимит то "открывается", если по рынку то "открыта"
-                        newPosition.State = newSignal.Type == OrderType.Limit ? PositionState.Opening : PositionState.Open;
-
                         // сохраняем позицию в клиенте
                         clientInfo.AllPositions.Add(newPosition);
-                    }
-
-                    // находим позицию для которой пришел сигнал
-                    var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
-
-                    if(needPosition != null)
+                    }                                      
+                    else
                     {
-                        // сигнал о том что позиция открылась
-                        if (action == ActionType.Open)
+                        // наращиваем объем позиции
+                        if (action == ActionType.NewOpenOrder)
                         {
-                            // ордер открывавший позу
-                            var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
+                            var openOrder = Emulator.SendOrder(newSignal, clientInfo);
 
-                            // изменяем его состояние на исполненный
-                            if (needOrder != null)
-                            {
-                                needOrder.State = OrderState.Done;
-                            }
+                            needPosition.OpenOrders.Add(openOrder);
 
-                            // меняем состояние позиции на "открыта"
-                            needPosition.State = PositionState.Open;
-
-                        }
-                        // сигнал на закрытие позиции
-                        else if (action == ActionType.Closing)
+                        } // сокращаем объем позиции
+                        else if (action == ActionType.NewCloseOrder)
                         {
-                            // создаем закрывающий ордер и прогружаем им позицию
                             var closeOrder = Emulator.SendOrder(newSignal, clientInfo);
 
                             needPosition.CloseOrders.Add(closeOrder);
 
-                            needPosition.State = newSignal.Type == OrderType.Limit ? PositionState.Closing : PositionState.Close;
-                        }
-                        // позиция закрылась
-                        else if (action == ActionType.Close)
+                        } // проверить состояние ордера
+                        else if (action == ActionType.CheckOrder)
                         {
-                            // изменяем состояния закрывающего ордера и позиции
                             var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
+                            
                             if (needOrder != null)
                             {
                                 needOrder.State = OrderState.Done;
                             }
 
-                            needPosition.State = PositionState.Close;
-                        }
-                        else if (action == ActionType.Cancel)
+                        } // отозвать ордер
+                        else if (action == ActionType.CancelOrder)
                         {
-                            // изменяем состояния закрывающего ордера и позиции
                             var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
                             if (needOrder != null)
                             {
                                 needOrder.State = OrderState.Canceled;
-                            }
-
-                            if (needPosition.State == PositionState.Opening)
-                            {
-                                needPosition.State = PositionState.Canceled;
-                            }
-                            else if (needPosition.State == PositionState.Closing)
-                            {
-                                needPosition.State = PositionState.Open;
-                            }
+                            }                            
                         }
-                    }
-                    else
-                    {
-                        
                     }
                 }
 
                 // обновляем информацию о клиенте в базе
 
                 await context.CallActivityAsync<bool>("UpdateClientInfoAsync", clientInfo);
-
-                //await UpdateClientInfoAsync(clientInfo);
 
                 // переходим на следующую итерацию, передавая себе текущее состояние
                 context.ContinueAsNew(clientInfo);
@@ -181,6 +147,7 @@ namespace CpzTrader
                 throw;
             }
         }
+
 
         /// <summary>
         /// обработчик событий пришедших от советника
@@ -416,9 +383,9 @@ namespace CpzTrader
                 {
                     updateEntity.CountPositions = client.AllPositions.Count;
 
-                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.Count;
+                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order=>order.State == OrderState.Done).Count;
 
-                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.Count;
+                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Done).Count;
 
                     updateEntity.ETag = "*";
 
