@@ -62,77 +62,77 @@ namespace CpzTrader
                 // ждем дальнейших указаний
                 var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
 
-                if (!clientInfo.IsEmulation)
+                // выполняем бизнес логику согласно данным из сигнала
+
+                //var res = await context.CallActivityAsync<bool>("SendOrder", (clientInfo,newSignal));
+
+                var action = newSignal.Action;
+
+                bool canOpen = false;
+
+                // если сигнал на открытие нового ордера, проверяем достаточно ли средств на балансе
+                if (action == ActionType.NewOpenOrder || action == ActionType.NewPosition)
                 {
-                    // реальная торговля
+                    canOpen = Emulator.CheckBalance(clientInfo.EmulatorSettings.CurrentBalance, newSignal.Price, clientInfo.TradeSettings.Volume);
+                }
 
-                    // выполняем бизнес логику согласно данным из сигнала
+                // находим позицию для которой пришел сигнал
+                var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
 
-                    var res = await context.CallActivityAsync<bool>("SendOrder", (clientInfo,newSignal));
+                // если сигнал на открытие новой позиции
+                if (action == ActionType.NewPosition && canOpen)
+                {
+                    // создаем ее
+                    Position newPosition = new Position();
+
+                    newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
+
+                    // добавляем в нее новый открывающий ордер
+                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
+
+                    newPosition.OpenOrders.Add(openOrder);
+
+                    // сохраняем позицию в клиенте
+                    clientInfo.AllPositions.Add(newPosition);
 
                 }
-                else // эмуляция торговли
-                {                    
-                    var action = newSignal.Action;
+                // наращиваем объем позиции
+                else if (action == ActionType.NewOpenOrder && canOpen)
+                {
+                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
 
-                    // находим позицию для которой пришел сигнал
-                    var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
+                    needPosition.OpenOrders.Add(openOrder);
 
-                    // если сигнал на открытие новой позиции
-                    if (needPosition == null)
-                    {                        
-                        // создаем ее
-                        Position newPosition = new Position();
+                } // сокращаем объем позиции
+                else if (action == ActionType.NewCloseOrder)
+                {
+                    var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
 
-                        newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
+                    var closeOrder = Emulator.SendOrder(needCloseVolume, newSignal);
 
-                        // добавляем в нее новый открывающий ордер
-                        var openOrder = Emulator.SendOrder(newSignal, clientInfo);
+                    needPosition.CloseOrders.Add(closeOrder);
 
-                        newPosition.OpenOrders.Add(openOrder);
+                } // проверить состояние ордера
+                else if (action == ActionType.CheckOrder)
+                {
+                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
-                        // сохраняем позицию в клиенте
-                        clientInfo.AllPositions.Add(newPosition);
-                    }                                      
-                    else
+                    if (needOrder != null)
                     {
-                        // наращиваем объем позиции
-                        if (action == ActionType.NewOpenOrder)
-                        {
-                            var openOrder = Emulator.SendOrder(newSignal, clientInfo);
+                        needOrder.State = OrderState.Done;
+                    }
 
-                            needPosition.OpenOrders.Add(openOrder);
+                } // отозвать ордер
+                else if (action == ActionType.CancelOrder)
+                {
+                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
-                        } // сокращаем объем позиции
-                        else if (action == ActionType.NewCloseOrder)
-                        {
-                            var closeOrder = Emulator.SendOrder(newSignal, clientInfo);
-
-                            needPosition.CloseOrders.Add(closeOrder);
-
-                        } // проверить состояние ордера
-                        else if (action == ActionType.CheckOrder)
-                        {
-                            var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-                            
-                            if (needOrder != null)
-                            {
-                                needOrder.State = OrderState.Done;
-                            }
-
-                        } // отозвать ордер
-                        else if (action == ActionType.CancelOrder)
-                        {
-                            var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-                            if (needOrder != null)
-                            {
-                                needOrder.State = OrderState.Canceled;
-                            }                            
-                        }
+                    if (needOrder != null)
+                    {
+                        needOrder.State = OrderState.Canceled;
                     }
                 }
-
+                
                 // обновляем информацию о клиенте в базе
 
                 await context.CallActivityAsync<bool>("UpdateClientInfoAsync", clientInfo);
@@ -260,17 +260,24 @@ namespace CpzTrader
         {
             List<Client> _clients = new List<Client>();
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 1; i++)
             {
                 _clients.Add(new Client(i.ToString(), advisorName)
                 {
-                    //UniqId = i.ToString(),
-                    //AdvisorName = advisorName,
-                    PublicKey = "pubKey"+ i,
-                    PrivateKey = "prKey" + i,
-                    IsEmulation = true,
-                    Volume = i,
+                    TradeSettings = new TradeSettings()
+                    {
+                        PublicKey = "pubKey" + i,
+                        PrivateKey = "prKey" + i,
+                        Volume = i + 10,
+                    },
+                    EmulatorSettings = new EmulatorSettings()
+                    {
+                        Slippage = 10 + i,
+                        StartingBalance = 10000 * i / 3,
+                        CurrentBalance = 10000 + i / 3,
+                    },
                     
+                    IsEmulation = true,                    
                 });               
             }
             return _clients;
@@ -412,66 +419,6 @@ namespace CpzTrader
                 throw;
             }
         }
-
-        ///// <summary>
-        ///// обновить запись о клиенте в базе
-        ///// </summary>
-        //private static async Task<bool> UpdateClientInfoAsync2(Client client)
-        //{
-        //    try
-        //    {
-        //        // подключаемся к локальному хранилищу
-        //        var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
-
-        //        // создаем объект для работы с таблицами
-        //        var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-        //        // получаем нужную таблицу
-        //        var table = cloudTableClient.GetTableReference("clientsinfo");
-
-        //        // создаем операцию получения
-        //        TableOperation retrieveOperation = TableOperation.Retrieve<Client>(client.PartitionKey, client.RowKey);
-
-        //        // выполняем операцию
-        //        var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-
-        //        // получаем результат
-        //        Client updateEntity = (Client)retrievedResult.Result;
-
-        //        // изменяем данные и сохраняем
-        //        if (updateEntity != null)
-        //        {
-        //            updateEntity.CountPositions = client.AllPositions.Count;
-
-        //            updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.Count;
-
-        //            updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.Count;
-
-        //            updateEntity.ETag = "*";
-
-        //            TableOperation updateOperation = TableOperation.Replace(updateEntity);
-
-        //            await table.ExecuteAsync(updateOperation);
-
-        //            return true;
-        //        }
-        //        else
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    catch (StorageException e)
-        //    {
-        //        Debug.WriteLine(e);
-        //        return false;
-        //    }
-
-        //    catch (Exception e)
-        //    {
-        //        Debug.WriteLine(e);
-        //        throw;
-        //    }
-        //}
 
         #endregion
 

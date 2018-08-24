@@ -24,20 +24,13 @@ namespace CpzTrader.Models
 
         public EmulatorSettings EmulatorSettings { get; set; }
 
+        public TradeSettings TradeSettings { get; set; }
+
         public List<Position> AllPositions { get; set; }
-
-        public decimal Volume { get; set; }
-
-        //public string UniqId { get; set; }
-
-        //public string AdvisorName { get; set; }
-
-        public string PublicKey { get; set; }
-
-        public string PrivateKey { get; set; }
 
         public string TraderId { get; set; }
 
+        // test data
         public int CountPositions { get; set; }
         
         // test data

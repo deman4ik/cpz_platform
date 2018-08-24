@@ -73,7 +73,12 @@ namespace CpzTrader.Models
     /// тип сигнала пришедшего от советника
     /// </summary>
     public enum ActionType
-    {      
+    {    
+        /// <summary>
+        /// новая позиция
+        /// </summary>
+        NewPosition,
+
         /// <summary>
         /// новый открывающий ордер
         /// </summary>

@@ -11,7 +11,6 @@ namespace CpzTrader.Models
             OpenOrders = new List<Order>();
 
             CloseOrders = new List<Order>();
-
         }
 
         /// <summary>
@@ -49,6 +48,25 @@ namespace CpzTrader.Models
             }
 
             return needOrder;
+        }
+
+        /// <summary>
+        /// получить кол-во контрактов открытых в этой позиции
+        /// </summary>
+        /// <returns></returns>
+        public decimal GetOpenVolume()
+        {
+            var openVolume = 0m;
+
+            foreach(var order in OpenOrders)
+            {
+                if(order.State == OrderState.Done)
+                {
+                    openVolume += order.Volume;
+                }
+            }
+
+            return openVolume;
         }
     }
 }

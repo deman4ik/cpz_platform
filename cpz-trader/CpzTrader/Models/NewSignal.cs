@@ -44,6 +44,11 @@ namespace CpzTrader.Models
         public OrderType Type { get; set; }
 
         /// <summary>
+        /// в случае сигнала на закрывающий ордер эта переменная указывает какой объем нужно закрыть. Вычисляется в % от открытого объема в позиции. Если равен 100, значит нужно закрыть всю позицию
+        /// </summary>
+        public int PercentVolume { get; set; }
+
+        /// <summary>
         /// номер ордера в роботе
         /// </summary>
         public string NumberOrderInRobot { get; set; }

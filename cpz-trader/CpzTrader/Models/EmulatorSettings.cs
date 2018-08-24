@@ -14,6 +14,8 @@ namespace CpzTrader.Models
 
         public decimal StartingBalance { get; set; }
 
+        public decimal CurrentBalance { get; set; }
+
         public decimal Slippage { get; set; }
 
     }
