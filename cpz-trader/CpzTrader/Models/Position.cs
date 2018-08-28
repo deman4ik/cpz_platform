@@ -32,6 +32,44 @@ namespace CpzTrader.Models
         /// состояние позиции
         /// </summary>
         public PositionState State { get; set; }
+        
+        /// <summary>
+        /// рассчитать результат по позиции
+        /// </summary>        
+        public decimal CalculatePositionResult()
+        {
+            var averageEntryPrice = 0m;
+
+            int openOrdersCount = 0;
+
+            var averageExitPrice = 0m;
+
+            int closeOrdersCount = 0;
+
+            foreach (var order in OpenOrders)
+            {
+                if(order.State == OrderState.Done)
+                {
+                    averageEntryPrice += order.Price;
+                    openOrdersCount++;
+                }
+            }
+
+            var openTotalVolume = averageEntryPrice / openOrdersCount * GetOpenVolume();
+
+            foreach (var order in CloseOrders)
+            {
+                if (order.State == OrderState.Done)
+                {
+                    averageExitPrice += order.Price;
+                    closeOrdersCount++;
+                }
+            }
+
+            var closeTotalVolume = averageExitPrice / closeOrdersCount * GetOpenVolume();
+
+            return closeTotalVolume - openTotalVolume;
+        }
 
         /// <summary>
         /// найти ордер по номеру

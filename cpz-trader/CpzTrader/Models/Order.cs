@@ -18,6 +18,15 @@ namespace CpzTrader.Models
 
         public OrderType OrderType { get; set; }
 
+        /// <summary>
+        /// номер ордера присвоенный роботом
+        /// </summary>
         public string NumberInRobot { get; set; }
+
+        /// <summary>
+        /// номер ордера присвоенный биржей
+        /// </summary>
+        public string NumberInSystem { get; set; }
+
     }
 }

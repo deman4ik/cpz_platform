@@ -27,18 +27,43 @@ namespace CpzTrader
         /// отправить ордер на биржу
         /// </summary>        
         [FunctionName("SendOrder")]
-        public static async Task<bool> SendOrder([ActivityTrigger] DurableActivityContext input)
+        public static async Task<Order> SendOrder([ActivityTrigger] DurableActivityContext input)
         {
-
             (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
 
-            var url = "http://localhost:7077/api/HttpTriggerJS";
+            var url = "http://localhost:7077/api/HttpTriggerJS/SetOrder";
 
             var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
 
             var status = orderResult.StatusCode;
 
-            if(status == HttpStatusCode.OK)
+            if (status == HttpStatusCode.OK)
+            {
+                var order = await orderResult.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<Order>(order);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// отменить ордер
+        /// </summary>        
+        [FunctionName("CancelOrder")]
+        public static async Task<bool> CancelOrder([ActivityTrigger] DurableActivityContext input)
+        {
+
+            (Client client, string numberOrder) tradeInfo = input.GetInput<(Client, string)>();
+
+            var url = "http://localhost:7077/api/HttpTriggerJS/CancelOrder";
+
+            var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
+
+            var status = orderResult.StatusCode;
+
+            if (status == HttpStatusCode.OK)
             {
                 return true;
             }
@@ -47,6 +72,63 @@ namespace CpzTrader
                 return false;
             }
         }
+
+        /// <summary>
+        /// проверить статус ордера
+        /// </summary>        
+        [FunctionName("CheckOrderStatus")]
+        public static async Task<bool> CheckOrderStatus([ActivityTrigger] DurableActivityContext input)
+        {
+
+            (Client client, string numberOrder) tradeInfo = input.GetInput<(Client, string)>();
+
+            var url = "http://localhost:7077/api/HttpTriggerJS";
+
+            var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
+
+            var status = orderResult.StatusCode;
+
+            if (status == HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// проверить баланс
+        /// </summary>        
+        [FunctionName("CheckBalance")]
+        public static async Task<bool> CheckBalance([ActivityTrigger] DurableActivityContext input)
+        {
+            (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
+
+            Client cl = tradeInfo.client;
+
+            NewSignal newSignal = tradeInfo.newSignal;
+
+            var jsonContent = "{\"name\":\"Andrey\"}";
+
+            var url = "http://localhost:7077/api/HttpTriggerJS";
+
+            var orderResult = await httpClient.PostAsJsonAsync(url, jsonContent);
+            
+            var status = orderResult.StatusCode;
+
+            if (status == HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
         /// <summary>
         /// трейдер-оркестратор, обрабатывает торговую логику отдельного клиента
         /// </summary>
@@ -64,8 +146,6 @@ namespace CpzTrader
 
                 // выполняем бизнес логику согласно данным из сигнала
 
-                //var res = await context.CallActivityAsync<bool>("SendOrder", (clientInfo,newSignal));
-
                 var action = newSignal.Action;
 
                 bool canOpen = false;
@@ -73,7 +153,8 @@ namespace CpzTrader
                 // если сигнал на открытие нового ордера, проверяем достаточно ли средств на балансе
                 if (action == ActionType.NewOpenOrder || action == ActionType.NewPosition)
                 {
-                    canOpen = Emulator.CheckBalance(clientInfo.EmulatorSettings.CurrentBalance, newSignal.Price, clientInfo.TradeSettings.Volume);
+                    canOpen = clientInfo.IsEmulation ? Emulator.CheckBalance(clientInfo.EmulatorSettings.CurrentBalance, newSignal.Price, clientInfo.TradeSettings.Volume)
+                                                     : await context.CallActivityAsync<bool>("CheckBalance", (clientInfo, newSignal));
                 }
 
                 // находим позицию для которой пришел сигнал
@@ -88,29 +169,43 @@ namespace CpzTrader
                     newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
 
                     // добавляем в нее новый открывающий ордер
-                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
+                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+                                                           : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
+                    if (openOrder != null)
+                    {
+                        newPosition.OpenOrders.Add(openOrder);
 
-                    newPosition.OpenOrders.Add(openOrder);
-
-                    // сохраняем позицию в клиенте
-                    clientInfo.AllPositions.Add(newPosition);
-
+                        // сохраняем позицию в клиенте
+                        clientInfo.AllPositions.Add(newPosition);
+                    }
                 }
                 // наращиваем объем позиции
                 else if (action == ActionType.NewOpenOrder && canOpen)
                 {
-                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
-
-                    needPosition.OpenOrders.Add(openOrder);
+                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+                                                           : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
+                    if (openOrder != null)
+                    {
+                        needPosition.OpenOrders.Add(openOrder);
+                    }
 
                 } // сокращаем объем позиции
                 else if (action == ActionType.NewCloseOrder)
                 {
                     var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
 
-                    var closeOrder = Emulator.SendOrder(needCloseVolume, newSignal);
+                    var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
+                                                            : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
+                    if (closeOrder != null)
+                    {
+                        needPosition.CloseOrders.Add(closeOrder);
+                    }
 
-                    needPosition.CloseOrders.Add(closeOrder);
+                    if(newSignal.PercentVolume == 100)
+                    {
+                        var totals = needPosition.CalculatePositionResult();
+                        clientInfo.EmulatorSettings.CurrentBalance += totals;
+                    }
 
                 } // проверить состояние ордера
                 else if (action == ActionType.CheckOrder)
@@ -119,7 +214,16 @@ namespace CpzTrader
 
                     if (needOrder != null)
                     {
-                        needOrder.State = OrderState.Done;
+                        if(clientInfo.IsEmulation)
+                        {
+                            needOrder.State = OrderState.Done;
+                        }
+                        else
+                        {
+                            var resultChecking = await context.CallActivityAsync<bool>("CheckOrderStatus", (clientInfo, needOrder.NumberInSystem));
+
+                            needOrder.State = resultChecking ? OrderState.Done : OrderState.Activ;
+                        }
                     }
 
                 } // отозвать ордер
@@ -129,7 +233,14 @@ namespace CpzTrader
 
                     if (needOrder != null)
                     {
-                        needOrder.State = OrderState.Canceled;
+                        if (clientInfo.IsEmulation)
+                        {
+                            needOrder.State = OrderState.Canceled;
+                        }
+                        else
+                        {
+                            var cancellationResult = await context.CallActivityAsync<bool>("CancelOrder", (clientInfo, needOrder.NumberInSystem));
+                        }
                     }
                 }
                 
@@ -137,7 +248,7 @@ namespace CpzTrader
 
                 await context.CallActivityAsync<bool>("UpdateClientInfoAsync", clientInfo);
 
-                // переходим на следующую итерацию, передавая себе текущее состояние
+                // переходим на следущую итерацию, передавая себе текущее состояние
                 context.ContinueAsNew(clientInfo);
 
             }
@@ -274,10 +385,10 @@ namespace CpzTrader
                     {
                         Slippage = 10 + i,
                         StartingBalance = 10000 * i / 3,
-                        CurrentBalance = 10000 + i / 3,
+                        CurrentBalance = 10000 * i / 3,
                     },
                     
-                    IsEmulation = true,                    
+                    IsEmulation = false,                    
                 });               
             }
             return _clients;
