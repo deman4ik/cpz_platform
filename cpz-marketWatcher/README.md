@@ -46,5 +46,7 @@ http://localhost:50527/api/import
 пример: `http://localhost:50527/api/import/<providerName>`
         
         
-      
+**Docker**
 
+Сборка - `docker build -t cpz-marketwatcher .`
+Запуск - `docker run -e API_KEY="SOME_API_KEY" -e EG_TOPIC_ENDPOINT="SOME_EG_ENDPOINT" -e EG_TOPIC_KEY="SOME_EG_TOPIC_KEY" -p 80:80 cpz-marketwatcher`
