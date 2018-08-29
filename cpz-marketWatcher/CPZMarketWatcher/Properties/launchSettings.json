@@ -24,7 +24,10 @@
       "launchBrowser": true,
       "launchUrl": "api/values",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "API_KEY": "test",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "EG_TOPIC_ENDPOINT": "https://cpz-test-topic.northeurope-1.eventgrid.azure.net/",
+        "EG_TOPIC_KEY": "QYUbWBMB2Ng2VAuHUenwrZ03kiubGjUWQCYattiVTEQ="
       },
       "applicationUrl": "http://localhost:50528/"
     }
