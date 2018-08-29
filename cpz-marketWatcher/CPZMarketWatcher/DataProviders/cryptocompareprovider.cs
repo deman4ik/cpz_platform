@@ -580,16 +580,16 @@ namespace CPZMarketWatcher.DataProviders
                 data.close = candles[i].Close;
                 data.high = candles[i].High;
                 data.low = candles[i].Low;
-                data.volumeInBaseq = candles[i].Volumefrom;
-                data.volumeInQuote = candles[i].Volumeto;
+                data.volume = candles[i].Volumefrom;
+                //data.volumeInQuote = candles[i].Volumeto;
 
                 // Создаем новое событие
                 eventsList.Add(new EventGridEvent()
                 {
                     Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                    Subject = $"{exchange}#{baseq}/{quote}", // тема события
+                    Subject = $"{exchange}#{baseq}/{quote}#1", // тема события
                     DataVersion = "1.0", // версия данных
-                    EventType = "CPZ.Ticks.NewCandles", // тип события
+                    EventType = "CPZ.Candles.NewCandle", // тип события
                     Data = data, // данные события
                     EventTime = DateTime.Now // время формирования события
                 });
