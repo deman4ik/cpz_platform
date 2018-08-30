@@ -1,7 +1,11 @@
 {
   "profiles": {
     "CpzTrader": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "EG_TOPIC_ENDPOINT": "https://cpz-test-topic.northeurope-1.eventgrid.azure.net/",
+        "EG_TOPIC_KEY": "QYUbWBMB2Ng2VAuHUenwrZ03kiubGjUWQCYattiVTEQ="
+      }
     }
   }
 }

@@ -24,9 +24,15 @@ namespace CpzTrader.Models
 
         public EmulatorSettings EmulatorSettings { get; set; }
 
+        public string EmulatorSettingsJson { get; set; }
+
         public TradeSettings TradeSettings { get; set; }
 
+        public string TradeSettingsJson { get; set; }
+
         public List<Position> AllPositions { get; set; }
+
+        public string AllPositionsJson { get; set; }
 
         public string TraderId { get; set; }
 

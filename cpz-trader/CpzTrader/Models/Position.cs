@@ -55,7 +55,14 @@ namespace CpzTrader.Models
                 }
             }
 
-            var openTotalVolume = averageEntryPrice / openOrdersCount * GetOpenVolume();
+            var vol = GetOpenVolume();
+
+            var openTotalVolume = 0m;
+
+            if (openOrdersCount != 0 && vol != 0)
+            {
+                 openTotalVolume = averageEntryPrice / openOrdersCount * vol;
+            }
 
             foreach (var order in CloseOrders)
             {
@@ -66,8 +73,13 @@ namespace CpzTrader.Models
                 }
             }
 
-            var closeTotalVolume = averageExitPrice / closeOrdersCount * GetOpenVolume();
+            var closeTotalVolume = 0m;
 
+            if (closeOrdersCount != 0 && vol != 0)
+            {
+                closeTotalVolume = averageExitPrice / closeOrdersCount * vol;
+            }
+            
             return closeTotalVolume - openTotalVolume;
         }
 
