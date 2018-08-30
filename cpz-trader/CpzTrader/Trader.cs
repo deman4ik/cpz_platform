@@ -13,6 +13,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.EventGrid;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
@@ -298,8 +299,7 @@ namespace CpzTrader
 
                 // событие появления нового сигнала
                 const string cpzSignalsNewSignal = "CPZ.Signals.NewSignal";
-
-
+                
                 string requestContent = await req.Content.ReadAsStringAsync();
 
                 EventGridEvent[] eventGridEvents = JsonConvert.DeserializeObject<EventGridEvent[]>(requestContent);
@@ -412,11 +412,11 @@ namespace CpzTrader
         {
             (string eventType, Order order) orderInfo = input.GetInput<(string eventType, Order order)>();
 
-            string _topicEndpoint = Environment.GetEnvironmentVariable("EG_TOPIC_ENDPOINT");
+            string _topicEndpoint = ConfigurationManager.TakeParameterByName("EgTopicEndpoint");
 
             var _topicHostname = new Uri(_topicEndpoint).Host;
 
-            string _topicKey = Environment.GetEnvironmentVariable("EG_TOPIC_KEY");
+            string _topicKey = ConfigurationManager.TakeParameterByName("EgTopicKey");
 
             var topicCredentials = new TopicCredentials(_topicKey);
 
@@ -453,11 +453,11 @@ namespace CpzTrader
         /// </summary>        
         public static async Task PublishEvent(string eventType,Order order)
         {
-            string _topicEndpoint = Environment.GetEnvironmentVariable("EG_TOPIC_ENDPOINT");
+            string _topicEndpoint = ConfigurationManager.TakeParameterByName("EgTopicEndpoint");
 
             var _topicHostname = new Uri(_topicEndpoint).Host;
 
-            string _topicKey = Environment.GetEnvironmentVariable("EG_TOPIC_KEY");
+            string _topicKey = ConfigurationManager.TakeParameterByName("EgTopicKey");
 
             var topicCredentials = new TopicCredentials(_topicKey);
 
@@ -631,8 +631,12 @@ namespace CpzTrader
         {
             try
             {
+                var appParameter = "AzureWebJobsStorage";
+
+                string connectionString = ConfigurationManager.TakeParameterByName(appParameter);
+
                 // подключаемся к локальному хранилищу
-                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
 
                 // создаем объект для работы с таблицами
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
