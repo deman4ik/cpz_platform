@@ -9,8 +9,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "azure-eventgrid": "^1.3.1",
     "base-64": "^0.1.0",
     "graphql-request": "^1.8.2",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "ms-rest-azure": "^2.5.7",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.10.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "jest": "^23.5.0",
+    "prettier": "^1.14.2"
   }
 }
