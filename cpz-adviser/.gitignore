@@ -21,3 +21,6 @@ project.lock.json
 .secrets
 appsettings.json
 local.settings.json
+
+.nyc_output
+coverage
