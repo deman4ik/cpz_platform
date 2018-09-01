@@ -44,7 +44,7 @@ namespace CPZMarketWatcher.Models
         /// базовая валюта
         /// </summary>
         [Required]
-        [JsonProperty(PropertyName = "qaseq")]
+        [JsonProperty(PropertyName = "baseq")]
         public string Baseq { get; set; }
 
         /// <summary>

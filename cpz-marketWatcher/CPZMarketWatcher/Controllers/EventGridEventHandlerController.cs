@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
@@ -27,13 +28,12 @@ namespace CPZMarketWatcher.Controllers
 
         [HttpPost]
         [Route("api/EventGridEventHandler")]
-        public async Task<JObject> Post([FromBody]object request)
+        public async Task<JsonResult> Post([FromBody]object request)
         {
             try
             {
-                const string customTopicEvent = "CPZ.Ticks.NewTick";
                 EventGridSubscriber eventGridSubscriber = new EventGridSubscriber();
-                eventGridSubscriber.AddOrUpdateCustomEventMapping(customTopicEvent, typeof(OrderToProvider));
+                eventGridSubscriber.AddOrUpdateCustomEventMapping(EventGridEventTypes.Subscribe, typeof(OrderToProvider));
                 EventGridEvent[] eventGridEvents = eventGridSubscriber.DeserializeEventGridEvents(request.ToString());
 
                 var queryKey = HttpContext.Request.Query["key"];
@@ -55,9 +55,9 @@ namespace CPZMarketWatcher.Controllers
                             };
 
                             // Возвращаем полученный код валидации
-                            return new JObject(responseData);
+                            return Json(responseData);
                         }
-                        else
+                        else if (eventGridEvent.EventType == EventGridEventTypes.Subscribe)
                         {
                             // Считываем данные
                             var eventData = (OrderToProvider)eventGridEvent.Data;
@@ -78,13 +78,16 @@ namespace CPZMarketWatcher.Controllers
                                 _manager.RemoveProvider(eventData.NameProvider);
                             }
                         }
+                        else {
+                            return Json(new HttpResponseMessage(HttpStatusCode.BadRequest));
+                        }
                     }
 
-                    return new JObject(new HttpResponseMessage(HttpStatusCode.OK));
+                     return Json(new HttpResponseMessage(HttpStatusCode.OK));
                 }
                 else
                 {
-                    return new JObject(new HttpResponseMessage(HttpStatusCode.Forbidden));
+                    return Json(new HttpResponseMessage(HttpStatusCode.Forbidden));
                 }
             }
             catch (Exception e)

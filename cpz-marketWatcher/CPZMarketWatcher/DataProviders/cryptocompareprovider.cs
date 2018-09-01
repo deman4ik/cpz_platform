@@ -85,7 +85,7 @@ namespace CPZMarketWatcher.DataProviders
                     var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
 
                     // подписываемся
-                    await SubscribeTrades(queryStr, subscribe.Proxy);
+                   // await SubscribeTrades(queryStr, subscribe.Proxy);
 
                     await StartCandleLoad(subscribe);
                 }
@@ -176,7 +176,7 @@ namespace CPZMarketWatcher.DataProviders
                     // запускаем задачу по скачиванию свечей
                     await Task.Run(async () =>
                     {
-                        int countNeedCandles = 100;
+                        int countNeedCandles = 1;
 
                         string exchange = queryStr.Exchange;
 
@@ -203,13 +203,13 @@ namespace CPZMarketWatcher.DataProviders
                                     var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
 
                                     // отправляем полученные свечи дальше
-                                    //await SendCandles(exchange, baseq, quote, candles.Data);
+                                    await SendCandles(exchange, baseq, quote, candles.Data);
 
                                     flag = false;
 
                                     lastTimeUpdate = DateTime.Now.Minute;
 
-                                    countNeedCandles = 1;
+                                    //countNeedCandles = 1;
 
                                     Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
                                                     $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))}" +
@@ -456,9 +456,9 @@ namespace CPZMarketWatcher.DataProviders
                             _newTrade.Volume = values[6];
                             _newTrade.Price = values[7];
 
-                            //await SendTick(_newTrade);
+                            await SendTick(_newTrade);
                            
-                            //Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
+                            Debug.WriteLine($"Бумага: {_newTrade.Baseq}-{_newTrade.Quote} {_newTrade.Side} время: {_newTrade.Time} объем: {_newTrade.Volume} цена: {_newTrade.Price}");
                         }
                     }
                     
