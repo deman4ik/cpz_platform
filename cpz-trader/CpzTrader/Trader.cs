@@ -412,11 +412,11 @@ namespace CpzTrader
         {
             (string eventType, Order order) orderInfo = input.GetInput<(string eventType, Order order)>();
 
-            string _topicEndpoint = ConfigurationManager.TakeParameterByName("EgTopicEndpoint");
+            string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint");
 
             var _topicHostname = new Uri(_topicEndpoint).Host;
 
-            string _topicKey = ConfigurationManager.TakeParameterByName("EgTopicKey");
+            string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
 
             var topicCredentials = new TopicCredentials(_topicKey);
 
@@ -453,11 +453,11 @@ namespace CpzTrader
         /// </summary>        
         public static async Task PublishEvent(string eventType,Order order)
         {
-            string _topicEndpoint = ConfigurationManager.TakeParameterByName("EgTopicEndpoint");
+            string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint"); 
 
             var _topicHostname = new Uri(_topicEndpoint).Host;
 
-            string _topicKey = ConfigurationManager.TakeParameterByName("EgTopicKey");
+            string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
 
             var topicCredentials = new TopicCredentials(_topicKey);
 
@@ -525,63 +525,66 @@ namespace CpzTrader
                     clientInfo.AllPositions.Add(newPosition);
                 }
             }
-            // наращиваем объем позиции
-            else if (action == ActionType.NewOpenOrder && canOpen)
+            if(needPosition != null)
             {
-                var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
-
-                await PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
-
-                if (openOrder != null)
+                // наращиваем объем позиции
+                if (action == ActionType.NewOpenOrder && canOpen)
                 {
-                    needPosition.OpenOrders.Add(openOrder);
-                }
+                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
 
-            } // сокращаем объем позиции
-            else if (action == ActionType.NewCloseOrder)
-            {
-                var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
+                    await PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
 
-                var closeOrder = Emulator.SendOrder(needCloseVolume, newSignal);
-
-                await PublishEvent("CPZ.Trader.NewCloseOrder", closeOrder);
-
-                if (closeOrder != null)
-                {
-                    needPosition.CloseOrders.Add(closeOrder);
-                }
-
-                if (newSignal.PercentVolume == 100)
-                {
-                    var totals = needPosition.CalculatePositionResult();
-                    clientInfo.EmulatorSettings.CurrentBalance += totals;
-                }
-
-            } // проверить состояние ордера
-            else if (action == ActionType.CheckOrder)
-            {
-                var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-                if (needOrder != null)
-                {
-                    if (clientInfo.IsEmulation)
+                    if (openOrder != null)
                     {
-                        needOrder.State = OrderState.Done;
-                    }                   
-                }
+                        needPosition.OpenOrders.Add(openOrder);
+                    }
 
-            } // отозвать ордер
-            else if (action == ActionType.CancelOrder)
-            {
-                var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-                await PublishEvent("CPZ.Trader.CancelOrder", needOrder);
-
-                if (needOrder != null)
+                } // сокращаем объем позиции
+                else if (action == ActionType.NewCloseOrder)
                 {
-                    if (clientInfo.IsEmulation)
+                    var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
+
+                    var closeOrder = Emulator.SendOrder(needCloseVolume, newSignal);
+
+                    await PublishEvent("CPZ.Trader.NewCloseOrder", closeOrder);
+
+                    if (closeOrder != null)
                     {
-                        needOrder.State = OrderState.Canceled;
+                        needPosition.CloseOrders.Add(closeOrder);
+                    }
+
+                    if (newSignal.PercentVolume == 100)
+                    {
+                        var totals = needPosition.CalculatePositionResult();
+                        clientInfo.EmulatorSettings.CurrentBalance += totals;
+                    }
+
+                } // проверить состояние ордера
+                else if (action == ActionType.CheckOrder)
+                {
+                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
+
+                    if (needOrder != null)
+                    {
+                        if (clientInfo.IsEmulation)
+                        {
+                            needOrder.State = OrderState.Done;
+                        }
+                    }
+
+                } // отозвать ордер
+                else if (action == ActionType.CancelOrder)
+                {
+                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
+
+                    await PublishEvent("CPZ.Trader.CancelOrder", needOrder);
+
+                    if (needOrder != null)
+                    {
+                        if (clientInfo.IsEmulation)
+                        {
+                            needOrder.State = OrderState.Canceled;
+                        }
                     }
                 }
             }
@@ -633,7 +636,7 @@ namespace CpzTrader
             {
                 var appParameter = "AzureWebJobsStorage";
 
-                string connectionString = ConfigurationManager.TakeParameterByName(appParameter);
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
 
                 // подключаемся к локальному хранилищу
                 var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
@@ -679,7 +682,11 @@ namespace CpzTrader
         {
             try
             {
-                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+                var appParameter = "AzureWebJobsStorage";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
 
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
@@ -729,8 +736,11 @@ namespace CpzTrader
             {
                 var client = input;
 
-                // подключаемся к локальному хранилищу
-                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+                var appParameter = "AzureWebJobsStorage";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
 
                 // создаем объект для работы с таблицами
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
@@ -798,9 +808,12 @@ namespace CpzTrader
             try
             {
                 var client = input.GetInput<Client>();
-              
-                // подключаемся к локальному хранилищу
-                var cloudStorageAccount = CloudStorageAccount.Parse("UseDevelopmentStorage=true");
+
+                var appParameter = "AzureWebJobsStorage";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
 
                 // создаем объект для работы с таблицами
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
