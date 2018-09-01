@@ -4,11 +4,14 @@ const Robot = require("./robot");
  *
  * @param {*} context
  * @param {*} state
+ * @param {*} candle
  */
-async function execute(context, state) {
+async function execute(context, state, candle) {
   try {
     // Инициализация класса робота с текущим состоянием
     const robot = new Robot(context, state);
+    // Новая свеча
+    robot.handleCandle(candle);
     // Вычисление индикаторов
     // TODO: robot.calcIndicators();
     // Запуск стратегии
