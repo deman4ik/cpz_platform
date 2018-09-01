@@ -65,11 +65,21 @@ class Robot {
     });
     return indicators;
   }
-
-  calcIndicators() {
-    // TODO: IMPLEMENT ME! ;-)
-    //! Сделать асинхронный цикл
+  /**
+   * Пересчет индикаторов
+   *
+   * @memberof Robot
+   */
+  async calcIndicators() {
     context.log("Calculating indicators");
+    const results = await Promise.all(
+      Object.keys(this.indicators).map(async key => {
+        const indicator = this.indicators[key];
+        const result = await indicator.calc(context);
+        return result;
+      })
+    );
+    this.context.log(results);
   }
   /**
    * Возвращает текущее состояние робота
