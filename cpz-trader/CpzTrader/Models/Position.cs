@@ -48,7 +48,7 @@ namespace CpzTrader.Models
 
             foreach (var order in OpenOrders)
             {
-                if(order.State == OrderState.Done)
+                if(order.State == OrderState.Closed)
                 {
                     averageEntryPrice += order.Price;
                     openOrdersCount++;
@@ -66,7 +66,7 @@ namespace CpzTrader.Models
 
             foreach (var order in CloseOrders)
             {
-                if (order.State == OrderState.Done)
+                if (order.State == OrderState.Closed)
                 {
                     averageExitPrice += order.Price;
                     closeOrdersCount++;
@@ -110,7 +110,7 @@ namespace CpzTrader.Models
 
             foreach(var order in OpenOrders)
             {
-                if(order.State == OrderState.Done)
+                if(order.State == OrderState.Closed)
                 {
                     openVolume += order.Volume;
                 }

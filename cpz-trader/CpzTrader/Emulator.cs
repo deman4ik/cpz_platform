@@ -22,7 +22,7 @@ namespace CpzTrader
                 Price = signal.Price,
                 Time = DateTime.UtcNow,
                 Volume = volume,
-                State = signal.Type == OrderType.Limit ? OrderState.Activ : OrderState.Done,
+                State = signal.Type == OrderType.Limit ? OrderState.Open : OrderState.Closed,
             };
 
             return newOrder;

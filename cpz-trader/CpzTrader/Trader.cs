@@ -36,19 +36,46 @@ namespace CpzTrader
 
             var url = "http://localhost:7077/api/HttpTriggerJS/SetOrder";
 
-            var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
+            var dataAsString = JsonConvert.SerializeObject(tradeInfo);
+
+            var content = new StringContent(dataAsString);
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");            
+
+            var orderResult = await httpClient.PostAsync(url, content);
+
+            var operationResult = await orderResult.Content.ReadAsStringAsync();
 
             var status = orderResult.StatusCode;
 
             if (status == HttpStatusCode.OK)
             {
-                var order = await orderResult.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<Order>(order);
+                Order newOrder = JsonConvert.DeserializeObject<Order>(operationResult);
+
+                if (newOrder.State == OrderState.Open)
+                {
+                    return newOrder;
+                }
             }
-            else
+            else if (status == HttpStatusCode.InternalServerError)
             {
-                return null;
+                (int code, string message) errorInfo = JsonConvert.DeserializeObject<(int, string)>(operationResult);
+
+                // отправить сообщение об ошибке в лог
+                if (errorInfo.code == 100)
+                {
+                    // ошибка идентификации пользователя на бирже
+                }
+                else if (errorInfo.code == 110)
+                {
+                    // Не достаточно средств для выставления ордера
+                }
+                else if (errorInfo.code == 120)
+                {
+                    // Ошибка в параметрах ордера
+                }
             }
+            return null;
         }
 
         /// <summary>
@@ -57,23 +84,51 @@ namespace CpzTrader
         [FunctionName("CancelOrder")]
         public static async Task<bool> CancelOrder([ActivityTrigger] DurableActivityContext input)
         {
+            (string numberOrder, Client client, NewSignal signal) tradeInfo = input.GetInput<(string, Client, NewSignal)>();
 
-            (Client client, string numberOrder) tradeInfo = input.GetInput<(Client, string)>();
+            var dataAsString = JsonConvert.SerializeObject(tradeInfo);
+
+            var content = new StringContent(dataAsString);
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var url = "http://localhost:7077/api/HttpTriggerJS/CancelOrder";
 
-            var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
+            var orderResult = await httpClient.PostAsync(url, content);
+
+            var operationResult = await orderResult.Content.ReadAsStringAsync();
 
             var status = orderResult.StatusCode;
 
             if (status == HttpStatusCode.OK)
             {
-                return true;
+                var canceledOrder = JsonConvert.DeserializeObject<Order>(operationResult);
+
+                if (canceledOrder.State == OrderState.Canceled)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
+            else if(status == HttpStatusCode.InternalServerError)
             {
-                return false;
+                (int code, string message) errorInfo = JsonConvert.DeserializeObject<(int, string)>(operationResult);
+
+                // отправить сообщение об ошибке в лог
+                if (errorInfo.code == 400)
+                {
+                    // Ошибка снятия, ордер уже отменен или исполнен
+
+                }
+                else if(errorInfo.code == 410)
+                {
+                    // Не удалось отменить ордер, ошибка сети
+                }
             }
+            return false;
         }
 
         /// <summary>
@@ -83,57 +138,67 @@ namespace CpzTrader
         public static async Task<bool> CheckOrderStatus([ActivityTrigger] DurableActivityContext input)
         {
 
-            (Client client, string numberOrder) tradeInfo = input.GetInput<(Client, string)>();
-
-            var url = "http://localhost:7077/api/HttpTriggerJS";
-
-            var orderResult = await httpClient.PostAsJsonAsync(url, tradeInfo);
-
-            var status = orderResult.StatusCode;
-
-            if (status == HttpStatusCode.OK)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// проверить баланс
-        /// </summary>        
-        [FunctionName("CheckBalance")]
-        public static async Task<bool> CheckBalance([ActivityTrigger] DurableActivityContext input)
-        {
-            (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
-
-            Client cl = tradeInfo.client;
-
-            NewSignal newSignal = tradeInfo.newSignal;
+            (string numberOrder, Client client, NewSignal signal) tradeInfo = input.GetInput<(string, Client, NewSignal)>();
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 
             var content = new StringContent(dataAsString);
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                     
-            var url = "http://localhost:7077/api/HttpTriggerJS";
+
+            var url = "http://localhost:7077/api/HttpTriggerJS/CheckOrder";
 
             var orderResult = await httpClient.PostAsync(url, content);
+
+            var operationResult = await orderResult.Content.ReadAsStringAsync();
 
             var status = orderResult.StatusCode;
 
             if (status == HttpStatusCode.OK)
             {
-                return true;
+                Order orderInfo = JsonConvert.DeserializeObject<Order>(operationResult);
+
+                if(orderInfo.Volume == orderInfo.Executed)
+                {
+                    return true;
+                }
+                return false;
             }
             else
             {
                 return false;
             }
         }
+
+        ///// <summary>
+        ///// проверить баланс
+        ///// </summary>        
+        //[FunctionName("CheckBalance")]
+        //public static async Task<bool> CheckBalance([ActivityTrigger] DurableActivityContext input)
+        //{
+        //    (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
+
+        //    var dataAsString = JsonConvert.SerializeObject(tradeInfo);
+
+        //    var content = new StringContent(dataAsString);
+
+        //    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                     
+        //    var url = "http://localhost:7077/api/HttpTriggerJS";
+
+        //    var orderResult = await httpClient.PostAsync(url, content);
+
+        //    var status = orderResult.StatusCode;
+
+        //    if (status == HttpStatusCode.OK)
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
 
 
         /// <summary>
@@ -234,13 +299,13 @@ namespace CpzTrader
                     {
                         if(clientInfo.IsEmulation)
                         {
-                            needOrder.State = OrderState.Done;
+                            needOrder.State = OrderState.Closed;
                         }
                         else
                         {
                             var resultChecking = await context.CallActivityAsync<bool>("CheckOrderStatus", (clientInfo, needOrder.NumberInSystem));
 
-                            needOrder.State = resultChecking ? OrderState.Done : OrderState.Activ;
+                            needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
                         }
                     }
 
@@ -257,7 +322,7 @@ namespace CpzTrader
                         }
                         else
                         {
-                            var cancellationResult = await context.CallActivityAsync<bool>("CancelOrder", (clientInfo, needOrder.NumberInSystem));
+                            var cancellationResult = await context.CallActivityAsync<bool>("CancelOrder", (clientInfo, newSignal, needOrder.NumberInSystem));
                         }
 
                         await context.CallActivityAsync("PublishEventDurable", ("CPZ.Trader.CancelOrder", needOrder));
@@ -307,7 +372,7 @@ namespace CpzTrader
                 foreach (EventGridEvent eventGridEvent in eventGridEvents)
                 {
                     JObject dataObject = eventGridEvent.Data as JObject;
-
+                    
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
                     if (string.Equals(eventGridEvent.EventType, subscriptionValidationEvent, StringComparison.OrdinalIgnoreCase))
@@ -568,7 +633,7 @@ namespace CpzTrader
                     {
                         if (clientInfo.IsEmulation)
                         {
-                            needOrder.State = OrderState.Done;
+                            needOrder.State = OrderState.Closed;
                         }
                     }
 
@@ -620,7 +685,7 @@ namespace CpzTrader
                         CurrentBalance = 10000 + i * 300,
                     },
                     
-                    IsEmulation = true,                    
+                    IsEmulation = false,                    
                 });               
             }
             return _clients;
@@ -768,9 +833,9 @@ namespace CpzTrader
 
                     updateEntity.CountPositions = client.AllPositions.Count;
 
-                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order => order.State == OrderState.Done).Count;
+                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order => order.State == OrderState.Closed).Count;
 
-                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Done).Count;
+                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Closed).Count;
 
                     updateEntity.ETag = "*";
 
@@ -835,9 +900,9 @@ namespace CpzTrader
                 {
                     updateEntity.CountPositions = client.AllPositions.Count;
 
-                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order=>order.State == OrderState.Done).Count;
+                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order=>order.State == OrderState.Closed).Count;
 
-                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Done).Count;
+                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Closed).Count;
 
                     updateEntity.ETag = "*";
 

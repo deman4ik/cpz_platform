@@ -56,12 +56,12 @@ namespace CpzTrader.Models
         /// <summary>
         /// выставлен
         /// </summary>
-        Activ,       
+        Open,       
 
         /// <summary>
         /// исполнен
         /// </summary>
-        Done,
+        Closed,
 
         /// <summary>
         /// отменен
