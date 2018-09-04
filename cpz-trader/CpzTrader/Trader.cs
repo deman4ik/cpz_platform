@@ -263,40 +263,48 @@ namespace CpzTrader
         /// </summary>        
         public static async Task PublishEvent(string eventType,Order order)
         {
-            string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint"); 
-
-            var _topicHostname = new Uri(_topicEndpoint).Host;
-
-            string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
-
-            var topicCredentials = new TopicCredentials(_topicKey);
-
-            EventGridClient eventGridClient = new EventGridClient(topicCredentials);
-
-            List<EventGridEvent> eventsList = new List<EventGridEvent>();
-
-            for (int i = 0; i < 1; i++)
+            try
             {
-                // Формируем данные
-                dynamic data = new JObject();
-                data.number = order.NumberInRobot;
-                data.symbol = order.Symbol;
-                data.time = order.Time;
+                string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint");
 
-                // Создаем новое событие
-                eventsList.Add(new EventGridEvent()
+                var _topicHostname = new Uri(_topicEndpoint).Host;
+
+                string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
+
+                var topicCredentials = new TopicCredentials(_topicKey);
+
+                EventGridClient eventGridClient = new EventGridClient(topicCredentials);
+
+                List<EventGridEvent> eventsList = new List<EventGridEvent>();
+
+                for (int i = 0; i < 1; i++)
                 {
-                    Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                    Subject = $"Ордер номер : {order.NumberInRobot} # бумага : {order.Symbol} # создан : {order.Time}", // тема события
-                    DataVersion = "1.0", // версия данных
-                    EventType = eventType, // тип события
-                    Data = data, // данные события
-                    EventTime = DateTime.Now // время формирования события
-                });
-            }
+                    // Формируем данные
+                    dynamic data = new JObject();
+                    data.number = order.NumberInRobot;
+                    data.symbol = order.Symbol;
+                    data.time = order.Time;
 
-            // Отправка событий в тему
-            await eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
+                    // Создаем новое событие
+                    eventsList.Add(new EventGridEvent()
+                    {
+                        Id = Guid.NewGuid().ToString(), // уникальный идентификатор
+                        Subject = $"Ордер номер : {order.NumberInRobot} # бумага : {order.Symbol} # создан : {order.Time}", // тема события
+                        DataVersion = "1.0", // версия данных
+                        EventType = eventType, // тип события
+                        Data = data, // данные события
+                        EventTime = DateTime.Now // время формирования события
+                    });
+                }
+
+                // Отправка событий в тему
+                await eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
+
+            }
+            catch(Exception error)
+            {
+                Debug.WriteLine(error);
+            }
         }
 
         /// <summary>
