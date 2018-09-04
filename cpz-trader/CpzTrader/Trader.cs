@@ -29,10 +29,9 @@ namespace CpzTrader
         /// <summary>
         /// отправить ордер на биржу
         /// </summary>        
-        [FunctionName("SendOrder")]
-        public static async Task<Order> SendOrder([ActivityTrigger] DurableActivityContext input)
+        public static async Task<Order> SendOrder(Client clientInfo, NewSignal signal)
         {
-            (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
+            (Client client, NewSignal newSignal) tradeInfo = (clientInfo, signal);                
 
             var url = "http://localhost:7077/api/HttpTriggerJS/SetOrder";
 
@@ -81,10 +80,9 @@ namespace CpzTrader
         /// <summary>
         /// отменить ордер
         /// </summary>        
-        [FunctionName("CancelOrder")]
-        public static async Task<bool> CancelOrder([ActivityTrigger] DurableActivityContext input)
+        public static async Task<bool> CancelOrder(string orderNumber, Client clientInfo, NewSignal signal)
         {
-            (string numberOrder, Client client, NewSignal signal) tradeInfo = input.GetInput<(string, Client, NewSignal)>();
+            (string numberOrder, Client client, NewSignal signal) tradeInfo = (orderNumber, clientInfo, signal);
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 
@@ -134,11 +132,9 @@ namespace CpzTrader
         /// <summary>
         /// проверить статус ордера
         /// </summary>        
-        [FunctionName("CheckOrderStatus")]
-        public static async Task<bool> CheckOrderStatus([ActivityTrigger] DurableActivityContext input)
+        public static async Task<bool> CheckOrderStatus(string orderNumber, Client clientInfo, NewSignal signal)
         {
-
-            (string numberOrder, Client client, NewSignal signal) tradeInfo = input.GetInput<(string, Client, NewSignal)>();
+            (string numberOrder, Client client, NewSignal signal) tradeInfo = (orderNumber, clientInfo, signal);
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 
@@ -200,151 +196,6 @@ namespace CpzTrader
         //    }
         //}
 
-
-        /// <summary>
-        /// трейдер-оркестратор, обрабатывает торговую логику отдельного клиента
-        /// </summary>
-        [FunctionName("Trader")]
-        public static async Task RunOrchestrator(
-            [OrchestrationTrigger] DurableOrchestrationContext context)
-        {
-            try
-            {
-                // получаем данные о клиенте аккаунт которого будем обрабатывать
-                var clientInfo = context.GetInput<Client>();
-
-                // ждем дальнейших указаний
-                var newSignal = await context.WaitForExternalEvent<NewSignal>("NewSignal");
-
-                // выполняем бизнес логику согласно данным из сигнала
-
-                var action = newSignal.Action;
-
-                bool canOpen = true;
-
-                // если сигнал на открытие нового ордера, проверяем достаточно ли средств на балансе
-                //if (action == ActionType.NewOpenOrder || action == ActionType.NewPosition)
-                //{
-                //    canOpen = clientInfo.IsEmulation ? Emulator.CheckBalance(clientInfo.EmulatorSettings.CurrentBalance, newSignal.Price, clientInfo.TradeSettings.Volume)
-                //                                     : await context.CallActivityAsync<bool>("CheckBalance", (clientInfo, newSignal));
-                //}
-
-                // находим позицию для которой пришел сигнал
-                var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
-
-                // если сигнал на открытие новой позиции
-                if (action == ActionType.NewPosition && canOpen)
-                {
-                    // создаем ее
-                    Position newPosition = new Position();
-
-                    newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
-
-                    // добавляем в нее новый открывающий ордер
-                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-                                                           : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
-
-                    await context.CallActivityAsync("PublishEventDurable", ("CPZ.Trader.NewOrder", openOrder));
-
-                    if (openOrder != null)
-                    {
-                        newPosition.OpenOrders.Add(openOrder);
-
-                        // сохраняем позицию в клиенте
-                        clientInfo.AllPositions.Add(newPosition);
-                    }
-                }
-                // наращиваем объем позиции
-                else if (action == ActionType.NewOpenOrder && canOpen)
-                {
-                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-                                                           : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
-
-                    await PublishEvent("CPZ.Trader.NewOrder", openOrder);
-
-                    await context.CallActivityAsync("PublishEventDurable", ("CPZ.Trader.NewOrder", openOrder));
-
-                    if (openOrder != null)
-                    {
-                        needPosition.OpenOrders.Add(openOrder);
-                    }
-
-                } // сокращаем объем позиции
-                else if (action == ActionType.NewCloseOrder)
-                {
-                    var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
-
-                    var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
-                                                            : await context.CallActivityAsync<Order>("SendOrder", (clientInfo, newSignal));
-
-                    await context.CallActivityAsync("PublishEventDurable", ("CPZ.Trader.NewCloseOrder", closeOrder));
-
-                    if (closeOrder != null)
-                    {
-                        needPosition.CloseOrders.Add(closeOrder);
-                    }
-
-                    if(newSignal.PercentVolume == 100)
-                    {
-                        var totals = needPosition.CalculatePositionResult();
-                        clientInfo.EmulatorSettings.CurrentBalance += totals;
-                    }
-
-                } // проверить состояние ордера
-                else if (action == ActionType.CheckOrder)
-                {
-                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-                    if (needOrder != null)
-                    {
-                        if(clientInfo.IsEmulation)
-                        {
-                            needOrder.State = OrderState.Closed;
-                        }
-                        else
-                        {
-                            var resultChecking = await context.CallActivityAsync<bool>("CheckOrderStatus", (clientInfo, needOrder.NumberInSystem));
-
-                            needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
-                        }
-                    }
-
-                } // отозвать ордер
-                else if (action == ActionType.CancelOrder)
-                {
-                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-                    
-                    if (needOrder != null)
-                    {
-                        if (clientInfo.IsEmulation)
-                        {
-                            needOrder.State = OrderState.Canceled;
-                        }
-                        else
-                        {
-                            var cancellationResult = await context.CallActivityAsync<bool>("CancelOrder", (clientInfo, newSignal, needOrder.NumberInSystem));
-                        }
-
-                        await context.CallActivityAsync("PublishEventDurable", ("CPZ.Trader.CancelOrder", needOrder));
-                    }                    
-                }
-                
-                // обновляем информацию о клиенте в базе
-
-                await context.CallActivityAsync<bool>("UpdateClientInfoAsync", clientInfo);
-
-                // переходим на следущую итерацию, передавая себе текущее состояние
-                context.ContinueAsNew(clientInfo);
-
-            }
-            catch (Exception e)
-            {
-                await context.CallActivityAsync( "SendLogMessage",e.Message);
-                throw;
-            }
-        }
-
-
         /// <summary>
         /// обработчик событий пришедших от советника
         /// </summary>
@@ -390,52 +241,20 @@ namespace CpzTrader
                             Content = new StringContent(JsonConvert.SerializeObject(responseData))
                         };
                     }
-                    // запуск проторговщиков
+                    // инициализация тестовых клиентов
                     else if (string.Equals(eventGridEvent.EventType, cpzTasksTraderStart, StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<StartNewTraderData>();
 
-                        List<Client> clients = GetClientsInfo(eventData.AdvisorName);
-
-                        // для каждого клиента запускаем своего проторговщика и сохраняем его идентификатор у клиента
-                        foreach (var client in clients)
-                        {
-                            string traderTask = await starter.StartNewAsync("Trader", client);
-
-                            client.TraderId = traderTask;                            
-                        }
+                        List<Client> clients = GetClientsInfo(eventData.AdvisorName);                        
 
                         // сохраняем обновленных клиентов в таблицу
                         await SaveClientsInfoDbAsync(clients);                      
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
-                    // новый сигнал
+                    // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, cpzSignalsNewSignal, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var eventData = dataObject.ToObject<NewSignal>();
-
-                        // получаем из базы клиентов с айдишниками трейдеров
-                        List<Client> clients = await GetClientsInfoFromDbAsync(eventData.AdvisorName);
-
-                        List<Task> parallelSignals = new List<Task>();
-
-                        if(clients != null)
-                        {
-                            // асинхронно отправляем сигнал всем проторговщикам
-                            foreach (Client client in clients)
-                            {
-                                var parallelSignal = starter.RaiseEventAsync(client.TraderId, "NewSignal", eventData);
-
-                                parallelSignals.Add(parallelSignal);
-                            }
-
-                            await Task.WhenAll(parallelSignals);
-                        }
-                        
-                        return new HttpResponseMessage(HttpStatusCode.OK);
-                    }
-                    else if (string.Equals(eventGridEvent.EventType, "noDurable", StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<NewSignal>();
 
@@ -469,50 +288,7 @@ namespace CpzTrader
             }            
         }
 
-        /// <summary>
-        /// проверить баланс
-        /// </summary>        
-        [FunctionName("PublishEventDurable")]
-        public static async Task PublishEventDurable([ActivityTrigger] DurableActivityContext input)
-        {
-            (string eventType, Order order) orderInfo = input.GetInput<(string eventType, Order order)>();
-
-            string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint");
-
-            var _topicHostname = new Uri(_topicEndpoint).Host;
-
-            string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
-
-            var topicCredentials = new TopicCredentials(_topicKey);
-
-            EventGridClient eventGridClient = new EventGridClient(topicCredentials);
-
-            List<EventGridEvent> eventsList = new List<EventGridEvent>();
-
-            for (int i = 0; i < 1; i++)
-            {
-                // Формируем данные
-                dynamic data = new JObject();
-                data.number = orderInfo.order.NumberInRobot;
-                data.symbol = orderInfo.order.Symbol;
-                data.time = orderInfo.order.Time;
-
-                // Создаем новое событие
-                eventsList.Add(new EventGridEvent()
-                {
-                    Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                    Subject = $"Ордер номер : {orderInfo.order.NumberInRobot} # бумага : {orderInfo.order.Symbol} # создан : {orderInfo.order.Time}", // тема события
-                    DataVersion = "1.0", // версия данных
-                    EventType = orderInfo.eventType, // тип события
-                    Data = data, // данные события
-                    EventTime = DateTime.Now // время формирования события
-                });
-            }
-
-            // Отправка событий в тему
-            await eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
-        }
-
+               
         /// <summary>
         /// опубликовать событие в event grid
         /// </summary>        
@@ -554,6 +330,11 @@ namespace CpzTrader
             await eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
         }
 
+        /// <summary>
+        /// клиентский проторговщик
+        /// </summary>
+        /// <param name="clientInfo">данные о клиенте, для которого обрабатывается сигнал</param>
+        /// <param name="newSignal">сигнал</param>
         public static async Task RunTrader(Client clientInfo, NewSignal newSignal)
         {
             var action = newSignal.Action;
@@ -578,7 +359,8 @@ namespace CpzTrader
                 newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
 
                 // добавляем в нее новый открывающий ордер
-                var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
+                var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+                                                           : await SendOrder(clientInfo, newSignal);
 
                 await PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
                                                        
@@ -595,7 +377,8 @@ namespace CpzTrader
                 // наращиваем объем позиции
                 if (action == ActionType.NewOpenOrder && canOpen)
                 {
-                    var openOrder = Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal);
+                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+                                                           : await SendOrder(clientInfo, newSignal);
 
                     await PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
 
@@ -635,6 +418,12 @@ namespace CpzTrader
                         {
                             needOrder.State = OrderState.Closed;
                         }
+                        else
+                        {
+                            var resultChecking = await CheckOrderStatus(needOrder.NumberInSystem, clientInfo, newSignal);
+
+                            needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
+                        }
                     }
 
                 } // отозвать ордер
@@ -642,19 +431,21 @@ namespace CpzTrader
                 {
                     var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
-                    await PublishEvent("CPZ.Trader.CancelOrder", needOrder);
-
                     if (needOrder != null)
                     {
                         if (clientInfo.IsEmulation)
                         {
                             needOrder.State = OrderState.Canceled;
                         }
+                        else
+                        {
+                            var cancellationResult = await CancelOrder(needOrder.NumberInSystem, clientInfo, newSignal);
+                        }
                     }
                 }
             }
 
-            await UpdateClientInfoAsyncSecond(clientInfo);
+            await UpdateClientInfoAsync(clientInfo);
         }
         
 
@@ -741,7 +532,7 @@ namespace CpzTrader
         /// <summary>
         /// получить из базы клиентов по имени советника
         /// </summary>
-        /// <param name="advisorName"></param>
+        /// <param name="advisorName">имя советника</param>
         /// <returns></returns>
         private static async Task<List<Client>> GetClientsInfoFromDbAsync(string advisorName)
         {
@@ -795,7 +586,7 @@ namespace CpzTrader
         /// <summary>
         /// обновить запись о клиенте в базе
         /// </summary>        
-        public static async Task<bool> UpdateClientInfoAsyncSecond(Client input)
+        public static async Task<bool> UpdateClientInfoAsync(Client input)
         {
             try
             {
@@ -862,74 +653,7 @@ namespace CpzTrader
                 throw;
             }
         }
-
-        /// <summary>
-        /// обновить запись о клиенте в базе
-        /// </summary>
-        [FunctionName("UpdateClientInfoAsync")]
-        public static async Task<bool> UpdateClientInfoAsync(
-            [ActivityTrigger] DurableActivityContext input)
-        {
-            try
-            {
-                var client = input.GetInput<Client>();
-
-                var appParameter = "AzureWebJobsStorage";
-
-                string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-                // создаем объект для работы с таблицами
-                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-                // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("clientsinfo");
-
-                // создаем операцию получения
-                TableOperation retrieveOperation = TableOperation.Retrieve<Client>(client.PartitionKey, client.RowKey);
-
-                // выполняем операцию
-                var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-
-                // получаем результат
-                Client updateEntity = (Client)retrievedResult.Result;
-
-                // изменяем данные и сохраняем
-                if (updateEntity != null)
-                {
-                    updateEntity.CountPositions = client.AllPositions.Count;
-
-                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order=>order.State == OrderState.Closed).Count;
-
-                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Closed).Count;
-
-                    updateEntity.ETag = "*";
-
-                    TableOperation updateOperation = TableOperation.Replace(updateEntity);
-
-                    await table.ExecuteAsync(updateOperation);
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (StorageException e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-                throw;
-            }
-        }
-
+        
         #endregion
 
         #region логирование
@@ -937,11 +661,8 @@ namespace CpzTrader
         /// <summary>
         /// отправляет сообщения в лог
         /// </summary>
-        [FunctionName("SendLogMessage")]
-        public static async Task SendLogMessage([ActivityTrigger] DurableActivityContext input)
+        public static async Task SendLogMessage(string message)
         {
-            var message = input.GetInput<string>();
-
             await Task.Run(async () =>
             {
                 Debug.WriteLine(message);
