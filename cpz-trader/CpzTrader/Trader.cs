@@ -164,37 +164,7 @@ namespace CpzTrader
             {
                 return false;
             }
-        }
-
-        ///// <summary>
-        ///// проверить баланс
-        ///// </summary>        
-        //[FunctionName("CheckBalance")]
-        //public static async Task<bool> CheckBalance([ActivityTrigger] DurableActivityContext input)
-        //{
-        //    (Client client, NewSignal newSignal) tradeInfo = input.GetInput<(Client, NewSignal)>();
-
-        //    var dataAsString = JsonConvert.SerializeObject(tradeInfo);
-
-        //    var content = new StringContent(dataAsString);
-
-        //    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                     
-        //    var url = "http://localhost:7077/api/HttpTriggerJS";
-
-        //    var orderResult = await httpClient.PostAsync(url, content);
-
-        //    var status = orderResult.StatusCode;
-
-        //    if (status == HttpStatusCode.OK)
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        //}
+        }       
 
         /// <summary>
         /// обработчик событий пришедших от советника
@@ -288,7 +258,6 @@ namespace CpzTrader
             }            
         }
 
-               
         /// <summary>
         /// опубликовать событие в event grid
         /// </summary>        
