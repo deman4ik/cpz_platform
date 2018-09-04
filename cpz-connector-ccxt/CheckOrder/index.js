@@ -1,64 +1,61 @@
-module.exports = async function (context, req) {
-   
-    const ccxt = require('ccxt');
+const ccxt = require("ccxt");
 
-    let tradeInfo = req.body;
-  
-    let clientInfo = tradeInfo.Item2;
+async function CheckOrder(context, req) {
+  const tradeInfo = req.body;
 
-    let signal = tradeInfo.Item3;
+  const clientInfo = tradeInfo.Item2;
 
-    // ID ордера для отмены
-    let orderId = tradeInfo.Item1;
+  const signal = tradeInfo.Item3;
 
-    // получаем имя нужной биржи из запроса
-    let needExchangeName = signal.Exchange.toLowerCase();
- 
-    // подключаемся к ней
-    let exchange = new ccxt[needExchangeName] (
-        {
-            'apiKey': clientInfo.TradeSettings.PublicKey,
-            'secret': clientInfo.TradeSettings.PrivateKey,
-            'timeout': 30000,
-            'enableRateLimit': true,
-        }
-    );
-    // инструмент, ордер которого нужно проверить
-    let symbol = signal.Baseq + "/" + signal.Quote;
+  // ID ордера для отмены
+  const orderId = tradeInfo.Item1;
 
-    try {
-        // запрашиваем информацию по ордеру
-        const response = await exchange.fetchOrder (orderId, symbol);
-        
-        let orderInfo = new Object();
-        
-        orderInfo.symbol = response.symbol;
-        orderInfo.volume = response.amount;
-        orderInfo.price = response.price;
-        orderInfo.time = response.datetime;
-        orderInfo.state = response.status;
-        orderInfo.ordertype = response.type;
-        orderInfo.numberInSystem = response.id;
-        order.executed = response.amount - response.remaining;
+  // получаем имя нужной биржи из запроса
+  const needExchangeName = signal.Exchange.toLowerCase();
 
-        context.res = {
-            status: 200,
-            body: orderInfo
-        };     
-    }catch(e)
-    {
-        let errorInfo = new Object();
-        
-        if(e.constructor.name == "NotSupported"){
+  // подключаемся к ней
+  const exchange = new ccxt[needExchangeName]({
+    apiKey: clientInfo.TradeSettings.PublicKey,
+    secret: clientInfo.TradeSettings.PrivateKey,
+    timeout: 30000,
+    enableRateLimit: true
+  });
+  // инструмент, ордер которого нужно проверить
+  const symbol = `${signal.Baseq}/${signal.Quote}`;
 
-            errorInfo.code = 500;
+  try {
+    // запрашиваем информацию по ордеру
+    const response = await exchange.fetchOrder(orderId, symbol);
 
-            errorInfo.message = "Данная биржа не поддерживает проверку";
+    const orderInfo = {
+      symbol: response.symbol,
+      volume: response.amount,
+      price: response.price,
+      time: response.datetime,
+      state: response.status,
+      ordertype: response.type,
+      numberInSystem: response.id,
+      executed: response.amount - response.remaining
+    };
 
-            context.res = {
-                status: 200,
-                body: errorInfo
-            }; 
-        }        
+    context.res = {
+      status: 200,
+      body: orderInfo
+    };
+  } catch (e) {
+    const errorInfo = {};
+
+    if (e.constructor.name === "NotSupported") {
+      errorInfo.code = 500;
+
+      errorInfo.message = "Данная биржа не поддерживает проверку";
+
+      context.res = {
+        status: 200,
+        body: errorInfo
+      };
     }
-};
+  }
+}
+
+module.exports = CheckOrder;

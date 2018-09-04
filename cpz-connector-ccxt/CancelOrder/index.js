@@ -1,72 +1,66 @@
-module.exports = async function (context, req) {
+const ccxt = require("ccxt");
 
-    const ccxt = require('ccxt');
-    
-    let tradeInfo = req.body;
-  
-    let clientInfo = tradeInfo.Item2;
+async function CancelOrder(context, req) {
+  const tradeInfo = req.body;
 
-    let signal = tradeInfo.Item3;
+  const clientInfo = tradeInfo.Item2;
 
-    // ID ордера для отмены
-    let orderId = tradeInfo.Item1;
+  const signal = tradeInfo.Item3;
 
-    // получаем имя нужной биржи из запроса
-    let needExchangeName = signal.Exchange.toLowerCase();
- 
-    // подключаемся к ней
-    let exchange = new ccxt[needExchangeName] (
-        {
-            'apiKey': clientInfo.TradeSettings.PublicKey,
-            'secret': clientInfo.TradeSettings.PrivateKey,
-            'timeout': 30000,
-            'enableRateLimit': true,
-        }
-    );
-    // инструмент, ордер которого нужно отменить
-    let symbol = signal.Baseq + "/" + signal.Quote;
+  // ID ордера для отмены
+  const orderId = tradeInfo.Item1;
 
-    try {
-        // отправляем ордер на биржу
-        const response = await exchange.cancelOrder (orderId, symbol);
-        console.log (response);
-        console.log ('Succeeded');
+  // получаем имя нужной биржи из запроса
+  const needExchangeName = signal.Exchange.toLowerCase();
 
-        let canceledOrder = new Object();
+  // подключаемся к ней
+  const exchange = new ccxt[needExchangeName]({
+    apiKey: clientInfo.TradeSettings.PublicKey,
+    secret: clientInfo.TradeSettings.PrivateKey,
+    timeout: 30000,
+    enableRateLimit: true
+  });
+  // инструмент, ордер которого нужно отменить
+  const symbol = `${signal.Baseq}/${signal.Quote}`;
 
-        canceledOrder.numberInSystem = response.id;
-        canceledOrder.symbol = response.symbol;
-        
-        context.res = {
-            status: 200,
-            body: canceledOrder
-        };     
+  try {
+    // отправляем ордер на биржу
+    const response = await exchange.cancelOrder(orderId, symbol);
+    console.log(response);
+    console.log("Succeeded");
+
+    const canceledOrder = {
+      numberInSystem: response.id,
+      symbol: response.symbol
+    };
+
+    context.res = {
+      status: 200,
+      body: canceledOrder
+    };
+  } catch (e) {
+    const errorInfo = {};
+    // орден не найден
+    if (e.constructor.name === "OrderNotFound") {
+      errorInfo.code = 400;
+
+      errorInfo.message = "Ошибка снятия, ордер уже отменен или исполнен";
+
+      context.res = {
+        status: 200,
+        body: errorInfo
+      };
+    } else if (e.constructor.name === "NetworkError") {
+      errorInfo.code = 410;
+
+      errorInfo.message = "Не удалось отменить ордер, ошибка сети";
+      // TO DO: повторная попытка отмены ордера
+      context.res = {
+        status: 200,
+        body: errorInfo
+      };
     }
-    catch (e) {
+  }
+}
 
-        let errorInfo = new Object();
-        // орден не найден
-        if(e.constructor.name == "OrderNotFound"){
-
-            errorInfo.code = 400;
-
-            errorInfo.message = "Ошибка снятия, ордер уже отменен или исполнен";
-
-            context.res = {
-                status: 200,
-                body: errorInfo
-            }; 
-        } 
-        else if(e.constructor.name == "NetworkError")
-        {
-            errorInfo.code = 410;
-
-            errorInfo.message = "Не удалось отменить ордер, ошибка сети";
-            // TO DO: повторная попытка отмены ордера
-            context.res = {
-                status: 200,
-                body: errorInfo
-            };             
-        }              
-    } 
-};
+module.exports = CancelOrder;
