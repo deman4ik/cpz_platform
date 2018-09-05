@@ -1,9 +1,0 @@
-{
-  "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "StorageConnectionString": "UseDevelopmentStorage=true",
-    "EgTopicEndpoint": "https://cpz-test-topic.northeurope-1.eventgrid.azure.net/",
-    "EgTopicKey": "QYUbWBMB2Ng2VAuHUenwrZ03kiubGjUWQCYattiVTEQ="
-  }
-}
