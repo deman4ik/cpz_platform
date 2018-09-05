@@ -41,8 +41,16 @@ namespace CpzTrader
 
                 foreach (EventGridEvent eventGridEvent in eventGridEvents)
                 {
+                    if (!CheckKey(eventGridEvent.Subject))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(JsonConvert.SerializeObject("Не верный ключ"))
+                        };
+                    }
+
                     JObject dataObject = eventGridEvent.Data as JObject;
-                    
+
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
                     if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
@@ -71,7 +79,58 @@ namespace CpzTrader
                         await DbContext.SaveClientsInfoDbAsync(clients);                      
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
+                    }                    
+                }
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                throw;
+            }            
+        }
+
+        [FunctionName("SignalHandler")]
+        public static async Task<HttpResponseMessage> SignalHandler(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
+            [OrchestrationClient]DurableOrchestrationClient signal,
+            TraceWriter log)
+        {
+            try
+            {
+                string requestContent = await req.Content.ReadAsStringAsync();
+
+                EventGridEvent[] eventGridEvents = JsonConvert.DeserializeObject<EventGridEvent[]>(requestContent);
+
+                foreach (EventGridEvent eventGridEvent in eventGridEvents)
+                {
+                    if (!CheckKey(eventGridEvent.Subject))
+                    {
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(JsonConvert.SerializeObject("Не верный ключ"))
+                        };
                     }
+
+                    JObject dataObject = eventGridEvent.Data as JObject;
+
+                    // В зависимости от типа события выполняем определенную логику
+                    // валидация
+                    if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
+                    {
+                        var eventData = dataObject.ToObject<SubscriptionValidationEventData>();
+
+                        var responseData = new SubscriptionValidationResponse();
+
+                        responseData.ValidationResponse = eventData.ValidationCode;
+
+                        Debug.WriteLine("Событие валидации обработано!");
+
+                        return new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(JsonConvert.SerializeObject(responseData))
+                        };
+                    }                    
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
@@ -104,7 +163,17 @@ namespace CpzTrader
             {
                 Debug.WriteLine(e.Message);
                 throw;
-            }            
+            }
+        }
+
+        /// <summary>
+        /// проверить ключ
+        /// </summary>
+        /// <param name="key">ключ пришедший в запросе</param>
+        public static bool CheckKey(string key)
+        {
+            string secretKey = Environment.GetEnvironmentVariable("SecretKey");
+            return key == secretKey ? true : false;
         }
     }
 }
