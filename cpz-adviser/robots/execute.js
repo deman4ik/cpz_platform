@@ -8,6 +8,7 @@ const Robot = require("./robot");
  */
 async function execute(context, state, candle) {
   try {
+    context.log("Executing...");
     // Инициализация класса робота с текущим состоянием
     const robot = new Robot(context, state);
     // Новая свеча
@@ -15,7 +16,7 @@ async function execute(context, state, candle) {
     // Вычисление индикаторов
     // TODO: robot.calcIndicators();
     // Запуск стратегии
-    robot.stretegyFunc();
+    await robot.stretegyFunc();
     return { isSuccessful: true };
   } catch (error) {
     context.log(error);

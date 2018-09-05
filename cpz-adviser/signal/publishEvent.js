@@ -1,7 +1,6 @@
 /*
  * Публикация свечей в топик EventGrid в различных таймфремах
  */
-const uuid = require("uuid").v4;
 const msRestAzure = require("ms-rest-azure");
 const EventGrid = require("azure-eventgrid");
 const url = require("url");

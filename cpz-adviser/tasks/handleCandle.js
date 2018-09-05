@@ -15,10 +15,11 @@ async function handleCandle(context, candle) {
       candle.exchange,
       candle.baseq,
       candle.quote,
-      candle.timeframe
+      candle.timeframe || 1
     );
+    context.log(slug);
     const robotsState = await getState(context, slug);
-
+    context.log(robotsState);
     const results = await Promise.all(
       robotsState.map(async state => {
         const result = await executeRobot(context, state, candle);
