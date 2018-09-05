@@ -116,7 +116,7 @@ class Robot {
     this.candles.push(candle);
   }
 
-  advice(signal) {
+  async advice(signal) {
     const events = [
       {
         id: uuid(),
@@ -144,7 +144,7 @@ class Robot {
         eventTime: new Date()
       }
     ];
-    publishSignal(this.context, events);
+    await publishSignal(this.context, events);
   }
 }
 

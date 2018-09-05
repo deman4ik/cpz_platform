@@ -8,7 +8,7 @@ const handleCandle = require("../tasks/handleCandle");
 // ! Разнести разные типы эвентов по разным функциям триггерам
 function eventHandler(context, req) {
   const parsedReq = JSON.parse(req.rawBody);
-  context.log(`CPZ Importer processed a request.${JSON.stringify(parsedReq)}`);
+  context.log(`CPZ Adviser processed a request.${JSON.stringify(parsedReq)}`);
   // TODO: SENDER ENDPOINT VALIDATION
   parsedReq.forEach(eventGridEvent => {
     const eventData = eventGridEvent.data;
