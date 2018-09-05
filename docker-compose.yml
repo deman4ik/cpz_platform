@@ -1,0 +1,55 @@
+version: '3'
+services:
+  cpz-marketwatcher:
+    container_name: cpz-marketwatcher
+    build: ./cpz-marketWatcher/
+    ports:
+      - "8102:80"
+    volumes:
+     - ./cpz-marketWatcher/:/cpz-marketWatcher/
+    environment:
+    - API_KEY
+    - EG_TOPIC_ENDPOINT
+    - EG_TOPIC_KEY 
+    restart: always
+  cpz-adviser:
+    container_name: cpz-adviser
+    build: ./cpz-adviser/
+    ports:
+      - "8104:80"
+    volumes:
+     - ./cpz-adviser/:/cpz-adviser/
+    environment:
+    - AZURE_STORAGE_CONNECTION_STRING
+    - EG_SIGNALS_TOPIC_KEY
+    - EG_SIGNALS_TOPIC_ENDPOINT  
+    restart: always
+  cpz-trader:
+    container_name: cpz-trader
+    build: ./cpz-trader/CpzTrader/
+    ports:
+      - "8105:80"
+    volumes:
+     - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
+    environment:
+    - AzureWebJobsStorage
+    - EgTopicEndpoint
+    - EgTopicKey   
+    - CCXTSendOrder
+    - CCXTCancelOrder
+    - CCXTCheckOrderStatus
+    restart: always
+  nginx:
+    container_name: nginx
+    build: ./docker-nginx/
+    ports:
+      - "8100:80"  
+  ngrok:
+    container_name: ngrok
+    ports:
+      - "0.0.0.0:4040:4040"
+    image: wernight/ngrok
+    links:
+      - "nginx"
+    environment:
+      - NGROK_PORT=nginx:80      
