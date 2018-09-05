@@ -1,16 +1,11 @@
 ﻿using CpzTrader.Models;
-using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CpzTrader
 {
+    /// <summary>
+    /// эмулятор торгов
+    /// </summary>
     public static class Emulator
     {
         public static Order SendOrder(decimal volume, NewSignal signal)
