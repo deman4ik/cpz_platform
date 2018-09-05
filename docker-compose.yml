@@ -24,11 +24,22 @@ services:
     - EG_SIGNALS_TOPIC_KEY
     - EG_SIGNALS_TOPIC_ENDPOINT  
     restart: always
+  cpz-postgraphile:
+    container_name: cpz-postgraphile
+    build: ./cpz-postgraphile/
+    ports:
+      - "8105:80"
+    volumes:
+      - ./cpz-postgraphile/:/cpz-postgraphile/
+    environment:
+      - CUSTOMCONNSTR_POSTGRESQL
+      - API_USER
+      - API_SECRET  
   cpz-trader:
     container_name: cpz-trader
     build: ./cpz-trader/CpzTrader/
     ports:
-      - "8105:80"
+      - "8106:80"
     volumes:
      - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
     environment:
