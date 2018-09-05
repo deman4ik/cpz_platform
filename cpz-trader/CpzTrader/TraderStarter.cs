@@ -34,16 +34,7 @@ namespace CpzTrader
             TraceWriter log)
         {
             try
-            {
-                // событие валидации подписки
-                const string subscriptionValidationEvent = "Microsoft.EventGrid.SubscriptionValidationEvent";
-
-                // событие запуска проторговщиков
-                const string cpzTasksTraderStart = "CPZ.Tasks.Trader.Start";
-
-                // событие появления нового сигнала
-                const string cpzSignalsNewSignal = "CPZ.Signals.NewSignal";
-                
+            {               
                 string requestContent = await req.Content.ReadAsStringAsync();
 
                 EventGridEvent[] eventGridEvents = JsonConvert.DeserializeObject<EventGridEvent[]>(requestContent);
@@ -54,7 +45,7 @@ namespace CpzTrader
                     
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
-                    if (string.Equals(eventGridEvent.EventType, subscriptionValidationEvent, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<SubscriptionValidationEventData>();
                         
@@ -70,7 +61,7 @@ namespace CpzTrader
                         };
                     }
                     // инициализация тестовых клиентов
-                    else if (string.Equals(eventGridEvent.EventType, cpzTasksTraderStart, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzTasksTraderStart"), StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<StartNewTraderData>();
 
@@ -82,7 +73,7 @@ namespace CpzTrader
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
                     // новый сигнал                    
-                    else if (string.Equals(eventGridEvent.EventType, cpzSignalsNewSignal, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<NewSignal>();
 

@@ -37,7 +37,7 @@ namespace CpzTrader
                 var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
                                                            : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                await EventGridPublisher.PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
+                await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
 
                 if (openOrder != null)
                 {
@@ -55,7 +55,7 @@ namespace CpzTrader
                     var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
                                                            : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                    await EventGridPublisher.PublishEvent("CPZ.Trader.NewOpenOrder", openOrder);
+                    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
 
                     if (openOrder != null)
                     {
@@ -70,7 +70,7 @@ namespace CpzTrader
                     var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
                                                             : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                    await EventGridPublisher.PublishEvent("CPZ.Trader.NewCloseOrder", closeOrder);
+                    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewCloseOrder"), closeOrder);
 
                     if (closeOrder != null)
                     {

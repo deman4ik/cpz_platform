@@ -1,0 +1,9 @@
+{
+  "Values": {
+    "SubscriptionValidationEvent": "Microsoft.EventGrid.SubscriptionValidationEvent",
+    "CpzTasksTraderStart": "CPZ.Tasks.Trader.Start",
+    "CpzSignalsNewSignal": "CPZ.Signals.NewSignal",
+    "NewOpenOrder": "CPZ.Trader.NewOpenOrder",
+    "NewCloseOrder": "CPZ.Trader.NewCloseOrder"
+  }
+}

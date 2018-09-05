@@ -1,5 +1,6 @@
 ﻿using CpzTrader.Models;
 using Newtonsoft.Json;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -21,7 +22,7 @@ namespace CpzTrader
         {
             (Client client, NewSignal newSignal) tradeInfo = (clientInfo, signal);
 
-            var url = "http://localhost:7077/api/HttpTriggerJS/SetOrder";
+            var url = Environment.GetEnvironmentVariable("CCXTSendOrder");
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 
@@ -78,7 +79,7 @@ namespace CpzTrader
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var url = "http://localhost:7077/api/HttpTriggerJS/CancelOrder";
+            var url = Environment.GetEnvironmentVariable("CCXTCancelOrder");
 
             var orderResult = await httpClient.PostAsync(url, content);
 
@@ -130,7 +131,7 @@ namespace CpzTrader
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var url = "http://localhost:7077/api/HttpTriggerJS/CheckOrder";
+            var url = Environment.GetEnvironmentVariable("CCXTCheckOrderStatus");
 
             var orderResult = await httpClient.PostAsync(url, content);
 
