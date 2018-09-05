@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO.Pipes;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using CpzTrader.Models;
-using Microsoft.Azure.EventGrid;
+﻿using CpzTrader.Models;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using SubscriptionValidationResponse = Microsoft.Azure.EventGrid.Models.SubscriptionValidationResponse;
 
 namespace CpzTrader
@@ -90,8 +84,7 @@ namespace CpzTrader
 
         [FunctionName("SignalHandler")]
         public static async Task<HttpResponseMessage> SignalHandler(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
-            [OrchestrationClient]DurableOrchestrationClient signal,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,            
             TraceWriter log)
         {
             try
@@ -170,7 +163,7 @@ namespace CpzTrader
         /// <param name="key">ключ пришедший в запросе</param>
         public static bool CheckKey(string key)
         {
-            string secretKey = Environment.GetEnvironmentVariable("SecretKey");
+            string secretKey = Environment.GetEnvironmentVariable("SignalHandlerSecretKey");
             return key == secretKey ? true : false;
         }
     }

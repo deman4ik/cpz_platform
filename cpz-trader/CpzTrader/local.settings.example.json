@@ -7,6 +7,7 @@
     "EgTopicKey": "ключ для доступа к eventGrid",
     "CCXTSendOrder": "конечноая точка для выставления ордеров через CCXT",
     "CCXTCancelOrder": "конечноая точка для отмены ордеров через CCXT",
-    "CCXTCheckOrderStatus": "конечноая точка для проверки ордеров через CCXT"
+    "CCXTCheckOrderStatus": "конечноая точка для проверки ордеров через CCXT",
+    "SignalHandlerSecretKey": "testKey"
   }
 }
