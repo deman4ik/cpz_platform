@@ -12,20 +12,23 @@ async function EGSub(context, req) {
       const results = await Promise.all(
         Object.keys(servicesConfig).map(async key => {
           const item = servicesConfig[key];
-          const subName = postfix ? `${item.name}-${postfix}` : item.name;
-          const res = await Promise.all(
-            item.egIn.map(async eg => {
-              const endpointUrl = baseUrl + item.localUrlPrefix + eg.url;
-              const result = await createOrUpdateSub(
-                EGMClient,
-                topicName,
-                subName,
-                endpointUrl,
-                eg.types
-              );
-              return result;
-            })
-          );
+          let res;
+          if (item.egIn) {
+            const subName = postfix ? `${item.name}-${postfix}` : item.name;
+            res = await Promise.all(
+              item.egIn.map(async eg => {
+                const endpointUrl = baseUrl + item.localUrlPrefix + eg.url;
+                const result = await createOrUpdateSub(
+                  EGMClient,
+                  topicName,
+                  subName,
+                  endpointUrl,
+                  eg.types
+                );
+                return result;
+              })
+            );
+          }
           return res;
         })
       );
