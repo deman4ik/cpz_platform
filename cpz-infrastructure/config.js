@@ -386,7 +386,8 @@ const config = {
       "EG_SIGNALS_ENDPOINT",
       "EG_SIGNALS_KEY",
       "EG_ORDERS_ENDPOINT",
-      "EG_ORDERS_KEY"
+      "EG_ORDERS_KEY",
+      "CCXT_ENDPOINT"
     ]
   },
   postgraphile: {
