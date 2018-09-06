@@ -1,11 +1,26 @@
 const SUB_VALIDATION_EVENT = "Microsoft.EventGrid.SubscriptionValidationEvent";
-const NEW_CANDLE_EVENT = "CPZ.Candles.NewCandle";
-const NEW_SIGNAL_EVENT = "CPZ.Signals.NewSignal";
-const START_ADVISER_EVENT = "CPZ.Tasks.Adviser.Start";
-
+const LOG_EVENT = "CPZ.Adviser.Log";
+const ERROR_EVENT = "CPZ.Adviser.Error";
+const TASKS_ADVISER_START_EVENT = "CPZ.Tasks.Adviser.Start";
+const TASKS_ADVISER_STOP_EVENT = "CPZ.Tasks.Adviser.Stop";
+const TASKS_ADVISER_STARTED_EVENT = "CPZ.Tasks.Adviser.Started";
+const TASKS_ADVISER_STOPPED_EVENT = "CPZ.Tasks.Adviser.Stopped";
+const CANDLES_NEW_CANDLE_EVENT = "CPZ.Candles.NewCandle";
+const CANDLES_HANDLED_EVENT = "CPZ.Candles.Handled";
+const SIGNALS_NEW_SIGNAL_EVENT = "CPZ.Signals.NewSignal";
+const STORAGE_ADVISERS_TABLE = "Advisers";
+const QUEUE_CANDLES_PENDING = "CandlesPending";
 module.exports = {
   SUB_VALIDATION_EVENT,
-  NEW_CANDLE_EVENT,
-  NEW_SIGNAL_EVENT,
-  START_ADVISER_EVENT
+  LOG_EVENT,
+  ERROR_EVENT,
+  TASKS_ADVISER_START_EVENT,
+  TASKS_ADVISER_STOP_EVENT,
+  TASKS_ADVISER_STARTED_EVENT,
+  TASKS_ADVISER_STOPPED_EVENT,
+  CANDLES_NEW_CANDLE_EVENT,
+  CANDLES_HANDLED_EVENT,
+  SIGNALS_NEW_SIGNAL_EVENT,
+  STORAGE_ADVISERS_TABLE,
+  QUEUE_CANDLES_PENDING
 };

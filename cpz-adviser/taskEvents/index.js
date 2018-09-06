@@ -1,11 +1,9 @@
 const {
   SUB_VALIDATION_EVENT,
-  NEW_CANDLE_EVENT,
-  START_ADVISER_EVENT
+  TASKS_ADVISER_START_EVENT
 } = require("../utils/constants");
 const handleStart = require("../tasks/handleStart");
-const handleCandle = require("../tasks/handleCandle");
-// ! Разнести разные типы эвентов по разным функциям триггерам
+
 function eventHandler(context, req) {
   const parsedReq = JSON.parse(req.rawBody);
   context.log(`CPZ Adviser processed a request.${JSON.stringify(parsedReq)}`);
@@ -28,14 +26,7 @@ function eventHandler(context, req) {
           "Content-Type": "application/json"
         }
       };
-    } else if (eventGridEvent.eventType === NEW_CANDLE_EVENT) {
-      context.log(
-        `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-          eventData
-        )}`
-      );
-      handleCandle(context, eventData);
-    } else if (eventGridEvent.eventType === START_ADVISER_EVENT) {
+    } else if (eventGridEvent.eventType === TASKS_ADVISER_START_EVENT) {
       context.log(
         `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
           eventData

@@ -5,12 +5,13 @@ const msRestAzure = require("ms-rest-azure");
 const EventGrid = require("azure-eventgrid");
 const url = require("url");
 
-const TOPIC_KEY = process.env.EG_SIGNALS_TOPIC_KEY;
-const TOPIC_END_POINT = process.env.EG_SIGNALS_TOPIC_ENDPOINT;
+const EG_TOPIC_ENDPOINT =
+  process.env.EG_SIGNALS_ENDPOINT || process.env.EG_TEST_ENDPOINT;
+const EG_TOPIC_KEY = process.env.EG_SIGNALS_KEY || process.env.EG_TEST_KEY;
 
-const topicCreds = new msRestAzure.TopicCredentials(TOPIC_KEY);
+const topicCreds = new msRestAzure.TopicCredentials(EG_TOPIC_KEY);
 const egClient = new EventGrid(topicCreds);
-const topicUrl = url.parse(TOPIC_END_POINT, true);
+const topicUrl = url.parse(EG_TOPIC_ENDPOINT, true);
 const topicHostName = topicUrl.host;
 
 async function publish(context, events) {

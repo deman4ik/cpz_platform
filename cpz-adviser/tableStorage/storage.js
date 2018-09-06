@@ -1,9 +1,7 @@
 // TODO: Move to https://github.com/Azure/azure-storage-js when available
 const azure = require("azure-storage");
 
-const tableService = azure.createTableService(
-  process.env.AZURE_STORAGE_CONNECTION_STRING
-);
+const tableService = azure.createTableService(process.env.AZ_STORAGE_CS);
 /**
  * Создание таблицы если еще не существует
  *
