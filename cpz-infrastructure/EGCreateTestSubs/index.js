@@ -1,5 +1,5 @@
 const { getClient, createOrUpdateSub } = require("../eventGrid");
-const servicesConfig = require("./config");
+const servicesConfig = require("../config");
 
 async function EGSub(context, req) {
   context.log("Manage subscription request.");
@@ -13,15 +13,20 @@ async function EGSub(context, req) {
         Object.keys(servicesConfig).map(async key => {
           const item = servicesConfig[key];
           const subName = postfix ? `${item.name}-${postfix}` : item.name;
-          const endpointUrl = baseUrl + item.url;
-          const result = await createOrUpdateSub(
-            EGMClient,
-            topicName,
-            subName,
-            endpointUrl,
-            item.types
+          const res = await Promise.all(
+            item.egIn.map(async eg => {
+              const endpointUrl = baseUrl + item.localUrlPrefix + eg.url;
+              const result = await createOrUpdateSub(
+                EGMClient,
+                topicName,
+                subName,
+                endpointUrl,
+                eg.types
+              );
+              return result;
+            })
           );
-          return result;
+          return res;
         })
       );
       context.res = {
