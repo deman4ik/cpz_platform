@@ -163,7 +163,7 @@ namespace CpzTrader
         /// <param name="key">ключ пришедший в запросе</param>
         public static bool CheckKey(string key)
         {
-            string secretKey = Environment.GetEnvironmentVariable("SignalHandlerSecretKey");
+            string secretKey = Environment.GetEnvironmentVariable("API_KEY");
             return key == secretKey ? true : false;
         }
     }

@@ -22,7 +22,7 @@ namespace CpzTrader
         {
             (Client client, NewSignal newSignal) tradeInfo = (clientInfo, signal);
 
-            var url = Environment.GetEnvironmentVariable("CCXTSendOrder");
+            var url = Environment.GetEnvironmentVariable("CCXT_SEND_ORDER");
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 
@@ -79,7 +79,7 @@ namespace CpzTrader
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var url = Environment.GetEnvironmentVariable("CCXTCancelOrder");
+            var url = Environment.GetEnvironmentVariable("CCXT_CANCEL_ORDER");
 
             var orderResult = await httpClient.PostAsync(url, content);
 
@@ -131,7 +131,7 @@ namespace CpzTrader
 
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var url = Environment.GetEnvironmentVariable("CCXTCheckOrderStatus");
+            var url = Environment.GetEnvironmentVariable("CCXT_CHECK_ORDER_STATUS");
 
             var orderResult = await httpClient.PostAsync(url, content);
 

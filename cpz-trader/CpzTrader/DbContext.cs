@@ -53,7 +53,7 @@ namespace CpzTrader
         {
             try
             {
-                var appParameter = "AzureWebJobsStorage";
+                var appParameter = "AZ_STORAGE_CS";
 
                 string connectionString = Environment.GetEnvironmentVariable(appParameter);
 
@@ -64,7 +64,7 @@ namespace CpzTrader
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
                 // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("clientsinfo");
+                var table = cloudTableClient.GetTableReference("Traders");
 
                 // если она еще не существует - создаем
                 var res = table.CreateIfNotExistsAsync().Result;
@@ -101,7 +101,7 @@ namespace CpzTrader
         {
             try
             {
-                var appParameter = "AzureWebJobsStorage";
+                var appParameter = "AZ_STORAGE_CS";
 
                 string connectionString = Environment.GetEnvironmentVariable(appParameter);
 
@@ -109,7 +109,7 @@ namespace CpzTrader
 
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
-                var table = cloudTableClient.GetTableReference("clientsinfo");
+                var table = cloudTableClient.GetTableReference("Traders");
 
                 // формируем фильтр, чтобы получить клиентов для нужного робота
                 var query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
@@ -155,7 +155,7 @@ namespace CpzTrader
             {
                 var client = input;
 
-                var appParameter = "AzureWebJobsStorage";
+                var appParameter = "AZ_STORAGE_CS";
 
                 string connectionString = Environment.GetEnvironmentVariable(appParameter);
 
@@ -165,7 +165,7 @@ namespace CpzTrader
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
                 // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("clientsinfo");
+                var table = cloudTableClient.GetTableReference("Traders");
 
                 // создаем операцию получения
                 TableOperation retrieveOperation = TableOperation.Retrieve<Client>(client.PartitionKey, client.RowKey);

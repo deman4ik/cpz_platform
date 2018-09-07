@@ -1,9 +1,15 @@
 {
   "Values": {
     "SubscriptionValidationEvent": "Microsoft.EventGrid.SubscriptionValidationEvent",
-    "CpzTasksTraderStart": "CPZ.Tasks.Trader.Start",
     "CpzSignalsNewSignal": "CPZ.Signals.NewSignal",
+    "StartTrader": "CPZ.Tasks.Trader.Start",
+    "StopTrader": "CPZ.Tasks.Trader.Stop",
     "NewOpenOrder": "CPZ.Trader.NewOpenOrder",
-    "NewCloseOrder": "CPZ.Trader.NewCloseOrder"
+    "NewCloseOrder": "CPZ.Trader.NewCloseOrder",
+    "SignalHandled": "CPZ.Signals.Handled",
+    "TraderLog": "CPZ.Trader.Log",
+    "TraderError": "CPZ.Trader.Error",
+    "TraderStarted": "CPZ.Tasks.Trader.Started",
+    "TraderStoped": "CPZ.Tasks.Trader.Stopped"
   }
 }

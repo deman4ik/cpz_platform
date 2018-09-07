@@ -18,11 +18,11 @@ namespace CpzTrader
         {
             try
             {
-                string _topicEndpoint = Environment.GetEnvironmentVariable("EgTopicEndpoint");
+                string _topicEndpoint = Environment.GetEnvironmentVariable("EG_TEST_ENDPOINT");
 
                 var _topicHostname = new Uri(_topicEndpoint).Host;
 
-                string _topicKey = Environment.GetEnvironmentVariable("EgTopicKey");
+                string _topicKey = Environment.GetEnvironmentVariable("EG_TEST_KEY");
 
                 var topicCredentials = new TopicCredentials(_topicKey);
 

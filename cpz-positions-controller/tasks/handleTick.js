@@ -1,5 +1,4 @@
 const { getState } = require("../tableStorage");
-const { createRobotSlug } = require("../robots/utils");
 
 /**
  * Обработка нового тика
@@ -13,12 +12,8 @@ async function handleTick(context, tick) {
 
     // цена тика
     const currentPrice = tick.price;
-
-    
-    context.log(slug);
-    
+  
    
-
   } catch (err) {
     context.log.error(err);
   }
