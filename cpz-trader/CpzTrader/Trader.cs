@@ -16,12 +16,6 @@ namespace CpzTrader
 
             bool canOpen = true;
 
-            // если сигнал на открытие нового ордера, проверяем достаточно ли средств на балансе
-            //if (action == ActionType.NewOpenOrder || action == ActionType.NewPosition)
-            //{
-            //    canOpen = Emulator.CheckBalance(clientInfo.EmulatorSettings.CurrentBalance, newSignal.Price, clientInfo.TradeSettings.Volume);
-            //}
-
             // находим позицию для которой пришел сигнал
             var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
 

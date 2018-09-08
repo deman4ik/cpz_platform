@@ -60,7 +60,7 @@ namespace CpzTrader
                             Content = new StringContent(JsonConvert.SerializeObject(responseData))
                         };
                     }
-                    // инициализация тестовых клиентов
+                    // добавить клиента
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzTasksTraderStart"), StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<StartNewTraderData>();

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CpzTrader.Models
+﻿namespace CpzTrader.Models
 {
     public class StartNewTraderData
     {
