@@ -8,11 +8,11 @@ CREATE TABLE signals
     params jsonb,
     signal_type varchar(10),
     signal_name varchar(20),
+    position bigint DEFAULT nextval('signals_position_seq'::regclass) NOT NULL,
     CONSTRAINT c_signals_robot_fk FOREIGN KEY (robot) REFERENCES robots (id)
 );
 CREATE UNIQUE INDEX c_signals_pk ON signals (id);
+CREATE UNIQUE INDEX c_signals_uk ON signals (robot, date_time, action, price, signal_type, position);
+CREATE UNIQUE INDEX c_signals_position_uk ON signals (position);
 COMMENT ON COLUMN signals.action IS 'Buy | Sell | Short | Cover';
-comment on table "cpz-platform".signals is E'@omit create,update,delete';
-
-ALTER TABLE signals
-  ADD CONSTRAINT c_signals_uk UNIQUE (robot, date_time, action, price, signal_type);
+COMMENT ON TABLE signals IS 'Current active signals';
