@@ -1,18 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
-using CPZMarketWatcher.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using CPZMarketWatcher.Models;
 using CPZMarketWatcher.Services;
-//using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
-
-using System.Net.Http;
-using Newtonsoft.Json;
 
 namespace CPZMarketWatcher.Controllers
 {

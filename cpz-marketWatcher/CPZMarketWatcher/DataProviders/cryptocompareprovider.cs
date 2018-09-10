@@ -1,18 +1,15 @@
 ﻿using CPZMarketWatcher.Models;
-using Newtonsoft.Json;
-using SuperSocket.ClientEngine;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
 using Newtonsoft.Json.Linq;
+using SuperSocket.ClientEngine;
 using SuperSocket.ClientEngine.Proxy;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using WebSocket4Net;
 using WebSocket = WebSocket4Net.WebSocket;
 using WebSocketState = WebSocket4Net.WebSocketState;
@@ -49,8 +46,6 @@ namespace CPZMarketWatcher.DataProviders
         /// </summary>
         public override List<OrderToProvider> SubscribedPairs { get; set; } = new List<OrderToProvider>();
 
-        private Dictionary<string, CancellationTokenSource> _allTokenSources = new Dictionary<string, CancellationTokenSource>();
-
         /// <summary>
         /// проверить был ли такой запрос
         /// </summary>       
@@ -85,9 +80,7 @@ namespace CPZMarketWatcher.DataProviders
                     var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
 
                     // подписываемся
-                   // await SubscribeTrades(queryStr, subscribe.Proxy);
-
-                    await StartCandleLoad(subscribe);
+                    await SubscribeTrades(queryStr, subscribe.Proxy);
                 }
             }
             catch (Exception e)
@@ -106,17 +99,9 @@ namespace CPZMarketWatcher.DataProviders
             {
                 _tokenSource.Cancel();
                 _tokenSource.Dispose();
-
-                foreach (var cancellationTokenSource in _allTokenSources)
-                {
-                    cancellationTokenSource.Value.Cancel();
-                    cancellationTokenSource.Value.Dispose();
-                }
-
+               
                 SubscribedPairs.Clear();
-
-                _allTokenSources.Clear();
-
+                
                 _webSocket.Dispose();
 
                 _eventGridClient.Dispose();
@@ -152,87 +137,7 @@ namespace CPZMarketWatcher.DataProviders
             }
         }
 
-        /// <summary>
-        /// запустить получение свечек
-        /// </summary>
-        /// <param name="queryStr"></param>
-        /// <returns></returns>
-        private async Task StartCandleLoad(OrderToProvider queryStr)
-        {
-            try
-            {
-                // создаем новый токен отмены
-                var tokenSource = new CancellationTokenSource();
-
-                var token = tokenSource.Token;
-
-                _allTokenSources.Add($"{queryStr.Exchange}_{queryStr.Baseq}_{queryStr.Quote}", tokenSource);
-
-                var webProxy = queryStr.Proxy != null ? new WebProxy(new Uri("http://" + queryStr.Proxy)) : null;
-
-                using (var httpClientHandler = new HttpClientHandler { Proxy = webProxy })
-                using (HttpClient client = queryStr.Proxy != null ? new HttpClient(httpClientHandler) : new HttpClient())
-                {
-                    // запускаем задачу по скачиванию свечей
-                    await Task.Run(async () =>
-                    {
-                        int countNeedCandles = 1;
-
-                        string exchange = queryStr.Exchange;
-
-                        string baseq = queryStr.Baseq;
-
-                        string quote = queryStr.Quote;
-
-                        var lastTimeUpdate = DateTime.Now.Minute;
-
-                        bool flag = true;
-
-                        while (!token.IsCancellationRequested)
-                        {
-                            var now = DateTime.Now;
-
-                            if (now.Second >= 0 && now.Second <= 10)
-                            {
-                                if (lastTimeUpdate != now.Minute || flag)
-                                {
-                                    var url = $"https://min-api.cryptocompare.com/data/histominute?&fsym={queryStr.Baseq}&tsym={queryStr.Quote}&limit={countNeedCandles}&e={queryStr.Exchange}";
-
-                                    var stringCandles = await client.GetStringAsync(url);
-
-                                    var candles = JsonConvert.DeserializeObject<Candles>(stringCandles);
-
-                                    // отправляем полученные свечи дальше
-                                    await SendCandles(exchange, baseq, quote, candles.Data);
-
-                                    flag = false;
-
-                                    lastTimeUpdate = DateTime.Now.Minute;
-
-                                    //countNeedCandles = 1;
-
-                                    Debug.WriteLine($"Получены свечи инструмент: {queryStr.Baseq}-{queryStr.Quote} Open: {candles.Data.Last().Open}" +
-                                                    $"  Close: {candles.Data.Last().Close} Time: {new DateTime(1970, 01, 01) + TimeSpan.FromSeconds(Convert.ToDouble(candles.Data.Last().Time))}" +
-                                                    $"    {DateTime.Now.Second} ");
-                                }
-                                
-                            }
-                           
-                            await Task.Delay(5000, token);                            
-                        }
-                    }, token);
-                }
-            }
-            catch (TaskCanceledException e)
-            {
-                Debug.WriteLine(e);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-                throw;
-            }            
-        }
+       
 
         /// <summary>
         /// строка подключения к criptocompare по вебсокету
@@ -283,18 +188,7 @@ namespace CPZMarketWatcher.DataProviders
 
                     var key = $"{subscribe.Exchange}_{subscribe.Baseq}_{subscribe.Quote}";
 
-                    // находим токен отмены для этого инструмента
-                    var needToken = _allTokenSources[key];
-
-                    if (needToken != null)
-                    {
-                        needToken.Cancel();
-                        needToken.Dispose();
-                    }
-
                     SubscribedPairs.Remove(subscribe);
-
-                    _allTokenSources.Remove(key);
                 }                
             }
             catch (Exception e)
@@ -313,7 +207,7 @@ namespace CPZMarketWatcher.DataProviders
             {
                 _webSocket = new WebSocket(StreamUrl);
 
-                if (proxyAddress != null)
+                if (proxyAddress != null && proxyAddress != "")
                 {
                     var partsProxy = proxyAddress.Split(':');
 
@@ -391,8 +285,6 @@ namespace CPZMarketWatcher.DataProviders
         }
 
         private readonly DateTime _timeStart = new DateTime(1970, 01, 01);
-
-        //private readonly object _newTradeLocker = new object();
 
         private Trade _newTrade = new Trade();
 
@@ -558,49 +450,6 @@ namespace CPZMarketWatcher.DataProviders
 #if DEBUG
             //Debug.Write("Published events to Event Grid.");
 #endif
-        }
-
-        /// <summary>
-        /// отправить свечи в eventGrid
-        /// </summary>
-        private async Task SendCandles(string exchange, string baseq, string quote, List<Candle> candles)
-        {
-            List<EventGridEvent> eventsList = new List<EventGridEvent>();
-
-            for (int i = 0; i < candles.Count; i++)
-            {
-                // Формируем данные
-                dynamic data = new JObject();
-
-                data.exchange = exchange;
-                data.baseq = baseq;
-                data.quote = quote;
-                data.time = candles[i].Time;
-                data.open = candles[i].Open;
-                data.close = candles[i].Close;
-                data.high = candles[i].High;
-                data.low = candles[i].Low;
-                data.volume = candles[i].Volumefrom;
-                //data.volumeInQuote = candles[i].Volumeto;
-
-                // Создаем новое событие
-                eventsList.Add(new EventGridEvent()
-                {
-                    Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                    Subject = $"{exchange}#{baseq}/{quote}#1", // тема события
-                    DataVersion = "1.0", // версия данных
-                    EventType = "CPZ.Candles.NewCandle", // тип события
-                    Data = data, // данные события
-                    EventTime = DateTime.Now // время формирования события
-                });
-            }
-
-            // Отправка событий в тему
-            await _eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
-
-#if DEBUG
-            //Debug.Write($"Свечи пары {baseq}/{quote} отправленны");
-#endif
-        }
+        }        
     }
 }
