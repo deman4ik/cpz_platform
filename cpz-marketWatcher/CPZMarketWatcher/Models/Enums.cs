@@ -12,6 +12,7 @@ namespace CPZMarketWatcher.Models
 
     public enum ActionType
     {
+        Start,
         Subscribe,
         Unsubscribe,
         Remove,

@@ -4,12 +4,14 @@
     "CpzSignalsNewSignal": "CPZ.Signals.NewSignal",
     "StartTrader": "CPZ.Tasks.Trader.Start",
     "StopTrader": "CPZ.Tasks.Trader.Stop",
+    "UpdateTrader": "CPZ.Tasks.Trader.Update",
     "NewOpenOrder": "CPZ.Trader.NewOpenOrder",
     "NewCloseOrder": "CPZ.Trader.NewCloseOrder",
     "SignalHandled": "CPZ.Signals.Handled",
     "TraderLog": "CPZ.Trader.Log",
     "TraderError": "CPZ.Trader.Error",
     "TraderStarted": "CPZ.Tasks.Trader.Started",
-    "TraderStopped": "CPZ.Tasks.Trader.Stopped"
+    "TraderStopped": "CPZ.Tasks.Trader.Stopped",
+    "TraderUpdeted": "CPZ.Tasks.Trader.Updeted"
   }
 }

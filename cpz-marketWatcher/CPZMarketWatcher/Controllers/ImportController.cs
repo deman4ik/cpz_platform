@@ -55,7 +55,11 @@ namespace CPZMarketWatcher.Controllers
             {
                 if (query != null && ModelState.IsValid)
                 {
-                    if (query.ActionType == ActionType.Subscribe)
+                    if (query.ActionType == ActionType.Start)
+                    {
+                        await _manager.SubscribeNewPaperAsync(query);
+                    }
+                    else if (query.ActionType == ActionType.Subscribe)
                     {
                         await _manager.SubscribeNewPaperAsync(query);
                     }
