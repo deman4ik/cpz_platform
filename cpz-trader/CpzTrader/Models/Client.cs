@@ -34,15 +34,7 @@ namespace CpzTrader.Models
 
         public string AllPositionsJson { get; set; }
 
-        public string TraderId { get; set; }
+        public bool IsLaunched { get; set; }
 
-        // test data
-        public int CountPositions { get; set; }
-        
-        // test data
-        public int CountOpenOrders { get; set; }
-
-        // test data
-        public int CountCloseOrders { get; set; }
     }
 }

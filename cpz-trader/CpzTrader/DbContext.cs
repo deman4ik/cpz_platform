@@ -49,7 +49,7 @@ namespace CpzTrader
         /// сохранить информацию о клиентах в базе
         /// </summary>
         /// <param name="clients">список клиентов</param>
-        public static async Task SaveClientsInfoDbAsync(List<Client> clients)
+        public static async Task SaveClientInfoDbAsync(Client client)
         {
             try
             {
@@ -71,17 +71,13 @@ namespace CpzTrader
 
                 TableBatchOperation batchOperation = new TableBatchOperation();
 
-                // сохраняем пачкой элементы в таблице
-                foreach (var client in clients)
-                {
-                    client.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
+                client.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
 
-                    client.TradeSettingsJson = JsonConvert.SerializeObject(client.TradeSettings);
+                client.TradeSettingsJson = JsonConvert.SerializeObject(client.TradeSettings);
 
-                    client.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
+                client.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
 
-                    batchOperation.Insert(client);
-                }
+                batchOperation.Insert(client);
 
                 await table.ExecuteBatchAsync(batchOperation);
             }
@@ -184,13 +180,7 @@ namespace CpzTrader
                     updateEntity.TradeSettingsJson = JsonConvert.SerializeObject(client.TradeSettings);
 
                     updateEntity.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
-
-                    updateEntity.CountPositions = client.AllPositions.Count;
-
-                    updateEntity.CountOpenOrders = client.AllPositions[client.AllPositions.Count - 1].OpenOrders.FindAll(order => order.State == OrderState.Closed).Count;
-
-                    updateEntity.CountCloseOrders = client.AllPositions[client.AllPositions.Count - 1].CloseOrders.FindAll(order => order.State == OrderState.Closed).Count;
-
+                   
                     updateEntity.ETag = "*";
 
                     TableOperation updateOperation = TableOperation.Replace(updateEntity);

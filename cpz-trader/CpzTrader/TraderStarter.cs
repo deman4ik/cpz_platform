@@ -63,15 +63,28 @@ namespace CpzTrader
                     // добавить клиента
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzTasksTraderStart"), StringComparison.OrdinalIgnoreCase))
                     {
-                        var eventData = dataObject.ToObject<StartNewTraderData>();
-
-                        List<Client> clients = DbContext.GetClientsInfo(eventData.AdvisorName);                        
-
+                        var clientInfo = dataObject.ToObject<Client>();
+                                                
                         // сохраняем обновленных клиентов в таблицу
-                        await DbContext.SaveClientsInfoDbAsync(clients);                      
+                        await DbContext.SaveClientInfoDbAsync(clientInfo);
+
+                        string message = $"";
+
+                        await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("TraderStarted"), null);
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
-                    }                    
+                    } // останавливаем
+                    else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzTasksTraderStор"), StringComparison.OrdinalIgnoreCase))
+                    {
+                        var clientInfo = dataObject.ToObject<Client>();
+
+                        // сохраняем обновленных клиентов в таблицу
+                        await DbContext.UpdateClientInfoAsync(clientInfo);
+
+                        await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("TraderStopped"), null);
+
+                        return new HttpResponseMessage(HttpStatusCode.OK);
+                    }
                 }
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
@@ -144,7 +157,7 @@ namespace CpzTrader
 
                             await Task.WhenAll(parallelTraders);
                         }
-
+                        // handled
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
                 }

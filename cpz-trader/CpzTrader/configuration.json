@@ -10,6 +10,6 @@
     "TraderLog": "CPZ.Trader.Log",
     "TraderError": "CPZ.Trader.Error",
     "TraderStarted": "CPZ.Tasks.Trader.Started",
-    "TraderStoped": "CPZ.Tasks.Trader.Stopped"
+    "TraderStopped": "CPZ.Tasks.Trader.Stopped"
   }
 }
