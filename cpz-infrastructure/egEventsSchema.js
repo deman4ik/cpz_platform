@@ -396,7 +396,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Start",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -434,7 +435,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Stop",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -444,7 +446,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Update",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -482,7 +485,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Started",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -519,7 +523,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Stopped",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -548,7 +553,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Adviser.Updated",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -577,7 +583,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Start",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -603,6 +610,10 @@ const tasks = {
           description: "Robot uniq Id. - 'AdvisorName'",
           type: "string"
         },
+        strategy: {
+          description: "Strategy file name.",
+          type: "string"
+        },
         userId: {
           description: "User uniq Id.",
           type: "string"
@@ -622,7 +633,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Stop",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -632,7 +644,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Update",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -657,7 +670,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Started",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -694,7 +708,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Stopped",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -723,7 +738,8 @@ const tasks = {
     },
     {
       eventType: "CPZ.Tasks.Trader.Updated",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         taskId: {
           description: "Uniq task id.",
@@ -837,7 +853,8 @@ const signals = {
   events: [
     {
       eventType: "CPZ.Signals.NewSignal",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         signalId: { description: "Uniq Candle Id.", type: "string" },
         exchange: { description: "Exchange code.", type: "string" },
@@ -909,7 +926,8 @@ const signals = {
     },
     {
       eventType: "CPZ.Signals.Handled",
-      subject: "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}",
+      subject:
+        "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}",
       dataSchema: {
         signalId: { description: "Uniq Signal Id.", type: "string" },
         error: {

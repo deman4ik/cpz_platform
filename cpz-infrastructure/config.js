@@ -55,7 +55,7 @@ const config = {
       {
         topic: "CPZ-LOG",
         types: ["CPZ.Taskrunner.Log", "CPZ.Taskrunner.Error"],
-        subject: "Realtime={Task Id}/Backtest={Task Id}.{Service Name}"
+        subject: "{ServiceName}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TASKS",
@@ -77,7 +77,7 @@ const config = {
           "CPZ.Tasks.Backtester.Stop"
         ],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.[Strategy]"
+          "{Exchange}/{Asset}/{Currency}/[Timeframe]/[Strategy]/{TaskId}.{B/E/R}"
       }
     ],
     storageTables: ["Tasks"],
@@ -116,16 +116,14 @@ const config = {
           "CPZ.Tasks.MarketWatcher.Subscribe",
           "CPZ.Tasks.MarketWatcher.Unsubscribe"
         ],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       }
     ],
     egOut: [
       {
         topic: "CPZ-LOG",
         types: ["CPZ.MarketWatcher.Log", "CPZ.MarketWatcher.Error"],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TASKS",
@@ -135,14 +133,12 @@ const config = {
           "CPZ.Tasks.MarketWatcher.Subscribed",
           "CPZ.Tasks.MarketWatcher.Unsubscribed"
         ],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TICKS",
         types: ["CPZ.Ticks.NewTick"],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       }
     ],
     storageTables: ["MarketWatchers"],
@@ -181,16 +177,14 @@ const config = {
           "CPZ.Tasks.Candlebatcher.StartBacktest",
           "CPZ.Tasks.Candlebatcher.StopBacktest"
         ],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       }
     ],
     egOut: [
       {
         topic: "CPZ-LOG",
         types: ["CPZ.Candlebatcher.Log", "CPZ.Candlebatcher.Error"],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TASKS",
@@ -203,14 +197,12 @@ const config = {
           "CPZ.Tasks.Candlebatcher.StartedBacktest",
           "CPZ.Tasks.Candlebatcher.StoppedBacktest"
         ],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-CANDLES",
         types: ["CPZ.Tasks.Candles.NewCandle"],
-        subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}"
+        subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}"
       }
     ],
     environmentVariables: [
@@ -240,7 +232,7 @@ const config = {
         topic: "CPZ-TASKS",
         types: ["CPZ.Tasks.Backtester.Start", "CPZ.Tasks.Backtester.Stop"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       },
       {
         name: "EventGrid Candles Handler",
@@ -249,7 +241,7 @@ const config = {
         topic: "CPZ-CANDLES",
         types: ["CPZ.Candles.NewCandle", "CPZ.Candles.Handled"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       },
       {
         name: "EventGrid Signals Handler",
@@ -258,7 +250,7 @@ const config = {
         topic: "CPZ-SIGNALS",
         types: ["CPZ.Signals.NewSignal", "CPZ.Signals.Handled"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       },
       {
         name: "EventGrid Orders Handler",
@@ -267,7 +259,7 @@ const config = {
         topic: "CPZ-ORDERS",
         types: ["CPZ.Orders.NewOpenOrder", "CPZ.Orders.NewCloseOrder"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       }
     ],
     egOut: [
@@ -275,13 +267,13 @@ const config = {
         topic: "CPZ-LOG",
         types: ["CPZ.Backtester.Log", "CPZ.Backtester.Error"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       },
       {
         topic: "CPZ-TASKS",
         types: ["CPZ.Tasks.Backtester.Started", "CPZ.Tasks.Backtester.Stopped"],
         subject:
-          "Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.B"
       }
     ],
     storageTables: ["Backtests", "BacktestItems"],
@@ -313,7 +305,7 @@ const config = {
           "CPZ.Tasks.Adviser.Update"
         ],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         name: "EventGrid Candles Handler",
@@ -322,7 +314,7 @@ const config = {
         topic: "CPZ-CANDLES",
         types: ["CPZ.Candles.NewCandle"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.[Strategy]"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       }
     ],
     egOut: [
@@ -330,7 +322,7 @@ const config = {
         topic: "CPZ-LOG",
         types: ["CPZ.Adviser.Log", "CPZ.Adviser.Error"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TASKS",
@@ -340,19 +332,19 @@ const config = {
           "CPZ.Tasks.Adviser.Updated"
         ],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-CANDLES",
         types: ["CPZ.Candles.Handled"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-SIGNALS",
         types: ["CPZ.Signals.NewSignal"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       }
     ],
     storageTables: ["Advisers"],
@@ -389,7 +381,7 @@ const config = {
           "CPZ.Tasks.Trader.Update"
         ],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         name: "EventGrid Signals Handler",
@@ -398,7 +390,7 @@ const config = {
         topic: "CPZ-SIGNALS",
         types: ["CPZ.Signals.NewSignal"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       }
     ],
     egOut: [
@@ -406,7 +398,7 @@ const config = {
         topic: "CPZ-LOG",
         types: ["CPZ.Trader.Log", "CPZ.Trader.Error"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-TASKS",
@@ -416,19 +408,19 @@ const config = {
           "CPZ.Tasks.Trader.Updated"
         ],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-SIGNALS",
         types: ["CPZ.Signals.Handled"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       },
       {
         topic: "CPZ-ORDERS",
         types: ["CPZ.Orders.NewOpenOrder", "CPZ.Orders.NewCloseOrder"],
         subject:
-          "Realtime={Task Id}/Backtest={Task Id}.{Exchange}.{Base}.{Quote}.{Timeframe}.{Strategy}"
+          "{Exchange}/{Asset}/{Currency}/{Timeframe}/{Strategy}/{TaskId}.{B/E/R}"
       }
     ],
     storageTables: ["Traders"],
