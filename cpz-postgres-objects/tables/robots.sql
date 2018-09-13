@@ -19,7 +19,8 @@ create table robots
   asset      varchar(10) not null
     constraint c_robots_asset_fk
     references assets on update cascade,
-  candlesize integer     not null
+  candlesize integer     not null,
+  enabled int default 1 not null
 );
 
 comment on table robots

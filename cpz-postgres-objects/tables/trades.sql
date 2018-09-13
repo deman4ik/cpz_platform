@@ -7,10 +7,12 @@ CREATE TABLE trades
     robot bigint NOT NULL,
     ordertype varchar(10),
     order_num integer,
-    position bigint,
+    --position bigint,
     user_id uuid,
     quantity numeric,
-    CONSTRAINT c_trades_robot_fk FOREIGN KEY (robot) REFERENCES robots (id) ON UPDATE CASCADE
+    roundtrip_id numeric NOT NULL,
+    CONSTRAINT c_trades_robot_fk FOREIGN KEY (robot) REFERENCES robots (id) ON UPDATE CASCADE,
+    CONSTRAINT c_trades_roundtrip_fk FOREIGN KEY (roundtrip_id) REFERENCES trade_roundtrips (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE UNIQUE INDEX c_trades_pk ON trades (id);
 CREATE UNIQUE INDEX c_trades_date_action_uk ON trades (robot, order_time, action, position, user_id);
