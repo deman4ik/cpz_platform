@@ -25,7 +25,7 @@ const baseFields = [
     name: "status",
     description: "Current task status.",
     type: "string",
-    values: ["Pending", "Started", "Busy", "Stopped", "Error"]
+    values: ["pending", "started", "busy", "stopped", "error"]
   }
 ];
 
