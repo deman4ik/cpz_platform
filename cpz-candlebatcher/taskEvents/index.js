@@ -1,12 +1,16 @@
 const {
   SUB_VALIDATION_EVENT,
-  NEW_CANDLE_EVENT
-} = require("../utils/constants");
-const handleCandle = require("../candles/handle");
+  TASKS_CANDLEBATCHER_START_EVENT,
+  TASKS_CANDLEBATCHER_STOP_EVENT,
+  TASKS_CANDLEBATCHER_UPDATE_EVENT
+} = require("../config");
+const handleStart = require("../candles/handleStart");
 
 function eventHandler(context, req) {
   const parsedReq = JSON.parse(req.rawBody);
-  context.log(`CPZ Importer processed a request.${JSON.stringify(parsedReq)}`);
+  context.log(
+    `CPZ Candlebatchers processed a request.${JSON.stringify(parsedReq)}`
+  );
   // TODO: SENDER ENDPOINT VALIDATION
   parsedReq.forEach(eventGridEvent => {
     const eventData = eventGridEvent.data;
@@ -26,13 +30,13 @@ function eventHandler(context, req) {
           "Content-Type": "application/json"
         }
       };
-    } else if (eventGridEvent.eventType === NEW_CANDLE_EVENT) {
+    } else if (eventGridEvent.eventType === TASKS_CANDLEBATCHER_START_EVENT) {
       context.log(
         `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
           eventData
         )}`
       );
-      handleCandle(context, eventData);
+      handleStart(context, eventData);
     } else {
       context.log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
     }

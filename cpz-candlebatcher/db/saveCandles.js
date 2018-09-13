@@ -2,19 +2,21 @@
  * Сохранение минутной свечи и запрос новых свечей в доступных таймфреймах
  */
 const { GraphQLClient } = require("graphql-request");
-const base64 = require("base-64");
+// const base64 = require("base-64");
 // Считывание переменных окружения
-const { DB_API_ENDPOINT, DB_API_USER, DB_API_SECRET } = process.env;
+const { DB_API_ENDPOINT } = process.env;
 
 // Создание GraphQL клиента
 const client = new GraphQLClient(DB_API_ENDPOINT, {
-  headers: {
+  /*  headers: {
     // Базовая авторизация
     Authorization: `Basic ${base64.encode(`${DB_API_USER}:${DB_API_SECRET}`)}`
-  }
+  } */
 });
-// Запрос
-const query = `mutation pCandlesInsert (
+
+async function saveCandle(context, candle) {
+  // Запрос
+  const query = `mutation pCandlesInsert (
   $start: Int!,
   $open:  BigFloat!,
   $high:  BigFloat!,
@@ -35,7 +37,6 @@ const query = `mutation pCandlesInsert (
     string
   }
 }`;
-async function saveCandle(context, candle) {
   try {
     /* const testVars = {
       start: 1530540000,
@@ -54,10 +55,10 @@ async function saveCandle(context, candle) {
       high: candle.high,
       low: candle.low,
       close: candle.close,
-      volume: candle.volumeInBaseq,
+      volume: candle.volume,
       exchange: candle.exchange,
-      currency: candle.quote,
-      asset: candle.baseq
+      currency: candle.currency,
+      asset: candle.asset
     };
     const result = await client.request(query, variables);
     /*
@@ -77,4 +78,28 @@ async function saveCandle(context, candle) {
   }
 }
 
-module.exports = saveCandle;
+async function saveCandlesArray(context, input) {
+  const query = `mutation pCandlesInsertJa(
+    $exchange: String!
+    $currency: String!
+    $asset: String!
+    $timeframe: Int!
+    $candles: JSON!
+  ) {
+    pCandlesInsertJa(input: { exchange: $exchange, currency:$currency,
+     asset: $asset, timeframe: $timeframe, candles: $candles }) {
+      string
+    }
+  }
+  `;
+  try {
+    const result = await client.request(query, input);
+    const data = JSON.parse(result);
+    return data;
+  } catch (err) {
+    context.log.error(`Can't save candles.\n${err}`);
+    throw err;
+  }
+}
+
+module.exports = { saveCandle, saveCandlesArray };
