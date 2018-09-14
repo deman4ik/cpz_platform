@@ -1,12 +1,5 @@
-drop function p_candles_insert_ja;
-create function p_candles_insert_ja(exchange varchar,
-																		currency varchar,
-																		asset    varchar,
-																		timeframe varchar,
-																		candles  json)
-	returns VARCHAR
-language plpgsql
-as $$
+CREATE OR REPLACE FUNCTION "cpz-platform"."p_candles_insert_ja"("exchange" varchar, "currency" varchar, "asset" varchar, "timeframe" varchar, "candles" json)
+  RETURNS "pg_catalog"."varchar" AS $BODY$
 DECLARE
 	rCANDLE candles%ROWTYPE;
 	rec     RECORD;
@@ -15,7 +8,7 @@ BEGIN
 	/* GraphQL Query Variables Example:
 		{
 				"exchange": "bitfinex2", "currency":"USD", "asset":"BTC",
-				"candles": "[{"time":1534183200,"close":6236.6,"high":6255.2,"low":6190.1,"open":6230,"volume":883.65}]"
+				"candles": [{"time":1534183200,"close":6236.6,"high":6255.2,"low":6190.1,"open":6230,"volume":883.65}]
 }
 */
 	rCANDLE.currency := currency;
@@ -56,7 +49,7 @@ BEGIN
 		rCANDLE.trades := null;
 		rCANDLE.vwp := null;
 		
-		if timeframe = '1m' then
+		if timeframe = 1 then
 		insert into candles (
 			start,
 			open,
@@ -85,7 +78,7 @@ BEGIN
 		on conflict do nothing; -- both for uk and pk
 		end if;
 		
-		if timeframe = '1h' then
+		if timeframe = 60 then
 			insert into candles60 (
 			start,
 			open,
@@ -118,11 +111,6 @@ BEGIN
 
 	RETURN '{"status":"ok"}';
 END;
-$$;
-
-comment on function p_candles_insert_ja(exchange varchar,
-																		currency varchar,
-																		asset    varchar,
-																		timeframe varchar,
-																		candles  json) is 
-  E'@resultFieldName result\n@name candles_insert';
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100
