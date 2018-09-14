@@ -26,7 +26,8 @@ BEGIN
 
      returns:
 
-    {"timeframe30":{"id":1,"time_start":"2018-07-20T11:31:00","time_end":"2018-07-20T12:00:00","start":1532087940,"end":1532088000,"open":7489.99,"high":7507,"low":7489.99,"close":7504.77,"volume":14.97665476,"trades":123,"vwp":14984.2782078305,"currency":"USD","asset":"BTC","exchange":5,"gap":1},
+    {"timeframe1": {just posted values with added candle.id}
+     "timeframe30":{"id":1,"time_start":"2018-07-20T11:31:00","time_end":"2018-07-20T12:00:00","start":1532087940,"end":1532088000,"open":7489.99,"high":7507,"low":7489.99,"close":7504.77,"volume":14.97665476,"trades":123,"vwp":14984.2782078305,"currency":"USD","asset":"BTC","exchange":5,"gap":1},
      "timeframe60":{"id":1141,"time_start":"2018-07-20T11:01:00","time_end":"2018-07-20T12:00:00","start":1532087940,"end":1532088000,"open":7489.99,"high":7507,"low":7489.99,"close":7504.77,"volume":14.97665476,"trades":123,"vwp":14984.2782078305,"currency":"USD","asset":"BTC","exchange":5,"gap":1}
     }
 
@@ -55,8 +56,12 @@ BEGIN
     WHEN NO_DATA_FOUND THEN
       RAISE EXCEPTION '20101: exchange by code "%" not found', sEXCHANGE;
   END;
+
+  rCANDLE.id := nextval('candles_id_seq');
 /*
+
   insert into candles (
+        id,
         start,
         open,
         high,
@@ -70,6 +75,7 @@ BEGIN
         exchange,
         timestamp
       ) values (
+        rCANDLE.id,
         rCANDLE.start,
         rCANDLE.open,
         rCANDLE.high,
@@ -85,9 +91,27 @@ BEGIN
       )
     on conflict do nothing; -- both for uk and pk
    */
+    -- return posted 1min candle back with id
+    j_tmp := json_build_object(
+        'id',        rCANDLE.id,
+        'start',     rCANDLE.start,
+        'open',      rCANDLE.open,
+        'high',      rCANDLE.high,
+        'low',       rCANDLE.low,
+        'close',     rCANDLE.close,
+        'volume',    rCANDLE.volume,
+        'trades',    rCANDLE.trades,
+        'vwp',       rCANDLE.vwp,
+        'currency',  rCANDLE.currency,
+        'asset',     rCANDLE.asset,
+        'exchange',  rCANDLE.exchange,
+        'timestamp', rCANDLE.timestamp
+      );
+
+    j:='{"timeframe1":'||j_tmp;
 
     -- check and return framed candles inserted by triggers
-    -- algo is as in F_T_CANDLES_POST_TIMEFRAME
+    -- algo as in F_T_CANDLES_POST_TIMEFRAME
     nFRAME := 5;
     if (to_char(rCANDLE.timestamp,'mi')::int)%nFRAME = 0 then
       BEGIN
@@ -98,9 +122,18 @@ BEGIN
           and asset    = rCANDLE.asset;
 
         if j_tmp is null then
-          RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          j_tmp := json_build_object(
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
         else
-          j:='{"timeframe5":'||j_tmp;
+          j:=j||', {"timeframe5":'||j_tmp;
         end if;
       /* row_to_json does not generate exception
       EXCEPTION
@@ -120,15 +153,19 @@ BEGIN
           and asset    = rCANDLE.asset;
 
         if j_tmp is null then
-          RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          j_tmp := json_build_object(
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
         else
-          if j is null then
-            j:='{"timeframe30":'||j_tmp;
-          else
             j:=j||', "timeframe30":'||j_tmp;
-          end if;
         end if;
-
       END;
 
     end if;
@@ -143,13 +180,18 @@ BEGIN
           and asset    = rCANDLE.asset;
 
         if j_tmp is null then
-          RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
+          j_tmp := json_build_object(
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
         else
-          if j is null then
-            j:='{"timeframe60":'||j_tmp;
-          else
-            j:=j||', "timeframe60":'||j_tmp;
-          end if;
+          j:=j||', "timeframe60":'||j_tmp;
         end if;
       END;
     end if;
