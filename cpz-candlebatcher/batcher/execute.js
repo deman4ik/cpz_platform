@@ -6,6 +6,7 @@ const uuid = require("uuid").v4;
 const Candlebatcher = require("./candlebatcher");
 const retry = require("../utils/retry");
 const publishEvents = require("../eventgrid/publish");
+const executeImport = require("../importer/execute");
 
 async function execute(context, state) {
   let candlebatcher;
@@ -25,12 +26,24 @@ async function execute(context, state) {
       return;
     }
     // Сохраняем новую загруженную свечу
-    const saveCandleResult = await retry(candlebatcher.saveCandle);
+    let saveCandleResult = await retry(candlebatcher.saveCandle);
     // Если ошибка
     if (!saveCandleResult.isSuccess) {
       // Если необходима подргрузка данных
       if (saveCandleResult.importRequested) {
-        // TODO: start import
+        const importRequest = {
+          ...saveCandleResult,
+          taskId: uuid()
+        };
+        await executeImport(context, importRequest);
+        // Пробуем сохранить еще раз
+        saveCandleResult = await retry(candlebatcher.saveCandle);
+        if (!saveCandleResult.isSuccess) {
+          // TODO: Отправить в Error Log EventGrid
+          // пропускаем итерацию
+          await candlebatcher.end();
+          return;
+        }
       } else {
         // TODO: Отправить в Error Log EventGrid
         // пропускаем итерацию

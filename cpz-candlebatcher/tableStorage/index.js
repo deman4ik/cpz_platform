@@ -58,35 +58,54 @@ async function saveImporterState(context, state) {
     );
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, state, error };
   }
 }
 
-async function getAllCandlebatchers(context) {
+async function getStartedCandlebatchers(context) {
   try {
-    const result = await queryEntities(STORAGE_CANDLEBATCHERS_TABLE);
+    const query = new TableQuery().where(
+      TableQuery.stringFilter(
+        "status",
+        TableUtilities.QueryComparisons.EQUAL,
+        "started"
+      )
+    );
+    const result = await queryEntities(STORAGE_CANDLEBATCHERS_TABLE, query);
     const entities = [];
     if (result) {
       result.entries.forEach(element => {
         entities.push(entityToObject(element));
       });
     }
-    return entities;
+    return { isSuccess: true, data: entities };
   } catch (error) {
-    context.log(error);
-    return null;
+    context.log.error(error);
+    return { isSuccess: false, error };
   }
 }
 
-async function getImporterById(context, id) {
+async function getImporterByKey(context, keys) {
   try {
-    const query = new TableQuery().where(
+    const rowKeyFilter = new TableQuery().where(
       TableQuery.stringFilter(
         "rowKey",
         TableUtilities.QueryComparisons.EQUAL,
-        id
+        keys.rowKey
       )
+    );
+    const partitionKeyFilter = new TableQuery().where(
+      TableQuery.stringFilter(
+        "rowKey",
+        TableUtilities.QueryComparisons.EQUAL,
+        keys.PartitionKey
+      )
+    );
+    const query = TableQuery.combineFilters(
+      rowKeyFilter,
+      TableUtilities.TableOperators.AND,
+      partitionKeyFilter
     );
     const result = await queryEntities(STORAGE_IMPORTERS_TABLE, query);
     const entities = [];
@@ -95,15 +114,15 @@ async function getImporterById(context, id) {
         entities.push(entityToObject(element));
       });
     }
-    return entities;
+    return { isSuccess: true, data: entities };
   } catch (error) {
-    context.log(error);
-    return null;
+    context.log.error(error, keys);
+    return { isSuccess: false, error, input: keys };
   }
 }
 module.exports = {
   saveCandlebatcherState,
   saveImporterState,
-  getAllCandlebatchers,
-  getImporterById
+  getStartedCandlebatchers,
+  getImporterByKey
 };

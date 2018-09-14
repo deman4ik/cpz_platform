@@ -59,8 +59,8 @@ function objectToEntity(object) {
   return entity;
 }
 
-function createSlug(exchange, baseq, quote) {
-  return `${exchange}.${baseq}.${quote}`;
+function createSlug(exchange, asset, currency) {
+  return `${exchange}.${asset}.${currency}`;
 }
 
 module.exports = { entityToObject, objectToEntity, createSlug };

@@ -76,20 +76,27 @@ class Candlebatcher {
 
   async saveCandle() {
     const result = await saveCandle(this.context, this.currentCandle);
-    if (result.error)
-      return {
-        isSuccess: false,
-        importRequested: true,
-        exchange: this.exchange,
-        asset: this.asset,
-        currency: this.currency,
-        timeframe: 1,
-        dateFrom: result.error.dateFrom,
-        dateTo: result.error.dateTo
-      };
+    if (result.isSuccess) {
+      if (result.data.error) {
+        if (result.data.error.code === "timeframe")
+          return {
+            ...this.getCurrentState(),
+            prevCandle: undefined,
+            currentCandles: undefined,
+            sendedCandles: undefined,
+            isSuccess: false,
+            importRequested: true,
+            timeframe: 1,
+            dateFrom: result.data.error.start,
+            dateTo: result.data.error.end
+          };
 
-    this.currentCandles = result;
-    return { isSuccess: true };
+        return result.error;
+      }
+      this.currentCandles = result.data;
+      return { isSuccess: true };
+    }
+    return result;
   }
 
   createSubject(timeframe) {
@@ -117,7 +124,7 @@ class Candlebatcher {
             asset: this.asset,
             currency: this.currency,
             timeframe: currentTimeframe,
-            time: current.time,
+            time: current.time || current.end,
             open: current.open,
             close: current.close,
             high: current.high,

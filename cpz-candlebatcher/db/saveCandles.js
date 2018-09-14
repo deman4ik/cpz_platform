@@ -71,10 +71,10 @@ async function saveCandle(context, candle) {
   }
 } */
     const data = JSON.parse(result.pCandlesInsert.string);
-    return data;
-  } catch (err) {
-    context.log.error(`Can't save candle.\n${err}`);
-    throw err;
+    return { isSuccess: true, data };
+  } catch (error) {
+    context.log.error(`Can't save candle.\n${error}\n${candle}`);
+    return { isSuccess: false, error, input: candle };
   }
 }
 
@@ -94,11 +94,11 @@ async function saveCandlesArray(context, input) {
   `;
   try {
     const result = await client.request(query, input);
-    const data = JSON.parse(result);
-    return data;
-  } catch (err) {
-    context.log.error(`Can't save candles.\n${err}`);
-    throw err;
+    const data = JSON.parse(result.pCandlesInsertJa.string);
+    return { isSuccess: true, data };
+  } catch (error) {
+    context.log.error(`Can't save candles.\n${error}\n${input}`);
+    return { isSuccess: false, error, input };
   }
 }
 

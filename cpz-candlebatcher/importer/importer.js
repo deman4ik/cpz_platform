@@ -1,5 +1,7 @@
 const { saveCandlesArray } = require("../db/saveCandles");
 const { saveImporterState } = require("../tableStorage");
+const { createSlug } = require("../tableStorage/utils");
+const { queueImportIteration } = require("../queueStorage");
 
 class Importer {
   constructor(context, state) {
@@ -20,7 +22,7 @@ class Importer {
     this.percent = state.percent || 0;
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
-    this.nextDate = state.nextDate;
+    this.nextDate = state.nextDate || this.dateTo;
     this.proxy = state.proxy;
     this.status = state.status || "started";
     this.initConnector();
@@ -52,8 +54,12 @@ class Importer {
         break;
     }
   }
-  setStatus(status = "started") {
-    this.status = status;
+  setStatus(status) {
+    if (!this.nextDate && !status) {
+      this.status = "finished";
+    } else {
+      this.status = status || "started";
+    }
   }
 
   setError(error) {
@@ -85,6 +91,20 @@ class Importer {
     return { isSuccess: result.status };
   }
 
+  async queueNext() {
+    if (this.nextDate) {
+      const message = {
+        rowKey: this.taskId,
+        partitionKey: createSlug(this.exchange, this.asset, this.currency)
+      };
+      const queuedMessageResult = await queueImportIteration(
+        this.context,
+        message
+      );
+      return queuedMessageResult;
+    }
+    return { isSuccess: true };
+  }
   createSubject(timeframe) {
     // "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}"
 

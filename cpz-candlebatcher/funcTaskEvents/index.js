@@ -2,9 +2,11 @@ const {
   SUB_VALIDATION_EVENT,
   TASKS_CANDLEBATCHER_START_EVENT,
   TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT
+  TASKS_CANDLEBATCHER_UPDATE_EVENT,
+  TASKS_CANDLEBATCHER_STARTIMPORT_EVENT
 } = require("../config");
-const handleStart = require("../candles/handleStart");
+const handleStart = require("../batcher/handleStart");
+const handleImport = require("../importer/execute");
 
 function eventHandler(context, req) {
   const parsedReq = JSON.parse(req.rawBody);
@@ -37,6 +39,15 @@ function eventHandler(context, req) {
         )}`
       );
       handleStart(context, eventData);
+    } else if (
+      eventGridEvent.eventType === TASKS_CANDLEBATCHER_STARTIMPORT_EVENT
+    ) {
+      context.log(
+        `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+          eventData
+        )}`
+      );
+      handleImport(context, eventData);
     } else {
       context.log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
     }
