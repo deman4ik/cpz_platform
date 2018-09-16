@@ -1,4 +1,4 @@
-const moment = require("moment");
+const dayjs = require("dayjs");
 const fetch = require("node-fetch");
 const HttpsProxyAgent = require("https-proxy-agent");
 const { histoDay, histoHour, histoMinute } = require("./cryptocompare");
@@ -32,7 +32,7 @@ async function loadCandles(context, input) {
     exchange: input.exchange,
     limit: input.limit || 500
   };
-  if (input.nextDate) options.timestamp = moment(input.nextDate).unix();
+  if (input.nextDate) options.timestamp = dayjs(input.nextDate).unix();
   let url;
   // Запрашиваем свечи
   switch (input.timeframe) {
@@ -66,7 +66,7 @@ async function loadCandles(context, input) {
         volume: latestCandle.volumefrom
       };
     }
-    const timeFrom = moment
+    const timeFrom = dayjs
       .unix(response.TimeFrom)
       .utc()
       .format();
@@ -87,9 +87,9 @@ async function loadCandles(context, input) {
     const percent = completedPercent(completedDuration, totalDuration);
     let nextDate;
     // Если дата начала импорта раньше чем дата первой загруженной свечи
-    if (moment(dateFrom).isBefore(dateStart)) {
+    if (dayjs(dateFrom).isBefore(dateStart)) {
       // Формируем параметры нового запроса на импорт
-      nextDate = moment(dateStart)
+      nextDate = dayjs(dateStart)
         .utc()
         .format();
     }

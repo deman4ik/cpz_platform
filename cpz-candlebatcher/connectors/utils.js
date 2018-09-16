@@ -1,8 +1,8 @@
-const moment = require("moment");
+const dayjs = require("dayjs");
 
 function durationMinutes(dateFrom, dateTo, positive = false) {
-  const duration = moment
-    .duration(moment(dateTo).diff(moment(dateFrom)))
+  const duration = dayjs
+    .duration(dayjs(dateTo).diff(dayjs(dateFrom)))
     .asMinutes();
   if (positive) return duration > 0 ? duration : 0;
   return duration;
