@@ -61,7 +61,7 @@ BEGIN
   END;
 
   rCANDLE.id := nextval('candles_id_seq');
-/*
+
 
   insert into candles (
         id,
@@ -93,7 +93,7 @@ BEGIN
         rCANDLE.timestamp
       )
     on conflict do nothing; -- both for uk and pk
-   */
+
     -- return posted 1min candle back with id
     j_tmp := json_build_object(
         'id',        rCANDLE.id,
