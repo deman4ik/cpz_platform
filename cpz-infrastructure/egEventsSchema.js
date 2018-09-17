@@ -614,12 +614,16 @@ const tasks = {
           description: "User uniq Id.",
           type: "string"
         },
-        params: {
+        settings: {
           description: "Trader parameters.",
           type: "object",
           props: {
             slippageStep: {
               description: "Price Slippage Step.",
+              type: "number"
+            },
+            volume: {
+              description: "User trade volume",
               type: "number"
             }
           },
@@ -651,12 +655,16 @@ const tasks = {
           description: "Debug mode.",
           type: "boolean"
         },
-        params: {
+        settings: {
           description: "Trader parameters.",
           type: "object",
           props: {
             slippageStep: {
               description: "Price Slippage Step.",
+              type: "number"
+            },
+            volume: {
+              description: "User trade volume",
               type: "number"
             }
           },
@@ -914,8 +922,8 @@ const signals = {
           },
           optional: true
         },
-        params: {
-          description: "Additinal params",
+        settings: {
+          description: "Additinal trader settings",
           type: "object"
         }
       }
