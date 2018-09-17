@@ -30,6 +30,9 @@ BEGIN
      "timeframe30":{"id":1,"time_start":"2018-07-20T11:31:00","time_end":"2018-07-20T12:00:00","start":1532087940,"end":1532088000,"open":7489.99,"high":7507,"low":7489.99,"close":7504.77,"volume":14.97665476,"trades":123,"vwp":14984.2782078305,"currency":"USD","asset":"BTC","exchange":5,"gap":1},
      "timeframe60":{"id":1141,"time_start":"2018-07-20T11:01:00","time_end":"2018-07-20T12:00:00","start":1532087940,"end":1532088000,"open":7489.99,"high":7507,"low":7489.99,"close":7504.77,"volume":14.97665476,"trades":123,"vwp":14984.2782078305,"currency":"USD","asset":"BTC","exchange":5,"gap":1}
     }
+    OR
+    {"error":{"numb" : 20101, "code" : "timeframe", "type" : 5, "start" : 1514764800, "end" : 1514765100, "descr" : "timeframe 5 not found as it should be after trigger"}}
+
 
     !!! the framed candle json object is a copy of CANDLES5 table row, will change automatically if table structure changes
   */
@@ -124,11 +127,25 @@ BEGIN
         if j_tmp is null then
           --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
           j_tmp := json_build_object(
+              'numb', 20101,
               'code', 'timeframe',
               'type', nFRAME,
               'start', rCANDLE.start-(nFRAME*60),
               'end',   rCANDLE.start,
-              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+              'descr', 'timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
+        end if;
+
+        if (j_tmp->>'gap')::int != 0 then
+          j_tmp := json_build_object(
+              'numb', 20102,
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
           );
           j:='{"error":'||j_tmp||'}';
           RETURN j;
@@ -155,11 +172,25 @@ BEGIN
         if j_tmp is null then
           --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
           j_tmp := json_build_object(
+              'numb', 20101,
               'code', 'timeframe',
               'type', nFRAME,
               'start', rCANDLE.start-(nFRAME*60),
               'end',   rCANDLE.start,
-              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+              'descr', 'timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
+        end if;
+
+        if (j_tmp->>'gap')::int != 0 then
+          j_tmp := json_build_object(
+              'numb', 20102,
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
           );
           j:='{"error":'||j_tmp||'}';
           RETURN j;
@@ -182,11 +213,25 @@ BEGIN
         if j_tmp is null then
           --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
           j_tmp := json_build_object(
+              'numb', 20101,
               'code', 'timeframe',
               'type', nFRAME,
               'start', rCANDLE.start-(nFRAME*60),
               'end',   rCANDLE.start,
-              'descr', '20101: timeframe ' || nFRAME || ' not found as it should be after trigger'
+              'descr', 'timeframe ' || nFRAME || ' not found as it should be after trigger'
+          );
+          j:='{"error":'||j_tmp||'}';
+          RETURN j;
+        end if;
+
+        if (j_tmp->>'gap')::int != 0 then
+          j_tmp := json_build_object(
+              'numb', 20102,
+              'code', 'timeframe',
+              'type', nFRAME,
+              'start', rCANDLE.start-(nFRAME*60),
+              'end',   rCANDLE.start,
+              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
           );
           j:='{"error":'||j_tmp||'}';
           RETURN j;
