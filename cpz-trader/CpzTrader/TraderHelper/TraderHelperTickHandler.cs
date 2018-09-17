@@ -1,4 +1,4 @@
-
+п»ї
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -34,14 +34,14 @@ namespace CpzTrader.TraderHelper
                 //{
                 //    return new HttpResponseMessage(HttpStatusCode.OK)
                 //    {
-                //        Content = new StringContent(JsonConvert.SerializeObject("Не верный ключ"))
+                //        Content = new StringContent(JsonConvert.SerializeObject("РќРµ РІРµСЂРЅС‹Р№ РєР»СЋС‡"))
                 //    };
                 //}
 
                 JObject dataObject = eventGridEvent.Data as JObject;
 
-                // В зависимости от типа события выполняем определенную логику
-                // валидация
+                // Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° СЃРѕР±С‹С‚РёСЏ РІС‹РїРѕР»РЅСЏРµРј РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ Р»РѕРіРёРєСѓ
+                // РІР°Р»РёРґР°С†РёСЏ
                 if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
                 {
                     var eventData = dataObject.ToObject<SubscriptionValidationEventData>();
@@ -55,7 +55,7 @@ namespace CpzTrader.TraderHelper
                         Content = new StringContent(JsonConvert.SerializeObject(responseData))
                     };
                 }
-                // новый сигнал                    
+                // РЅРѕРІС‹Р№ СЃРёРіРЅР°Р»                    
                 else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                 {
                     Utils.RunAsync(HandleTick((dynamic)dataObject, log));
@@ -68,7 +68,7 @@ namespace CpzTrader.TraderHelper
 
 
         /// <summary>
-        /// обработчик тиков
+        /// РѕР±СЂР°Р±РѕС‚С‡РёРє С‚РёРєРѕРІ
         /// </summary>
         public static async Task HandleTick(dynamic dataObject, TraceWriter log)
         { 
@@ -78,10 +78,10 @@ namespace CpzTrader.TraderHelper
 
                 var partitionKey = Utils.CreatePartitionKey(dataObject.exchange, dataObject.baseq, dataObject.quote);
 
-                // взять нужные позиции
+                // РІР·СЏС‚СЊ РЅСѓР¶РЅС‹Рµ РїРѕР·РёС†РёРё
                 List<Position> allPositions = await DbContext.GetAllPositionsByKeyAsync(partitionKey);
 
-                // выбираем только не закрытые позиции
+                // РІС‹Р±РёСЂР°РµРј С‚РѕР»СЊРєРѕ РЅРµ Р·Р°РєСЂС‹С‚С‹Рµ РїРѕР·РёС†РёРё
                 List<Position> positions = allPositions.FindAll(pos => pos.State != PositionState.Close);
 
                 foreach (var position in positions)
@@ -107,7 +107,7 @@ namespace CpzTrader.TraderHelper
                                         if(currentPrice >= entryPrice)
                                         {
                                             var res = DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.NumberPositionInRobot, position);
-                                            // отправить проторговщикам
+                                            // РѕС‚РїСЂР°РІРёС‚СЊ РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј
                                             await Utils.SendSignalAllTraders(position);
                                         }
                                     }
@@ -120,7 +120,7 @@ namespace CpzTrader.TraderHelper
                                         if (currentPrice <= entryPrice)
                                         {
                                             var res = DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.NumberPositionInRobot, position);
-                                            // отправить проторговщикам
+                                            // РѕС‚РїСЂР°РІРёС‚СЊ РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј
                                             await Utils.SendSignalAllTraders(position);
                                         }
                                     }
@@ -150,7 +150,7 @@ namespace CpzTrader.TraderHelper
 
                                         if (currentPrice >= entryPrice)
                                         {
-                                            // отправить проторговщикам
+                                            // РѕС‚РїСЂР°РІРёС‚СЊ РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј
                                             await Utils.SendSignalAllTraders(position);
                                         }
                                     }
@@ -162,7 +162,7 @@ namespace CpzTrader.TraderHelper
 
                                         if (currentPrice <= entryPrice)
                                         {
-                                            // отправить проторговщикам
+                                            // РѕС‚РїСЂР°РІРёС‚СЊ РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј
                                             await Utils.SendSignalAllTraders(position);
                                         }
                                     }
@@ -174,7 +174,7 @@ namespace CpzTrader.TraderHelper
 
                 }
 
-                // после того как отправили сигнал, обновляем информацию по позициям в хранилище
+                // РїРѕСЃР»Рµ С‚РѕРіРѕ РєР°Рє РѕС‚РїСЂР°РІРёР»Рё СЃРёРіРЅР°Р», РѕР±РЅРѕРІР»СЏРµРј РёРЅС„РѕСЂРјР°С†РёСЋ РїРѕ РїРѕР·РёС†РёСЏРј РІ С…СЂР°РЅРёР»РёС‰Рµ
 
             }
             catch (Exception e)
