@@ -53,7 +53,7 @@ BEGIN
   END IF;
 
   BEGIN
-    select id into strict rCANDLE.exchange from exchanges where code = sEXCHANGE;
+    select id into strict rCANDLE.exchange from exchanges where code = lower(sEXCHANGE);
 
   EXCEPTION
     WHEN NO_DATA_FOUND THEN
@@ -97,7 +97,7 @@ BEGIN
     -- return posted 1min candle back with id
     j_tmp := json_build_object(
         'id',        rCANDLE.id,
-        'start',     rCANDLE.start,
+        'time',      rCANDLE.start,
         'open',      rCANDLE.open,
         'high',      rCANDLE.high,
         'low',       rCANDLE.low,
