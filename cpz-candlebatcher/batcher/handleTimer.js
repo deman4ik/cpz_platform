@@ -1,5 +1,5 @@
 const { getStartedCandlebatchers } = require("../tableStorage");
-const { executeCandlebatcher } = require("./execute");
+const executeCandlebatcher = require("./execute");
 
 async function handleTimer(context) {
   try {
@@ -16,7 +16,7 @@ async function handleTimer(context) {
       })
     );
   } catch (error) {
-    this.context.log.error(error);
+    context.log.error(error);
     // TODO: EVENTGRID LOG
   }
 }

@@ -1,9 +1,7 @@
 const dayjs = require("dayjs");
 
 function durationMinutes(dateFrom, dateTo, positive = false) {
-  const duration = dayjs
-    .duration(dayjs(dateTo).diff(dayjs(dateFrom)))
-    .asMinutes();
+  const duration = dayjs(dateTo).diff(dateFrom, "minutes");
   if (positive) return duration > 0 ? duration : 0;
   return duration;
 }

@@ -21,8 +21,8 @@ function fetchJSON(url, agent) {
  * Загрзука свечей из CryptoCompare
  * Обратный порядок загрузки сначала свежие потом старые */
 async function loadCandles(context, input) {
-  context.log("loadCandles");
-  context.log(input);
+  context.log.info("Load Candles CryptoCompare");
+  context.log.info(input);
 
   const agent = new HttpsProxyAgent(input.proxy || process.env.PROXY_ENDPOINT);
 
@@ -58,24 +58,24 @@ async function loadCandles(context, input) {
       // Сразу отдаем последнюю свечу
       const latestCandle = response.Data[0];
       return {
-        time: latestCandle.time,
-        open: latestCandle.open,
-        close: latestCandle.close,
-        high: latestCandle.high,
-        low: latestCandle.low,
-        volume: latestCandle.volumefrom
+        isSuccess: true,
+        data: {
+          time: latestCandle.time,
+          open: latestCandle.open,
+          close: latestCandle.close,
+          high: latestCandle.high,
+          low: latestCandle.low,
+          volume: latestCandle.volumefrom
+        }
       };
     }
-    const timeFrom = dayjs
-      .unix(response.TimeFrom)
-      .utc()
-      .format();
+    const timeFrom = dayjs(response.TimeFrom);
     // Дата конца импорта
-    const dateEnd = input.dateTo;
+    const dateEnd = dayjs(input.dateTo);
     // Дата первой загруженный свечи
     const dateStart = timeFrom;
     // Дата начала импорта
-    const { dateFrom } = input;
+    const dateFrom = dayjs(input.dateFrom);
     // Всего минут
     const totalDuration =
       input.totalDuration || durationMinutes(dateFrom, dateEnd);
@@ -87,13 +87,11 @@ async function loadCandles(context, input) {
     const percent = completedPercent(completedDuration, totalDuration);
     let nextDate;
     // Если дата начала импорта раньше чем дата первой загруженной свечи
-    if (dayjs(dateFrom).isBefore(dateStart)) {
+    if (dateFrom.isBefore(dateStart)) {
       // Формируем параметры нового запроса на импорт
-      nextDate = dayjs(dateStart)
-        .utc()
-        .format();
+      nextDate = dateStart.toJSON();
     }
-
+    // TODO: Удалить записи из массива не попадающие во временные рамки
     /* Преобразуем объект в массив */
     const data = response.Data.map(item => [
       item.time,
@@ -107,6 +105,7 @@ async function loadCandles(context, input) {
     data.pop();
     // Результат выполнения
     const result = {
+      isSuccess: true,
       nextDate,
       totalDuration,
       completedDuration,

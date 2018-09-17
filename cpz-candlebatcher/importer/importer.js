@@ -26,9 +26,15 @@ class Importer {
     this.proxy = state.proxy;
     this.status = state.status || "started";
     this.initConnector();
+    this.log(`Importer ${this.createSubject()} initialized`);
   }
-
+  log(...args) {
+    if (this.debug) {
+      this.context.log.info(`Importer ${this.createSubject()}:`, ...args);
+    }
+  }
   initConnector() {
+    this.log(`initConnector()`);
     try {
       // TODO: check connection
       this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
@@ -55,6 +61,7 @@ class Importer {
     }
   }
   setStatus(status) {
+    this.log(`setStatus()`, status);
     if (!this.nextDate && !status) {
       this.status = "finished";
     } else {
@@ -63,23 +70,35 @@ class Importer {
   }
 
   setError(error) {
-    this.error = error;
+    this.log(`setError()`, error);
+    if (error)
+      this.error = {
+        time: new Date().toISOString(),
+        error
+      };
   }
 
   async loadCandles() {
+    this.log(`loadCandles()`);
     const result = await this.loadCandlesFunc(
       this.context,
       this.getCurrentState()
     );
-    this.nextDate = result.nextDate;
-    this.totalDuration = result.totalDuration;
-    this.completedDuration = result.completedDuration;
-    this.leftDuration = result.leftDuration;
-    this.percent = result.percent;
-    this.candles = result.data;
+    this.log(`loadCandles() result:`, result);
+    if (result.isSuccess) {
+      this.nextDate = result.nextDate;
+      this.totalDuration = result.totalDuration;
+      this.completedDuration = result.completedDuration;
+      this.leftDuration = result.leftDuration;
+      this.percent = result.percent;
+      this.candles = result.data;
+      return { isSuccess: true };
+    }
+    throw result;
   }
 
-  async saveCandle() {
+  async saveCandles() {
+    this.log(`saveCandles()`);
     const input = {
       exchange: this.exchange,
       asset: this.asset,
@@ -88,10 +107,12 @@ class Importer {
       candles: this.candles
     };
     const result = await saveCandlesArray(this.context, input);
+    this.log(`saveCandles() result:`, result);
     return { isSuccess: result.status };
   }
 
   async queueNext() {
+    this.log(`queueNext()`);
     if (this.nextDate) {
       const message = {
         rowKey: this.taskId,
@@ -101,20 +122,20 @@ class Importer {
         this.context,
         message
       );
+      this.log(`queueNext() result:`, queuedMessageResult);
       return queuedMessageResult;
     }
     return { isSuccess: true };
   }
-  createSubject(timeframe) {
-    // "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}"
-
-    return `${this.exchange}/${this.asset}/${this.currency}/${timeframe}/${
+  createSubject() {
+    return `${this.exchange}/${this.asset}/${this.currency}/${this.timeframe}/${
       this.taskId
     }.${this.modeStr}`;
   }
 
   getCurrentState() {
-    return {
+    this.log(`getCurrentState()`);
+    const state = {
       taskId: this.taskId,
       mode: this.mode,
       debug: this.debug,
@@ -135,8 +156,10 @@ class Importer {
       status: this.status,
       error: this.error
     };
+    return state;
   }
   async save() {
+    this.log(`save()`);
     const result = await saveImporterState(
       this.context,
       this.getCurrentState()
@@ -145,10 +168,8 @@ class Importer {
   }
 
   async end(error, status) {
-    if (error) {
-      this.error = error;
-    }
-
+    this.log(`end()`);
+    this.setError(error);
     this.setStatus(status);
     await this.save();
   }
