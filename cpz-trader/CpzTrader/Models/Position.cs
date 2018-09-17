@@ -1,11 +1,18 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Storage.Table;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CpzTrader.Models
 {
-    public class Position
+    public class Position : TableEntity
     {
+        public Position(string uniqId, string partitionKey) : this ()
+        {
+            this.RowKey = uniqId;
+            this.PartitionKey = partitionKey;
+        }
+
         public Position()
         {
             OpenOrders = new List<Order>();
@@ -18,15 +25,25 @@ namespace CpzTrader.Models
         /// </summary>
         public string NumberPositionInRobot { get; set; }
 
+        
+        /// <summary>
+        /// мультипозиционный ли робот, которому принадлежит позиция
+        /// </summary>
+        public bool IsMultiPosition { get; set; }
+
         /// <summary>
         /// ордера открывшие позицию
         /// </summary>
         public List<Order> OpenOrders { get; set; }
 
+        public string OpenOrdersJson { get; set; }
+
         /// <summary>
         /// ордера закрывшие позицию
         /// </summary>
         public List<Order> CloseOrders { get; set; }
+
+        public string CloseOrdersJson { get; set; }
 
         /// <summary>
         /// состояние позиции

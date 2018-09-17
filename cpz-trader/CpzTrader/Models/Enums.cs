@@ -45,7 +45,12 @@ namespace CpzTrader.Models
         /// <summary>
         /// по рынку
         /// </summary>
-        Market
+        Market,
+
+        /// <summary>
+        /// стоп лосс
+        /// </summary>
+        Stop
     }
 
     /// <summary>
@@ -80,14 +85,24 @@ namespace CpzTrader.Models
         NewPosition,
 
         /// <summary>
-        /// новый открывающий ордер
+        /// открытие длинной позиции
         /// </summary>
-        NewOpenOrder,
+        Long,
 
         /// <summary>
-        /// новый закрывающий ордер
+        /// закрытие длинной позиции
         /// </summary>
-        NewCloseOrder,
+        CloseLong,
+
+        /// <summary>
+        /// открытие короткой позиции
+        /// </summary>
+        Short,
+
+        /// <summary>
+        /// закрытие короткой позиции
+        /// </summary>
+        CloseShort,
 
         /// <summary>
         /// проверить ордер

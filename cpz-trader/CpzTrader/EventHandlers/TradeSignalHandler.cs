@@ -6,7 +6,6 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -62,7 +61,7 @@ namespace CpzTrader.EventHandlers
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(EditSignal(dataObject));
+                        Utils.RunAsync(HandleSignal(dataObject, log));
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
@@ -79,31 +78,88 @@ namespace CpzTrader.EventHandlers
         /// <summary>
         /// обработчик сигналов от робота
         /// </summary>
-        public static async Task EditSignal(JObject dataObject)
+        public static async Task HandleSignal(JObject dataObject, TraceWriter log)
         {
-            var signal = dataObject.ToObject<NewSignal>();
-
-            // получаем из базы клиентов с текущими настройками
-            List<Client> clients = await DbContext.GetClientsInfoFromDbAsync(signal.AdvisorName);
-
-            List<Task> parallelTraders = new List<Task>();
-
-            if (clients != null)
+            try
             {
-                // асинхронно отправляем сигнал всем проторговщикам
-                foreach (Client client in clients)
-                {
-                    var parallelTrader = Trader.RunTrader(client, signal);
+                var signal = dataObject.ToObject<NewSignal>();
 
-                    parallelTraders.Add(parallelTrader);
+                // получаем биржу и бумагу по которой пришел сигнал
+                var clients = await DbContext.GetClientsInfoFromDbAsync(signal.AdvisorName);
+
+                string exchange;
+
+                string baseq;
+
+                string quote;
+
+                if(clients != null && clients.Count != 0)
+                {
+                    exchange = clients[0].RobotSettings.Exchange;
+
+                    baseq = clients[0].RobotSettings.Baseq;
+
+                    quote = clients[0].RobotSettings.Quote;
+                }
+                else
+                {
+                    // сигнал получен но у этого робота нет клиентов
+                    return;
                 }
 
-                await Task.WhenAll(parallelTraders);
+                var action = signal.Action;
+
+                string partitionKey = Utils.CreatePartitionKey(exchange, baseq, quote);
+
+                if (action == ActionType.Long || action == ActionType.Short)
+                {
+                    Position newPosition = new Position(signal.NumberPositionInRobot, partitionKey);
+
+                    Order newOrder = Utils.CreateOrder(signal);
+
+                    newOrder.Slippage = signal.Slippage == 0 ? clients[0].RobotSettings.Slippage : signal.Slippage;
+
+                    newOrder.Deviation = signal.Deviation == 0 ? clients[0].RobotSettings.Deviation : signal.Deviation;
+
+                    newPosition.OpenOrders.Add(newOrder);
+
+                    newPosition.State = signal.Type == OrderType.Market ? PositionState.Open : PositionState.Opening;
+
+                    // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
+                    if (signal.Type == OrderType.Market)
+                    {
+                        await Utils.SendSignalAllTraders(newPosition);
+                    }
+
+                    // сохранить в хранилище
+                    var result = await DbContext.InsertEntity<Position>("Positions", newPosition);
+                }
+                else
+                {
+                    // получить из хранилища позицию для которой пришел сигнал
+                    Position needPosition = await DbContext.GetEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot); // заглушка
+
+                    Order newOrder = Utils.CreateOrder(signal);
+
+                    needPosition.CloseOrders.Add(newOrder);
+
+                    needPosition.State = signal.Type == OrderType.Market ? PositionState.Close : PositionState.Closing;
+
+                    // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
+                    if (signal.Type == OrderType.Market)
+                    {
+                        await Utils.SendSignalAllTraders(needPosition);
+                    }
+
+                    // сохранить обновленную позицию в хранилище
+                    var res = await DbContext.UpdateEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot, needPosition);                    
+                }               
             }
-
-            string message = $"Сигнал от робота - {signal.AdvisorName} обработан.";
-
-            await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("SignalHandled"), message);
+            catch (Exception e)
+            {                
+                Debug.WriteLine(e.Message);
+                throw;
+            }
         }
     }
 }

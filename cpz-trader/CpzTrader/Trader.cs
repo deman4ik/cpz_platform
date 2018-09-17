@@ -10,110 +10,108 @@ namespace CpzTrader
         /// </summary>
         /// <param name="clientInfo">данные о клиенте, для которого обрабатывается сигнал</param>
         /// <param name="newSignal">сигнал</param>
-        public static async Task RunTrader(Client clientInfo, NewSignal newSignal)
+        public static async Task RunTrader(Client clientInfo, Position newSignal)
         {
-            var action = newSignal.Action;
+            //var action = newSignal.Action;
 
-            bool canOpen = true;
+            //// находим позицию для которой пришел сигнал
+            //var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
 
-            // находим позицию для которой пришел сигнал
-            var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
+            //// если сигнал на открытие новой позиции
+            //if (action == ActionType.NewPosition)
+            //{
+            //    // создаем ее
+            //    Position newPosition = new Position();
 
-            // если сигнал на открытие новой позиции
-            if (action == ActionType.NewPosition && canOpen)
-            {
-                // создаем ее
-                Position newPosition = new Position();
+            //    newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
 
-                newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
+            //    // добавляем в нее новый открывающий ордер
+            //    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+            //                                           : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                // добавляем в нее новый открывающий ордер
-                var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-                                                           : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+            //    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
 
-                await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
+            //    if (openOrder != null)
+            //    {
+            //        newPosition.OpenOrders.Add(openOrder);
 
-                if (openOrder != null)
-                {
-                    newPosition.OpenOrders.Add(openOrder);
+            //        // сохраняем позицию в клиенте
+            //        clientInfo.AllPositions.Add(newPosition);
+            //    }
+            //}
+            //if (needPosition != null)
+            //{
+            //    // наращиваем объем позиции
+            //    if (action == ActionType.Long)
+            //    {
+            //        var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
+            //                                               : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                    // сохраняем позицию в клиенте
-                    clientInfo.AllPositions.Add(newPosition);
-                }
-            }
-            if (needPosition != null)
-            {
-                // наращиваем объем позиции
-                if (action == ActionType.NewOpenOrder && canOpen)
-                {
-                    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-                                                           : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+            //        await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
 
-                    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
+            //        if (openOrder != null)
+            //        {
+            //            needPosition.OpenOrders.Add(openOrder);
+            //        }
 
-                    if (openOrder != null)
-                    {
-                        needPosition.OpenOrders.Add(openOrder);
-                    }
+            //    } // сокращаем объем позиции
+            //    else if (action == ActionType.CloseLong)
+            //    {
+            //        var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
 
-                } // сокращаем объем позиции
-                else if (action == ActionType.NewCloseOrder)
-                {
-                    var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
+            //        var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
+            //                                                : await ActivityFunctions.SendOrder(clientInfo, newSignal);
 
-                    var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
-                                                            : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+            //        await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewCloseOrder"), closeOrder);
 
-                    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewCloseOrder"), closeOrder);
+            //        if (closeOrder != null)
+            //        {
+            //            needPosition.CloseOrders.Add(closeOrder);
+            //        }
 
-                    if (closeOrder != null)
-                    {
-                        needPosition.CloseOrders.Add(closeOrder);
-                    }
+            //        if (newSignal.PercentVolume == 100)
+            //        {
+            //            var totals = needPosition.CalculatePositionResult();
+            //            clientInfo.EmulatorSettings.CurrentBalance += totals;
+            //        }
 
-                    if (newSignal.PercentVolume == 100)
-                    {
-                        var totals = needPosition.CalculatePositionResult();
-                        clientInfo.EmulatorSettings.CurrentBalance += totals;
-                    }
+            //    } // проверить состояние ордера
+            //    else if (action == ActionType.CheckOrder)
+            //    {
+            //        var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
-                } // проверить состояние ордера
-                else if (action == ActionType.CheckOrder)
-                {
-                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
+            //        if (needOrder != null)
+            //        {
+            //            if (clientInfo.IsEmulation)
+            //            {
+            //                needOrder.State = OrderState.Closed;
+            //            }
+            //            else
+            //            {
+            //                var resultChecking = await ActivityFunctions.CheckOrderStatus(needOrder.NumberInSystem, clientInfo, newSignal);
 
-                    if (needOrder != null)
-                    {
-                        if (clientInfo.IsEmulation)
-                        {
-                            needOrder.State = OrderState.Closed;
-                        }
-                        else
-                        {
-                            var resultChecking = await ActivityFunctions.CheckOrderStatus(needOrder.NumberInSystem, clientInfo, newSignal);
+            //                needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
+            //            }
+            //        }
 
-                            needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
-                        }
-                    }
+            //    } // отозвать ордер
+            //    else if (action == ActionType.CancelOrder)
+            //    {
+            //        var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
 
-                } // отозвать ордер
-                else if (action == ActionType.CancelOrder)
-                {
-                    var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-                    if (needOrder != null)
-                    {
-                        if (clientInfo.IsEmulation)
-                        {
-                            needOrder.State = OrderState.Canceled;
-                        }
-                        else
-                        {
-                            var cancellationResult = await ActivityFunctions.CancelOrder(needOrder.NumberInSystem, clientInfo, newSignal);
-                        }
-                    }
-                }
-            }
+            //        if (needOrder != null)
+            //        {
+            //            if (clientInfo.IsEmulation)
+            //            {
+            //                needOrder.State = OrderState.Canceled;
+            //            }
+            //            else
+            //            {
+            //                var cancellationResult = await ActivityFunctions.CancelOrder(needOrder.NumberInSystem, clientInfo, newSignal);
+            //            }
+            //        }
+            //    }
+            //}
 
             await DbContext.UpdateClientInfoAsync(clientInfo);
         }

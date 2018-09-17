@@ -12,11 +12,11 @@ namespace CpzTrader
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Environment.CurrentDirectory)
-                .AddJsonFile("configuration.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+                .AddJsonFile("configuration.json", optional: false, reloadOnChange: true)
+                .Build();           
 
-            string value = config[$"{name}"];
+            string value = config[$"Values:{name}"];
+
             return value;
         }
     }

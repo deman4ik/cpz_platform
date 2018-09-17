@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +10,7 @@ namespace CpzTrader.Models
         /// <summary>
         /// имя робота
         /// </summary>
+        [JsonProperty("robot")]
         public string AdvisorName { get; set; }
 
         /// <summary>
@@ -24,8 +26,10 @@ namespace CpzTrader.Models
         /// <summary>
         /// базовая валюта
         /// </summary>
+        [JsonProperty("asset")]
         public string Baseq { get; set; }
 
+        [JsonProperty("currency")]
         public string Quote { get; set; }
 
         /// <summary>
@@ -49,13 +53,25 @@ namespace CpzTrader.Models
         public int PercentVolume { get; set; }
 
         /// <summary>
+        /// проскальзывание
+        /// </summary>
+        public decimal Slippage { get; set; }
+
+        /// <summary>
+        /// отклонение
+        /// </summary>
+        public decimal Deviation { get; set; }
+
+        /// <summary>
         /// номер ордера в роботе
         /// </summary>
+        [JsonProperty("id")]
         public string NumberOrderInRobot { get; set; }
 
         /// <summary>
         /// номер позиции в роботе
         /// </summary>
+        [JsonProperty("position")]
         public string NumberPositionInRobot { get; set; }
 
     }

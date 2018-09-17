@@ -12,6 +12,6 @@
     "TraderError": "CPZ.Trader.Error",
     "TraderStarted": "CPZ.Tasks.Trader.Started",
     "TraderStopped": "CPZ.Tasks.Trader.Stopped",
-    "TraderUpdeted": "CPZ.Tasks.Trader.Updeted"
+    "TraderUpdeted": "CPZ.Tasks.Trader.Updated"
   }
 }

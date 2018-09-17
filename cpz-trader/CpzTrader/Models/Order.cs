@@ -27,14 +27,34 @@ namespace CpzTrader.Models
         public decimal Price { get; set; }
 
         /// <summary>
+        /// проскальзывание
+        /// </summary>
+        public decimal Slippage { get; set; }
+
+        /// <summary>
+        /// отклонение
+        /// </summary>
+        public decimal Deviation { get; set; }
+
+        /// <summary>
         /// время выставления ордера
         /// </summary>
         public DateTime Time { get; set; }
 
         /// <summary>
+        /// время создания ордера
+        /// </summary>
+        public DateTime TimeCreate { get; set; }
+
+        /// <summary>
         /// текущее состояние
         /// </summary>
         public OrderState State { get; set; }
+
+        /// <summary>
+        /// направление сделки
+        /// </summary>
+        public string Direction { get; set; }
 
         /// <summary>
         /// тип ордера

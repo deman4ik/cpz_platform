@@ -13,37 +13,7 @@ namespace CpzTrader
     /// набор методов доступа к базе данных
     /// </summary>
     public static class DbContext
-    {
-        /// <summary>
-        /// инициализирует тестовых клиентов
-        /// </summary>
-        /// <param name="advisorName">имя советника</param>
-        public static List<Client> GetClientsInfo(string advisorName)
-        {
-            List<Client> _clients = new List<Client>();
-
-            for (int i = 0; i < 1; i++)
-            {
-                _clients.Add(new Client(i.ToString(), advisorName)
-                {
-                    TradeSettings = new TradeSettings()
-                    {
-                        PublicKey = i == 0 ? "111" : "pubKey" + i,
-                        PrivateKey = i == 0 ? "222" : "pubKey" + i,
-                        Volume = i + 12,
-                    },
-                    EmulatorSettings = new EmulatorSettings()
-                    {
-                        Slippage = 10 + i,
-                        StartingBalance = 10000 + i * 300,
-                        CurrentBalance = 10000 + i * 300,
-                    },
-
-                    IsEmulation = false,
-                });
-            }
-            return _clients;
-        }
+    {       
 
         /// <summary>
         /// сохранить информацию о клиентах в базе
@@ -73,9 +43,9 @@ namespace CpzTrader
 
                 client.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
 
-                client.TradeSettingsJson = JsonConvert.SerializeObject(client.TradeSettings);
-
                 client.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
+
+                client.RobotSettingsJson = JsonConvert.SerializeObject(client.RobotSettings);
 
                 batchOperation.Insert(client);
 
@@ -83,7 +53,6 @@ namespace CpzTrader
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e);
                 throw;
             }
         }
@@ -118,9 +87,9 @@ namespace CpzTrader
                 {
                     client.AllPositions = JsonConvert.DeserializeObject<List<Position>>(client.AllPositionsJson);
 
-                    client.TradeSettings = JsonConvert.DeserializeObject<TradeSettings>(client.TradeSettingsJson);
-
                     client.EmulatorSettings = JsonConvert.DeserializeObject<EmulatorSettings>(client.EmulatorSettingsJson);
+
+                    client.RobotSettings = JsonConvert.DeserializeObject<RobotSettings>(client.RobotSettingsJson);
 
                     clients.Add(client);
                 }
@@ -130,17 +99,14 @@ namespace CpzTrader
             }
             catch (StorageException e)
             {
-                Debug.WriteLine(e);
                 return null;
             }
 
             catch (Exception e)
             {
-                Debug.WriteLine(e);
                 throw;
             }
         }
-
 
         /// <summary>
         /// обновить запись о клиенте в базе
@@ -177,8 +143,6 @@ namespace CpzTrader
                 {
                     updateEntity.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
 
-                    updateEntity.TradeSettingsJson = JsonConvert.SerializeObject(client.TradeSettings);
-
                     updateEntity.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
                    
                     updateEntity.ETag = "*";
@@ -204,6 +168,239 @@ namespace CpzTrader
             {
                 Debug.WriteLine(e);
                 throw;
+            }
+        }
+
+        //--------------------------------------------------------------------------------------------------------------
+        // методы для работы с позициями в БД
+
+        /// <summary>
+        /// сохранить позицию в базу
+        /// </summary>
+        public static async Task SavePositionDbAsync(Position position)
+        {
+            try
+            {
+                var appParameter = "AZ_STORAGE_CS";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                // подключаемся к локальному хранилищу
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+                // создаем объект для работы с таблицами
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                // получаем нужную таблицу
+                var table = cloudTableClient.GetTableReference("Positions");
+
+                // если она еще не существует - создаем
+                var res = table.CreateIfNotExistsAsync().Result;
+
+                TableBatchOperation batchOperation = new TableBatchOperation();
+
+                position.OpenOrdersJson = JsonConvert.SerializeObject(position.OpenOrders);
+
+                position.CloseOrdersJson = JsonConvert.SerializeObject(position.CloseOrders);
+
+                batchOperation.Insert(position);
+
+                await table.ExecuteBatchAsync(batchOperation);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+
+        public static async Task<Position> GetPositionById(string partitionKey, string id)
+        {
+            var appParameter = "AZ_STORAGE_CS";
+
+            string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+            // подключаемся к локальному хранилищу
+            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+            // создаем объект для работы с таблицами
+            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+            // получаем нужную таблицу
+            var table = cloudTableClient.GetTableReference("Positions");
+
+            TableOperation retrieveOperation = TableOperation.Retrieve<Position>(partitionKey, id);
+            
+            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
+
+            return (Position)retrievedResult.Result;
+        }
+
+
+        /// <summary>
+        /// получить из базы позиции по ключу
+        /// </summary>
+        public static async Task<List<Position>> GetAllPositionsByKeyAsync(string partitionKey)
+        {
+            try
+            {
+                var appParameter = "AZ_STORAGE_CS";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                var table = cloudTableClient.GetTableReference("Positions");
+
+                // формируем фильтр, чтобы получить позиции по нужному инструменту
+                var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
+
+                TableQuerySegment<Position> result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
+
+                List<Position> positions = new List<Position>();
+
+                foreach (var position in positions)
+                {
+                    position.OpenOrders = JsonConvert.DeserializeObject<List<Order>>(position.OpenOrdersJson);
+
+                    position.CloseOrders = JsonConvert.DeserializeObject<List<Order>>(position.CloseOrdersJson);
+
+                    positions.Add(position);
+                }
+
+                return positions;
+            }
+            catch (StorageException e)
+            {
+                Debug.WriteLine(e);
+                return null;
+            }
+
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                throw;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------
+
+
+        /// <summary>
+        /// вставить сущность в таблицу
+        /// </summary>
+        public static async Task<bool> InsertEntity<T>(string tableName, T entyti) where T: TableEntity
+        {
+            try
+            {
+                var appParameter = "AZ_STORAGE_CS";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                // подключаемся к локальному хранилищу
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+                // создаем объект для работы с таблицами
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                // получаем нужную таблицу
+                var table = cloudTableClient.GetTableReference(tableName);
+
+                // если она еще не существует - создаем
+                await table.CreateIfNotExistsAsync();
+
+                TableOperation insertOperation = TableOperation.Insert(entyti);
+
+                await table.ExecuteAsync(insertOperation);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                //return false;
+                throw e;
+            }
+        }
+
+        /// <summary>
+        /// получить одну сущность из хранилища 
+        /// </summary>
+        /// <typeparam name="T">тип нужной сущьности</typeparam>
+        /// <param name="tableName">имя таблицы</param>
+        /// <param name="partitionKey">ключ раздела</param>
+        /// <param name="rowKey">ключ строки</param>
+        /// <returns>экземпляр сущности</returns>
+        public static async Task<T> GetEntityById<T>(string tableName, string partitionKey, string rowKey) where T: TableEntity
+        {
+            var appParameter = "AZ_STORAGE_CS";
+
+            string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+            // подключаемся к локальному хранилищу
+            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+            // создаем объект для работы с таблицами
+            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+            // получаем нужную таблицу
+            var table = cloudTableClient.GetTableReference(tableName);
+
+            TableOperation retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+
+            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
+            
+            if(retrievedResult.Result != null)
+            {
+                var res = retrievedResult.Result;
+                return (T)res;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// обновить сущьность в хранилище
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tableName"></param>
+        /// <param name="partitionKey"></param>
+        /// <param name="rowKey"></param>
+        /// <param name="updatedEntyti"></param>
+        /// <returns></returns>
+        public static async Task<bool> UpdateEntityById<T>(string tableName, string partitionKey, string rowKey, T updatedEntyti) where T : TableEntity
+        {
+            var appParameter = "AZ_STORAGE_CS";
+            
+            string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+            // подключаемся к локальному хранилищу
+            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+            // создаем объект для работы с таблицами
+            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+            // получаем нужную таблицу
+            var table = cloudTableClient.GetTableReference(tableName);
+
+            TableOperation retrieveOperation = TableOperation.Retrieve<Position>(partitionKey, rowKey);
+
+            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
+
+            if (retrievedResult.Result != null)
+            {
+                TableOperation updateOperation = TableOperation.Replace(updatedEntyti);
+                
+                await table.ExecuteAsync(updateOperation);
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

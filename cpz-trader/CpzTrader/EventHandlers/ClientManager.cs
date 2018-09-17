@@ -64,28 +64,22 @@ namespace CpzTrader
                     // добавить клиента
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StartTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(StartClientHandler(dataObject));
-
-                        return new HttpResponseMessage(HttpStatusCode.OK);
+                        Utils.RunAsync(StartClientHandler(eventGridEvent.Subject, dataObject));
                     } // останавливаем
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StopTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(StopClientHandler(dataObject));
-
-                        return new HttpResponseMessage(HttpStatusCode.OK);
+                        Utils.RunAsync(StopClientHandler(eventGridEvent.Subject, dataObject));
                     } // обновить инфо о клиенте
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("UpdateTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(UpdateClientHandler(dataObject));
-
-                        return new HttpResponseMessage(HttpStatusCode.OK);
+                        Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject));
                     }
                 }
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return new HttpResponseMessage(HttpStatusCode.OK);
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                log.Error(e.Message);
                 throw;
             }            
         }
@@ -93,46 +87,108 @@ namespace CpzTrader
         /// <summary>
         /// запуск клиента
         /// </summary>
-        public static async Task StartClientHandler(JObject dataObject)
+        public static async Task StartClientHandler(string subject, dynamic dataObject)
         {
-            var clientInfo = dataObject.ToObject<Client>();
+            try
+            {
+                Client clientInfo = Utils.CreateClient(dataObject);               
 
-            // сохраняем в таблицу запись о новом подключенном клиенте
-            await DbContext.SaveClientInfoDbAsync(clientInfo);
+                clientInfo.Status = "started";
 
-            string message = $"Клиент с ID {clientInfo.RowKey} подключен к роботу - {clientInfo.PartitionKey}.";
+                clientInfo.ObjectToJson();
 
-            await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("TraderStarted"), message);
+                // сохраняем в таблицу запись о новом подключенном клиенте
+                //await DbContext.SaveClientInfoDbAsync(clientInfo);
+
+                await DbContext.InsertEntity<Client>("Traders", clientInfo);
+
+                string message = $"Клиент с ID {clientInfo.RowKey} подключен к роботу - {clientInfo.PartitionKey}.";
+
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderStarted"), dataObject.taskId.ToString(), message);
+            }
+            catch(Exception e)
+            {
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                await Log.SendLogMessage(e.Message);
+            }            
         }
 
         /// <summary>
         /// остановка клиента
         /// </summary>
-        public static async Task StopClientHandler(JObject dataObject)
+        public static async Task StopClientHandler(string subject, dynamic dataObject)
         {
-            var clientInfo = dataObject.ToObject<Client>();
+            try
+            {
+                var clientInfo = dataObject.ToObject<dynamic>();
 
-            // сохраняем в таблицу запись об отключении клиента клиенте
-            await DbContext.UpdateClientInfoAsync(clientInfo);
+                Client needClient = await DbContext.GetEntityById<Client>("Traders", clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
 
-            string message = $"Клиент с ID {clientInfo.RowKey} отключен от робота - {clientInfo.PartitionKey}.";
+                if (needClient != null)
+                {
+                    needClient.Status = "stopped";
 
-            await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("TraderStopped"), message);
+                    // сохраняем в таблицу запись об отключении клиента
+                    await DbContext.UpdateEntityById<Client>("Traders", needClient.PartitionKey, needClient.RowKey, needClient);
+
+                    string message = $"Клиент с ID {needClient.RowKey} отключен от робота - {needClient.PartitionKey}.";
+
+                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderStopped"), dataObject.taskId.ToString(), message);
+                }
+                else
+                {
+                    string message = $"Kлиент с ID {clientInfo.taskId} не найден.";
+                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), message);
+                }                    
+            }
+            catch (Exception e)
+            {
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                await Log.SendLogMessage(e.Message);
+            }
         }
 
         /// <summary>
         /// обновление клиента
         /// </summary>
-        public static async Task UpdateClientHandler(JObject dataObject)
+        public static async Task UpdateClientHandler(string subject, dynamic dataObject)
         {
-            var clientInfo = dataObject.ToObject<Client>();
+            try
+            {
+                var clientInfo = (dynamic)dataObject;
 
-            // сохраняем обновленную информацию о клиенте в таблицу
-            await DbContext.UpdateClientInfoAsync(clientInfo);
+                // находим клиента которого нужно обновить
+                Client needClient = await DbContext.GetEntityById<Client>("Traders", clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
 
-            string message = $"Обновление данных клиента с ID {clientInfo.RowKey}, подключенного к роботу - {clientInfo.PartitionKey}.";
+                if(needClient != null)
+                {
+                    needClient.JsonToObject();
 
-            await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("TraderUpdeted"), message);
+                    needClient.RobotSettings.Slippage = clientInfo.settings.slippageStep;
+
+                    needClient.RobotSettings.Volume = clientInfo.settings.volume;
+
+                    needClient.ObjectToJson();
+
+                    // сохраняем в таблицу запись об обновлении клиента
+                    await DbContext.UpdateEntityById<Client>("Traders", needClient.PartitionKey, needClient.RowKey, needClient);
+
+                    // публикуем в эвентгрид информацию об успешной операции
+                    string message = $"Обновление данных клиента с ID {needClient.RowKey}, подключенного к роботу - {needClient.PartitionKey}.";
+                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderUpdeted"), dataObject.taskId.ToString(), message);
+                }
+                else
+                {
+                    string message = $"Kлиент с ID {clientInfo.taskId} не найден.";
+                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), message);
+                }
+                
+            }
+            catch (Exception e)
+            {
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                await Log.SendLogMessage(e.Message);
+            }
         }
     }
 }

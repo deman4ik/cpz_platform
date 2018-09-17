@@ -64,7 +64,7 @@ namespace CpzTrader
         /// <summary>
         /// опубликовать событие в event grid
         /// </summary>        
-        public static async Task PublishEventInfo(string eventType, string message)
+        public static async Task PublishEventInfo(string subject, string eventType, string taskId , string message)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace CpzTrader
                     eventsList.Add(new EventGridEvent()
                     {
                         Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                        Subject = "", // тема события
+                        Subject = subject, // тема события
                         DataVersion = "1.0", // версия данных
                         EventType = eventType, // тип события
                         Data = data, // данные события
