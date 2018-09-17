@@ -43,7 +43,7 @@ function objectToEntity(object) {
   Object.keys(object).forEach(key => {
     const element = object[key];
     if (typeof element === "object") {
-      if (element instanceof "Date") {
+      if (element instanceof Date) {
         entity[key] = entityGenerator.DateTime(element);
       } else {
         entity[key] = entityGenerator.String(JSON.stringify(element));
