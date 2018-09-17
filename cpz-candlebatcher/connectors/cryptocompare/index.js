@@ -32,7 +32,9 @@ async function loadCandles(context, input) {
     exchange: input.exchange,
     limit: input.limit || 500
   };
-  if (input.nextDate) options.timestamp = dayjs(input.nextDate).unix();
+  if (input.limit !== 1) {
+    options.timestamp = dayjs(input.nextDate || input.dateTo).unix();
+  }
   let url;
   // Запрашиваем свечи
   switch (input.timeframe) {
@@ -60,7 +62,7 @@ async function loadCandles(context, input) {
       return {
         isSuccess: true,
         data: {
-          time: latestCandle.time,
+          time: latestCandle.time * 1000,
           open: latestCandle.open,
           close: latestCandle.close,
           high: latestCandle.high,
@@ -69,40 +71,43 @@ async function loadCandles(context, input) {
         }
       };
     }
-    const timeFrom = dayjs(response.TimeFrom);
+    // Дата начала импорта
+    const dateStart = dayjs(input.dateFrom);
     // Дата конца импорта
     const dateEnd = dayjs(input.dateTo);
-    // Дата первой загруженный свечи
-    const dateStart = timeFrom;
-    // Дата начала импорта
-    const dateFrom = dayjs(input.dateFrom);
-    // Всего минут
-    const totalDuration =
-      input.totalDuration || durationMinutes(dateFrom, dateEnd);
-    // Осталось минут
-    const leftDuration = durationMinutes(dateFrom, dateStart, true);
-    // Загружено минут
-    const completedDuration = totalDuration - leftDuration;
-    // Процент выполнения
-    const percent = completedPercent(completedDuration, totalDuration);
-    let nextDate;
-    // Если дата начала импорта раньше чем дата первой загруженной свечи
-    if (dateFrom.isBefore(dateStart)) {
-      // Формируем параметры нового запроса на импорт
-      nextDate = dateStart.toJSON();
-    }
-    // TODO: Удалить записи из массива не попадающие во временные рамки
+    const filteredData = response.Data.filter(
+      candle =>
+        dayjs(candle.time * 1000).isAfter(dateStart) ||
+        dayjs(candle.time * 1000).isBefore(dateEnd)
+    );
     /* Преобразуем объект в массив */
-    const data = response.Data.map(item => [
-      item.time,
+    const data = filteredData.map(item => [
+      item.time * 1000,
       item.open,
       item.high,
       item.low,
       item.close,
       item.volumefrom
     ]);
-    // Исключаем последний элемент из массива с неполной свечей
-    data.pop();
+    // Дата первой загруженный свечи
+    const currentStart = dayjs(data[0][0]);
+
+    // Всего минут
+    const totalDuration =
+      input.totalDuration || durationMinutes(dateStart, dateEnd);
+    // Осталось минут
+    const leftDuration = durationMinutes(dateStart, currentStart, true);
+    // Загружено минут
+    const completedDuration = totalDuration - leftDuration;
+    // Процент выполнения
+    const percent = completedPercent(completedDuration, totalDuration);
+    let nextDate;
+    // Если дата начала импорта раньше чем дата первой загруженной свечи
+    if (dateStart.isBefore(currentStart)) {
+      // Формируем параметры нового запроса на импорт
+      nextDate = currentStart.toJSON();
+    }
+
     // Результат выполнения
     const result = {
       isSuccess: true,

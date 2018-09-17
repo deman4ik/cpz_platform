@@ -22,7 +22,7 @@ class Importer {
     this.percent = state.percent || 0;
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
-    this.nextDate = state.nextDate || this.dateTo;
+    this.nextDate = state.nextDate;
     this.proxy = state.proxy;
     this.status = state.status || "started";
     this.initConnector();

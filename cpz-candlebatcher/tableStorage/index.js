@@ -100,24 +100,22 @@ async function getStartedCandlebatchers(context) {
 
 async function getCandlebatcherByKey(context, keys) {
   try {
-    const rowKeyFilter = new TableQuery().where(
-      TableQuery.stringFilter(
-        "rowKey",
-        TableUtilities.QueryComparisons.EQUAL,
-        keys.rowKey
-      )
+    const rowKeyFilter = TableQuery.stringFilter(
+      "RowKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.rowKey
     );
-    const partitionKeyFilter = new TableQuery().where(
-      TableQuery.stringFilter(
-        "rowKey",
-        TableUtilities.QueryComparisons.EQUAL,
-        keys.PartitionKey
-      )
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.partitionKey
     );
-    const query = TableQuery.combineFilters(
-      rowKeyFilter,
-      TableUtilities.TableOperators.AND,
-      partitionKeyFilter
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        rowKeyFilter,
+        TableUtilities.TableOperators.AND,
+        partitionKeyFilter
+      )
     );
     const result = await queryEntities(STORAGE_CANDLEBATCHERS_TABLE, query);
     const entities = [];
@@ -135,24 +133,22 @@ async function getCandlebatcherByKey(context, keys) {
 
 async function getImporterByKey(context, keys) {
   try {
-    const rowKeyFilter = new TableQuery().where(
-      TableQuery.stringFilter(
-        "rowKey",
-        TableUtilities.QueryComparisons.EQUAL,
-        keys.rowKey
-      )
+    const rowKeyFilter = TableQuery.stringFilter(
+      "RowKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.rowKey
     );
-    const partitionKeyFilter = new TableQuery().where(
-      TableQuery.stringFilter(
-        "rowKey",
-        TableUtilities.QueryComparisons.EQUAL,
-        keys.PartitionKey
-      )
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.partitionKey
     );
-    const query = TableQuery.combineFilters(
-      rowKeyFilter,
-      TableUtilities.TableOperators.AND,
-      partitionKeyFilter
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        rowKeyFilter,
+        TableUtilities.TableOperators.AND,
+        partitionKeyFilter
+      )
     );
     const result = await queryEntities(STORAGE_IMPORTERS_TABLE, query);
     const entities = [];

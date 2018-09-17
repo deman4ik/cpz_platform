@@ -1,5 +1,5 @@
 const { getImporterByKey } = require("../tableStorage");
-const { execute } = require("../importer/execute");
+const execute = require("../importer/execute");
 
 async function handleQueue(context, keys) {
   const getImporterResult = await getImporterByKey(context, keys);
