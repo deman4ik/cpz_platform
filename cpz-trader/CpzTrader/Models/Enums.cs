@@ -69,6 +69,11 @@ namespace CpzTrader.Models
         Closed,
 
         /// <summary>
+        /// размещен на бирже
+        /// </summary>
+        Posted,
+
+        /// <summary>
         /// отменен
         /// </summary>
         Canceled,

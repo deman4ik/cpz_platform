@@ -10,27 +10,8 @@ namespace CpzTrader.Models
         /// <summary>
         /// имя робота
         /// </summary>
-        [JsonProperty("robot")]
+        [JsonProperty("robotId")]
         public string AdvisorName { get; set; }
-
-        /// <summary>
-        /// направление сделки
-        /// </summary>
-        public string Direction { get; set; }
-
-        /// <summary>
-        /// биржа
-        /// </summary>
-        public string Exchange { get; set; }
-
-        /// <summary>
-        /// базовая валюта
-        /// </summary>
-        [JsonProperty("asset")]
-        public string Baseq { get; set; }
-
-        [JsonProperty("currency")]
-        public string Quote { get; set; }
 
         /// <summary>
         /// тип действия сигнала
@@ -42,25 +23,25 @@ namespace CpzTrader.Models
         /// </summary>
         public decimal Price { get; set; }
 
+        public string Baseq { get; set; }
+
+        public string Quote { get; set; }
+
+
         /// <summary>
         /// тип сделки - по рынку или лимиткой
         /// </summary>
-        public OrderType Type { get; set; }
-
-        /// <summary>
-        /// в случае сигнала на закрывающий ордер эта переменная указывает какой объем нужно закрыть. Вычисляется в % от открытого объема в позиции. Если равен 100, значит нужно закрыть всю позицию
-        /// </summary>
-        public int PercentVolume { get; set; }
+        public OrderType OrderType { get; set; }
 
         /// <summary>
         /// проскальзывание
         /// </summary>
-        public decimal Slippage { get; set; }
+        public decimal? Slippage { get; set; }
 
         /// <summary>
         /// отклонение
         /// </summary>
-        public decimal Deviation { get; set; }
+        public decimal? Deviation { get; set; }
 
         /// <summary>
         /// номер ордера в роботе
@@ -71,7 +52,7 @@ namespace CpzTrader.Models
         /// <summary>
         /// номер позиции в роботе
         /// </summary>
-        [JsonProperty("position")]
+        [JsonProperty("positionId")]
         public string NumberPositionInRobot { get; set; }
 
     }

@@ -15,12 +15,12 @@ namespace CpzTrader.Models
         /// <summary>
         /// проскальзывание
         /// </summary>
-        public decimal Slippage { get; set; }
+        public decimal? Slippage { get; set; }
 
         /// <summary>
         /// отклонение
         /// </summary>
-        public decimal Deviation { get; set; }
+        public decimal? Deviation { get; set; }
 
         /// <summary>
         /// биржа
@@ -40,6 +40,6 @@ namespace CpzTrader.Models
         /// <summary>
         /// таймфрейм
         /// </summary>
-        public int Timeframe { get; set; }
+        public int? Timeframe { get; set; }
     }    
 }

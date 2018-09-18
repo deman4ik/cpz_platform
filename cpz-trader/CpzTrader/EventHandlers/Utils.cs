@@ -36,7 +36,7 @@ namespace CpzTrader.EventHandlers
         public static async Task SendSignalAllTraders(Position signal)
         {
             // получаем из базы клиентов с текущими настройками
-            List<Client> clients = await DbContext.GetClientsInfoFromDbAsync(signal.PartitionKey);
+            List<Client> clients = await DbContext.GetClientsInfoFromDbAsync(signal.RobotId);
 
             List<Task> parallelTraders = new List<Task>();
 
@@ -63,7 +63,7 @@ namespace CpzTrader.EventHandlers
         /// </summary>
         public static string CreatePartitionKey(string exchange, string baseq, string quote)
         {
-            return $"{exchange}#{baseq}-{quote}";
+            return $"{exchange}{baseq}{quote}";
         }
 
         /// <summary>
@@ -76,11 +76,11 @@ namespace CpzTrader.EventHandlers
             return  new Order()
             {
                 NumberInRobot = signal.NumberOrderInRobot,
-                OrderType = signal.Type,
+                OrderType = signal.OrderType,
                 Price = signal.Price,
                 Symbol = $"{signal.Baseq}/{signal.Quote}",
                 TimeCreate = DateTime.UtcNow,
-                State = signal.Type == OrderType.Market ? OrderState.Closed : OrderState.Open,
+                State = signal.OrderType == OrderType.Market ? OrderState.Closed : OrderState.Open,
                 Direction = signal.Action == ActionType.CloseShort || signal.Action == ActionType.Long ? "buy" : "sell",
             };
         }
@@ -118,6 +118,9 @@ namespace CpzTrader.EventHandlers
                 DebugMode = data.debug,
                 UserId = data.userId,
                 AllPositions = new List<Position>(),
+                AllPositionsJson = "",
+                RobotSettingsJson = "",
+                EmulatorSettingsJson = "",
                 RobotSettings = new RobotSettings()
                 {
                     Exchange = data.exchange,

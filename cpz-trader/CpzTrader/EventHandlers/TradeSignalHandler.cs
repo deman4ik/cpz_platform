@@ -61,7 +61,7 @@ namespace CpzTrader.EventHandlers
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(HandleSignal(dataObject, log));
+                        Utils.RunAsync(HandleSignal(eventGridEvent.Subject, dataObject, log));
 
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
@@ -78,7 +78,7 @@ namespace CpzTrader.EventHandlers
         /// <summary>
         /// обработчик сигналов от робота
         /// </summary>
-        public static async Task HandleSignal(JObject dataObject, TraceWriter log)
+        public static async Task HandleSignal(string subject, JObject dataObject, TraceWriter log)
         {
             try
             {
@@ -107,6 +107,9 @@ namespace CpzTrader.EventHandlers
                     return;
                 }
 
+                signal.Baseq = baseq;
+                signal.Quote = quote;
+
                 var action = signal.Action;
 
                 string partitionKey = Utils.CreatePartitionKey(exchange, baseq, quote);
@@ -115,21 +118,25 @@ namespace CpzTrader.EventHandlers
                 {
                     Position newPosition = new Position(signal.NumberPositionInRobot, partitionKey);
 
+                    newPosition.RobotId = signal.AdvisorName;
+
                     Order newOrder = Utils.CreateOrder(signal);
 
-                    newOrder.Slippage = signal.Slippage == 0 ? clients[0].RobotSettings.Slippage : signal.Slippage;
+                    newOrder.Slippage = signal.Slippage == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Slippage;
 
-                    newOrder.Deviation = signal.Deviation == 0 ? clients[0].RobotSettings.Deviation : signal.Deviation;
+                    newOrder.Deviation = signal.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Deviation;
 
                     newPosition.OpenOrders.Add(newOrder);
 
-                    newPosition.State = signal.Type == OrderType.Market ? PositionState.Open : PositionState.Opening;
+                    newPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Open : (int)PositionState.Opening;//"open" : "opening";
 
                     // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
-                    if (signal.Type == OrderType.Market)
+                    if (signal.OrderType == OrderType.Market)
                     {
                         await Utils.SendSignalAllTraders(newPosition);
                     }
+
+                    newPosition.ObjectToJson();
 
                     // сохранить в хранилище
                     var result = await DbContext.InsertEntity<Position>("Positions", newPosition);
@@ -137,28 +144,32 @@ namespace CpzTrader.EventHandlers
                 else
                 {
                     // получить из хранилища позицию для которой пришел сигнал
-                    Position needPosition = await DbContext.GetEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot); // заглушка
+                    Position needPosition = await DbContext.GetEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot);
+
+                    needPosition.JsonToObject();
 
                     Order newOrder = Utils.CreateOrder(signal);
 
                     needPosition.CloseOrders.Add(newOrder);
 
-                    needPosition.State = signal.Type == OrderType.Market ? PositionState.Close : PositionState.Closing;
+                    needPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;//signal.OrderType == OrderType.Market ? PositionState.Close.ToString() : PositionState.Closing.ToString();
 
                     // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
-                    if (signal.Type == OrderType.Market)
+                    if (signal.OrderType == OrderType.Market)
                     {
                         await Utils.SendSignalAllTraders(needPosition);
                     }
+
+                    needPosition.ObjectToJson();
 
                     // сохранить обновленную позицию в хранилище
                     var res = await DbContext.UpdateEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot, needPosition);                    
                 }               
             }
             catch (Exception e)
-            {                
-                Debug.WriteLine(e.Message);
-                throw;
+            {
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.ToObject<NewSignal>().NumberOrderInRobot, e.Message);
+                await Log.SendLogMessage(e.Message);
             }
         }
     }

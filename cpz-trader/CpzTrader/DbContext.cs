@@ -85,7 +85,7 @@ namespace CpzTrader
 
                 foreach (var client in result)
                 {
-                    client.AllPositions = JsonConvert.DeserializeObject<List<Position>>(client.AllPositionsJson);
+                    //client.AllPositions = JsonConvert.DeserializeObject<List<Position>>(client.AllPositionsJson);
 
                     client.EmulatorSettings = JsonConvert.DeserializeObject<EmulatorSettings>(client.EmulatorSettingsJson);
 
@@ -261,11 +261,9 @@ namespace CpzTrader
 
                 List<Position> positions = new List<Position>();
 
-                foreach (var position in positions)
+                foreach (var position in result)
                 {
-                    position.OpenOrders = JsonConvert.DeserializeObject<List<Order>>(position.OpenOrdersJson);
-
-                    position.CloseOrders = JsonConvert.DeserializeObject<List<Order>>(position.CloseOrdersJson);
+                    position.JsonToObject();
 
                     positions.Add(position);
                 }

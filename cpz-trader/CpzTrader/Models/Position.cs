@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,7 +24,7 @@ namespace CpzTrader.Models
         /// <summary>
         /// номер позиции в роботе
         /// </summary>
-        public string NumberPositionInRobot { get; set; }
+        public string RobotId { get; set; }
 
         
         /// <summary>
@@ -48,8 +49,31 @@ namespace CpzTrader.Models
         /// <summary>
         /// состояние позиции
         /// </summary>
-        public PositionState State { get; set; }
-        
+        public int State { get; set; }
+
+        public void UpdateState()
+        {
+
+        }
+
+        /// <summary>
+        /// преобразовать объекты в JSON
+        /// </summary>
+        public void ObjectToJson()
+        {
+            this.OpenOrdersJson = JsonConvert.SerializeObject(OpenOrders);
+            this.CloseOrdersJson = JsonConvert.SerializeObject(CloseOrders);
+        }
+
+        /// <summary>
+        /// преобразовать JSON в объекты
+        /// </summary>
+        public void JsonToObject()
+        {
+            this.OpenOrders = JsonConvert.DeserializeObject<List<Order>>(OpenOrdersJson);
+            this.CloseOrders = JsonConvert.DeserializeObject<List<Order>>(CloseOrdersJson);
+        }
+
         /// <summary>
         /// рассчитать результат по позиции
         /// </summary>        
