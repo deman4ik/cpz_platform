@@ -2,10 +2,18 @@ const { saveCandlesArray } = require("../db/saveCandles");
 const { saveImporterState } = require("../tableStorage");
 const { createSlug } = require("../tableStorage/utils");
 const { queueImportIteration } = require("../queueStorage");
+const {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_FINISHED,
+  LOG_EVENT
+} = require("../config");
+const { publishEvents, createEvents } = require("../eventgrid");
 
 class Importer {
   constructor(context, state) {
     this.context = context;
+    this.eventSubject = state.eventSubject;
     this.taskId = state.taskId;
     this.mode = state.mode;
     this.initModStr();
@@ -24,15 +32,37 @@ class Importer {
     this.dateTo = state.dateTo;
     this.nextDate = state.nextDate;
     this.proxy = state.proxy;
-    this.status = state.status || "started";
+    this.stopRequested = state.stopRequested || false;
+    this.status = this.stopRequested
+      ? STATUS_STOPPED
+      : state.status || STATUS_STARTED;
     this.initConnector();
-    this.log(`Importer ${this.createSubject()} initialized`);
+    this.log(`Importer ${this.eventSubject} initialized`);
   }
   log(...args) {
     if (this.debug) {
-      this.context.log.info(`Importer ${this.createSubject()}:`, ...args);
+      this.context.log.info(`Importer ${this.eventSubject}:`, ...args);
     }
   }
+
+  logEvent(data) {
+    if (this.debug) {
+      // Публикуем событие - ошибка
+      publishEvents(
+        this.context,
+        "log",
+        createEvents({
+          subject: this.eventSubject,
+          eventType: LOG_EVENT,
+          data: {
+            taskId: this.taskId,
+            data: JSON.stringify(data)
+          }
+        })
+      );
+    }
+  }
+
   initConnector() {
     this.log(`initConnector()`);
     try {
@@ -63,9 +93,9 @@ class Importer {
   setStatus(status) {
     this.log(`setStatus()`, status);
     if (!this.nextDate && !status) {
-      this.status = "finished";
+      this.status = STATUS_FINISHED;
     } else {
-      this.status = status || "started";
+      this.status = status || STATUS_STARTED;
     }
   }
 
@@ -127,16 +157,12 @@ class Importer {
     }
     return { isSuccess: true };
   }
-  createSubject() {
-    return `${this.exchange}/${this.asset}/${this.currency}/${this.timeframe}/${
-      this.taskId
-    }.${this.modeStr}`;
-  }
 
   getCurrentState() {
     this.log(`getCurrentState()`);
     const state = {
       taskId: this.taskId,
+      eventSubject: this.eventSubject,
       mode: this.mode,
       debug: this.debug,
       providerType: this.providerType,
@@ -167,7 +193,7 @@ class Importer {
     if (!result.isSuccess) throw new Error(`Can't save state\n${result.error}`);
   }
 
-  async end(error, status) {
+  async end(status, error) {
     this.log(`end()`);
     this.setError(error);
     this.setStatus(status);

@@ -10,9 +10,19 @@ module.exports = {
   TASKS_CANDLEBATCHER_STARTED_EVENT: "CPZ.Tasks.Candlebatcher.Started",
   TASKS_CANDLEBATCHER_STOPPED_EVENT: "CPZ.Tasks.Candlebatcher.Stopped",
   TASKS_CANDLEBATCHER_UPDATED_EVENT: "CPZ.Tasks.Candlebatcher.Updated",
+  TASKS_CANDLEBATCHER_STARTEDIMPORT_EVENT:
+    "CPZ.Tasks.Candlebatcher.StartedImport",
+  TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT:
+    "CPZ.Tasks.Candlebatcher.StopppedImport",
   CANDLES_NEW_CANDLE_EVENT: "CPZ.Candles.NewCandle",
   CANDLES_HANDLED_EVENT: "CPZ.Candles.Handled",
   STORAGE_CANDLEBATCHERS_TABLE: "Candlebatchers",
   STORAGE_IMPORTERS_TABLE: "Importers",
-  STORAGE_IMPORTERS_QUEUE: "importer-next"
+  STORAGE_IMPORTERS_QUEUE: "importer-next",
+  STATUS_STARTED: "started",
+  STATUS_PENDING: "pending",
+  STATUS_BUSY: "busy",
+  STATUS_STOPPED: "stopped",
+  STATUS_ERROR: "error",
+  STATUS_FINISHED: "finished"
 };

@@ -74,7 +74,7 @@ async function saveCandle(context, candle) {
     return { isSuccess: true, data };
   } catch (error) {
     context.log.error(`Can't save candle.\n${error}\n${candle}`);
-    return { isSuccess: false, error, input: candle };
+    return { isSuccess: false, error };
   }
 }
 

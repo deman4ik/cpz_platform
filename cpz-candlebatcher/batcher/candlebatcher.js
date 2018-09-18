@@ -1,18 +1,20 @@
 const uuid = require("uuid").v4;
-
 const { saveCandle } = require("../db/saveCandles");
+const { saveCandlebatcherState } = require("../tableStorage");
 const {
-  saveCandlebatcherState,
-  updateCandlebatcherState
-} = require("../tableStorage");
-const { CANDLES_NEW_CANDLE_EVENT } = require("../config");
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  CANDLES_NEW_CANDLE_EVENT,
+  LOG_EVENT
+} = require("../config");
+const { publishEvents, createEvents } = require("../eventgrid");
 
 class Candlebatcher {
   constructor(context, state) {
     this.context = context;
+    this.eventSubject = state.eventSubject;
     this.taskId = state.taskId;
     this.mode = state.mode;
-    this.initModStr();
     this.debug = state.debug;
     this.providerType = state.providerType;
     this.exchange = state.exchange;
@@ -23,11 +25,17 @@ class Candlebatcher {
     this.lastCandles = state.lastCandles || {};
     this.sendedCandles = state.sendedCandles || {};
     this.proxy = state.proxy;
-    this.status = this.stopRequested ? "stopped" : state.status || "started";
+    this.updateRequested = state.updateRequested || false;
+    this.stopRequested = state.stopRequested || false;
+    this.status = this.stopRequested
+      ? STATUS_STOPPED
+      : state.status || STATUS_STARTED;
     this.initConnector();
+    this.log(`Candlebatcher ${this.eventSubject} initialized`);
   }
 
   initConnector() {
+    this.log(`initConnector()`);
     try {
       // TODO: check connection
       this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
@@ -37,52 +45,55 @@ class Candlebatcher {
       throw new Error(`Can't find connector "${this.providerType}"`);
     }
   }
-  initModStr() {
-    switch (this.mode) {
-      case "realtime":
-        this.modeStr = "R";
-        break;
-      case "backtest":
-        this.modeStr = "B";
-        break;
-      case "emulator":
-        this.modeStr = "E";
-        break;
-      default:
-        this.modeStr = "R";
-        break;
+
+  log(...args) {
+    if (this.debug) {
+      this.context.log.info(`Candlebatcher ${this.eventSubject}:`, ...args);
     }
   }
+
+  logEvent(data) {
+    if (this.debug) {
+      // Публикуем событие - ошибка
+      publishEvents(
+        this.context,
+        "log",
+        createEvents({
+          subject: this.eventSubject,
+          eventType: LOG_EVENT,
+          data: {
+            taskId: this.taskId,
+            data: JSON.stringify(data)
+          }
+        })
+      );
+    }
+  }
+
   getStatus() {
+    this.log(`getStatus()`);
     return this.status;
   }
 
   getUpdateRequested() {
+    this.log(`getUpdateRequested()`);
     return this.updateRequested;
   }
-  setStopRequested() {
-    this.stopRequested = true;
-  }
-  setUpdateRequested(updatedFields) {
-    const updatedState = {
-      debug: updatedFields.debug,
-      timeframes: updatedFields.timeframes,
-      proxy: updatedFields.proxy
-    };
-    this.updateRequested = updatedState;
+
+  setStatus(status) {
+    this.log(`setStatus()`, status);
+    if (status) this.status = status;
   }
 
   setUpdate(updatedFields = this.updateRequested) {
+    this.log(`setStatus()`, updatedFields);
     this.debug = updatedFields.debug;
     this.timeframes = updatedFields.timeframes;
     this.proxy = updatedFields.proxy;
   }
 
-  setStatus(status) {
-    if (status) this.status = status;
-  }
-
   setError(error) {
+    this.log(`setError()`, error);
     if (error)
       this.error = {
         time: new Date().toISOString(),
@@ -91,6 +102,7 @@ class Candlebatcher {
   }
 
   async loadCandle() {
+    this.log(`loadCandle()`);
     const input = {
       exchange: this.exchange,
       asset: this.asset,
@@ -100,6 +112,7 @@ class Candlebatcher {
     };
 
     const result = await this.loadCandlesFunc(this.context, input);
+    this.log(`loadCandles() result:`, result);
     if (!this.lastLoadedCandle || this.lastLoadedCandle.time !== result.time) {
       this.lastLoadedCandle = result;
       return { isSuccess: true };
@@ -108,6 +121,7 @@ class Candlebatcher {
   }
 
   async saveCandle() {
+    this.log(`saveCandle()`);
     const input = {
       exchange: this.exchange,
       asset: this.asset,
@@ -115,7 +129,7 @@ class Candlebatcher {
       ...this.lastLoadedCandle
     };
     const result = await saveCandle(this.context, input);
-    this.context.log.info(result);
+    this.log(`saveCandle() result:`, result);
     if (result.isSuccess) {
       if (result.data.error) {
         if (result.data.error.code === "timeframe")
@@ -140,14 +154,24 @@ class Candlebatcher {
   }
 
   createSubject(timeframe) {
-    // "{Exchange}/{Asset}/{Currency}/{Timeframe}/{TaskId}.{B/E/R}"
-
-    return `${this.exchange}/${this.asset}/${this.currency}/${timeframe}/${
-      this.taskId
-    }.${this.modeStr}`;
+    const modeToStr = mode => {
+      switch (mode) {
+        case "realtime":
+          return "R";
+        case "backtest":
+          return "B";
+        case "emulator":
+          return "E";
+        default:
+          return "R";
+      }
+    };
+    return `${this.exchange}/${this.asset}/${this.currency}/${timeframe ||
+      JSON.stringify(this.timeframes)}/${this.taskId}.${modeToStr(this.mode)}`;
   }
 
   getEvents() {
+    this.log(`getEvents()`);
     const events = [];
     const currentSendedCandles = [];
     Object.keys(this.lastCandles).forEach(key => {
@@ -184,8 +208,10 @@ class Candlebatcher {
   }
 
   getCurrentState() {
+    this.log(`getCurrentState()`);
     return {
       taskId: this.taskId,
+      eventSubject: this.eventSubject,
       mode: this.mode,
       debug: this.debug,
       providerType: this.providerType,
@@ -200,36 +226,25 @@ class Candlebatcher {
       error: this.error
     };
   }
+
   async save() {
-    const result = await saveCandlebatcherState(
-      this.context,
-      this.getCurrentState()
-    );
+    this.log(`save()`);
+    const state = this.getCurrentState();
+    if (this.updateRequested) {
+      state.updateRequested = false;
+    }
+    if (this.stopRequested) {
+      state.stopRequested = false;
+    }
+    const result = await saveCandlebatcherState(this.context, state);
     if (!result.isSuccess)
       throw new Error(`Can't update state\n${result.error}`);
   }
 
-  async updateState() {
-    const newState = {
-      taskId: this.taskId,
-      debug: this.debug,
-      exchange: this.exchange,
-      asset: this.asset,
-      currency: this.currency,
-      timeframes: this.timeframes,
-      proxy: this.proxy,
-      error: this.error,
-      stopRequested: this.stopRequested,
-      updateRequested: this.updateRequested
-    };
-    const result = await updateCandlebatcherState(this.context, newState);
-    if (!result.isSuccess)
-      throw new Error(`Can't update state\n${result.error}`);
-  }
-
-  async end(error, status) {
+  async end(status, error) {
+    this.log(`end()`);
+    this.setStatus(status);
     this.setError(error);
-    this.setStatus(status || "started");
     await this.save();
   }
 }

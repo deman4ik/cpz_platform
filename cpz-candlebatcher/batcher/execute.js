@@ -4,8 +4,15 @@
 
 const uuid = require("uuid").v4;
 const Candlebatcher = require("./candlebatcher");
+const {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_BUSY,
+  STATUS_ERROR,
+  ERROR_EVENT
+} = require("../config");
 const retry = require("../utils/retry");
-const publishEvents = require("../eventgrid/publish");
+const { publishEvents, createEvents } = require("../eventgrid");
 const executeImport = require("../importer/execute");
 
 async function execute(context, state) {
@@ -14,7 +21,10 @@ async function execute(context, state) {
     // Создаем экземпляр класса Candlebatcher
     candlebatcher = new Candlebatcher(context, state);
     // Если задача остановлена
-    if (candlebatcher.getStatus() === "stopped") {
+    if (
+      candlebatcher.getStatus() === STATUS_STOPPED ||
+      candlebatcher.getStatus() === STATUS_ERROR
+    ) {
       // Сохраняем состояние и завершаем работу
       candlebatcher.end();
       return;
@@ -25,7 +35,7 @@ async function execute(context, state) {
       candlebatcher.setUpdate();
     }
     // Устанавливаем статус "Занят"
-    candlebatcher.setStatus("busy");
+    candlebatcher.setStatus(STATUS_BUSY);
     await candlebatcher.save();
     // Загружаем новую минутную свечу
     const loadCandleFunc = candlebatcher.loadCandle.bind(candlebatcher);
@@ -49,9 +59,21 @@ async function execute(context, state) {
         // Пробуем сохранить еще раз
         saveCandleResult = await retry(saveCandleFunc);
         if (!saveCandleResult.isSuccess) {
-          // TODO: Отправить в Error Log EventGrid
           // пропускаем итерацию
-          await candlebatcher.end();
+          await candlebatcher.end(STATUS_STARTED, saveCandleResult.error);
+          // Публикуем событие - ошибка
+          await publishEvents(
+            context,
+            "log",
+            createEvents({
+              subject: state.eventSubject,
+              eventType: ERROR_EVENT,
+              data: {
+                taskId: state.taskId,
+                error: saveCandleResult.error
+              }
+            })
+          );
           return;
         }
       } else {
@@ -75,16 +97,30 @@ async function execute(context, state) {
     }
 
     // Завершаем работу и сохраняем стейт
-    await candlebatcher.end();
+    await candlebatcher.end(STATUS_STARTED);
+    // Логируем итерацию
+    await candlebatcher.logEvent(candlebatcher.getCurrentState());
   } catch (error) {
     // Все необработанные ошибки
     context.log.error(error, state);
     // Если есть экземпляр класса
     if (candlebatcher) {
-      // Сохраняем ошибку в сторедже
-      await candlebatcher.end(error);
+      // Сохраняем ошибку в сторедже и продолжаем работу
+      await candlebatcher.end(STATUS_STARTED, error);
     }
-    // TODO: Отправить в Error Log EventGrid
+    // Публикуем событие - ошибка
+    await publishEvents(
+      context,
+      "log",
+      createEvents({
+        subject: state.eventSubject,
+        eventType: ERROR_EVENT,
+        data: {
+          taskId: state.taskId,
+          error
+        }
+      })
+    );
   }
 }
 module.exports = execute;

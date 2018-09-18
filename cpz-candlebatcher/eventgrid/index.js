@@ -4,6 +4,7 @@
 const msRestAzure = require("ms-rest-azure");
 const EventGrid = require("azure-eventgrid");
 const url = require("url");
+const uuid = require("uuid").v4;
 
 function createClient(key) {
   return new EventGrid(new msRestAzure.TopicCredentials(key));
@@ -14,6 +15,10 @@ function getHost(endpoint) {
 }
 
 const topics = {
+  tasks: {
+    client: createClient(process.env.EG_TASKS_KEY || process.env.EG_TEST_KEY),
+    host: getHost(process.env.EG_TASKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+  },
   candles: {
     client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
     host: getHost(
@@ -26,7 +31,20 @@ const topics = {
   }
 };
 
-async function publish(context, topic, events) {
+function createEvents(eventData) {
+  const events = [];
+  const newEvent = {
+    id: uuid(),
+    dataVersion: "1.0",
+    eventTime: new Date(),
+    subject: eventData.subject,
+    eventType: eventData.eventType,
+    data: eventData.data
+  };
+  events.push(newEvent);
+  return events;
+}
+async function publishEvents(context, topic, events) {
   try {
     const { client, host } = topics[topic];
     await client.publishEvents(host, events);
@@ -38,4 +56,4 @@ async function publish(context, topic, events) {
   }
 }
 
-module.exports = publish;
+module.exports = { publishEvents, createEvents };

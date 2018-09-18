@@ -38,10 +38,6 @@ async function saveCandlebatcherState(context, state) {
 async function updateCandlebatcherState(context, state) {
   try {
     const entity = {
-      PartitionKey: entityGenerator.String(
-        createSlug(state.exchange, state.asset, state.currency)
-      ),
-      RowKey: entityGenerator.String(state.taskId),
       ...objectToEntity(state)
     };
     const entityUpdated = await mergeEntity(
@@ -71,6 +67,19 @@ async function saveImporterState(context, state) {
     return { isSuccess: entityUpdated };
   } catch (error) {
     context.log.error(error);
+    return { isSuccess: false, state, error };
+  }
+}
+
+async function updateImporterState(context, state) {
+  try {
+    const entity = {
+      ...objectToEntity(state)
+    };
+    const entityUpdated = await mergeEntity(STORAGE_IMPORTERS_TABLE, entity);
+    return { isSuccess: entityUpdated };
+  } catch (error) {
+    context.log(error);
     return { isSuccess: false, state, error };
   }
 }
@@ -167,6 +176,7 @@ module.exports = {
   saveCandlebatcherState,
   updateCandlebatcherState,
   saveImporterState,
+  updateImporterState,
   getStartedCandlebatchers,
   getCandlebatcherByKey,
   getImporterByKey

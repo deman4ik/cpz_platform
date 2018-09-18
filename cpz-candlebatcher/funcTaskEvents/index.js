@@ -3,14 +3,18 @@ const {
   TASKS_CANDLEBATCHER_START_EVENT,
   TASKS_CANDLEBATCHER_STOP_EVENT,
   TASKS_CANDLEBATCHER_UPDATE_EVENT,
-  TASKS_CANDLEBATCHER_STARTIMPORT_EVENT
+  TASKS_CANDLEBATCHER_STARTIMPORT_EVENT,
+  TASKS_CANDLEBATCHER_STOPIMPORT_EVENT
 } = require("../config");
 const {
   handleStart,
   handleStop,
   handleUpdate
 } = require("../batcher/handleEvents");
-const handleImport = require("../importer/execute");
+const {
+  handleImportStart,
+  handleImportStop
+} = require("../importer/handleEvents");
 
 function eventHandler(context, req) {
   const parsedReq = JSON.parse(req.rawBody);
@@ -20,6 +24,7 @@ function eventHandler(context, req) {
   // TODO: SENDER ENDPOINT VALIDATION
   parsedReq.forEach(eventGridEvent => {
     const eventData = eventGridEvent.data;
+    const eventSubject = eventGridEvent.subject;
     switch (eventGridEvent.eventType) {
       case SUB_VALIDATION_EVENT: {
         context.log.warn(
@@ -44,7 +49,7 @@ function eventHandler(context, req) {
             eventData
           )}`
         );
-        handleStart(context, eventData);
+        handleStart(context, { eventSubject, ...eventData });
         break;
       }
       case TASKS_CANDLEBATCHER_STOP_EVENT: {
@@ -53,7 +58,7 @@ function eventHandler(context, req) {
             eventData
           )}`
         );
-        handleStop(context, eventData);
+        handleStop(context, { eventSubject, ...eventData });
         break;
       }
       case TASKS_CANDLEBATCHER_UPDATE_EVENT: {
@@ -62,7 +67,7 @@ function eventHandler(context, req) {
             eventData
           )}`
         );
-        handleUpdate(context, eventData);
+        handleUpdate(context, { eventSubject, ...eventData });
         break;
       }
       case TASKS_CANDLEBATCHER_STARTIMPORT_EVENT: {
@@ -71,7 +76,16 @@ function eventHandler(context, req) {
             eventData
           )}`
         );
-        handleImport(context, eventData);
+        handleImportStart(context, { eventSubject, ...eventData });
+        break;
+      }
+      case TASKS_CANDLEBATCHER_STOPIMPORT_EVENT: {
+        context.log.info(
+          `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+            eventData
+          )}`
+        );
+        handleImportStop(context, { eventSubject, ...eventData });
         break;
       }
       default: {

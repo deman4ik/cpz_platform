@@ -1,5 +1,7 @@
 const { getStartedCandlebatchers } = require("../tableStorage");
 const executeCandlebatcher = require("./execute");
+const { ERROR_EVENT } = require("../config");
+const { publishEvents, createEvents } = require("../eventgrid");
 
 async function handleTimer(context) {
   try {
@@ -17,7 +19,18 @@ async function handleTimer(context) {
     );
   } catch (error) {
     context.log.error(error);
-    // TODO: EVENTGRID LOG
+    // Публикуем событие - ошибка
+    await publishEvents(
+      context,
+      "log",
+      createEvents({
+        subject: "Timer",
+        eventType: ERROR_EVENT,
+        data: {
+          error
+        }
+      })
+    );
   }
 }
 module.exports = handleTimer;
