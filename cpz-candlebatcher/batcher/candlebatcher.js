@@ -1,6 +1,10 @@
 const uuid = require("uuid").v4;
+
 const { saveCandle } = require("../db/saveCandles");
-const { saveCandlebatcherState } = require("../tableStorage");
+const {
+  saveCandlebatcherState,
+  updateCandlebatcherState
+} = require("../tableStorage");
 const { CANDLES_NEW_CANDLE_EVENT } = require("../config");
 
 class Candlebatcher {
@@ -15,11 +19,11 @@ class Candlebatcher {
     this.asset = state.asset;
     this.currency = state.currency;
     this.timeframes = state.timeframes;
-    this.prevCandle = state.prevCandle;
-    this.currentCandles = state.currentCandles || {};
+    this.lastLoadedCandle = state.lastLoadedCandle || {};
+    this.lastCandles = state.lastCandles || {};
     this.sendedCandles = state.sendedCandles || {};
     this.proxy = state.proxy;
-    this.status = state.status || "started";
+    this.status = this.stopRequested ? "stopped" : state.status || "started";
     this.initConnector();
   }
 
@@ -49,12 +53,41 @@ class Candlebatcher {
         break;
     }
   }
-  setStatus(status = "started") {
-    this.status = status;
+  getStatus() {
+    return this.status;
+  }
+
+  getUpdateRequested() {
+    return this.updateRequested;
+  }
+  setStopRequested() {
+    this.stopRequested = true;
+  }
+  setUpdateRequested(updatedFields) {
+    const updatedState = {
+      debug: updatedFields.debug,
+      timeframes: updatedFields.timeframes,
+      proxy: updatedFields.proxy
+    };
+    this.updateRequested = updatedState;
+  }
+
+  setUpdate(updatedFields = this.updateRequested) {
+    this.debug = updatedFields.debug;
+    this.timeframes = updatedFields.timeframes;
+    this.proxy = updatedFields.proxy;
+  }
+
+  setStatus(status) {
+    if (status) this.status = status;
   }
 
   setError(error) {
-    this.error = error;
+    if (error)
+      this.error = {
+        time: new Date().toISOString(),
+        error
+      };
   }
 
   async loadCandle() {
@@ -67,22 +100,29 @@ class Candlebatcher {
     };
 
     const result = await this.loadCandlesFunc(this.context, input);
-    if (!this.currentCandle || this.currentCandle.time !== result.time) {
-      this.currentCandle = result;
+    if (!this.lastLoadedCandle || this.lastLoadedCandle.time !== result.time) {
+      this.lastLoadedCandle = result;
       return { isSuccess: true };
     }
     throw new Error("Loaded same candle.");
   }
 
   async saveCandle() {
-    const result = await saveCandle(this.context, this.currentCandle);
+    const input = {
+      exchange: this.exchange,
+      asset: this.asset,
+      currency: this.currency,
+      ...this.lastLoadedCandle
+    };
+    const result = await saveCandle(this.context, input);
+    this.context.log.info(result);
     if (result.isSuccess) {
       if (result.data.error) {
         if (result.data.error.code === "timeframe")
           return {
             ...this.getCurrentState(),
-            prevCandle: undefined,
-            currentCandles: undefined,
+            providerType: "ccxt",
+            lastLoadedCandle: undefined,
             sendedCandles: undefined,
             isSuccess: false,
             importRequested: true,
@@ -93,7 +133,7 @@ class Candlebatcher {
 
         return result.error;
       }
-      this.currentCandles = result.data;
+      this.lastCandles = result.data;
       return { isSuccess: true };
     }
     return result;
@@ -109,13 +149,16 @@ class Candlebatcher {
 
   getEvents() {
     const events = [];
-    Object(this.currentCandles).keys.forEach(key => {
-      const current = this.currentCandles[key];
+    const currentSendedCandles = [];
+    Object.keys(this.lastCandles).forEach(key => {
+      const current = this.lastCandles[key];
       const sended = this.sendedCandles[key];
-      if (current.id !== sended.id) {
+      if (!sended || current.id !== sended.id) {
         const currentTimeframe = parseInt(key.replace("timeframe", ""), 10);
         const newEvent = {
           id: uuid(),
+          dataVersion: "1.0",
+          eventTime: new Date(),
           subject: this.createSubject(currentTimeframe),
           eventType: CANDLES_NEW_CANDLE_EVENT,
           data: {
@@ -132,9 +175,11 @@ class Candlebatcher {
             volume: current.volume
           }
         };
+        currentSendedCandles.push(current);
         events.push(newEvent);
       }
     });
+    this.sendedCandles = currentSendedCandles;
     return events;
   }
 
@@ -148,7 +193,7 @@ class Candlebatcher {
       asset: this.asset,
       currency: this.currency,
       timeframes: this.timeframes,
-      prevCandle: this.prevCandle,
+      lastLoadedCandle: this.lastLoadedCandle,
       sendedCandles: this.sendedCandles,
       proxy: this.proxy,
       status: this.status,
@@ -160,15 +205,31 @@ class Candlebatcher {
       this.context,
       this.getCurrentState()
     );
-    if (!result.isSuccess) throw new Error(`Can't save state\n${result.error}`);
+    if (!result.isSuccess)
+      throw new Error(`Can't update state\n${result.error}`);
+  }
+
+  async updateState() {
+    const newState = {
+      taskId: this.taskId,
+      debug: this.debug,
+      exchange: this.exchange,
+      asset: this.asset,
+      currency: this.currency,
+      timeframes: this.timeframes,
+      proxy: this.proxy,
+      error: this.error,
+      stopRequested: this.stopRequested,
+      updateRequested: this.updateRequested
+    };
+    const result = await updateCandlebatcherState(this.context, newState);
+    if (!result.isSuccess)
+      throw new Error(`Can't update state\n${result.error}`);
   }
 
   async end(error, status) {
-    if (error) {
-      this.error = error;
-    }
-
-    this.setStatus(status);
+    this.setError(error);
+    this.setStatus(status || "started");
     await this.save();
   }
 }

@@ -13,23 +13,33 @@ async function execute(context, state) {
   try {
     // Создаем экземпляр класса Candlebatcher
     candlebatcher = new Candlebatcher(context, state);
+    // Если задача остановлена
+    if (candlebatcher.getStatus() === "stopped") {
+      // Сохраняем состояние и завершаем работу
+      candlebatcher.end();
+      return;
+    }
+    // Если есть запрос на обновление параметров
+    if (candlebatcher.getUpdateRequested()) {
+      // Обновляем параметры
+      candlebatcher.setUpdate();
+    }
     // Устанавливаем статус "Занят"
     candlebatcher.setStatus("busy");
     await candlebatcher.save();
     // Загружаем новую минутную свечу
-    const loadCandleResult = await retry(candlebatcher.loadCandle);
+    const loadCandleFunc = candlebatcher.loadCandle.bind(candlebatcher);
+    const loadCandleResult = await retry(loadCandleFunc);
     // Если не удалось загрузить новую свечу
     if (!loadCandleResult.isSuccess) {
-      // TODO: Отправить в Error Log EventGrid
-      // пропускаем итерацию
-      await candlebatcher.end();
-      return;
+      throw loadCandleResult;
     }
     // Сохраняем новую загруженную свечу
-    let saveCandleResult = await retry(candlebatcher.saveCandle);
+    const saveCandleFunc = candlebatcher.saveCandle.bind(candlebatcher);
+    let saveCandleResult = await retry(saveCandleFunc);
     // Если ошибка
     if (!saveCandleResult.isSuccess) {
-      // Если необходима подргрузка данных
+      // Если необходима подгрузка данных
       if (saveCandleResult.importRequested) {
         const importRequest = {
           ...saveCandleResult,
@@ -37,7 +47,7 @@ async function execute(context, state) {
         };
         await executeImport(context, importRequest);
         // Пробуем сохранить еще раз
-        saveCandleResult = await retry(candlebatcher.saveCandle);
+        saveCandleResult = await retry(saveCandleFunc);
         if (!saveCandleResult.isSuccess) {
           // TODO: Отправить в Error Log EventGrid
           // пропускаем итерацию
@@ -45,10 +55,7 @@ async function execute(context, state) {
           return;
         }
       } else {
-        // TODO: Отправить в Error Log EventGrid
-        // пропускаем итерацию
-        await candlebatcher.end();
-        return;
+        throw saveCandleResult;
       }
     }
     // Генерируем события для отправки
@@ -57,13 +64,13 @@ async function execute(context, state) {
     if (eventsToSend.length > 0) {
       // Отправляем
       const publishEventsResult = await publishEvents(
-        this.context,
+        context,
         "candles",
         eventsToSend
       );
       // Если не удалось отправить события
       if (!publishEventsResult.isSuccess) {
-        // TODO: Отправить в Error Log EventGrid
+        throw publishEventsResult;
       }
     }
 
@@ -71,11 +78,11 @@ async function execute(context, state) {
     await candlebatcher.end();
   } catch (error) {
     // Все необработанные ошибки
-    this.context.log.error(error, state);
+    context.log.error(error, state);
     // Если есть экземпляр класса
     if (candlebatcher) {
-      // Останавливаем процесс загрузки
-      await candlebatcher.end(error, "error");
+      // Сохраняем ошибку в сторедже
+      await candlebatcher.end(error);
     }
     // TODO: Отправить в Error Log EventGrid
   }

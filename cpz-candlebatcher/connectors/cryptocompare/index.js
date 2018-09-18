@@ -21,8 +21,8 @@ function fetchJSON(url, agent) {
  * Загрзука свечей из CryptoCompare
  * Обратный порядок загрузки сначала свежие потом старые */
 async function loadCandles(context, input) {
-  context.log("loadCandles");
-  context.log(input);
+  context.log.info("Load Candles CryptoCompare");
+  context.log.info(input);
 
   const agent = new HttpsProxyAgent(input.proxy || process.env.PROXY_ENDPOINT);
 
@@ -32,7 +32,9 @@ async function loadCandles(context, input) {
     exchange: input.exchange,
     limit: input.limit || 500
   };
-  if (input.nextDate) options.timestamp = dayjs(input.nextDate).unix();
+  if (input.limit !== 1) {
+    options.timestamp = dayjs(input.nextDate || input.dateTo).unix();
+  }
   let url;
   // Запрашиваем свечи
   switch (input.timeframe) {
@@ -58,55 +60,57 @@ async function loadCandles(context, input) {
       // Сразу отдаем последнюю свечу
       const latestCandle = response.Data[0];
       return {
-        time: latestCandle.time,
-        open: latestCandle.open,
-        close: latestCandle.close,
-        high: latestCandle.high,
-        low: latestCandle.low,
-        volume: latestCandle.volumefrom
+        isSuccess: true,
+        data: {
+          time: latestCandle.time * 1000,
+          open: latestCandle.open,
+          close: latestCandle.close,
+          high: latestCandle.high,
+          low: latestCandle.low,
+          volume: latestCandle.volumefrom
+        }
       };
     }
-    const timeFrom = dayjs
-      .unix(response.TimeFrom)
-      .utc()
-      .format();
-    // Дата конца импорта
-    const dateEnd = input.dateTo;
-    // Дата первой загруженный свечи
-    const dateStart = timeFrom;
     // Дата начала импорта
-    const { dateFrom } = input;
-    // Всего минут
-    const totalDuration =
-      input.totalDuration || durationMinutes(dateFrom, dateEnd);
-    // Осталось минут
-    const leftDuration = durationMinutes(dateFrom, dateStart, true);
-    // Загружено минут
-    const completedDuration = totalDuration - leftDuration;
-    // Процент выполнения
-    const percent = completedPercent(completedDuration, totalDuration);
-    let nextDate;
-    // Если дата начала импорта раньше чем дата первой загруженной свечи
-    if (dayjs(dateFrom).isBefore(dateStart)) {
-      // Формируем параметры нового запроса на импорт
-      nextDate = dayjs(dateStart)
-        .utc()
-        .format();
-    }
-
+    const dateStart = dayjs(input.dateFrom);
+    // Дата конца импорта
+    const dateEnd = dayjs(input.dateTo);
+    const filteredData = response.Data.filter(
+      candle =>
+        dayjs(candle.time * 1000).isAfter(dateStart) ||
+        dayjs(candle.time * 1000).isBefore(dateEnd)
+    );
     /* Преобразуем объект в массив */
-    const data = response.Data.map(item => [
-      item.time,
+    const data = filteredData.map(item => [
+      item.time * 1000,
       item.open,
       item.high,
       item.low,
       item.close,
       item.volumefrom
     ]);
-    // Исключаем последний элемент из массива с неполной свечей
-    data.pop();
+    // Дата первой загруженный свечи
+    const currentStart = dayjs(data[0][0]);
+
+    // Всего минут
+    const totalDuration =
+      input.totalDuration || durationMinutes(dateStart, dateEnd);
+    // Осталось минут
+    const leftDuration = durationMinutes(dateStart, currentStart, true);
+    // Загружено минут
+    const completedDuration = totalDuration - leftDuration;
+    // Процент выполнения
+    const percent = completedPercent(completedDuration, totalDuration);
+    let nextDate;
+    // Если дата начала импорта раньше чем дата первой загруженной свечи
+    if (dateStart.isBefore(currentStart)) {
+      // Формируем параметры нового запроса на импорт
+      nextDate = currentStart.toJSON();
+    }
+
     // Результат выполнения
     const result = {
+      isSuccess: true,
       nextDate,
       totalDuration,
       completedDuration,
