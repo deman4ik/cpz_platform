@@ -152,7 +152,7 @@ BEGIN
           j:='{"error":'||j_tmp||'}';
           RETURN j;
         else
-          j:=j||', {"timeframe5":'||j_tmp;
+          j:=j||', "timeframe5":'||j_tmp;
         end if;
       /* row_to_json does not generate exception
       EXCEPTION
@@ -248,4 +248,5 @@ BEGIN
 
   RETURN j;
 END;
-$$;
+
+$BODY$;
