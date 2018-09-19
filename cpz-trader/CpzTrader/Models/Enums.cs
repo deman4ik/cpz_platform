@@ -77,6 +77,29 @@ namespace CpzTrader.Models
         /// отменен
         /// </summary>
         Canceled,
+
+        /// <summary>
+        /// ошибка выставления
+        /// </summary>
+        Fall
+    }
+
+    public enum SignalType
+    {
+        /// <summary>
+        /// открыть по рынку
+        /// </summary>
+        OpenByMarket,
+
+        /// <summary>
+        /// выставить лимитку
+        /// </summary>
+        SetLimit,
+
+        /// <summary>
+        /// проверить состояние лимитного ордера
+        /// </summary>
+        CheckLimit       
     }
 
     /// <summary>

@@ -33,10 +33,10 @@ namespace CpzTrader.EventHandlers
         /// <summary>
         /// отправить сигнал всем проторговщикам
         /// </summary>
-        public static async Task SendSignalAllTraders(Position signal)
+        public static async Task SendSignalAllTraders(string numberOrder, SignalType signalType, Position position)
         {
             // получаем из базы клиентов с текущими настройками
-            List<Client> clients = await DbContext.GetClientsInfoFromDbAsync(signal.RobotId);
+            List<Client> clients = await DbContext.GetClientsInfoFromDbAsync(position.RobotId);
 
             List<Task> parallelTraders = new List<Task>();
 
@@ -45,7 +45,7 @@ namespace CpzTrader.EventHandlers
                 // асинхронно отправляем сигнал всем проторговщикам
                 foreach (Client client in clients)
                 {
-                    var parallelTrader = Trader.RunTrader(client, signal);
+                    var parallelTrader = Trader.RunTrader(numberOrder, signalType, client, position);
 
                     parallelTraders.Add(parallelTrader);
                 }
@@ -53,7 +53,7 @@ namespace CpzTrader.EventHandlers
                 await Task.WhenAll(parallelTraders);
             }
 
-            string message = $"Сигнал от робота - {signal.PartitionKey} обработан.";
+            string message = $"Сигнал от робота - {position.PartitionKey} обработан.";
 
             //await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("SignalHandled"), message);
         }
@@ -90,27 +90,27 @@ namespace CpzTrader.EventHandlers
         /// </summary>
         public static Client CreateClient(dynamic data)
         {
-            Client Ncl = new Client(data.taskId.ToString(), data.robotId.ToString());
+            //Client Ncl = new Client(data.taskId.ToString(), data.robotId.ToString());
 
-            Ncl.Mode = data.mode;
-            Ncl.DebugMode = data.debug;
-            Ncl.UserId = data.userId;
-            Ncl.AllPositions = new List<Position>();
-            Ncl.RobotSettings = new RobotSettings()
-            {
-                Exchange = data.exchange,
-                Baseq = data.asset,
-                Quote = data.currency,
-                Timeframe = data.timeframe,
-                Volume = data.settings.volume,
-                Slippage = data.settings.slippageStep,
-            };
-            Ncl.EmulatorSettings = new EmulatorSettings()
-            {
-                Slippage = data.settings.slippageStep,
-                StartingBalance = 10000,
-                CurrentBalance = 10000
-            };
+            //Ncl.Mode = data.mode;
+            //Ncl.DebugMode = data.debug;
+            //Ncl.UserId = data.userId;
+            //Ncl.AllPositions = new List<Position>();
+            //Ncl.RobotSettings = new RobotSettings()
+            //{
+            //    Exchange = data.exchange,
+            //    Baseq = data.asset,
+            //    Quote = data.currency,
+            //    Timeframe = data.timeframe,
+            //    Volume = data.settings.volume,
+            //    Slippage = data.settings.slippageStep,
+            //};
+            //Ncl.EmulatorSettings = new EmulatorSettings()
+            //{
+            //    Slippage = data.settings.slippageStep,
+            //    StartingBalance = 10000,
+            //    CurrentBalance = 10000
+            //};
 
             return new Client(data.taskId.ToString(), data.robotId.ToString())
             {
@@ -118,7 +118,7 @@ namespace CpzTrader.EventHandlers
                 DebugMode = data.debug,
                 UserId = data.userId,
                 AllPositions = new List<Position>(),
-                AllPositionsJson = "",
+                AllPositionsJson = "[]",
                 RobotSettingsJson = "",
                 EmulatorSettingsJson = "",
                 RobotSettings = new RobotSettings()
@@ -128,7 +128,8 @@ namespace CpzTrader.EventHandlers
                     Quote = data.currency,
                     Timeframe =data.timeframe,
                     Volume = data.settings.volume,
-                    Slippage = data.settings.slippageStep,                    
+                    Slippage = data.settings.slippageStep,
+                    Deviation = data.settings.deviation
                 },
                 EmulatorSettings = new EmulatorSettings()
                 {

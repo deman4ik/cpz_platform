@@ -8,19 +8,11 @@ namespace CpzTrader
     /// </summary>
     public static class Emulator
     {
-        public static Order SendOrder(decimal volume, NewSignal signal)
+        public static Order SendOrder(decimal volume, Order signal)
         {
-            Order newOrder = new Order()
-            {
-                NumberInRobot = signal.NumberOrderInRobot,
-                Symbol = signal.Baseq + "-" + signal.Quote,
-                Price = signal.Price,
-                Time = DateTime.UtcNow,
-                Volume = volume,
-                State = signal.OrderType == OrderType.Limit ? OrderState.Open : OrderState.Closed,
-            };
-
-            return newOrder;
+            signal.State = signal.OrderType == OrderType.Limit ? OrderState.Open : OrderState.Closed;
+ 
+            return signal;
         }
 
         /// <summary>

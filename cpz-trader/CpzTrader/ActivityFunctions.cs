@@ -18,9 +18,9 @@ namespace CpzTrader
         /// <summary>
         /// отправить ордер на биржу
         /// </summary>        
-        public static async Task<Order> SendOrder(Client clientInfo, NewSignal signal)
+        public static async Task<Order> SendOrder(Client clientInfo, Order signal)
         {
-            (Client client, NewSignal newSignal) tradeInfo = (clientInfo, signal);
+            (Client client, Order newSignal) tradeInfo = (clientInfo, signal);
 
             var url = Environment.GetEnvironmentVariable("CCXT_SEND_ORDER");
 
@@ -53,14 +53,17 @@ namespace CpzTrader
                 if (errorInfo.code == 100)
                 {
                     // ошибка идентификации пользователя на бирже
+                    return null;
                 }
                 else if (errorInfo.code == 110)
                 {
                     // Не достаточно средств для выставления ордера
+                    return null;
                 }
                 else if (errorInfo.code == 120)
                 {
                     // Ошибка в параметрах ордера
+                    return null;
                 }
             }
             return null;
@@ -121,9 +124,9 @@ namespace CpzTrader
         /// <summary>
         /// проверить статус ордера
         /// </summary>        
-        public static async Task<bool> CheckOrderStatus(string orderNumber, Client clientInfo, NewSignal signal)
+        public static async Task<bool> CheckOrderStatus(string orderNumber, Client clientInfo, Order signal)
         {
-            (string numberOrder, Client client, NewSignal signal) tradeInfo = (orderNumber, clientInfo, signal);
+            (string numberOrder, Client client, Order signal) tradeInfo = (orderNumber, clientInfo, signal);
 
             var dataAsString = JsonConvert.SerializeObject(tradeInfo);
 

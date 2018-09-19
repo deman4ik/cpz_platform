@@ -105,26 +105,12 @@ namespace CpzTrader.TraderHelper
                                 }
                                 else if (order.OrderType == OrderType.Stop)
                                 {
-                                    await CheckStopOrder(currentPrice, PositionState.Close, order, position);
+                                    await CheckStopOrder(currentPrice, PositionState.Open, order, position);
                                 }
                             }
                             else if(order.State == OrderState.Posted)
                             {
-                                if(order.Direction == "buy")
-                                {
-                                    if(currentPrice < order.Price)
-                                    {
-                                        order.State = OrderState.Closed;
-
-                                    }
-                                }
-                                else if(order.Direction == "sell")
-                                {
-                                    if (currentPrice > order.Price)
-                                    {
-                                        order.State = OrderState.Closed;
-                                    }
-                                }
+                                await CheckPostedOrder(currentPrice, PositionState.Open, order, position);
                             }
                         }
                     }
@@ -145,7 +131,7 @@ namespace CpzTrader.TraderHelper
                             }
                             else if (order.State == OrderState.Posted)
                             {
-
+                                await CheckPostedOrder(currentPrice, PositionState.Close, order, position);
                             }
                         }
                     }
@@ -160,15 +146,42 @@ namespace CpzTrader.TraderHelper
         }
 
         /// <summary>
+        /// проверить размещенный ордер
+        /// </summary>
+        private static async Task CheckPostedOrder(decimal currentPrice, PositionState state, Order order, Position position)
+        {
+            if ((order.Direction == "buy" && currentPrice < order.Price) || (order.Direction == "sell" && currentPrice > order.Price))
+            {
+                order.State = OrderState.Closed;
+                position.State = (int)state;
+                try
+                {
+                    // обновляем информацию о позиции в хранилище
+                    var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+
+                    // если обновление прошло успешно, даем сигнал трейдерам проверить свои ордера
+                    if (result)
+                    {
+                        // отправить проторговщикам
+                        Utils.RunAsync(Utils.SendSignalAllTraders(order.NumberInRobot, SignalType.CheckLimit, position));
+                    }
+                }
+                catch (Exception e)
+                {
+                    // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                }
+            }            
+        }
+
+        /// <summary>
         /// проверить отложенный лимитник
         /// </summary>
         private static async Task CheckLimitOrder(decimal currentPrice, Order order, Position position)
         {
             if (order.Direction == "buy")
             {
-                if(currentPrice - order.Price <= order.Slippage)
+                if (currentPrice - order.Price <= order.Slippage)
                 {
-                    
                     order.State = OrderState.Posted;
                     position.ObjectToJson();
 
@@ -181,7 +194,7 @@ namespace CpzTrader.TraderHelper
                         if (result)
                         {
                             // отправить проторговщикам
-                            Utils.RunAsync(Utils.SendSignalAllTraders(position));
+                            Utils.RunAsync(Utils.SendSignalAllTraders(order.NumberInRobot, SignalType.SetLimit, position));
                         }
                     }
                     catch (Exception e)
@@ -199,14 +212,14 @@ namespace CpzTrader.TraderHelper
 
                     try
                     {
-                            // обновляем информацию о позиции в хранилище
-                            var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                        // обновляем информацию о позиции в хранилище
+                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
 
                         // если обновление прошло успешно, даем сигнал трейдерам
                         if (result)
                         {
                             // отправить проторговщикам
-                            Utils.RunAsync(Utils.SendSignalAllTraders(position));
+                            Utils.RunAsync(Utils.SendSignalAllTraders(order.NumberInRobot, SignalType.SetLimit, position));
                         }
                     }
                     catch (Exception e)
@@ -232,7 +245,7 @@ namespace CpzTrader.TraderHelper
 
                 var entryPrice = signalPrice + order.Slippage;
 
-                if (currentPrice >= entryPrice)
+                if (currentPrice >= signalPrice)
                 {
                     order.Price = entryPrice;
                     order.State = OrderState.Closed;
@@ -249,7 +262,7 @@ namespace CpzTrader.TraderHelper
                         if (result)
                         {
                             // отправить проторговщикам
-                            Utils.RunAsync(Utils.SendSignalAllTraders(position));
+                            Utils.RunAsync(Utils.SendSignalAllTraders(order.NumberInRobot, SignalType.OpenByMarket, position));
                         }
                     }
                     catch (Exception e)
@@ -264,7 +277,7 @@ namespace CpzTrader.TraderHelper
 
                 var entryPrice = signalPrice - order.Slippage;
 
-                if (currentPrice <= entryPrice)
+                if (currentPrice <= signalPrice)
                 {
                     order.Price = entryPrice;
                     order.State = OrderState.Closed;
@@ -281,7 +294,7 @@ namespace CpzTrader.TraderHelper
                         if (res2)
                         {
                             // отправить проторговщикам
-                            Utils.RunAsync(Utils.SendSignalAllTraders(position));
+                            Utils.RunAsync(Utils.SendSignalAllTraders(order.NumberInRobot, SignalType.OpenByMarket, position));
                         }
                     }
                     catch (Exception e)

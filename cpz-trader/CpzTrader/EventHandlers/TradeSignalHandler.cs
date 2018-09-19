@@ -133,7 +133,7 @@ namespace CpzTrader.EventHandlers
                     // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
                     if (signal.OrderType == OrderType.Market)
                     {
-                        await Utils.SendSignalAllTraders(newPosition);
+                        await Utils.SendSignalAllTraders(newOrder.NumberInRobot, SignalType.OpenByMarket, newPosition);
                     }
 
                     newPosition.ObjectToJson();
@@ -150,6 +150,10 @@ namespace CpzTrader.EventHandlers
 
                     Order newOrder = Utils.CreateOrder(signal);
 
+                    newOrder.Slippage = signal.Slippage == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Slippage;
+
+                    newOrder.Deviation = signal.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Deviation;
+
                     needPosition.CloseOrders.Add(newOrder);
 
                     needPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;//signal.OrderType == OrderType.Market ? PositionState.Close.ToString() : PositionState.Closing.ToString();
@@ -157,7 +161,7 @@ namespace CpzTrader.EventHandlers
                     // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
                     if (signal.OrderType == OrderType.Market)
                     {
-                        await Utils.SendSignalAllTraders(needPosition);
+                        await Utils.SendSignalAllTraders(newOrder.NumberInRobot, SignalType.OpenByMarket, needPosition);
                     }
 
                     needPosition.ObjectToJson();

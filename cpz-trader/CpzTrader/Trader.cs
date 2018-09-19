@@ -1,4 +1,5 @@
 ﻿using CpzTrader.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CpzTrader
@@ -8,112 +9,86 @@ namespace CpzTrader
         /// <summary>
         /// клиентский проторговщик
         /// </summary>
-        /// <param name="clientInfo">данные о клиенте, для которого обрабатывается сигнал</param>
-        /// <param name="newSignal">сигнал</param>
-        public static async Task RunTrader(Client clientInfo, Position newSignal)
+        public static async Task RunTrader(string numberOrder, SignalType signalType, Client clientInfo, Position position)
         {
-            //var action = newSignal.Action;
+            // находим позицию для которой пришел сигнал
+            var needPosition = clientInfo.AllPositions.Find(pos => pos.RowKey == position.RowKey);
 
-            //// находим позицию для которой пришел сигнал
-            //var needPosition = clientInfo.AllPositions.Find(position => position.NumberPositionInRobot == newSignal.NumberPositionInRobot);
+            // если такой позы нет, значит открывается новая
+            if (needPosition == null)
+            {
+                var myPosition = (Position)position.Clone();
 
-            //// если сигнал на открытие новой позиции
-            //if (action == ActionType.NewPosition)
-            //{
-            //    // создаем ее
-            //    Position newPosition = new Position();
+                myPosition.OpenOrders = new List<Order>();
+                myPosition.CloseOrders = new List<Order>();
 
-            //    newPosition.NumberPositionInRobot = newSignal.NumberPositionInRobot;
+                var needOrder = position.GetNeedOrder(numberOrder);
 
-            //    // добавляем в нее новый открывающий ордер
-            //    var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-            //                                           : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+                Order myOrder = (Order)needOrder.Clone();
 
-            //    await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
+                if (signalType != SignalType.CheckLimit)
+                {
+                    var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
+                                                                  : await ActivityFunctions.SendOrder(clientInfo, myOrder);
 
-            //    if (openOrder != null)
-            //    {
-            //        newPosition.OpenOrders.Add(openOrder);
+                    if (openOrder != null)
+                    {
+                        myOrder.NumberInSystem = openOrder.NumberInSystem;                                              
+                    }
+                    else
+                    {
+                        myOrder.State = OrderState.Fall;
+                    }
 
-            //        // сохраняем позицию в клиенте
-            //        clientInfo.AllPositions.Add(newPosition);
-            //    }
-            //}
-            //if (needPosition != null)
-            //{
-            //    // наращиваем объем позиции
-            //    if (action == ActionType.Long)
-            //    {
-            //        var openOrder = clientInfo.IsEmulation ? Emulator.SendOrder(clientInfo.TradeSettings.Volume, newSignal)
-            //                                               : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+                    myPosition.OpenOrders.Add(myOrder);
 
-            //        await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewOpenOrder"), openOrder);
+                    clientInfo.AllPositions.Add(myPosition);
 
-            //        if (openOrder != null)
-            //        {
-            //            needPosition.OpenOrders.Add(openOrder);
-            //        }
+                    await DbContext.UpdateClientInfoAsync(clientInfo);
+                }                
+            }
+            else
+            {                
+                if (signalType != SignalType.CheckLimit)
+                {
+                    var needOrder = position.GetNeedOrder(numberOrder);
 
-            //    } // сокращаем объем позиции
-            //    else if (action == ActionType.CloseLong)
-            //    {
-            //        var needCloseVolume = needPosition.GetOpenVolume() * newSignal.PercentVolume / 100;
+                    Order myOrder = (Order)needOrder.Clone();
 
-            //        var closeOrder = clientInfo.IsEmulation ? Emulator.SendOrder(needCloseVolume, newSignal)
-            //                                                : await ActivityFunctions.SendOrder(clientInfo, newSignal);
+                    var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
+                                                                  : await ActivityFunctions.SendOrder(clientInfo, myOrder);
 
-            //        await EventGridPublisher.PublishEvent(ConfigurationManager.TakeParameterByName("NewCloseOrder"), closeOrder);
+                    if (openOrder != null)
+                    {
+                        myOrder.NumberInSystem = openOrder.NumberInSystem;
+                    }
+                    else
+                    {
+                        myOrder.State = OrderState.Fall;
+                    }
 
-            //        if (closeOrder != null)
-            //        {
-            //            needPosition.CloseOrders.Add(closeOrder);
-            //        }
+                    needPosition.CloseOrders.Add(myOrder);
 
-            //        if (newSignal.PercentVolume == 100)
-            //        {
-            //            var totals = needPosition.CalculatePositionResult();
-            //            clientInfo.EmulatorSettings.CurrentBalance += totals;
-            //        }
+                    clientInfo.AllPositions.Add(needPosition);
 
-            //    } // проверить состояние ордера
-            //    else if (action == ActionType.CheckOrder)
-            //    {
-            //        var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
+                    await DbContext.UpdateClientInfoAsync(clientInfo);
+                }
+                else
+                {
+                    var needOrder = needPosition.GetNeedOrder(numberOrder);
 
-            //        if (needOrder != null)
-            //        {
-            //            if (clientInfo.IsEmulation)
-            //            {
-            //                needOrder.State = OrderState.Closed;
-            //            }
-            //            else
-            //            {
-            //                var resultChecking = await ActivityFunctions.CheckOrderStatus(needOrder.NumberInSystem, clientInfo, newSignal);
+                    if (clientInfo.Mode == "emulator")
+                    {
+                        needOrder.State = OrderState.Closed;
+                    }
+                    else
+                    {
+                        var resultChecking = await ActivityFunctions.CheckOrderStatus(needOrder.NumberInSystem, clientInfo, needOrder);
 
-            //                needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
-            //            }
-            //        }
-
-            //    } // отозвать ордер
-            //    else if (action == ActionType.CancelOrder)
-            //    {
-            //        var needOrder = needPosition.GetNeedOrder(newSignal.NumberOrderInRobot);
-
-            //        if (needOrder != null)
-            //        {
-            //            if (clientInfo.IsEmulation)
-            //            {
-            //                needOrder.State = OrderState.Canceled;
-            //            }
-            //            else
-            //            {
-            //                var cancellationResult = await ActivityFunctions.CancelOrder(needOrder.NumberInSystem, clientInfo, newSignal);
-            //            }
-            //        }
-            //    }
-            //}
-
-            await DbContext.UpdateClientInfoAsync(clientInfo);
+                        needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
+                    }
+                }
+            }           
         }
     }
 }

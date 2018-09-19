@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CpzTrader.Models
 {
-    public class Position : TableEntity
+    public class Position : TableEntity, ICloneable
     {
         public Position(string uniqId, string partitionKey) : this ()
         {
@@ -50,11 +50,6 @@ namespace CpzTrader.Models
         /// состояние позиции
         /// </summary>
         public int State { get; set; }
-
-        public void UpdateState()
-        {
-
-        }
 
         /// <summary>
         /// преобразовать объекты в JSON
@@ -158,6 +153,15 @@ namespace CpzTrader.Models
             }
 
             return openVolume;
+        }
+
+        /// <summary>
+        /// копировать позицию
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CpzTrader.Models
 {
-    public class Order
+    public class Order : ICloneable
     {
         /// <summary>
         /// бумага
@@ -71,5 +71,13 @@ namespace CpzTrader.Models
         /// </summary>
         public string NumberInSystem { get; set; }
 
+        /// <summary>
+        /// клонировать ордер
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }
