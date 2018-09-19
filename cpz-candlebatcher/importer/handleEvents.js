@@ -1,6 +1,9 @@
 const execute = require("./execute");
 const { updateImporterState } = require("../tableStorage");
-const { TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT } = require("../config");
+const {
+  TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT,
+  IMPORTER_SERVICE
+} = require("../config");
 const { publishEvents, createEvents } = require("../eventgrid");
 
 /**
@@ -35,18 +38,17 @@ async function handleImportStop(context, eventData) {
     await publishEvents(
       context,
       "tasks",
-      createEvents(
-        {
-          subject: eventData.eventSubject,
-          data: {
-            taskId: eventData.taskId,
-            rowKey: eventData.rowKey,
-            partitionKey: eventData.partitionKey,
-            error
-          }
-        },
-        TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT
-      )
+      createEvents({
+        subject: eventData.eventSubject,
+        eventType: TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT,
+        data: {
+          service: IMPORTER_SERVICE,
+          taskId: eventData.taskId,
+          rowKey: eventData.rowKey,
+          partitionKey: eventData.partitionKey,
+          error
+        }
+      })
     );
   }
 }

@@ -29,21 +29,19 @@ async function handleStart(context, eventData) {
     await publishEvents(
       context,
       "tasks",
-      createEvents(
-        {
-          subject: eventData.eventSubject,
-          data: {
-            taskId: eventData.taskId,
-            rowKey: eventData.rowKey,
-            partitionKey: createSlug(
-              eventData.exchange,
-              eventData.asset,
-              eventData.currency
-            )
-          }
-        },
-        TASKS_CANDLEBATCHER_STARTED_EVENT
-      )
+      createEvents({
+        subject: eventData.eventSubject,
+        eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
+        data: {
+          taskId: eventData.taskId,
+          rowKey: eventData.rowKey,
+          partitionKey: createSlug(
+            eventData.exchange,
+            eventData.asset,
+            eventData.currency
+          )
+        }
+      })
     );
   } catch (error) {
     context.log.error("Candlebatcher starting error:", error, eventData);
@@ -147,11 +145,13 @@ async function handleUpdate(context, eventData) {
       // Если в работе
       if (candlebatcherState.status === STATUS_BUSY) {
         newState.updateRequested = {
+          eventSubject: eventData.eventSubject,
           debug: eventData.debug,
           timeframes: eventData.timeframes,
           proxy: eventData.proxy
         };
       } else {
+        newState.eventSubject = eventData.eventSubject;
         newState.debug = eventData.debug;
         newState.timeframes = eventData.timeframes;
         newState.proxy = eventData.proxy;
@@ -189,7 +189,6 @@ async function handleUpdate(context, eventData) {
           taskId: eventData.taskId,
           rowKey: eventData.rowKey,
           partitionKey: eventData.partitionKey,
-
           error
         }
       })

@@ -6,7 +6,8 @@ const {
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED,
-  LOG_EVENT
+  LOG_EVENT,
+  IMPORTER_SERVICE
 } = require("../config");
 const { publishEvents, createEvents } = require("../eventgrid");
 
@@ -55,8 +56,9 @@ class Importer {
           subject: this.eventSubject,
           eventType: LOG_EVENT,
           data: {
+            service: IMPORTER_SERVICE,
             taskId: this.taskId,
-            data: JSON.stringify(data)
+            data
           }
         })
       );
@@ -90,6 +92,11 @@ class Importer {
         break;
     }
   }
+  getStatus() {
+    this.log(`getStatus()`);
+    return this.status;
+  }
+
   setStatus(status) {
     this.log(`setStatus()`, status);
     if (!this.nextDate && !status) {

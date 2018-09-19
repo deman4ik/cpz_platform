@@ -1,23 +1,15 @@
-/*
+const client = require("./client");
+/**
  * Сохранение минутной свечи и запрос новых свечей в доступных таймфреймах
+ *
+ * @param {*} context
+ * @param {*} candle
+ * @returns
  */
-const { GraphQLClient } = require("graphql-request");
-// const base64 = require("base-64");
-// Считывание переменных окружения
-const { DB_API_ENDPOINT } = process.env;
-
-// Создание GraphQL клиента
-const client = new GraphQLClient(DB_API_ENDPOINT, {
-  /*  headers: {
-    // Базовая авторизация
-    Authorization: `Basic ${base64.encode(`${DB_API_USER}:${DB_API_SECRET}`)}`
-  } */
-});
-
 async function saveCandle(context, candle) {
   // Запрос
   const query = `mutation pCandlesInsert (
-  $start: Int!,
+  $time: Int!,
   $open:  BigFloat!,
   $high:  BigFloat!,
   $low:  BigFloat!,
@@ -30,7 +22,7 @@ async function saveCandle(context, candle) {
   $exchange: String!
 )
 {
-  pCandlesInsert(input: {nstart: $start, nopen: $open,
+  pCandlesInsert(input: {ntime: $time, nopen: $open,
   nhigh: $high, nlow: $low, nclose: $close, nvolume: $volume,
   ntrades: $trades, nvwp: $vwp, scurency: $currency, 
   sasset: $asset, sexchange: $exchange}) {
@@ -38,19 +30,9 @@ async function saveCandle(context, candle) {
   }
 }`;
   try {
-    /* const testVars = {
-      start: 1530540000,
-      open: 6329.5,
-      high: 6329.93,
-      low: 6329.5,
-      close: 6329.93,
-      volume: 1.69403961,
-      exchange: "gdax",
-      currency: "USD",
-      asset: "BTC"
-    }; */
     const variables = {
-      start: candle.time,
+      time:
+        candle.time.toString().length > 10 ? candle.time / 1000 : candle.time,
       open: candle.open,
       high: candle.high,
       low: candle.low,
@@ -74,7 +56,7 @@ async function saveCandle(context, candle) {
     return { isSuccess: true, data };
   } catch (error) {
     context.log.error(`Can't save candle.\n${error}\n${candle}`);
-    return { isSuccess: false, error };
+    throw error;
   }
 }
 
@@ -98,7 +80,7 @@ async function saveCandlesArray(context, input) {
     return { isSuccess: true, data };
   } catch (error) {
     context.log.error(`Can't save candles.\n${error}\n${input}`);
-    return { isSuccess: false, error, input };
+    throw error;
   }
 }
 

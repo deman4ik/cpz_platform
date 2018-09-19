@@ -1,4 +1,6 @@
 module.exports = {
+  CANDLEBATCHER_SERVICE: "candlebatcher",
+  IMPORTER_SERVICE: "importer",
   SUB_VALIDATION_EVENT: "Microsoft.EventGrid.SubscriptionValidationEvent",
   LOG_EVENT: "CPZ.Candlebatcher.Log",
   ERROR_EVENT: "CPZ.Candlebatcher.Error",
@@ -6,7 +8,7 @@ module.exports = {
   TASKS_CANDLEBATCHER_STOP_EVENT: "CPZ.Tasks.Candlebatcher.Stop",
   TASKS_CANDLEBATCHER_STARTIMPORT_EVENT: "CPZ.Tasks.Candlebatcher.StartImport",
   TASKS_CANDLEBATCHER_STOPIMPORT_EVENT: "CPZ.Tasks.Candlebatcher.StopImport",
-  TASKS_CANDLEBATCHER_UPDATE_EVENT: "CPZ.Tasks.Candlebatcher.Stop",
+  TASKS_CANDLEBATCHER_UPDATE_EVENT: "CPZ.Tasks.Candlebatcher.Update",
   TASKS_CANDLEBATCHER_STARTED_EVENT: "CPZ.Tasks.Candlebatcher.Started",
   TASKS_CANDLEBATCHER_STOPPED_EVENT: "CPZ.Tasks.Candlebatcher.Stopped",
   TASKS_CANDLEBATCHER_UPDATED_EVENT: "CPZ.Tasks.Candlebatcher.Updated",

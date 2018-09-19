@@ -93,7 +93,6 @@ function eventHandler(context, req) {
       }
     }
   });
-
   context.done();
 }
 

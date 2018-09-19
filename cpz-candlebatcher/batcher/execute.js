@@ -59,22 +59,7 @@ async function execute(context, state) {
         // Пробуем сохранить еще раз
         saveCandleResult = await retry(saveCandleFunc);
         if (!saveCandleResult.isSuccess) {
-          // пропускаем итерацию
-          await candlebatcher.end(STATUS_STARTED, saveCandleResult.error);
-          // Публикуем событие - ошибка
-          await publishEvents(
-            context,
-            "log",
-            createEvents({
-              subject: state.eventSubject,
-              eventType: ERROR_EVENT,
-              data: {
-                taskId: state.taskId,
-                error: saveCandleResult.error
-              }
-            })
-          );
-          return;
+          throw saveCandleResult;
         }
       } else {
         throw saveCandleResult;

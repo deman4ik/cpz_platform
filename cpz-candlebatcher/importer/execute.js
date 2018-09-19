@@ -4,6 +4,7 @@
 const Importer = require("./importer");
 const retry = require("../utils/retry");
 const {
+  IMPORTER_SERVICE,
   STATUS_STOPPED,
   STATUS_ERROR,
   STATUS_BUSY,
@@ -36,21 +37,20 @@ async function execute(context, state, start = false) {
       await publishEvents(
         context,
         "tasks",
-        createEvents(
-          {
-            subject: state.eventSubject,
-            data: {
-              taskId: state.taskId,
-              rowKey: state.rowKey,
-              partitionKey: createSlug(
-                state.exchange,
-                state.asset,
-                state.currency
-              )
-            }
-          },
-          TASKS_CANDLEBATCHER_STARTEDIMPORT_EVENT
-        )
+        createEvents({
+          subject: state.eventSubject,
+          eventType: TASKS_CANDLEBATCHER_STARTEDIMPORT_EVENT,
+          data: {
+            service: IMPORTER_SERVICE,
+            taskId: state.taskId,
+            rowKey: state.rowKey,
+            partitionKey: createSlug(
+              state.exchange,
+              state.asset,
+              state.currency
+            )
+          }
+        })
       );
     }
     // Загружаем новые свечи
@@ -82,6 +82,7 @@ async function execute(context, state, start = false) {
         subject: state.eventSubject,
         eventType: ERROR_EVENT,
         data: {
+          service: IMPORTER_SERVICE,
           taskId: state.taskId,
           error
         }

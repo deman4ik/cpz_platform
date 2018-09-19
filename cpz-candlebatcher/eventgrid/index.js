@@ -5,6 +5,7 @@ const msRestAzure = require("ms-rest-azure");
 const EventGrid = require("azure-eventgrid");
 const url = require("url");
 const uuid = require("uuid").v4;
+const { CANDLEBATCHER_SERVICE } = require("../config");
 
 function createClient(key) {
   return new EventGrid(new msRestAzure.TopicCredentials(key));
@@ -33,13 +34,14 @@ const topics = {
 
 function createEvents(eventData) {
   const events = [];
+  const data = { service: CANDLEBATCHER_SERVICE, ...eventData.data };
   const newEvent = {
     id: uuid(),
     dataVersion: "1.0",
     eventTime: new Date(),
     subject: eventData.subject,
     eventType: eventData.eventType,
-    data: eventData.data
+    data
   };
   events.push(newEvent);
   return events;
