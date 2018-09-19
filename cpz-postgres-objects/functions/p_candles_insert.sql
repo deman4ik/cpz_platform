@@ -1,18 +1,22 @@
-CREATE or replace FUNCTION p_candles_insert(
-  nSTART      in int,
-  nOPEN       in numeric,
-  nHIGH       in numeric,
-  nLOW        in numeric,
-  nCLOSE      in numeric,
-  nVOLUME     in numeric,
-  nTRADES     in int,
-  nVWP        in numeric,
-  sCURENCY    in varchar,
-  sASSET      in varchar,
-  sEXCHANGE   in varchar)
-  RETURNS varchar
-LANGUAGE plpgsql
-AS $$
+CREATE OR REPLACE FUNCTION "cpz-platform".p_candles_insert(
+	ntime integer,
+	nopen numeric,
+	nhigh numeric,
+	nlow numeric,
+	nclose numeric,
+	nvolume numeric,
+	ntrades integer,
+	nvwp numeric,
+	scurency character varying,
+	sasset character varying,
+	sexchange character varying)
+    RETURNS character varying
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
+
 DECLARE
   nFRAME int;
   rCANDLE candles%ROWTYPE;
@@ -33,11 +37,10 @@ BEGIN
     OR
     {"error":{"numb" : 20101, "code" : "timeframe", "type" : 5, "start" : 1514764800, "end" : 1514765100, "descr" : "timeframe 5 not found as it should be after trigger"}}
 
-
     !!! the framed candle json object is a copy of CANDLES5 table row, will change automatically if table structure changes
   */
 
-  rCANDLE.start     := nSTART;
+  rCANDLE.start     := nTIME;
   rCANDLE.open      := nOPEN;
   rCANDLE.high      := nHIGH;
   rCANDLE.low       := nLOW;
@@ -47,7 +50,7 @@ BEGIN
   rCANDLE.vwp       := nVWP;
   rCANDLE.currency  := sCURENCY;
   rCANDLE.asset     := sASSET;
-  rCANDLE.timestamp := to_timestamp(nSTART);
+  rCANDLE.timestamp := to_timestamp(nTIME);
   IF (sEXCHANGE is null) THEN
     RAISE EXCEPTION '20101: json key "exchange" must be specified';
   END IF;
@@ -61,7 +64,6 @@ BEGIN
   END;
 
   rCANDLE.id := nextval('candles_id_seq');
-
 
   insert into candles (
         id,
@@ -93,7 +95,7 @@ BEGIN
         rCANDLE.timestamp
       )
     on conflict do nothing; -- both for uk and pk
-
+   
     -- return posted 1min candle back with id
     j_tmp := json_build_object(
         'id',        rCANDLE.id,
@@ -156,7 +158,6 @@ BEGIN
       EXCEPTION
         WHEN NO_DATA_FOUND THEN*/
       END;
-
 
     end if;
 
