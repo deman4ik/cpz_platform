@@ -31,7 +31,7 @@ async function saveCandlebatcherState(context, state) {
     return { isSuccess: entityUpdated };
   } catch (error) {
     context.log(error);
-    return { isSuccess: false, state, error };
+    return { isSuccess: false, error };
   }
 }
 
@@ -47,7 +47,7 @@ async function updateCandlebatcherState(context, state) {
     return { isSuccess: entityUpdated };
   } catch (error) {
     context.log(error);
-    return { isSuccess: false, state, error };
+    return { isSuccess: false, error };
   }
 }
 
@@ -67,7 +67,7 @@ async function saveImporterState(context, state) {
     return { isSuccess: entityUpdated };
   } catch (error) {
     context.log.error(error);
-    return { isSuccess: false, state, error };
+    return { isSuccess: false, error };
   }
 }
 
@@ -136,7 +136,7 @@ async function getCandlebatcherByKey(context, keys) {
     return { isSuccess: true, data: entities[0] };
   } catch (error) {
     context.log.error(error, keys);
-    return { isSuccess: false, error, input: keys };
+    return { isSuccess: false, error };
   }
 }
 
@@ -169,7 +169,7 @@ async function getImporterByKey(context, keys) {
     return { isSuccess: true, data: entities[0] };
   } catch (error) {
     context.log.error(error, keys);
-    return { isSuccess: false, error, input: keys };
+    return { isSuccess: false, error };
   }
 }
 module.exports = {

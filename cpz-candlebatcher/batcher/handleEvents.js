@@ -1,3 +1,4 @@
+const dayjs = require("dayjs");
 const Candlebatcher = require("./candlebatcher");
 const {
   getCandlebatcherByKey,
@@ -20,7 +21,6 @@ const { createSlug } = require("../tableStorage/utils");
  */
 async function handleStart(context, eventData) {
   try {
-    context.log("Start");
     // Инициализируем новый загрузчик
     const candlebatcher = new Candlebatcher(context, eventData);
     // Сохраняем состояние
@@ -34,7 +34,7 @@ async function handleStart(context, eventData) {
         eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
         data: {
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
+          rowKey: eventData.taskId,
           partitionKey: createSlug(
             eventData.exchange,
             eventData.asset,
@@ -84,6 +84,7 @@ async function handleStop(context, eventData) {
         newState.stopRequested = true;
       } else {
         newState.status = STATUS_STOPPED;
+        newState.endedAt = dayjs().toJSON();
       }
       const result = await updateCandlebatcherState(context, newState);
       if (!result.isSuccess)

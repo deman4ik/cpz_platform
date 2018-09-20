@@ -36,6 +36,9 @@ class Candlebatcher {
     this.status = this.stopRequested
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED; // текущий статус сервиса
+    this.startedAt = state.startedAt || dayjs().toJSON(); //  Дата и время запуска
+    this.endedAt =
+      state.endedAt || this.status === STATUS_STOPPED ? dayjs().toJSON() : ""; // Дата и время остановки
     this.initConnector();
     this.log(`Candlebatcher ${this.eventSubject} initialized`);
   }
@@ -342,7 +345,9 @@ class Candlebatcher {
       sendedCandles: this.sendedCandles,
       proxy: this.proxy,
       status: this.status,
-      error: this.error
+      error: this.error,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt
     };
   }
 

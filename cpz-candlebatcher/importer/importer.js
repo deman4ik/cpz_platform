@@ -1,3 +1,4 @@
+const dayjs = require("dayjs");
 const { saveCandlesArray } = require("../db/saveCandles");
 const { saveImporterState } = require("../tableStorage");
 const { createSlug } = require("../tableStorage/utils");
@@ -37,6 +38,9 @@ class Importer {
     this.status = this.stopRequested
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED;
+    this.startedAt = state.startedAt || dayjs().toJSON(); //  Дата и время запуска
+    this.endedAt =
+      state.endedAt || this.status === STATUS_STOPPED ? dayjs().toJSON() : ""; // Дата и время остановки
     this.initConnector();
     this.log(`Importer ${this.eventSubject} initialized`);
   }
@@ -187,7 +191,9 @@ class Importer {
       nextDate: this.nextDate,
       proxy: this.proxy,
       status: this.status,
-      error: this.error
+      error: this.error,
+      startedAt: this.startedAt,
+      endedAt: this.endedAt
     };
     return state;
   }

@@ -1,4 +1,5 @@
 const client = require("./client");
+const { tryParseJSON } = require("../tableStorage/utils");
 
 async function getFirstGap(context, input) {
   const query = `query candles_diff(
@@ -27,8 +28,9 @@ async function getFirstGap(context, input) {
       timestampFrom: input.dateFrom
     };
     const result = await client.request(query, variables);
-    const data = JSON.parse(result.allVCandlesDiffs.nodes[0].time);
-    return { isSuccess: true, data };
+    const data = tryParseJSON(result.allVCandlesDiffs.nodes[0].time);
+    if (data) return { isSuccess: true, data };
+    throw result;
   } catch (error) {
     this.context.log.error(error);
     throw error;

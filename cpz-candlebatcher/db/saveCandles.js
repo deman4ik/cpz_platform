@@ -1,4 +1,5 @@
 const client = require("./client");
+const { tryParseJSON } = require("../tableStorage/utils");
 /**
  * Сохранение минутной свечи и запрос новых свечей в доступных таймфреймах
  *
@@ -52,8 +53,9 @@ async function saveCandle(context, candle) {
     }
   }
 } */
-    const data = JSON.parse(result.pCandlesInsert.string);
-    return { isSuccess: true, data };
+    const data = tryParseJSON(result.pCandlesInsert.string);
+    if (data) return { isSuccess: true, data };
+    throw result;
   } catch (error) {
     context.log.error(`Can't save candle.\n${error}\n${candle}`);
     throw error;
@@ -76,8 +78,9 @@ async function saveCandlesArray(context, input) {
   `;
   try {
     const result = await client.request(query, input);
-    const data = JSON.parse(result.pCandlesInsertJa.string);
-    return { isSuccess: true, data };
+    const data = tryParseJSON(result.pCandlesInsertJa.string);
+    if (data) return { isSuccess: true, data };
+    throw result;
   } catch (error) {
     context.log.error(`Can't save candles.\n${error}\n${input}`);
     throw error;
