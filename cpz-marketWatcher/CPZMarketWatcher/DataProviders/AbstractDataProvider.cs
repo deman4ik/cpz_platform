@@ -1,5 +1,6 @@
 ﻿using CPZMarketWatcher.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CPZMarketWatcher.DataProviders
 {
@@ -20,7 +21,7 @@ namespace CPZMarketWatcher.DataProviders
 
         public abstract List<OrderToProvider> SubscribedPairs { get; set; }
 
-        public abstract void StartReceivingData(OrderToProvider subscribe);
+        public abstract Task StartReceivingData(OrderToProvider subscribe);
 
         public abstract void StopReceivingData();
 

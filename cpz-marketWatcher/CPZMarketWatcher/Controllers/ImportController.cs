@@ -57,7 +57,7 @@ namespace CPZMarketWatcher.Controllers
                 {
                     if (query.ActionType == ActionType.Start)
                     {
-                        await _manager.SubscribeNewPaperAsync(query);
+                        await _manager.StartNewProviderAsync(query.NameProvider, query.TypeDataProvider);
                     }
                     else if (query.ActionType == ActionType.Subscribe)
                     {
@@ -78,7 +78,6 @@ namespace CPZMarketWatcher.Controllers
                 Debug.WriteLine(e);
                 throw;
             }
-            
         }
     }
 }

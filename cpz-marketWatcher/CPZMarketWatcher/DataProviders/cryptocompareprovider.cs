@@ -69,7 +69,7 @@ namespace CPZMarketWatcher.DataProviders
         /// запустить получение данных
         /// </summary>
         /// <param name="subscribe"></param>
-        public override async void StartReceivingData(OrderToProvider subscribe)
+        public override async Task StartReceivingData(OrderToProvider subscribe)
         {
             try
             {

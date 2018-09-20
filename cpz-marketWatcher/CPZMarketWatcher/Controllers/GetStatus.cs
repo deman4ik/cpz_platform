@@ -1,34 +1,27 @@
-﻿
-using CPZMarketWatcher.Models;
+﻿using CPZMarketWatcher.Models;
 using CPZMarketWatcher.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
-
 
 namespace CPZMarketWatcher.Controllers
 {
     [Produces("application/json")]
-    [Route("api/EventHandler")]
-    public class EventGridEventHandlerController : Controller
+    [Route("api/GetStatus")]
+    public class StatusHandler : Controller
     {
         private ProviderManager _manager;
 
-        public EventGridEventHandlerController(ProviderManager manager)
+        public StatusHandler(ProviderManager manager)
         {
             _manager = manager;
         }
 
-        [HttpPost]        
-        public async Task<JsonResult> Post([FromBody]object request)
+        [HttpPost]   
+        public JsonResult GetStatus([FromBody]object request)
         {
             try
             {
@@ -59,29 +52,20 @@ namespace CPZMarketWatcher.Controllers
                         }
                         else
                         {
-                            JObject dataObject = eventGridEvent.Data as JObject;
                             // Считываем данные
-                            var eventData = dataObject.ToObject<OrderToProvider>(); //(OrderToProvider)eventGridEvent.Data;
+                            var eventData = (OrderToProvider)eventGridEvent.Data;
 
-                            // Если пришел запрос на запуск поставщика
-                            if (eventGridEvent.EventType == EventGridEventTypes.Start)
+                            // Получить информацию о поставщике по идентификатору
+                            if (eventGridEvent.EventType == EventGridEventTypes.GetStatusById)
                             {
-                                await _manager.StartNewProviderAsync(eventData.NameProvider, eventData.TypeDataProvider);
+                                var info = _manager.TakeActiveProviderByName(eventData.NameProvider);
+                                return Json(info);
                             }
-                            // Если пришел запрос на  получения данных по определенной паре
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Subscribe)
+                            // Получить информацию обо всех поставщиках
+                            else if (eventGridEvent.EventType == EventGridEventTypes.GetStatusAll)
                             {
-                                await _manager.SubscribeNewPaperAsync(eventData);
-                            }
-                            // Если пришел запрос на остановку получения данных по определенной паре
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Unsubscribe)
-                            {
-                                _manager.UnsubscribePair(eventData);
-                            }
-                            // Если пришел запрос на остановку поставщика
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Stop)
-                            {
-                                _manager.RemoveProvider(eventData.NameProvider);
+                                var info = _manager.TakeAllActiveProviders();
+                                return Json(info);
                             }
                         }
                     }
@@ -94,10 +78,9 @@ namespace CPZMarketWatcher.Controllers
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e);
                 throw;
             }
-            
+
         }        
     }
 }

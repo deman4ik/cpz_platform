@@ -51,8 +51,6 @@ namespace CpzTrader
                         var responseData = new SubscriptionValidationResponse();
 
                         responseData.ValidationResponse = eventData.ValidationCode;
-
-                        Debug.WriteLine("Событие валидации обработано!");
                         
                         return new HttpResponseMessage(HttpStatusCode.OK)
                         {

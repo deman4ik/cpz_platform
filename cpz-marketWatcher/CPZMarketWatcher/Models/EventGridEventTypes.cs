@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CPZMarketWatcher.Models
+﻿namespace CPZMarketWatcher.Models
 {
     /// <summary>
     /// типы событий, приходящих из EventGrid
@@ -19,5 +14,9 @@ namespace CPZMarketWatcher.Models
         public const string Unsubscribe = "CPZ.Tasks.MarketWatcher.Unsubscribe";
 
         public const string Stop = "CPZ.Tasks.MarketWatcher.Stop";
+
+        public const string GetStatusById = "CPZ.Tasks.MarketWatcher.GetStatusById";
+
+        public const string GetStatusAll = "CPZ.Tasks.MarketWatcher.GetStatusAll";
     }
 }

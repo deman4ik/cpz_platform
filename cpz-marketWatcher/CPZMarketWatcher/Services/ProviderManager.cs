@@ -30,19 +30,12 @@ namespace CPZMarketWatcher.Services
         /// <param name="uniqName">уникальное имя поставщика</param>
         /// <param name="type">тип поставщика</param>
         /// <returns></returns>
-        public async Task<AbstractDataProvider> GetProviderAsync(string uniqName, ProvidersType type)
+        public async Task<AbstractDataProvider> StartNewProviderAsync(string uniqName, ProvidersType type)
         {
             AbstractDataProvider provider;
 
             return await Task.Run(() =>
-            {
-                provider = AllRunningProviders.Find(prov => prov.Name == uniqName);
-
-                if (provider != null)
-                {
-                    return provider;
-                }
-
+            {                
                 if (type == ProvidersType.CryptoCompare)
                 {
                     provider = new CryptoCompareProvider(uniqName);
@@ -61,9 +54,9 @@ namespace CPZMarketWatcher.Services
         /// </summary>
         public async Task SubscribeNewPaperAsync(OrderToProvider queryMsg)
         {
-            AbstractDataProvider needProvider = await GetProviderAsync(queryMsg.NameProvider, queryMsg.TypeDataProvider);
+            AbstractDataProvider needProvider = AllRunningProviders.Find(prov => prov.Name == queryMsg.NameProvider); //await GetProviderAsync(queryMsg.NameProvider, queryMsg.TypeDataProvider);
 
-            needProvider.StartReceivingData(queryMsg);
+            await needProvider.StartReceivingData(queryMsg);
         }
 
         /// <summary>
