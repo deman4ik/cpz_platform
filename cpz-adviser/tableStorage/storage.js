@@ -17,6 +17,7 @@ function createTableIfNotExists(tableName) {
     });
   });
 }
+
 /**
  * Добавление или обновление записи в таблице
  *
@@ -24,9 +25,41 @@ function createTableIfNotExists(tableName) {
  * @param {*} entity
  * @returns
  */
-function insertOrReplaceEntity(tableName, entity) {
+function insertOrMergeEntity(tableName, entity) {
   return new Promise((resolve, reject) => {
-    tableService.insertOrReplaceEntity(tableName, entity, error => {
+    tableService.insertOrMergeEntity(tableName, entity, error => {
+      if (error) reject(error);
+      resolve(true);
+    });
+  });
+}
+
+/**
+ * Обновление записи в таблице
+ *
+ * @param {*} tableName
+ * @param {*} entity
+ * @returns
+ */
+function mergeEntity(tableName, entity) {
+  return new Promise((resolve, reject) => {
+    tableService.mergeEntity(tableName, entity, error => {
+      if (error) reject(error);
+      resolve(true);
+    });
+  });
+}
+
+/**
+ * Удаление записи из таблицы
+ *
+ * @param {*} tableName
+ * @param {*} entity
+ * @returns
+ */
+function deleteEntity(tableName, entity) {
+  return new Promise((resolve, reject) => {
+    tableService.deleteEntity(tableName, entity, error => {
       if (error) reject(error);
       resolve(true);
     });
@@ -49,6 +82,8 @@ function queryEntities(tableName, tableQuery) {
 }
 module.exports = {
   createTableIfNotExists,
-  insertOrReplaceEntity,
+  insertOrMergeEntity,
+  mergeEntity,
+  deleteEntity,
   queryEntities
 };

@@ -43,9 +43,15 @@ function objectToEntity(object) {
   Object.keys(object).forEach(key => {
     const element = object[key];
     if (typeof element === "object") {
-      entity[key] = entityGenerator.String(JSON.stringify(element));
+      if (element instanceof "Date") {
+        entity[key] = entityGenerator.DateTime(element);
+      } else {
+        entity[key] = entityGenerator.String(JSON.stringify(element));
+      }
     } else if (typeof element === "number") {
       entity[key] = entityGenerator.Double(element);
+    } else if (typeof element === "boolean") {
+      entity[key] = entityGenerator.Boolean(element);
     } else {
       entity[key] = entityGenerator.String(element);
     }
@@ -53,4 +59,8 @@ function objectToEntity(object) {
   return entity;
 }
 
-module.exports = { entityToObject, objectToEntity };
+function createSlug(exchange, asset, currency, timeframe) {
+  return `${exchange}.${asset}.${currency}.${timeframe}`;
+}
+
+module.exports = { entityToObject, objectToEntity, createSlug };
