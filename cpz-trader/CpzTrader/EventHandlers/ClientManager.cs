@@ -72,6 +72,7 @@ namespace CpzTrader
                     {
                         Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject));
                     }
+                    
                 }
                 return new HttpResponseMessage(HttpStatusCode.OK);
             }

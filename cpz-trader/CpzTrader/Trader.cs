@@ -67,9 +67,9 @@ namespace CpzTrader
                         myOrder.State = OrderState.Fall;
                     }
 
-                    needPosition.CloseOrders.Add(myOrder);
+                    needPosition.State = needOrder.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;
 
-                    clientInfo.AllPositions.Add(needPosition);
+                    needPosition.CloseOrders.Add(myOrder);                    
 
                     await DbContext.UpdateClientInfoAsync(clientInfo);
                 }
@@ -87,6 +87,10 @@ namespace CpzTrader
 
                         needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
                     }
+
+                    needPosition.State = needPosition.State == (int)PositionState.Opening ? (int)PositionState.Open : (int)PositionState.Close;
+
+                    await DbContext.UpdateClientInfoAsync(clientInfo);
                 }
             }           
         }

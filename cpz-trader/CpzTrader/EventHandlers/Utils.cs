@@ -90,28 +90,6 @@ namespace CpzTrader.EventHandlers
         /// </summary>
         public static Client CreateClient(dynamic data)
         {
-            //Client Ncl = new Client(data.taskId.ToString(), data.robotId.ToString());
-
-            //Ncl.Mode = data.mode;
-            //Ncl.DebugMode = data.debug;
-            //Ncl.UserId = data.userId;
-            //Ncl.AllPositions = new List<Position>();
-            //Ncl.RobotSettings = new RobotSettings()
-            //{
-            //    Exchange = data.exchange,
-            //    Baseq = data.asset,
-            //    Quote = data.currency,
-            //    Timeframe = data.timeframe,
-            //    Volume = data.settings.volume,
-            //    Slippage = data.settings.slippageStep,
-            //};
-            //Ncl.EmulatorSettings = new EmulatorSettings()
-            //{
-            //    Slippage = data.settings.slippageStep,
-            //    StartingBalance = 10000,
-            //    CurrentBalance = 10000
-            //};
-
             return new Client(data.taskId.ToString(), data.robotId.ToString())
             {
                 Mode =data.mode,

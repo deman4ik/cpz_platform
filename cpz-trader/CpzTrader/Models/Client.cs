@@ -26,6 +26,21 @@ namespace CpzTrader.Models
         public string UserId { get; set; }
 
         /// <summary>
+        /// уникальный номер пользователя
+        /// </summary>
+        public string SecretName { get; set; }
+
+        /// <summary>
+        /// номер версии
+        /// </summary>
+        public string SecretVersion { get; set; }
+
+        /// <summary>
+        /// номер версии
+        /// </summary>
+        public string SecretKey { get; set; }
+
+        /// <summary>
         /// режим "backtest", "emulator", "realtime"]
         /// </summary>
         public string Mode { get; set; }
