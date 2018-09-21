@@ -1,4 +1,4 @@
-using CpzTrader.Models;
+п»їusing CpzTrader.Models;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -16,7 +16,7 @@ namespace CpzTrader.EventHandlers
     public static class TradeSignalHandler
     {
         /// <summary>
-        /// обработка сигнала от робота
+        /// РѕР±СЂР°Р±РѕС‚РєР° СЃРёРіРЅР°Р»Р° РѕС‚ СЂРѕР±РѕС‚Р°
         /// </summary>
         [FunctionName("SignalHandler")]
         public static async Task<HttpResponseMessage> SignalHandler(
@@ -34,14 +34,14 @@ namespace CpzTrader.EventHandlers
                     //{
                     //    return new HttpResponseMessage(HttpStatusCode.OK)
                     //    {
-                    //        Content = new StringContent(JsonConvert.SerializeObject("Не верный ключ"))
+                    //        Content = new StringContent(JsonConvert.SerializeObject("РќРµ РІРµСЂРЅС‹Р№ РєР»СЋС‡"))
                     //    };
                     //}
 
                     JObject dataObject = eventGridEvent.Data as JObject;
 
-                    // В зависимости от типа события выполняем определенную логику
-                    // валидация
+                    // Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° СЃРѕР±С‹С‚РёСЏ РІС‹РїРѕР»РЅСЏРµРј РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ Р»РѕРіРёРєСѓ
+                    // РІР°Р»РёРґР°С†РёСЏ
                     if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
                     {
                         var eventData = dataObject.ToObject<SubscriptionValidationEventData>();
@@ -50,14 +50,14 @@ namespace CpzTrader.EventHandlers
 
                         responseData.ValidationResponse = eventData.ValidationCode;
 
-                        Debug.WriteLine("Событие валидации обработано!");
+                        Debug.WriteLine("РЎРѕР±С‹С‚РёРµ РІР°Р»РёРґР°С†РёРё РѕР±СЂР°Р±РѕС‚Р°РЅРѕ!");
 
                         return new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(JsonConvert.SerializeObject(responseData))
                         };
                     }
-                    // новый сигнал                    
+                    // РЅРѕРІС‹Р№ СЃРёРіРЅР°Р»                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
                         Utils.RunAsync(HandleSignal(eventGridEvent.Subject, dataObject, log));
@@ -75,7 +75,7 @@ namespace CpzTrader.EventHandlers
         }
 
         /// <summary>
-        /// обработчик сигналов от робота
+        /// РѕР±СЂР°Р±РѕС‚С‡РёРє СЃРёРіРЅР°Р»РѕРІ РѕС‚ СЂРѕР±РѕС‚Р°
         /// </summary>
         public static async Task HandleSignal(string subject, JObject dataObject, TraceWriter log)
         {
@@ -83,7 +83,7 @@ namespace CpzTrader.EventHandlers
             {
                 var signal = dataObject.ToObject<NewSignal>();
 
-                // получаем биржу и бумагу по которой пришел сигнал
+                // РїРѕР»СѓС‡Р°РµРј Р±РёСЂР¶Сѓ Рё Р±СѓРјР°РіСѓ РїРѕ РєРѕС‚РѕСЂРѕР№ РїСЂРёС€РµР» СЃРёРіРЅР°Р»
                 var clients = await DbContext.GetClientsInfoFromDbAsync(signal.AdvisorName);
 
                 string exchange;
@@ -102,7 +102,7 @@ namespace CpzTrader.EventHandlers
                 }
                 else
                 {
-                    // сигнал получен но у этого робота нет клиентов
+                    // СЃРёРіРЅР°Р» РїРѕР»СѓС‡РµРЅ РЅРѕ Сѓ СЌС‚РѕРіРѕ СЂРѕР±РѕС‚Р° РЅРµС‚ РєР»РёРµРЅС‚РѕРІ
                     return;
                 }
 
@@ -129,7 +129,7 @@ namespace CpzTrader.EventHandlers
 
                     newPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Open : (int)PositionState.Opening;//"open" : "opening";
 
-                    // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
+                    // РµСЃР»Рё РЅСѓР¶РЅРѕ РёСЃРїРѕР»РЅРёС‚СЊ РѕСЂРґРµСЂ РїРѕ СЂС‹РЅРєСѓ С‚Рѕ СЃСЂР°Р·Сѓ РµРіРѕ РѕРґР°РµРј РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј Рё РїРѕСЃР»Рµ СЌС‚РѕРіРѕ РѕС‚РґР°РµРј РїРѕРјРѕС€РЅРёРєСѓ С‡РµСЂРµР· С…СЂР°РЅРёР»РёС‰Рµ
                     if (signal.OrderType == OrderType.Market)
                     {
                         await Utils.SendSignalAllTraders(newOrder.NumberInRobot, SignalType.OpenByMarket, newPosition);
@@ -137,12 +137,12 @@ namespace CpzTrader.EventHandlers
 
                     newPosition.ObjectToJson();
 
-                    // сохранить в хранилище
+                    // СЃРѕС…СЂР°РЅРёС‚СЊ РІ С…СЂР°РЅРёР»РёС‰Рµ
                     var result = await DbContext.InsertEntity<Position>("Positions", newPosition);
                 }
                 else
                 {
-                    // получить из хранилища позицию для которой пришел сигнал
+                    // РїРѕР»СѓС‡РёС‚СЊ РёР· С…СЂР°РЅРёР»РёС‰Р° РїРѕР·РёС†РёСЋ РґР»СЏ РєРѕС‚РѕСЂРѕР№ РїСЂРёС€РµР» СЃРёРіРЅР°Р»
                     Position needPosition = await DbContext.GetEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot);
 
                     needPosition.JsonToObject();
@@ -157,7 +157,7 @@ namespace CpzTrader.EventHandlers
 
                     needPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;//signal.OrderType == OrderType.Market ? PositionState.Close.ToString() : PositionState.Closing.ToString();
 
-                    // если нужно исполнить ордер по рынку то сразу его одаем проторговщикам и после этого отдаем помошнику через хранилище
+                    // РµСЃР»Рё РЅСѓР¶РЅРѕ РёСЃРїРѕР»РЅРёС‚СЊ РѕСЂРґРµСЂ РїРѕ СЂС‹РЅРєСѓ С‚Рѕ СЃСЂР°Р·Сѓ РµРіРѕ РѕРґР°РµРј РїСЂРѕС‚РѕСЂРіРѕРІС‰РёРєР°Рј Рё РїРѕСЃР»Рµ СЌС‚РѕРіРѕ РѕС‚РґР°РµРј РїРѕРјРѕС€РЅРёРєСѓ С‡РµСЂРµР· С…СЂР°РЅРёР»РёС‰Рµ
                     if (signal.OrderType == OrderType.Market)
                     {
                         await Utils.SendSignalAllTraders(newOrder.NumberInRobot, SignalType.OpenByMarket, needPosition);
@@ -165,7 +165,7 @@ namespace CpzTrader.EventHandlers
 
                     needPosition.ObjectToJson();
 
-                    // сохранить обновленную позицию в хранилище
+                    // СЃРѕС…СЂР°РЅРёС‚СЊ РѕР±РЅРѕРІР»РµРЅРЅСѓСЋ РїРѕР·РёС†РёСЋ РІ С…СЂР°РЅРёР»РёС‰Рµ
                     var res = await DbContext.UpdateEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot, needPosition);                    
                 }               
             }
