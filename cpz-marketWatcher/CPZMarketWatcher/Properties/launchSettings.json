@@ -14,6 +14,8 @@
       "launchUrl": "api/import",
       "environmentVariables": {
         "API_KEY": "test",
+        "EG_TEST_KEY": "QYUbWBMB2Ng2VAuHUenwrZ03kiubGjUWQCYattiVTEQ=",
+        "EG_TEST_ENDPOINT": "https://cpz-test-topic.northeurope-1.eventgrid.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "EG_TOPIC_ENDPOINT": "https://cpz-test-topic.northeurope-1.eventgrid.azure.net/",
         "EG_TOPIC_KEY": "QYUbWBMB2Ng2VAuHUenwrZ03kiubGjUWQCYattiVTEQ="

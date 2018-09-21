@@ -1,4 +1,5 @@
 ﻿using CPZMarketWatcher.Models;
+using CPZMarketWatcher.Services;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
 using Newtonsoft.Json.Linq;
@@ -138,7 +139,6 @@ namespace CPZMarketWatcher.DataProviders
         }
 
        
-
         /// <summary>
         /// строка подключения к criptocompare по вебсокету
         /// </summary>
@@ -438,7 +438,7 @@ namespace CPZMarketWatcher.DataProviders
                     Id = Guid.NewGuid().ToString(), // уникальный идентификатор
                     Subject = $"{trade.Exchange}#{trade.Baseq}/{trade.Quote}", // тема события
                     DataVersion = "1.0", // версия данных
-                    EventType = "CPZ.Ticks.NewTick", // тип события
+                    EventType = ConfigurationManager.TakeParameterByName("NewTick"), // тип события
                     Data = data, // данные события
                     EventTime = DateTime.Now // время формирования события
                 });

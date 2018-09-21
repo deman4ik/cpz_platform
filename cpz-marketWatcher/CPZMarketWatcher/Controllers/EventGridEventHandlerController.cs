@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 
+
 namespace CPZMarketWatcher.Controllers
 {
     [Produces("application/json")]
-    [Route("api/EventHandler")]
+    [Route("api/eventhandler")]
     public class EventGridEventHandlerController : Controller
     {
         private ProviderManager _manager;
@@ -33,7 +32,7 @@ namespace CPZMarketWatcher.Controllers
             try
             {
                 EventGridSubscriber eventGridSubscriber = new EventGridSubscriber();
-                //eventGridSubscriber.AddOrUpdateCustomEventMapping(EventGridEventTypes.Subscribe, typeof(OrderToProvider));
+                
                 EventGridEvent[] eventGridEvents = eventGridSubscriber.DeserializeEventGridEvents(request.ToString());
 
                 var queryKey = HttpContext.Request.Query["key"];
@@ -45,7 +44,7 @@ namespace CPZMarketWatcher.Controllers
                     foreach (EventGridEvent eventGridEvent in eventGridEvents)
                     {
                         // Если пришел запрос на валидацию 
-                        if (eventGridEvent.EventType == EventGridEventTypes.SubscriptionValidationEvent)
+                        if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"))
                         {
                             var eventData = (SubscriptionValidationEventData)eventGridEvent.Data;
 
@@ -59,29 +58,48 @@ namespace CPZMarketWatcher.Controllers
                         }
                         else
                         {
+                            string subject = eventGridEvent.Subject;
+                            string topic = ConfigurationManager.TakeParameterByName("CPZ-TASKS");
+
                             JObject dataObject = eventGridEvent.Data as JObject;
                             // Считываем данные
                             var eventData = dataObject.ToObject<OrderToProvider>(); //(OrderToProvider)eventGridEvent.Data;
 
                             // Если пришел запрос на запуск поставщика
-                            if (eventGridEvent.EventType == EventGridEventTypes.Start)
+                            if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Start"))
                             {
                                 await _manager.StartNewProviderAsync(eventData.NameProvider, eventData.TypeDataProvider);
+
+                                string eventType = ConfigurationManager.TakeParameterByName("Started");
+
+                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
                             }
                             // Если пришел запрос на  получения данных по определенной паре
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Subscribe)
+                            else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Subscribe"))
                             {
                                 await _manager.SubscribeNewPaperAsync(eventData);
+
+                                string eventType = ConfigurationManager.TakeParameterByName("Subscribed");
+
+                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
                             }
                             // Если пришел запрос на остановку получения данных по определенной паре
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Unsubscribe)
+                            else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Unsubscribe"))
                             {
                                 _manager.UnsubscribePair(eventData);
+
+                                string eventType = ConfigurationManager.TakeParameterByName("Unsubscribed");                             
+
+                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
                             }
                             // Если пришел запрос на остановку поставщика
-                            else if (eventGridEvent.EventType == EventGridEventTypes.Stop)
+                            else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Stop"))
                             {
                                 _manager.RemoveProvider(eventData.NameProvider);
+
+                                string eventType = ConfigurationManager.TakeParameterByName("Stopped");
+
+                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
                             }
                         }
                     }
@@ -89,12 +107,25 @@ namespace CPZMarketWatcher.Controllers
                 }
                 else
                 {
+                    string eventType = ConfigurationManager.TakeParameterByName("Log");
+                    string topic = ConfigurationManager.TakeParameterByName("CPZ-LOG");
+
+                    dynamic data = new JObject();
+
+                    data.message = "Недействительный ключ";
+
+                    await EventGridPublisher.PublishEvent(topic, eventType, "MARKETWATCHER-KEY-ERROR", data);
+
                     return Json(new HttpResponseMessage(HttpStatusCode.Forbidden));
                 }
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e);
+                string eventType = ConfigurationManager.TakeParameterByName("Error");
+                string topic = ConfigurationManager.TakeParameterByName("CPZ-LOG");
+
+                await EventGridPublisher.PublishEvent(topic, eventType, "ERROR", (dynamic)e );
+
                 throw;
             }
             
