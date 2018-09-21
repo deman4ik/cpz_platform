@@ -7,7 +7,6 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -21,8 +20,7 @@ namespace CpzTrader
         /// обработчик событий пришедших от советника
         /// </summary>
         [FunctionName("Trader_HttpStart")]
-        public static async Task<HttpResponseMessage> HttpStart(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/taskEvents")]HttpRequestMessage req, TraceWriter log)
         {
             try
             {               

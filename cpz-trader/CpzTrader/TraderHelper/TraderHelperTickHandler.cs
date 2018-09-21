@@ -1,28 +1,23 @@
-﻿
-using System.IO;
-using Microsoft.AspNetCore.Mvc;
+﻿using CpzTrader.EventHandlers;
+using CpzTrader.Models;
+using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
-using Microsoft.Azure.EventGrid.Models;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using System.Net;
-using CpzTrader.EventHandlers;
 using System;
 using System.Collections.Generic;
-using CpzTrader.Models;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace CpzTrader.TraderHelper
 {
     public static class TraderHelperTickHandler
     {
         [FunctionName("TraderHelperTickHandler")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "api/newTick")]HttpRequestMessage req, TraceWriter log)
         {
             try
             {

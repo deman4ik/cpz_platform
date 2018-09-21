@@ -26,6 +26,17 @@ namespace CpzTrader.Models
         public string UserId { get; set; }
 
         /// <summary>
+        /// секретный ключ
+        /// </summary>
+        public string PublicName { get; set; }
+
+        /// <summary>
+        /// публичный ключ
+        /// </summary>
+        public string PublicKey { get; set; }
+
+
+        /// <summary>
         /// уникальный номер пользователя
         /// </summary>
         public string SecretName { get; set; }
@@ -36,7 +47,7 @@ namespace CpzTrader.Models
         public string SecretVersion { get; set; }
 
         /// <summary>
-        /// номер версии
+        /// секретный ключ
         /// </summary>
         public string SecretKey { get; set; }
 
