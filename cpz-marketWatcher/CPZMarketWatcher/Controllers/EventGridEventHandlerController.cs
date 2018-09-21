@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace CPZMarketWatcher.Controllers
 {
     [Produces("application/json")]
-    [Route("api/eventhandler")]
+    [Route("api/taskEvents")]
     public class EventGridEventHandlerController : Controller
     {
         private ProviderManager _manager;

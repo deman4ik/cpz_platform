@@ -13,6 +13,7 @@ namespace CpzTrader.Models
         /// <summary>
         /// тип действия сигнала
         /// </summary>
+        [JsonProperty("action")]
         public ActionType Action { get; set; }
 
         /// <summary>
@@ -28,6 +29,7 @@ namespace CpzTrader.Models
         /// <summary>
         /// тип сделки - по рынку или лимиткой
         /// </summary>
+        [JsonProperty("orderType")]
         public OrderType OrderType { get; set; }
 
         /// <summary>
