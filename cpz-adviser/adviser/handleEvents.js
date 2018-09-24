@@ -111,9 +111,7 @@ async function handleStop(context, eventData) {
         subject: eventData.eventSubject,
         eventType: TASKS_ADVISER_STOPPED_EVENT,
         data: {
-          taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey
+          taskId: eventData.taskId
         }
       })
     );
@@ -128,8 +126,6 @@ async function handleStop(context, eventData) {
         eventType: TASKS_ADVISER_STOPPED_EVENT,
         data: {
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey,
           error
         }
       })
@@ -174,9 +170,7 @@ async function handleUpdate(context, eventData) {
           subject: eventData.eventSubject,
           eventType: TASKS_ADVISER_UPDATED_EVENT,
           data: {
-            taskId: eventData.taskId,
-            rowKey: eventData.rowKey,
-            partitionKey: eventData.partitionKey
+            taskId: eventData.taskId
           }
         })
       );
@@ -194,8 +188,6 @@ async function handleUpdate(context, eventData) {
         eventType: TASKS_ADVISER_UPDATED_EVENT,
         data: {
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey,
           error
         }
       })
@@ -209,8 +201,9 @@ async function handleUpdate(context, eventData) {
  * @param {*} context
  * @param {*} candle
  */
-async function handleCandle(context, candle) {
+async function handleCandle(context, data) {
   try {
+    const { candle } = data;
     // Параметры запроса - биржа + инструмент + таймфрейм
     const slug = createSlug(
       candle.exchange,
@@ -239,6 +232,7 @@ async function handleCandle(context, candle) {
         return result;
       })
     );
+
     // Для занятых советников параллельно наполняем свечами очередь на дальнейшую обработку
     const pendingCandlesResults = await Promise.all(
       busyAdvisers.map(async state => {
@@ -250,8 +244,6 @@ async function handleCandle(context, candle) {
         return result;
       })
     );
-    context.log.info(adviserExecutionResults);
-    context.log.info(pendingCandlesResults);
 
     // Отбираем из результата выполнения только успешные
     const successAdvisers = adviserExecutionResults
@@ -261,7 +253,7 @@ async function handleCandle(context, candle) {
     const errorAdvisers = adviserExecutionResults
       .filter(result => result.isSuccess === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
-
+    // TODO: обработать ошибки вставки в сторедж и отправить свечи в очередь
     // Отбираем из результата выполнения только успешные
     const successPendingAdvisers = pendingCandlesResults
       .filter(result => result.isSuccess === true)
@@ -271,10 +263,6 @@ async function handleCandle(context, candle) {
       .filter(result => result.isSuccess === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
-    context.log.info(successAdvisers);
-    context.log.info(errorAdvisers);
-    context.log.info(successPendingAdvisers);
-    context.log.info(errorPendingAdvisers);
     // Публикуем событие - успех
     await publishEvents(
       context,
@@ -285,7 +273,7 @@ async function handleCandle(context, candle) {
         }`,
         eventType: CANDLES_HANDLED_EVENT,
         data: {
-          candleId: candle.id,
+          candleId: candle.candleId,
           successAdvisers,
           errorAdvisers,
           successPendingAdvisers,
@@ -294,7 +282,7 @@ async function handleCandle(context, candle) {
       })
     );
   } catch (error) {
-    context.log.error("Handle candle error:", error, candle);
+    context.log.error("Handle candle error:", error, data);
     // Публикуем событие - ошибка
     await publishEvents(
       context,
@@ -303,7 +291,7 @@ async function handleCandle(context, candle) {
         subject: "Candle",
         eventType: ERROR_EVENT,
         data: {
-          candleId: candle.id,
+          candleId: data.candle.id,
           error
         }
       })

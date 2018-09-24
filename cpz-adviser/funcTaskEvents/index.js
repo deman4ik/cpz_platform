@@ -16,6 +16,7 @@ function eventHandler(context, req) {
     `CPZ Adviser processed a request.${JSON.stringify(parsedReq)}`
   );
   // TODO: SENDER ENDPOINT VALIDATION
+  // check req.originalUrl
   parsedReq.forEach(eventGridEvent => {
     const eventData = eventGridEvent.data;
     const eventSubject = eventGridEvent.subject;
@@ -69,6 +70,9 @@ function eventHandler(context, req) {
       }
     }
   });
+  context.res = {
+    status: 200
+  };
   context.done();
 }
 

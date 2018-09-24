@@ -29,7 +29,7 @@ async function execute(context, state, candle) {
     ) {
       // Сохраняем состояние и завершаем работу
       adviser.end();
-      return;
+      return { isSuccess: true, taskId: state.taskId };
     }
     // Если есть запрос на обновление параметров
     if (adviser.getUpdateRequested()) {
@@ -44,6 +44,21 @@ async function execute(context, state, candle) {
 
     // Запуск стратегии
     await adviser.stretegyFunc();
+    // Запрашиваем события для отправки
+    const eventsToSend = await adviser.getEvents();
+    // Если есть хотя бы одно событие
+    if (eventsToSend.length > 0) {
+      // Отправляем
+      const publishEventsResult = await publishEvents(
+        context,
+        "signals",
+        eventsToSend
+      );
+      // Если не удалось отправить события
+      if (!publishEventsResult.isSuccess) {
+        throw publishEventsResult;
+      }
+    }
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию

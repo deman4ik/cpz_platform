@@ -24,6 +24,7 @@ class Adviser {
     this.context = context; // текущий контекст выполнения
     this.eventSubject = state.eventSubject; // тема события
     this.taskId = state.taskId; // уникальный идентификатор задачи
+    this.robotId = state.robotId; // идентификатор робота
     this.mode = state.mode; // режим работы ['backtest', 'emulator', 'realtime']
     this.debug = state.debug; // режима дебага [true,false]
     this.strategy = state.strategy; // имя файла стратегии
@@ -31,11 +32,11 @@ class Adviser {
     this.asset = state.asset; // базовая валюта
     this.currency = state.currency; // котировка валюты
     this.timeframe = state.timeframe; // таймфрейм
+    this.settings = state.settings || {}; // объект настроек из веб-интерфейса
     this.currentCandle = state.currentCandle || {}; // текущая свеча
     this.lastCandles = state.lastCandles || []; // массив последних свечей
     this.lastSignals = state.lastSignals || []; // массив последних сигналов
     this.sendSignals = []; // массив сигналов к отправке
-    this.settings = state.settings || {}; // объект настроек из веб-интерфейса
     this.variables = state.variables || {}; // объект переменных используемых в стратегии
     this.updateRequested = state.updateRequested || false; // объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false
     this.stopRequested = state.stopRequested || false; // признак запроса на остановку сервиса [true,false]
@@ -58,8 +59,8 @@ class Adviser {
     this.stretegyFunc = require(`../strategies/${this.strategy}`).bind(this); // eslint-disable-line
       if (typeof this.stretegyFunc !== "function")
         throw new Error(`Strategy "${this.strategy}" is not a function`);
-    } catch (err) {
-      throw new Error(`Can't find strategy "${this.strategy}"`);
+    } catch (error) {
+      throw new Error(`Can't find strategy "${this.strategy}"\n${error}`);
     }
   }
   /**
@@ -246,21 +247,26 @@ class Adviser {
       subject: this.createSubject(),
       eventType: SIGNALS_NEW_SIGNAL_EVENT,
       data: {
-        AdvisorName: this.taskId,
-        Exchange: this.exchange,
-        Baseq: this.asset,
-        Quote: this.currency,
-        Action: signal.action || "NewPosition",
-        Price: signal.price || 2000,
-        Type: signal.type || "limit",
-        Direction: signal.Direction || "sell",
-        NumberOrderInRobot: signal.numberOrderInRobot || "113",
-        NumberPositionInRobot: signal.numberPositionInRobot || "2",
-        PercentVolume: signal.percentVolume || 0
+        id: uuid(),
+        robotId: this.robotId,
+        advisorId: this.taskId,
+        exchange: this.exchange,
+        asset: this.asset,
+        currency: this.currency,
+        ...signal
       }
     };
 
     this.sendSignals.push(newSignal);
+  }
+
+  /**
+   * Запрос текущих событий для отправки
+   *
+   * @memberof Adviser
+   */
+  getEvents() {
+    return this.sendSignals;
   }
 
   /**
@@ -273,6 +279,7 @@ class Adviser {
     return {
       eventSubject: this.eventSubject,
       taskId: this.taskId,
+      robotId: this.robotId,
       mode: this.mode,
       debug: this.debug,
       strategy: this.strategy,

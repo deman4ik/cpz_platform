@@ -41,10 +41,10 @@ async function saveAdviserState(context, state) {
       STORAGE_ADVISERS_TABLE,
       entity
     );
-    return { isSuccessful: entityUpdated };
+    return { isSuccess: entityUpdated };
   } catch (error) {
     context.log(error);
-    return { isSuccessful: false, error };
+    return { isSuccess: false, error };
   }
 }
 
@@ -66,10 +66,10 @@ async function savePendingCandles(context, candle) {
       STORAGE_CANDLESPENDING_TABLE,
       entity
     );
-    return { isSuccessful: entityUpdated, taskId: candle.taskId };
+    return { isSuccess: entityUpdated, taskId: candle.taskId };
   } catch (error) {
     context.log(error);
-    return { isSuccessful: false, error };
+    return { isSuccess: false, error };
   }
 }
 
@@ -111,10 +111,10 @@ async function deletePendingCandles(context, candle) {
       STORAGE_CANDLESPENDING_TABLE,
       entity
     );
-    return { isSuccessful: entityDeleted };
+    return { isSuccess: entityDeleted };
   } catch (error) {
     context.log(error);
-    return { isSuccessful: false, error };
+    return { isSuccess: false, error };
   }
 }
 

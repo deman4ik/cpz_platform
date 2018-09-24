@@ -34,7 +34,7 @@ function eventHandler(context, req) {
             eventData
           )}`
         );
-        handleCandle(context, { eventSubject, ...eventData });
+        handleCandle(context, { eventSubject, candle: eventData });
         break;
       }
       default: {
