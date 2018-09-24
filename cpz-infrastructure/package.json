@@ -10,19 +10,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "chai": "^4.1.2",
-    "dotenv": "^6.0.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^2.10.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-prettier": "^2.6.2",
-    "mocha": "^5.2.0",
-    "prettier": "^1.14.2",
-    "util": "^0.11.0"
+    "prettier": "^1.14.2"
   },
   "dependencies": {
-    "azure-arm-eventgrid": "^1.4.0",
+    "azure-arm-eventgrid": "^1.5.0",
+    "fastest-validator": "^0.6.10",
     "ms-rest-azure": "^2.5.7"
   }
 }
