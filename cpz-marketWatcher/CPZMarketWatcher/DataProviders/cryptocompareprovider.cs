@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocket4Net;
@@ -56,8 +57,8 @@ namespace CPZMarketWatcher.DataProviders
         {
             var needQuery = SubscribedPairs.Find(q =>
                 q.Exchange == newQuery.Exchange &&
-                q.Baseq == newQuery.Baseq &&
-                q.Quote == newQuery.Quote);
+                q.Asset == newQuery.Asset &&
+                q.Currency == newQuery.Currency);
 
             if (needQuery == null)
             {
@@ -78,7 +79,7 @@ namespace CPZMarketWatcher.DataProviders
                 {
                     SubscribedPairs.Add(subscribe);
                     // генерируем строку подписки согласно полученному запросу
-                    var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
+                    var queryStr = GenerateQueryStringTrades("SubAdd",subscribe.Exchange, subscribe.Asset, subscribe.Currency);
 
                     // подписываемся
                     await SubscribeTrades(queryStr, subscribe.Proxy);
@@ -182,11 +183,11 @@ namespace CPZMarketWatcher.DataProviders
                 if (CheckSubscription(subscribe))
                 {
                     // генерируем строку отписки согласно полученному запросу
-                    var queryStr = GenerateQueryStringTrades("SubRemove", subscribe.Exchange, subscribe.Baseq, subscribe.Quote);
+                    var queryStr = GenerateQueryStringTrades("SubRemove", subscribe.Exchange, subscribe.Asset, subscribe.Currency);
 
                     _webSocket.Send(queryStr);
 
-                    var key = $"{subscribe.Exchange}_{subscribe.Baseq}_{subscribe.Quote}";
+                    var key = $"{subscribe.Exchange}_{subscribe.Asset}_{subscribe.Currency}";
 
                     SubscribedPairs.Remove(subscribe);
                 }                
@@ -252,11 +253,11 @@ namespace CPZMarketWatcher.DataProviders
             {
                 if (i != needQueries.Count - 1)
                 {
-                    pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Baseq}~{needQueries[i].Quote}\",";
+                    pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Asset}~{needQueries[i].Currency}\",";
                 }
                 else
                 {
-                    pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Baseq}~{needQueries[i].Quote}\"]}}]";
+                    pattern += $"\"0~{needQueries[i].Exchange}~{needQueries[i].Asset}~{needQueries[i].Currency}\"]}}]";
                 }
             }
             return pattern;
@@ -409,6 +410,8 @@ namespace CPZMarketWatcher.DataProviders
         /// Клиент EventGrid
         /// </summary>
         readonly EventGridClient _eventGridClient;
+
+        private static HttpClient httpClient = new HttpClient();
 
         /// <summary>
         /// отправить тик в eventGrid

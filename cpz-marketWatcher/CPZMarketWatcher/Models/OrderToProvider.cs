@@ -38,14 +38,14 @@ namespace CPZMarketWatcher.Models
         /// </summary>
         //[Required]
         [JsonProperty(PropertyName = "asset")]
-        public string Baseq { get; set; }
+        public string Asset { get; set; }
 
         /// <summary>
         /// котировка валюты
         /// </summary>
         //[Required]
         [JsonProperty(PropertyName = "currency")]
-        public string Quote { get; set; }
+        public string Currency { get; set; }
 
         /// <summary>
         /// адрес прокси

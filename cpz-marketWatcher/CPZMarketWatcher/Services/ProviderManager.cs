@@ -75,7 +75,7 @@ namespace CPZMarketWatcher.Services
 
                     foreach (var startImportQuery in abstractDataProvider.SubscribedPairs)
                     {
-                        runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Baseq}-{startImportQuery.Quote}");
+                        runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Asset}-{startImportQuery.Currency}");
                     }
 
                     allProviders.Add(new ProviderInfo()
@@ -114,7 +114,7 @@ namespace CPZMarketWatcher.Services
 
                 foreach (var startImportQuery in needProvider.SubscribedPairs)
                 {
-                    runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Baseq}-{startImportQuery.Quote}");
+                    runningPairs.Add($"{startImportQuery.Exchange}:{startImportQuery.Asset}-{startImportQuery.Currency}");
                 }
 
                 return new ProviderInfo()

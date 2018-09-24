@@ -1,33 +1,30 @@
 const ccxt = require("ccxt");
 
 async function SetOrder(context, req) {
-  const tradeInfo = req.body;
-
-  const clientInfo = tradeInfo.Item1;
-
-  const signal = tradeInfo.Item2;
+  
+  const signal = req.body;
 
   // получаем имя нужной биржи из запроса
-  const needExchangeName = signal.Exchange.toLowerCase();
+  const needExchangeName = signal.exchange.toLowerCase();
 
   // подключаемся к ней
   const exchange = new ccxt[needExchangeName]({
-    apiKey: clientInfo.TradeSettings.PublicKey,
-    secret: clientInfo.TradeSettings.PrivateKey,
+    apiKey: signal.publicKey,
+    secret: signal.privateKey,
     timeout: 30000,
     enableRateLimit: true
   });
 
   // бумага для ордера
-  const symbol = `${signal.Baseq}/${signal.Quote}`;
+  const symbol = `${signal.asset}/${signal.currency}`;
   // тип ордера
-  const orderType = signal.Type === 0 ? "limit" : "market";
+  const orderType = signal.type; // "limit" : "market"
   // направление сделки
-  const side = signal.Direction;
+  const side = signal.direction;
   // объем
-  const amount = clientInfo.TradeSettings.Volume;
+  const amount = signal.volume;
   // цена для ордера
-  const price = signal.Price;
+  const price = signal.price;
 
   try {
     // отправляем ордер на биржу

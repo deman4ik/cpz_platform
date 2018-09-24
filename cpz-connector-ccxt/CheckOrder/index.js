@@ -1,27 +1,23 @@
 const ccxt = require("ccxt");
 
 async function CheckOrder(context, req) {
-  const tradeInfo = req.body;
-
-  const clientInfo = tradeInfo.Item2;
-
-  const signal = tradeInfo.Item3;
-
-  // ID ордера для отмены
-  const orderId = tradeInfo.Item1;
+  const signal = req.body;
 
   // получаем имя нужной биржи из запроса
-  const needExchangeName = signal.Exchange.toLowerCase();
+  const needExchangeName = signal.exchange.toLowerCase();
 
   // подключаемся к ней
   const exchange = new ccxt[needExchangeName]({
-    apiKey: clientInfo.TradeSettings.PublicKey,
-    secret: clientInfo.TradeSettings.PrivateKey,
+    apiKey: signal.publicKey,
+    secret: signal.privateKey,
     timeout: 30000,
     enableRateLimit: true
   });
-  // инструмент, ордер которого нужно проверить
-  const symbol = `${signal.Baseq}/${signal.Quote}`;
+
+  // номер отменяемого ордера
+  const orderId = signal.number;
+  // бумага для ордера
+  const symbol = `${signal.asset}/${signal.currency}`;
 
   try {
     // запрашиваем информацию по ордеру

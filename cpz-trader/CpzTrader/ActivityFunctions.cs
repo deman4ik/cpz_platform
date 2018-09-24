@@ -1,5 +1,7 @@
-﻿using CpzTrader.Models;
+﻿using CpzTrader.EventHandlers;
+using CpzTrader.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -20,63 +22,78 @@ namespace CpzTrader
         /// </summary>        
         public static async Task<Order> SendOrder(Client clientInfo, Order signal)
         {
-            (Client client, Order newSignal) tradeInfo = (clientInfo, signal);
-
-            var url = Environment.GetEnvironmentVariable("CCXT_SEND_ORDER");
-
-            var dataAsString = JsonConvert.SerializeObject(tradeInfo);
-
-            var content = new StringContent(dataAsString);
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            var orderResult = await httpClient.PostAsync(url, content);
-
-            var operationResult = await orderResult.Content.ReadAsStringAsync();
-
-            var status = orderResult.StatusCode;
-
-            if (status == HttpStatusCode.OK)
+            try
             {
-                Order newOrder = JsonConvert.DeserializeObject<Order>(operationResult);
+                dynamic data = Utils.CreateOrderData(clientInfo, signal);
 
-                if (newOrder.State == OrderState.Open)
+                var url = Environment.GetEnvironmentVariable("CCXT_SEND_ORDER");
+
+                var dataAsString = JsonConvert.SerializeObject(data);
+
+                var content = new StringContent(dataAsString);
+
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var orderResult = await httpClient.PostAsync(url, content);
+
+                var operationResult = await orderResult.Content.ReadAsStringAsync();
+
+                var status = orderResult.StatusCode;
+
+                if (status == HttpStatusCode.OK)
                 {
+                    Order newOrder = JsonConvert.DeserializeObject<Order>(operationResult);
+
+                    if(newOrder.Executed != 0)
+                    {
+                        newOrder.State = OrderState.Closed;
+                    }
+                    else
+                    {
+                        newOrder.State = OrderState.Open;
+                    }
+
                     return newOrder;
                 }
-            }
-            else if (status == HttpStatusCode.InternalServerError)
-            {
-                (int code, string message) errorInfo = JsonConvert.DeserializeObject<(int, string)>(operationResult);
+                else if (status == HttpStatusCode.InternalServerError)
+                {
+                    //(int code, string message) errorInfo = JsonConvert.DeserializeObject<(int, string)>(operationResult);
 
-                // отправить сообщение об ошибке в лог
-                if (errorInfo.code == 100)
-                {
-                    // ошибка идентификации пользователя на бирже
-                    return null;
+                    dynamic errorInfo = JsonConvert.DeserializeObject(operationResult);
+
+                    // отправить сообщение об ошибке в лог
+                    if (errorInfo.code == 100)
+                    {
+                        // ошибка идентификации пользователя на бирже
+                        return null;
+                    }
+                    else if (errorInfo.code == 110)
+                    {
+                        // Не достаточно средств для выставления ордера
+                        return null;
+                    }
+                    else if (errorInfo.code == 120)
+                    {
+                        // Ошибка в параметрах ордера
+                        return null;
+                    }
                 }
-                else if (errorInfo.code == 110)
-                {
-                    // Не достаточно средств для выставления ордера
-                    return null;
-                }
-                else if (errorInfo.code == 120)
-                {
-                    // Ошибка в параметрах ордера
-                    return null;
-                }
+                return null;
             }
-            return null;
+            catch(Exception e)
+            {
+                throw;
+            }            
         }
 
         /// <summary>
         /// отменить ордер
         /// </summary>        
-        public static async Task<bool> CancelOrder(string orderNumber, Client clientInfo, NewSignal signal)
-        {
-            (string numberOrder, Client client, NewSignal signal) tradeInfo = (orderNumber, clientInfo, signal);
+        public static async Task<bool> CancelOrder(Client clientInfo, Order signal)
+        {           
+            dynamic data = Utils.CreateOrderData(clientInfo, signal);
 
-            var dataAsString = JsonConvert.SerializeObject(tradeInfo);
+            var dataAsString = JsonConvert.SerializeObject(data);
 
             var content = new StringContent(dataAsString);
 
@@ -124,11 +141,11 @@ namespace CpzTrader
         /// <summary>
         /// проверить статус ордера
         /// </summary>        
-        public static async Task<bool> CheckOrderStatus(string orderNumber, Client clientInfo, Order signal)
+        public static async Task<bool> CheckOrderStatus(Client clientInfo, Order signal)
         {
-            (string numberOrder, Client client, Order signal) tradeInfo = (orderNumber, clientInfo, signal);
+            dynamic data = Utils.CreateOrderData(clientInfo, signal);
 
-            var dataAsString = JsonConvert.SerializeObject(tradeInfo);
+            var dataAsString = JsonConvert.SerializeObject(data);
 
             var content = new StringContent(dataAsString);
 

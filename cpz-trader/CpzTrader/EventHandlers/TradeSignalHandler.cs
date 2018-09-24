@@ -96,9 +96,9 @@ namespace CpzTrader.EventHandlers
                 {
                     exchange = clients[0].RobotSettings.Exchange;
 
-                    baseq = clients[0].RobotSettings.Baseq;
+                    baseq = clients[0].RobotSettings.Asset;
 
-                    quote = clients[0].RobotSettings.Quote;
+                    quote = clients[0].RobotSettings.Currency;
                 }
                 else
                 {

@@ -30,12 +30,12 @@ namespace CpzTrader.Models
         /// <summary>
         /// актив
         /// </summary>
-        public string Baseq { get; set; }
+        public string Asset { get; set; }
 
         /// <summary>
         /// валюта
         /// </summary>
-        public string Quote { get; set; }
+        public string Currency { get; set; }
 
         /// <summary>
         /// таймфрейм

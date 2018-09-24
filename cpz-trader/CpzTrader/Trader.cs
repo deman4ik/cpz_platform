@@ -26,6 +26,8 @@ namespace CpzTrader
 
                 Order myOrder = (Order)needOrder.Clone();
 
+                myOrder.Volume = clientInfo.RobotSettings.Volume;
+
                 if (signalType != SignalType.CheckLimit)
                 {
                     var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
@@ -55,23 +57,28 @@ namespace CpzTrader
 
                     Order myOrder = (Order)needOrder.Clone();
 
-                    var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
+                    var openVolume = needPosition.GetOpenVolume();
+
+                    if(openVolume != 0)
+                    {
+                        var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
                                                                   : await ActivityFunctions.SendOrder(clientInfo, myOrder);
 
-                    if (openOrder != null)
-                    {
-                        myOrder.NumberInSystem = openOrder.NumberInSystem;
-                    }
-                    else
-                    {
-                        myOrder.State = OrderState.Fall;
-                    }
+                        if (openOrder != null)
+                        {
+                            myOrder.NumberInSystem = openOrder.NumberInSystem;
+                        }
+                        else
+                        {
+                            myOrder.State = OrderState.Fall;
+                        }
 
-                    needPosition.State = needOrder.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;
+                        needPosition.State = needOrder.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;
 
-                    needPosition.CloseOrders.Add(myOrder);                    
+                        needPosition.CloseOrders.Add(myOrder);
 
-                    await DbContext.UpdateClientInfoAsync(clientInfo);
+                        await DbContext.UpdateClientInfoAsync(clientInfo);
+                    }                    
                 }
                 else
                 {
@@ -83,7 +90,7 @@ namespace CpzTrader
                     }
                     else
                     {
-                        var resultChecking = await ActivityFunctions.CheckOrderStatus(needOrder.NumberInSystem, clientInfo, needOrder);
+                        var resultChecking = await ActivityFunctions.CheckOrderStatus(clientInfo, needOrder);
 
                         needOrder.State = resultChecking ? OrderState.Closed : OrderState.Open;
                     }

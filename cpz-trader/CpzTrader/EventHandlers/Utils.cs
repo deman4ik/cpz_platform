@@ -1,4 +1,5 @@
 ﻿using CpzTrader.Models;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -102,8 +103,8 @@ namespace CpzTrader.EventHandlers
                 RobotSettings = new RobotSettings()
                 {
                     Exchange = data.exchange,
-                    Baseq = data.asset,
-                    Quote = data.currency,
+                    Asset = data.asset,
+                    Currency = data.currency,
                     Timeframe =data.timeframe,
                     Volume = data.settings.volume,
                     Slippage = data.settings.slippageStep,
@@ -119,5 +120,28 @@ namespace CpzTrader.EventHandlers
             };
         }
 
+        /// <summary>
+        /// преобразовать данные в приказ коннектору CCXT
+        /// </summary>
+        public static dynamic CreateOrderData(Client clientInfo, Order signal)
+        {
+            dynamic data = new JObject();
+
+            data.exchange = clientInfo.RobotSettings.Exchange;
+            data.asset = clientInfo.RobotSettings.Asset;
+            data.currency = clientInfo.RobotSettings.Currency;
+
+            data.number = signal.NumberInSystem;
+
+            data.volume = signal.Volume;
+            data.type = signal.OrderType == OrderType.Limit ? "limit" : "market";
+            data.direction = signal.Direction;
+            data.price = signal.Price;
+
+            data.publicKey = Environment.GetEnvironmentVariable("TEST_PUBLIC_KEY");
+            data.privateKey = Environment.GetEnvironmentVariable("TEST_PRIVATE_KEY");
+
+            return data;
+        }
     }
 }
