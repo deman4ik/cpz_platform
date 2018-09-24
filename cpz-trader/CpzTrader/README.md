@@ -14,92 +14,83 @@
 
 При тестировании через фидлер или постман первый шаг можно пропустить.
 
-Для запуска проторговщиков необходимо отправиль сигнал с типом события `CPZ.Tasks.Trader.Start` который содержит имя робота.
+Для подключения клиента к советнику нужно отправить событие с типом `CPZ.Tasks.Trader.Start` которое содержит данные клиента.
 
 Шаблон тела запроса:
 
 ```
 [{
-  "id": "2d1781af-3a4c-4d7c-bd0c-e34b19da4e19",
+"id": "2d1781af-3a4c-4d7c-bd0c-e34b19da4e19",
   "topic": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "subject": "",
+  "subject": "testSub",
   "data": {
-    "AdvisorName": "PriceChanell_1H"    
-  },
-  "eventType": "CPZ.Tasks.Trader.Start",
-  "eventTime": "2018-08-17T20:12:19.4556811Z",
-  "metadataVersion": "1",
-  "dataVersion": "1"
+    "userId":"Ivanov",
+    "taskId": "ClientNumberOne",
+    "robotId": "TestRobot",
+    "mode": "emulator",        
+    "timeframe": 5,
+    "exchange": "binance",
+    "asset": "XRP",
+    "currency":"ETH",    
+    "debug":"true",
+    "settings": {
+       "slippageStep": 20,
+       "volume": 12,
+       "deviation":10
+    }    
+   },
+  "eventType": "CPZ.Tasks.Trader.Start"
 }]
 ```
 
-Далее трейдер готов к приему торговых сигналов, для этого отправляем событие 
+`CPZ.Tasks.Trader.Stop` - остановить клиента
 
-`CPZ.Signals.NewSignal` - для использования устойчивых функций
+```
+[{
+"id": "2d1781af-3a4c-4d7c-bd0c-e34b19da4e19",
+  "topic": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "subject": "testSub",
+  "data": {
+    "taskId": "ClientNumberOne",
+    "robotId": "TestRobot",    
+   },
+  "eventType": "CPZ.Tasks.Trader.Stop"
+}]
+```
 
+`CPZ.Tasks.Trader.Update` - обновить инфо о клиенте
+
+
+ 
+
+`CPZ.Signals.NewSignal` - новый сигнал от советника
 
 ```
 [{
   "data": {
-    "AdvisorName": "PriceChanell_1H",
-    "Action": "NewPosition",
-    "Price": 100, 
-    "Type": "limit",   
-    "Direction": "buy",
-    "Exchange": "Binance",
-    "Baseq": "BTC",
-    "Quote": "USD",
-    "NumberOrderInRobot":"111",  
-    "NumberPositionInRobot":"1",
-    "PercentVolume":0
+    "alertTime":"2018-03-19T10:00:00Z",
+    "robotId": "TestRobot",
+    "action": "Long",
+    "price": 9000, 
+    "orderType": "stop",      
+    "id":"111",  
+    "positionId":"num1"
   },
   "eventType": "CPZ.Signals.NewSignal"
 }]
 ```
 
-или `noDurable` - для обычных функций
-
+`CPZ.Trader.NewTick` - событие нового тика
 ```
 [{
   "data": {
-    "AdvisorName": "PriceChanell_1H",
-    "Action": "NewPosition",
-    "Price": 100, 
-    "Type": "market",   
-    "Direction": "buy",
-    "Exchange": "Binance",
-    "Baseq": "BTC",
-    "Quote": "USD",
-    "NumberOrderInRobot":"111",  
-    "NumberPositionInRobot":"1",
-    "PercentVolume":0
+    "price": 9995, 
+    "exchange": "binance",   
+    "baseq": "XRP",    
+    "quote":"ETH"
   },
-  "eventType": "noDurable"
+  "eventType": "CPZ.Trader.NewTick"
 }]
 ```
 
-Поле `AdvisorName` содержит имя робота от которого пришел сигнал
 
-`Action` - тип сигнала, их несколько
-
-1. `NewPosition` - сигнализирует об открытии новой позиции и первого открывающего ордера,
-  данные пришедшие в этом событии должны содержать уникальный номер позиции в системе в поле `NumberPositionInRobot`.
- 
-2. `NewOpenOrder` - новый ордер, который доливает объем в уже имеющуяся позицию, в поле `NumberPositionInRobot` указывается номер позиции
-   в которую нужно долиться.
-3. `NewCloseOrder` - новый ордер, который либо закрывает позицию полностью, либо сокращает ее объем. Если 
-    поле `PercentVolume` равно 100, значит нужно полностью закрыть позицию, иначе закрыть только часть равную `PercentVolume`
-в процентах от открытого объема. Так же не забываем указать номер позиции которую обрабатываем этим сигналом.
-4. `CancelOrder` - отозвать ордер
-5. `CheckOrder` - проверить ордер на бирже в случае реальной торговли, либо изменить состояние ордера с "activ" на "done"
-   в случае эмуляции.
-
-`Type` - по умолчанию "limit", при необходимости "market"
-
-`Direction` - направление сделки "buy" или "sell"
-
-`NumberOrderInRobot` - номер ордера в роботе
-
-`NumberPositionInRobot` - номер позиции в роботе
-
-`PercentVolume` - объем для закрытия в процентах
