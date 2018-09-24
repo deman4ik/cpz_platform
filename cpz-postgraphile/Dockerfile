@@ -5,6 +5,7 @@ COPY package.json /home/site/wwwroot
 COPY package-lock.json /home/site/wwwroot
 COPY ecosystem.config.js /home/site/wwwroot
 ENV NODE_ENV=production
+ENV NODE_PORT=80
 RUN npm install --production && \
     npm cache clean --force
 

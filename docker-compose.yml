@@ -1,16 +1,51 @@
 version: '3'
 services:
-  cpz-marketwatcher:
-    container_name: cpz-marketwatcher
-    build: ./cpz-marketWatcher/
+  cpz-events-logger:
+    container_name: cpz-events-logger
+    build: ./cpz-events-logger/
     ports:
-      - "8102:80"
+      - "8101:80"
     volumes:
-     - ./cpz-marketWatcher/:/cpz-marketWatcher/
+      - ./cpz-events-logger/:/cpz-events-logger/
     environment:
+      - AZ_STORAGE_CS
+      - API_KEY 
+      - DB_API_ENDPOINT
+      - EG_EMULATOR_MODE
+      - LOG_TABLE_STORAGE
+      - LOG_POSTGRE
+      - NODE_TLS_REJECT_UNAUTHORIZED
+  # cpz-marketwatcher:
+  #   container_name: cpz-marketwatcher
+  #   build: ./cpz-marketWatcher/
+  #   ports:
+  #     - "8102:80"
+  #   volumes:
+  #    - ./cpz-marketWatcher/:/cpz-marketWatcher/
+  #   environment:
+  #   - AzureWebJobsStorage
+  #   - AZ_STORAGE_CS  
+  #   - API_KEY
+  #   - EG_TEST_ENDPOINT
+  #   - EG_TEST_KEY 
+  #   - PROXY_ENDPOINT
+  #   restart: always
+  cpz-candlebatcher:
+    container_name: cpz-candlebatcher
+    build: ./cpz-candlebatcher/
+    ports:
+      - "8103:80"
+    volumes:
+     - ./cpz-candlebatcher/:/cpz-candlebatcher/
+    environment:
+    - AzureWebJobsStorage  
+    - AZ_STORAGE_CS  
     - API_KEY
-    - EG_TOPIC_ENDPOINT
-    - EG_TOPIC_KEY 
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY 
+    - DB_API_ENDPOINT
+    - PROXY_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
   cpz-adviser:
     container_name: cpz-adviser
@@ -20,10 +55,13 @@ services:
     volumes:
      - ./cpz-adviser/:/cpz-adviser/
     environment:
-    - AZURE_STORAGE_CONNECTION_STRING
-    - EG_SIGNALS_TOPIC_KEY
-    - EG_SIGNALS_TOPIC_ENDPOINT  
-    restart: always
+    - AzureWebJobsStorage 
+    - AZ_STORAGE_CS
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY  
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always  
   cpz-postgraphile:
     container_name: cpz-postgraphile
     build: ./cpz-postgraphile/
@@ -33,34 +71,51 @@ services:
       - ./cpz-postgraphile/:/cpz-postgraphile/
     environment:
       - CUSTOMCONNSTR_POSTGRESQL
-      - API_USER
-      - API_SECRET  
-  cpz-trader:
-    container_name: cpz-trader
-    build: ./cpz-trader/CpzTrader/
-    ports:
-      - "8106:80"
-    volumes:
-     - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
-    environment:
-    - AzureWebJobsStorage
-    - EgTopicEndpoint
-    - EgTopicKey   
-    - CCXTSendOrder
-    - CCXTCancelOrder
-    - CCXTCheckOrderStatus
-    restart: always
+      - API_KEY 
+  # cpz-trader:
+  #   container_name: cpz-trader
+  #   build: ./cpz-trader/CpzTrader/
+  #   ports:
+  #     - "8106:80"
+  #   volumes:
+  #    - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
+  #   environment:     
+  #   - AZ_STORAGE_CS
+  #   - API_KEY
+  #   - EG_TEST_ENDPOINT
+  #   - EG_TEST_KEY  
+  #   - CCXT_ENDPOINT
+  #   restart: always
+  # cpz-connector-ccxt:
+  #   container_name: cpz-connector-ccxt
+  #   build: ./cpz-connector-ccxt
+  #   ports:
+  #     - "8107:80"
+  #   volumes:
+  #    - ./cpz-connector-ccxt/:/cpz-connector-ccxt/
+  #   environment:     
+  #   - API_KEY
+  #   - PROXY_ENDPOINT
+  #   - NODE_TLS_REJECT_UNAUTHORIZED
+  #   restart: always  
   nginx:
     container_name: nginx
     build: ./docker-nginx/
     ports:
-      - "8100:80"  
-  ngrok:
-    container_name: ngrok
-    ports:
-      - "0.0.0.0:4040:4040"
-    image: wernight/ngrok
-    links:
-      - "nginx"
-    environment:
-      - NGROK_PORT=nginx:80      
+      - "8100:443"  
+  # ngrok:
+  #   container_name: ngrok
+  #   ports:
+  #     - "0.0.0.0:4040:4040"
+  #   image: wernight/ngrok
+  #   links:
+  #     - "nginx"
+  #   environment:
+  #     - NGROK_PORT=nginx:80    
+  # storage-emulator:
+  #   container_name: storage-emulator
+  #   ports:
+  #     - "10000:10000"
+  #     - "10001:10001"
+  #     - "10002:10002"
+  #   image: microsoft/azure-storage-emulator  

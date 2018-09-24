@@ -7,7 +7,8 @@ RUN apt-get update &&  \
     apt-get install -y gcc
 COPY . /home/site/wwwroot
 WORKDIR /home/site/wwwroot
-RUN npm install --production && \
+RUN npm install ccxt && \
+    npm install --production && \
     npm cache clean --force
 RUN apt-get remove -y git && \
     apt-get remove -y python2.7 && \
