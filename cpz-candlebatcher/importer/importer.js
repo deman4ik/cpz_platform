@@ -76,8 +76,8 @@ class Importer {
       this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
       if (typeof this.loadCandlesFunc !== "function")
         throw new Error(`Connector "${this.providerType}" is not a function`);
-    } catch (err) {
-      throw new Error(`Can't find connector "${this.providerType}"`);
+    } catch (error) {
+      throw new Error(`Can't find connector "${this.providerType}\n${error}"`);
     }
   }
   initModStr() {

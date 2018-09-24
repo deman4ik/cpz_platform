@@ -97,9 +97,7 @@ async function handleStop(context, eventData) {
           subject: eventData.eventSubject,
           eventType: TASKS_CANDLEBATCHER_STOPPED_EVENT,
           data: {
-            taskId: eventData.taskId,
-            rowKey: eventData.rowKey,
-            partitionKey: eventData.partitionKey
+            taskId: eventData.taskId
           }
         })
       );
@@ -117,8 +115,6 @@ async function handleStop(context, eventData) {
         eventType: TASKS_CANDLEBATCHER_STOPPED_EVENT,
         data: {
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey,
           error
         }
       })
@@ -168,9 +164,7 @@ async function handleUpdate(context, eventData) {
           subject: eventData.eventSubject,
           eventType: TASKS_CANDLEBATCHER_UPDATED_EVENT,
           data: {
-            taskId: eventData.taskId,
-            rowKey: eventData.rowKey,
-            partitionKey: eventData.partitionKey
+            taskId: eventData.taskId
           }
         })
       );
@@ -188,8 +182,6 @@ async function handleUpdate(context, eventData) {
         eventType: TASKS_CANDLEBATCHER_UPDATED_EVENT,
         data: {
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey,
           error
         }
       })

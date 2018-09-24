@@ -1,5 +1,5 @@
 #Start Candlebatcher
-POST http://localhost:7071/api/funcTaskEvents
+POST /api/taskEvents
 [{
   "data": {
   	  "taskId": "test170918_1500",
@@ -12,11 +12,11 @@ POST http://localhost:7071/api/funcTaskEvents
       "timeframes":[1,5,60]
     },
   "eventType": "CPZ.Tasks.Candlebatcher.Start",
-  "subject":"bitfinex/BTC/USD/[5,60]/test170918_1500.E"
+  "subject":"bitfinex/BTC/USD/[1,5,60]/test170918_1500.E"
 }]
 
 #Stop Candlebatcher
-POST http://localhost:7071/api/funcTaskEvents
+POST /api/taskEvents
 [{
   "data": {
   	  "taskId": "test170918_1500",
@@ -24,10 +24,11 @@ POST http://localhost:7071/api/funcTaskEvents
       "partitionKey":"bitfinex.BTC.USD"
     },
   "eventType": "CPZ.Tasks.Candlebatcher.Stop",
-  "subject":"bitfinex/BTC/USD/[5,60]/test170918_1500.E"
+  "subject":"bitfinex/BTC/USD/[1,5,60]/test170918_1500.E"
 }]
 
 #Update Candlebatcher
+POST /api/taskEvents
 [{
   "data": {
   	  "taskId": "test170918_1500",
@@ -41,9 +42,10 @@ POST http://localhost:7071/api/funcTaskEvents
 }]
 
 #Start Import
+POST /api/taskEvents
 [{
   "data": {
-  	  "taskId": "test180918_0200",
+  	  "taskId": "test170918_1500",
       "mode": "emulator",
       "debug": true,
       "providerType": "ccxt",
@@ -56,5 +58,17 @@ POST http://localhost:7071/api/funcTaskEvents
       "dateTo":"2018-09-18T15:00:00.000Z"
     },
   "eventType": "CPZ.Tasks.Candlebatcher.StartImport",
-  "subject":"bitfinex/BTC/USD/[5,60]/test170918_1500.E"
+  "subject":"bitfinex/BTC/USD/1/test170918_1500.E"
+}]
+
+#Stop Import
+POST /api/taskEvents
+[{
+  "data": {
+  	  "taskId": "test170918_1500",
+      "rowKey": "test170918_1500",
+      "partitionKey":"bitfinex.BTC.USD"
+    },
+  "eventType": "CPZ.Tasks.Candlebatcher.StopImport",
+  "subject":"bitfinex/BTC/USD/1/test170918_1500.E"
 }]

@@ -208,7 +208,7 @@ class Candlebatcher {
       // Но есть ошибка бизнес логики
       if (result.data.error) {
         // и ошибка формирования таймфреймов
-        if (result.data.error.code === "timeframe")
+        if (result.data.error.code === "timeframe") {
           // создаем новый запрос на импорт недостающих свечей
           return {
             taskId: uuid(),
@@ -226,6 +226,7 @@ class Candlebatcher {
             dateFrom: dayjs(result.data.error.start * 1000).toJSON(),
             dateTo: dayjs(result.data.error.end * 1000).toJSON()
           };
+        }
         // иначе возращаем ошибку
         return result.error;
       }

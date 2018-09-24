@@ -63,4 +63,4 @@ function createSlug(exchange, asset, currency) {
   return `${exchange}.${asset}.${currency}`;
 }
 
-module.exports = { entityToObject, objectToEntity, createSlug };
+module.exports = { tryParseJSON, entityToObject, objectToEntity, createSlug };

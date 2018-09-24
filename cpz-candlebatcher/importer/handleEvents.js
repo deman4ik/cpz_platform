@@ -32,6 +32,19 @@ async function handleImportStop(context, eventData) {
     const result = await updateImporterState(context, newState);
     if (!result.isSuccess)
       throw new Error(`Can't update Importer state\n${result.error}`);
+    // Публикуем событие - успех
+    await publishEvents(
+      context,
+      "tasks",
+      createEvents({
+        subject: eventData.eventSubject,
+        eventType: TASKS_CANDLEBATCHER_STOPPPEDIMPORT_EVENT,
+        data: {
+          service: IMPORTER_SERVICE,
+          taskId: eventData.taskId
+        }
+      })
+    );
   } catch (error) {
     context.log.error(error, eventData);
     // Публикуем событие - ошибка
@@ -44,8 +57,6 @@ async function handleImportStop(context, eventData) {
         data: {
           service: IMPORTER_SERVICE,
           taskId: eventData.taskId,
-          rowKey: eventData.rowKey,
-          partitionKey: eventData.partitionKey,
           error
         }
       })
