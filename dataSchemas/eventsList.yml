@@ -1,0 +1,94 @@
+
+endpoints:
+# Marketwatcher
+- name: "marketwatcher-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.MarketWatcher.Start
+  - CPZ.Tasks.MarketWatcher.Stop
+  - CPZ.Tasks.MarketWatcher.Subscribe
+  - CPZ.Tasks.MarketWatcher.Unsubscribe
+# Candlebatcher  
+- name: "candlebatcher-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Candlebatcher.Start
+  - CPZ.Tasks.Candlebatcher.Stop
+  - CPZ.Tasks.Candlebatcher.Update
+  - CPZ.Tasks.Candlebatcher.StartImport
+  - CPZ.Tasks.Candlebatcher.StopImport
+  - CPZ.Tasks.Candlebatcher.StartBacktest
+  - CPZ.Tasks.Candlebatcher.StopBacktest
+# Adviser  
+- name: "adviser-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Adviser.Start
+  - CPZ.Tasks.Adviser.Stop
+  - CPZ.Tasks.Adviser.Update
+- name: "adviser-candles"
+  topic: CPZ-CANDLES
+  url: "/api/candleEvents"
+  types:
+  - CPZ.Candles.NewCandle
+# Trader  
+- name: "trader-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Trader.Start
+  - CPZ.Tasks.Trader.Stop
+  - CPZ.Tasks.Trader.Update
+- name: "trader-signals"
+  topic: CPZ-SIGNALS
+  url: "/trader/api/signalEvents"
+  types:
+  - CPZ.Signals.NewSignal
+# Taskrunner
+- name: "taskrunner-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.MarketWatcher.Started
+  - CPZ.Tasks.MarketWatcher.Stopped
+  - CPZ.Tasks.MarketWatcher.Subscribed
+  - CPZ.Tasks.MarketWatcher.Unsubscribed
+  - CPZ.Tasks.Candlebatcher.Started
+  - CPZ.Tasks.Candlebatcher.Stopped
+  - CPZ.Tasks.Candlebatcher.Updated
+  - CPZ.Tasks.Adviser.Started
+  - CPZ.Tasks.Adviser.Stopped
+  - CPZ.Tasks.Adviser.Updated
+  - CPZ.Tasks.Trader.Started
+  - CPZ.Tasks.Trader.Stopped
+  - CPZ.Tasks.Trader.Updated
+  - CPZ.Tasks.Backtester.Started
+  - CPZ.Tasks.Backtester.Stopped
+# Backtester
+- name: "backtester-tasks"
+  topic: CPZ-TASKS
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Backtester.Start
+  - CPZ.Tasks.Backtester.Stop
+- name: "backtester-candles"
+  topic: CPZ-CANDLES
+  url: "/api/candleEvents"
+  types:
+  - CPZ.Candles.NewCandle
+  - CPZ.Candles.Handled
+- name: "backtester-signals"
+  topic: CPZ-SIGNALS
+  url: "/api/signalEvents"
+  types:
+  - CPZ.Signals.NewSignal
+  - CPZ.Signals.Handled
+- name: "backtester-orders"
+  topic: CPZ-ORDERS
+  url: "/api/orderEvents"
+  types:
+  - CPZ.Orders.NewOpenOrder
+  - CPZ.Orders.NewCloseOrder
