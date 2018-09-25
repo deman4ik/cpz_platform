@@ -10,7 +10,7 @@ namespace CPZMarketWatcher.Services
         /// <summary>
         /// опубликовать событие ордера в event grid
         /// </summary>        
-        public static async Task PublishEvent(string topic, string eventType, string subject, dynamic data)
+        public static async Task PublishEvent(string eventType, string subject, dynamic data)
         {
             try
             {
@@ -32,7 +32,6 @@ namespace CPZMarketWatcher.Services
                     eventsList.Add(new EventGridEvent()
                     {
                         Id = Guid.NewGuid().ToString(), // уникальный идентификатор
-                        Topic = topic,
                         Subject = subject, // тема события
                         DataVersion = "1.0", // версия данных
                         EventType = eventType, // тип события

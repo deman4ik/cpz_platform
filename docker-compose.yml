@@ -15,21 +15,21 @@ services:
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
       - NODE_TLS_REJECT_UNAUTHORIZED
-  # cpz-marketwatcher:
-  #   container_name: cpz-marketwatcher
-  #   build: ./cpz-marketWatcher/
-  #   ports:
-  #     - "8102:80"
-  #   volumes:
-  #    - ./cpz-marketWatcher/:/cpz-marketWatcher/
-  #   environment:
-  #   - AzureWebJobsStorage
-  #   - AZ_STORAGE_CS  
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY 
-  #   - PROXY_ENDPOINT
-  #   restart: always
+  cpz-marketwatcher:
+    container_name: cpz-marketwatcher
+    build: ./cpz-marketWatcher/
+    ports:
+      - "8102:80"
+    volumes:
+     - ./cpz-marketWatcher/:/cpz-marketWatcher/
+    environment:
+    - AzureWebJobsStorage
+    - AZ_STORAGE_CS  
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY 
+    - PROXY_ENDPOINT
+    restart: always
   cpz-candlebatcher:
     container_name: cpz-candlebatcher
     build: ./cpz-candlebatcher/
@@ -72,32 +72,32 @@ services:
     environment:
       - CUSTOMCONNSTR_POSTGRESQL
       - API_KEY 
-  # cpz-trader:
-  #   container_name: cpz-trader
-  #   build: ./cpz-trader/CpzTrader/
-  #   ports:
-  #     - "8106:80"
-  #   volumes:
-  #    - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
-  #   environment:     
-  #   - AZ_STORAGE_CS
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY  
-  #   - CCXT_ENDPOINT
-  #   restart: always
-  # cpz-connector-ccxt:
-  #   container_name: cpz-connector-ccxt
-  #   build: ./cpz-connector-ccxt
-  #   ports:
-  #     - "8107:80"
-  #   volumes:
-  #    - ./cpz-connector-ccxt/:/cpz-connector-ccxt/
-  #   environment:     
-  #   - API_KEY
-  #   - PROXY_ENDPOINT
-  #   - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always  
+  cpz-trader:
+    container_name: cpz-trader
+    build: ./cpz-trader/CpzTrader/
+    ports:
+      - "8106:80"
+    volumes:
+     - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
+    environment:     
+    - AZ_STORAGE_CS
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY  
+    - CCXT_ENDPOINT
+    restart: always
+  cpz-connector-ccxt:
+    container_name: cpz-connector-ccxt
+    build: ./cpz-connector-ccxt
+    ports:
+      - "8107:80"
+    volumes:
+     - ./cpz-connector-ccxt/:/cpz-connector-ccxt/
+    environment:     
+    - API_KEY
+    - PROXY_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always  
   nginx:
     container_name: nginx
     build: ./docker-nginx/

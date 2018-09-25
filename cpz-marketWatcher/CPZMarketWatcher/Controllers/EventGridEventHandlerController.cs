@@ -59,7 +59,6 @@ namespace CPZMarketWatcher.Controllers
                         else
                         {
                             string subject = eventGridEvent.Subject;
-                            string topic = ConfigurationManager.TakeParameterByName("CPZ-TASKS");
 
                             JObject dataObject = eventGridEvent.Data as JObject;
                             // Считываем данные
@@ -72,7 +71,7 @@ namespace CPZMarketWatcher.Controllers
 
                                 string eventType = ConfigurationManager.TakeParameterByName("Started");
 
-                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
+                                await EventGridPublisher.PublishEvent(eventType, subject, "");
                             }
                             // Если пришел запрос на  получения данных по определенной паре
                             else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Subscribe"))
@@ -81,7 +80,7 @@ namespace CPZMarketWatcher.Controllers
 
                                 string eventType = ConfigurationManager.TakeParameterByName("Subscribed");
 
-                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
+                                await EventGridPublisher.PublishEvent(eventType, subject, "");
                             }
                             // Если пришел запрос на остановку получения данных по определенной паре
                             else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Unsubscribe"))
@@ -90,7 +89,7 @@ namespace CPZMarketWatcher.Controllers
 
                                 string eventType = ConfigurationManager.TakeParameterByName("Unsubscribed");                             
 
-                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
+                                await EventGridPublisher.PublishEvent(eventType, subject, "");
                             }
                             // Если пришел запрос на остановку поставщика
                             else if (eventGridEvent.EventType == ConfigurationManager.TakeParameterByName("Stop"))
@@ -99,7 +98,7 @@ namespace CPZMarketWatcher.Controllers
 
                                 string eventType = ConfigurationManager.TakeParameterByName("Stopped");
 
-                                await EventGridPublisher.PublishEvent(topic, eventType, subject, "");
+                                await EventGridPublisher.PublishEvent(eventType, subject, "");
                             }
                         }
                     }
@@ -114,7 +113,7 @@ namespace CPZMarketWatcher.Controllers
 
                     data.message = "Недействительный ключ";
 
-                    await EventGridPublisher.PublishEvent(topic, eventType, "MARKETWATCHER-KEY-ERROR", data);
+                    await EventGridPublisher.PublishEvent(eventType, "MARKETWATCHER-KEY-ERROR", data);
 
                     return Json(new HttpResponseMessage(HttpStatusCode.Forbidden));
                 }
@@ -124,7 +123,7 @@ namespace CPZMarketWatcher.Controllers
                 string eventType = ConfigurationManager.TakeParameterByName("Error");
                 string topic = ConfigurationManager.TakeParameterByName("CPZ-LOG");
 
-                await EventGridPublisher.PublishEvent(topic, eventType, "ERROR", (dynamic)e );
+                await EventGridPublisher.PublishEvent(eventType, "ERROR", (dynamic)e );
 
                 throw;
             }
