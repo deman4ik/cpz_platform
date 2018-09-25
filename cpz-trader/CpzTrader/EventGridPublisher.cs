@@ -64,7 +64,50 @@ namespace CpzTrader
         /// <summary>
         /// опубликовать событие в event grid
         /// </summary>        
-        public static async Task PublishEventInfo(string subject, string eventType, string taskId , string message)
+        public static async Task PublishEventInfo(string subject, string eventType, string taskId, dynamic data)
+        {
+            try
+            {
+                string _topicEndpoint = Environment.GetEnvironmentVariable("EG_TEST_ENDPOINT");
+
+                var _topicHostname = new Uri(_topicEndpoint).Host;
+
+                string _topicKey = Environment.GetEnvironmentVariable("EG_TEST_KEY");
+
+                var topicCredentials = new TopicCredentials(_topicKey);
+
+                EventGridClient eventGridClient = new EventGridClient(topicCredentials);
+
+                List<EventGridEvent> eventsList = new List<EventGridEvent>();
+
+                for (int i = 0; i < 1; i++)
+                {
+                    // Создаем новое событие
+                    eventsList.Add(new EventGridEvent()
+                    {
+                        Id = Guid.NewGuid().ToString(), // уникальный идентификатор
+                        Subject = subject, // тема события
+                        DataVersion = "1.0", // версия данных
+                        EventType = eventType, // тип события
+                        Data = data, // данные события
+                        EventTime = DateTime.Now // время формирования события
+                    });
+                }
+
+                // Отправка событий в тему
+                await eventGridClient.PublishEventsAsync(_topicHostname, eventsList);
+
+            }
+            catch (Exception error)
+            {
+                Debug.WriteLine(error);
+            }
+        }
+
+        /// <summary>
+        /// опубликовать событие в event grid
+        /// </summary>        
+        public static async Task PublishEventInfo(string subject, string eventType, string taskId , string message = "")
         {
             try
             {
@@ -84,7 +127,8 @@ namespace CpzTrader
                 {
                     // Формируем данные
                     dynamic data = new JObject();
-                    data.message = message;                    
+                    data.message = message;
+                    data.taskId = taskId;
 
                     // Создаем новое событие
                     eventsList.Add(new EventGridEvent()

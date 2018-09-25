@@ -117,6 +117,8 @@ namespace CpzTrader.EventHandlers
                 {
                     Position newPosition = new Position(signal.NumberPositionInRobot, partitionKey);
 
+                    newPosition.Subject = subject;
+
                     newPosition.RobotId = signal.AdvisorName;
 
                     Order newOrder = Utils.CreateOrder(signal);
@@ -167,7 +169,8 @@ namespace CpzTrader.EventHandlers
 
                     // сохранить обновленную позицию в хранилище
                     var res = await DbContext.UpdateEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot, needPosition);                    
-                }               
+                }
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("SignalHandled"), signal.NumberOrderInRobot);
             }
             catch (Exception e)
             {

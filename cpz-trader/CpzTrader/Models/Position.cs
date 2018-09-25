@@ -26,7 +26,8 @@ namespace CpzTrader.Models
         /// </summary>
         public string RobotId { get; set; }
 
-        
+        public string Subject { get; set; }
+
         /// <summary>
         /// мультипозиционный ли робот, которому принадлежит позиция
         /// </summary>

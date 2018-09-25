@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace CpzTrader.Models
 {
@@ -25,6 +26,8 @@ namespace CpzTrader.Models
 
         public string Quote { get; set; }
 
+        [JsonProperty("alertTime")]
+        public DateTime AlertTime { get; set; }
 
         /// <summary>
         /// тип сделки - по рынку или лимиткой

@@ -11,7 +11,9 @@ namespace CpzTrader
         public static Order SendOrder(decimal volume, Order signal)
         {
             signal.State = signal.OrderType == OrderType.Limit ? OrderState.Open : OrderState.Closed;
- 
+            signal.Executed = volume;
+            signal.NumberInSystem = Guid.NewGuid().ToString();
+
             return signal;
         }
 

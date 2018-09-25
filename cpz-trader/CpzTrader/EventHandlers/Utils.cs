@@ -53,10 +53,6 @@ namespace CpzTrader.EventHandlers
 
                 await Task.WhenAll(parallelTraders);
             }
-
-            string message = $"Сигнал от робота - {position.PartitionKey} обработан.";
-
-            //await EventGridPublisher.PublishEventInfo(Environment.GetEnvironmentVariable("SignalHandled"), message);
         }
 
         /// <summary>
@@ -80,9 +76,11 @@ namespace CpzTrader.EventHandlers
                 OrderType = signal.OrderType,
                 Price = signal.Price,
                 Symbol = $"{signal.Baseq}/{signal.Quote}",
-                TimeCreate = DateTime.UtcNow,
+                TimeCreate = signal.AlertTime,
                 State = signal.OrderType == OrderType.Market ? OrderState.Closed : OrderState.Open,
                 Direction = signal.Action == ActionType.CloseShort || signal.Action == ActionType.Long ? "buy" : "sell",
+                Action = signal.Action.ToString(),
+                
             };
         }
 

@@ -13,6 +13,7 @@
     "TraderStarted": "CPZ.Tasks.Trader.Started",
     "TraderStopped": "CPZ.Tasks.Trader.Stopped",
     "TraderUpdeted": "CPZ.Tasks.Trader.Updated",
-    "NewTick": "CPZ.Trader.NewTick"
+    "NewTick": "CPZ.Trader.NewTick",
+    "Roundtrip": "CPZ.Trader.Roundtrip"
   }
 }

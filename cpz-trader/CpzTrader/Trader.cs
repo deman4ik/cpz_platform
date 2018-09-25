@@ -1,4 +1,6 @@
 ﻿using CpzTrader.Models;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,12 +37,55 @@ namespace CpzTrader
 
                     if (openOrder != null)
                     {
-                        myOrder.NumberInSystem = openOrder.NumberInSystem;                                              
+                        myOrder.NumberInSystem = openOrder.NumberInSystem;
+
+                        dynamic roundtripData = new JObject();
+
+                        try
+                        {
+                            dynamic orderData = new JObject();
+
+                            orderData.id = openOrder.NumberInSystem;
+                            orderData.roundtripId = myPosition.RowKey;
+                            orderData.userId = clientInfo.RowKey;
+                            orderData.robotId = myPosition.RobotId;
+                            orderData.action = myOrder.Action;
+                            orderData.orderTime = openOrder.Time;
+                            orderData.price = openOrder.Price;
+                            orderData.orderType = openOrder.OrderType;
+                            orderData.quantity = openOrder.Executed;
+
+                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("NewOpenOrder"), clientInfo.RowKey, orderData);
+
+                            roundtripData.robotid = myPosition.RobotId;
+                            roundtripData.signalid = myOrder.NumberInRobot;
+                            roundtripData.positionid = myPosition.RowKey;
+                            roundtripData.userid = clientInfo.RowKey;
+                            roundtripData.action = myOrder.Action;
+                            roundtripData.quantity = openOrder.Executed;
+                            roundtripData.emulator = clientInfo.Mode;
+                            roundtripData.entryDate = myOrder.TimeCreate;
+                            roundtripData.entryPrice = myOrder.Price;
+                            roundtripData.exitDate = null;
+                            roundtripData.exitPrice = null;
+
+                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("Roundtrip"), clientInfo.RowKey, roundtripData);
+                        }
+                        catch(Exception e)
+                        {
+                            throw;
+                        }
                     }
                     else
                     {
                         myOrder.State = OrderState.Fall;
+
+                        string message = $"Ошибка выставления ордера - {myOrder.NumberInRobot}";
+
+                        await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("TraderError"), clientInfo.RowKey, message);
                     }
+
+                    
 
                     myPosition.OpenOrders.Add(myOrder);
 
@@ -62,15 +107,51 @@ namespace CpzTrader
                     if(openVolume != 0)
                     {
                         var openOrder = clientInfo.Mode == "emulator" ? Emulator.SendOrder(clientInfo.RobotSettings.Volume, myOrder)
-                                                                  : await ActivityFunctions.SendOrder(clientInfo, myOrder);
+                                                                      : await ActivityFunctions.SendOrder(clientInfo, myOrder);
 
                         if (openOrder != null)
                         {
                             myOrder.NumberInSystem = openOrder.NumberInSystem;
+
+                            dynamic orderData = new JObject();
+
+                            orderData.id = openOrder.NumberInSystem;
+                            orderData.roundtripId = needPosition.RowKey;
+                            orderData.userId = clientInfo.RowKey;
+                            orderData.robotId = needPosition.RobotId;
+                            orderData.action = myOrder.Action;
+                            orderData.orderTime = openOrder.Time;
+                            orderData.price = openOrder.Price;
+                            orderData.orderType = openOrder.OrderType;
+                            orderData.quantity = openOrder.Executed;
+
+                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("NewCloseOrder"), clientInfo.RowKey, orderData);
+
+
+                            dynamic roundtripData = new JObject();
+
+                            roundtripData.id = needPosition.RowKey;
+                            roundtripData.robotid = needPosition.RobotId;
+                            roundtripData.signalid = myOrder.NumberInRobot;
+                            roundtripData.positionid = needPosition.RowKey;
+                            roundtripData.userid = clientInfo.RowKey;
+                            roundtripData.action = myOrder.Action;
+                            roundtripData.quantity = openOrder.Executed;
+                            roundtripData.emulator = clientInfo.Mode;
+                            roundtripData.entryDate = needPosition.OpenOrders[0].TimeCreate;
+                            roundtripData.entryPrice = needPosition.OpenOrders[0].Price;
+                            roundtripData.exitDate = myOrder.TimeCreate;
+                            roundtripData.exitPrice = myOrder.Price;
+
+                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("Roundtrip"), clientInfo.RowKey, roundtripData);
                         }
                         else
                         {
                             myOrder.State = OrderState.Fall;
+
+                            string message = $"Ошибка выставления ордера - {myOrder.NumberInRobot}";
+
+                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("TraderError"), clientInfo.RowKey, message);
                         }
 
                         needPosition.State = needOrder.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;
