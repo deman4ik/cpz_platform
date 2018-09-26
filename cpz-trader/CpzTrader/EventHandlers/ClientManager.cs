@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -72,11 +73,19 @@ namespace CpzTrader
                         }
                         else
                         {
+                            // создаем и заполняем объект ошибки валидации
                             dynamic validationError = new JObject();
 
-                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.code = ErrorCodes.ClientData;
                             validationError.message = "Data Validation Error on Receiving a Client Start Request";
-                            validationError.details = JsonConvert.SerializeObject(errorMessages);
+
+                            dynamic details = new JObject();
+
+                            details.input = dataObject;
+                            details.taskId = dataObject.GetValue("taskId");
+                            details.internalError = JsonConvert.SerializeObject(errorMessages);
+
+                            validationError.details = details;
 
                             await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
                         }
@@ -96,9 +105,16 @@ namespace CpzTrader
                         {
                             dynamic validationError = new JObject();
 
-                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.code = ErrorCodes.ClientData;
                             validationError.message = "Data validation error when receiving a request to stop the client";
-                            validationError.details = JsonConvert.SerializeObject(errorMessages);
+
+                            dynamic details = new JObject();
+
+                            details.input = dataObject;
+                            details.taskId = dataObject.GetValue("taskId");
+                            details.internalError = JsonConvert.SerializeObject(errorMessages);
+
+                            validationError.details = details;
 
                             await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
                         }
@@ -118,10 +134,17 @@ namespace CpzTrader
                         {
                             dynamic validationError = new JObject();
 
-                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.code = ErrorCodes.ClientData;
                             validationError.message = "Data Validation Error When Retrieving a Client Update Request";
-                            validationError.details = JsonConvert.SerializeObject(errorMessages);
 
+                            dynamic details = new JObject();
+
+                            details.input = dataObject;
+                            details.taskId = dataObject.GetValue("taskId");
+                            details.internalError = JsonConvert.SerializeObject(errorMessages);
+
+                            validationError.details = details;
+                            
                             await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
                         }                        
                     }
