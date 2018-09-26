@@ -64,7 +64,7 @@ namespace CpzTrader
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StartTrader"), StringComparison.OrdinalIgnoreCase))
                     {
                         // проверить пришедшие данные на валидность
-                        var isValid = Validator.CheckDataForClientManager("start",dataObject, out errorMessages);
+                        var isValid = Validator.CheckData("start",dataObject, out errorMessages);
 
                         if(isValid)
                         {
@@ -94,7 +94,7 @@ namespace CpzTrader
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StopTrader"), StringComparison.OrdinalIgnoreCase))
                     {
                         // проверить пришедшие данные на валидность
-                        var isValid = Validator.CheckDataForClientManager("stop", dataObject, out errorMessages);
+                        var isValid = Validator.CheckData("stop", dataObject, out errorMessages);
 
                         if (isValid)
                         {
@@ -123,7 +123,7 @@ namespace CpzTrader
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("UpdateTrader"), StringComparison.OrdinalIgnoreCase))
                     {
                         // проверить пришедшие данные на валидность
-                        var isValid = Validator.CheckDataForClientManager("update", dataObject, out errorMessages);
+                        var isValid = Validator.CheckData("update", dataObject, out errorMessages);
 
                         if (isValid)
                         {

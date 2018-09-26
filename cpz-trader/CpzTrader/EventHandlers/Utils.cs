@@ -61,9 +61,9 @@ namespace CpzTrader.EventHandlers
         /// <summary>
         /// создать ключ раздела для позиции
         /// </summary>
-        public static string CreatePartitionKey(string exchange, string baseq, string quote)
+        public static string CreatePartitionKey(string exchange, string asset, string currency)
         {
-            return $"{exchange}{baseq}{quote}";
+            return $"{exchange}{asset}{currency}";
         }
 
         /// <summary>
@@ -75,10 +75,10 @@ namespace CpzTrader.EventHandlers
         {
             return  new Order()
             {
-                NumberInRobot = signal.NumberOrderInRobot,
+                NumberInRobot = signal.SignalId,
                 OrderType = signal.OrderType,
                 Price = signal.Price,
-                Symbol = $"{signal.Baseq}/{signal.Quote}",
+                Symbol = $"{signal.Asset}/{signal.Currency}",
                 TimeCreate = signal.AlertTime,
                 State = signal.OrderType == OrderType.Market ? OrderState.Closed : OrderState.Open,
                 Direction = signal.Action == ActionType.CloseShort || signal.Action == ActionType.Long ? "buy" : "sell",

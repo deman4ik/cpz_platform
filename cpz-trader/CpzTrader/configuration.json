@@ -14,6 +14,8 @@
     "TraderStopped": "CPZ.Tasks.Trader.Stopped",
     "TraderUpdeted": "CPZ.Tasks.Trader.Updated",
     "NewTick": "CPZ.Trader.NewTick",
-    "Roundtrip": "CPZ.Trader.Roundtrip"
+    "Roundtrip": "CPZ.Trader.Roundtrip",
+    "PositionsTableName": "Positions",
+    "ClientsTableName": "Traders"
   }
 }

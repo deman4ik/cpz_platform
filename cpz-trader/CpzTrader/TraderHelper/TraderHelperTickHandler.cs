@@ -1,5 +1,6 @@
 ﻿using CpzTrader.EventHandlers;
 using CpzTrader.Models;
+using CpzTrader.Services;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -38,6 +39,8 @@ namespace CpzTrader.TraderHelper
 
                     JObject dataObject = eventGridEvent.Data as JObject;
 
+                    IList<string> errorMessages;
+
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
                     if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
@@ -56,7 +59,29 @@ namespace CpzTrader.TraderHelper
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("NewTick"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(HandleTick(eventGridEvent.Subject,(dynamic)dataObject, log));
+                        var isValid = Validator.CheckData("signal", dataObject, out errorMessages);
+
+                        if (isValid)
+                        {
+                            Utils.RunAsync(HandleTick(eventGridEvent.Subject, (dynamic)dataObject, log));
+                        }
+                        else
+                        {
+                            dynamic validationError = new JObject();
+
+                            validationError.code = ErrorCodes.SignalData;
+                            validationError.message = "Validation error in the tick";
+
+                            dynamic details = new JObject();
+
+                            details.input = dataObject;
+                            details.taskId = eventGridEvent.Subject;
+                            details.internalError = JsonConvert.SerializeObject(errorMessages);
+
+                            validationError.details = details;
+
+                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                        }                        
                     }
                 }
                 return new HttpResponseMessage(HttpStatusCode.OK);

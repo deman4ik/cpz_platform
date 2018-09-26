@@ -1,4 +1,5 @@
 ﻿using CpzTrader.Models;
+using CpzTrader.Services;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -6,6 +7,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -40,6 +42,8 @@ namespace CpzTrader.EventHandlers
 
                     JObject dataObject = eventGridEvent.Data as JObject;
 
+                    IList<string> errorMessages;
+
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
                     if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
@@ -60,8 +64,29 @@ namespace CpzTrader.EventHandlers
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("CpzSignalsNewSignal"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(HandleSignal(eventGridEvent.Subject, dataObject, log));
+                        var isValid = Validator.CheckData("signal", dataObject, out errorMessages);
 
+                        if (true)
+                        {
+                            Utils.RunAsync(HandleSignal(eventGridEvent.Subject, dataObject, log));
+                        }
+                        else
+                        {
+                            dynamic validationError = new JObject();
+
+                            validationError.code = ErrorCodes.SignalData;
+                            validationError.message = "Validation error in the signal";
+
+                            dynamic details = new JObject();
+
+                            details.input = dataObject;
+                            details.taskId = dataObject.GetValue("taskId");
+                            details.internalError = JsonConvert.SerializeObject(errorMessages);
+
+                            validationError.details = details;
+
+                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                        }
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
                 }
@@ -69,7 +94,7 @@ namespace CpzTrader.EventHandlers
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                log.Error(e.Message);
                 throw;
             }
         }
@@ -84,21 +109,21 @@ namespace CpzTrader.EventHandlers
                 var signal = dataObject.ToObject<NewSignal>();
 
                 // получаем биржу и бумагу по которой пришел сигнал
-                var clients = await DbContext.GetClientsInfoFromDbAsync(signal.AdvisorName);
+                var clients = await DbContext.GetClientsInfoFromDbAsync(signal.RobotId);
 
                 string exchange;
 
-                string baseq;
+                string asset;
 
-                string quote;
+                string currency;
 
                 if(clients != null && clients.Count != 0)
                 {
                     exchange = clients[0].RobotSettings.Exchange;
 
-                    baseq = clients[0].RobotSettings.Asset;
+                    asset = clients[0].RobotSettings.Asset;
 
-                    quote = clients[0].RobotSettings.Currency;
+                    currency = clients[0].RobotSettings.Currency;
                 }
                 else
                 {
@@ -106,26 +131,28 @@ namespace CpzTrader.EventHandlers
                     return;
                 }
 
-                signal.Baseq = baseq;
-                signal.Quote = quote;
+                signal.Asset = asset;
+                signal.Currency = currency;
 
                 var action = signal.Action;
 
-                string partitionKey = Utils.CreatePartitionKey(exchange, baseq, quote);
+                string partitionKey = Utils.CreatePartitionKey(exchange, asset, currency);
+
+                var tableName = ConfigurationManager.TakeParameterByName("PositionsTableName");
 
                 if (action == ActionType.Long || action == ActionType.Short)
                 {
-                    Position newPosition = new Position(signal.NumberPositionInRobot, partitionKey);
+                    Position newPosition = new Position(signal.PositionId, partitionKey);
 
                     newPosition.Subject = subject;
 
-                    newPosition.RobotId = signal.AdvisorName;
+                    newPosition.RobotId = signal.RobotId;
 
                     Order newOrder = Utils.CreateOrder(signal);
 
-                    newOrder.Slippage = signal.Slippage == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Slippage;
+                    newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
 
-                    newOrder.Deviation = signal.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Deviation;
+                    newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
 
                     newPosition.OpenOrders.Add(newOrder);
 
@@ -140,20 +167,20 @@ namespace CpzTrader.EventHandlers
                     newPosition.ObjectToJson();
 
                     // сохранить в хранилище
-                    var result = await DbContext.InsertEntity<Position>("Positions", newPosition);
+                    var result = await DbContext.InsertEntity<Position>(tableName, newPosition);
                 }
                 else
-                {
+                {                    
                     // получить из хранилища позицию для которой пришел сигнал
-                    Position needPosition = await DbContext.GetEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot);
+                    Position needPosition = await DbContext.GetEntityById<Position>(tableName, partitionKey, signal.PositionId);
 
                     needPosition.JsonToObject();
 
                     Order newOrder = Utils.CreateOrder(signal);
 
-                    newOrder.Slippage = signal.Slippage == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Slippage;
+                    newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
 
-                    newOrder.Deviation = signal.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Deviation;
+                    newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
 
                     needPosition.CloseOrders.Add(newOrder);
 
@@ -168,13 +195,13 @@ namespace CpzTrader.EventHandlers
                     needPosition.ObjectToJson();
 
                     // сохранить обновленную позицию в хранилище
-                    var res = await DbContext.UpdateEntityById<Position>("Positions", partitionKey, signal.NumberPositionInRobot, needPosition);                    
+                    var res = await DbContext.UpdateEntityById<Position>(tableName, partitionKey, signal.PositionId, needPosition);                    
                 }
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("SignalHandled"), signal.NumberOrderInRobot);
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("SignalHandled"), signal.SignalId);
             }
             catch (Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.ToObject<NewSignal>().NumberOrderInRobot, e.Message);
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.ToObject<NewSignal>().SignalId, e.Message);
                 await Log.SendLogMessage(e.Message);
             }
         }
