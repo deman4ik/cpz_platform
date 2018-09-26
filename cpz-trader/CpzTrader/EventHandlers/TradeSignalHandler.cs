@@ -20,7 +20,7 @@ namespace CpzTrader.EventHandlers
         /// </summary>
         [FunctionName("SignalHandler")]
         public static async Task<HttpResponseMessage> SignalHandler(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/signalEvents")]HttpRequestMessage req, TraceWriter log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "signalEvents")]HttpRequestMessage req, TraceWriter log)
         {
             try
             {

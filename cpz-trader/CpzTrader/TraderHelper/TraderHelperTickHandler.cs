@@ -17,7 +17,7 @@ namespace CpzTrader.TraderHelper
     public static class TraderHelperTickHandler
     {
         [FunctionName("TraderHelperTickHandler")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "api/newTick")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "newTick")]HttpRequestMessage req, TraceWriter log)
         {
             try
             {

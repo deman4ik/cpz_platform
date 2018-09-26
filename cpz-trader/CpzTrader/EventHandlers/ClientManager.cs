@@ -1,5 +1,6 @@
 ﻿using CpzTrader.EventHandlers;
 using CpzTrader.Models;
+using CpzTrader.Services;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -7,6 +8,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -20,7 +22,7 @@ namespace CpzTrader
         /// обработчик событий пришедших от советника
         /// </summary>
         [FunctionName("Trader_HttpStart")]
-        public static async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/taskEvents")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "taskEvents")]HttpRequestMessage req, TraceWriter log)
         {
             try
             {               
@@ -40,6 +42,8 @@ namespace CpzTrader
 
                     JObject dataObject = eventGridEvent.Data as JObject;
 
+                    IList<string> errorMessages;
+
                     // В зависимости от типа события выполняем определенную логику
                     // валидация
                     if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("SubscriptionValidationEvent"), StringComparison.OrdinalIgnoreCase))
@@ -58,17 +62,69 @@ namespace CpzTrader
                     // добавить клиента
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StartTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(StartClientHandler(eventGridEvent.Subject, dataObject));
+                        // проверить пришедшие данные на валидность
+                        var isValid = Validator.CheckDataForClientManager("start",dataObject, out errorMessages);
+
+                        if(isValid)
+                        {
+                            // добавить клиента в хранилище
+                            Utils.RunAsync(StartClientHandler(eventGridEvent.Subject, dataObject));
+                        }
+                        else
+                        {
+                            dynamic validationError = new JObject();
+
+                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.message = "Data Validation Error on Receiving a Client Start Request";
+                            validationError.details = JsonConvert.SerializeObject(errorMessages);
+
+                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                        }
+                        
                     } // останавливаем
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("StopTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(StopClientHandler(eventGridEvent.Subject, dataObject));
+                        // проверить пришедшие данные на валидность
+                        var isValid = Validator.CheckDataForClientManager("stop", dataObject, out errorMessages);
+
+                        if (isValid)
+                        {
+                            // отключить клиента
+                            Utils.RunAsync(StopClientHandler(eventGridEvent.Subject, dataObject));
+                        }
+                        else
+                        {
+                            dynamic validationError = new JObject();
+
+                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.message = "Data validation error when receiving a request to stop the client";
+                            validationError.details = JsonConvert.SerializeObject(errorMessages);
+
+                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                        }
+                        
                     } // обновить инфо о клиенте
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("UpdateTrader"), StringComparison.OrdinalIgnoreCase))
                     {
-                        Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject));
+                        // проверить пришедшие данные на валидность
+                        var isValid = Validator.CheckDataForClientManager("update", dataObject, out errorMessages);
+
+                        if (isValid)
+                        {
+                            // обновить информацию о клиенте в хранилище
+                            Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject));
+                        }
+                        else
+                        {
+                            dynamic validationError = new JObject();
+
+                            validationError.code = ErrorCodes.ClientData.ToString();
+                            validationError.message = "Data Validation Error When Retrieving a Client Update Request";
+                            validationError.details = JsonConvert.SerializeObject(errorMessages);
+
+                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                        }                        
                     }
-                    
                 }
                 return new HttpResponseMessage(HttpStatusCode.OK);
             }
@@ -93,8 +149,6 @@ namespace CpzTrader
                 clientInfo.ObjectToJson();
 
                 // сохраняем в таблицу запись о новом подключенном клиенте
-                //await DbContext.SaveClientInfoDbAsync(clientInfo);
-
                 await DbContext.InsertEntity<Client>("Traders", clientInfo);
 
                 string message = $"Клиент с ID {clientInfo.RowKey} подключен к роботу - {clientInfo.PartitionKey}.";
@@ -103,7 +157,7 @@ namespace CpzTrader
             }
             catch(Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e);
                 await Log.SendLogMessage(e.Message);
             }            
         }

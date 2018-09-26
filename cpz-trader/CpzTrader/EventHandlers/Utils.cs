@@ -46,9 +46,12 @@ namespace CpzTrader.EventHandlers
                 // асинхронно отправляем сигнал всем проторговщикам
                 foreach (Client client in clients)
                 {
-                    var parallelTrader = Trader.RunTrader(numberOrder, signalType, client, position);
+                    if(client.Status == "started")
+                    {
+                        var parallelTrader = Trader.RunTrader(numberOrder, signalType, client, position);
 
-                    parallelTraders.Add(parallelTrader);
+                        parallelTraders.Add(parallelTrader);
+                    }                    
                 }
 
                 await Task.WhenAll(parallelTraders);
