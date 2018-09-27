@@ -729,6 +729,11 @@ const tasks = {
                     description: "Uniq task id.",
                     type: "string",
                     empty: false
+                },
+                robotId: {
+                    description: "Robot id.",
+                    type: "string",
+                    empty: false
                 }
             }
         },
