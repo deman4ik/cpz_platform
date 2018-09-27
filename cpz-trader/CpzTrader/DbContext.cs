@@ -217,7 +217,6 @@ namespace CpzTrader
             }
             catch (Exception e)
             {
-                //return false;
                 throw e;
             }
         }
@@ -232,32 +231,39 @@ namespace CpzTrader
         /// <returns>экземпляр сущности</returns>
         public static async Task<T> GetEntityById<T>(string tableName, string partitionKey, string rowKey) where T: TableEntity
         {
-            var appParameter = "AZ_STORAGE_CS";
-
-            string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-            // подключаемся к локальному хранилищу
-            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-            // создаем объект для работы с таблицами
-            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-            // получаем нужную таблицу
-            var table = cloudTableClient.GetTableReference(tableName);
-
-            TableOperation retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
-
-            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-            
-            if(retrievedResult.Result != null)
+            try
             {
-                var res = retrievedResult.Result;
-                return (T)res;
+                var appParameter = "AZ_STORAGE_CS";
+
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                // подключаемся к локальному хранилищу
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+                // создаем объект для работы с таблицами
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                // получаем нужную таблицу
+                var table = cloudTableClient.GetTableReference(tableName);
+
+                TableOperation retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+
+                var retrievedResult = await table.ExecuteAsync(retrieveOperation);
+
+                if (retrievedResult.Result != null)
+                {
+                    var res = retrievedResult.Result;
+                    return (T)res;
+                }
+                else
+                {
+                    return null;
+                }
             }
-            else
+            catch(Exception e)
             {
-                return null;
-            }
+                throw;
+            }            
         }
 
         /// <summary>
@@ -271,35 +277,42 @@ namespace CpzTrader
         /// <returns></returns>
         public static async Task<bool> UpdateEntityById<T>(string tableName, string partitionKey, string rowKey, T updatedEntyti) where T : TableEntity
         {
-            var appParameter = "AZ_STORAGE_CS";
-            
-            string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-            // подключаемся к локальному хранилищу
-            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-            // создаем объект для работы с таблицами
-            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-            // получаем нужную таблицу
-            var table = cloudTableClient.GetTableReference(tableName);
-
-            TableOperation retrieveOperation = TableOperation.Retrieve<Position>(partitionKey, rowKey);
-
-            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-
-            if (retrievedResult.Result != null)
+            try
             {
-                TableOperation updateOperation = TableOperation.Replace(updatedEntyti);
-                
-                await table.ExecuteAsync(updateOperation);
+                var appParameter = "AZ_STORAGE_CS";
 
-                return true;
+                string connectionString = Environment.GetEnvironmentVariable(appParameter);
+
+                // подключаемся к локальному хранилищу
+                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+                // создаем объект для работы с таблицами
+                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+
+                // получаем нужную таблицу
+                var table = cloudTableClient.GetTableReference(tableName);
+
+                TableOperation retrieveOperation = TableOperation.Retrieve<Position>(partitionKey, rowKey);
+
+                var retrievedResult = await table.ExecuteAsync(retrieveOperation);
+
+                if (retrievedResult.Result != null)
+                {
+                    TableOperation updateOperation = TableOperation.Replace(updatedEntyti);
+
+                    await table.ExecuteAsync(updateOperation);
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
+            catch(Exception e)
             {
-                return false;
-            }
+                throw;
+            }            
         }
     }
 }

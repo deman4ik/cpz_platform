@@ -5,6 +5,7 @@ using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -72,21 +73,12 @@ namespace CpzTrader
                         }
                         else
                         {
-                            // создаем и заполняем объект ошибки валидации
-                            dynamic validationError = new JObject();
+                            string message = "Data Validation Error on Receiving a Client Start Request";
 
-                            validationError.code = ErrorCodes.ClientData;
-                            validationError.message = "Data Validation Error on Receiving a Client Start Request";
+                            string internalError = JsonConvert.SerializeObject(errorMessages);
 
-                            dynamic details = new JObject();
-
-                            details.input = dataObject;
-                            details.taskId = dataObject.GetValue("taskId");
-                            details.internalError = JsonConvert.SerializeObject(errorMessages);
-
-                            validationError.details = details;
-
-                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                            // отправить сообщение об ошибке
+                            await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), eventGridEvent.Subject, dataObject, internalError);
                         }
                         
                     } // останавливаем
@@ -102,20 +94,12 @@ namespace CpzTrader
                         }
                         else
                         {
-                            dynamic validationError = new JObject();
+                            string message = "Data validation error when receiving a request to stop the client";
 
-                            validationError.code = ErrorCodes.ClientData;
-                            validationError.message = "Data validation error when receiving a request to stop the client";
+                            string internalError = JsonConvert.SerializeObject(errorMessages);
 
-                            dynamic details = new JObject();
-
-                            details.input = dataObject;
-                            details.taskId = dataObject.GetValue("taskId");
-                            details.internalError = JsonConvert.SerializeObject(errorMessages);
-
-                            validationError.details = details;
-
-                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                            // отправить сообщение об ошибке
+                            await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), eventGridEvent.Subject, dataObject, internalError);
                         }
                         
                     } // обновить инфо о клиенте
@@ -131,20 +115,12 @@ namespace CpzTrader
                         }
                         else
                         {
-                            dynamic validationError = new JObject();
+                            string message = "Data Validation Error When Retrieving a Client Update Request";
 
-                            validationError.code = ErrorCodes.ClientData;
-                            validationError.message = "Data Validation Error When Retrieving a Client Update Request";
+                            string internalError = JsonConvert.SerializeObject(errorMessages);
 
-                            dynamic details = new JObject();
-
-                            details.input = dataObject;
-                            details.taskId = dataObject.GetValue("taskId");
-                            details.internalError = JsonConvert.SerializeObject(errorMessages);
-
-                            validationError.details = details;
-                            
-                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                            // отправить сообщение об ошибке
+                            await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), eventGridEvent.Subject, dataObject, internalError);                            
                         }                        
                     }
                 }
@@ -170,16 +146,33 @@ namespace CpzTrader
 
                 clientInfo.ObjectToJson();
 
+                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
+
                 // сохраняем в таблицу запись о новом подключенном клиенте
-                await DbContext.InsertEntity<Client>("Traders", clientInfo);
+                await DbContext.InsertEntity<Client>(tableName, clientInfo);
 
                 string message = $"Клиент с ID {clientInfo.RowKey} подключен к роботу - {clientInfo.PartitionKey}.";
 
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderStarted"), dataObject.taskId.ToString(), message);
             }
+            catch(StorageException e)
+            {
+                string message = "Error adding new client to the storage";
+
+                string internalError = e.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
+                log.LogError(e.Message, e);
+            }
             catch(Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e);
+                string message = "An error occurred while connecting a new client";
+
+                string internalError = e.Message;                  
+                               
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
                 log.LogError(e.Message, e);
             }            
         }
@@ -193,9 +186,11 @@ namespace CpzTrader
             {
                 var clientInfo = dataObject.ToObject<dynamic>();
 
-                Client needClient = await DbContext.GetEntityById<Client>("Traders", clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
+                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
 
-                if (needClient != null)
+                Client needClient = await DbContext.GetEntityById<Client>(tableName, clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
+
+                if (needClient != null && needClient.Status != "stopped")
                 {
                     needClient.Status = "stopped";
 
@@ -208,13 +203,28 @@ namespace CpzTrader
                 }
                 else
                 {
-                    string message = $"Kлиент с ID {clientInfo.taskId} не найден.";
-                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), message);
+                    string message = $"Kлиент с ID {clientInfo.taskId} не найден или уже со статусом \"stopped\"";
+                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, dataObject.GetValue("taskId").ToString(), subject, dataObject);
                 }                    
+            }
+            catch (StorageException e)
+            {
+                string message = "Error updating client status when stopped";
+
+                string internalError = e.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
+                log.LogError(e.Message, e);
             }
             catch (Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                string message = "There was an error stopping the client";
+
+                string internalError = e.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
                 log.LogError(e.Message, e);
             }
         }
@@ -228,8 +238,10 @@ namespace CpzTrader
             {
                 var clientInfo = (dynamic)dataObject;
 
+                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
+
                 // находим клиента которого нужно обновить
-                Client needClient = await DbContext.GetEntityById<Client>("Traders", clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
+                Client needClient = await DbContext.GetEntityById<Client>(tableName, clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
 
                 if(needClient != null)
                 {
@@ -242,7 +254,7 @@ namespace CpzTrader
                     needClient.ObjectToJson();
 
                     // сохраняем в таблицу запись об обновлении клиента
-                    await DbContext.UpdateEntityById<Client>("Traders", needClient.PartitionKey, needClient.RowKey, needClient);
+                    await DbContext.UpdateEntityById<Client>(tableName, needClient.PartitionKey, needClient.RowKey, needClient);
 
                     // публикуем в эвентгрид информацию об успешной операции
                     string message = $"Обновление данных клиента с ID {needClient.RowKey}, подключенного к роботу - {needClient.PartitionKey}.";
@@ -251,13 +263,28 @@ namespace CpzTrader
                 else
                 {
                     string message = $"Kлиент с ID {clientInfo.taskId} не найден.";
-                    await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), message);
+                    await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), subject, dataObject);
                 }
                 
             }
+            catch (StorageException e)
+            {
+                string message = "Error updating client to the storage";
+
+                string internalError = e.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
+                log.LogError(e.Message, e);
+            }
             catch (Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
+                string message = "There was an error updating the client";
+
+                string internalError = e.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("taskId").ToString(), subject, dataObject, internalError);
                 log.LogError(e.Message, e);
             }
         }
