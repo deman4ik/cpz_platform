@@ -14,49 +14,6 @@ namespace CpzTrader
     /// </summary>
     public static class DbContext
     {       
-
-        /// <summary>
-        /// сохранить информацию о клиентах в базе
-        /// </summary>
-        /// <param name="clients">список клиентов</param>
-        public static async Task SaveClientInfoDbAsync(Client client)
-        {
-            try
-            {
-                var appParameter = "AZ_STORAGE_CS";
-
-                string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-                // подключаемся к локальному хранилищу
-                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-                // создаем объект для работы с таблицами
-                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-                // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("Traders");
-
-                // если она еще не существует - создаем
-                var res = table.CreateIfNotExistsAsync().Result;
-
-                TableBatchOperation batchOperation = new TableBatchOperation();
-
-                client.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
-
-                client.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
-
-                client.RobotSettingsJson = JsonConvert.SerializeObject(client.RobotSettings);
-
-                batchOperation.Insert(client);
-
-                await table.ExecuteBatchAsync(batchOperation);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-        }
-
         /// <summary>
         /// получить из базы клиентов по имени советника
         /// </summary>
@@ -74,7 +31,9 @@ namespace CpzTrader
 
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
-                var table = cloudTableClient.GetTableReference("Traders");
+                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
+
+                var table = cloudTableClient.GetTableReference(tableName);
 
                 // формируем фильтр, чтобы получить клиентов для нужного робота
                 var query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
@@ -126,8 +85,10 @@ namespace CpzTrader
                 // создаем объект для работы с таблицами
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
+                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
+
                 // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("Traders");
+                var table = cloudTableClient.GetTableReference(tableName);
 
                 // создаем операцию получения
                 TableOperation retrieveOperation = TableOperation.Retrieve<Client>(client.PartitionKey, client.RowKey);
@@ -171,71 +132,6 @@ namespace CpzTrader
             }
         }
 
-        //--------------------------------------------------------------------------------------------------------------
-        // методы для работы с позициями в БД
-
-        /// <summary>
-        /// сохранить позицию в базу
-        /// </summary>
-        public static async Task SavePositionDbAsync(Position position)
-        {
-            try
-            {
-                var appParameter = "AZ_STORAGE_CS";
-
-                string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-                // подключаемся к локальному хранилищу
-                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-                // создаем объект для работы с таблицами
-                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-                // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference("Positions");
-
-                // если она еще не существует - создаем
-                var res = table.CreateIfNotExistsAsync().Result;
-
-                TableBatchOperation batchOperation = new TableBatchOperation();
-
-                position.OpenOrdersJson = JsonConvert.SerializeObject(position.OpenOrders);
-
-                position.CloseOrdersJson = JsonConvert.SerializeObject(position.CloseOrders);
-
-                batchOperation.Insert(position);
-
-                await table.ExecuteBatchAsync(batchOperation);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-                throw;
-            }
-        }
-
-        public static async Task<Position> GetPositionById(string partitionKey, string id)
-        {
-            var appParameter = "AZ_STORAGE_CS";
-
-            string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-            // подключаемся к локальному хранилищу
-            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-            // создаем объект для работы с таблицами
-            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-            // получаем нужную таблицу
-            var table = cloudTableClient.GetTableReference("Positions");
-
-            TableOperation retrieveOperation = TableOperation.Retrieve<Position>(partitionKey, id);
-            
-            var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-
-            return (Position)retrievedResult.Result;
-        }
-
 
         /// <summary>
         /// получить из базы позиции по ключу
@@ -252,7 +148,9 @@ namespace CpzTrader
 
                 var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
-                var table = cloudTableClient.GetTableReference("Positions");
+                var tableName = ConfigurationManager.TakeParameterByName("PositionsTableName");
+
+                var table = cloudTableClient.GetTableReference(tableName);
 
                 // формируем фильтр, чтобы получить позиции по нужному инструменту
                 var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
@@ -364,10 +262,10 @@ namespace CpzTrader
         /// обновить сущьность в хранилище
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="tableName"></param>
-        /// <param name="partitionKey"></param>
-        /// <param name="rowKey"></param>
-        /// <param name="updatedEntyti"></param>
+        /// <param name="tableName">имя таблицы</param>
+        /// <param name="partitionKey">ключ раздела</param>
+        /// <param name="rowKey">ключ строки</param>
+        /// <param name="updatedEntyti">обновленная сущьность</param>
         /// <returns></returns>
         public static async Task<bool> UpdateEntityById<T>(string tableName, string partitionKey, string rowKey, T updatedEntyti) where T : TableEntity
         {

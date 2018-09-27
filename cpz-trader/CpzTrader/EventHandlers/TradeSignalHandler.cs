@@ -80,7 +80,7 @@ namespace CpzTrader.EventHandlers
                             dynamic details = new JObject();
 
                             details.input = dataObject;
-                            details.taskId = dataObject.GetValue("taskId");
+                            details.taskId = dataObject.GetValue("signalId");
                             details.internalError = JsonConvert.SerializeObject(errorMessages);
 
                             validationError.details = details;
@@ -220,7 +220,7 @@ namespace CpzTrader.EventHandlers
             catch (Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.ToObject<NewSignal>().SignalId, e.Message);
-                await Log.SendLogMessage(e.Message);
+                log.Error(e.Message);
             }
         }
     }

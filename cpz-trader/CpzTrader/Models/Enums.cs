@@ -29,6 +29,9 @@ namespace CpzTrader.Models
         /// </summary>
         Close,
 
+        /// <summary>
+        /// отменена
+        /// </summary>
         Canceled
     }
 
