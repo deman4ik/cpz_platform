@@ -66,7 +66,7 @@ namespace CpzTrader.EventHandlers
                     {
                         var isValid = Validator.CheckData("signal", dataObject, out errorMessages);
 
-                        if (true)
+                        if (isValid)
                         {
                             Utils.RunAsync(HandleSignal(eventGridEvent.Subject, dataObject, log));
                         }
@@ -142,7 +142,7 @@ namespace CpzTrader.EventHandlers
 
                 if (action == ActionType.Long || action == ActionType.Short)
                 {
-                    Position newPosition = new Position(signal.PositionId, partitionKey);
+                    Position newPosition = new Position(signal.PositionId.ToString(), partitionKey);
 
                     newPosition.Subject = subject;
 
@@ -150,10 +150,19 @@ namespace CpzTrader.EventHandlers
 
                     Order newOrder = Utils.CreateOrder(signal);
 
-                    newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
+                    if(signal.Settings != null)
+                    {
+                        newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
 
-                    newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
+                        newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
+                    }
+                    else
+                    {
+                        newOrder.Slippage = (decimal)clients[0].RobotSettings.Slippage;
 
+                        newOrder.Deviation = (decimal)clients[0].RobotSettings.Deviation;
+                    }
+                    
                     newPosition.OpenOrders.Add(newOrder);
 
                     newPosition.State = signal.OrderType == OrderType.Market ? (int)PositionState.Open : (int)PositionState.Opening;//"open" : "opening";
@@ -172,15 +181,24 @@ namespace CpzTrader.EventHandlers
                 else
                 {                    
                     // получить из хранилища позицию для которой пришел сигнал
-                    Position needPosition = await DbContext.GetEntityById<Position>(tableName, partitionKey, signal.PositionId);
+                    Position needPosition = await DbContext.GetEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString());
 
                     needPosition.JsonToObject();
 
                     Order newOrder = Utils.CreateOrder(signal);
 
-                    newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
+                    if (signal.Settings != null)
+                    {
+                        newOrder.Slippage = signal.Settings.SlippageStep == null ? (decimal)clients[0].RobotSettings.Slippage : (decimal)signal.Settings.SlippageStep;
 
-                    newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
+                        newOrder.Deviation = signal.Settings.Deviation == null ? (decimal)clients[0].RobotSettings.Deviation : (decimal)signal.Settings.Deviation;
+                    }
+                    else
+                    {
+                        newOrder.Slippage = (decimal)clients[0].RobotSettings.Slippage;
+
+                        newOrder.Deviation = (decimal)clients[0].RobotSettings.Deviation;
+                    }
 
                     needPosition.CloseOrders.Add(newOrder);
 
@@ -195,7 +213,7 @@ namespace CpzTrader.EventHandlers
                     needPosition.ObjectToJson();
 
                     // сохранить обновленную позицию в хранилище
-                    var res = await DbContext.UpdateEntityById<Position>(tableName, partitionKey, signal.PositionId, needPosition);                    
+                    var res = await DbContext.UpdateEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString(), needPosition);                    
                 }
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("SignalHandled"), signal.SignalId);
             }

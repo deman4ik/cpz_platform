@@ -79,7 +79,7 @@ namespace CpzTrader.EventHandlers
                 OrderType = signal.OrderType,
                 Price = signal.Price,
                 Symbol = $"{signal.Asset}/{signal.Currency}",
-                TimeCreate = signal.AlertTime,
+                TimeCreate = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(signal.AlertTime),
                 State = signal.OrderType == OrderType.Market ? OrderState.Closed : OrderState.Open,
                 Direction = signal.Action == ActionType.CloseShort || signal.Action == ActionType.Long ? "buy" : "sell",
                 Action = signal.Action.ToString(),

@@ -51,7 +51,7 @@ namespace CpzTrader.Models
         /// Signal time in seconds
         /// </summary>
         [JsonProperty("alertTime")]
-        public DateTime AlertTime { get; set; }
+        public double AlertTime { get; set; }
 
         /// <summary>
         /// Signal type
@@ -63,7 +63,7 @@ namespace CpzTrader.Models
         /// Volume
         /// </summary>
         [JsonProperty("qty")]
-        public ActionType Qty { get; set; }
+        public decimal Qty { get; set; }
 
         /// <summary>
         /// Order type - "stop", "limit", "market"
@@ -87,7 +87,7 @@ namespace CpzTrader.Models
         /// Uniq position Id
         /// </summary>
         [JsonProperty("positionId")]
-        public string PositionId { get; set; }
+        public int PositionId { get; set; }
 
         /// <summary>
         /// Signal from Candle
