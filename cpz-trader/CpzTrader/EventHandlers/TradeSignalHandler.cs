@@ -4,6 +4,7 @@ using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -22,7 +23,7 @@ namespace CpzTrader.EventHandlers
         /// </summary>
         [FunctionName("SignalHandler")]
         public static async Task<HttpResponseMessage> SignalHandler(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "signalEvents")]HttpRequestMessage req, TraceWriter log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "signalEvents")]HttpRequestMessage req, ILogger log)
         {
             try
             {
@@ -94,7 +95,7 @@ namespace CpzTrader.EventHandlers
             }
             catch (Exception e)
             {
-                log.Error(e.Message);
+                log.LogError(e.Message, e);
                 throw;
             }
         }
@@ -102,7 +103,7 @@ namespace CpzTrader.EventHandlers
         /// <summary>
         /// обработчик сигналов от робота
         /// </summary>
-        public static async Task HandleSignal(string subject, JObject dataObject, TraceWriter log)
+        public static async Task HandleSignal(string subject, JObject dataObject, ILogger log)
         {
             try
             {
@@ -220,7 +221,7 @@ namespace CpzTrader.EventHandlers
             catch (Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.ToObject<NewSignal>().SignalId, e.Message);
-                log.Error(e.Message);
+                log.LogError(e.Message, e);
             }
         }
     }

@@ -5,6 +5,7 @@ using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,7 +19,7 @@ namespace CpzTrader.TraderHelper
     public static class TraderHelperTickHandler
     {
         [FunctionName("TraderHelperTickHandler")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "newTick")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "newTick")]HttpRequestMessage req, ILogger log)
         {
             try
             {
@@ -88,7 +89,7 @@ namespace CpzTrader.TraderHelper
             }
             catch (Exception e)
             {
-                log.Error(e.Message, e);
+                log.LogError(e.Message, e);
                 throw;
             }            
         }
@@ -97,7 +98,7 @@ namespace CpzTrader.TraderHelper
         /// <summary>
         /// обработчик тиков
         /// </summary>
-        public static async Task HandleTick(string subject, dynamic dataObject, TraceWriter log)
+        public static async Task HandleTick(string subject, dynamic dataObject, ILogger log)
         { 
             try
             {
@@ -161,7 +162,7 @@ namespace CpzTrader.TraderHelper
             catch (Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.price.ToString(), e.Message);
-                await Log.SendLogMessage(e.Message);
+                log.LogError(e.Message, e);
             }
         }
 

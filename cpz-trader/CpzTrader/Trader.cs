@@ -80,7 +80,7 @@ namespace CpzTrader
                     {
                         myOrder.State = OrderState.Fall;
 
-                        string message = $"Ошибка выставления ордера - {myOrder.NumberInRobot}";
+                        string message = $"Error placing order - {myOrder.NumberInRobot}";
 
                         await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("TraderError"), clientInfo.RowKey, message);
                     }
@@ -149,7 +149,7 @@ namespace CpzTrader
                         {
                             myOrder.State = OrderState.Fall;
 
-                            string message = $"Ошибка выставления ордера - {myOrder.NumberInRobot}";
+                            string message = $"Error placing order - {myOrder.NumberInRobot}";
 
                             await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("TraderError"), clientInfo.RowKey, message);
                         }

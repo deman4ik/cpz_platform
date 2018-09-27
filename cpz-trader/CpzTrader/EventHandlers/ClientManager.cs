@@ -4,12 +4,11 @@ using CpzTrader.Services;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -23,7 +22,7 @@ namespace CpzTrader
         /// обработчик событий пришедших от советника
         /// </summary>
         [FunctionName("Trader_HttpStart")]
-        public static async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "taskEvents")]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "taskEvents")]HttpRequestMessage req, ILogger log)
         {
             try
             {               
@@ -69,7 +68,7 @@ namespace CpzTrader
                         if(isValid)
                         {
                             // добавить клиента в хранилище
-                            Utils.RunAsync(StartClientHandler(eventGridEvent.Subject, dataObject));
+                            Utils.RunAsync(StartClientHandler(eventGridEvent.Subject, dataObject, log));
                         }
                         else
                         {
@@ -99,7 +98,7 @@ namespace CpzTrader
                         if (isValid)
                         {
                             // отключить клиента
-                            Utils.RunAsync(StopClientHandler(eventGridEvent.Subject, dataObject));
+                            Utils.RunAsync(StopClientHandler(eventGridEvent.Subject, dataObject, log));
                         }
                         else
                         {
@@ -128,7 +127,7 @@ namespace CpzTrader
                         if (isValid)
                         {
                             // обновить информацию о клиенте в хранилище
-                            Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject));
+                            Utils.RunAsync(UpdateClientHandler(eventGridEvent.Subject, dataObject, log));
                         }
                         else
                         {
@@ -153,7 +152,7 @@ namespace CpzTrader
             }
             catch (Exception e)
             {
-                log.Error(e.Message);
+                log.LogError(e.Message, e);
                 throw;
             }            
         }
@@ -161,7 +160,7 @@ namespace CpzTrader
         /// <summary>
         /// запуск клиента
         /// </summary>
-        public static async Task StartClientHandler(string subject, dynamic dataObject)
+        public static async Task StartClientHandler(string subject, dynamic dataObject, ILogger log)
         {
             try
             {
@@ -181,14 +180,14 @@ namespace CpzTrader
             catch(Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e);
-                await Log.SendLogMessage(e.Message);
+                log.LogError(e.Message, e);
             }            
         }
 
         /// <summary>
         /// остановка клиента
         /// </summary>
-        public static async Task StopClientHandler(string subject, dynamic dataObject)
+        public static async Task StopClientHandler(string subject, dynamic dataObject, ILogger log)
         {
             try
             {
@@ -216,14 +215,14 @@ namespace CpzTrader
             catch (Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
-                await Log.SendLogMessage(e.Message);
+                log.LogError(e.Message, e);
             }
         }
 
         /// <summary>
         /// обновление клиента
         /// </summary>
-        public static async Task UpdateClientHandler(string subject, dynamic dataObject)
+        public static async Task UpdateClientHandler(string subject, dynamic dataObject, ILogger log)
         {
             try
             {
@@ -259,7 +258,7 @@ namespace CpzTrader
             catch (Exception e)
             {
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.taskId.ToString(), e.Message);
-                await Log.SendLogMessage(e.Message);
+                log.LogError(e.Message, e);
             }
         }
     }

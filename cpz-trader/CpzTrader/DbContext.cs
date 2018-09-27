@@ -153,7 +153,9 @@ namespace CpzTrader
                 var table = cloudTableClient.GetTableReference(tableName);
 
                 // формируем фильтр, чтобы получить позиции по нужному инструменту
-                var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
+                var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey))
+                                                      .Where(TableQuery.GenerateFilterCondition("State", QueryComparisons.NotEqual, "1"))
+                                                      .Where(TableQuery.GenerateFilterCondition("State", QueryComparisons.NotEqual, "3"));
 
                 TableQuerySegment<Position> result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
