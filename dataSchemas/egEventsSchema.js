@@ -1070,6 +1070,10 @@ const signals = {
                     description: "Uniq position Id",
                     type: "number"
                 },
+                signalId: {
+                    description: "Uniq signal Id",
+                    type: "number"
+                },
                 candle: {
                     description: "Signal from Candle.",
                     type: "object",
