@@ -73,20 +73,12 @@ namespace CpzTrader.EventHandlers
                         }
                         else
                         {
-                            dynamic validationError = new JObject();
+                            string message = "Validation error in the signal";
 
-                            validationError.code = ErrorCodes.SignalData;
-                            validationError.message = "Validation error in the signal";
+                            string internalError = JsonConvert.SerializeObject(errorMessages);
 
-                            dynamic details = new JObject();
-
-                            details.input = dataObject;
-                            details.taskId = dataObject.GetValue("signalId");
-                            details.internalError = JsonConvert.SerializeObject(errorMessages);
-
-                            validationError.details = details;
-
-                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                            // отправить сообщение об ошибке
+                            await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("robotId").ToString(), eventGridEvent.Subject, dataObject, internalError);
                         }
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
@@ -110,7 +102,7 @@ namespace CpzTrader.EventHandlers
                 var signal = dataObject.ToObject<NewSignal>();
 
                 // получаем биржу и бумагу по которой пришел сигнал
-                var clients = await DbContext.GetClientsInfoFromDbAsync(signal.RobotId);
+                var clients = await DbContext.GetClientsInfoFromDbAsync(signal.RobotId, subject);
 
                 string exchange;
 
@@ -177,12 +169,12 @@ namespace CpzTrader.EventHandlers
                     newPosition.ObjectToJson();
 
                     // сохранить в хранилище
-                    var result = await DbContext.InsertEntity<Position>(tableName, newPosition);
+                    var result = await DbContext.InsertEntity<Position>(tableName, newPosition, subject);
                 }
                 else
                 {                    
                     // получить из хранилища позицию для которой пришел сигнал
-                    Position needPosition = await DbContext.GetEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString());
+                    Position needPosition = await DbContext.GetEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString(), subject);
 
                     needPosition.JsonToObject();
 
@@ -214,7 +206,7 @@ namespace CpzTrader.EventHandlers
                     needPosition.ObjectToJson();
 
                     // сохранить обновленную позицию в хранилище
-                    var res = await DbContext.UpdateEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString(), needPosition);                    
+                    var res = await DbContext.UpdateEntityById<Position>(tableName, partitionKey, signal.PositionId.ToString(), needPosition, subject);                    
                 }
                 await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("SignalHandled"), signal.SignalId);
             }

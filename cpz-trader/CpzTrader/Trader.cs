@@ -16,6 +16,8 @@ namespace CpzTrader
             // находим позицию для которой пришел сигнал
             var needPosition = clientInfo.AllPositions.Find(pos => pos.RowKey == position.RowKey);
 
+            var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
+
             // если такой позы нет, значит открывается новая
             if (needPosition == null)
             {
@@ -85,13 +87,11 @@ namespace CpzTrader
                         await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("TraderError"), clientInfo.RowKey, message);
                     }
 
-                    
-
                     myPosition.OpenOrders.Add(myOrder);
 
                     clientInfo.AllPositions.Add(myPosition);
 
-                    await DbContext.UpdateClientInfoAsync(clientInfo);
+                    await DbContext.UpdateEntityById<Client>(tableName, clientInfo.PartitionKey, clientInfo.RowKey, clientInfo, clientInfo.Subject);
                 }                
             }
             else
@@ -158,7 +158,7 @@ namespace CpzTrader
 
                         needPosition.CloseOrders.Add(myOrder);
 
-                        await DbContext.UpdateClientInfoAsync(clientInfo);
+                        await DbContext.UpdateEntityById<Client>(tableName, clientInfo.PartitionKey, clientInfo.RowKey, clientInfo, clientInfo.Subject);
                     }                    
                 }
                 else
@@ -178,7 +178,7 @@ namespace CpzTrader
 
                     needPosition.State = needPosition.State == (int)PositionState.Opening ? (int)PositionState.Open : (int)PositionState.Close;
 
-                    await DbContext.UpdateClientInfoAsync(clientInfo);
+                    await DbContext.UpdateEntityById<Client>(tableName, clientInfo.PartitionKey, clientInfo.RowKey, clientInfo, clientInfo.Subject);
                 }
             }           
         }

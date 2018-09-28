@@ -107,7 +107,10 @@ namespace CpzTrader.TraderHelper
                 var partitionKey = Utils.CreatePartitionKey(dataObject.exchange.ToString(), dataObject.baseq.ToString(), dataObject.quote.ToString());
 
                 // взять нужные позиции
-                List<Position> needPositions = await DbContext.GetAllPositionsByKeyAsync(partitionKey);
+                List<Position> allPositions = await DbContext.GetAllPositionsByKeyAsync(partitionKey);
+
+                // выбираем только не закрытые позиции
+                List<Position> needPositions = allPositions.FindAll(pos => (PositionState)pos.State != PositionState.Close && (PositionState)pos.State != PositionState.Open);
 
                 foreach (var position in needPositions)
                 {

@@ -19,7 +19,7 @@ namespace CpzTrader
         /// </summary>
         /// <param name="advisorName">имя советника</param>
         /// <returns></returns>
-        public static async Task<List<Client>> GetClientsInfoFromDbAsync(string advisorName)
+        public static async Task<List<Client>> GetClientsInfoFromDbAsync(string advisorName, string subject = "")
         {
             try
             {
@@ -36,7 +36,8 @@ namespace CpzTrader
                 var table = cloudTableClient.GetTableReference(tableName);
 
                 // формируем фильтр, чтобы получить клиентов для нужного робота
-                var query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName));
+                var query = new TableQuery<Client>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, advisorName))
+                                                    .Where(TableQuery.GenerateFilterCondition("Status", QueryComparisons.Equal, "started"));
 
                 TableQuerySegment<Client> result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
@@ -54,80 +55,22 @@ namespace CpzTrader
                 }
 
                 return clients;
-
             }
             catch (StorageException e)
             {
+                string message = "error when getting the right clients";
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, null, subject, null, e.Message);
                 return null;
             }
 
             catch (Exception e)
             {
-                throw;
-            }
-        }
+                string message = "error when getting the right clients";
 
-        /// <summary>
-        /// обновить запись о клиенте в базе
-        /// </summary>        
-        public static async Task<bool> UpdateClientInfoAsync(Client input)
-        {
-            try
-            {
-                var client = input;
-
-                var appParameter = "AZ_STORAGE_CS";
-
-                string connectionString = Environment.GetEnvironmentVariable(appParameter);
-
-                var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-                // создаем объект для работы с таблицами
-                var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-                var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
-
-                // получаем нужную таблицу
-                var table = cloudTableClient.GetTableReference(tableName);
-
-                // создаем операцию получения
-                TableOperation retrieveOperation = TableOperation.Retrieve<Client>(client.PartitionKey, client.RowKey);
-
-                // выполняем операцию
-                var retrievedResult = await table.ExecuteAsync(retrieveOperation);
-
-                // получаем результат
-                Client updateEntity = (Client)retrievedResult.Result;
-
-                // изменяем данные и сохраняем
-                if (updateEntity != null)
-                {
-                    updateEntity.AllPositionsJson = JsonConvert.SerializeObject(client.AllPositions);
-
-                    updateEntity.EmulatorSettingsJson = JsonConvert.SerializeObject(client.EmulatorSettings);
-                   
-                    updateEntity.ETag = "*";
-
-                    TableOperation updateOperation = TableOperation.Replace(updateEntity);
-
-                    await table.ExecuteAsync(updateOperation);
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (StorageException e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, null, subject, null, e.Message);
                 throw;
             }
         }
@@ -136,7 +79,7 @@ namespace CpzTrader
         /// <summary>
         /// получить из базы позиции по ключу
         /// </summary>
-        public static async Task<List<Position>> GetAllPositionsByKeyAsync(string partitionKey)
+        public static async Task<List<Position>> GetAllPositionsByKeyAsync(string partitionKey, string subject = "")
         {
             try
             {
@@ -153,9 +96,7 @@ namespace CpzTrader
                 var table = cloudTableClient.GetTableReference(tableName);
 
                 // формируем фильтр, чтобы получить позиции по нужному инструменту
-                var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey))
-                                                      .Where(TableQuery.GenerateFilterCondition("State", QueryComparisons.NotEqual, "1"))
-                                                      .Where(TableQuery.GenerateFilterCondition("State", QueryComparisons.NotEqual, "3"));
+                var query = new TableQuery<Position>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));                
 
                 TableQuerySegment<Position> result = await table.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
 
@@ -172,7 +113,10 @@ namespace CpzTrader
             }
             catch (StorageException e)
             {
-                Debug.WriteLine(e);
+                string message = "error while trying to get the required line item";
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, "", subject, null, e.Message);
                 return null;
             }
 
@@ -189,7 +133,7 @@ namespace CpzTrader
         /// <summary>
         /// вставить сущность в таблицу
         /// </summary>
-        public static async Task<bool> InsertEntity<T>(string tableName, T entyti) where T: TableEntity
+        public static async Task<bool> InsertEntity<T>(string tableName, T entyti, string subject = "") where T: TableEntity
         {
             try
             {
@@ -217,6 +161,10 @@ namespace CpzTrader
             }
             catch (Exception e)
             {
+                string message = "error when trying to insert an entity into a table";
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, entyti.RowKey, subject, null, e.Message);
                 throw e;
             }
         }
@@ -229,7 +177,7 @@ namespace CpzTrader
         /// <param name="partitionKey">ключ раздела</param>
         /// <param name="rowKey">ключ строки</param>
         /// <returns>экземпляр сущности</returns>
-        public static async Task<T> GetEntityById<T>(string tableName, string partitionKey, string rowKey) where T: TableEntity
+        public static async Task<T> GetEntityById<T>(string tableName, string partitionKey, string rowKey, string subject = "") where T: TableEntity
         {
             try
             {
@@ -257,11 +205,21 @@ namespace CpzTrader
                 }
                 else
                 {
+                    string message = "the requested entity was not found in the repository";
+
+                    // отправить сообщение об ошибке
+                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, rowKey, subject, null, message);
+
                     return null;
                 }
             }
             catch(Exception e)
             {
+                string message = "error when trying to get an entity in storage";
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, rowKey, subject, null, e.Message);
+
                 throw;
             }            
         }
@@ -275,7 +233,7 @@ namespace CpzTrader
         /// <param name="rowKey">ключ строки</param>
         /// <param name="updatedEntyti">обновленная сущьность</param>
         /// <returns></returns>
-        public static async Task<bool> UpdateEntityById<T>(string tableName, string partitionKey, string rowKey, T updatedEntyti) where T : TableEntity
+        public static async Task<bool> UpdateEntityById<T>(string tableName, string partitionKey, string rowKey, T updatedEntyti, string subject = "") where T : TableEntity
         {
             try
             {
@@ -306,12 +264,22 @@ namespace CpzTrader
                 }
                 else
                 {
+                    string message = "attempt to update an existing record";
+
+                    // отправить сообщение об ошибке
+                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, updatedEntyti.RowKey, subject, updatedEntyti, message);
+
                     return false;
                 }
             }
             catch(Exception e)
             {
-                throw;
+                string message = "error while trying to update the storage entity";
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, updatedEntyti.RowKey, subject, updatedEntyti, e.Message);
+
+                return false;
             }            
         }
     }

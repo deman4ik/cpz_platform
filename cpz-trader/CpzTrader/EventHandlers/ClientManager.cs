@@ -144,12 +144,14 @@ namespace CpzTrader
 
                 clientInfo.Status = "started";
 
+                clientInfo.Subject = subject;
+
                 clientInfo.ObjectToJson();
 
                 var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
 
                 // сохраняем в таблицу запись о новом подключенном клиенте
-                await DbContext.InsertEntity<Client>(tableName, clientInfo);
+                await DbContext.InsertEntity<Client>(tableName, clientInfo, subject);
 
                 string message = $"Клиент с ID {clientInfo.RowKey} подключен к роботу - {clientInfo.PartitionKey}.";
 
@@ -195,7 +197,7 @@ namespace CpzTrader
                     needClient.Status = "stopped";
 
                     // сохраняем в таблицу запись об отключении клиента
-                    await DbContext.UpdateEntityById<Client>("Traders", needClient.PartitionKey, needClient.RowKey, needClient);
+                    await DbContext.UpdateEntityById<Client>("Traders", needClient.PartitionKey, needClient.RowKey, needClient, subject);
 
                     string message = $"Клиент с ID {needClient.RowKey} отключен от робота - {needClient.PartitionKey}.";
 
@@ -241,7 +243,7 @@ namespace CpzTrader
                 var tableName = ConfigurationManager.TakeParameterByName("ClientsTableName");
 
                 // находим клиента которого нужно обновить
-                Client needClient = await DbContext.GetEntityById<Client>(tableName, clientInfo.robotId.ToString(), clientInfo.taskId.ToString());
+                Client needClient = await DbContext.GetEntityById<Client>(tableName, clientInfo.robotId.ToString(), clientInfo.taskId.ToString(), subject);
 
                 if(needClient != null)
                 {
@@ -254,7 +256,7 @@ namespace CpzTrader
                     needClient.ObjectToJson();
 
                     // сохраняем в таблицу запись об обновлении клиента
-                    await DbContext.UpdateEntityById<Client>(tableName, needClient.PartitionKey, needClient.RowKey, needClient);
+                    await DbContext.UpdateEntityById<Client>(tableName, needClient.PartitionKey, needClient.RowKey, needClient, subject);
 
                     // публикуем в эвентгрид информацию об успешной операции
                     string message = $"Обновление данных клиента с ID {needClient.RowKey}, подключенного к роботу - {needClient.PartitionKey}.";

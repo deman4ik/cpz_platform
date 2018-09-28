@@ -32,6 +32,7 @@ namespace CpzTrader.Models
         /// </summary>
         public string PublicKey { get; set; }
 
+        public string Subject { get; set; }
 
         /// <summary>
         /// уникальный номер пользователя
