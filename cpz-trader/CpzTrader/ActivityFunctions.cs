@@ -18,23 +18,33 @@ namespace CpzTrader
         public static HttpClient httpClient = new HttpClient();
 
         /// <summary>
+        /// отправить запрос
+        /// </summary>
+        private static async Task<HttpResponseMessage> SendRequest(string endPoint,Client clientInfo, Order signal)
+        {
+            dynamic data = Utils.CreateOrderData(clientInfo, signal);
+
+            var url = Environment.GetEnvironmentVariable("CCXT_CONNECTOR");
+
+            var dataAsString = JsonConvert.SerializeObject(data);
+
+            var content = new StringContent(dataAsString);
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var orderResult = await httpClient.PostAsync(url + endPoint, content);
+
+            return orderResult;
+        }
+
+        /// <summary>
         /// отправить ордер на биржу
         /// </summary>        
         public static async Task<Order> SendOrder(Client clientInfo, Order signal)
         {
             try
             {
-                dynamic data = Utils.CreateOrderData(clientInfo, signal);
-
-                var url = Environment.GetEnvironmentVariable("CCXT_SEND_ORDER");
-
-                var dataAsString = JsonConvert.SerializeObject(data);
-
-                var content = new StringContent(dataAsString);
-
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-                var orderResult = await httpClient.PostAsync(url, content);
+                var orderResult = await SendRequest("SetOrder", clientInfo, signal);
 
                 var operationResult = await orderResult.Content.ReadAsStringAsync();
 
@@ -90,18 +100,8 @@ namespace CpzTrader
         /// отменить ордер
         /// </summary>        
         public static async Task<bool> CancelOrder(Client clientInfo, Order signal)
-        {           
-            dynamic data = Utils.CreateOrderData(clientInfo, signal);
-
-            var dataAsString = JsonConvert.SerializeObject(data);
-
-            var content = new StringContent(dataAsString);
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            var url = Environment.GetEnvironmentVariable("CCXT_CANCEL_ORDER");
-
-            var orderResult = await httpClient.PostAsync(url, content);
+        {
+            var orderResult = await SendRequest("CancelOrder", clientInfo, signal);
 
             var operationResult = await orderResult.Content.ReadAsStringAsync();
 
@@ -143,17 +143,7 @@ namespace CpzTrader
         /// </summary>        
         public static async Task<bool> CheckOrderStatus(Client clientInfo, Order signal)
         {
-            dynamic data = Utils.CreateOrderData(clientInfo, signal);
-
-            var dataAsString = JsonConvert.SerializeObject(data);
-
-            var content = new StringContent(dataAsString);
-
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            var url = Environment.GetEnvironmentVariable("CCXT_CHECK_ORDER_STATUS");
-
-            var orderResult = await httpClient.PostAsync(url, content);
+            var orderResult = await SendRequest("CheckOrder", clientInfo, signal);
 
             var operationResult = await orderResult.Content.ReadAsStringAsync();
 
