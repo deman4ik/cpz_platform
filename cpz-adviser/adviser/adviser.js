@@ -6,9 +6,9 @@ const {
   SIGNALS_NEW_SIGNAL_EVENT,
   LOG_EVENT
 } = require("../config");
+const BaseStrategy = require("./baseStrategy");
 const { saveAdviserState } = require("../tableStorage");
 const { publishEvents, createEvents } = require("../eventgrid");
-
 /**
  * Класс советника
  *
@@ -27,17 +27,18 @@ class Adviser {
     this.robotId = state.robotId; // идентификатор робота
     this.mode = state.mode; // режим работы ['backtest', 'emulator', 'realtime']
     this.debug = state.debug; // режима дебага [true,false]
-    this.strategy = state.strategy; // имя файла стратегии
+    this.settings = state.settings || {}; // объект настроек из веб-интерфейса
     this.exchange = state.exchange; // код биржи
     this.asset = state.asset; // базовая валюта
     this.currency = state.currency; // котировка валюты
     this.timeframe = state.timeframe; // таймфрейм
-    this.settings = state.settings || {}; // объект настроек из веб-интерфейса
-    this.currentCandle = state.currentCandle || {}; // текущая свеча
-    this.lastCandles = state.lastCandles || []; // массив последних свечей
+    this.strategy = state.strategy; // имя файла стратегии
+    this.strategyState = state.strategyState || { variables: {} }; // состояне стратегии
+    this.strategyInitialized = state.strategyInitialized || false; // стратегия инициализирована
+    this.candle = {}; // текущая свеча
+    this.lastCandle = state.lastCandle || {}; // последняя свеча
+    this.signals = []; // массив сигналов к отправке
     this.lastSignals = state.lastSignals || []; // массив последних сигналов
-    this.sendSignals = []; // массив сигналов к отправке
-    this.variables = state.variables || {}; // объект переменных используемых в стратегии
     this.updateRequested = state.updateRequested || false; // объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false
     this.stopRequested = state.stopRequested || false; // признак запроса на остановку сервиса [true,false]
     this.status = this.stopRequested
@@ -48,19 +49,61 @@ class Adviser {
       state.endedAt || this.status === STATUS_STOPPED ? dayjs().toJSON() : ""; // Дата и время остановки
     this.initStrategy();
   }
+
   /**
-   * Инициализации функций стратегии
+   * Инициализации стратегии
    *
    * @memberof Adviser
    */
   initStrategy() {
     try {
-      // TODO: использовать 2 метода init и run
-    this.stretegyFunc = require(`../strategies/${this.strategy}`).bind(this); // eslint-disable-line
-      if (typeof this.stretegyFunc !== "function")
-        throw new Error(`Strategy "${this.strategy}" is not a function`);
+      // Считываем класс стратегии
+            this.StrategyClass = require(`../strategies/${this.strategy}`); // eslint-disable-line
+      // Создаем новый инстанс класса стратегии
+      this.strategyInstance = new this.StrategyClass({
+        context: this.context,
+        settings: this.settings,
+        exchange: this.exchange,
+        asset: this.asset,
+        currency: this.currency,
+        timeframe: this.timeframe,
+        advice: this.advice.bind(this), // функция advise -> adviser.advise
+        log: this.logEvent.bind(this), // функция log -> advise.logEvent
+        ...this.strategyState // предыдущий стейт стратегии
+      });
+      // Если инстанс стратегии не наследуется от BaseStrategy - ошибка
+      if (!(this.strategyInstance instanceof BaseStrategy))
+        throw new Error(
+          `Strategy ${this.strategy} class must extend BaseStrategy.`
+        );
+      // Если стратегия еще не проинициализирована
+      if (!this.strategyInitialized) {
+        // Инициализируем
+        this.strategyInstance.init();
+        this.strategyInitialized = true;
+        // TODO: Отдельный метод init с отловом ошибок?
+      }
     } catch (error) {
-      throw new Error(`Can't find strategy "${this.strategy}"\n${error}`);
+      throw new Error(`Init strategy "${this.strategy} error:"\n${error}`);
+    }
+  }
+
+  /**
+   * Запрос текущего состояния стратегии
+   *
+   * @memberof Adviser
+   */
+  getStrategyInstanceState() {
+    try {
+      // Все свойства инстанса стратегии
+      Object.keys(this.strategyInstance)
+        .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
+        .forEach(key => {
+          // TODO: check indicators
+          this.strategyState.variables[key] = this.strategyInstance[key]; // сохраняем каждое свойство
+        });
+    } catch (error) {
+      throw new Error(`Can't find strategy "${this.strategy}" state\n${error}`);
     }
   }
   /**
@@ -126,7 +169,7 @@ class Adviser {
    * @memberof Adviser
    */
   logEvent(data) {
-    // Публикуем событие - ошибка
+    // Публикуем событие
     publishEvents(
       this.context,
       "log",
@@ -144,7 +187,7 @@ class Adviser {
   /**
    * Запрос текущего статуса сервиса
    *
-   * @returns
+   * @returns status
    * @memberof Adviser
    */
   getStatus() {
@@ -154,7 +197,7 @@ class Adviser {
   /**
    * Запрос текущего признака обновления параметров
    *
-   * @returns
+   * @returns updateRequested
    * @memberof Adviser
    */
   getUpdateRequested() {
@@ -204,33 +247,15 @@ class Adviser {
    * @memberof Adviser
    */
   handleCandle(candle) {
+    this.context.log("handleCandle");
+    // TODO: Проверить что эта свеча еще не обрабатывалась
     // Обновить текущую свечу
-    this.currentCandle = candle;
-    this.lastCandles.push(candle);
-  }
-
-  /**
-   * Генерация темы события NewSignal
-   *
-   * @returns
-   * @memberof Candlebatcher
-   */
-  createSubject() {
-    const modeToStr = mode => {
-      switch (mode) {
-        case "realtime":
-          return "R";
-        case "backtest":
-          return "B";
-        case "emulator":
-          return "E";
-        default:
-          return "R";
-      }
-    };
-    return `${this.exchange}/${this.asset}/${this.currency}/${this.timeframe}/${
-      this.taskId
-    }.${modeToStr(this.mode)}`;
+    this.candle = candle;
+    // Передать свечу в инстанс стратегии
+    this.strategyInstance._handleCandle(candle);
+    // Запустить проверку стратегии
+    this.strategyInstance.check();
+    // TODO: Отдельный метод check с отловом ошибок?
   }
 
   /**
@@ -257,7 +282,31 @@ class Adviser {
       }
     };
 
-    this.sendSignals.push(newSignal);
+    this.signals.push(newSignal);
+  }
+
+  /**
+   * Генерация темы события NewSignal
+   *
+   * @returns subject
+   * @memberof Candlebatcher
+   */
+  createSubject() {
+    const modeToStr = mode => {
+      switch (mode) {
+        case "realtime":
+          return "R";
+        case "backtest":
+          return "B";
+        case "emulator":
+          return "E";
+        default:
+          return "R";
+      }
+    };
+    return `${this.exchange}/${this.asset}/${this.currency}/${this.timeframe}/${
+      this.taskId
+    }.${modeToStr(this.mode)}`;
   }
 
   /**
@@ -266,32 +315,33 @@ class Adviser {
    * @memberof Adviser
    */
   getEvents() {
-    return this.sendSignals;
+    return this.signals;
   }
 
   /**
    * Запрос всего текущего состояния
    *
-   * @returns
+   * @returns {object}
    * @memberof Adviser
    */
   getCurrentState() {
+    this.getStrategyInstanceState();
     return {
       eventSubject: this.eventSubject,
       taskId: this.taskId,
       robotId: this.robotId,
       mode: this.mode,
       debug: this.debug,
-      strategy: this.strategy,
+      settings: this.settings,
       exchange: this.exchange,
       asset: this.asset,
       currency: this.currency,
       timeframe: this.timeframe,
-      currentCandle: this.currentCandle,
-      lastCandles: this.lastCandles,
+      lastCandle: this.lastCandle,
       lastSignals: this.lastSignals,
-      settings: this.settings,
-      variables: this.variables,
+      strategy: this.strategy,
+      strategyState: this.strategyState,
+      strategyInitialized: this.strategyInitialized,
       updateRequested: this.updateRequested,
       stopRequested: this.stopRequested,
       status: this.status,
@@ -308,15 +358,6 @@ class Adviser {
   async save() {
     this.log(`save()`);
     const state = this.getCurrentState();
-
-    if (this.updateRequested) {
-      // Обнуляем запрос на обновление параметров
-      state.updateRequested = false;
-    }
-    if (this.stopRequested) {
-      // Обнуляем запрос на остановку сервиса
-      state.stopRequested = false;
-    }
     // Сохраняем состояние в локальном хранилище
     const result = await saveAdviserState(this.context, state);
     if (!result.isSuccess)
@@ -334,6 +375,11 @@ class Adviser {
     this.log(`end()`);
     this.setStatus(status);
     this.setError(error);
+
+    this.updateRequested = false; // Обнуляем запрос на обновление параметров
+    this.stopRequested = false; // Обнуляем запрос на остановку сервиса
+    this.lastSignals = this.signals;
+    this.lastCandle = this.candle;
     await this.save();
   }
 }

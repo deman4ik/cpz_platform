@@ -1,14 +1,11 @@
-const uuid = require("uuid").v4;
 const Adviser = require("./adviser");
 const {
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_BUSY,
-  STATUS_ERROR,
-  ERROR_EVENT
+  STATUS_ERROR
 } = require("../config");
-const retry = require("../utils/retry");
-const { publishEvents, createEvents } = require("../eventgrid");
+const { publishEvents } = require("../eventgrid");
 
 /**
  * Основная задача советника
@@ -18,6 +15,7 @@ const { publishEvents, createEvents } = require("../eventgrid");
  * @param {*} candle
  */
 async function execute(context, state, candle) {
+  context.log("execute");
   let adviser;
   try {
     // Создаем экземпляр класса Adviser
@@ -39,11 +37,8 @@ async function execute(context, state, candle) {
     // Устанавливаем статус "Занят"
     adviser.setStatus(STATUS_BUSY);
     await adviser.save();
-    // Новая свеча
+    // Обработка новой свечи и запуск стратегии
     adviser.handleCandle(candle);
-
-    // Запуск стратегии
-    await adviser.stretegyFunc();
     // Запрашиваем события для отправки
     const eventsToSend = await adviser.getEvents();
     // Если есть хотя бы одно событие
