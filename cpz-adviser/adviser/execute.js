@@ -21,33 +21,28 @@ async function execute(context, state, candle) {
     // Создаем экземпляр класса Adviser
     adviser = new Adviser(context, state);
     // Если задача остановлена
-    if (
-      adviser.getStatus() === STATUS_STOPPED ||
-      adviser.getStatus() === STATUS_ERROR
-    ) {
+    if (adviser.status === STATUS_STOPPED || adviser.status === STATUS_ERROR) {
       // Сохраняем состояние и завершаем работу
       adviser.end();
       return { isSuccess: true, taskId: state.taskId };
     }
     // Если есть запрос на обновление параметров
-    if (adviser.getUpdateRequested()) {
+    if (adviser.updateRequested) {
       // Обновляем параметры
       adviser.setUpdate();
     }
     // Устанавливаем статус "Занят"
-    adviser.setStatus(STATUS_BUSY);
+    adviser.status = STATUS_BUSY;
     await adviser.save();
     // Обработка новой свечи и запуск стратегии
     adviser.handleCandle(candle);
-    // Запрашиваем события для отправки
-    const eventsToSend = await adviser.getEvents();
-    // Если есть хотя бы одно событие
-    if (eventsToSend.length > 0) {
+    // Если есть хотя бы одно событие для отправка
+    if (adviser.events.length > 0) {
       // Отправляем
       const publishEventsResult = await publishEvents(
         context,
         "signals",
-        eventsToSend
+        adviser.events
       );
       // Если не удалось отправить события
       if (!publishEventsResult.isSuccess) {
@@ -57,7 +52,7 @@ async function execute(context, state, candle) {
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию
-    await adviser.logEvent(adviser.getCurrentState());
+    await adviser.logEvent(adviser.currentState);
     return { isSuccess: true, taskId: state.taskId };
   } catch (error) {
     context.log.error(error, state.taskId);

@@ -10,11 +10,13 @@ class StrRobot1 extends BaseStrategy {
     this.myInitialVar = {
       some: "value"
     };
+    this.addIndicator("MyEMA", "EMA", { weight: 1 });
   }
 
   check() {
     this._context.log("check");
     this._context.log(this.candle);
+    this._context.log(this.indicators.MyEMA.result);
     this.userDefinedFunc();
     const newSignal = {
       alertTime: new Date().toISOString,
