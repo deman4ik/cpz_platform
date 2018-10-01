@@ -78,7 +78,7 @@ namespace CpzTrader.EventHandlers
                             string internalError = JsonConvert.SerializeObject(errorMessages);
 
                             // отправить сообщение об ошибке
-                            await EventGridPublisher.SendError((int)ErrorCodes.ClientData, message, dataObject.GetValue("robotId").ToString(), eventGridEvent.Subject, dataObject, internalError);
+                            await EventGridPublisher.SendError((int)ErrorCodes.SignalData, message, dataObject.GetValue("robotId").ToString(), eventGridEvent.Subject, dataObject, internalError);
                         }
                         return new HttpResponseMessage(HttpStatusCode.OK);
                     }
