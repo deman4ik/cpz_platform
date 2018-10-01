@@ -220,7 +220,7 @@ namespace CpzTrader
                 // отправить сообщение об ошибке
                 await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, rowKey, subject, null, e.Message);
 
-                throw;
+                throw e;
             }            
         }
 
@@ -282,7 +282,7 @@ namespace CpzTrader
                 }
                 else
                 {
-                    throw;
+                    throw e;
                 }                
             }            
         }

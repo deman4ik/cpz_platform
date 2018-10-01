@@ -1,17 +1,33 @@
 const ccxt = require("ccxt");
 
+const HttpsProxyAgent = require("https-proxy-agent");
+
+const validator = require("../utils/validator");
+
 async function CancelOrder(context, req) {
+
   const signal = req.body;
 
-  // получаем имя нужной биржи из запроса
+  var validationResult = validator(signal);
+
+  if(validationResult === true)
+  {
+    // получаем имя нужной биржи из запроса
   const needExchangeName = signal.exchange.toLowerCase();
+
+  const proxy = signal.proxy || process.env.PROXY_ENDPOINT;
+  
+  let agent;
+
+  if (proxy) {
+    agent = new HttpsProxyAgent(proxy);
+  }
 
   // подключаемся к ней
   const exchange = new ccxt[needExchangeName]({
     apiKey: signal.publicKey,
     secret: signal.privateKey,
-    timeout: 30000,
-    enableRateLimit: true
+    agent: agent
   });
 
   // номер отменяемого ордера
@@ -22,8 +38,6 @@ async function CancelOrder(context, req) {
   try {
     // отправляем приказ на биржу
     const response = await exchange.cancelOrder(orderId, symbol);
-    console.log(response);
-    console.log("Succeeded");
 
     const canceledOrder = {
       numberInSystem: response.id,
@@ -43,7 +57,7 @@ async function CancelOrder(context, req) {
       errorInfo.message = "Ошибка снятия, ордер уже отменен или исполнен";
 
       context.res = {
-        status: 200,
+        status: 500,
         body: errorInfo
       };
     } else if (e.constructor.name === "NetworkError") {
@@ -52,10 +66,11 @@ async function CancelOrder(context, req) {
       errorInfo.message = "Не удалось отменить ордер, ошибка сети";
       // TO DO: повторная попытка отмены ордера
       context.res = {
-        status: 200,
+        status: 500,
         body: errorInfo
       };
     }
+  }
   }
 }
 
