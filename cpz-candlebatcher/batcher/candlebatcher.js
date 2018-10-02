@@ -7,7 +7,10 @@ const {
   LOG_EVENT
 } = require("../config");
 const { saveCandle } = require("../db/saveCandles");
-const { saveCandlebatcherState } = require("../tableStorage");
+const {
+  saveCandleToCache,
+  saveCandlebatcherState
+} = require("../tableStorage");
 const { publishEvents, createEvents } = require("../eventgrid");
 
 /**
@@ -52,7 +55,7 @@ class Candlebatcher {
     try {
       // TODO: check connection
       // Динамически подгружаем функцию загрузки свечей
-      this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
+            this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
       // Если полученные объект не функция
       if (typeof this.loadCandlesFunc !== "function")
         // Генерируем ошибку
@@ -191,8 +194,8 @@ class Candlebatcher {
    * @returns
    * @memberof Candlebatcher
    */
-  async saveCandle() {
-    this.log(`saveCandle()`);
+  async handleCandle() {
+    this.log(`handleCandle()`);
     // Инициализация входных параметров
     const input = {
       exchange: this.exchange,
@@ -202,7 +205,7 @@ class Candlebatcher {
     };
     // Вызов функции сохранения
     const result = await saveCandle(this.context, input);
-    this.log(`saveCandle() result:`, result);
+    this.log(`handleCandle() result:`, result);
     // Если успешно
     if (result.isSuccess) {
       // Но есть ошибка бизнес логики
@@ -238,6 +241,19 @@ class Candlebatcher {
     return result;
   }
 
+  async saveCandleToCache(candles) {
+    const results = [];
+    candles.forEach(async candle => {
+      const result = await saveCandleToCache(this.context, candle.data);
+      results.push(result);
+    });
+    const errorResults = results.filter(res => !res.isSuccess);
+    if (errorResults.length > 0) {
+      const errors = errorResults.map(err => err.error);
+      throw new Error(`Error saving to cache storage.\n${errors}`);
+    }
+    return { isSuccess: true };
+  }
   /**
    * Генерация темы события NewCandle
    *

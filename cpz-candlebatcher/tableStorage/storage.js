@@ -50,6 +50,22 @@ function mergeEntity(tableName, entity) {
 }
 
 /**
+ * Удаление записи в таблице
+ *
+ * @param {*} tableName
+ * @param {*} entity
+ * @returns
+ */
+function deleteEntity(tableName, entity) {
+  return new Promise((resolve, reject) => {
+    tableService.deleteEntity(tableName, entity, error => {
+      if (error) reject(error);
+      resolve(true);
+    });
+  });
+}
+
+/**
  * Выборка данных из таблицы
  *
  * @param {*} tableName
@@ -68,5 +84,6 @@ module.exports = {
   createTableIfNotExists,
   insertOrMergeEntity,
   mergeEntity,
+  deleteEntity,
   queryEntities
 };

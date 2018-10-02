@@ -45,30 +45,34 @@ async function execute(context, state) {
       throw loadCandleResult;
     }
     // Сохраняем новую загруженную свечу
-    const saveCandleFunc = candlebatcher.saveCandle.bind(candlebatcher);
-    let saveCandleResult = await retry(saveCandleFunc);
+    const handleCandleFunc = candlebatcher.handleCandle.bind(candlebatcher);
+    let handleCandleResult = await retry(handleCandleFunc);
     // Если ошибка
-    if (!saveCandleResult.isSuccess) {
+    if (!handleCandleResult.isSuccess) {
       // Если необходима подгрузка данных
-      if (saveCandleResult.importRequested) {
+      if (handleCandleResult.importRequested) {
         const importRequest = {
-          ...saveCandleResult,
+          ...handleCandleResult,
           taskId: uuid()
         };
         await executeImport(context, importRequest);
         // Пробуем сохранить еще раз
-        saveCandleResult = await retry(saveCandleFunc);
-        if (!saveCandleResult.isSuccess) {
-          throw saveCandleResult;
+        handleCandleResult = await retry(handleCandleFunc);
+        if (!handleCandleResult.isSuccess) {
+          throw handleCandleResult;
         }
       } else {
-        throw saveCandleResult;
+        throw handleCandleResult;
       }
     }
     // Генерируем события для отправки
     const eventsToSend = await candlebatcher.getEvents();
     // Если есть хотя бы одно событие
     if (eventsToSend.length > 0) {
+      // Сохраняем в кэш
+      const saveToCacheResult = await candlebatcher.saveCandleToCache(
+        eventsToSend
+      );
       // Отправляем
       const publishEventsResult = await publishEvents(
         context,
@@ -78,6 +82,9 @@ async function execute(context, state) {
       // Если не удалось отправить события
       if (!publishEventsResult.isSuccess) {
         throw publishEventsResult;
+      }
+      if (!saveToCacheResult.isSuccess) {
+        throw saveToCacheResult;
       }
     }
 

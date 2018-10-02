@@ -5,16 +5,24 @@ const {
   mergeEntity,
   queryEntities
 } = require("./storage");
-const { objectToEntity, entityToObject, createSlug } = require("./utils");
+const {
+  objectToEntity,
+  entityToObject,
+  createSlug,
+  generateKey
+} = require("./utils");
 const {
   STORAGE_CANDLEBATCHERS_TABLE,
-  STORAGE_IMPORTERS_TABLE
+  STORAGE_IMPORTERS_TABLE,
+  STORAGE_CANDLESCACHED_TABLE
 } = require("../config");
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 createTableIfNotExists(STORAGE_CANDLEBATCHERS_TABLE);
 createTableIfNotExists(STORAGE_IMPORTERS_TABLE);
+createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
+
 async function saveCandlebatcherState(context, state) {
   try {
     const entity = {
@@ -30,7 +38,7 @@ async function saveCandlebatcherState(context, state) {
     );
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -46,7 +54,7 @@ async function updateCandlebatcherState(context, state) {
     );
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -79,8 +87,33 @@ async function updateImporterState(context, state) {
     const entityUpdated = await mergeEntity(STORAGE_IMPORTERS_TABLE, entity);
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, state, error };
+  }
+}
+
+async function saveCandleToCache(context, candle) {
+  try {
+    const slug = createSlug(
+      candle.exchange,
+      candle.asset,
+      candle.currency,
+      candle.timeframe
+    );
+    const entity = {
+      PartitionKey: entityGenerator.String(slug),
+      RowKey: entityGenerator.String(generateKey()),
+      ...objectToEntity(candle)
+    };
+    const entityUpdated = await insertOrMergeEntity(
+      STORAGE_CANDLESCACHED_TABLE,
+      entity
+    );
+
+    return { isSuccess: entityUpdated };
+  } catch (error) {
+    context.log.error(error);
+    return { isSuccess: false, error };
   }
 }
 
@@ -177,6 +210,7 @@ module.exports = {
   updateCandlebatcherState,
   saveImporterState,
   updateImporterState,
+  saveCandleToCache,
   getStartedCandlebatchers,
   getCandlebatcherByKey,
   getImporterByKey

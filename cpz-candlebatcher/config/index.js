@@ -20,11 +20,13 @@ module.exports = {
   CANDLES_HANDLED_EVENT: "CPZ.Candles.Handled",
   STORAGE_CANDLEBATCHERS_TABLE: "Candlebatchers",
   STORAGE_IMPORTERS_TABLE: "Importers",
+  STORAGE_CANDLESCACHED_TABLE: "CandlesCached",
   STORAGE_IMPORTERS_QUEUE: "importer-next",
   STATUS_STARTED: "started",
   STATUS_PENDING: "pending",
   STATUS_BUSY: "busy",
   STATUS_STOPPED: "stopped",
   STATUS_ERROR: "error",
-  STATUS_FINISHED: "finished"
+  STATUS_FINISHED: "finished",
+  CANDLESCACHED_LIMIT: 10
 };

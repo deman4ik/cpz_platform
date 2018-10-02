@@ -1,3 +1,4 @@
+const uuid = require("uuid").v4;
 const { TableUtilities } = require("azure-storage");
 
 const { entityGenerator } = TableUtilities;
@@ -59,8 +60,30 @@ function objectToEntity(object) {
   return entity;
 }
 
-function createSlug(exchange, asset, currency) {
-  return `${exchange}.${asset}.${currency}`;
+function createSlug(exchange, asset, currency, timeframe) {
+  const slug = `${exchange}.${asset}.${currency}`;
+  if (timeframe) return `${slug}.${timeframe}`;
+  return slug;
 }
 
-module.exports = { tryParseJSON, entityToObject, objectToEntity, createSlug };
+function getInvertedTimestamp() {
+  const inverted = new Date("3000-01-01").valueOf() - new Date().valueOf();
+  const invertedString = inverted.toString();
+  const pad = "000000000000000";
+
+  return pad.substring(0, pad.length - invertedString.length) + invertedString;
+}
+
+function generateKey() {
+  const inverted = getInvertedTimestamp();
+  const uid = uuid();
+  return `${inverted}_${uid}`;
+}
+
+module.exports = {
+  tryParseJSON,
+  entityToObject,
+  objectToEntity,
+  createSlug,
+  generateKey
+};
