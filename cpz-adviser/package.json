@@ -16,6 +16,7 @@
     "dayjs": "^1.7.5",
     "ms-rest-azure": "^2.5.7",
     "p-retry": "^2.0.0",
+    "tulind": "^0.8.13",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

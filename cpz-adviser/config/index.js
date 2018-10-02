@@ -13,11 +13,13 @@ module.exports = {
   CANDLES_HANDLED_EVENT: "CPZ.Candles.Handled",
   SIGNALS_NEW_SIGNAL_EVENT: "CPZ.Signals.NewSignal",
   STORAGE_ADVISERS_TABLE: "Advisers",
+  STORAGE_CANDLESCACHED_TABLE: "CandlesCached",
   STORAGE_CANDLESPENDING_TABLE: "CandlesPending",
   STATUS_STARTED: "started",
   STATUS_PENDING: "pending",
   STATUS_BUSY: "busy",
   STATUS_STOPPED: "stopped",
   STATUS_ERROR: "error",
-  STATUS_FINISHED: "finished"
+  STATUS_FINISHED: "finished",
+  CANDLESCACHED_LIMIT: 10
 };

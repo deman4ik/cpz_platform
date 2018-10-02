@@ -23,7 +23,8 @@ async function execute(context, state, candle) {
     // Если задача остановлена
     if (adviser.status === STATUS_STOPPED || adviser.status === STATUS_ERROR) {
       // Сохраняем состояние и завершаем работу
-      adviser.end();
+      adviser.end(adviser.status);
+
       return { isSuccess: true, taskId: state.taskId };
     }
     // Если есть запрос на обновление параметров
@@ -35,7 +36,7 @@ async function execute(context, state, candle) {
     adviser.status = STATUS_BUSY;
     await adviser.save();
     // Обработка новой свечи и запуск стратегии
-    adviser.handleCandle(candle);
+    await adviser.handleCandle(candle);
     // Если есть хотя бы одно событие для отправка
     if (adviser.events.length > 0) {
       // Отправляем

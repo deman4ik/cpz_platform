@@ -6,7 +6,7 @@ POST /api/taskEvents
       "robotId": "robot_1",
       "mode": "emulator",
       "debug": true,
-      "strategy": "STR_ROBOT_1",
+      "strategyName": "STR_ROBOT_1",
       "exchange": "bitfinex",
       "asset": "BTC",
       "currency": "USD",

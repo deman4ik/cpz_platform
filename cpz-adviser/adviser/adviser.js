@@ -7,7 +7,7 @@ const {
   LOG_EVENT
 } = require("../config");
 const BaseStrategy = require("./baseStrategy");
-const { saveAdviserState } = require("../tableStorage");
+const { getCachedCandlesByKey, saveAdviserState } = require("../tableStorage");
 const { publishEvents, createEvents } = require("../eventgrid");
 /**
  * Класс советника
@@ -77,7 +77,8 @@ class Adviser {
         currency: this._currency,
         timeframe: this._timeframe,
         advice: this.advice.bind(this), // функция advise -> adviser.advise
-        log: this.logEvent.bind(this), // функция log -> advise.logEvent
+        log: this.log.bind(this), // функция log -> advise.log
+        logEvent: this.logEvent.bind(this), // функция logEvent -> advise.logEvent
         ...this._strategy // предыдущий стейт стратегии
       });
       // Если инстанс стратегии не наследуется от BaseStrategy - ошибка
@@ -99,7 +100,7 @@ class Adviser {
     try {
       Object.keys(this._indicators).forEach(key => {
         try {
-                    const IndicatorClass = require(`../indicators/${this._indicators[key].indicatorName}`); //eslint-disable-line
+                    const IndicatorClass = require(`../indicators/${this._indicators[key].fileName}`); //eslint-disable-line
           this[`_${key}Instance`] = new IndicatorClass({
             context: this._context,
             name: this._indicators[key].name,
@@ -111,7 +112,8 @@ class Adviser {
             currency: this._currency,
             timeframe: this._timeframe,
             options: this._indicators[key].options,
-            log: this.logEvent.bind(this),
+            log: this.log.bind(this), // функция log -> advise.log
+            logEvent: this.logEvent.bind(this), // функция logEvent -> advise.logEvent
             ...this._indicators[key]
           });
         } catch (err) {
@@ -179,17 +181,19 @@ class Adviser {
    *
    * @memberof Adviser
    */
-  calcIndicators() {
+  async calcIndicators() {
     this._context.log("calcIndicators");
     try {
-      Object.keys(this._indicators).forEach(key => {
-        try {
-          this[`_${key}Instance`].handleCandle(this._candle);
-          this[`_${key}Instance`].calc();
-        } catch (err) {
-          throw new Error(`Can't calculate indicator ${key}`);
-        }
-      });
+      await Promise.all(
+        Object.keys(this._indicators).map(async key => {
+          this[`_${key}Instance`].handleCandle(
+            this._candle,
+            this._candles,
+            this._candlesProps
+          );
+          await this[`_${key}Instance`].calc();
+        })
+      );
     } catch (error) {
       throw new Error(
         `Calculate indicators "${this._strategyName} error:"\n${error}`
@@ -273,17 +277,41 @@ class Adviser {
   }
 
   /**
-   * Установка объекта с ошибкой
+   * Загрузка свечей из кэша
    *
-   * @param {*} error
    * @memberof Adviser
    */
-  set error(error) {
-    if (error)
-      this.error = {
-        time: new Date().toISOString(),
-        error
-      };
+  async _loadCandles() {
+    const result = await getCachedCandlesByKey(
+      this._context,
+      `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`
+    );
+    if (result.isSuccess) {
+      this._candles = result.data.reverse();
+    } else {
+      throw result.error;
+    }
+  }
+  /**
+   * Преобразование свечей для индикаторов
+   *
+   * @memberof Adviser
+   */
+  _prepareCandles() {
+    this._candlesProps = {
+      open: [],
+      high: [],
+      low: [],
+      close: [],
+      volume: []
+    };
+    this._candles.forEach(candle => {
+      this._candlesProps.open.push(candle.open);
+      this._candlesProps.high.push(candle.high);
+      this._candlesProps.low.push(candle.low);
+      this._candlesProps.close.push(candle.close);
+      this._candlesProps.volume.push(candle.volume);
+    });
   }
 
   /**
@@ -292,20 +320,29 @@ class Adviser {
    * @param {*} candle
    * @memberof Adviser
    */
-  handleCandle(candle) {
-    this._context.log("handleCandle");
-    // TODO: Проверить что эта свеча еще не обрабатывалась
-    // Обновить текущую свечу
-    this._candle = candle;
-    // Рассчитать значения индикаторов
-    this.calcIndicators();
-    // Считать текущее состояние индикаторов
-    this.getIndicatorsState();
-    // Передать свечу и значения индикаторов в инстанс стратегии
-    this._strategyInstance.handleCandle(this._candle, this._indicators);
-    // Запустить проверку стратегии
-    this._strategyInstance.check();
-    // TODO: Отдельный метод check с отловом ошибок?
+  async handleCandle(candle) {
+    try {
+      this.log("handleCandle");
+      // TODO: Проверить что эта свеча еще не обрабатывалась
+      // Обновить текущую свечу
+      this._candle = candle;
+      // Загрузить свечи из кеша
+      await this._loadCandles();
+      // Подготовить свечи для индикаторов
+      this._prepareCandles();
+      // Рассчитать значения индикаторов
+      await this.calcIndicators();
+      // Считать текущее состояние индикаторов
+      this.getIndicatorsState();
+      // Передать свечу и значения индикаторов в инстанс стратегии
+      this._strategyInstance.handleCandle(this._candle, this._indicators);
+      // Запустить проверку стратегии
+      this._strategyInstance.check();
+      // TODO: Отдельный метод check с отловом ошибок?
+    } catch (error) {
+      this._context.log.error(error);
+      throw error;
+    }
   }
 
   /**
@@ -374,7 +411,6 @@ class Adviser {
    * @memberof Adviser
    */
   getIndicatorsState() {
-    this._context.log("getIndicatorsState");
     try {
       Object.keys(this._indicators).forEach(ind => {
         this._indicators[ind].initialized = this[`_${ind}Instance`].initialized;
@@ -383,10 +419,12 @@ class Adviser {
         Object.keys(this[`_${ind}Instance`])
           .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
           .forEach(key => {
-            this._indicators[ind].variables[key] = this[`_${ind}Instance`][key]; // сохраняем каждое свойство
+            if (typeof this[`_${ind}Instance`][key] !== "function")
+              this._indicators[ind].variables[key] = this[`_${ind}Instance`][
+                key
+              ]; // сохраняем каждое свойство
           });
       });
-      this._context.log(this._indicators);
     } catch (error) {
       throw new Error(
         `Can't find indicators state for strategy "${
@@ -408,7 +446,8 @@ class Adviser {
       Object.keys(this._strategyInstance)
         .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
         .forEach(key => {
-          this._strategy.variables[key] = this._strategyInstance[key]; // сохраняем каждое свойство
+          if (typeof this._strategyInstance[key] !== "function")
+            this._strategy.variables[key] = this._strategyInstance[key]; // сохраняем каждое свойство
         });
     } catch (error) {
       throw new Error(
@@ -472,8 +511,8 @@ class Adviser {
    */
   async end(status, error) {
     this.log(`end()`);
-    this.status = status;
-    this.error = error;
+    this._status = status;
+    this._error = error;
     this._updateRequested = false; // Обнуляем запрос на обновление параметров
     this._stopRequested = false; // Обнуляем запрос на остановку сервиса
     this._lastSignals = this._signals;

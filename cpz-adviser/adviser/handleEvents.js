@@ -30,7 +30,7 @@ async function handleStart(context, eventData) {
     // Инициализируем класс советника
     const adviser = new Adviser(context, eventData);
     // Сохраняем состояние
-    adviser.end();
+    adviser.end(STATUS_STARTED);
     // Публикуем событие - успех
     await publishEvents(
       context,

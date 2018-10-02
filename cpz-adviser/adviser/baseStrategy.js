@@ -10,7 +10,8 @@ class BaseStrategy {
     this._candle = null;
     this._indicators = state.indicators || {};
     this._advice = state.advice; // Генерация события NewSignal
-    this._log = state.log; // Функция логирования в EventGrid в топик CPZ-LOGS
+    this._log = state.log; // Функция логирования в консоль
+    this._logEvent = state.logEvent; // Функция логирования в EventGrid в топик CPZ-LOGS
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -40,6 +41,7 @@ class BaseStrategy {
     this._indicators[name] = {};
     this._indicators[name].name = name;
     this._indicators[name].indicatorName = indicatorName;
+    this._indicators[name].fileName = indicatorName;
     this._indicators[name].options = options;
     this._indicators[name].variables = {};
   }
@@ -47,6 +49,13 @@ class BaseStrategy {
     return this._addIndicator;
   }
 
+  _addTulipIndicator(name, indicatorName, options) {
+    this._addIndicator(name, indicatorName, options);
+    this._indicators[name].fileName = "TULIP";
+  }
+  get addTulipIndicator() {
+    return this._addTulipIndicator;
+  }
   get initialized() {
     return this._initialized;
   }
@@ -86,6 +95,10 @@ class BaseStrategy {
 
   get log() {
     return this._log;
+  }
+
+  get logEvent() {
+    return this._logEvent;
   }
 }
 

@@ -8,6 +8,7 @@ class EMA extends BaseIndicator {
     this.age = 0;
   }
   calc() {
+    this.log("calc");
     this.price = this.candle.close;
     // The first time we can't calculate based on previous
     // ema, because we haven't calculated any yet.
@@ -22,6 +23,7 @@ class EMA extends BaseIndicator {
 
     // calculation
     this.result = this.price * k + y * (1 - k);
+    this.log(this.result);
   }
 }
 

@@ -2,10 +2,10 @@ const BaseStrategy = require("../adviser/baseStrategy");
 
 class StrRobot1 extends BaseStrategy {
   userDefinedFunc() {
-    this._context.log(this.userDefinedVar);
+    this.log(this.userDefinedVar);
   }
   init() {
-    this._context.log("init");
+    this.log("init");
     this.userDefinedVar = "test";
     this.myInitialVar = {
       some: "value"
@@ -14,9 +14,9 @@ class StrRobot1 extends BaseStrategy {
   }
 
   check() {
-    this._context.log("check");
-    this._context.log(this.candle);
-    this._context.log(this.indicators.MyEMA.result);
+    this.log("check");
+    this.log(this.candle);
+    this.log(this.indicators.MyEMA.result);
     this.userDefinedFunc();
     const newSignal = {
       alertTime: new Date().toISOString,

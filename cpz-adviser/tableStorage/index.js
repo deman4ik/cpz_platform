@@ -11,7 +11,9 @@ const {
   STATUS_STARTED,
   STATUS_BUSY,
   STORAGE_ADVISERS_TABLE,
-  STORAGE_CANDLESPENDING_TABLE
+  STORAGE_CANDLESPENDING_TABLE,
+  STORAGE_CANDLESCACHED_TABLE,
+  CANDLESCACHED_LIMIT
 } = require("../config");
 
 const { TableQuery, TableUtilities } = azure;
@@ -43,7 +45,7 @@ async function saveAdviserState(context, state) {
     );
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -59,7 +61,7 @@ async function savePendingCandles(context, candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
-      RowKey: entityGenerator.String(candle.id),
+      RowKey: entityGenerator.String(candle.id.toString()),
       ...objectToEntity(candle)
     };
     const entityUpdated = await insertOrMergeEntity(
@@ -68,7 +70,7 @@ async function savePendingCandles(context, candle) {
     );
     return { isSuccess: entityUpdated, taskId: candle.taskId };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -88,7 +90,7 @@ async function updateAdviserState(context, state) {
     const entityUpdated = await mergeEntity(STORAGE_ADVISERS_TABLE, entity);
     return { isSuccess: entityUpdated };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -104,7 +106,7 @@ async function deletePendingCandles(context, candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
-      RowKey: entityGenerator.String(candle.id),
+      RowKey: entityGenerator.String(candle.id.toString()),
       ...objectToEntity(candle)
     };
     const entityDeleted = await deleteEntity(
@@ -113,7 +115,7 @@ async function deletePendingCandles(context, candle) {
     );
     return { isSuccess: entityDeleted };
   } catch (error) {
-    context.log(error);
+    context.log.error(error);
     return { isSuccess: false, error };
   }
 }
@@ -209,6 +211,38 @@ async function getAdvisersBySlug(context, slug) {
 }
 
 /**
+ * Отбор закешированныз свечей по ключу
+ *
+ * @param {*} context
+ * @param {string} key
+ * @returns
+ */
+async function getCachedCandlesByKey(context, key) {
+  try {
+    const query = new TableQuery()
+      .where(
+        TableQuery.stringFilter(
+          "PartitionKey",
+          TableUtilities.QueryComparisons.EQUAL,
+          key
+        )
+      )
+      .top(CANDLESCACHED_LIMIT);
+    const result = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
+    const entities = [];
+    if (result) {
+      result.entries.forEach(element => {
+        entities.push(entityToObject(element));
+      });
+    }
+    return { isSuccess: true, data: entities };
+  } catch (error) {
+    context.log.error(error, key);
+    return { isSuccess: false, error };
+  }
+}
+
+/**
  * Поиск свечей ожидающих обработки для конкретного советника
  *
  * @param {*} context
@@ -244,5 +278,6 @@ module.exports = {
   deletePendingCandles,
   getAdviserByKey,
   getAdvisersBySlug,
+  getCachedCandlesByKey,
   getPendingCandlesByAdviserId
 };
