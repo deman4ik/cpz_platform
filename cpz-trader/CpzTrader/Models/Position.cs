@@ -19,6 +19,10 @@ namespace CpzTrader.Models
             OpenOrders = new List<Order>();
 
             CloseOrders = new List<Order>();
+
+            OpenOrdersString = new List<string>();
+
+            CloseOrdersString = new List<string>();
         }
 
         /// <summary>
@@ -38,12 +42,16 @@ namespace CpzTrader.Models
         /// </summary>
         public List<Order> OpenOrders { get; set; }
 
+        public List<string> OpenOrdersString { get; set; }
+
         public string OpenOrdersJson { get; set; }
 
         /// <summary>
         /// ордера закрывшие позицию
         /// </summary>
         public List<Order> CloseOrders { get; set; }
+
+        public List<string> CloseOrdersString { get; set; }
 
         public string CloseOrdersJson { get; set; }
 
@@ -57,8 +65,19 @@ namespace CpzTrader.Models
         /// </summary>
         public void ObjectToJson()
         {
-            this.OpenOrdersJson = JsonConvert.SerializeObject(OpenOrders);
-            this.CloseOrdersJson = JsonConvert.SerializeObject(CloseOrders);
+            foreach(var order in OpenOrders)
+            {
+                OpenOrdersString.Add(JsonConvert.SerializeObject(order));
+            }
+
+            OpenOrdersJson = JsonConvert.SerializeObject(OpenOrdersString);
+
+            foreach (var order in CloseOrders)
+            {
+                CloseOrdersString.Add(JsonConvert.SerializeObject(order));
+            }
+
+            CloseOrdersJson = JsonConvert.SerializeObject(CloseOrdersString);
         }
 
         /// <summary>
@@ -66,8 +85,21 @@ namespace CpzTrader.Models
         /// </summary>
         public void JsonToObject()
         {
-            this.OpenOrders = JsonConvert.DeserializeObject<List<Order>>(OpenOrdersJson);
-            this.CloseOrders = JsonConvert.DeserializeObject<List<Order>>(CloseOrdersJson);
+            OpenOrdersString = JsonConvert.DeserializeObject<List<string>>(OpenOrdersJson);
+
+            foreach (var order in OpenOrdersString)
+            {
+                OpenOrders.Add(JsonConvert.DeserializeObject<Order>(order));
+            }
+
+            CloseOrdersString = JsonConvert.DeserializeObject<List<string>>(CloseOrdersJson);
+
+            foreach (var order in CloseOrdersString)
+            {
+                CloseOrders.Add(JsonConvert.DeserializeObject<Order>(order));
+            }
+            //this.OpenOrders = JsonConvert.DeserializeObject<List<Order>>(OpenOrdersJson);
+            //this.CloseOrders = JsonConvert.DeserializeObject<List<Order>>(CloseOrdersJson);
         }
 
         /// <summary>

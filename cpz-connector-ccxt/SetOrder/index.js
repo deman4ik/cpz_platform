@@ -100,7 +100,16 @@ async function SetOrder(context, req) {
         };
       }
       else{
-        
+        errorInfo.code = 130;
+  
+        errorInfo.message = "Неизвестная ошибка";
+
+        errorInfo.details = e;
+  
+        context.res = {
+          status: 500,
+          body: errorInfo
+        };
       }
     }
   }

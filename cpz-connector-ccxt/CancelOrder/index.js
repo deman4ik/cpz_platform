@@ -61,6 +61,20 @@ async function CancelOrder(context, req) {
         body: errorInfo
       };
     } else if (e.constructor.name === "NetworkError") {
+
+      // отправляем приказ на биржу
+      const response = await exchange.cancelOrder(orderId, symbol);
+
+      const canceledOrder = {
+        numberInSystem: response.id,
+        symbol: response.symbol
+      };
+
+      context.res = {
+        status: 200,
+        body: canceledOrder
+      };
+      
       errorInfo.code = 410;
 
       errorInfo.message = "Не удалось отменить ордер, ошибка сети";
@@ -69,6 +83,18 @@ async function CancelOrder(context, req) {
         status: 500,
         body: errorInfo
       };
+    }
+    else{
+      errorInfo.code = 430;
+  
+        errorInfo.message = "Неизвестная ошибка";
+
+        errorInfo.details = e;
+  
+        context.res = {
+          status: 500,
+          body: errorInfo
+        };
     }
   }
   }

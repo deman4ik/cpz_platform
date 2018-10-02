@@ -43,40 +43,34 @@ namespace CpzTrader
 
                         dynamic roundtripData = new JObject();
 
-                        try
-                        {
-                            dynamic orderData = new JObject();
+                        dynamic orderData = new JObject();
 
-                            orderData.id = openOrder.NumberInSystem;
-                            orderData.roundtripId = myPosition.RowKey;
-                            orderData.userId = clientInfo.RowKey;
-                            orderData.robotId = myPosition.RobotId;
-                            orderData.action = myOrder.Action;
-                            orderData.orderTime = openOrder.Time;
-                            orderData.price = openOrder.Price;
-                            orderData.orderType = openOrder.OrderType;
-                            orderData.quantity = openOrder.Executed;
+                        orderData.id = openOrder.NumberInSystem;
+                        orderData.roundtripId = myPosition.RowKey;
+                        orderData.userId = clientInfo.RowKey;
+                        orderData.robotId = myPosition.RobotId;
+                        orderData.action = myOrder.Action;
+                        orderData.orderTime = openOrder.Time;
+                        orderData.price = openOrder.Price;
+                        orderData.orderType = openOrder.OrderType;
+                        orderData.quantity = openOrder.Executed;
 
-                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("NewOpenOrder"), clientInfo.RowKey, orderData);
+                        await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("NewOpenOrder"), clientInfo.RowKey, orderData);
 
-                            roundtripData.robotid = myPosition.RobotId;
-                            roundtripData.signalid = myOrder.NumberInRobot;
-                            roundtripData.positionid = myPosition.RowKey;
-                            roundtripData.userid = clientInfo.RowKey;
-                            roundtripData.action = myOrder.Action;
-                            roundtripData.quantity = openOrder.Executed;
-                            roundtripData.emulator = clientInfo.Mode;
-                            roundtripData.entryDate = myOrder.TimeCreate;
-                            roundtripData.entryPrice = myOrder.Price;
-                            roundtripData.exitDate = null;
-                            roundtripData.exitPrice = null;
+                        roundtripData.robotid = myPosition.RobotId;
+                        roundtripData.signalid = myOrder.NumberInRobot;
+                        roundtripData.positionid = myPosition.RowKey;
+                        roundtripData.userid = clientInfo.RowKey;
+                        roundtripData.action = myOrder.Action;
+                        roundtripData.quantity = openOrder.Executed;
+                        roundtripData.emulator = clientInfo.Mode;
+                        roundtripData.entryDate = myOrder.TimeCreate;
+                        roundtripData.entryPrice = myOrder.Price;
+                        roundtripData.exitDate = null;
+                        roundtripData.exitPrice = null;
 
-                            await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("Roundtrip"), clientInfo.RowKey, roundtripData);
-                        }
-                        catch(Exception e)
-                        {
-                            throw;
-                        }
+                        await EventGridPublisher.PublishEventInfo(position.Subject, ConfigurationManager.TakeParameterByName("Roundtrip"), clientInfo.RowKey, roundtripData);
+
                     }
                     else
                     {
@@ -90,6 +84,8 @@ namespace CpzTrader
                     myPosition.OpenOrders.Add(myOrder);
 
                     clientInfo.AllPositions.Add(myPosition);
+
+                    clientInfo.ObjectToJson();
 
                     await DbContext.UpdateEntityById<Client>(tableName, clientInfo.PartitionKey, clientInfo.RowKey, clientInfo, clientInfo.Subject);
                 }                
@@ -157,6 +153,8 @@ namespace CpzTrader
                         needPosition.State = needOrder.OrderType == OrderType.Market ? (int)PositionState.Close : (int)PositionState.Closing;
 
                         needPosition.CloseOrders.Add(myOrder);
+
+                        clientInfo.ObjectToJson();
 
                         await DbContext.UpdateEntityById<Client>(tableName, clientInfo.PartitionKey, clientInfo.RowKey, clientInfo, clientInfo.Subject);
                     }                    

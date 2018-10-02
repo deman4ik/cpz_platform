@@ -89,6 +89,7 @@ namespace CpzTrader.Models
         {
             this.RobotSettingsJson = JsonConvert.SerializeObject(RobotSettings);
             this.EmulatorSettingsJson = JsonConvert.SerializeObject(EmulatorSettings);
+            this.AllPositionsJson = JsonConvert.SerializeObject(AllPositions);
         }
 
         /// <summary>
@@ -98,6 +99,7 @@ namespace CpzTrader.Models
         {
             this.RobotSettings = JsonConvert.DeserializeObject<RobotSettings>(RobotSettingsJson);
             this.EmulatorSettings = JsonConvert.DeserializeObject<EmulatorSettings>(EmulatorSettingsJson);
+            this.AllPositions = JsonConvert.DeserializeObject<List<Position>>(AllPositionsJson);
         }
 
 

@@ -15,8 +15,6 @@ function chekData(data){
         
     var check = v.compile(schema);
 
-    console.log(check(data));
-
     var reslult = check(data);
     
     return reslult;

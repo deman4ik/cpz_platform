@@ -29,8 +29,8 @@ namespace CpzTrader.Services
                 'userId': {'type': 'string'},
                 'settings': {'type': ['object', 'null'],
                            'properties': {
-                                          'slippageStep': {'type': ['integer', 'null']},
-                                          'volume': {'type': 'integer'}
+                                          'slippageStep': {'type': ['number', 'null']},
+                                          'volume': {'type': 'number'}
                                          }
                             }
                 }}");

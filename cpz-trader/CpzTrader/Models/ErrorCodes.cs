@@ -9,5 +9,6 @@
         SignalData = 920,
         TickData = 930,
         DataBase = 940,
+        Activity = 950,
     }
 }
