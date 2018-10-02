@@ -220,7 +220,7 @@ namespace CpzTrader
                 // отправить сообщение об ошибке
                 await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, rowKey, subject, null, e.Message);
 
-                throw;
+                throw e;
             }            
         }
 
@@ -266,20 +266,24 @@ namespace CpzTrader
                 {
                     string message = "attempt to update an existing record";
 
-                    // отправить сообщение об ошибке
-                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, updatedEntyti.RowKey, subject, updatedEntyti, message);
-
-                    return false;
+                    throw new Exception(message);
                 }
             }
             catch(Exception e)
             {
-                string message = "error while trying to update the storage entity";
+                if (e.Message == "Precondition Failed")
+                {
+                    string message = "attempt to change a record that has already been updated since the extraction";
 
-                // отправить сообщение об ошибке
-                await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, updatedEntyti.RowKey, subject, updatedEntyti, e.Message);
+                    // отправить сообщение об ошибке
+                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, updatedEntyti.RowKey, subject, updatedEntyti, e.Message);
 
-                return false;
+                    return false;
+                }
+                else
+                {
+                    throw e;
+                }                
             }            
         }
     }

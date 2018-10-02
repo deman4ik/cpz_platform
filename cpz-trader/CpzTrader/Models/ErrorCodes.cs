@@ -1,13 +1,14 @@
 ﻿namespace CpzTrader.Models
 {
     /// <summary>
-    /// ошибки валидации
+    /// коды ошибок
     /// </summary>
     public enum ErrorCodes
     {
         ClientData = 910,
         SignalData = 920,
         TickData = 930,
-        DataBase = 940
+        DataBase = 940,
+        Activity = 950,
     }
 }

@@ -20,7 +20,7 @@ namespace CpzTrader
         /// <summary>
         /// отправить запрос
         /// </summary>
-        private static async Task<HttpResponseMessage> SendRequest(string endPoint,Client clientInfo, Order signal)
+        private static async Task<HttpResponseMessage> SendRequest(string endPoint, Client clientInfo, Order signal)
         {
             dynamic data = Utils.CreateOrderData(clientInfo, signal);
 
@@ -71,27 +71,40 @@ namespace CpzTrader
 
                     dynamic errorInfo = JsonConvert.DeserializeObject(operationResult);
 
+                    string message = "";
+
                     // отправить сообщение об ошибке в лог
                     if (errorInfo.code == 100)
                     {
                         // ошибка идентификации пользователя на бирже
-                        return null;
+                        message = "user identification error on the exchange";                        
                     }
                     else if (errorInfo.code == 110)
                     {
                         // Не достаточно средств для выставления ордера
-                        return null;
+                        message = "Not enough funds to place orders";
                     }
                     else if (errorInfo.code == 120)
                     {
                         // Ошибка в параметрах ордера
-                        return null;
+                        message = "Error in order parameters";                        
                     }
+                    else
+                    {
+                        // неизвестная ошибка
+                        message = "Unknown error";
+                    }
+
+                    await EventGridPublisher.SendError(errorInfo.code, message, signal.NumberInRobot, clientInfo.Subject, signal);
                 }
                 return null;
             }
             catch(Exception e)
             {
+                string message = $"Internal error while trying to place an order number {signal.NumberInRobot} for a client - {clientInfo.RowKey}";
+
+                await EventGridPublisher.SendError((int)ErrorCodes.Activity, message, signal.NumberInRobot, clientInfo.Subject, signal);
+
                 throw;
             }            
         }
@@ -124,16 +137,25 @@ namespace CpzTrader
             {
                 (int code, string message) errorInfo = JsonConvert.DeserializeObject<(int, string)>(operationResult);
 
+                string message = "";
+
                 // отправить сообщение об ошибке в лог
                 if (errorInfo.code == 400)
                 {
                     // Ошибка снятия, ордер уже отменен или исполнен
-
+                    message = "Removal error, order already canceled or executed";
                 }
                 else if (errorInfo.code == 410)
                 {
                     // Не удалось отменить ордер, ошибка сети
+                    message = "Could not cancel order, network error";
                 }
+                else
+                {
+                    // неизвестная ошибка
+                    message = "Unknown error";
+                }
+                await EventGridPublisher.SendError(errorInfo.code, message, signal.NumberInRobot, clientInfo.Subject, signal);
             }
             return false;
         }

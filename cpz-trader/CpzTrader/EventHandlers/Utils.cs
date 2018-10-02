@@ -48,6 +48,8 @@ namespace CpzTrader.EventHandlers
                 {
                     if(client.Status == "started")
                     {
+                        client.JsonToObject();
+
                         var parallelTrader = Trader.RunTrader(numberOrder, signalType, client, position);
 
                         parallelTraders.Add(parallelTrader);
@@ -82,8 +84,7 @@ namespace CpzTrader.EventHandlers
                 TimeCreate = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(signal.AlertTime),
                 State = signal.OrderType == OrderType.Market ? OrderState.Closed : OrderState.Open,
                 Direction = signal.Action == ActionType.CloseShort || signal.Action == ActionType.Long ? "buy" : "sell",
-                Action = signal.Action.ToString(),
-                
+                Action = signal.Action.ToString(),                                
             };
         }
 

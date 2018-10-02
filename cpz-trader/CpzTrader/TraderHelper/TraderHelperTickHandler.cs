@@ -60,7 +60,7 @@ namespace CpzTrader.TraderHelper
                     // новый сигнал                    
                     else if (string.Equals(eventGridEvent.EventType, ConfigurationManager.TakeParameterByName("NewTick"), StringComparison.OrdinalIgnoreCase))
                     {
-                        var isValid = Validator.CheckData("signal", dataObject, out errorMessages);
+                        var isValid = Validator.CheckData("tick", dataObject, out errorMessages);
 
                         if (isValid)
                         {
@@ -68,20 +68,12 @@ namespace CpzTrader.TraderHelper
                         }
                         else
                         {
-                            dynamic validationError = new JObject();
+                            string message = "Validation error in the tick";
 
-                            validationError.code = ErrorCodes.SignalData;
-                            validationError.message = "Validation error in the tick";
+                            string internalError = JsonConvert.SerializeObject(errorMessages);
 
-                            dynamic details = new JObject();
-
-                            details.input = dataObject;
-                            details.taskId = eventGridEvent.Subject;
-                            details.internalError = JsonConvert.SerializeObject(errorMessages);
-
-                            validationError.details = details;
-
-                            await EventGridPublisher.PublishEventInfo(eventGridEvent.Subject, ConfigurationManager.TakeParameterByName("TraderError"), validationError);
+                            // отправить сообщение об ошибке
+                            await EventGridPublisher.SendError((int)ErrorCodes.TickData, message, eventGridEvent.Subject, eventGridEvent.Subject, dataObject, internalError);
                         }                        
                     }
                 }
@@ -122,16 +114,16 @@ namespace CpzTrader.TraderHelper
                             {
                                 if (order.OrderType == OrderType.Limit)
                                 {
-                                    await CheckLimitOrder(currentPrice, order, position);
+                                    await CheckLimitOrder(currentPrice, order, position, subject);
                                 }
                                 else if (order.OrderType == OrderType.Stop)
                                 {
-                                    await CheckStopOrder(currentPrice, PositionState.Open, order, position);
+                                    await CheckStopOrder(currentPrice, PositionState.Open, order, position, subject);
                                 }
                             }
                             else if(order.State == OrderState.Posted)
                             {
-                                await CheckPostedOrder(currentPrice, PositionState.Open, order, position);
+                                await CheckPostedOrder(currentPrice, PositionState.Open, order, position, subject);
                             }
                         }
                     }
@@ -143,25 +135,29 @@ namespace CpzTrader.TraderHelper
                             {
                                 if (order.OrderType == OrderType.Limit)
                                 {
-                                    await CheckLimitOrder(currentPrice, order, position);
+                                    await CheckLimitOrder(currentPrice, order, position, subject);
                                 }
                                 else if (order.OrderType == OrderType.Stop)
                                 {
-                                    await CheckStopOrder(currentPrice, PositionState.Close, order, position);
+                                    await CheckStopOrder(currentPrice, PositionState.Close, order, position, subject);
                                 }
                             }
                             else if (order.State == OrderState.Posted)
                             {
-                                await CheckPostedOrder(currentPrice, PositionState.Close, order, position);
+                                await CheckPostedOrder(currentPrice, PositionState.Close, order, position, subject);
                             }
                         }
                     }
-
                 }
             }
             catch (Exception e)
             {
-                await EventGridPublisher.PublishEventInfo(subject, ConfigurationManager.TakeParameterByName("TraderError"), dataObject.price.ToString(), e.Message);
+                string message = "Data Validation Error on Receiving a Client Start Request";
+
+                string internalError = e.InnerException.Message;
+
+                // отправить сообщение об ошибке
+                await EventGridPublisher.SendError((int)ErrorCodes.TickData, message, subject, subject, dataObject, internalError);               
                 log.LogError(e.Message, e);
             }
         }
@@ -169,7 +165,7 @@ namespace CpzTrader.TraderHelper
         /// <summary>
         /// проверить размещенный ордер
         /// </summary>
-        private static async Task CheckPostedOrder(decimal currentPrice, PositionState state, Order order, Position position)
+        private static async Task CheckPostedOrder(decimal currentPrice, PositionState state, Order order, Position position, string subject)
         {
             if ((order.Direction == "buy" && currentPrice < order.Price) || (order.Direction == "sell" && currentPrice > order.Price))
             {
@@ -178,7 +174,7 @@ namespace CpzTrader.TraderHelper
                 try
                 {
                     // обновляем информацию о позиции в хранилище
-                    var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                    var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position, subject);
 
                     // если обновление прошло успешно, даем сигнал трейдерам проверить свои ордера
                     if (result)
@@ -189,7 +185,10 @@ namespace CpzTrader.TraderHelper
                 }
                 catch (Exception e)
                 {
-                    // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                    string message = "error while trying to update the storage entity";
+
+                    // отправить сообщение об ошибке
+                    await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, position.RowKey, subject, position, e.Message);
                 }
             }            
         }
@@ -197,7 +196,7 @@ namespace CpzTrader.TraderHelper
         /// <summary>
         /// проверить отложенный лимитник
         /// </summary>
-        private static async Task CheckLimitOrder(decimal currentPrice, Order order, Position position)
+        private static async Task CheckLimitOrder(decimal currentPrice, Order order, Position position, string subject)
         {
             if (order.Direction == "buy")
             {
@@ -209,7 +208,7 @@ namespace CpzTrader.TraderHelper
                     try
                     {
                         // обновляем информацию о позиции в хранилище
-                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position, subject);
 
                         // если обновление прошло успешно, даем сигнал трейдерам
                         if (result)
@@ -220,7 +219,10 @@ namespace CpzTrader.TraderHelper
                     }
                     catch (Exception e)
                     {
-                        // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                        string message = "error while trying to update the storage entity";
+
+                        // отправить сообщение об ошибке
+                        await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, position.RowKey, subject, position, e.Message);
                     }
                 }
             }
@@ -234,7 +236,7 @@ namespace CpzTrader.TraderHelper
                     try
                     {
                         // обновляем информацию о позиции в хранилище
-                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position, subject);
 
                         // если обновление прошло успешно, даем сигнал трейдерам
                         if (result)
@@ -245,7 +247,10 @@ namespace CpzTrader.TraderHelper
                     }
                     catch (Exception e)
                     {
-                        // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                        string message = "error while trying to update the storage entity";
+
+                        // отправить сообщение об ошибке
+                        await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, position.RowKey, subject, position, e.Message);
                     }
                 }
             }
@@ -258,7 +263,7 @@ namespace CpzTrader.TraderHelper
         /// <param name="state">состояние позиции</param>
         /// <param name="order">ссылка на проверяемый ордер</param>
         /// <param name="position">позиция, которой принадлежит ордер</param>
-        private static async Task CheckStopOrder(decimal currentPrice, PositionState state, Order order, Position position)
+        private static async Task CheckStopOrder(decimal currentPrice, PositionState state, Order order, Position position, string subject)
         {
             if (order.Direction == "buy")
             {
@@ -277,7 +282,7 @@ namespace CpzTrader.TraderHelper
                     try
                     {
                         // обновляем информацию о позиции в хранилище
-                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                        var result = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position, subject);
 
                         // если обновление прошло успешно, даем сигнал трейдерам
                         if (result)
@@ -288,7 +293,11 @@ namespace CpzTrader.TraderHelper
                     }
                     catch (Exception e)
                     {
-                        // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                        string message = "error while trying to update the storage entity";
+
+                        // отправить сообщение об ошибке
+                        await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, position.RowKey, subject, position, e.Message);
+                                               
                     }
                 }
             }
@@ -309,7 +318,7 @@ namespace CpzTrader.TraderHelper
                     try
                     {
                         // обновляем информацию о позиции в хранилище
-                        var res2 = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position);
+                        var res2 = await DbContext.UpdateEntityById<Position>("Positions", position.PartitionKey, position.RowKey, position, subject);
 
                         // если обновление прошло успешно, даем сигнал трейдерам
                         if (res2)
@@ -320,7 +329,10 @@ namespace CpzTrader.TraderHelper
                     }
                     catch (Exception e)
                     {
-                        // если выпало исключение при обновлении значит запись была обновлена с момента извлечения, а это значит что сигнал уже был отправлен                                                
+                        string message = "error while trying to update the storage entity";
+
+                        // отправить сообщение об ошибке
+                        await EventGridPublisher.SendError((int)ErrorCodes.DataBase, message, position.RowKey, subject, position, e.Message);
                     }
                 }
             }
