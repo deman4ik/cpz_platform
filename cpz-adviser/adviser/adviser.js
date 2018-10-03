@@ -4,7 +4,8 @@ const {
   STATUS_STARTED,
   STATUS_STOPPED,
   SIGNALS_NEW_SIGNAL_EVENT,
-  LOG_EVENT
+  LOG_EVENT,
+  CANDLESCACHED_LIMIT
 } = require("../config");
 const BaseStrategy = require("./baseStrategy");
 const { getCachedCandlesByKey, saveAdviserState } = require("../tableStorage");
@@ -33,6 +34,9 @@ class Adviser {
     this._currency = state.currency; // котировка валюты
     this._timeframe = state.timeframe; // таймфрейм
     this._strategyName = state.strategyName; // имя файла стратегии
+    this._requiredHistoryCache = state.requiredHistoryCache || true; // загружать историю из кэша
+    this._requiredHistoryMaxBars =
+      state.requiredHistoryMaxBars || CANDLESCACHED_LIMIT; // максимально количество свечей в кэше
     this._strategy = state.strategy || { variables: {} }; // состояне стратегии
     this._indicators = state.indicators || {}; // состояние индикаторов
     this._candle = {}; // текущая свеча
@@ -284,7 +288,8 @@ class Adviser {
   async _loadCandles() {
     const result = await getCachedCandlesByKey(
       this._context,
-      `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`
+      `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
+      this._requiredHistoryMaxBars
     );
     if (result.isSuccess) {
       this._candles = result.data.reverse();
@@ -326,8 +331,14 @@ class Adviser {
       // TODO: Проверить что эта свеча еще не обрабатывалась
       // Обновить текущую свечу
       this._candle = candle;
-      // Загрузить свечи из кеша
-      await this._loadCandles();
+      // Если нужна история
+      if (this._requiredHistoryCache) {
+        // Загрузить свечи из кеша
+        await this._loadCandles();
+      } else {
+        // Обрабатываем только текущую свечу
+        this._candles.push(this._candle);
+      }
       // Подготовить свечи для индикаторов
       this._prepareCandles();
       // Рассчитать значения индикаторов

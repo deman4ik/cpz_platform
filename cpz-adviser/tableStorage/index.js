@@ -12,8 +12,7 @@ const {
   STATUS_BUSY,
   STORAGE_ADVISERS_TABLE,
   STORAGE_CANDLESPENDING_TABLE,
-  STORAGE_CANDLESCACHED_TABLE,
-  CANDLESCACHED_LIMIT
+  STORAGE_CANDLESCACHED_TABLE
 } = require("../config");
 
 const { TableQuery, TableUtilities } = azure;
@@ -217,7 +216,7 @@ async function getAdvisersBySlug(context, slug) {
  * @param {string} key
  * @returns
  */
-async function getCachedCandlesByKey(context, key) {
+async function getCachedCandlesByKey(context, key, limit) {
   try {
     const query = new TableQuery()
       .where(
@@ -227,7 +226,7 @@ async function getCachedCandlesByKey(context, key) {
           key
         )
       )
-      .top(CANDLESCACHED_LIMIT);
+      .top(limit);
     const result = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
     const entities = [];
     if (result) {
