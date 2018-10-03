@@ -10,7 +10,9 @@ POST /api/taskEvents
       "exchange": "bitfinex",
       "asset": "BTC",
       "currency": "USD",
-      "timeframe": 1
+      "timeframe": 1,
+      "requiredHistoryCache": true,
+      "requiredHistoryMaxBars: 100
     },
   "eventType": "CPZ.Tasks.Adviser.Start",
   "subject":"bitfinex/BTC/USD/1/robot_1/test240918.E"
@@ -35,7 +37,9 @@ POST /api/taskEvents
   	  "taskId": "test240918",
       "rowKey": "test240918",
       "partitionKey": "bitfinex.BTC.USD",
-      "debug": false
+      "debug": false,
+      "requiredHistoryCache": false,
+      "requiredHistoryMaxBars: 100
     },
   "eventType": "CPZ.Tasks.Candlebatcher.Update",
   "subject":"bitfinex/BTC/USD/1/robot_1/test240918.E"

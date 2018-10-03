@@ -276,8 +276,12 @@ class Adviser {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setUpdate()`, updatedFields);
-    this._debug = updatedFields.debug;
-    this._settings = updatedFields.settings;
+    this._debug = updatedFields.debug || this._debug;
+    this._settings = updatedFields.settings || this._settings;
+    this._requiredHistoryCache =
+      updatedFields._requiredHistoryCache || this._requiredHistoryCache;
+    this._requiredHistoryMaxBars =
+      updatedFields._requiredHistoryMaxBars || this._requiredHistoryMaxBars;
   }
 
   /**

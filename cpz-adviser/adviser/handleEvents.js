@@ -152,12 +152,16 @@ async function handleUpdate(context, eventData) {
         newState.updateRequested = {
           eventSubject: eventData.eventSubject,
           debug: eventData.debug,
-          settings: eventData.settings
+          settings: eventData.settings,
+          requiredHistoryCache: eventData.requiredHistoryCache,
+          requiredHistoryMaxBars: eventData.requiredHistoryMaxBars
         };
       } else {
         newState.eventSubject = eventData.eventSubject;
         newState.debug = eventData.debug;
         newState.settings = eventData.settings;
+        newState.requiredHistoryCache = eventData.requiredHistoryCache;
+        newState.requiredHistoryMaxBars = eventData.requiredHistoryMaxBars;
       }
       const result = await updateAdviserState(context, newState);
       if (!result.isSuccess)
