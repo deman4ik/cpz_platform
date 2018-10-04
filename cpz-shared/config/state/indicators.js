@@ -1,0 +1,4 @@
+const INDICATORS_BASE = "base";
+const INDICATORS_TULIP = "tulip";
+
+export { INDICATORS_BASE, INDICATORS_TULIP };
