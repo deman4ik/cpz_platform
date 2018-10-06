@@ -1,4 +1,4 @@
-create or replace view V_CANDLES_DIFF
+create or replace view V_CANDLES_CHECK_DIFF
 as select d.* from (
   SELECT
     t.start,
@@ -15,4 +15,4 @@ as select d.* from (
   where t.exchange = e.id	
   ORDER BY t.start desc
 ) d
-where diff is null or diff != 60;
+where diff != 60 and diff != 0;
