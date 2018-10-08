@@ -1,7 +1,5 @@
 const SIGNALS_NEWSIGNAL_EVENT = {
   eventType: "CPZ.Signals.NewSignal",
-  subject:
-    "{Exchange}/{Asset}/{Currency}/{Timeframe}/{RobotId}/{TaskId}.{B/E/R}",
   dataSchema: {
     signalId: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "string", empty: false },

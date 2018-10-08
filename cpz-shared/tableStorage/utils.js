@@ -1,4 +1,5 @@
 import { TableUtilities } from "azure-storage";
+import { modeToStr } from "cpzUtils/helpers";
 
 const { entityGenerator } = TableUtilities;
 
@@ -22,7 +23,9 @@ function tryParseJSON(jsonString) {
 function entityToObject(entity) {
   const object = {};
   Object.keys(entity).forEach(key => {
-    if (key === ".metadata") return;
+    if (key === ".metadata") {
+      object[".metadata"] = entity[".metadata"];
+    }
     const json = tryParseJSON(entity[key]._);
     if (json) {
       object[key] = json;
@@ -42,8 +45,11 @@ function objectToEntity(object) {
   const entity = {};
   Object.keys(object).forEach(key => {
     const element = object[key];
+
     if (typeof element === "object") {
-      if (element instanceof Date) {
+      if (key === ".metadata") {
+        entity[".metadata"] = element;
+      } else if (element instanceof Date) {
         entity[key] = entityGenerator.DateTime(element);
       } else {
         entity[key] = entityGenerator.String(JSON.stringify(element));
@@ -59,8 +65,16 @@ function objectToEntity(object) {
   return entity;
 }
 
-function createSlug(exchange, asset, currency, timeframe) {
-  return `${exchange}.${asset}.${currency}.${timeframe}`;
+function createAdviserSlug(
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  mode = "realtime"
+) {
+  if (mode === "realtime")
+    return `${exchange}.${asset}.${currency}.${timeframe}`;
+  return `${exchange}.${asset}.${currency}.${timeframe}.${modeToStr(mode)}`;
 }
 
-export { tryParseJSON, entityToObject, objectToEntity, createSlug };
+export { tryParseJSON, entityToObject, objectToEntity, createAdviserSlug };

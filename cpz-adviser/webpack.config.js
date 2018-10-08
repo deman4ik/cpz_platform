@@ -1,8 +1,12 @@
 require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
+const CleanWebpackPlugin = require("clean-webpack-plugin");
 const fs = require("fs");
 const path = require("path");
+
+// the path(s) that should be cleaned
+const pathsToClean = [path.resolve(__dirname, "dist")];
 
 /**
  * Finds all functions entry points from /src/funcs
@@ -32,6 +36,8 @@ const config = {
         __dirname,
         "../cpz-shared/config/storageTables"
       ),
+      cpzStorage: path.resolve(__dirname, "../cpz-shared/tableStorage"),
+      cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
       cpzUtils: path.resolve(__dirname, "../cpz-shared/utils")
     }
   },
@@ -58,6 +64,7 @@ const config = {
   target: "node",
   externals: [nodeExternals()],
   plugins: [
+    new CleanWebpackPlugin(pathsToClean),
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),

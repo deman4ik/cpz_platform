@@ -1,12 +1,13 @@
+import VError from "verror";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_BUSY,
   STATUS_ERROR
 } from "cpzState";
+import { TOPICS, publishEvents } from "cpzEvents";
+import { createErrorOutput } from "cpzUtils/error";
 import Adviser from "./adviser";
-import { publishEvents } from "../eventgrid";
-
 /**
  * Основная задача советника
  *
@@ -25,7 +26,7 @@ async function execute(context, state, candle) {
       // Сохраняем состояние и завершаем работу
       adviser.end(adviser.status);
 
-      return { isSuccess: true, taskId: state.taskId };
+      return;
     }
     // Если есть запрос на обновление параметров
     if (adviser.updateRequested) {
@@ -40,29 +41,34 @@ async function execute(context, state, candle) {
     // Если есть хотя бы одно событие для отправка
     if (adviser.events.length > 0) {
       // Отправляем
-      const publishEventsResult = await publishEvents(
-        context,
-        "signals",
-        adviser.events
-      );
-      // Если не удалось отправить события
-      if (!publishEventsResult.isSuccess) {
-        throw publishEventsResult;
-      }
+      await publishEvents(context, TOPICS.SIGNALS, adviser.events);
     }
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию
     await adviser.logEvent(adviser.currentState);
-    return { isSuccess: true, taskId: state.taskId };
+    return;
   } catch (error) {
-    context.log.error(error, state.taskId);
+    const err = new VError(
+      {
+        name: "AdviserExecutionError",
+        cause: error,
+        info: {
+          state,
+          candle
+        }
+      },
+      'Failed to execute adviser taskId: "%s"',
+      state.taskId
+    );
+    const errorOutput = createErrorOutput(err);
+    context.log.error(errorOutput.message, errorOutput);
     // Если есть экземпляр класса
     if (adviser) {
       // Сохраняем ошибку в сторедже и продолжаем работу
-      await adviser.end(STATUS_STARTED, error);
+      await adviser.end(STATUS_STARTED, errorOutput);
     }
-    return { isSuccess: false, taskId: state.taskId, error: error.message };
+    throw err;
   }
 }
 

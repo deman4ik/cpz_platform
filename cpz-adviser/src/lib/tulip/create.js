@@ -1,5 +1,6 @@
 /* from https://github.com/askmike/gekko/ */
 import tulind from "tulind";
+import VError from "verror";
 
 function isNumeric(obj) {
   return !Array.isArray(obj) && obj - parseFloat(obj) + 1 >= 0;
@@ -23,7 +24,17 @@ async function execute(params) {
     }
     return results;
   } catch (error) {
-    throw error;
+    throw new VError(
+      {
+        name: "TulipExecuteError",
+        cause: error,
+        info: {
+          params
+        }
+      },
+      'Failed to execute Tulip indicator "%s"',
+      params.indicator.indicator
+    );
   }
 }
 
@@ -34,15 +45,29 @@ const verifyParams = (methodName, params) => {
 
   requiredParams.forEach(paramName => {
     if (!Object.prototype.hasOwnProperty.call(params, paramName)) {
-      throw new Error(
-        `Can't configure tulip ${methodName} requires ${paramName}.`
+      throw new VError(
+        {
+          name: "ValidationError",
+          info: {
+            methodName,
+            paramName
+          }
+        },
+        `Can't configure tulip ${methodName} requires ${paramName}`
       );
     }
 
     const val = params[paramName];
 
     if (!isNumeric(val)) {
-      throw new Error(
+      throw new VError(
+        {
+          name: "ValidationError",
+          info: {
+            methodName,
+            paramName
+          }
+        },
         `Can't configure tulip ${methodName} - ${paramName} needs to be a number`
       );
     }

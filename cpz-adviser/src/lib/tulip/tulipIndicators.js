@@ -1,3 +1,4 @@
+import VError from "verror";
 import BaseIndicator from "../../adviser/baseIndicator";
 import tulip from "./create";
 
@@ -9,23 +10,18 @@ class Tulip extends BaseIndicator {
   }
 
   async calc() {
-    try {
-      this.log("CALC");
-      const result = await this.calculate(this.candlesProps);
-      this.log("result", result);
-      const resultKeys = Object.keys(result);
-      if (resultKeys.length > 0) {
-        resultKeys.forEach(key => {
-          this[key] = result[key];
-        });
-      } else {
-        this.result = result;
-      }
-      this.log("this.result", this.result);
-    } catch (error) {
-      this._context.log.error(error);
-      throw error;
+    this.log("CALC");
+    const result = await this.calculate(this.candlesProps);
+    this.log("result", result);
+    const resultKeys = Object.keys(result);
+    if (resultKeys.length > 0) {
+      resultKeys.forEach(key => {
+        this[key] = result[key];
+      });
+    } else {
+      this.result = result;
     }
+    this.log("this.result", this.result);
   }
 }
 

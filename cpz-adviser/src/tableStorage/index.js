@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import VError from "verror";
 import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import {
   STORAGE_ADVISERS_TABLE,
@@ -11,8 +12,12 @@ import {
   mergeEntity,
   deleteEntity,
   queryEntities
-} from "./storage";
-import { objectToEntity, entityToObject, createSlug } from "./utils";
+} from "cpzStorage/storage";
+import {
+  objectToEntity,
+  entityToObject,
+  createAdviserSlug
+} from "cpzStorage/utils";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
@@ -24,108 +29,130 @@ createTableIfNotExists(STORAGE_CANDLESPENDING_TABLE);
 /**
  * Сохранение состояния советника
  *
- * @param {*} context
  * @param {*} state
  * @returns
  */
-async function saveAdviserState(context, state) {
+async function saveAdviserState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createSlug(state.exchange, state.asset, state.currency, state.timeframe)
+        createAdviserSlug(
+          state.exchange,
+          state.asset,
+          state.currency,
+          state.timeframe,
+          state.mode
+        )
       ),
       RowKey: entityGenerator.String(state.taskId),
       ...objectToEntity(state)
     };
-    const entityUpdated = await insertOrMergeEntity(
-      STORAGE_ADVISERS_TABLE,
-      entity
-    );
-    return { isSuccess: entityUpdated };
+    await insertOrMergeEntity(STORAGE_ADVISERS_TABLE, entity);
   } catch (error) {
-    context.log.error(error);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          state
+        }
+      },
+      "Failed to save adviser state"
+    );
   }
 }
 
 /**
  * Сохранение свечей ожидающих обработки
  *
- * @param {*} context
  * @param {*} candle
  * @returns
  */
-async function savePendingCandles(context, candle) {
+async function savePendingCandles(candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
       RowKey: entityGenerator.String(candle.id.toString()),
       ...objectToEntity(candle)
     };
-    const entityUpdated = await insertOrMergeEntity(
-      STORAGE_CANDLESPENDING_TABLE,
-      entity
-    );
-    return { isSuccess: entityUpdated, taskId: candle.taskId };
+    await insertOrMergeEntity(STORAGE_CANDLESPENDING_TABLE, entity);
   } catch (error) {
-    context.log.error(error);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          candle
+        }
+      },
+      'Failed to save candle to "%s"',
+      STORAGE_CANDLESPENDING_TABLE
+    );
   }
 }
 
 /**
  * Обновление состояния советника
  *
- * @param {*} context
  * @param {*} state
  * @returns
  */
-async function updateAdviserState(context, state) {
+async function updateAdviserState(state) {
   try {
     const entity = {
       ...objectToEntity(state)
     };
-    const entityUpdated = await mergeEntity(STORAGE_ADVISERS_TABLE, entity);
-    return { isSuccess: entityUpdated };
+    await mergeEntity(STORAGE_ADVISERS_TABLE, entity);
   } catch (error) {
-    context.log.error(error);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          state
+        }
+      },
+      "Failed to update adviser state"
+    );
   }
 }
 
 /**
  * Удаление свечи ожидающей выполнения
  *
- * @param {*} context
  * @param {*} candle
  * @returns
  */
-async function deletePendingCandles(context, candle) {
+async function deletePendingCandles(candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
       RowKey: entityGenerator.String(candle.id.toString()),
       ...objectToEntity(candle)
     };
-    const entityDeleted = await deleteEntity(
-      STORAGE_CANDLESPENDING_TABLE,
-      entity
-    );
-    return { isSuccess: entityDeleted };
+    await deleteEntity(STORAGE_CANDLESPENDING_TABLE, entity);
   } catch (error) {
-    context.log.error(error);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          candle
+        }
+      },
+      'Failed to delete candle from "%s"',
+      STORAGE_CANDLESPENDING_TABLE
+    );
   }
 }
 
 /**
  * Поиск советника по уникальному ключу
  *
- * @param {*} context
  * @param {object} keys
  * @returns
  */
-async function getAdviserByKey(context, keys) {
+async function getAdviserByKey(keys) {
   try {
     const rowKeyFilter = TableQuery.stringFilter(
       "RowKey",
@@ -151,21 +178,30 @@ async function getAdviserByKey(context, keys) {
         entities.push(entityToObject(element));
       });
     }
-    return { isSuccess: true, data: entities[0] };
+    return { data: entities[0] };
   } catch (error) {
-    context.log.error(error, keys);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          keys
+        }
+      },
+      'Failed to read adviser state "%s", "%d"',
+      keys.partitionKey,
+      keys.rowKey
+    );
   }
 }
 
 /**
  * Поиск запущенных или занятых советников по бирже+инструменту+таймфрейму
  *
- * @param {*} context
  * @param {string} slug
  * @returns
  */
-async function getAdvisersBySlug(context, slug) {
+async function getAdvisersBySlug(slug) {
   try {
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -177,7 +213,7 @@ async function getAdvisersBySlug(context, slug) {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const budyStatusFilter = TableQuery.stringFilter(
+    const busyStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_BUSY
@@ -185,7 +221,7 @@ async function getAdvisersBySlug(context, slug) {
     const statusFilter = TableQuery.combineFilters(
       startedStatusFilter,
       TableUtilities.TableOperators.OR,
-      budyStatusFilter
+      busyStatusFilter
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
@@ -201,21 +237,29 @@ async function getAdvisersBySlug(context, slug) {
         entities.push(entityToObject(element));
       });
     }
-    return { isSuccess: true, data: entities };
+    return { data: entities };
   } catch (error) {
-    context.log.error(error, slug);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          slug
+        }
+      },
+      'Failed to read advisers by slug "%s"',
+      slug
+    );
   }
 }
 
 /**
  * Отбор закешированныз свечей по ключу
  *
- * @param {*} context
  * @param {string} key
  * @returns
  */
-async function getCachedCandlesByKey(context, key, limit) {
+async function getCachedCandlesByKey(key, limit) {
   try {
     const query = new TableQuery()
       .where(
@@ -233,21 +277,29 @@ async function getCachedCandlesByKey(context, key, limit) {
         entities.push(entityToObject(element));
       });
     }
-    return { isSuccess: true, data: entities };
+    return { data: entities };
   } catch (error) {
-    context.log.error(error, key);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          key
+        }
+      },
+      'Failed to read cached candles by key "%s"',
+      key
+    );
   }
 }
 
 /**
  * Поиск свечей ожидающих обработки для конкретного советника
  *
- * @param {*} context
  * @param {string} id
  * @returns
  */
-async function getPendingCandlesByAdviserId(context, id) {
+async function getPendingCandlesByAdviserId(id) {
   try {
     const query = new TableQuery().where(
       TableQuery.stringFilter(
@@ -263,10 +315,19 @@ async function getPendingCandlesByAdviserId(context, id) {
         entities.push(entityToObject(element));
       });
     }
-    return { isSuccess: true, data: entities };
+    return { data: entities };
   } catch (error) {
-    context.log.error(error, id);
-    return { isSuccess: false, error };
+    throw new VError(
+      {
+        name: "AdviserStorageError",
+        cause: error,
+        info: {
+          id
+        }
+      },
+      'Failed to read pending candles by adviser id "%s"',
+      id
+    );
   }
 }
 export {

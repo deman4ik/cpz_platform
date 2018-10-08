@@ -1,18 +1,21 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
-import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
+import VError from "verror";
+import { ADVISER_SERVICE } from "cpzServices";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
   INDICATORS_BASE,
   INDICATORS_TULIP
 } from "cpzState";
+import { publishEvents, TOPICS } from "cpzEvents";
+import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
+import { modeToStr } from "cpzUtils/helpers";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
 import { getCachedCandlesByKey, saveAdviserState } from "../tableStorage";
-import { publishEvents, createEvents } from "../eventgrid";
 
 /**
  * Класс советника
@@ -21,49 +24,152 @@ import { publishEvents, createEvents } from "../eventgrid";
  */
 class Adviser {
   /**
-   *Конструктор
+   * Конструктор
    * @param {Object} context
    * @param {Object} state
    */
   constructor(context, state) {
-    this._context = context; // текущий контекст выполнения
-    this._eventSubject = state.eventSubject; // тема события
-    this._taskId = state.taskId; // уникальный идентификатор задачи
-    this._robotId = state.robotId; // идентификатор робота
-    this._mode = state.mode; // режим работы ['backtest', 'emulator', 'realtime']
-    this._debug = state.debug; // режима дебага [true,false]
-    this._settings = state.settings || {}; // объект настроек из веб-интерфейса
-    this._exchange = state.exchange; // код биржи
-    this._asset = state.asset; // базовая валюта
-    this._currency = state.currency; // котировка валюты
-    this._timeframe = state.timeframe; // таймфрейм
-    this._strategyName = state.strategyName; // имя файла стратегии
-    this._requiredHistoryCache = state.requiredHistoryCache || true; // загружать историю из кэша
+    /* Текущий контекст выполнения */
+    this._context = context;
+    /* Тема события */
+    this._eventSubject = state.eventSubject;
+    /* Уникальный идентификатор задачи */
+    this._taskId = state.taskId;
+    /* Идентификатор робота */
+    this._robotId = state.robotId;
+    /* Режим работы ['backtest', 'emulator', 'realtime'] */
+    this._mode = state.mode;
+    /* Режима дебага [true,false] */
+    this._debug = state.debug;
+    /* Объект настроек из веб-интерфейса */
+    this._settings = state.settings || {};
+    /* Код биржи */
+    this._exchange = state.exchange;
+    /* Базовая валюта */
+    this._asset = state.asset;
+    /* Котировка валюты */
+    this._currency = state.currency;
+    /* Таймфрейм */
+    this._timeframe = state.timeframe;
+    /* Имя файла стратегии */
+    this._strategyName = state.strategyName;
+    /* Загружать историю из кэша */
+    this._requiredHistoryCache = state.requiredHistoryCache || true;
+    /* Максимально количество свечей в кэше */
     this._requiredHistoryMaxBars =
-      state.requiredHistoryMaxBars || REQUIRED_HISTORY_MAX_BARS; // максимально количество свечей в кэше
-    this._strategy = state.strategy || { variables: {} }; // состояне стратегии
-    this._indicators = state.indicators || {}; // состояние индикаторов
-    this._candle = {}; // текущая свеча
-    this._lastCandle = state.lastCandle || {}; // последняя свеча
-    this._indicators = state.indicators || {}; // индикаторы
-    this._signals = []; // массив сигналов к отправке
-    this._lastSignals = state.lastSignals || []; // массив последних сигналов
-    this._updateRequested = state.updateRequested || false; // объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false
-    this._stopRequested = state.stopRequested || false; // признак запроса на остановку сервиса [true,false]
+      state.requiredHistoryMaxBars || REQUIRED_HISTORY_MAX_BARS;
+    /* Состояне стратегии */
+    this._strategy = state.strategy || { variables: {} };
+    /* Состояние индикаторов */
+    this._indicators = state.indicators || {};
+    /* Текущая свеча */
+    this._candle = {};
+    /* Последняя свеча */
+    this._lastCandle = state.lastCandle || {};
+    /* Индикаторы */
+    this._indicators = state.indicators || {};
+    /* Массив сигналов к отправке */
+    this._signals = [];
+    /* Массив последних сигналов */
+    this._lastSignals = state.lastSignals || [];
+    /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false */
+    this._updateRequested = state.updateRequested || false;
+    /* Признак запроса на остановку сервиса [true,false] */
+    this._stopRequested = state.stopRequested || false;
+    /* Текущий статус сервиса */
     this._status = this._stopRequested
       ? STATUS_STOPPED
-      : state.status || STATUS_STARTED; // текущий статус сервиса
-    this._startedAt = state.startedAt || dayjs().toJSON(); //  Дата и время запуска
+      : state.status || STATUS_STARTED;
+    /* Дата и время запуска */
+    this._startedAt = state.startedAt || dayjs().toJSON();
+    /* Дата и время остановки */
     this._endedAt =
-      state.endedAt || this._status === STATUS_STOPPED ? dayjs().toJSON() : ""; // Дата и время остановки
+      state.endedAt || this._status === STATUS_STOPPED ? dayjs().toJSON() : "";
+    /* Признак выполнения инициализации */
     this._initialized = state.initialized || false;
-    this.loadStrategy();
-    this.loadIndicators();
-    if (!this._initialized) {
-      this.initStrategy();
+    /* Метаданные стореджа */
+    this._metadata = state[".metadata"];
 
+    /* Запуск загрузки стратегии */
+    this.loadStrategy();
+    /* Запуск загрузки индикаторов */
+    this.loadIndicators();
+    /* Если инициализация не выполнялась */
+    if (!this._initialized) {
+      /* Запуск инициализации стратегии */
+      this.initStrategy();
       this._initialized = true;
     }
+  }
+
+  /**
+   * Запрос текущего статуса сервиса
+   *
+   * @returns status
+   * @memberof Adviser
+   */
+  get status() {
+    return this._status;
+  }
+
+  /**
+   * Запрос текущего признака обновления параметров
+   *
+   * @returns updateRequested
+   * @memberof Adviser
+   */
+  get updateRequested() {
+    return this._updateRequested;
+  }
+
+  /**
+   * Запрос текущих событий для отправки
+   *
+   * @memberof Adviser
+   */
+  get events() {
+    return this._signals;
+  }
+
+  /**
+   * Установка статуса сервиса
+   *
+   * @param {*} status
+   * @memberof Adviser
+   */
+  set status(status) {
+    if (status) this._status = status;
+  }
+
+  /**
+   * Логирование в консоль
+   *
+   * @param {*} args
+   * @memberof Adviser
+   */
+  log(...args) {
+    if (this._debug) {
+      this._context.log.info(`Adviser ${this._eventSubject}:`, ...args);
+    }
+  }
+
+  /**
+   * Логирование в EventGrid в топик CPZ-LOGS
+   *
+   * @param {*} data
+   * @memberof Adviser
+   */
+  logEvent(data) {
+    // Публикуем событие
+    publishEvents(this._context, TOPICS.LOG, {
+      service: ADVISER_SERVICE,
+      subject: this._eventSubject,
+      eventType: LOG_ADVISER_EVENT.eventType,
+      data: {
+        taskId: this._taskId,
+        data
+      }
+    });
   }
 
   /**
@@ -72,6 +178,7 @@ class Adviser {
    * @memberof Adviser
    */
   loadStrategy() {
+    this.log("loadStrategy()");
     try {
       // Считываем стратегию
       /* eslint-disable import/no-dynamic-require, global-require */
@@ -101,7 +208,20 @@ class Adviser {
         ...this._strategy // предыдущий стейт стратегии
       });
     } catch (error) {
-      throw new Error(`Load strategy "${this._strategyName} error:"\n${error}`);
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to load strategy "%s"',
+        this._strategyName
+      );
     }
   }
 
@@ -138,7 +258,7 @@ class Adviser {
                   indicatorFunctions[ownProp] = indicatorObject[ownProp];
                 });
               // Создаем новый инстанc базового индикатора
-              this[`_${key}Instance`] = new BaseIndicator({
+              this[`_ind${key}Instance`] = new BaseIndicator({
                 context: this._context,
                 exchange: this._exchange,
                 asset: this._asset,
@@ -150,7 +270,17 @@ class Adviser {
                 ...indicator // стейт индикатора
               });
             } catch (err) {
-              throw new Error(`Can't load indicator ${key} error:\n${err}`);
+              throw new VError(
+                {
+                  name: "AdviserIndicatorError",
+                  cause: err,
+                  info: {
+                    indicator: key
+                  }
+                },
+                'Failed to load indicator "%s"',
+                key
+              );
             }
             break;
           }
@@ -158,7 +288,7 @@ class Adviser {
             // Если внешний индикатор Tulip
             try {
               // Создаем новый инстанc индикатора Tulip
-              this[`_${key}Instance`] = new TulipIndicatorClass({
+              this[`_ind${key}Instance`] = new TulipIndicatorClass({
                 context: this._context,
                 exchange: this._exchange,
                 asset: this._asset,
@@ -170,8 +300,16 @@ class Adviser {
                 ...indicator // стейт индикатора
               });
             } catch (err) {
-              throw new Error(
-                `Can't load Tulip indicator ${key} error:\n${err}`
+              throw new VError(
+                {
+                  name: "AdviserIndicatorError",
+                  cause: err,
+                  info: {
+                    indicator: key
+                  }
+                },
+                'Failed to load Tulip indicator "%s"',
+                key
               );
             }
             break;
@@ -182,8 +320,19 @@ class Adviser {
         }
       });
     } catch (error) {
-      throw new Error(
-        `Load indicators "${this._strategyName} error:"\n${error}`
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to load indicators for strategy "%s"',
+        this._strategyName
       );
     }
   }
@@ -194,7 +343,7 @@ class Adviser {
    * @memberof Adviser
    */
   initStrategy() {
-    this._context.log("initStrategy");
+    this.log("initStrategy()");
     try {
       // Если стратегия еще не проинициализирована
       if (!this._strategyInstance.initialized) {
@@ -203,14 +352,26 @@ class Adviser {
         this._strategyInstance.initialized = true;
         // Считываем настройки индикаторов
         this._indicators = this._strategyInstance.indicators;
-        this._context.log(this._indicators);
         // Загружаем индикаторы
         this.loadIndicators();
         // Инициализируем индикаторы
         this.initIndicators();
       }
     } catch (error) {
-      throw new Error(`Init strategy "${this._strategyName} error:"\n${error}`);
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to initialize strategy "%s"',
+        this._strategyName
+      );
     }
   }
 
@@ -220,21 +381,42 @@ class Adviser {
    * @memberof Adviser
    */
   initIndicators() {
-    this._context.log("initIndicators");
+    this.log("initIndicators()");
     try {
       Object.keys(this._indicators).forEach(key => {
         try {
-          if (!this[`_${key}Instance`].initialized) {
-            this[`_${key}Instance`].init();
-            this[`_${key}Instance`].initialized = true;
+          if (!this[`_ind${key}Instance`].initialized) {
+            this[`_ind${key}Instance`].init();
+            this[`_ind${key}Instance`].initialized = true;
           }
         } catch (err) {
-          throw new Error(`Can't initialize indicator ${key} error:\n${err}`);
+          throw new VError(
+            {
+              name: "AdviserIndicatorError",
+              cause: err,
+              info: {
+                indicator: key
+              }
+            },
+            'Failed to initialize indicator "%s"',
+            key
+          );
         }
       });
     } catch (error) {
-      throw new Error(
-        `Init indicators "${this._strategyName} error:"\n${error}`
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to initialize indicators for strategy "%s"',
+        this._strategyName
       );
     }
   }
@@ -245,103 +427,77 @@ class Adviser {
    * @memberof Adviser
    */
   async calcIndicators() {
-    this._context.log("calcIndicators");
+    this.log("calcIndicators()");
     try {
       await Promise.all(
         Object.keys(this._indicators).map(async key => {
-          this[`_${key}Instance`].handleCandle(
-            this._candle,
-            this._candles,
-            this._candlesProps
-          );
-          await this[`_${key}Instance`].calc();
+          try {
+            this[`_ind${key}Instance`].handleCandle(
+              this._candle,
+              this._candles,
+              this._candlesProps
+            );
+            await this[`_ind${key}Instance`].calc();
+          } catch (err) {
+            throw new VError(
+              {
+                name: "AdviserIndicatorError",
+                cause: err,
+                info: {
+                  indicator: key
+                }
+              },
+              'Failed to calculate indicator "%s"',
+              key
+            );
+          }
         })
       );
     } catch (error) {
-      throw new Error(
-        `Calculate indicators "${this._strategyName} error:"\n${error}`
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to calculate indicators for strategy "%s"',
+        this._strategyName
       );
     }
   }
 
   /**
-   * Логирование в консоль
+   * Запуск основной функции стратегии
    *
-   * @param {*} args
    * @memberof Adviser
    */
-  log(...args) {
-    if (this._debug) {
-      this._context.log.info(`Adviser ${this._eventSubject}:`, ...args);
+  runStrategy() {
+    try {
+      // Передать свечу и значения индикаторов в инстанс стратегии
+      this._strategyInstance.handleCandle(this._candle, this._indicators);
+      // Запустить проверку стратегии
+      this._strategyInstance.check();
+    } catch (error) {
+      throw new VError(
+        {
+          name: "AdviserStrategyError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to run strategy "%s"',
+        this._strategyName
+      );
     }
-  }
-
-  /**
-   * Логирование в EventGrid в топик CPZ-LOGS
-   *
-   * @param {*} data
-   * @memberof Adviser
-   */
-  logEvent(data) {
-    // Публикуем событие
-    publishEvents(
-      this._context,
-      "log",
-      createEvents({
-        subject: this._eventSubject,
-        eventType: LOG_ADVISER_EVENT.eventType,
-        data: {
-          taskId: this._taskId,
-          data
-        }
-      })
-    );
-  }
-
-  /**
-   * Запрос текущего статуса сервиса
-   *
-   * @returns status
-   * @memberof Adviser
-   */
-  get status() {
-    return this._status;
-  }
-
-  /**
-   * Запрос текущего признака обновления параметров
-   *
-   * @returns updateRequested
-   * @memberof Adviser
-   */
-  get updateRequested() {
-    return this._updateRequested;
-  }
-
-  /**
-   * Установка статуса сервиса
-   *
-   * @param {*} status
-   * @memberof Adviser
-   */
-  set status(status) {
-    if (status) this._status = status;
-  }
-
-  /**
-   * Установка новых параметров
-   *
-   * @param {*} [updatedFields=this.updateRequested]
-   * @memberof Adviser
-   */
-  setUpdate(updatedFields = this._updateRequested) {
-    this.log(`setUpdate()`, updatedFields);
-    this._debug = updatedFields.debug || this._debug;
-    this._settings = updatedFields.settings || this._settings;
-    this._requiredHistoryCache =
-      updatedFields._requiredHistoryCache || this._requiredHistoryCache;
-    this._requiredHistoryMaxBars =
-      updatedFields._requiredHistoryMaxBars || this._requiredHistoryMaxBars;
   }
 
   /**
@@ -350,15 +506,29 @@ class Adviser {
    * @memberof Adviser
    */
   async _loadCandles() {
-    const result = await getCachedCandlesByKey(
-      this._context,
-      `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
-      this._requiredHistoryMaxBars
-    );
-    if (result.isSuccess) {
+    try {
+      const result = await getCachedCandlesByKey(
+        this._context,
+        `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
+        this._requiredHistoryMaxBars
+      );
+
       this._candles = result.data.reverse();
-    } else {
-      throw result.error;
+    } catch (error) {
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to load candles from cache for strategy "%s"',
+        this._strategyName
+      );
     }
   }
 
@@ -392,10 +562,12 @@ class Adviser {
    */
   async handleCandle(candle) {
     try {
-      this.log("handleCandle");
-      // TODO: Проверить что эта свеча еще не обрабатывалась
+      this.log("handleCandle()");
+
       // Обновить текущую свечу
       this._candle = candle;
+      // Если  свеча уже обрабатывалась - выходим
+      if (this._candle === this._lastCandle) return;
       // Если нужна история
       if (this._requiredHistoryCache) {
         // Загрузить свечи из кеша
@@ -410,14 +582,26 @@ class Adviser {
       await this.calcIndicators();
       // Считать текущее состояние индикаторов
       this.getIndicatorsState();
-      // Передать свечу и значения индикаторов в инстанс стратегии
-      this._strategyInstance.handleCandle(this._candle, this._indicators);
-      // Запустить проверку стратегии
-      this._strategyInstance.check();
-      // TODO: Отдельный метод check с отловом ошибок?
+
+      // Запуск стратегии
+      this.runStrategy();
+      // Обработанная свеча
+      this._lastCandle = this._candle;
     } catch (error) {
-      this._context.log.error(error);
-      throw error;
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to handle new candle for strategy "%s"',
+        this._strategyName
+      );
     }
   }
 
@@ -428,18 +612,6 @@ class Adviser {
    * @memberof Candlebatcher
    */
   _createSubject() {
-    const modeToStr = mode => {
-      switch (mode) {
-        case "realtime":
-          return "R";
-        case "backtest":
-          return "B";
-        case "emulator":
-          return "E";
-        default:
-          return "R";
-      }
-    };
     return `${this._exchange}/${this._asset}/${this._currency}/${
       this._timeframe
     }/${this._taskId}.${modeToStr(this._mode)}`;
@@ -452,6 +624,7 @@ class Adviser {
    * @memberof Adviser
    */
   advice(signal) {
+    this.log("advice()");
     const newSignal = {
       id: uuid(),
       dataVersion: "1.0",
@@ -465,20 +638,12 @@ class Adviser {
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
+        service: ADVISER_SERVICE,
         ...signal
       }
     };
 
     this._signals.push(newSignal);
-  }
-
-  /**
-   * Запрос текущих событий для отправки
-   *
-   * @memberof Adviser
-   */
-  get events() {
-    return this._signals;
   }
 
   /**
@@ -502,10 +667,19 @@ class Adviser {
           });
       });
     } catch (error) {
-      throw new Error(
-        `Can't find indicators state for strategy "${
-          this._strategyName
-        }" \n${error}`
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to find indicators state for strategy "%s"',
+        this._strategyName
       );
     }
   }
@@ -526,8 +700,19 @@ class Adviser {
             this._strategy.variables[key] = this._strategyInstance[key]; // сохраняем каждое свойство
         });
     } catch (error) {
-      throw new Error(
-        `Can't find strategy state "${this._strategyName}" \n${error}`
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to find strategy "%s" state ',
+        this._strategyName
       );
     }
   }
@@ -562,8 +747,25 @@ class Adviser {
       status: this._status,
       startedAt: this._startedAt,
       endedAt: this._endedAt,
-      initialized: this._initialized
+      initialized: this._initialized,
+      ".metadata": this._metadata
     };
+  }
+
+  /**
+   * Установка новых параметров
+   *
+   * @param {*} [updatedFields=this.updateRequested]
+   * @memberof Adviser
+   */
+  setUpdate(updatedFields = this._updateRequested) {
+    this.log(`setUpdate()`, updatedFields);
+    this._debug = updatedFields.debug || this._debug;
+    this._settings = updatedFields.settings || this._settings;
+    this._requiredHistoryCache =
+      updatedFields._requiredHistoryCache || this._requiredHistoryCache;
+    this._requiredHistoryMaxBars =
+      updatedFields._requiredHistoryMaxBars || this._requiredHistoryMaxBars;
   }
 
   /**
@@ -573,10 +775,25 @@ class Adviser {
    */
   async save() {
     this.log(`save()`);
-    // Сохраняем состояние в локальном хранилище
-    const result = await saveAdviserState(this._context, this.currentState);
-    if (!result.isSuccess)
-      throw new Error(`Can't update state\n${result.error}`);
+    try {
+      // Сохраняем состояние в локальном хранилище
+      await saveAdviserState(this.currentState);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "AdviserError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            eventSubject: this._eventSubject,
+            strategyName: this._strategyName
+          }
+        },
+        'Failed to update strategy "%s" state',
+        this._strategyName
+      );
+    }
   }
 
   /**
