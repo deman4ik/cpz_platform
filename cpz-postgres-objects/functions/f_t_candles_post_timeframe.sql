@@ -4,7 +4,8 @@ CREATE OR REPLACE FUNCTION f_t_candles_post_timeframe (
   nEXCHANGE   in bigint,
   sCURRENCY   in varchar,
   sASSET      in varchar,
-  dTIMESTAMP  in timestamp
+  dTIMESTAMP  in timestamp,
+  nFLAG_USE_START_TIME in int default 0 -- 0 - use end time, 1 - use start time
 )
 RETURNS integer
 LANGUAGE plpgsql
@@ -22,9 +23,19 @@ BEGIN
 
   end if;
 
-  if (to_char(dTIMESTAMP,'mi')::int)%nFRAME = 0 then
-    rC5.time_start := dTIMESTAMP - make_interval(mins => (nFRAME-1)); -- start from 1 min, for ex. 00:01-01:00, or 00:21-00:25
-    rC5.time_end   := dTIMESTAMP;
+  if nFLAG_USE_START_TIME = 0 and (to_char(dTIMESTAMP,'mi')::int)%nFRAME = 0 or      -- making interval on last minute
+     nFLAG_USE_START_TIME = 1 and (to_char(dTIMESTAMP + make_interval(mins => (1),'mi'))::int )%nFRAME = 0 then  -- making interval on last - 1 minute
+    
+    if nFLAG_USE_START_TIME = 0 then
+      rC5.time_start := dTIMESTAMP - make_interval(mins => (nFRAME-1)); -- start from 1 min, for ex. 00:01-01:00, or 00:21-00:25
+      rC5.time_end   := dTIMESTAMP; -- 01:00
+      rC5.timestamp  := rC5.time_end;
+    else
+      rC5.time_start := dTIMESTAMP - make_interval(mins => (nFRAME-1)); -- start from 00 min, for ex. 00:00-00:59, or 00:20-00:24
+      rC5.time_end   := dTIMESTAMP; -- 00:59
+      rC5.timestamp  := rC5.time_start;    
+    end if;
+    
     BEGIN
       select
           first_open,

@@ -19,6 +19,7 @@ CREATE TABLE candles5
     asset varchar(10) NOT NULL,
     exchange integer NOT NULL,
     gap integer NOT NULL,
+    "timestamp" timestamp,
     CONSTRAINT c_candle5_currency_fk FOREIGN KEY (currency) REFERENCES currency (code),
     CONSTRAINT c_candle5_assets_fk FOREIGN KEY (asset) REFERENCES assets (code),
     CONSTRAINT c_candle5_exchange_fk FOREIGN KEY (exchange) REFERENCES exchanges (id),
