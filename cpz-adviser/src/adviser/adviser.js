@@ -90,7 +90,7 @@ class Adviser {
     /* Признак выполнения инициализации */
     this._initialized = state.initialized || false;
     /* Метаданные стореджа */
-    this._metadata = state[".metadata"];
+    this._metadata = state.metadata;
 
     /* Запуск загрузки стратегии */
     this.loadStrategy();
@@ -748,7 +748,7 @@ class Adviser {
       startedAt: this._startedAt,
       endedAt: this._endedAt,
       initialized: this._initialized,
-      ".metadata": this._metadata
+      metadata: this._metadata
     };
   }
 

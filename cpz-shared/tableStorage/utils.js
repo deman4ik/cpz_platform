@@ -23,7 +23,7 @@ function entityToObject(entity) {
   const object = {};
   Object.keys(entity).forEach(key => {
     if (key === ".metadata") {
-      object[".metadata"] = entity[".metadata"];
+      object.metadata = entity[".metadata"];
     }
     const json = tryParseJSON(entity[key]._);
     if (json) {
@@ -46,7 +46,7 @@ function objectToEntity(object) {
     const element = object[key];
 
     if (typeof element === "object") {
-      if (key === ".metadata") {
+      if (key === "metadata") {
         entity[".metadata"] = element;
       } else if (element instanceof Date) {
         entity[key] = entityGenerator.DateTime(element);
