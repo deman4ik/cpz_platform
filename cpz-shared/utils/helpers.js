@@ -12,6 +12,19 @@ const getModeFromSubject = eventSubject => {
   }
 };
 
+const subjectToStr = eventSubject => {
+  const str = eventSubject.slice(-1);
+  switch (str) {
+    case "R":
+      return "R";
+    case "E":
+      return "E";
+    case "B":
+      return "B";
+    default:
+      return "R";
+  }
+};
 const modeToStr = mode => {
   switch (mode) {
     case "realtime":
@@ -26,4 +39,4 @@ const modeToStr = mode => {
   }
 };
 
-export { getModeFromSubject, modeToStr };
+export { getModeFromSubject, subjectToStr, modeToStr };

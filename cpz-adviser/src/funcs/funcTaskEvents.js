@@ -1,10 +1,19 @@
+import "babel-polyfill";
 import {
+  BASE_EVENT,
   SUB_VALIDATION_EVENT,
   TASKS_ADVISER_START_EVENT,
   TASKS_ADVISER_STOP_EVENT,
   TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
-import { handleStart, handleStop, handleUpdate } from "../adviser/handleEvents";
+import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import {
+  handleStart,
+  handleStop,
+  handleUpdate
+} from "../adviser/handleTaskEvents";
+
+const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
@@ -15,6 +24,8 @@ function eventHandler(context, req) {
     // TODO: SENDER ENDPOINT VALIDATION
     // check req.originalUrl
     parsedReq.forEach(eventGridEvent => {
+      // Валидация структуры события
+      genErrorIfExist(validateEvent(eventGridEvent));
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {

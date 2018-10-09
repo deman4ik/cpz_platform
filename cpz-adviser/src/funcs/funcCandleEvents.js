@@ -1,5 +1,13 @@
-import { SUB_VALIDATION_EVENT, CANDLES_NEWCANDLE_EVENT } from "cpzEventTypes";
-import { handleCandle } from "../adviser/handleEvents";
+import "babel-polyfill";
+import {
+  BASE_EVENT,
+  SUB_VALIDATION_EVENT,
+  CANDLES_NEWCANDLE_EVENT
+} from "cpzEventTypes";
+import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import handleCandle from "../adviser/handleCandleEvents";
+
+const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
@@ -9,6 +17,8 @@ function eventHandler(context, req) {
     );
     // TODO: SENDER ENDPOINT VALIDATION
     parsedReq.forEach(eventGridEvent => {
+      // Валидация структуры события
+      genErrorIfExist(validateEvent(eventGridEvent));
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {

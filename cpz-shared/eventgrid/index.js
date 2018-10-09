@@ -36,16 +36,16 @@ const topicsConfig = {
   log: {
     client: createClient(process.env.EG_LOG_KEY || process.env.EG_TEST_KEY),
     host: getHost(process.env.EG_LOG_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+  },
+  error: {
+    client: createClient(process.env.EG_LOG_KEY || process.env.EG_TEST_KEY),
+    host: getHost(process.env.EG_LOG_ENDPOINT || process.env.EG_TEST_ENDPOINT)
   }
 };
 
-const TOPICS = Object.keys(topicsConfig)
-  .map(key => ({ [key.toUpperCase()]: key }))
-  .reduce((p, n) => ({ ...p, ...n }), {});
-
 async function publishEvents(context, topic, eventData) {
   try {
-    let events;
+    let events = [];
     if (Array.isArray(eventData)) {
       events = eventData;
     } else {
@@ -83,4 +83,4 @@ async function publishEvents(context, topic, eventData) {
   }
 }
 
-export { TOPICS, publishEvents };
+export default publishEvents;

@@ -18,6 +18,7 @@ import {
   entityToObject,
   createAdviserSlug
 } from "cpzStorage/utils";
+import { modeToStr } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
@@ -41,7 +42,7 @@ async function saveAdviserState(state) {
           state.asset,
           state.currency,
           state.timeframe,
-          state.mode
+          modeToStr(state.mode)
         )
       ),
       RowKey: entityGenerator.String(state.taskId),

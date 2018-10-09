@@ -2,7 +2,6 @@ import { INDICATORS_BASE, INDICATORS_TULIP } from "cpzState";
 
 class BaseStrategy {
   constructor(state) {
-    this._context = state.context; // текущий контекст выполнения
     this._initialized = state.initialized || false; // стратегия инициализирована
     this._settings = state.settings;
     this._exchange = state.exchange;
@@ -21,7 +20,6 @@ class BaseStrategy {
     }
     if (state.strategyFunctions) {
       Object.getOwnPropertyNames(state.strategyFunctions).forEach(key => {
-        this._context.log(state.strategyFunctions[key]);
         this[key] = state.strategyFunctions[key];
       });
     }
@@ -42,7 +40,6 @@ class BaseStrategy {
           ];
         });
     });
-    this._context.log(this._indicators);
   }
 
   get handleCandle() {

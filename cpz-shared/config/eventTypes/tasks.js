@@ -441,9 +441,10 @@ const TASKS_ADVISER_START_EVENT = {
     debug: {
       description: "Debug mode.",
       type: "boolean",
-      empty: false
+      empty: false,
+      optional: true
     },
-    strategy: {
+    strategyName: {
       description: "Strategy file name.",
       type: "string",
       empty: false
@@ -457,7 +458,20 @@ const TASKS_ADVISER_START_EVENT = {
     },
     settings: {
       description: "Adviser parameters.",
-      type: "object"
+      type: "object",
+      optional: true
+    },
+    requiredHistoryCache: {
+      description: "Load history data from cache.",
+      type: "boolean",
+      optional: true,
+      default: true
+    },
+    requiredHistoryMaxBars: {
+      description: "Load history data from cache.",
+      type: "number",
+      integer: true,
+      optional: true
     }
   }
 };
@@ -501,13 +515,31 @@ const TASKS_ADVISER_UPDATE_EVENT = {
       type: "string",
       empty: false
     },
+    eventSubject: {
+      description: "Event subject.",
+      type: "string",
+      optional: true
+    },
     debug: {
       description: "Debug mode.",
-      type: "boolean"
+      type: "boolean",
+      optional: true
     },
     settings: {
       description: "Adviser parameters.",
-      type: "object"
+      type: "object",
+      optional: true
+    },
+    requiredHistoryCache: {
+      description: "Load history data from cache.",
+      type: "boolean",
+      optional: true
+    },
+    requiredHistoryMaxBars: {
+      description: "Load history data from cache.",
+      type: "number",
+      integer: true,
+      optional: true
     }
   }
 };

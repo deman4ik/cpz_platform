@@ -8,8 +8,12 @@ import {
   INDICATORS_BASE,
   INDICATORS_TULIP
 } from "cpzState";
-import { publishEvents, TOPICS } from "cpzEvents";
-import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
+import publishEvents from "cpzEvents";
+import {
+  SIGNALS_NEWSIGNAL_EVENT,
+  LOG_ADVISER_EVENT,
+  LOG_TOPIC
+} from "cpzEventTypes";
 import { modeToStr } from "cpzUtils/helpers";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
 import BaseStrategy from "./baseStrategy";
@@ -40,7 +44,7 @@ class Adviser {
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
     /* Режима дебага [true,false] */
-    this._debug = state.debug;
+    this._debug = state.debug || false;
     /* Объект настроек из веб-интерфейса */
     this._settings = state.settings || {};
     /* Код биржи */
@@ -59,15 +63,13 @@ class Adviser {
     this._requiredHistoryMaxBars =
       state.requiredHistoryMaxBars || REQUIRED_HISTORY_MAX_BARS;
     /* Состояне стратегии */
-    this._strategy = state.strategy || { variables: {} };
+    this._strategy = state.strategy || { variables: {}, initialized: false };
     /* Состояние индикаторов */
     this._indicators = state.indicators || {};
     /* Текущая свеча */
     this._candle = {};
     /* Последняя свеча */
     this._lastCandle = state.lastCandle || {};
-    /* Индикаторы */
-    this._indicators = state.indicators || {};
     /* Массив сигналов к отправке */
     this._signals = [];
     /* Массив последних сигналов */
@@ -161,10 +163,10 @@ class Adviser {
    */
   logEvent(data) {
     // Публикуем событие
-    publishEvents(this._context, TOPICS.LOG, {
+    publishEvents(this._context, LOG_TOPIC, {
       service: ADVISER_SERVICE,
       subject: this._eventSubject,
-      eventType: LOG_ADVISER_EVENT.eventType,
+      eventType: LOG_ADVISER_EVENT,
       data: {
         taskId: this._taskId,
         data
@@ -184,17 +186,14 @@ class Adviser {
       /* eslint-disable import/no-dynamic-require, global-require */
       const strategyObject = require(`../strategies/${this._strategyName}`);
       /* import/no-dynamic-require, global-require */
-      this._context.log(JSON.stringify(strategyObject));
       const strategyFunctions = {};
       Object.getOwnPropertyNames(strategyObject)
         .filter(key => typeof strategyObject[key] === "function")
         .forEach(key => {
           strategyFunctions[key] = strategyObject[key];
         });
-      this._context.log(strategyFunctions);
       // Создаем новый инстанс класса стратегии
       this._strategyInstance = new BaseStrategy({
-        context: this._context,
         initialized: this._strategy._initialized,
         settings: this._settings,
         exchange: this._exchange,
@@ -259,7 +258,6 @@ class Adviser {
                 });
               // Создаем новый инстанc базового индикатора
               this[`_ind${key}Instance`] = new BaseIndicator({
-                context: this._context,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
@@ -289,7 +287,6 @@ class Adviser {
             try {
               // Создаем новый инстанc индикатора Tulip
               this[`_ind${key}Instance`] = new TulipIndicatorClass({
-                context: this._context,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
@@ -384,6 +381,7 @@ class Adviser {
     this.log("initIndicators()");
     try {
       Object.keys(this._indicators).forEach(key => {
+        this.log(key);
         try {
           if (!this[`_ind${key}Instance`].initialized) {
             this[`_ind${key}Instance`].init();
@@ -508,7 +506,6 @@ class Adviser {
   async _loadCandles() {
     try {
       const result = await getCachedCandlesByKey(
-        this._context,
         `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
         this._requiredHistoryMaxBars
       );
@@ -567,7 +564,7 @@ class Adviser {
       // Обновить текущую свечу
       this._candle = candle;
       // Если  свеча уже обрабатывалась - выходим
-      if (this._candle === this._lastCandle) return;
+      if (this._candle.candleId === this._lastCandle.candleId) return;
       // Если нужна история
       if (this._requiredHistoryCache) {
         // Загрузить свечи из кеша
@@ -652,16 +649,19 @@ class Adviser {
    * @memberof Adviser
    */
   getIndicatorsState() {
+    this.log("getIndicatorsState()");
     try {
       Object.keys(this._indicators).forEach(ind => {
-        this._indicators[ind].initialized = this[`_${ind}Instance`].initialized;
-        this._indicators[ind].options = this[`_${ind}Instance`].options;
+        this._indicators[ind].initialized = this[
+          `_ind${ind}Instance`
+        ].initialized;
+        this._indicators[ind].options = this[`_ind${ind}Instance`].options;
         // Все свойства инстанса стратегии
-        Object.keys(this[`_${ind}Instance`])
+        Object.keys(this[`_ind${ind}Instance`])
           .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
           .forEach(key => {
-            if (typeof this[`_${ind}Instance`][key] !== "function")
-              this._indicators[ind].variables[key] = this[`_${ind}Instance`][
+            if (typeof this[`_ind${ind}Instance`][key] !== "function")
+              this._indicators[ind].variables[key] = this[`_ind${ind}Instance`][
                 key
               ]; // сохраняем каждое свойство
           });
@@ -723,7 +723,7 @@ class Adviser {
    * @returns {object}
    * @memberof Adviser
    */
-  get currentState() {
+  getCurrentState() {
     this.getIndicatorsState();
     this.getStrategyState();
     return {
@@ -777,7 +777,7 @@ class Adviser {
     this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
-      await saveAdviserState(this.currentState);
+      await saveAdviserState(this.getCurrentState());
     } catch (error) {
       throw new VError(
         {
@@ -804,14 +804,29 @@ class Adviser {
    * @memberof Adviser
    */
   async end(status, error) {
-    this.log(`end()`);
-    this._status = status;
-    this._error = error;
-    this._updateRequested = false; // Обнуляем запрос на обновление параметров
-    this._stopRequested = false; // Обнуляем запрос на остановку сервиса
-    this._lastSignals = this._signals;
-    this._lastCandle = this._candle;
-    await this.save();
+    try {
+      this.log(`end()`);
+      this._status = status;
+      this._error = error;
+      this._updateRequested = false; // Обнуляем запрос на обновление параметров
+      this._stopRequested = false; // Обнуляем запрос на остановку сервиса
+      this._lastSignals = this._signals;
+      this._lastCandle = this._candle;
+      await this.save();
+    } catch (err) {
+      if (err instanceof VError) {
+        throw err;
+      } else {
+        throw new VError(
+          {
+            name: "AdviserError",
+            cause: error
+          },
+          'Failed to end adviser execution for strategy "%s"',
+          this._strategyName
+        );
+      }
+    }
   }
 }
 

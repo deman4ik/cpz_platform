@@ -5,7 +5,8 @@ import {
   STATUS_BUSY,
   STATUS_ERROR
 } from "cpzState";
-import { TOPICS, publishEvents } from "cpzEvents";
+import publishEvents from "cpzEvents";
+import { SIGNALS_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import Adviser from "./adviser";
 /**
@@ -41,12 +42,12 @@ async function execute(context, state, candle) {
     // Если есть хотя бы одно событие для отправка
     if (adviser.events.length > 0) {
       // Отправляем
-      await publishEvents(context, TOPICS.SIGNALS, adviser.events);
+      await publishEvents(context, SIGNALS_TOPIC, adviser.events);
     }
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию
-    await adviser.logEvent(adviser.currentState);
+    await adviser.logEvent(adviser.getCurrentState());
     return;
   } catch (error) {
     const err = new VError(

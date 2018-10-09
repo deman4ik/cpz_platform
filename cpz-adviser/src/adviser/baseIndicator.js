@@ -1,6 +1,5 @@
 class BaseIndicator {
   constructor(state) {
-    this._context = state.context; // текущий контекст выполнения
     this._name = state.name;
     this._indicatorName = state.indicatorName;
     this._initialized = state.initialized || false; // индикатор инициализирован

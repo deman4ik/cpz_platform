@@ -1,45 +1,45 @@
 const BASE_EVENT = {
-  id: {
-    description: "An unique identifier for the event.",
-    type: "string",
-    empty: false
-  },
-  topic: {
-    description: "The resource path of the event source.",
-    type: "string",
-    empty: false
-  },
-  subject: {
-    description: "A resource path relative to the topic path.",
-    type: "string",
-    empty: false
-  },
-  data: {
-    description: "Event data specific to the event type.",
-    type: "object",
-    empty: false
-  },
-  eventType: {
-    description: "The type of the event that occurred.",
-    type: "string",
-    empty: false
-  },
-  eventTime: {
-    description: "The time (in UTC) the event was generated.",
-    format: "date-time",
-    type: "string",
-    empty: false
-  },
-  metadataVersion: {
-    description: "The schema version of the event metadata.",
-    readOnly: true,
-    type: "string",
-    empty: false
-  },
-  dataVersion: {
-    description: "The schema version of the data object.",
-    type: "string",
-    empty: false
+  dataSchema: {
+    id: {
+      description: "An unique identifier for the event.",
+      type: "string",
+      empty: false
+    },
+    topic: {
+      description: "The resource path of the event source.",
+      type: "string",
+      empty: false
+    },
+    subject: {
+      description: "A resource path relative to the topic path.",
+      type: "string",
+      empty: false
+    },
+    data: {
+      description: "Event data specific to the event type.",
+      type: "object",
+      empty: false
+    },
+    eventType: {
+      description: "The type of the event that occurred.",
+      type: "string",
+      empty: false
+    },
+    eventTime: {
+      description: "The time (in UTC) the event was generated.",
+      type: "string",
+      empty: false
+    },
+    metadataVersion: {
+      description: "The schema version of the event metadata.",
+      type: "string",
+      empty: false
+    },
+    dataVersion: {
+      description: "The schema version of the data object.",
+      type: "string",
+      empty: false
+    }
   }
 };
 const SUB_VALIDATION_EVENT = {

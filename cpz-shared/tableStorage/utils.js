@@ -1,5 +1,4 @@
 import { TableUtilities } from "azure-storage";
-import { modeToStr } from "cpzUtils/helpers";
 
 const { entityGenerator } = TableUtilities;
 
@@ -70,11 +69,10 @@ function createAdviserSlug(
   asset,
   currency,
   timeframe,
-  mode = "realtime"
+  modeStr = "R"
 ) {
-  if (mode === "realtime")
-    return `${exchange}.${asset}.${currency}.${timeframe}`;
-  return `${exchange}.${asset}.${currency}.${timeframe}.${modeToStr(mode)}`;
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
+  return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
 }
 
 export { tryParseJSON, entityToObject, objectToEntity, createAdviserSlug };

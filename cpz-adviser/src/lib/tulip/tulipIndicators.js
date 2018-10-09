@@ -1,4 +1,3 @@
-import VError from "verror";
 import BaseIndicator from "../../adviser/baseIndicator";
 import tulip from "./create";
 
