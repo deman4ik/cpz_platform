@@ -8,7 +8,8 @@ RUN apt-get update &&  \
 COPY . /home/site/wwwroot
 WORKDIR /home/site/wwwroot
 RUN npm install tulind --build-from-source && \
-    npm install --production && \
+    npm install && \
+    npm run webpack && \
     npm cache clean --force
 RUN apt-get remove -y git && \
     apt-get remove -y python2.7 && \
