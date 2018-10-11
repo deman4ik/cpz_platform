@@ -5,6 +5,7 @@ import { ADVISER_SERVICE } from "cpzServices";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
+  STATUS_FINISHED,
   INDICATORS_BASE,
   INDICATORS_TULIP
 } from "cpzState";
@@ -49,6 +50,8 @@ class Adviser {
     this._settings = state.settings || {};
     /* Код биржи */
     this._exchange = state.exchange;
+    /* Идентификатор биржи */
+    this._exchangeId = state.exchangeId;
     /* Базовая валюта */
     this._asset = state.asset;
     /* Котировка валюты */
@@ -85,8 +88,9 @@ class Adviser {
     /* Дата и время запуска */
     this._startedAt = state.startedAt || dayjs().toJSON();
     /* Дата и время остановки */
-    this._endedAt =
-      state.endedAt || this._status === STATUS_STOPPED ? dayjs().toJSON() : "";
+    this._endedAt = this._stopRequested
+      ? dayjs().toJSON()
+      : state.endedAt || "";
     /* Признак выполнения инициализации */
     this._initialized = state.initialized || false;
     /* Метаданные стореджа */
@@ -141,6 +145,8 @@ class Adviser {
    */
   set status(status) {
     if (status) this._status = status;
+    if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
+      this._endedAt = dayjs().toJSON();
   }
 
   /**
@@ -203,6 +209,7 @@ class Adviser {
         advice: this.advice.bind(this), // функция advise -> adviser.advise
         log: this.log.bind(this), // функция log -> advise.log
         logEvent: this.logEvent.bind(this), // функция logEvent -> advise.logEvent
+        // TODO: функция Error прекращает работу советника
         strategyFunctions, // функции стратегии
         ...this._strategy // предыдущий стейт стратегии
       });
@@ -584,6 +591,8 @@ class Adviser {
       this.runStrategy();
       // Обработанная свеча
       this._lastCandle = this._candle;
+      // Сгенерированные сигналы
+      this._lastSignals = this._signals;
     } catch (error) {
       throw new VError(
         {
@@ -639,7 +648,7 @@ class Adviser {
         ...signal
       }
     };
-
+    this._signals = [];
     this._signals.push(newSignal);
   }
 
@@ -691,7 +700,7 @@ class Adviser {
    */
   getStrategyState() {
     try {
-      this._strategy._initialized = this._strategyInstance.initialized;
+      this._strategy.initialized = this._strategyInstance.initialized;
       // Все свойства инстанса стратегии
       Object.keys(this._strategyInstance)
         .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
@@ -734,6 +743,7 @@ class Adviser {
       debug: this._debug,
       settings: this._settings,
       exchange: this._exchange,
+      exchangeId: this._exchangeId,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
@@ -810,8 +820,7 @@ class Adviser {
       this._error = error;
       this._updateRequested = false; // Обнуляем запрос на обновление параметров
       this._stopRequested = false; // Обнуляем запрос на остановку сервиса
-      this._lastSignals = this._signals;
-      this._lastCandle = this._candle;
+
       await this.save();
     } catch (err) {
       if (err instanceof VError) {

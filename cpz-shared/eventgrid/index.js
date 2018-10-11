@@ -63,6 +63,7 @@ async function publishEvents(context, topic, eventData) {
       events.push(newEvent);
     }
     const { client, host } = topicsConfig[topic];
+    // TODO: механизм retry
     await client.publishEvents(host, events);
   } catch (error) {
     const err = new VError(

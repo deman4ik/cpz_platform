@@ -48,6 +48,7 @@ async function execute(context, state, candle) {
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию
     await adviser.logEvent(adviser.getCurrentState());
+    //! TODO  Считывание и обработка Pending Candles
     return;
   } catch (error) {
     const err = new VError(

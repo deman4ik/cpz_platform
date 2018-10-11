@@ -13,7 +13,7 @@ import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { subjectToStr } from "cpzUtils/helpers";
-import { getAdvisersBySlug, savePendingCandles } from "../tableStorage";
+import { getAdvisersBySlug, savePendingCandle } from "../tableStorage";
 import execute from "./execute";
 
 const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
@@ -75,7 +75,7 @@ async function handleCandle(context, eventData) {
           taskId: state.taskId
         };
         try {
-          await savePendingCandles(newPendingCandle);
+          await savePendingCandle(newPendingCandle);
         } catch (error) {
           return {
             isSuccess: false,
@@ -107,7 +107,7 @@ async function handleCandle(context, eventData) {
           taskId: state.taskId
         };
         try {
-          await savePendingCandles(newPendingCandle);
+          await savePendingCandle(newPendingCandle);
         } catch (error) {
           return {
             isSuccess: false,

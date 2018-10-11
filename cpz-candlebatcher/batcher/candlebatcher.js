@@ -243,7 +243,7 @@ class Candlebatcher {
 
   async saveCandleToCache(candles) {
     const results = [];
-    candles.forEach(async candle => {
+    candles.map(async candle => {
       const result = await saveCandleToCache(this.context, candle.data);
       results.push(result);
     });
@@ -310,7 +310,7 @@ class Candlebatcher {
             subject: this.createSubject(currentTimeframe),
             eventType: CANDLES_NEW_CANDLE_EVENT,
             data: {
-              candleId: current.id,
+              id: current.id,
               exchange: this.exchange,
               asset: this.asset,
               currency: this.currency,

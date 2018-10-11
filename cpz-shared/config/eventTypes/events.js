@@ -42,6 +42,36 @@ const BASE_EVENT = {
     }
   }
 };
+
+const BASE_ERROR = {
+  type: "object",
+  description: "Error object if something goes wrong.",
+  optional: true,
+  props: {
+    name: {
+      description: "Error name.",
+      type: "string",
+      empty: false
+    },
+    message: {
+      description: "Error message.",
+      type: "string",
+      empty: false
+    },
+    info: {
+      description: "Error details.",
+      type: "object",
+      optional: true
+    },
+    stack: {
+      description: "Error stack.",
+      type: "string",
+      optional: true,
+      empty: false
+    }
+  }
+};
+
 const SUB_VALIDATION_EVENT = {
   eventType: "Microsoft.EventGrid.SubscriptionValidationEvent"
 };
@@ -80,6 +110,7 @@ const ERROR_TRADER_EVENT = {
 
 export {
   BASE_EVENT,
+  BASE_ERROR,
   SUB_VALIDATION_EVENT,
   LOG_ADVISER_EVENT,
   LOG_CANDLEBATCHER_EVENT,

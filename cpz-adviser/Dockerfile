@@ -10,6 +10,7 @@ WORKDIR /home/site/wwwroot
 RUN npm install tulind --build-from-source && \
     npm install && \
     npm run webpack && \
+    npm uninstall -D && \
     npm cache clean --force
 RUN apt-get remove -y git && \
     apt-get remove -y python2.7 && \

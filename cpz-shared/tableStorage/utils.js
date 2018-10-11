@@ -1,18 +1,8 @@
 import { TableUtilities } from "azure-storage";
+import { tryParseJSON } from "../utils/helpers";
 
 const { entityGenerator } = TableUtilities;
 
-function tryParseJSON(jsonString) {
-  try {
-    const o = JSON.parse(jsonString);
-    if (o && typeof o === "object") {
-      return o;
-    }
-  } catch (e) {
-    return false;
-  }
-  return false;
-}
 /**
  * Преобразовывает объект типа Azure Table Storage Entity в обычный объект JS
  *
@@ -75,4 +65,4 @@ function createAdviserSlug(
   return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
 }
 
-export { tryParseJSON, entityToObject, objectToEntity, createAdviserSlug };
+export { entityToObject, objectToEntity, createAdviserSlug };

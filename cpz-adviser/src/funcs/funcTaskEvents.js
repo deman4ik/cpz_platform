@@ -3,6 +3,7 @@ import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
   TASKS_ADVISER_START_EVENT,
+  TASKS_ADVISER_STARTBACKTEST_EVENT,
   TASKS_ADVISER_STOP_EVENT,
   TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
@@ -12,6 +13,7 @@ import {
   handleStop,
   handleUpdate
 } from "../adviser/handleTaskEvents";
+import handleBacktest from "../backtester/handleBacktestEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -53,6 +55,15 @@ function eventHandler(context, req) {
             )}`
           );
           handleStart(context, { eventSubject, ...eventData });
+          break;
+        }
+        case TASKS_ADVISER_STARTBACKTEST_EVENT.eventType: {
+          context.log.info(
+            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+              eventData
+            )}`
+          );
+          handleBacktest(context, { eventSubject, ...eventData });
           break;
         }
         case TASKS_ADVISER_STOP_EVENT.eventType: {

@@ -38,7 +38,8 @@ const config = {
       ),
       cpzStorage: path.resolve(__dirname, "../cpz-shared/tableStorage"),
       cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
-      cpzUtils: path.resolve(__dirname, "../cpz-shared/utils")
+      cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
+      cpzDB: path.resolve(__dirname, "../cpz-shared/db")
     }
   },
   output: {
