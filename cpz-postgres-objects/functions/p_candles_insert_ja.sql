@@ -56,6 +56,7 @@ BEGIN
 
 		rCANDLE.trades := null;
 		rCANDLE.vwp := null;
+    rCANDLE.timestamp := to_timestamp(rCANDLE.start);
 
 		if timeframe = 1 then
       insert into candles (
@@ -69,7 +70,8 @@ BEGIN
         vwp,
         currency,
         asset,
-        exchange
+        exchange,
+        timestamp
       ) values (
         rCANDLE.start,
         rCANDLE.open,
@@ -81,14 +83,14 @@ BEGIN
         rCANDLE.vwp,
         rCANDLE.currency,
         rCANDLE.asset,
-        rCANDLE.exchange
+        rCANDLE.exchange,
+        rCANDLE.timestamp
       )
       on conflict do nothing; -- both for uk and pk
 		end if;
 
-		if timeframe = 60 then
-			insert into candles60 (
-			start,
+    if timeframe = 5 then
+			insert into candles5 (
 			open,
 			high,
 			low,
@@ -98,9 +100,9 @@ BEGIN
 			vwp,
 			currency,
 			asset,
-			exchange
+			exchange,
+      timestamp
       ) values (
-        rCANDLE.start,
         rCANDLE.open,
         rCANDLE.high,
         rCANDLE.low,
@@ -110,7 +112,66 @@ BEGIN
         rCANDLE.vwp,
         rCANDLE.currency,
         rCANDLE.asset,
-        rCANDLE.exchange
+        rCANDLE.exchange,
+        rCANDLE.timestamp
+      )
+      on conflict do nothing; -- both for uk and pk
+		end if;
+
+    if timeframe = 30 then
+			insert into candles30 (
+			open,
+			high,
+			low,
+			close,
+			volume,
+			trades,
+			vwp,
+			currency,
+			asset,
+			exchange,
+      timestamp
+      ) values (
+        rCANDLE.open,
+        rCANDLE.high,
+        rCANDLE.low,
+        rCANDLE.close,
+        rCANDLE.volume,
+        rCANDLE.trades,
+        rCANDLE.vwp,
+        rCANDLE.currency,
+        rCANDLE.asset,
+        rCANDLE.exchange,
+        rCANDLE.timestamp
+      )
+      on conflict do nothing; -- both for uk and pk
+		end if;
+
+		if timeframe = 60 then
+			insert into candles60 (
+			open,
+			high,
+			low,
+			close,
+			volume,
+			trades,
+			vwp,
+			currency,
+			asset,
+			exchange,
+      timestamp
+      ) values (
+        rCANDLE.open,
+        rCANDLE.high,
+        rCANDLE.low,
+        rCANDLE.close,
+        rCANDLE.volume,
+        rCANDLE.trades,
+        rCANDLE.vwp,
+        rCANDLE.currency,
+        rCANDLE.asset,
+        rCANDLE.exchange,
+        rCANDLE.timestamp
       )
       on conflict do nothing; -- both for uk and pk
 		end if;
