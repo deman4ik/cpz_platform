@@ -1,22 +1,20 @@
-CREATE OR REPLACE FUNCTION "cpz-platform".p_candles_insert(
-	ntime integer,
-	nopen numeric,
-	nhigh numeric,
-	nlow numeric,
-	nclose numeric,
-	nvolume numeric,
-	ntrades integer,
-	nvwp numeric,
-	scurency character varying,
-	sasset character varying,
-	sexchange character varying)
-    RETURNS character varying
-    LANGUAGE 'plpgsql'
-
-    COST 100
-    VOLATILE 
-AS $BODY$
-
+create or replace function p_candles_insert(
+  ntime     in integer,
+  nopen     in numeric,
+  nhigh     in numeric,
+  nlow      in numeric,
+  nclose    in numeric,
+  nvolume   in numeric,
+  ntrades   in integer,
+  nvwp      in numeric,
+  scurency  in varchar,
+  sasset    in varchar,
+  sexchange in varchar,
+  nflag_mark_gaps in numeric default 0 -- use 1 to mark gaps as checked and do not return errors for gaps
+)
+  returns varchar
+language plpgsql
+as $$
 DECLARE
   nFRAME int;
   rCANDLE candles%ROWTYPE;
@@ -26,7 +24,7 @@ DECLARE
 BEGIN
   /* insert 1min candle
      check timeframe
-     select and returns json of frames candles
+     select and returns json of timeframed candles
 
      returns:
 
@@ -121,10 +119,10 @@ BEGIN
     if (to_char(rCANDLE.timestamp,'mi')::int)%nFRAME = 0 then
       BEGIN
         select row_to_json(t.*) into j_tmp from candles5 t
-        where time_end = rCANDLE.timestamp
-          and exchange = rCANDLE.exchange
-          and currency = rCANDLE.currency
-          and asset    = rCANDLE.asset;
+        where timestamp = rCANDLE.timestamp
+          and exchange  = rCANDLE.exchange
+          and currency  = rCANDLE.currency
+          and asset     = rCANDLE.asset;
 
         if j_tmp is null then
           --RAISE EXCEPTION '20101: timeframe % not found as it should be after trigger (%, %)', nFRAME, sEXCHANGE, rCANDLE.timestamp;
@@ -141,19 +139,26 @@ BEGIN
         end if;
 
         if (j_tmp->>'gap')::int != 0 then
-          j_tmp := json_build_object(
-              'numb', 20102,
-              'code', 'timeframe',
-              'type', nFRAME,
-              'start', rCANDLE.start-(nFRAME*60),
-              'end',   rCANDLE.start,
-              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
-          );
-          j:='{"error":'||j_tmp||'}';
-          RETURN j;
-        else
-          j:=j||', "timeframe5":'||j_tmp;
+          if nflag_mark_gaps = 0 then
+            j_tmp := json_build_object(
+                'numb', 20102,
+                'code', 'timeframe',
+                'type', nFRAME,
+                'start', rCANDLE.start-(nFRAME*60),
+                'end',   rCANDLE.start,
+                'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
+            );
+            j:='{"error":'||j_tmp||'}';
+            RETURN j;
+          else
+            update candles5 set gap = -1
+            where timestamp = rCANDLE.timestamp
+              and exchange  = rCANDLE.exchange
+              and currency  = rCANDLE.currency
+              and asset     = rCANDLE.asset;
+          end if;
         end if;
+        j:=j||', "timeframe5":'||j_tmp;
       /* row_to_json does not generate exception
       EXCEPTION
         WHEN NO_DATA_FOUND THEN*/
@@ -185,19 +190,26 @@ BEGIN
         end if;
 
         if (j_tmp->>'gap')::int != 0 then
-          j_tmp := json_build_object(
-              'numb', 20102,
-              'code', 'timeframe',
-              'type', nFRAME,
-              'start', rCANDLE.start-(nFRAME*60),
-              'end',   rCANDLE.start,
-              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
-          );
-          j:='{"error":'||j_tmp||'}';
-          RETURN j;
-        else
-            j:=j||', "timeframe30":'||j_tmp;
+          if nflag_mark_gaps = 0 then
+            j_tmp := json_build_object(
+                'numb', 20102,
+                'code', 'timeframe',
+                'type', nFRAME,
+                'start', rCANDLE.start-(nFRAME*60),
+                'end',   rCANDLE.start,
+                'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
+            );
+            j:='{"error":'||j_tmp||'}';
+            RETURN j;
+          else
+            update candles30 set gap = -1
+            where timestamp = rCANDLE.timestamp
+              and exchange  = rCANDLE.exchange
+              and currency  = rCANDLE.currency
+              and asset     = rCANDLE.asset;
+          end if;
         end if;
+        j:=j||', "timeframe30":'||j_tmp;
       END;
 
     end if;
@@ -226,19 +238,26 @@ BEGIN
         end if;
 
         if (j_tmp->>'gap')::int != 0 then
-          j_tmp := json_build_object(
-              'numb', 20102,
-              'code', 'timeframe',
-              'type', nFRAME,
-              'start', rCANDLE.start-(nFRAME*60),
-              'end',   rCANDLE.start,
-              'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
-          );
-          j:='{"error":'||j_tmp||'}';
-          RETURN j;
-        else
-          j:=j||', "timeframe60":'||j_tmp;
+          if nflag_mark_gaps = 0 then
+            j_tmp := json_build_object(
+                'numb', 20102,
+                'code', 'timeframe',
+                'type', nFRAME,
+                'start', rCANDLE.start-(nFRAME*60),
+                'end',   rCANDLE.start,
+                'descr', 'timeframe ' || nFRAME || ' has gaps on the interval'
+            );
+            j:='{"error":'||j_tmp||'}';
+            RETURN j;
+          else
+            update candles60 set gap = -1
+            where timestamp = rCANDLE.timestamp
+              and exchange  = rCANDLE.exchange
+              and currency  = rCANDLE.currency
+              and asset     = rCANDLE.asset;
+          end if;
         end if;
+        j:=j||', "timeframe60":'||j_tmp;
       END;
     end if;
 
@@ -249,4 +268,6 @@ BEGIN
   RETURN j;
 END;
 
-$BODY$;
+$$;
+
+
