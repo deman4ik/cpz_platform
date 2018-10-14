@@ -9,14 +9,17 @@ import publishEvents from "cpzEvents";
 import { SIGNALS_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import Adviser from "./adviser";
+import { getPendingCandlesByAdviserId, getAdviserByKey } from "../tableStorage";
+
 /**
  * Основная задача советника
  *
  * @param {*} context
  * @param {*} state
  * @param {*} candle
+ * @param {boolean} child признак вызовая функции повторно
  */
-async function execute(context, state, candle) {
+async function execute(context, state, candle, child = false) {
   context.log("execute");
   let adviser;
   try {
@@ -47,9 +50,16 @@ async function execute(context, state, candle) {
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);
     // Логируем итерацию
-    await adviser.logEvent(adviser.getCurrentState());
-    //! TODO  Считывание и обработка Pending Candles
-    return;
+    const currentState = adviser.getCurrentState();
+    await adviser.logEvent(currentState);
+    // Если это основной вызов
+    if (!child) {
+      // Проверяем ожидающие обработку свечи
+      await handlePendingCandles(context, {
+        partitionKey: state.PartitionKey,
+        rowKey: state.RowKey
+      });
+    }
   } catch (error) {
     const err = new VError(
       {
@@ -75,8 +85,21 @@ async function execute(context, state, candle) {
       // Сохраняем ошибку в сторедже
       await adviser.end(status, errorOutput);
     }
-    throw err;
   }
+}
+
+/**
+ * Обработка ожидающих обработки свечей
+ *
+ * @param {*} taskId
+ */
+async function handlePendingCandles(context, keys) {
+  // Считываем не обработанные свечи
+  const pendingCandles = getPendingCandlesByAdviserId(keys.rowKey);
+  pendingCandles.map(async pendingCandle => {
+    const adviserState = await getAdviserByKey(keys);
+    await execute(context, adviserState, pendingCandle, true);
+  });
 }
 
 export default execute;

@@ -12,7 +12,8 @@
         "import/prefer-default-export": "error",
         "no-console": "off",
         "no-param-reassign": "off",
-        "no-underscore-dangle": "off"
+        "no-underscore-dangle": "off",
+        "no-use-before-define": ["error", { "functions": false }]
     },
     "settings": {
         "import/resolver": "webpack"
