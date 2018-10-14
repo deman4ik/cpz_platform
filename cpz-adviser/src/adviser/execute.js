@@ -9,7 +9,11 @@ import publishEvents from "cpzEvents";
 import { SIGNALS_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import Adviser from "./adviser";
-import { getPendingCandlesByAdviserId, getAdviserByKey } from "../tableStorage";
+import {
+  getPendingCandlesByAdviserId,
+  getAdviserByKey,
+  deletePendingCandle
+} from "../tableStorage";
 
 /**
  * Основная задача советника
@@ -97,8 +101,12 @@ async function handlePendingCandles(context, keys) {
   // Считываем не обработанные свечи
   const pendingCandles = getPendingCandlesByAdviserId(keys.rowKey);
   pendingCandles.map(async pendingCandle => {
+    // Считываем текущее состояние советника
     const adviserState = await getAdviserByKey(keys);
+    // Начинаем обработку
     await execute(context, adviserState, pendingCandle, true);
+    // Удаляем свечу из очереди
+    await deletePendingCandle(pendingCandle);
   });
 }
 

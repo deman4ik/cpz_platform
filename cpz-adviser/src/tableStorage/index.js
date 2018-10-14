@@ -187,7 +187,7 @@ async function updateAdviserState(state) {
  * @param {*} candle
  * @returns
  */
-async function deletePendingCandles(candle) {
+async function deletePendingCandle(candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
@@ -372,7 +372,7 @@ export {
   saveBacktesterState,
   saveBacktesterItem,
   updateAdviserState,
-  deletePendingCandles,
+  deletePendingCandle,
   getAdviserByKey,
   getAdvisersBySlug,
   getCachedCandlesByKey,
