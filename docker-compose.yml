@@ -74,11 +74,11 @@ services:
       - API_KEY 
   cpz-trader:
     container_name: cpz-trader
-    build: ./cpz-trader/CpzTrader/
+    build: ./cpz-trader-net/CpzTrader/
     ports:
       - "8106:80"
     volumes:
-     - ./cpz-trader/CpzTrader/:/cpz-trader/CpzTrader/
+     - ./cpz-trader-net/CpzTrader/:/cpz-trader-net/CpzTrader/
     environment:     
     - AZ_STORAGE_CS
     - API_KEY
@@ -111,11 +111,4 @@ services:
   #   links:
   #     - "nginx"
   #   environment:
-  #     - NGROK_PORT=nginx:80    
-  # storage-emulator:
-  #   container_name: storage-emulator
-  #   ports:
-  #     - "10000:10000"
-  #     - "10001:10001"
-  #     - "10002:10002"
-  #   image: microsoft/azure-storage-emulator  
+  #     - NGROK_PORT=nginx:80
