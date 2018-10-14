@@ -67,8 +67,13 @@ async function execute(context, state, candle) {
     context.log.error(errorOutput.message, errorOutput);
     // Если есть экземпляр класса
     if (adviser) {
-      // Сохраняем ошибку в сторедже и продолжаем работу
-      await adviser.end(STATUS_STARTED, errorOutput);
+      // По умолчанию продолжаем работу после ошибки
+      let status = STATUS_STARTED;
+      // Если была аварийная остановка - устанавливаем статус ошибка
+      if (VError.hasCauseWithName(err, "AdviserCrachError"))
+        status = STATUS_ERROR;
+      // Сохраняем ошибку в сторедже
+      await adviser.end(status, errorOutput);
     }
     throw err;
   }

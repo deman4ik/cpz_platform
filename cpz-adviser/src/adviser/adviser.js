@@ -181,6 +181,24 @@ class Adviser {
   }
 
   /**
+   * Аварийная остановка советника
+   *
+   * @param {*} msg
+   * @memberof Adviser
+   */
+  crash(msg) {
+    this.log("crash()");
+    throw new VError(
+      {
+        name: "AdviserCrachError"
+      },
+      'Error while executing strategy "%s" - "%d"',
+      this._strategyName,
+      msg
+    );
+  }
+
+  /**
    * Загрузка стратегии
    *
    * @memberof Adviser
@@ -209,7 +227,7 @@ class Adviser {
         advice: this.advice.bind(this), // функция advise -> adviser.advise
         log: this.log.bind(this), // функция log -> advise.log
         logEvent: this.logEvent.bind(this), // функция logEvent -> advise.logEvent
-        // TODO: функция Error прекращает работу советника
+        crash: this.crash.bind(this), // функция crash -> adviser.crash
         strategyFunctions, // функции стратегии
         ...this._strategy // предыдущий стейт стратегии
       });

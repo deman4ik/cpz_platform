@@ -13,6 +13,7 @@ class BaseStrategy {
     this._advice = state.advice; // Генерация события NewSignal
     this._log = state.log; // Функция логирования в консоль
     this._logEvent = state.logEvent; // Функция логирования в EventGrid в топик CPZ-LOGS
+    this._crash = state.crash; // Функция аварийной остановка советника
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -115,6 +116,10 @@ class BaseStrategy {
 
   get logEvent() {
     return this._logEvent;
+  }
+
+  get crash() {
+    return this._crash;
   }
 }
 
