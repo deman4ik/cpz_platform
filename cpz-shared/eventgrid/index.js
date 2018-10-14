@@ -7,6 +7,7 @@ import url from "url";
 import { v4 as uuid } from "uuid";
 import VError from "verror";
 import { createErrorOutput } from "../utils/error";
+import retry from "../utils/retry";
 
 function createClient(key) {
   return new EventGrid(new msRestAzure.TopicCredentials(key));
@@ -63,8 +64,16 @@ async function publishEvents(context, topic, eventData) {
       events.push(newEvent);
     }
     const { client, host } = topicsConfig[topic];
-    // TODO: механизм retry
-    await client.publishEvents(host, events);
+    await retry(
+      async () => {
+        await client.publishEvents(host, events);
+      },
+      {
+        retries: 2,
+        minTimeout: 200,
+        maxTimeout: 1000
+      }
+    );
   } catch (error) {
     const err = new VError(
       {
