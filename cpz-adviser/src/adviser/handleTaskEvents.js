@@ -91,15 +91,11 @@ async function handleStop(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
-    // Ищем советника по уникальному ключу
-    const getAdviserResult = await getAdviserByKey({
+    // Запрашиваем текущее состояние советника по уникальному ключу
+    const adviserState = await getAdviserByKey({
       rowKey: eventData.rowKey,
       partitionKey: eventData.partitionKey
     });
-    // Если ошибка - генерируем исключение
-    if (!getAdviserResult.isSuccess) throw getAdviserResult;
-    // Текущее состояние советника
-    const adviserState = getAdviserResult.data;
     // Генерируем новое состояние
     const newState = {
       RowKey: eventData.rowKey,
@@ -115,10 +111,7 @@ async function handleStop(context, eventData) {
       newState.endedAt = dayjs().toJSON();
     }
     // Обновляем состояние советника
-    const result = await updateAdviserState(newState);
-    // Если ошибка - генерируем исключение
-    if (!result.isSuccess)
-      throw new Error(`Can't update state\n${result.error}`);
+    await updateAdviserState(newState);
     // Публикуем событие - успех
     await publishEvents(context, TASKS_TOPIC, {
       service: ADVISER_SERVICE,
@@ -164,44 +157,38 @@ async function handleUpdate(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUpdate(eventData));
-    const getCandlebatcherResult = await getAdviserByKey(eventData);
-    if (getCandlebatcherResult.isSuccess) {
-      const candlebatcherState = getCandlebatcherResult.data;
-      const newState = {
-        RowKey: eventData.rowKey,
-        PartitionKey: eventData.partitionKey
+    const candlebatcherState = await getAdviserByKey(eventData);
+    const newState = {
+      RowKey: eventData.rowKey,
+      PartitionKey: eventData.partitionKey
+    };
+    // Если занят
+    if (candlebatcherState.status === STATUS_BUSY) {
+      newState.updateRequested = {
+        eventSubject: eventData.eventSubject,
+        debug: eventData.debug,
+        settings: eventData.settings,
+        requiredHistoryCache: eventData.requiredHistoryCache,
+        requiredHistoryMaxBars: eventData.requiredHistoryMaxBars
       };
-      // Если занят
-      if (candlebatcherState.status === STATUS_BUSY) {
-        newState.updateRequested = {
-          eventSubject: eventData.eventSubject,
-          debug: eventData.debug,
-          settings: eventData.settings,
-          requiredHistoryCache: eventData.requiredHistoryCache,
-          requiredHistoryMaxBars: eventData.requiredHistoryMaxBars
-        };
-      } else {
-        newState.eventSubject = eventData.eventSubject;
-        newState.debug = eventData.debug;
-        newState.settings = eventData.settings;
-        newState.requiredHistoryCache = eventData.requiredHistoryCache;
-        newState.requiredHistoryMaxBars = eventData.requiredHistoryMaxBars;
-      }
-      const result = await updateAdviserState(newState);
-      if (!result.isSuccess)
-        throw new Error(`Can't update state\n${result.error}`);
-      // Публикуем событие - успех
-      await publishEvents(context, TASKS_TOPIC, {
-        service: ADVISER_SERVICE,
-        subject: eventData.eventSubject,
-        eventType: TASKS_ADVISER_UPDATED_EVENT,
-        data: {
-          taskId: eventData.taskId
-        }
-      });
     } else {
-      throw getCandlebatcherResult;
+      newState.eventSubject = eventData.eventSubject;
+      newState.debug = eventData.debug;
+      newState.settings = eventData.settings;
+      newState.requiredHistoryCache = eventData.requiredHistoryCache;
+      newState.requiredHistoryMaxBars = eventData.requiredHistoryMaxBars;
     }
+    await updateAdviserState(newState);
+
+    // Публикуем событие - успех
+    await publishEvents(context, TASKS_TOPIC, {
+      service: ADVISER_SERVICE,
+      subject: eventData.eventSubject,
+      eventType: TASKS_ADVISER_UPDATED_EVENT,
+      data: {
+        taskId: eventData.taskId
+      }
+    });
   } catch (error) {
     const errorOutput = createErrorOutput(
       new VError(

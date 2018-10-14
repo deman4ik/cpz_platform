@@ -1,6 +1,7 @@
 // TODO: Move to https://github.com/Azure/azure-storage-js when available
 import azure from "azure-storage";
 import VError from "verror";
+import { entityToObject } from "./utils";
 
 const tableService = azure.createTableService(process.env.AZ_STORAGE_CS);
 /**
@@ -168,7 +169,7 @@ function queryEntities(tableName, tableQuery) {
         reject(
           new VError(
             {
-              name: err.name,
+              name: error.name,
               cause: error,
               info: {
                 tableName,
@@ -179,8 +180,13 @@ function queryEntities(tableName, tableQuery) {
             tableName
           )
         );
-
-      resolve(result);
+      const entities = [];
+      if (result) {
+        result.entries.forEach(element => {
+          entities.push(entityToObject(element));
+        });
+      }
+      resolve(entities);
     });
   });
 }

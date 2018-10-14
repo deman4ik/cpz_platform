@@ -530,12 +530,12 @@ class Adviser {
    */
   async _loadCandles() {
     try {
-      const result = await getCachedCandlesByKey(
+      const cachedCandles = await getCachedCandlesByKey(
         `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
         this._requiredHistoryMaxBars
       );
 
-      this._candles = result.data.reverse();
+      this._candles = cachedCandles.reverse();
     } catch (error) {
       throw new VError(
         {

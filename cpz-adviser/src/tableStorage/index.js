@@ -16,11 +16,7 @@ import {
   deleteEntity,
   queryEntities
 } from "cpzStorage/storage";
-import {
-  objectToEntity,
-  entityToObject,
-  createAdviserSlug
-} from "cpzStorage/utils";
+import { objectToEntity, createAdviserSlug } from "cpzStorage/utils";
 import { modeToStr, generateKey } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
@@ -239,14 +235,7 @@ async function getAdviserByKey(keys) {
         partitionKeyFilter
       )
     );
-    const result = await queryEntities(STORAGE_ADVISERS_TABLE, query);
-    const entities = [];
-    if (result) {
-      result.entries.forEach(element => {
-        entities.push(entityToObject(element));
-      });
-    }
-    return { data: entities[0] };
+    return await queryEntities(STORAGE_ADVISERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -298,14 +287,7 @@ async function getAdvisersBySlug(slug) {
         statusFilter
       )
     );
-    const result = await queryEntities(STORAGE_ADVISERS_TABLE, query);
-    const entities = [];
-    if (result) {
-      result.entries.forEach(element => {
-        entities.push(entityToObject(element));
-      });
-    }
-    return { data: entities };
+    return await queryEntities(STORAGE_ADVISERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -338,14 +320,7 @@ async function getCachedCandlesByKey(key, limit) {
         )
       )
       .top(limit);
-    const result = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
-    const entities = [];
-    if (result) {
-      result.entries.forEach(element => {
-        entities.push(entityToObject(element));
-      });
-    }
-    return { data: entities };
+    return await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -376,14 +351,7 @@ async function getPendingCandlesByAdviserId(id) {
         id
       )
     );
-    const result = await queryEntities(STORAGE_CANDLESPENDING_TABLE, query);
-    const entities = [];
-    if (result) {
-      result.entries.forEach(element => {
-        entities.push(entityToObject(element));
-      });
-    }
-    return { data: entities };
+    return await queryEntities(STORAGE_CANDLESPENDING_TABLE, query);
   } catch (error) {
     throw new VError(
       {

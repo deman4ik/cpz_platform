@@ -40,9 +40,7 @@ async function handleCandle(context, eventData) {
     );
     context.log(slug);
     // Ищем подходящих советников
-    const getAdvisersResult = await getAdvisersBySlug(slug);
-    // Все подходящие советники
-    const advisers = getAdvisersResult.data;
+    const advisers = await getAdvisersBySlug(slug);
     // Фильтруем только доступные советники
     const startedAdvisers = advisers.filter(
       adviser => adviser.status === STATUS_STARTED
