@@ -650,7 +650,7 @@ class Adviser {
   advice(signal) {
     this.log("advice()");
     const newSignal = {
-      id: uuid(),
+      signalId: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._createSubject(),
@@ -783,17 +783,18 @@ class Adviser {
   /**
    * Установка новых параметров
    *
-   * @param {*} [updatedFields=this.updateRequested]
+   * @param {object} [updatedFields=this._updateRequested]
    * @memberof Adviser
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setUpdate()`, updatedFields);
+    this._eventSubject = updatedFields.eventSubject || this._eventSubject;
     this._debug = updatedFields.debug || this._debug;
     this._settings = updatedFields.settings || this._settings;
     this._requiredHistoryCache =
-      updatedFields._requiredHistoryCache || this._requiredHistoryCache;
+      updatedFields.requiredHistoryCache || this._requiredHistoryCache;
     this._requiredHistoryMaxBars =
-      updatedFields._requiredHistoryMaxBars || this._requiredHistoryMaxBars;
+      updatedFields.requiredHistoryMaxBars || this._requiredHistoryMaxBars;
   }
 
   /**

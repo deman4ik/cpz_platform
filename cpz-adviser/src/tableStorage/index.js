@@ -109,7 +109,7 @@ async function savePendingCandle(candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
-      RowKey: entityGenerator.String(candle.id.toString()),
+      RowKey: entityGenerator.String(candle.candleId.toString()),
       ...objectToEntity(candle)
     };
     await insertOrMergeEntity(STORAGE_CANDLESPENDING_TABLE, entity);
@@ -191,7 +191,7 @@ async function deletePendingCandle(candle) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
-      RowKey: entityGenerator.String(candle.id.toString()),
+      RowKey: entityGenerator.String(candle.candleId.toString()),
       ...objectToEntity(candle)
     };
     await deleteEntity(STORAGE_CANDLESPENDING_TABLE, entity);

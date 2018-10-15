@@ -157,13 +157,13 @@ async function handleUpdate(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUpdate(eventData));
-    const candlebatcherState = await getAdviserByKey(eventData);
+    const adviserState = await getAdviserByKey(eventData);
     const newState = {
       RowKey: eventData.rowKey,
       PartitionKey: eventData.partitionKey
     };
     // Если занят
-    if (candlebatcherState.status === STATUS_BUSY) {
+    if (adviserState.status === STATUS_BUSY) {
       newState.updateRequested = {
         eventSubject: eventData.eventSubject,
         debug: eventData.debug,

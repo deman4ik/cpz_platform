@@ -3,7 +3,7 @@ import {
   ERROR_ADVISER_EVENT,
   CANDLES_NEWCANDLE_EVENT,
   CANDLES_HANDLED_EVENT,
-  TASKS_TOPIC,
+  CANDLES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
@@ -131,7 +131,7 @@ async function handleCandle(context, eventData) {
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(context, CANDLES_TOPIC, {
       service: ADVISER_SERVICE,
       subject: `${candle.exchange}/${candle.asset}/${candle.currency}/${
         candle.timeframe
@@ -165,7 +165,7 @@ async function handleCandle(context, eventData) {
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,
       data: {
-        candleId: eventData.candle.id,
+        candleId: eventData.candle.candleId,
         error: errorOutput
       }
     });
