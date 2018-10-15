@@ -1,0 +1,18 @@
+const TRADE_ACTION_LONG = "long";
+const TRADE_ACTION_CLOSE_LONG = "closeLong";
+const TRADE_ACTION_SHORT = "short";
+const TRADE_ACTION_CLOSE_SHORT = "closeShort";
+
+const ORDER_TYPE_LIMIT = "limit";
+const ORDER_TYPE_MARKET = "market";
+const ORDER_TYPE_STOP = "stop";
+
+export {
+  TRADE_ACTION_LONG,
+  TRADE_ACTION_CLOSE_LONG,
+  TRADE_ACTION_SHORT,
+  TRADE_ACTION_CLOSE_SHORT,
+  ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
+  ORDER_TYPE_STOP
+};

@@ -1,5 +1,8 @@
+import { BASE_ERROR } from "./events";
+
 const SIGNALS_NEWSIGNAL_EVENT = {
   eventType: "CPZ.Signals.NewSignal",
+
   dataSchema: {
     signalId: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "string", empty: false },
@@ -73,8 +76,8 @@ const SIGNALS_NEWSIGNAL_EVENT = {
           description: "Price Slippage Step.",
           type: "number"
         },
-        volume: {
-          description: "User trade volume",
+        deviation: {
+          description: "Price deviation",
           type: "number"
         }
       },
@@ -84,6 +87,7 @@ const SIGNALS_NEWSIGNAL_EVENT = {
 };
 const SIGNALS_HANDLED_EVENT = {
   eventType: "CPZ.Signals.Handled",
+
   dataSchema: {
     signalId: { description: "Uniq Signal Id.", type: "string", empty: false },
     service: {
@@ -91,42 +95,36 @@ const SIGNALS_HANDLED_EVENT = {
       type: "string",
       values: ["trader"]
     },
-    successTraders: {
-      description: "Success Traders execution list",
+    success: {
+      description: "Success execution list",
       type: "array",
       items: "string"
     },
-    errorTraders: {
-      description: "Error Traders execution list",
+    error: {
+      description: "Error execution list",
       type: "array",
       items: {
         type: "object",
         props: {
           taskId: { type: "string", empty: false },
-          error: {
-            type: "object",
-            description: "Error object if something goes wrong.",
-            props: {
-              code: {
-                description: "Error code.",
-                type: "string",
-                empty: false
-              },
-              message: {
-                description: "Error message.",
-                type: "string",
-                empty: false
-              },
-              detail: {
-                description: "Error detail.",
-                type: "string",
-                optional: true,
-                empty: false
-              }
-            },
-            optional: true
-          }
+          error: BASE_ERROR
         }
+      }
+    }
+  },
+  successPending: {
+    description: "Success queued list",
+    type: "array",
+    items: "string"
+  },
+  errorPending: {
+    description: "Error queued list",
+    type: "array",
+    items: {
+      type: "object",
+      props: {
+        taskId: { type: "string", empty: false },
+        error: BASE_ERROR
       }
     }
   }

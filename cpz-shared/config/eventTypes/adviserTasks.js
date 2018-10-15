@@ -139,6 +139,7 @@ const TASKS_ADVISER_STOP_EVENT = {
     }
   }
 };
+
 const TASKS_ADVISER_UPDATE_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Update",
 

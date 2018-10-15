@@ -1,8 +1,10 @@
+import { BASE_ERROR } from "./events";
+
 const CANDLES_NEWCANDLE_EVENT = {
   eventType: "CPZ.Candles.NewCandle",
 
   dataSchema: {
-    id: { description: "Uniq Candle Id.", type: "string", empty: false },
+    candleId: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },
@@ -40,29 +42,7 @@ const CANDLES_HANDLED_EVENT = {
         type: "object",
         props: {
           taskId: { type: "string", empty: false },
-          error: {
-            type: "object",
-            description: "Error object if something goes wrong.",
-            props: {
-              code: {
-                description: "Error code.",
-                type: "string",
-                empty: false
-              },
-              message: {
-                description: "Error message.",
-                type: "string",
-                empty: false
-              },
-              detail: {
-                description: "Error detail.",
-                type: "string",
-                optional: true,
-                empty: false
-              }
-            },
-            optional: true
-          }
+          error: BASE_ERROR
         }
       }
     }
@@ -79,29 +59,7 @@ const CANDLES_HANDLED_EVENT = {
       type: "object",
       props: {
         taskId: { type: "string", empty: false },
-        error: {
-          type: "object",
-          description: "Error object if something goes wrong.",
-          props: {
-            code: {
-              description: "Error code.",
-              type: "string",
-              empty: false
-            },
-            message: {
-              description: "Error message.",
-              type: "string",
-              empty: false
-            },
-            detail: {
-              description: "Error detail.",
-              type: "string",
-              optional: true,
-              empty: false
-            }
-          },
-          optional: true
-        }
+        error: BASE_ERROR
       }
     }
   }

@@ -1,3 +1,3 @@
 const ADVISER_SERVICE = "adviser";
-
-export { ADVISER_SERVICE };
+const TRADER_SERVICE = "trader";
+export { ADVISER_SERVICE, TRADER_SERVICE };

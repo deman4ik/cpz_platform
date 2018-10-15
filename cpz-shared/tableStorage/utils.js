@@ -65,4 +65,9 @@ function createAdviserSlug(
   return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
 }
 
-export { entityToObject, objectToEntity, createAdviserSlug };
+function createTraderSlug(exchange, asset, currency, timeframe, modeStr = "R") {
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
+  return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
+}
+
+export { entityToObject, objectToEntity, createAdviserSlug, createTraderSlug };
