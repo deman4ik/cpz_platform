@@ -190,7 +190,7 @@ class Adviser {
     this.log("crash()");
     throw new VError(
       {
-        name: "AdviserCrachError"
+        name: "AdviserCrashError"
       },
       'Error while executing strategy "%s" - "%d"',
       this._strategyName,

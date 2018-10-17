@@ -25,11 +25,11 @@ const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
  */
 async function handleCandle(context, eventData) {
   try {
-    const { eventSubject, candle } = eventData;
-    const modeStr = subjectToStr(eventSubject);
-    context.log(modeStr);
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(eventData.candle));
+    const { eventSubject, candle } = eventData;
+    const modeStr = subjectToStr(eventSubject);
+
     // Параметры запроса - биржа + инструмент + таймфрейм
     const slug = createAdviserSlug(
       candle.exchange,

@@ -84,7 +84,7 @@ async function execute(context, state, candle, child = false) {
       // По умолчанию продолжаем работу после ошибки
       let status = STATUS_STARTED;
       // Если была аварийная остановка - устанавливаем статус ошибка
-      if (VError.hasCauseWithName(err, "AdviserCrachError"))
+      if (VError.hasCauseWithName(err, "AdviserCrashError"))
         status = STATUS_ERROR;
       // Сохраняем ошибку в сторедже
       await adviser.end(status, errorOutput);
