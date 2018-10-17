@@ -45,7 +45,7 @@ function eventHandler(context, req) {
               eventData
             )}`
           );
-          handleTick(context, { eventSubject, candle: eventData });
+          handleTick(context, { eventSubject, tick: eventData });
           break;
         }
         default: {

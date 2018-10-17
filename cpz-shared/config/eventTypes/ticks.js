@@ -16,6 +16,11 @@ const TICKS_NEWTICK_EVENT = {
       empty: false
     },
     time: { description: "Trade time in seconds.", type: "number" },
+    timestamp: {
+      description: "Trade timestamp in UTC.",
+      type: "datetime",
+      optinal: true // TODO: remove after altering candlebatcher
+    },
     volume: { description: "Trade Volume.", type: "number" },
     price: { description: "Trade Price.", type: "number" }
   }

@@ -26,6 +26,11 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       description: "Signal time in seconds.",
       type: "number"
     },
+    timestamp: {
+      description: "Signal timestamp in UTC.",
+      type: "datetime",
+      optinal: true // TODO: remove after altering adviser
+    },
     action: {
       description: "Signal type.",
       type: "string",

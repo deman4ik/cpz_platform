@@ -5,17 +5,23 @@ const STATUS_STOPPED = "stopped";
 const STATUS_ERROR = "error";
 const STATUS_FINISHED = "finished";
 
-const POSITION_OPENING = "opening";
-const POSITION_OPEN = "open";
-const POSITION_CLOSING = "closing";
-const POSITION_CLOSE = "close";
-const POSITION_CANCELED = "canceled";
+const POS_STATUS_NONE = "none";
+const POS_STATUS_ACTIVE = "active";
+const POS_STATUS_POSTED = "posted";
+const POS_STATUS_CANCELED = "canceled";
+const POS_STATUS_ERROR = "error";
+const POS_STATUS_PENDING = "pending";
 
-const ORDER_OPEN = "open";
-const ORDER_CLOSED = "closed";
-const ORDER_POSTED = "posted";
-const ORDER_CANCELED = "canceled";
-const ORDER_ERROR = "error";
+const ORDER_STATUS_PENDING = "pending";
+const ORDER_STATUS_OPEN = "open";
+const ORDER_STATUS_CLOSED = "closed";
+const ORDER_STATUS_POSTED = "posted";
+const ORDER_STATUS_CANCELED = "canceled";
+const ORDER_STATUS_ERROR = "error";
+
+const ORDER_TASK_OPENBYMARKET = "openByMarket";
+const ORDER_TASK_SETLIMIT = "setLimit";
+const ORDER_TASK_CHECKLIMIT = "checkLimit";
 
 export {
   STATUS_BUSY,
@@ -24,14 +30,19 @@ export {
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STOPPED,
-  POSITION_OPENING,
-  POSITION_OPEN,
-  POSITION_CLOSING,
-  POSITION_CLOSE,
-  POSITION_CANCELED,
-  ORDER_OPEN,
-  ORDER_CLOSED,
-  ORDER_POSTED,
-  ORDER_CANCELED,
-  ORDER_ERROR
+  POS_STATUS_NONE,
+  POS_STATUS_ACTIVE,
+  POS_STATUS_POSTED,
+  POS_STATUS_CANCELED,
+  POS_STATUS_ERROR,
+  POS_STATUS_PENDING,
+  ORDER_STATUS_PENDING,
+  ORDER_STATUS_OPEN,
+  ORDER_STATUS_CLOSED,
+  ORDER_STATUS_POSTED,
+  ORDER_STATUS_CANCELED,
+  ORDER_STATUS_ERROR,
+  ORDER_TASK_OPENBYMARKET,
+  ORDER_TASK_SETLIMIT,
+  ORDER_TASK_CHECKLIMIT
 };

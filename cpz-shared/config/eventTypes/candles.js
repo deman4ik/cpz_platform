@@ -13,6 +13,11 @@ const CANDLES_NEWCANDLE_EVENT = {
       type: "number"
     },
     time: { description: "Candle time in seconds.", type: "number" },
+    timestamp: {
+      description: "Candle timestamp in UTC.",
+      type: "datetime",
+      optinal: true // TODO: remove after altering candlebatcher
+    },
     open: { description: "Candle Open Price.", type: "number" },
     close: { description: "Candle Close Price.", type: "number" },
     high: { description: "Candle Highest Price.", type: "number" },

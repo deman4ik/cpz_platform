@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import { REALTIME_MODE, EMULATOR_MODE, BACKTEST_MODE } from "../config/state";
 
 function tryParseJSON(jsonString) {
   try {
@@ -16,13 +17,13 @@ function getModeFromSubject(eventSubject) {
   const str = eventSubject.slice(-1);
   switch (str) {
     case "R":
-      return "realtime";
+      return REALTIME_MODE;
     case "E":
-      return "emulator";
+      return EMULATOR_MODE;
     case "B":
-      return "backtest";
+      return BACKTEST_MODE;
     default:
-      return "realtime";
+      return REALTIME_MODE;
   }
 }
 
@@ -41,11 +42,11 @@ function subjectToStr(eventSubject) {
 }
 function modeToStr(mode) {
   switch (mode) {
-    case "realtime":
+    case REALTIME_MODE:
       return "R";
-    case "emulator":
+    case EMULATOR_MODE:
       return "E";
-    case "backtest":
+    case BACKTEST_MODE:
       return "B";
 
     default:

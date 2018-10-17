@@ -1,23 +1,44 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 import VError from "verror";
+import { createErrorOutput } from "cpzUtils/error";
 import { TRADER_SERVICE } from "cpzServices";
 import {
+  REALTIME_MODE,
+  EMULATOR_MODE,
+  BACKTEST_MODE,
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED,
+  POS_STATUS_ACTIVE,
+  POS_STATUS_POSTED,
+  POS_STATUS_CANCELED,
+  POS_STATUS_ERROR,
+  POS_STATUS_PENDING,
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_SHORT,
   ORDER_TYPE_MARKET,
-  ORDER_CLOSED,
-  ORDER_OPEN
+  ORDER_STATUS_CLOSED,
+  ORDER_STATUS_OPEN,
+  ORDER_STATUS_POSTED,
+  ORDER_TYPE_LIMIT,
+  ORDER_TASK_OPENBYMARKET,
+  ORDER_TASK_SETLIMIT,
+  ORDER_TASK_CHECKLIMIT,
+  ORDER_POS_DIR_OPEN,
+  ORDER_POS_DIR_CLOSE
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { modeToStr } from "cpzUtils/helpers";
-import { saveTraderState } from "../tableStorage";
+import { createTraderSlug } from "cpzStorage/utils";
+import {
+  saveTraderState,
+  getPositonByKey,
+  getPendingSignalsBySlugAndTraderId
+} from "../tableStorage";
 import Position from "./position";
 /**
  * Класс проторговщика
@@ -69,6 +90,7 @@ class Trader {
     this._signal = {};
     /* Последнтй сигнал */
     this._lastSignal = state.lastSignal || {};
+    this._currentPositions = {};
     /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false */
     this._updateRequested = state.updateRequested || false;
     /* Признак запроса на остановку сервиса [true,false] */
@@ -162,7 +184,7 @@ class Trader {
     this.log("crash()");
     throw new VError(
       {
-        name: "TraderCrachError"
+        name: "TraderCrashError"
       },
       'Critical error while executing trader "%s" for user "%d" - "%f"',
       this._taskId,
@@ -176,8 +198,10 @@ class Trader {
    *
    * @memberof Trader
    */
-  _createPosition() {
-    this._currentPosition = new Position({
+  _createPosition(positionId) {
+    this._currentPositions[positionId] = new Position({
+      mode: this._mode,
+      positionId,
       robotId: this._taskId,
       userId: this._userId,
       adviserId: this._adviserId,
@@ -192,11 +216,19 @@ class Trader {
   }
 
   /**
-   * Загрузка новой позиции
+   * Загрузка существующей позиции
    *
    * @memberof Trader
    */
-  _loadPosition() {}
+  async _loadPosition(positionId) {
+    if (
+      !Object.prototype.hasOwnProperty.call(this._currentPositions, positionId)
+    )
+      this._currentPositions[positionId] = await getPositonByKey({
+        partitionKey: this._taskId,
+        rowkey: positionId
+      });
+  }
 
   /**
    * Обработка нового сигнала
@@ -216,11 +248,15 @@ class Trader {
         this._signal.action === TRADE_ACTION_LONG ||
         this._signal.action === TRADE_ACTION_SHORT
       ) {
-        this._createPosition();
-        this._currentPosition.createOpenOrder(this._signal);
+        this._createPosition(this._signal.positionId);
+        this._currentPositions[this._signal.positionId].createOpenOrder(
+          this._signal
+        );
       } else {
-        this._loadPosition();
-        this._currentPosition.createCloseOrder(this._signal);
+        await this._loadPosition(this._signal.positionId);
+        this._currentPositions[this._signal.positionId].createCloseOrder(
+          this._signal
+        );
       }
       // TODO: если нужно исполнить ордер по рынку то сразу его исполянем
       // Обработанный сигнал
@@ -243,6 +279,42 @@ class Trader {
         this._userId
       );
     }
+  }
+
+  async executeOrders(orders) {
+    orders.map(async order => {
+      const orderResult = { ...order };
+      if (order.task === ORDER_TASK_CHECKLIMIT) {
+        if (this._mode === REALTIME_MODE) {
+          // TODO: CheckOrderStatus API CALL
+          orderResult.state = ORDER_STATUS_CLOSED;
+        } else {
+          orderResult.state = ORDER_STATUS_CLOSED;
+        }
+      } else if (
+        order.task === ORDER_TASK_SETLIMIT ||
+        order.task === ORDER_TASK_OPENBYMARKET
+      ) {
+        const orderToExecute = { ...order, volume: this._volume };
+        if (this._mode === REALTIME_MODE) {
+          // TODO: SendOrder API CALL
+          const result = { externalId: uuid() };
+          orderResult.state = ORDER_STATUS_POSTED;
+          orderResult.externalId = result.externalId;
+        } else {
+          if (order.orderType === ORDER_TYPE_LIMIT) {
+            orderResult.state = ORDER_STATUS_OPEN;
+          } else {
+            orderResult.state = ORDER_STATUS_CLOSED;
+          }
+          orderResult.executed = orderToExecute.volume;
+        }
+      }
+
+      this._loadPosition(order.positionId);
+      this._currentPositions[order.positionId].handleOrder(orderResult);
+      await this._currentPositions[order.positionId].save();
+    });
   }
 
   /**

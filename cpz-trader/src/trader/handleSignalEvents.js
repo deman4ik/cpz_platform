@@ -6,17 +6,118 @@ import {
   SIGNALS_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_BUSY,
+  STATUS_ERROR,
+  STATUS_STOPPED
+} from "cpzState";
 import { createTraderSlug } from "cpzStorage/utils";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { subjectToStr } from "cpzUtils/helpers";
-import { getTradersBySlug, savePendingSignal } from "../tableStorage";
-import execute from "./execute";
+import {
+  getTradersBySlug,
+  getTraderByKey,
+  savePendingSignal,
+  getPendingSignalsByTraderId,
+  deletePendingSignal
+} from "../tableStorage";
+import Trader from "./trader";
 
 const validateNewCandle = createValidator(SIGNALS_NEWSIGNAL_EVENT.dataSchema);
+
+/**
+ * Обработка сигнала проторговщиком
+ *
+ * @param {*} context
+ * @param {*} state
+ * @param {*} signal
+ * @param {boolean} child признак вызовая функции повторно
+ */
+async function execute(context, state, signal, child = false) {
+  let trader;
+  try {
+    // Создаем экземпляр класса
+    trader = new Trader(context, state);
+    // Если задача остановлена
+    if (trader.status === STATUS_STOPPED || trader.status === STATUS_ERROR) {
+      // Сохраняем состояние и завершаем работу
+      trader.end(trader.status);
+
+      return;
+    }
+    // Если есть запрос на обновление параметров
+    if (trader.updateRequested) {
+      // Обновляем параметры
+      trader.setUpdate();
+    }
+    // Устанавливаем статус "Занят"
+    trader.status(STATUS_BUSY);
+    await trader.save();
+    // Обработка нового сигнала
+    await trader.handleSignal(signal);
+    // Завершаем работу и сохраняем стейт
+    await trader.end(STATUS_STARTED);
+    // Логируем итерацию
+    const currentState = trader.getCurrentState();
+    await trader.logEvent(currentState);
+    // Если это основной вызов
+    if (!child) {
+      // Проверяем ожидающие обработку свечи
+      await handlePendingSignals(context, {
+        partitionKey: state.PartitionKey,
+        rowKey: state.RowKey
+      });
+    }
+  } catch (error) {
+    const err = new VError(
+      {
+        name: "TraderHandleSignalError",
+        cause: error,
+        info: {
+          state,
+          signal
+        }
+      },
+      'Failed to execute trader taskId: "%s"',
+      state.taskId
+    );
+    const errorOutput = createErrorOutput(err);
+    context.log.error(errorOutput.message, errorOutput);
+    // Если есть экземпляр класса
+    if (trader) {
+      // По умолчанию продолжаем работу после ошибки
+      let status = STATUS_STARTED;
+      // Если была аварийная остановка - устанавливаем статус ошибка
+      if (VError.hasCauseWithName(err, "TraderCrashError"))
+        status = STATUS_ERROR;
+      // Сохраняем ошибку в сторедже
+      await trader.end(status, errorOutput);
+    }
+  }
+}
+
+/**
+ * Обработка ожидающих обработки сигналов
+ *
+ * @param {*} taskId
+ */
+async function handlePendingSignals(context, keys) {
+  // Считываем не обработанные сигналы
+  const pendingSignals = getPendingSignalsByTraderId(keys.rowKey);
+  pendingSignals.map(async pendingSignal => {
+    // Считываем текущее состояние проторговщика
+    const traderState = await getTraderByKey(keys);
+    // Начинаем обработку
+    await execute(context, traderState, pendingSignal, true);
+    // Удаляем свечу из очереди
+    await deletePendingSignal(pendingSignal);
+  });
+}
+
 /**
  * Обработка нового сигнала
  *

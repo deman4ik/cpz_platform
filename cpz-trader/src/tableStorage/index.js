@@ -1,10 +1,11 @@
 import azure from "azure-storage";
 import VError from "verror";
 
-import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import { STATUS_STARTED, STATUS_BUSY, POS_STATUS_ACTIVE } from "cpzState";
 import {
   STORAGE_TRADERS_TABLE,
-  STORAGE_SIGNALSPENDING_TABLE
+  STORAGE_SIGNALSPENDING_TABLE,
+  STORAGE_POSITIONS_TABLE
 } from "cpzStorageTables";
 import {
   createTableIfNotExists,
@@ -58,6 +59,41 @@ async function saveTraderState(state) {
   }
 }
 
+/**
+ * Сохранение позиции
+ *
+ * @param {*} state
+ * @returns
+ */
+async function savePositionState(state) {
+  try {
+    const entity = {
+      PartitionKey: entityGenerator.String(
+        createTraderSlug(
+          state.exchange,
+          state.asset,
+          state.currency,
+          state.timeframe,
+          modeToStr(state.mode)
+        )
+      ),
+      RowKey: entityGenerator.String(state.positionId),
+      ...objectToEntity(state)
+    };
+    await insertOrMergeEntity(STORAGE_POSITIONS_TABLE, entity);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error,
+        info: {
+          state
+        }
+      },
+      "Failed to save position state"
+    );
+  }
+}
 /**
  * Сохранение сигнала ожидающего обработки
  *
@@ -113,6 +149,31 @@ async function updateTraderState(state) {
   }
 }
 
+/**
+ * Обновление состояния позиции
+ *
+ * @param {*} state
+ * @returns
+ */
+async function updatePositionState(state) {
+  try {
+    const entity = {
+      ...objectToEntity(state)
+    };
+    await mergeEntity(STORAGE_POSITIONS_TABLE, entity);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error,
+        info: {
+          state
+        }
+      },
+      "Failed to update position state"
+    );
+  }
+}
 /**
  * Удаление сигнала ожидающей выполнения
  *
@@ -236,12 +297,147 @@ async function getTradersBySlug(slug) {
 }
 
 /**
+ * Поиск позиции по уникальному ключу
+ *
+ * @param {object} keys
+ * @returns
+ */
+async function getPositonByKey(keys) {
+  try {
+    const rowKeyFilter = TableQuery.stringFilter(
+      "RowKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.rowKey
+    );
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      keys.partitionKey
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        rowKeyFilter,
+        TableUtilities.TableOperators.AND,
+        partitionKeyFilter
+      )
+    );
+    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error,
+        info: {
+          keys
+        }
+      },
+      'Failed to read position state "%s", "%d"',
+      keys.partitionKey,
+      keys.rowKey
+    );
+  }
+}
+
+/**
+ * Поиск открытых позиций по бирже+инструменту+таймфрейму
+ *
+ * @param {string} slug
+ * @returns
+ */
+async function getActivePositions(slug) {
+  try {
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
+    const openStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      POS_STATUS_ACTIVE
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        partitionKeyFilter,
+        TableUtilities.TableOperators.AND,
+        openStatusFilter
+      )
+    );
+    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error,
+        info: {
+          slug
+        }
+      },
+      'Failed to read open positions by traderId "%s"',
+      slug
+    );
+  }
+}
+
+/**
+ * Поиск открытых позиций по бирже+инструменту+таймфрейму и идентификатору проторговщика
+ *
+ * @param {string} slug
+ * @param {string} traderId
+ * @returns
+ */
+async function getActivePositionsByTraderId(slug, traderId) {
+  try {
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
+    const traderFilet = TableQuery.stringFilter(
+      "traderId",
+      TableUtilities.QueryComparisons.EQUAL,
+      traderId
+    );
+    const keysFilter = TableQuery.combineFilters(
+      partitionKeyFilter,
+      TableUtilities.TableOperators.AND,
+      traderFilet
+    );
+    const openStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      POS_STATUS_ACTIVE
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        keysFilter,
+        TableUtilities.TableOperators.AND,
+        openStatusFilter
+      )
+    );
+    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error,
+        info: {
+          slug
+        }
+      },
+      'Failed to read open positions by traderId "%s"',
+      slug
+    );
+  }
+}
+
+/**
  * Поиск сигналов ожидающих обработки для конкретного советника
  *
  * @param {string} id
  * @returns
  */
-async function getPendingSignalsByTraderId(id) {
+async function getPendingSignalsBySlugAndTraderId(id) {
   try {
     const query = new TableQuery().where(
       TableQuery.stringFilter(
@@ -268,10 +464,15 @@ async function getPendingSignalsByTraderId(id) {
 
 export {
   saveTraderState,
+  savePositionState,
   savePendingSignal,
   updateTraderState,
+  updatePositionState,
   deletePendingSignal,
   getTraderByKey,
   getTradersBySlug,
-  getPendingSignalsByTraderId
+  getPositonByKey,
+  getActivePositions,
+  getActivePositionsByTraderId,
+  getPendingSignalsBySlugAndTraderId
 };
