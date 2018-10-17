@@ -91,6 +91,10 @@ class Position {
     );
   }
 
+  get currentOrder() {
+    return this._currentOrder;
+  }
+
   /**
    * Создать ордер из сигнала
    *

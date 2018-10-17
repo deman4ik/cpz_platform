@@ -223,11 +223,15 @@ class Trader {
   async _loadPosition(positionId) {
     if (
       !Object.prototype.hasOwnProperty.call(this._currentPositions, positionId)
-    )
-      this._currentPositions[positionId] = await getPositonByKey({
+    ) {
+      const positionsState = await getPositonByKey({
         partitionKey: this._taskId,
         rowkey: positionId
       });
+      positionsState.forEach(position => {
+        this._currentPositions[position.positionid] = new Position(position);
+      });
+    }
   }
 
   /**
@@ -258,6 +262,15 @@ class Trader {
           this._signal
         );
       }
+      const createdOrder = this._currentPositions[this._signal.positionId]
+        .currentOrder;
+
+      if (createdOrder.orderType === ORDER_TYPE_MARKET) {
+        this.executeOrders([createdOrder]);
+      } else {
+        await this._currentPositions[this._signal.positionId].save();
+      }
+
       // TODO: если нужно исполнить ордер по рынку то сразу его исполянем
       // Обработанный сигнал
       this._lastSignal = this._signal;
