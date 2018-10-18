@@ -66,20 +66,22 @@ services:
     environment:
       - CUSTOMCONNSTR_POSTGRESQL
       - API_KEY 
-  # cpz-trader:
-  #   container_name: cpz-trader
-  #   build: ./cpz-trader-net/CpzTrader/
-  #   ports:
-  #     - "8106:80"
-  #   volumes:
-  #    - ./cpz-trader-net/CpzTrader/:/cpz-trader-net/CpzTrader/
-  #   environment:     
-  #   - AZ_STORAGE_CS
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY  
-  #   - CCXT_ENDPOINT
-  #   restart: always
+  cpz-trader:
+    container_name: cpz-trader
+    build:
+      context: .
+      dockerfile: CPZTrader.Dockerfile
+    ports:
+      - "8106:80"
+    environment:   
+    - AzureWebJobsStorage   
+    - AZ_STORAGE_CS
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY  
+    - CCXT_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
   # cpz-connector-ccxt:
   #   container_name: cpz-connector-ccxt
   #   build: ./cpz-connector-ccxt
