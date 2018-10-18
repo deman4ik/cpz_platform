@@ -87,8 +87,9 @@ class Trader {
     this._endedAt = this._stopRequested
       ? dayjs().toJSON()
       : state.endedAt || "";
-    /* Признак выполнения инициализации */
-    this._initialized = state.initialized || false;
+    /* События для отправки */
+    this._events = [];
+
     /* Метаданные стореджа */
     this._metadata = state.metadata;
   }
@@ -111,6 +112,16 @@ class Trader {
    */
   get updateRequested() {
     return this._updateRequested;
+  }
+
+  /**
+   * События
+   *
+   * @readonly
+   * @memberof Position
+   */
+  get events() {
+    return this._events;
   }
 
   /**
@@ -340,9 +351,13 @@ class Trader {
           orderResult.executed = orderToExecute.volume;
         }
       }
-
+      // Загружаем позицию
       this._loadPosition(order.positionId);
-      this._currentPositions[order.positionId].handleOrder(orderResult);
+      // Сохраняем ордер в позиции и генерируем событие
+      this._events.push(
+        this._currentPositions[order.positionId].handleOrder(orderResult)
+      );
+      // Сохраняем состояние позиции в сторедж
       await this._currentPositions[order.positionId].save();
     });
   }

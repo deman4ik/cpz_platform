@@ -4,6 +4,7 @@ import {
   SIGNALS_NEWSIGNAL_EVENT,
   SIGNALS_HANDLED_EVENT,
   SIGNALS_TOPIC,
+  TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
 import {
@@ -59,6 +60,12 @@ async function execute(context, state, signal, child = false) {
     await trader.save();
     // Обработка нового сигнала
     await trader.handleSignal(signal);
+
+    // Если есть хотя бы одно событие для отправка
+    if (trader.events.length > 0) {
+      // Отправляем
+      await publishEvents(context, TRADES_TOPIC, trader.events);
+    }
     // Завершаем работу и сохраняем стейт
     await trader.end(STATUS_STARTED);
     // Логируем итерацию

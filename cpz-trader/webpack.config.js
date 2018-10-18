@@ -24,7 +24,7 @@ function findEntryPoints() {
 
 const config = {
   mode: process.env.NODE_ENV || "development",
-  watch: true,
+  watch: false,
   entry: findEntryPoints(),
   resolve: {
     alias: {

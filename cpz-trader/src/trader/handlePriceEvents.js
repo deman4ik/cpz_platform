@@ -7,6 +7,7 @@ import {
   CANDLES_NEWCANDLE_EVENT,
   // PRICES_NEWPRICE,
   ERROR_TRADER_EVENT,
+  TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
@@ -53,6 +54,11 @@ async function handlePrice(context, eventData) {
             });
 
             await trader.executeOrders(requiredOrders);
+            // Если есть хотя бы одно событие для отправка
+            if (trader.events.length > 0) {
+              // Отправляем
+              await publishEvents(context, TRADES_TOPIC, trader.events);
+            }
           }
         } catch (error) {
           return {

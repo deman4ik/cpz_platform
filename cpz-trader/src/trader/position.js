@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import VError from "verror";
 import dayjs from "dayjs";
+import { TRADER_SERVICE } from "cpzServices";
 import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_SHORT,
@@ -26,6 +27,7 @@ import {
   ORDER_POS_DIR_OPEN,
   ORDER_POS_DIR_CLOSE
 } from "cpzState";
+import { TRADES_ORDER_EVENT } from "cpzEventTypes";
 import { createTraderSlug } from "cpzStorage/utils";
 import { modeToStr } from "cpzUtils/helpers";
 import { savePositionState } from "../tableStorage";
@@ -362,6 +364,45 @@ class Position {
     }
     // Устанавливаем статус позиции
     this.setStatus();
+    // Создаем новое осбытие
+    return this._createOrderEvent(order);
+  }
+
+  /**
+   * Генерация темы события Order и Position
+   *
+   * @returns subject
+   * @memberof Position
+   */
+  _createSubject() {
+    return `${this._exchange}/${this._asset}/${this._currency}/${
+      this._timeframe
+    }/${this._traderId}.${modeToStr(this._mode)}`;
+  }
+
+  /**
+   * Создать событие Ордер
+   *
+   * @param {*} order
+   */
+  _createOrderEvent(order) {
+    return {
+      signalId: uuid(),
+      dataVersion: "1.0",
+      eventTime: new Date(),
+      subject: this._createSubject(),
+      eventType: TRADES_ORDER_EVENT.eventType,
+      data: {
+        ...order,
+        id: uuid(),
+        positionId: this._positionId,
+        traderId: this._traderId,
+        robotId: this._robotId,
+        userId: this._userId,
+        adviserId: this._adviserId,
+        service: TRADER_SERVICE
+      }
+    };
   }
 
   /**
