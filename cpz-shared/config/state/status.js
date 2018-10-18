@@ -1,27 +1,38 @@
-const STATUS_STARTED = "started";
-const STATUS_PENDING = "pending";
-const STATUS_BUSY = "busy";
-const STATUS_STOPPED = "stopped";
-const STATUS_ERROR = "error";
-const STATUS_FINISHED = "finished";
+/**
+ * Статус сервиса
+ */
+const STATUS_STARTED = "started"; //  Запущен
+const STATUS_PENDING = "pending"; //  Ожидает обработки
+const STATUS_BUSY = "busy"; //  Занят, выполняет обработку
+const STATUS_STOPPED = "stopped"; //  Остановлен
+const STATUS_ERROR = "error"; //  Произошла ошибка во время работы
+const STATUS_FINISHED = "finished"; // Обработка завершена
 
-const POS_STATUS_NONE = "none";
-const POS_STATUS_ACTIVE = "active";
-const POS_STATUS_POSTED = "posted";
-const POS_STATUS_CANCELED = "canceled";
-const POS_STATUS_ERROR = "error";
-const POS_STATUS_PENDING = "pending";
+/**
+ * Статус позиции
+ */
+const POS_STATUS_NONE = "none"; // Не определен
+const POS_STATUS_OPENED = "opened"; // Позиция открыта (активна)
+const POS_STATUS_CLOSED = "closed"; // Позиция закрыта (завершена)
+const POS_STATUS_CANCELED = "canceled"; // Позиция отменена
+const POS_STATUS_ERROR = "error"; // Произошла ошибка во время обработки позиции
 
-const ORDER_STATUS_PENDING = "pending";
-const ORDER_STATUS_OPEN = "open";
-const ORDER_STATUS_CLOSED = "closed";
-const ORDER_STATUS_POSTED = "posted";
-const ORDER_STATUS_CANCELED = "canceled";
-const ORDER_STATUS_ERROR = "error";
+/**
+ * Статус ордера
+ */
+const ORDER_STATUS_NONE = "none"; // Не определен
+const ORDER_STATUS_OPENED = "opened"; // Ордер открыт (создан в системе)
+const ORDER_STATUS_CLOSED = "closed"; // Ордер закрыт (исполнен на бирже)
+const ORDER_STATUS_POSTED = "posted"; // Ордер выставлен на биржу
+const ORDER_STATUS_CANCELED = "canceled"; // Ордер отменен
+const ORDER_STATUS_ERROR = "error"; // Произошла ошибка во время обработки ордера
 
-const ORDER_TASK_OPENBYMARKET = "openByMarket";
-const ORDER_TASK_SETLIMIT = "setLimit";
-const ORDER_TASK_CHECKLIMIT = "checkLimit";
+/**
+ * Задание для ордера
+ */
+const ORDER_TASK_OPENBYMARKET = "openByMarket"; // Выставить ордер по рынку
+const ORDER_TASK_SETLIMIT = "setLimit"; // Выставить лимитный ордер
+const ORDER_TASK_CHECKLIMIT = "checkLimit"; // Проверить выполненный объем ордера на бирже
 
 export {
   STATUS_BUSY,
@@ -31,13 +42,12 @@ export {
   STATUS_STARTED,
   STATUS_STOPPED,
   POS_STATUS_NONE,
-  POS_STATUS_ACTIVE,
-  POS_STATUS_POSTED,
+  POS_STATUS_OPENED,
+  POS_STATUS_CLOSED,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
-  POS_STATUS_PENDING,
-  ORDER_STATUS_PENDING,
-  ORDER_STATUS_OPEN,
+  ORDER_STATUS_NONE,
+  ORDER_STATUS_OPENED,
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_POSTED,
   ORDER_STATUS_CANCELED,

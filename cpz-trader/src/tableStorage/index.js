@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 
-import { STATUS_STARTED, STATUS_BUSY, POS_STATUS_ACTIVE } from "cpzState";
+import { STATUS_STARTED, STATUS_BUSY, POS_STATUS_OPENED } from "cpzState";
 import {
   STORAGE_TRADERS_TABLE,
   STORAGE_SIGNALSPENDING_TABLE,
@@ -354,7 +354,7 @@ async function getActivePositions(slug) {
     const openStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
-      POS_STATUS_ACTIVE
+      POS_STATUS_OPENED
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
@@ -406,7 +406,7 @@ async function getActivePositionsByTraderId(slug, traderId) {
     const openStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
-      POS_STATUS_ACTIVE
+      POS_STATUS_OPENED
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(

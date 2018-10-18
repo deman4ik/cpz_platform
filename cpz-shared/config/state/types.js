@@ -1,21 +1,37 @@
-const REALTIME_MODE = "realtime";
-const EMULATOR_MODE = "emulator";
-const BACKTEST_MODE = "backtest";
+/**
+ * Режим запуска сервиса
+ */
+const REALTIME_MODE = "realtime"; // в реальном времени (текущие данные с биржи, выставление реальных ордеров на биржу)
+const EMULATOR_MODE = "emulator"; // эмуляция (текущие данные с биржи, эмуляция реальной торговли)
+const BACKTEST_MODE = "backtest"; // бэктест (исторические данные, эмуляция реальной торговли)
 
-const TRADE_ACTION_LONG = "long";
-const TRADE_ACTION_CLOSE_LONG = "closeLong";
-const TRADE_ACTION_SHORT = "short";
-const TRADE_ACTION_CLOSE_SHORT = "closeShort";
+/**
+ * Торговое действие
+ */
+const TRADE_ACTION_LONG = "long"; // открыть длинную позицию - покупаем
+const TRADE_ACTION_CLOSE_LONG = "closeLong"; // закрыть длинную позицию - продаем
+const TRADE_ACTION_SHORT = "short"; // открыть коротку позицию - продаем
+const TRADE_ACTION_CLOSE_SHORT = "closeShort"; // закрыть коротку позицию - покупаем
 
-const ORDER_TYPE_LIMIT = "limit";
-const ORDER_TYPE_MARKET = "market";
-const ORDER_TYPE_STOP = "stop";
+/**
+ * Тип ордера
+ */
+const ORDER_TYPE_LIMIT = "limit"; // лимитный ордер
+const ORDER_TYPE_MARKET = "market"; // рыночной ордер
+const ORDER_TYPE_STOP = "stop"; // стоп ордер
 
-const ORDER_DIRECTION_BUY = "buy";
-const ORDER_DIRECTION_SELL = "sell";
+/**
+ * Направление торговли ордера
+ */
+const ORDER_DIRECTION_BUY = "buy"; // покупка
+const ORDER_DIRECTION_SELL = "sell"; // продажа
 
-const ORDER_POS_DIR_OPEN = "open";
-const ORDER_POS_DIR_CLOSE = "close";
+/**
+ * Место ордера в позиции
+ */
+const ORDER_POS_DIR_OPEN = "open"; // ордер открывает позицию
+const ORDER_POS_DIR_CLOSE = "close"; // ордер закрывает позицию
+
 export {
   REALTIME_MODE,
   EMULATOR_MODE,

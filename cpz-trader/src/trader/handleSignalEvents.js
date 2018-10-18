@@ -22,7 +22,7 @@ import {
   getTradersBySlug,
   getTraderByKey,
   savePendingSignal,
-  getPendingSignalsByTraderId,
+  getPendingSignalsBySlugAndTraderId,
   deletePendingSignal
 } from "../tableStorage";
 import Trader from "./trader";
@@ -107,7 +107,7 @@ async function execute(context, state, signal, child = false) {
  */
 async function handlePendingSignals(context, keys) {
   // Считываем не обработанные сигналы
-  const pendingSignals = getPendingSignalsByTraderId(keys.rowKey);
+  const pendingSignals = getPendingSignalsBySlugAndTraderId(keys);
   pendingSignals.map(async pendingSignal => {
     // Считываем текущее состояние проторговщика
     const traderState = await getTraderByKey(keys);

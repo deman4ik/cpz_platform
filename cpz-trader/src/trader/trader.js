@@ -1,44 +1,26 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 import VError from "verror";
-import { createErrorOutput } from "cpzUtils/error";
+
 import { TRADER_SERVICE } from "cpzServices";
 import {
   REALTIME_MODE,
-  EMULATOR_MODE,
-  BACKTEST_MODE,
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED,
-  POS_STATUS_ACTIVE,
-  POS_STATUS_POSTED,
-  POS_STATUS_CANCELED,
-  POS_STATUS_ERROR,
-  POS_STATUS_PENDING,
   TRADE_ACTION_LONG,
-  TRADE_ACTION_CLOSE_LONG,
   TRADE_ACTION_SHORT,
-  TRADE_ACTION_CLOSE_SHORT,
-  ORDER_TYPE_MARKET,
   ORDER_STATUS_CLOSED,
-  ORDER_STATUS_OPEN,
   ORDER_STATUS_POSTED,
   ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT,
-  ORDER_POS_DIR_OPEN,
-  ORDER_POS_DIR_CLOSE
+  ORDER_TASK_CHECKLIMIT
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import { modeToStr } from "cpzUtils/helpers";
-import { createTraderSlug } from "cpzStorage/utils";
-import {
-  saveTraderState,
-  getPositonByKey,
-  getPendingSignalsBySlugAndTraderId
-} from "../tableStorage";
+import { saveTraderState, getPositonByKey } from "../tableStorage";
 import Position from "./position";
 /**
  * Класс проторговщика
@@ -194,8 +176,9 @@ class Trader {
   }
 
   /**
-   * Создание новой позиции
+   *Создание новой позиции
    *
+   * @param {*} positionId
    * @memberof Trader
    */
   _createPosition(positionId) {
@@ -221,16 +204,19 @@ class Trader {
    * @memberof Trader
    */
   async _loadPosition(positionId) {
+    // Если позиция еще не загружена
     if (
       !Object.prototype.hasOwnProperty.call(this._currentPositions, positionId)
     ) {
+      // Запрашиваем из стореджа
       const positionsState = await getPositonByKey({
         partitionKey: this._taskId,
         rowkey: positionId
       });
-      positionsState.forEach(position => {
-        this._currentPositions[position.positionid] = new Position(position);
-      });
+      // Создем экземпяр позиции
+      this._currentPositions[positionsState.positionid] = new Position(
+        positionsState
+      );
     }
   }
 
@@ -247,32 +233,40 @@ class Trader {
       this._signal = signal;
       // Если сигнал уже обрабатывалась - выходим
       if (this._signal.signalId === this._lastSignal.signalId) return;
-
+      // Если сигнал на открытие позиции
       if (
         this._signal.action === TRADE_ACTION_LONG ||
         this._signal.action === TRADE_ACTION_SHORT
       ) {
+        // Создаем новую позицию
         this._createPosition(this._signal.positionId);
+        // Создаем ордер на открытие позиции
         this._currentPositions[this._signal.positionId].createOpenOrder(
           this._signal
         );
       } else {
+        // Если сигнал на закрытие позиции
+
+        // Загружаем существующую позицию
         await this._loadPosition(this._signal.positionId);
+        // Создаем ордер на закрытие позиции
         this._currentPositions[this._signal.positionId].createCloseOrder(
           this._signal
         );
       }
+      // Созданный ордер
       const createdOrder = this._currentPositions[this._signal.positionId]
         .currentOrder;
-
+      // Если тип созданного ордера - рыночнй ордер
       if (createdOrder.orderType === ORDER_TYPE_MARKET) {
-        this.executeOrders([createdOrder]);
+        // Немедленно исполянем ордер
+        await this.executeOrders([createdOrder]);
       } else {
+        // Если любой другой тип ордера
+        // Сохраняем позицию в сторедж
         await this._currentPositions[this._signal.positionId].save();
       }
-
-      // TODO: если нужно исполнить ордер по рынку то сразу его исполянем
-      // Обработанный сигнал
+      // Последний обработанный сигнал
       this._lastSignal = this._signal;
     } catch (error) {
       throw new VError(
@@ -294,32 +288,55 @@ class Trader {
     }
   }
 
+  /**
+   * Исполнение ордеров
+   *
+   * @param {*} orders
+   */
   async executeOrders(orders) {
+    // Для каждого ордера
     orders.map(async order => {
       const orderResult = { ...order };
+      // Если задача - проверить исполнения объема
       if (order.task === ORDER_TASK_CHECKLIMIT) {
+        // Если режим - в реальном времени
         if (this._mode === REALTIME_MODE) {
+          // Запрашиваем статус ордера с биржи
           // TODO: CheckOrderStatus API CALL
           orderResult.state = ORDER_STATUS_CLOSED;
+          orderResult.executed = this._volume;
         } else {
+          // Если режим - эмуляция или бэктест
+          // Считаем, что ордер исполнен
           orderResult.state = ORDER_STATUS_CLOSED;
+          // Полностью - т.е. по заданному объему
+          orderResult.executed = this._volume;
         }
+        // Если задача - выставить лимитный или рыночный ордер
       } else if (
         order.task === ORDER_TASK_SETLIMIT ||
         order.task === ORDER_TASK_OPENBYMARKET
       ) {
+        // Устанавливаем объем из параметров
         const orderToExecute = { ...order, volume: this._volume };
+        // Если режим - в реальном времени
         if (this._mode === REALTIME_MODE) {
+          // Публикуем ордер на биржу
           // TODO: SendOrder API CALL
           const result = { externalId: uuid() };
           orderResult.state = ORDER_STATUS_POSTED;
           orderResult.externalId = result.externalId;
+        } else if (order.orderType === ORDER_TYPE_LIMIT) {
+          // Если режим - эмуляция или бэктест
+          // Если тип ордера - лимитный
+          // Считаем, что ордер успешно выставлен на биржу
+          orderResult.state = ORDER_STATUS_POSTED;
         } else {
-          if (order.orderType === ORDER_TYPE_LIMIT) {
-            orderResult.state = ORDER_STATUS_OPEN;
-          } else {
-            orderResult.state = ORDER_STATUS_CLOSED;
-          }
+          // Если режим - эмуляция или бэктест
+          // Если тип ордера - по рынку
+          // Считаем, что ордер исполнен
+          orderResult.state = ORDER_STATUS_CLOSED;
+          // Полностью - т.е. по заданному объему
           orderResult.executed = orderToExecute.volume;
         }
       }

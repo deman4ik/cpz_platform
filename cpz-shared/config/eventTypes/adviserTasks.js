@@ -1,5 +1,8 @@
 import { BASE_ERROR } from "./events";
 
+/**
+ * Событие - Запуск нового советника
+ */
 const TASKS_ADVISER_START_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Start",
 
@@ -118,6 +121,9 @@ const TASKS_ADVISER_STARTBACKTEST_EVENT = {
   }
 };
 
+/**
+ * Событие - Остановка советника
+ */
 const TASKS_ADVISER_STOP_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Stop",
 
@@ -140,6 +146,9 @@ const TASKS_ADVISER_STOP_EVENT = {
   }
 };
 
+/**
+ * Событие - Обновление параметров советника
+ */
 const TASKS_ADVISER_UPDATE_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Update",
 
@@ -187,6 +196,10 @@ const TASKS_ADVISER_UPDATE_EVENT = {
     }
   }
 };
+
+/**
+ *  Событие - Советник запущен
+ */
 const TASKS_ADVISER_STARTED_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Started",
 
@@ -244,6 +257,9 @@ const TASKS_ADVISER_BACKTESTFINISHED_EVENT = {
   }
 };
 
+/**
+ * Событие - Советник остановлен
+ */
 const TASKS_ADVISER_STOPPED_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Stopped",
 
@@ -256,6 +272,10 @@ const TASKS_ADVISER_STOPPED_EVENT = {
     error: BASE_ERROR
   }
 };
+
+/**
+ * Событие - Параметры советника обновлены
+ */
 const TASKS_ADVISER_UPDATED_EVENT = {
   eventType: "CPZ.Tasks.Adviser.Updated",
 

@@ -1,5 +1,8 @@
 import { BASE_ERROR } from "./events";
 
+/**
+ * Событие - запуск нового проторговщика
+ */
 const TASKS_TRADER_START_EVENT = {
   eventType: "CPZ.Tasks.Trader.Start",
 
@@ -61,6 +64,9 @@ const TASKS_TRADER_START_EVENT = {
   }
 };
 
+/**
+ * Событие - Остановка проторговщика
+ */
 const TASKS_TRADER_STOP_EVENT = {
   eventType: "CPZ.Tasks.Trader.Stop",
 
@@ -83,6 +89,9 @@ const TASKS_TRADER_STOP_EVENT = {
   }
 };
 
+/**
+ * Событие - Обновление параметров проторговщика
+ */
 const TASKS_TRADER_UPDATE_EVENT = {
   eventType: "CPZ.Tasks.Trader.Update",
 
@@ -129,6 +138,10 @@ const TASKS_TRADER_UPDATE_EVENT = {
     }
   }
 };
+
+/**
+ * Событие - Проторговщик запущен
+ */
 const TASKS_TRADER_STARTED_EVENT = {
   eventType: "CPZ.Tasks.Trader.Started",
 
@@ -151,6 +164,10 @@ const TASKS_TRADER_STARTED_EVENT = {
     error: BASE_ERROR
   }
 };
+
+/**
+ * Событие - Проторговщик остановлен
+ */
 const TASKS_TRADER_STOPPED_EVENT = {
   eventType: "CPZ.Tasks.Trader.Stopped",
 
@@ -163,6 +180,10 @@ const TASKS_TRADER_STOPPED_EVENT = {
     error: BASE_ERROR
   }
 };
+
+/**
+ * Событие - параметры проторговщика обновлены
+ */
 const TASKS_TRADER_UPDATED_EVENT = {
   eventType: "CPZ.Tasks.Trader.Updated",
 
