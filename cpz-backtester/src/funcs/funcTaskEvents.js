@@ -2,16 +2,11 @@ import "babel-polyfill";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
-  TASKS_ADVISER_START_EVENT,
-  TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT
+  TASKS_BACKTESTER_START_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import {
-  handleStart,
-  handleStop,
-  handleUpdate
-} from "../adviser/handleTaskEvents";
+import { BACKTEST_MODE } from "cpzState";
+import handleStart from "../backtester/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -46,31 +41,18 @@ function eventHandler(context, req) {
           };
           break;
         }
-        case TASKS_ADVISER_START_EVENT.eventType: {
+
+        case TASKS_BACKTESTER_START_EVENT.eventType: {
           context.log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleStart(context, { eventSubject, ...eventData });
-          break;
-        }
-        case TASKS_ADVISER_STOP_EVENT.eventType: {
-          context.log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
-          );
-          handleStop(context, { eventSubject, ...eventData });
-          break;
-        }
-        case TASKS_ADVISER_UPDATE_EVENT.eventType: {
-          context.log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
-          );
-          handleUpdate(context, { eventSubject, ...eventData });
+          handleStart(context, {
+            ...eventData,
+            eventSubject,
+            mode: BACKTEST_MODE
+          });
           break;
         }
         default: {

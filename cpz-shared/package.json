@@ -16,7 +16,8 @@
     "graphql-request": "^1.8.2",
     "ms-rest-azure": "^2.5.9",
     "p-retry": "^2.0.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "verror": "^1.10.0"
   },
   "devDependencies": {
     "eslint": "^5.6.1",

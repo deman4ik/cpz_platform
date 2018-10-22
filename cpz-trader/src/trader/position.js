@@ -24,8 +24,9 @@ import {
   ORDER_TASK_CHECKLIMIT,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
-  ORDER_POS_DIR_OPEN,
-  ORDER_POS_DIR_CLOSE
+  ORDER_POS_DIR_ENTRY,
+  ORDER_POS_DIR_EXIT,
+  BACKTEST_MODE
 } from "cpzState";
 import { TRADES_ORDER_EVENT } from "cpzEventTypes";
 import { createTraderSlug } from "cpzStorage/utils";
@@ -41,6 +42,7 @@ class Position {
   constructor(state) {
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
+
     /* Уникальный идентификатор позиции */
     this._positionId = state.positionId;
     /* Идентификатор проторговщика */
@@ -62,21 +64,27 @@ class Position {
     /* Таймфрейм */
     this._timeframe = state.timeframe;
     /* Шаг проскальзывания */
-    this._slippageStep = state.slippageStep;
+    this._slippageStep = state.slippageStep || 0;
     /* Отклонение цены */
-    this._deviation = state.deviation;
+    this._deviation = state.deviation || 0;
     /* Текущий статус ["none","opened","closed","canceled","error"] */
     this._status = state.status || POS_STATUS_NONE;
     /* Текущий статус открытия ["none","opened","posted","closed","canceled","error"] */
-    this._openStatus = state.openStatus || ORDER_STATUS_NONE;
+    this._entryStatus = state.entryStatus || ORDER_STATUS_NONE;
     /* Текущий статус закрытия ["none","opened","posted","closed","canceled","error"] */
-    this._closeStatus = state.closeStatus || ORDER_STATUS_NONE;
+    this._exitStatus = state.exitStatus || ORDER_STATUS_NONE;
+    this._entryPrice = state.entryPrice || 0;
+    this._exitPrice = state.exitPrice || 0;
+    this._entryDate = state.entryDate || "";
+    this._exitDate = state.exitDate || "";
     /* Ордера открытия */
-    this._openOrders = state.openOrders || {};
+    this._entryOrders = state.entryOrders || {};
     /* Ордера закрытия */
-    this._closedOrder = state.closedOrders || {};
+    this._exitOrders = state.exitOrders || {};
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+    this.log = state.log || console.log;
+    this.logEvent = state.logEvent || console.log;
   }
 
   /**
@@ -107,6 +115,10 @@ class Position {
    */
   get robotId() {
     return this._robotId;
+  }
+
+  get status() {
+    return this._status;
   }
 
   /**
@@ -142,25 +154,25 @@ class Position {
    */
   setStatus() {
     if (
-      this._openStatus === ORDER_STATUS_OPENED ||
-      this._closeStatus === ORDER_STATUS_OPENED ||
-      this._openStatus === ORDER_STATUS_POSTED ||
-      this._closeStatus === ORDER_STATUS_POSTED
+      this._entryStatus === ORDER_STATUS_OPENED ||
+      this._exitStatus === ORDER_STATUS_OPENED ||
+      this._entryStatus === ORDER_STATUS_POSTED ||
+      this._exitStatus === ORDER_STATUS_POSTED
     ) {
       this._status = POS_STATUS_OPENED;
     } else if (
-      this._openStatus === ORDER_STATUS_CLOSED &&
-      this._closeStatus === ORDER_STATUS_CLOSED
+      this._entryStatus === ORDER_STATUS_CLOSED &&
+      this._exitStatus === ORDER_STATUS_CLOSED
     ) {
       this._status = POS_STATUS_CLOSED;
     } else if (
-      this._openStatus === ORDER_STATUS_CANCELED ||
-      this._closeStatus === ORDER_STATUS_CANCELED
+      this._entryStatus === ORDER_STATUS_CANCELED ||
+      this._exitStatus === ORDER_STATUS_CANCELED
     ) {
       this._status = POS_STATUS_CANCELED;
     } else if (
-      this._openStatus === ORDER_STATUS_ERROR ||
-      this._closeStatus === ORDER_STATUS_ERROR
+      this._entryStatus === ORDER_STATUS_ERROR ||
+      this._exitStatus === ORDER_STATUS_ERROR
     ) {
       this._status = POS_STATUS_ERROR;
     }
@@ -177,6 +189,7 @@ class Position {
     this._currentOrder = {
       orderId: uuid(), // Уникальный идентификатор ордера
       signalId: signal.signalId, // Идентификатор сигнала
+      positionId: this._positionId, // Идентификатор позиции
       orderType: signal.orderType, // Тип ордера
       price: signal.price, // Цена ордера
       exchange: this._exchange, // Код биржи
@@ -197,35 +210,45 @@ class Position {
   }
 
   /**
-   * Создать ордер на открытие позиции из сигнала
+   * Создать ордер на вход в позицию
    *
    * @param {*} signal
    *
    * @memberof Position
    */
-  createOpenOrder(signal) {
+  createEntryOrder(signal) {
+    this.log("createEntryOrder()");
     // Создаем ордер на открытие позиции
-    this._createOrder(signal, ORDER_POS_DIR_OPEN);
+    this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
-    this._openOrders[this._currentOrder.orderId] = this._currentOrder;
+    this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
-    this._openStatus = this._currentOrder.status;
+    this._entryStatus = this._currentOrder.status;
+    this._entryPrice = this._currentOrder.price;
+    this._entryDate = this._currentOrder.createdAt;
+    // Устанавливаем статус позиции
+    this.setStatus();
   }
 
   /**
-   * Создать ордер на закрытие позиции из сигнала
+   * Создать ордер на выход из позиции
    *
    * @param {*} signal
    *
    * @memberof Position
    */
-  createCloseOrder(signal) {
+  createExitOrder(signal) {
+    this.log("createExitOrder()");
     // Создаем ордер на закрытие позиции
-    this._createOrder(signal, ORDER_POS_DIR_CLOSE);
+    this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
-    this._closeOrders[this._currentOrder.orderId] = this._currentOrder;
+    this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
-    this._closeStatus = this._currentOrder.status;
+    this._exitStatus = this._currentOrder.status;
+    this._exitPrice = this._currentOrder.price;
+    this._exitDate = this._currentOrder.createdAt;
+    // Устанавливаем статус позиции
+    this.setStatus();
   }
 
   /**
@@ -237,6 +260,7 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price) {
+    this.log("_checkOrder()");
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_OPENED) {
       // Тип ордера - лимитный
@@ -244,7 +268,7 @@ class Position {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
           // Если проскальзывание текущей цены меньше или равно заданного
-          if (price - order.price <= order.slippageStep) {
+          if (price - order.price <= this._slippageStep) {
             // Нужно выставить лимитный ордер
             return { ...order, task: ORDER_TASK_SETLIMIT };
           }
@@ -252,7 +276,7 @@ class Position {
         // Если продаем
         if (order.direction === ORDER_DIRECTION_SELL) {
           // Если проскальзывание текущей цены меньше или равно заданного
-          if (order.price - price <= order.slippageStep) {
+          if (order.price - price <= this._slippageStep) {
             // Нужно выставить лимитный ордер
             return { ...order, task: ORDER_TASK_SETLIMIT };
           }
@@ -262,9 +286,9 @@ class Position {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
           // Цена сигнала с учетом отклонения
-          const signalPrice = order.price - order.deviation;
+          const signalPrice = order.price - this._deviation;
           // Цена ордера с учетом проскальзывания
-          const entryPrice = signalPrice + order.slippageStep;
+          const entryPrice = signalPrice + this._slippageStep;
           // Если текущая цена больше или равна цене с учетом отклонения
           if (price >= signalPrice) {
             // Нужно выставить ордер по рынку, по цене с учетом проскальзывания
@@ -279,9 +303,9 @@ class Position {
         // Если продаем
         if (order.direction === ORDER_DIRECTION_SELL) {
           // Цена сигнала с учетом отклонения
-          const signalPrice = order.price + order.deviation;
+          const signalPrice = order.price + this._deviation;
           // Цена ордера с учетом проскальзывания
-          const entryPrice = signalPrice - order.slippageStep;
+          const entryPrice = signalPrice - this._slippageStep;
           // Если текущая цена меньше или равна цене с учетом отклонения
           if (price <= signalPrice) {
             // Нужно выставить ордер по рынку, по цене с учетом проскальзывания
@@ -318,21 +342,22 @@ class Position {
    * @memberof Position
    */
   getRequiredOrders(price) {
+    this.log("getRequiredOrders()");
     this._requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
-    if (this._openStatus === ORDER_STATUS_OPENED) {
+    if (this._entryStatus === ORDER_STATUS_OPENED) {
       // Проверяем все ордера на открытие позиции ожидающие обработки
-      Object.keys(this._openOrders).forEach(key => {
-        const order = this._openOrders[key];
+      Object.keys(this._entryOrders).forEach(key => {
+        const order = this._entryOrders[key];
         const checkedOrder = this._checkOrder(order, price);
         if (checkedOrder) this._requiredOrders.push(checkedOrder);
       });
     }
     // Если ордера на закрытие позиции ожидают обработки
-    if (this._closeStatus === ORDER_STATUS_OPENED) {
+    if (this._exitStatus === ORDER_STATUS_OPENED) {
       // Проверяем все ордера на открытие позиции ожидающие обработки
-      Object.keys(this._closeOrders).forEach(key => {
-        const order = this._closeOrders[key];
+      Object.keys(this._exitOrders).forEach(key => {
+        const order = this._exitOrders[key];
         const checkedOrder = this._checkOrder(order, price);
         if (checkedOrder) this._requiredOrders.push(checkedOrder);
       });
@@ -349,18 +374,23 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
+    this.log("handleOrder()");
     // Если ордер на открытие позиции
-    if (order.positionDirection === ORDER_POS_DIR_OPEN) {
+    if (order.positionDirection === ORDER_POS_DIR_ENTRY) {
       // Изменяем статус открытия позиции
-      this._openStatus = order.status;
+      this._entryStatus = order.status;
       // Сохраянем ордер в списке ордеров на открытие позиции
-      this._openOrders[order.orderId] = order;
+      this._entryOrders[order.orderId] = order;
+      this._entryPrice = order.price;
+      this._entryDate = order.createdAt;
     } else {
       // Если ордер на закрытие позиции
       // Изменяем статус закрытия позиции
-      this._closeStatus = order.status;
+      this._exitStatus = order.status;
       // Сохраянем ордер в списке ордеров на закрытие позиции
-      this._closeStatus[order.orderId] = order;
+      this._exitOrders[order.orderId] = order;
+      this._exitPrice = order.price;
+      this._exitDate = order.createdAt;
     }
     // Устанавливаем статус позиции
     this.setStatus();
@@ -387,14 +417,13 @@ class Position {
    */
   _createOrderEvent(order) {
     return {
-      signalId: uuid(),
+      id: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._createSubject(),
       eventType: TRADES_ORDER_EVENT.eventType,
       data: {
         ...order,
-        id: uuid(),
         positionId: this._positionId,
         traderId: this._traderId,
         robotId: this._robotId,
@@ -426,10 +455,14 @@ class Position {
       slippageStep: this._slippageStep,
       deviation: this._deviation,
       status: this._status,
-      openStatus: this._openStatus,
-      closeStatus: this._closeStatus,
-      openOrders: this._openOrders,
-      closedOrders: this._closedOrder
+      entryStatus: this._entryStatus,
+      exitStatus: this._exitStatus,
+      entryPrice: this._entryPrice,
+      exitPrice: this._exitPrice,
+      entryDate: this._entryDate,
+      exitDate: this._exitDate,
+      entryOrders: this._entryOrders,
+      exitOrders: this._exitOrders
     };
   }
 
@@ -442,7 +475,8 @@ class Position {
     this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
-      await savePositionState(this.getCurrentState());
+      if (this._mode !== BACKTEST_MODE)
+        await savePositionState(this.getCurrentState());
     } catch (error) {
       throw new VError(
         {

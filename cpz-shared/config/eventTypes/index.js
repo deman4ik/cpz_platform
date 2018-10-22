@@ -4,6 +4,7 @@ export * from "./signals";
 export * from "./tasks";
 export * from "./adviserTasks";
 export * from "./traderTasks";
+export * from "./backtesterTasks";
 export * from "./ticks";
 export * from "./prices";
 export * from "./topics";

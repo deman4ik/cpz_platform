@@ -29,8 +29,8 @@ const ORDER_DIRECTION_SELL = "sell"; // продажа
 /**
  * Место ордера в позиции
  */
-const ORDER_POS_DIR_OPEN = "open"; // ордер открывает позицию
-const ORDER_POS_DIR_CLOSE = "close"; // ордер закрывает позицию
+const ORDER_POS_DIR_ENTRY = "entry"; // ордер открывает позицию
+const ORDER_POS_DIR_EXIT = "exit"; // ордер закрывает позицию
 
 export {
   REALTIME_MODE,
@@ -45,6 +45,6 @@ export {
   ORDER_TYPE_STOP,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
-  ORDER_POS_DIR_OPEN,
-  ORDER_POS_DIR_CLOSE
+  ORDER_POS_DIR_ENTRY,
+  ORDER_POS_DIR_EXIT
 };

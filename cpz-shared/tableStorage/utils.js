@@ -70,4 +70,14 @@ function createTraderSlug(exchange, asset, currency, timeframe, modeStr = "R") {
   return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
 }
 
-export { entityToObject, objectToEntity, createAdviserSlug, createTraderSlug };
+function createBacktesterSlug(exchange, asset, currency, timeframe, robotId) {
+  return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
+}
+
+export {
+  entityToObject,
+  objectToEntity,
+  createAdviserSlug,
+  createTraderSlug,
+  createBacktesterSlug
+};

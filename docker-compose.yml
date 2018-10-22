@@ -82,6 +82,23 @@ services:
     - CCXT_ENDPOINT
     - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
+   cpz-backtester:
+    container_name: cpz-backtester
+    build:
+      context: .
+      dockerfile: CPZBacktester.Dockerfile
+    ports:
+      - "8108:80"
+    environment:   
+    - AzureWebJobsStorage   
+    - AZ_STORAGE_CS
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY  
+    - DB_API_ENDPOINT
+    - CCXT_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always 
   # cpz-connector-ccxt:
   #   container_name: cpz-connector-ccxt
   #   build: ./cpz-connector-ccxt

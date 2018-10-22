@@ -115,14 +115,18 @@ async function execute(context, state, signal, child = false) {
 async function handlePendingSignals(context, keys) {
   // Считываем не обработанные сигналы
   const pendingSignals = getPendingSignalsBySlugAndTraderId(keys);
-  pendingSignals.map(async pendingSignal => {
+  /* eslint-disable no-restricted-syntax */
+  for (const pendingSignal of pendingSignals) {
+    /* eslint-disable no-await-in-loop */
     // Считываем текущее состояние проторговщика
     const traderState = await getTraderByKey(keys);
     // Начинаем обработку
     await execute(context, traderState, pendingSignal, true);
     // Удаляем свечу из очереди
     await deletePendingSignal(pendingSignal);
-  });
+    /*  no-await-in-loop */
+  }
+  /*  no-restricted-syntax */
 }
 
 /**

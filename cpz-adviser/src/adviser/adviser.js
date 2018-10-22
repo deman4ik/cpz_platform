@@ -72,7 +72,7 @@ class Adviser {
     /* Текущая свеча */
     this._candle = {};
     /* Последняя свеча */
-    this._lastCandle = state.lastCandle || {};
+    this._lastCandle = state.lastCandle || { candleId: null };
     /* Массив сигналов к отправке */
     this._signals = [];
     /* Массив последних сигналов */
@@ -650,13 +650,13 @@ class Adviser {
   advice(signal) {
     this.log("advice()");
     const newSignal = {
-      signalId: uuid(),
+      id: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._createSubject(),
       eventType: SIGNALS_NEWSIGNAL_EVENT.eventType,
       data: {
-        id: uuid(),
+        signalId: uuid(),
         robotId: this._robotId,
         advisorId: this._taskId,
         exchange: this._exchange,

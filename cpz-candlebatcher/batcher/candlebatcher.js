@@ -243,10 +243,14 @@ class Candlebatcher {
 
   async saveCandleToCache(candles) {
     const results = [];
-    candles.map(async candle => {
+    /* eslint-disable no-restricted-syntax */
+    for (const candle of candles) {
+      /* eslint-disable no-await-in-loop */
       const result = await saveCandleToCache(this.context, candle.data);
       results.push(result);
-    });
+      /*  no-await-in-loop */
+    }
+    /*  no-restricted-syntax */
     const errorResults = results.filter(res => !res.isSuccess);
     if (errorResults.length > 0) {
       const errors = errorResults.map(err => err.error);

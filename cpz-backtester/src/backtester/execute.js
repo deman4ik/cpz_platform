@@ -1,24 +1,41 @@
+import dayjs from "dayjs";
 import VError from "verror";
-import { STATUS_FINISHED, STATUS_ERROR } from "cpzState";
+import { STATUS_STARTED, STATUS_FINISHED, STATUS_ERROR } from "cpzState";
 import publishEvents from "cpzEvents";
-import { ADVISER_SERVICE } from "cpzServices";
+import { BACKTESTER_SERVICE } from "cpzServices";
 import {
-  TASKS_ADVISER_BACKTESTFINISHED_EVENT,
+  TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_FINISHED_EVENT,
   ERROR_ADVISER_EVENT,
   SIGNALS_TOPIC,
   ERROR_TOPIC,
-  TASKS_TOPIC
+  TASKS_TOPIC,
+  TRADES_TOPIC
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import getHistoryCandles from "cpzDB/historyCandles";
-import Backtester from "./backtester";
+import { createBacktesterSlug } from "cpzStorage/utils";
+import AdviserBacktester from "./adviser";
+import TraderBacktester from "./trader";
+import { saveBacktesterState, saveBacktesterItem } from "../tableStorage";
 
 async function backtest(context, eventData) {
-  let backtester;
+  const backtesterState = {
+    ...eventData,
+    totalBars: 0,
+    processedBars: 0,
+    leftBars: 0,
+    percent: 0,
+    startedAt: dayjs().toJSON(),
+    status: STATUS_STARTED
+  };
+  let adviserBacktester;
+  let traderBacktester;
   try {
     context.log.info(`Starting backtest ${eventData.taskId}...`);
-    // Создаем экземпляр класса Adviser
-    backtester = new Backtester(context, eventData);
+    // Создаем экземпляры классов
+    adviserBacktester = new AdviserBacktester(context, eventData);
+    traderBacktester = new TraderBacktester(context, eventData);
     // Если необходим прогрев
     if (eventData.requiredHistoryCache && eventData.requiredHistoryMaxBars) {
       // Формируем параметры запроса
@@ -27,7 +44,7 @@ async function backtest(context, eventData) {
         asset: eventData.asset,
         currency: eventData.currency,
         timeframe: eventData.timeframe,
-        dateTo: eventData.dateFrom,
+        dateTo: dayjs(eventData.dateFrom).add(-1, "minute"),
         first: eventData.requiredHistoryMaxBars,
         orderByTimestampDesc: true
       };
@@ -55,9 +72,26 @@ async function backtest(context, eventData) {
       }
       // Сортируем загруженные свечи в порядке возрастания
       const requiredHistory = getRequiredHistoryResult.nodes.reverse();
-      backtester.setCachedCandles(requiredHistory);
+      adviserBacktester.setCachedCandles(requiredHistory);
     }
-    await backtester.save();
+    // Сохраняем начальное состояние
+    await saveBacktesterState(backtesterState);
+    await publishEvents(context, TASKS_TOPIC, {
+      service: BACKTESTER_SERVICE,
+      subject: eventData.eventSubject,
+      eventType: TASKS_BACKTESTER_STARTED_EVENT,
+      data: {
+        partitionKey: createBacktesterSlug(
+          eventData.exchange,
+          eventData.asset,
+          eventData.currency,
+          eventData.timeframe,
+          eventData.robotId
+        ),
+        rowKey: eventData.taskId,
+        taskId: eventData.taskId
+      }
+    });
     // Загружаем пачками основной массив свечей из БД
     let loadHistoryIteration = {
       taskId: eventData.taskId,
@@ -77,21 +111,56 @@ async function backtest(context, eventData) {
       );
       /* no-await-in-loop */
       // Устанавливем общее количество баров
-      backtester.setTotalBars(getHistoryCandlesResult.totalCount);
+      backtesterState.totalBars = getHistoryCandlesResult.totalCount;
+
       const historyCandles = getHistoryCandlesResult.nodes;
       // Обрабатываем по очереди
-      historyCandles.map(async candle => {
-        await backtester.handleCandle(candle);
-        // Если есть хотя бы одно событие для отправка
-        if (backtester.events.length > 0) {
-          // Отправляем
-          await publishEvents(context, SIGNALS_TOPIC, backtester.events);
+      /* eslint-disable no-restricted-syntax */
+      for (const candle of historyCandles) {
+        await adviserBacktester.handleCandle(candle);
+        await traderBacktester.handlePrice({
+          price: candle.close
+        });
+
+        for (const event of adviserBacktester.events) {
+          await traderBacktester.handleSignal(event.data);
+        }
+        if (eventData.debug) {
+          // Если есть хотя бы одно событие для отправка
+          if (adviserBacktester.events.length > 0) {
+            // Отправляем
+            await publishEvents(
+              context,
+              SIGNALS_TOPIC,
+              adviserBacktester.events
+            );
+          }
+          // Если есть хотя бы одно событие для отправка
+          if (traderBacktester.events.length > 0) {
+            // Отправляем
+            await publishEvents(context, TRADES_TOPIC, traderBacktester.events);
+          }
         }
         // Сохраянем состояние итерации
-        await backtester.saveItem();
-      });
+        await saveBacktesterItem({
+          taskId: backtesterState.taskId,
+          candle,
+          adviserEvents: adviserBacktester.events,
+          traderEvents: traderBacktester.events
+        });
+
+        // Обновляем статистику
+        backtesterState.processedBars += 1;
+        backtesterState.leftBars =
+          backtesterState.totalBars - backtesterState.processedBars;
+        backtesterState.percent = Math.round(
+          (backtesterState.processedBars / backtesterState.totalBars) * 100
+        );
+      }
+      /* no-restricted-syntax */
       // Сохраняем состояние пачки
-      await backtester.save();
+      await saveBacktesterState(backtesterState);
+
       // Формируем новую итерацию обработки
       loadHistoryIteration = {
         ...loadHistoryIteration,
@@ -99,11 +168,16 @@ async function backtest(context, eventData) {
         pageInfo: getHistoryCandlesResult.pageInfo
       };
     }
-    await backtester.end(STATUS_FINISHED);
+    // Закончили обработку
+    backtesterState.status = STATUS_FINISHED;
+    backtesterState.endedAt = dayjs().toJSON();
+    // Сохраняем состояние пачки
+    await saveBacktesterState(backtesterState);
+
     await publishEvents(context, TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
-      eventType: TASKS_ADVISER_BACKTESTFINISHED_EVENT,
+      eventType: TASKS_BACKTESTER_FINISHED_EVENT,
       data: {
         taskId: eventData.taskId
       }
@@ -112,7 +186,7 @@ async function backtest(context, eventData) {
   } catch (error) {
     const err = new VError(
       {
-        name: "AdviserBacktestError",
+        name: "BacktestError",
         cause: error,
         info: {
           eventData
@@ -124,13 +198,14 @@ async function backtest(context, eventData) {
     const errorOutput = createErrorOutput(err);
     context.log.error(JSON.stringify(errorOutput));
     // Если есть экземпляр класса
-    if (backtester) {
-      // Сохраняем ошибку в сторедже и завершаем работу
-      await backtester.end(STATUS_ERROR, errorOutput);
+    if (backtesterState) {
+      backtesterState.status = STATUS_ERROR;
+      backtesterState.error = errorOutput;
+      await saveBacktesterState(backtesterState);
     }
     // Публикуем событие - ошибка
     await publishEvents(context, ERROR_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,
       data: {

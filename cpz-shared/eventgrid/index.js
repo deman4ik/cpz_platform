@@ -34,6 +34,12 @@ const topicsConfig = {
       process.env.EG_SIGNALS_ENDPOINT || process.env.EG_TEST_ENDPOINT
     )
   },
+  trades: {
+    client: createClient(process.env.EG_TRADES_KEY || process.env.EG_TEST_KEY),
+    host: getHost(
+      process.env.EG_TRADES_ENDPOINT || process.env.EG_TEST_ENDPOINT
+    )
+  },
   log: {
     client: createClient(process.env.EG_LOG_KEY || process.env.EG_TEST_KEY),
     host: getHost(process.env.EG_LOG_ENDPOINT || process.env.EG_TEST_ENDPOINT)
@@ -64,7 +70,8 @@ async function publishEvents(context, topic, eventData) {
       events.push(newEvent);
     }
     const { client, host } = topicsConfig[topic];
-    await retry(
+    await client.publishEvents(host, events);
+    /*await retry(
       async () => {
         await client.publishEvents(host, events);
       },
@@ -73,7 +80,7 @@ async function publishEvents(context, topic, eventData) {
         minTimeout: 200,
         maxTimeout: 1000
       }
-    );
+    ); */
   } catch (error) {
     const err = new VError(
       {

@@ -100,14 +100,18 @@ async function execute(context, state, candle, child = false) {
 async function handlePendingCandles(context, keys) {
   // Считываем не обработанные свечи
   const pendingCandles = getPendingCandlesByAdviserId(keys.rowKey);
-  pendingCandles.map(async pendingCandle => {
+  /* eslint-disable no-restricted-syntax */
+  for (const pendingCandle of pendingCandles) {
+    /* eslint-disable no-await-in-loop */
     // Считываем текущее состояние советника
     const adviserState = await getAdviserByKey(keys);
     // Начинаем обработку
     await execute(context, adviserState, pendingCandle, true);
     // Удаляем свечу из очереди
     await deletePendingCandle(pendingCandle);
-  });
+    /* no-await-in-loop */
+  }
+  /*  no-restricted-syntax */
 }
 
 export default execute;

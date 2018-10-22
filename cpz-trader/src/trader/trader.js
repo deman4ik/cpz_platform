@@ -50,8 +50,6 @@ class Trader {
     this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
-    /* Объект настроек из веб-интерфейса */
-    this._settings = state.settings || {};
     /* Код биржи */
     this._exchange = state.exchange;
     /* Идентификатор биржи */
@@ -63,15 +61,15 @@ class Trader {
     /* Таймфрейм */
     this._timeframe = state.timeframe;
     /* Шаг проскальзывания */
-    this._slippageStep = state.slippageStep;
+    this._slippageStep = state.slippageStep || 0;
     /* Отклонение цены */
-    this._deviation = state.deviation;
+    this._deviation = state.deviation || 0;
     /* Объем */
     this._volume = state.volume;
     /* Текущий сигнал */
     this._signal = {};
     /* Последнтй сигнал */
-    this._lastSignal = state.lastSignal || {};
+    this._lastSignal = state.lastSignal || { signalId: null };
     this._currentPositions = {};
     /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false */
     this._updateRequested = state.updateRequested || false;
@@ -193,10 +191,18 @@ class Trader {
    * @memberof Trader
    */
   _createPosition(positionId) {
+    this.log("_createPosition()");
+    let slippageStep;
+    let deviation;
+    if (this._signal.settings) {
+      slippageStep = this._signal.settings.slippageStep || this._slippageStep;
+      deviation = this._signal.settings.deviation || this._deviation;
+    }
     this._currentPositions[positionId] = new Position({
       mode: this._mode,
       positionId,
-      robotId: this._taskId,
+      traderId: this._taskId,
+      robotId: this._robotId,
       userId: this._userId,
       adviserId: this._adviserId,
       exchange: this._exchange,
@@ -204,8 +210,10 @@ class Trader {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      slippageStep: this._signal.settings.slippageStep || this._slippageStep,
-      deviation: this._signal.settings.deviation
+      slippageStep,
+      deviation,
+      log: this.log.bind(this),
+      logEvent: this.logEvent.bind(this)
     });
   }
 
@@ -215,18 +223,40 @@ class Trader {
    * @memberof Trader
    */
   async _loadPosition(positionId) {
-    // Если позиция еще не загружена
-    if (
-      !Object.prototype.hasOwnProperty.call(this._currentPositions, positionId)
-    ) {
-      // Запрашиваем из стореджа
-      const positionsState = await getPositonByKey({
-        partitionKey: this._taskId,
-        rowkey: positionId
-      });
-      // Создем экземпяр позиции
-      this._currentPositions[positionsState.positionid] = new Position(
-        positionsState
+    this.log("_loadPosition()");
+    try {
+      // Если позиция еще не загружена
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          this._currentPositions,
+          positionId
+        )
+      ) {
+        // Запрашиваем из стореджа
+        this.log("loading...");
+        const positionsState = await getPositonByKey({
+          partitionKey: this._taskId,
+          rowkey: positionId
+        });
+
+        // Создем экземпяр позиции
+        this._currentPositions[positionsState.positionId] = new Position({
+          ...positionsState,
+          log: this.log.bind(this),
+          logEvent: this.logEvent.bind(this)
+        });
+      }
+    } catch (error) {
+      throw new VError(
+        {
+          name: "PositionNotFound",
+          cause: error,
+          info: {
+            positionId
+          }
+        },
+        'Error while loading position id "%s"',
+        positionId
       );
     }
   }
@@ -238,8 +268,8 @@ class Trader {
    * @memberof Trader
    */
   async handleSignal(signal) {
+    this.log("handleSignal()");
     try {
-      this.log("handleSignal()");
       // Обновить текущий сигнал
       this._signal = signal;
       // Если сигнал уже обрабатывалась - выходим
@@ -252,7 +282,7 @@ class Trader {
         // Создаем новую позицию
         this._createPosition(this._signal.positionId);
         // Создаем ордер на открытие позиции
-        this._currentPositions[this._signal.positionId].createOpenOrder(
+        this._currentPositions[this._signal.positionId].createEntryOrder(
           this._signal
         );
       } else {
@@ -261,7 +291,7 @@ class Trader {
         // Загружаем существующую позицию
         await this._loadPosition(this._signal.positionId);
         // Создаем ордер на закрытие позиции
-        this._currentPositions[this._signal.positionId].createCloseOrder(
+        this._currentPositions[this._signal.positionId].createExitOrder(
           this._signal
         );
       }
@@ -292,9 +322,8 @@ class Trader {
             eventSubject: this._eventSubject
           }
         },
-        'Error while handling signal trader "%s" for user "%d"',
-        this._taskId,
-        this._userId
+        'Error while handling signal trader "%s"',
+        this._taskId
       );
     }
   }
@@ -305,61 +334,81 @@ class Trader {
    * @param {*} orders
    */
   async executeOrders(orders) {
+    this.log("executeOrders()");
     // Для каждого ордера
-    orders.map(async order => {
-      const orderResult = { ...order };
-      // Если задача - проверить исполнения объема
-      if (order.task === ORDER_TASK_CHECKLIMIT) {
-        // Если режим - в реальном времени
-        if (this._mode === REALTIME_MODE) {
-          // Запрашиваем статус ордера с биржи
-          // TODO: CheckOrderStatus API CALL
-          orderResult.state = ORDER_STATUS_CLOSED;
-          orderResult.executed = this._volume;
-        } else {
-          // Если режим - эмуляция или бэктест
-          // Считаем, что ордер исполнен
-          orderResult.state = ORDER_STATUS_CLOSED;
-          // Полностью - т.е. по заданному объему
-          orderResult.executed = this._volume;
+    /* eslint-disable no-restricted-syntax */
+    for (const order of orders) {
+      /* eslint-disable no-await-in-loop */
+      try {
+        const orderResult = { ...order };
+        // Если задача - проверить исполнения объема
+        if (order.task === ORDER_TASK_CHECKLIMIT) {
+          // Если режим - в реальном времени
+          if (this._mode === REALTIME_MODE) {
+            // Запрашиваем статус ордера с биржи
+            // TODO: CheckOrderStatus API CALL
+            orderResult.state = ORDER_STATUS_CLOSED;
+            orderResult.executed = this._volume;
+          } else {
+            // Если режим - эмуляция или бэктест
+            // Считаем, что ордер исполнен
+            orderResult.state = ORDER_STATUS_CLOSED;
+            // Полностью - т.е. по заданному объему
+            orderResult.executed = this._volume;
+          }
+          // Если задача - выставить лимитный или рыночный ордер
+        } else if (
+          order.task === ORDER_TASK_SETLIMIT ||
+          order.task === ORDER_TASK_OPENBYMARKET
+        ) {
+          // Устанавливаем объем из параметров
+          const orderToExecute = { ...order, volume: this._volume };
+          // Если режим - в реальном времени
+          if (this._mode === REALTIME_MODE) {
+            // Публикуем ордер на биржу
+            // TODO: SendOrder API CALL
+            const result = { externalId: uuid() };
+            orderResult.state = ORDER_STATUS_POSTED;
+            orderResult.externalId = result.externalId;
+          } else if (order.orderType === ORDER_TYPE_LIMIT) {
+            // Если режим - эмуляция или бэктест
+            // Если тип ордера - лимитный
+            // Считаем, что ордер успешно выставлен на биржу
+            orderResult.state = ORDER_STATUS_POSTED;
+          } else {
+            // Если режим - эмуляция или бэктест
+            // Если тип ордера - по рынку
+            // Считаем, что ордер исполнен
+            orderResult.state = ORDER_STATUS_CLOSED;
+            // Полностью - т.е. по заданному объему
+            orderResult.executed = orderToExecute.volume;
+          }
         }
-        // Если задача - выставить лимитный или рыночный ордер
-      } else if (
-        order.task === ORDER_TASK_SETLIMIT ||
-        order.task === ORDER_TASK_OPENBYMARKET
-      ) {
-        // Устанавливаем объем из параметров
-        const orderToExecute = { ...order, volume: this._volume };
-        // Если режим - в реальном времени
-        if (this._mode === REALTIME_MODE) {
-          // Публикуем ордер на биржу
-          // TODO: SendOrder API CALL
-          const result = { externalId: uuid() };
-          orderResult.state = ORDER_STATUS_POSTED;
-          orderResult.externalId = result.externalId;
-        } else if (order.orderType === ORDER_TYPE_LIMIT) {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - лимитный
-          // Считаем, что ордер успешно выставлен на биржу
-          orderResult.state = ORDER_STATUS_POSTED;
-        } else {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - по рынку
-          // Считаем, что ордер исполнен
-          orderResult.state = ORDER_STATUS_CLOSED;
-          // Полностью - т.е. по заданному объему
-          orderResult.executed = orderToExecute.volume;
-        }
+        // Загружаем позицию
+        this._loadPosition(order.positionId);
+
+        // Сохраняем ордер в позиции и генерируем событие
+        this._events.push(
+          this._currentPositions[order.positionId].handleOrder(orderResult)
+        );
+        // Сохраняем состояние позиции в сторедж
+        await this._currentPositions[order.positionId].save();
+      } catch (error) {
+        throw new VError(
+          {
+            name: "ExecutingOrder",
+            cause: error,
+            info: {
+              order
+            }
+          },
+          'Error while executing order "%s"',
+          order.orderId
+        );
       }
-      // Загружаем позицию
-      this._loadPosition(order.positionId);
-      // Сохраняем ордер в позиции и генерируем событие
-      this._events.push(
-        this._currentPositions[order.positionId].handleOrder(orderResult)
-      );
-      // Сохраняем состояние позиции в сторедж
-      await this._currentPositions[order.positionId].save();
-    });
+      /* eslint-disable no-await-in-loop */
+    }
+    /* eslint-disable no-restricted-syntax */
   }
 
   /**
