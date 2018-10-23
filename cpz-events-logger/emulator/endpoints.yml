@@ -40,6 +40,14 @@ endpoints:
   url: "/api/signalEvents"
   types:
   - CPZ.Signals.NewSignal
+- container_name: "cpz-trader"
+  url: "/api/candleEvents"
+  types:
+  - CPZ.Candles.NewCandle
+- container_name: "cpz-trader"
+  url: "/api/tickEvents"
+  types:
+  - CPZ.Ticks.NewTick
 # Taskrunner
 # - container_name: "cpz-taskrunner"
 #   url: "/api/taskEvents"
@@ -59,24 +67,8 @@ endpoints:
 #   - CPZ.Tasks.Trader.Updated
 #   - CPZ.Tasks.Backtester.Started
 #   - CPZ.Tasks.Backtester.Stopped
-# Backtester
-# - container_name: "cpz-backtester"
-#   url: "/api/taskEvents"
-#   types:
-#   - CPZ.Tasks.Backtester.Start
-#   - CPZ.Tasks.Backtester.Stop
-# - container_name: "cpz-backtester"
-#   url: "/api/candleEvents"
-#   types:
-#   - CPZ.Candles.NewCandle
-#   - CPZ.Candles.Handled
-# - container_name: "cpz-backtester"
-#   url: "/api/signalEvents"
-#   types:
-#   - CPZ.Signals.NewSignal
-#   - CPZ.Signals.Handled
-# - container_name: "cpz-backtester"
-#   url: "/api/orderEvents"
-#   types:
-#   - CPZ.Orders.NewOpenOrder
-#   - CPZ.Orders.NewCloseOrder
+Backtester
+- container_name: "cpz-backtester"
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Backtester.Start
