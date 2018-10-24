@@ -1,0 +1,21 @@
+{
+    "extends": ["airbnb-base", "plugin:prettier/recommended"],
+    "env": {
+        "node": true,
+        "mocha": true
+    },
+    "plugins": ["prettier"],
+    "rules": {
+        "prettier/prettier": "error",
+        "no-unused-vars": "warn",
+        "class-methods-use-this": "off",
+        "import/prefer-default-export": "error",
+        "no-console": "off",
+        "no-param-reassign": "off",
+        "no-underscore-dangle": "off",
+        "no-use-before-define": ["error", { "functions": false }]
+    },
+    "settings": {
+        "import/resolver": "webpack"
+    }
+}

@@ -54,6 +54,11 @@ function objectToEntity(object) {
   return entity;
 }
 
+function createMarketwatcherSlug(hostId, modeStr = "R") {
+  if (modeStr === "R") return hostId;
+  return `${hostId}.${modeStr}`;
+}
+
 function createAdviserSlug(
   exchange,
   asset,
@@ -77,6 +82,7 @@ function createBacktesterSlug(exchange, asset, currency, timeframe, robotId) {
 export {
   entityToObject,
   objectToEntity,
+  createMarketwatcherSlug,
   createAdviserSlug,
   createTraderSlug,
   createBacktesterSlug
