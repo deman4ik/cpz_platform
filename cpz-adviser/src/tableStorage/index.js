@@ -17,7 +17,7 @@ import {
   queryEntities
 } from "cpzStorage/storage";
 import { objectToEntity, createAdviserSlug } from "cpzStorage/utils";
-import { modeToStr, generateKey } from "cpzUtils/helpers";
+import { modeToStr } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;

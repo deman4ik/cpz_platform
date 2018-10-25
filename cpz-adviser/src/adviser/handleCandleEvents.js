@@ -131,7 +131,7 @@ async function handleCandle(context, eventData) {
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
     // Публикуем событие - успех
-    await publishEvents(context, CANDLES_TOPIC, {
+    await publishEvents(CANDLES_TOPIC, {
       service: ADVISER_SERVICE,
       subject: `${candle.exchange}/${candle.asset}/${candle.currency}/${
         candle.timeframe
@@ -160,7 +160,7 @@ async function handleCandle(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,

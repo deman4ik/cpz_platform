@@ -169,7 +169,7 @@ class Adviser {
    */
   logEvent(data) {
     // Публикуем событие
-    publishEvents(this._context, LOG_TOPIC, {
+    publishEvents(LOG_TOPIC, {
       service: ADVISER_SERVICE,
       subject: this._eventSubject,
       eventType: LOG_ADVISER_EVENT,

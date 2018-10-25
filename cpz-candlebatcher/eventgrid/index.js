@@ -46,7 +46,7 @@ function createEvents(eventData) {
   events.push(newEvent);
   return events;
 }
-async function publishEvents(context, topic, events) {
+async function publishEvents(topic, events) {
   try {
     const { client, host } = topics[topic];
     await client.publishEvents(host, events);

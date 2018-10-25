@@ -64,7 +64,7 @@ async function execute(context, state, signal, child = false) {
     // Если есть хотя бы одно событие для отправка
     if (trader.events.length > 0) {
       // Отправляем
-      await publishEvents(context, TRADES_TOPIC, trader.events);
+      await publishEvents(TRADES_TOPIC, trader.events);
     }
     // Завершаем работу и сохраняем стейт
     await trader.end(STATUS_STARTED);
@@ -243,7 +243,7 @@ async function handleSignal(context, eventData) {
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
     // Публикуем событие - успех
-    await publishEvents(context, SIGNALS_TOPIC, {
+    await publishEvents(SIGNALS_TOPIC, {
       service: TRADER_SERVICE,
       subject: `${signal.exchange}/${signal.asset}/${signal.currency}/${
         signal.timeframe
@@ -272,7 +272,7 @@ async function handleSignal(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_TRADER_EVENT,

@@ -50,7 +50,7 @@ const topicsConfig = {
   }
 };
 
-async function publishEvents(context, topic, eventData) {
+async function publishEvents(topic, eventData) {
   try {
     let events = [];
     if (Array.isArray(eventData)) {
@@ -95,7 +95,7 @@ async function publishEvents(context, topic, eventData) {
       topic
     );
     const errorOutput = createErrorOutput(err);
-    context.log.error(errorOutput.message, errorOutput);
+    console.error(errorOutput.message, errorOutput);
     throw err;
   }
 }

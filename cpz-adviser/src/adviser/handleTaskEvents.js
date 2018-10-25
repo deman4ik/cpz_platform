@@ -38,7 +38,7 @@ async function handleStart(context, eventData) {
     // Сохраняем состояние
     adviser.end(STATUS_STARTED);
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STARTED_EVENT,
@@ -69,7 +69,7 @@ async function handleStart(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STARTED_EVENT,
@@ -113,7 +113,7 @@ async function handleStop(context, eventData) {
     // Обновляем состояние советника
     await updateAdviserState(newState);
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STOPPED_EVENT,
@@ -136,7 +136,7 @@ async function handleStop(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STOPPED_EVENT,
@@ -181,7 +181,7 @@ async function handleUpdate(context, eventData) {
     await updateAdviserState(newState);
 
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_UPDATED_EVENT,
@@ -204,7 +204,7 @@ async function handleUpdate(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: ADVISER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_UPDATED_EVENT,

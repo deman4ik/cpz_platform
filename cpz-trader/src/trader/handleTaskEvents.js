@@ -38,7 +38,7 @@ async function handleStart(context, eventData) {
     // Сохраняем состояние
     trader.end(STATUS_STARTED);
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_STARTED_EVENT,
@@ -69,7 +69,7 @@ async function handleStart(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_STARTED_EVENT,
@@ -113,7 +113,7 @@ async function handleStop(context, eventData) {
     // Обновляем состояние проторговщика
     await updateTraderState(newState);
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_STOPPED_EVENT,
@@ -136,7 +136,7 @@ async function handleStop(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_STOPPED_EVENT,
@@ -177,7 +177,7 @@ async function handleUpdate(context, eventData) {
     await updateTraderState(newState);
 
     // Публикуем событие - успех
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_UPDATED_EVENT,
@@ -200,7 +200,7 @@ async function handleUpdate(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_UPDATED_EVENT,

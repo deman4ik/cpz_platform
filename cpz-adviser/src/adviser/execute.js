@@ -49,7 +49,7 @@ async function execute(context, state, candle, child = false) {
     // Если есть хотя бы одно событие для отправка
     if (adviser.events.length > 0) {
       // Отправляем
-      await publishEvents(context, SIGNALS_TOPIC, adviser.events);
+      await publishEvents(SIGNALS_TOPIC, adviser.events);
     }
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);

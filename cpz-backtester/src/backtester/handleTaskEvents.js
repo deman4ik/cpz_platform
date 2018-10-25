@@ -39,7 +39,7 @@ async function handleStart(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,

@@ -76,7 +76,7 @@ async function backtest(context, eventData) {
     }
     // Сохраняем начальное состояние
     await saveBacktesterState(backtesterState);
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,
@@ -138,7 +138,7 @@ async function backtest(context, eventData) {
           // Если есть хотя бы одно событие для отправка
           if (traderBacktester.events.length > 0) {
             // Отправляем
-            await publishEvents(context, TRADES_TOPIC, traderBacktester.events);
+            await publishEvents(TRADES_TOPIC, traderBacktester.events);
           }
         }
         // Сохраянем состояние итерации
@@ -174,7 +174,7 @@ async function backtest(context, eventData) {
     // Сохраняем состояние пачки
     await saveBacktesterState(backtesterState);
 
-    await publishEvents(context, TASKS_TOPIC, {
+    await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_FINISHED_EVENT,
@@ -204,7 +204,7 @@ async function backtest(context, eventData) {
       await saveBacktesterState(backtesterState);
     }
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: BACKTESTER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,

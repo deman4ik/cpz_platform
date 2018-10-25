@@ -57,7 +57,7 @@ async function handlePrice(context, eventData) {
             // Если есть хотя бы одно событие для отправка
             if (trader.events.length > 0) {
               // Отправляем
-              await publishEvents(context, TRADES_TOPIC, trader.events);
+              await publishEvents(TRADES_TOPIC, trader.events);
             }
           }
         } catch (error) {
@@ -114,7 +114,7 @@ async function handlePrice(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_TRADER_EVENT,
@@ -159,7 +159,7 @@ async function handleTick(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_TRADER_EVENT,
@@ -204,7 +204,7 @@ async function handleCandle(context, eventData) {
     );
     context.log.error(errorOutput.message, errorOutput);
     // Публикуем событие - ошибка
-    await publishEvents(context, ERROR_TOPIC, {
+    await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_TRADER_EVENT,
