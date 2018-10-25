@@ -27,7 +27,6 @@ async function handleStart(context, eventData) {
     candlebatcher.end();
     // Публикуем событие - успех
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,
@@ -47,7 +46,6 @@ async function handleStart(context, eventData) {
     context.log.error("Candlebatcher starting error:", error, eventData);
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,
@@ -91,7 +89,6 @@ async function handleStop(context, eventData) {
         throw new Error(`Can't update state\n${result.error}`);
       // Публикуем событие - успех
       await publishEvents(
-        context,
         "tasks",
         createEvents({
           subject: eventData.eventSubject,
@@ -108,7 +105,6 @@ async function handleStop(context, eventData) {
     context.log.error("Candlebatcher stopping error:", error, eventData);
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,
@@ -158,7 +154,6 @@ async function handleUpdate(context, eventData) {
         throw new Error(`Can't update state\n${result.error}`);
       // Публикуем событие - успех
       await publishEvents(
-        context,
         "tasks",
         createEvents({
           subject: eventData.eventSubject,
@@ -175,7 +170,6 @@ async function handleUpdate(context, eventData) {
     context.log.error("Candlebatcher updating error:", error, eventData);
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,

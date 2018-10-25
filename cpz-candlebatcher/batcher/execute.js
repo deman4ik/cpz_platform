@@ -102,7 +102,6 @@ async function execute(context, state) {
     }
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "log",
       createEvents({
         subject: state.eventSubject,

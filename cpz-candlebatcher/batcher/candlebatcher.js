@@ -85,7 +85,6 @@ class Candlebatcher {
   logEvent(data) {
     // Публикуем событие - ошибка
     publishEvents(
-      this.context,
       "log",
       createEvents({
         subject: this.eventSubject,

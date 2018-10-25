@@ -129,11 +129,7 @@ async function backtest(context, eventData) {
           // Если есть хотя бы одно событие для отправка
           if (adviserBacktester.events.length > 0) {
             // Отправляем
-            await publishEvents(
-              context,
-              SIGNALS_TOPIC,
-              adviserBacktester.events
-            );
+            await publishEvents(SIGNALS_TOPIC, adviserBacktester.events);
           }
           // Если есть хотя бы одно событие для отправка
           if (traderBacktester.events.length > 0) {

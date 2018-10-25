@@ -34,7 +34,6 @@ async function handleImportStop(context, eventData) {
       throw new Error(`Can't update Importer state\n${result.error}`);
     // Публикуем событие - успех
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,
@@ -49,7 +48,6 @@ async function handleImportStop(context, eventData) {
     context.log.error(error, eventData);
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "tasks",
       createEvents({
         subject: eventData.eventSubject,

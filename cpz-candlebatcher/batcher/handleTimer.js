@@ -21,7 +21,6 @@ async function handleTimer(context) {
     context.log.error(error);
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "log",
       createEvents({
         subject: "Timer",

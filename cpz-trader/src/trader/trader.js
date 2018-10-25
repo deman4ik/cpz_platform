@@ -154,7 +154,7 @@ class Trader {
    */
   logEvent(data) {
     // Публикуем событие
-    publishEvents(this._context, LOG_TOPIC, {
+    publishEvents(LOG_TOPIC, {
       service: TRADER_SERVICE,
       subject: this._eventSubject,
       eventType: LOG_TRADER_EVENT,

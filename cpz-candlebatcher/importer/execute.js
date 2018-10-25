@@ -35,7 +35,6 @@ async function execute(context, state, start = false) {
     if (start) {
       // Публикуем событие - успех
       await publishEvents(
-        context,
         "tasks",
         createEvents({
           subject: state.eventSubject,
@@ -76,7 +75,6 @@ async function execute(context, state, start = false) {
     }
     // Публикуем событие - ошибка
     await publishEvents(
-      context,
       "log",
       createEvents({
         subject: state.eventSubject,

@@ -54,7 +54,6 @@ class Importer {
     if (this.debug) {
       // Публикуем событие - ошибка
       publishEvents(
-        this.context,
         "log",
         createEvents({
           subject: this.eventSubject,
@@ -73,7 +72,7 @@ class Importer {
     this.log(`initConnector()`);
     try {
       // TODO: check connection
-      this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
+            this.loadCandlesFunc = require(`../connectors/${this.providerType}`); // eslint-disable-line
       if (typeof this.loadCandlesFunc !== "function")
         throw new Error(`Connector "${this.providerType}" is not a function`);
     } catch (error) {
