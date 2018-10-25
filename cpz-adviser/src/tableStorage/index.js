@@ -66,40 +66,6 @@ async function saveAdviserState(state) {
 }
 
 /**
- * Сохранение состояния бэктеста
- *
- * @param {*} state
- * @returns
- */
-async function saveBacktesterState(state) {
-  try {
-    const entity = {
-      PartitionKey: entityGenerator.String(
-        createAdviserSlug(
-          state.exchange,
-          state.asset,
-          state.currency,
-          state.timeframe
-        )
-      ),
-      RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
-    };
-    await insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, entity);
-  } catch (error) {
-    throw new VError(
-      {
-        name: "BacktesterStorageError",
-        cause: error,
-        info: {
-          state
-        }
-      },
-      "Failed to save backtester state"
-    );
-  }
-}
-/**
  * Сохранение свечи ожидающих обработки
  *
  * @param {*} candle
@@ -124,33 +90,6 @@ async function savePendingCandle(candle) {
       },
       'Failed to save candle to "%s"',
       STORAGE_CANDLESPENDING_TABLE
-    );
-  }
-}
-
-/**
- * Сохранение свечей в кэш
- * @param {*} candle
- */
-async function saveBacktesterItem(item) {
-  try {
-    const entity = {
-      PartitionKey: entityGenerator.String(`${item.taskId}`),
-      RowKey: entityGenerator.String(generateKey()),
-      ...objectToEntity(item)
-    };
-    await insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, entity);
-  } catch (error) {
-    throw new VError(
-      {
-        name: "AdviserStorageError",
-        cause: error,
-        info: {
-          item
-        }
-      },
-      'Failed to save candle to "%s"',
-      STORAGE_BACKTESTITEMS_TABLE
     );
   }
 }
@@ -245,7 +184,7 @@ async function getAdviserByKey(keys) {
           keys
         }
       },
-      'Failed to read adviser state "%s", "%d"',
+      'Failed to read adviser state "%s", "%s"',
       keys.partitionKey,
       keys.rowKey
     );
@@ -369,8 +308,6 @@ async function getPendingCandlesByAdviserId(id) {
 export {
   saveAdviserState,
   savePendingCandle,
-  saveBacktesterState,
-  saveBacktesterItem,
   updateAdviserState,
   deletePendingCandle,
   getAdviserByKey,
