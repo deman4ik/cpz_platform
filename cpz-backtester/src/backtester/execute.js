@@ -65,7 +65,7 @@ async function backtest(context, eventData) {
               actualHistoryMaxBars: getRequiredHistoryResult.nodes.length
             }
           },
-          "Can't load history required: %s bars but loaded: %d bars",
+          "Can't load history required: %s bars but loaded: %s bars",
           eventData.requiredHistoryMaxBars,
           getRequiredHistoryResult.nodes.length
         );
