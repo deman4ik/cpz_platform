@@ -15,7 +15,7 @@ import {
   queryEntities
 } from "cpzStorage/storage";
 import { objectToEntity, createTraderSlug } from "cpzStorage/utils";
-import { modeToStr, generateKey } from "cpzUtils/helpers";
+import { modeToStr } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
@@ -238,7 +238,7 @@ async function getTraderByKey(keys) {
           keys
         }
       },
-      'Failed to read trader state "%s", "%d"',
+      'Failed to read trader state "%s", "%s"',
       keys.partitionKey,
       keys.rowKey
     );
@@ -331,7 +331,7 @@ async function getPositonByKey(keys) {
           keys
         }
       },
-      'Failed to read position state "%s", "%d"',
+      'Failed to read position state "%s", "%s"',
       keys.partitionKey,
       keys.rowKey
     );

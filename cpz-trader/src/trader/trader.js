@@ -177,7 +177,7 @@ class Trader {
       {
         name: "TraderCrashError"
       },
-      'Critical error while executing trader "%s" for user "%d" - "%f"',
+      'Critical error while executing trader "%s" for user "%s" - "%s"',
       this._taskId,
       this._userId,
       msg
