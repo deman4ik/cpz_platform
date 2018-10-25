@@ -22,6 +22,12 @@ const topicsConfig = {
     client: createClient(process.env.EG_TASKS_KEY || process.env.EG_TEST_KEY),
     host: getHost(process.env.EG_TASKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
   },
+  ticks: {
+    client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
+    host: getHost(
+      process.env.EG_CANDLES_ENDPOINT || process.env.EG_TEST_ENDPOINT
+    )
+  },
   candles: {
     client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
     host: getHost(

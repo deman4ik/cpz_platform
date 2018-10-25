@@ -15,10 +15,7 @@ const pathsToClean = [path.resolve(__dirname, "dist")];
  */
 function findEntryPoints() {
   const entry = {
-    cryptocompare: path.resolve(
-      __dirname,
-      "src/providers/cryptocompare/process.js"
-    )
+    cryptocompare: path.resolve(__dirname, "src/providers/cryptocompare.js")
   };
   fs.readdirSync(path.resolve(__dirname, "src/funcs")).forEach(file => {
     const key = file.replace(".js", "");
@@ -72,7 +69,6 @@ const config = {
   plugins: [
     new CleanWebpackPlugin(pathsToClean),
     new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({
       banner: 'require("source-map-support").install();',

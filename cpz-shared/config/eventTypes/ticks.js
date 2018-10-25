@@ -5,24 +5,23 @@ const TICKS_NEWTICK_EVENT = {
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },
-    side: {
-      description: "Trade side.",
+    direction: {
+      description: "Price direction.",
       type: "string",
-      values: ["buy", "sell"]
+      values: ["up", "down", "unchanged"]
     },
-    tradeId: {
-      description: "Trade ID.",
-      type: "string",
-      empty: false
-    },
-    time: { description: "Trade time in seconds.", type: "number" },
+    price: { description: "Trade Price.", type: "number" },
     timestamp: {
       description: "Trade timestamp in UTC.",
       type: "datetime",
       optinal: true // TODO: remove after altering candlebatcher
     },
     volume: { description: "Trade Volume.", type: "number" },
-    price: { description: "Trade Price.", type: "number" }
+    tradeId: {
+      description: "Trade ID.",
+      type: "string",
+      empty: false
+    }
   }
 };
 

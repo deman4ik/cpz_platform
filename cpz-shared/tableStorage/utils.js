@@ -59,6 +59,22 @@ function createMarketwatcherSlug(hostId, modeStr = "R") {
   return `${hostId}.${modeStr}`;
 }
 
+function createCachedTickSlug(exchange, asset, currency, modeStr = "R") {
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
+  return `${exchange}.${asset}.${currency}.${modeStr}`;
+}
+
+function createCachedCandleSlug(
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  modeStr = "R"
+) {
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
+  return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
+}
+
 function createAdviserSlug(
   exchange,
   asset,
@@ -83,6 +99,8 @@ export {
   entityToObject,
   objectToEntity,
   createMarketwatcherSlug,
+  createCachedTickSlug,
+  createCachedCandleSlug,
   createAdviserSlug,
   createTraderSlug,
   createBacktesterSlug

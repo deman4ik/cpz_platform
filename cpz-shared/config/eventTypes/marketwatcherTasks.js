@@ -8,11 +8,6 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
     mode: {
       description: "Service run mode.",
       type: "string",
@@ -61,11 +56,6 @@ const TASKS_MARKETWATCHER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
     }
   }
 };
@@ -75,11 +65,6 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
       type: "string",
       empty: false
     },
@@ -110,16 +95,11 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
   }
 };
 const TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT = {
-  eventType: "CPZ.Tasks.Marketwatcher.Unsubsribe",
+  eventType: "CPZ.Tasks.Marketwatcher.Unsubscribe",
 
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
       type: "string",
       empty: false
     },
