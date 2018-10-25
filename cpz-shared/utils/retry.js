@@ -23,7 +23,7 @@ async function retry(
           retries: options.retries
         }
       },
-      'Failed to execute function "%s" after "%d" attempts',
+      'Failed to execute function "%s" after "%s" attempts',
       name,
       options.retries
     );
