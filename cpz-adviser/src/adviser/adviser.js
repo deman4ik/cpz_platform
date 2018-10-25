@@ -192,7 +192,7 @@ class Adviser {
       {
         name: "AdviserCrashError"
       },
-      'Error while executing strategy "%s" - "%d"',
+      'Error while executing strategy "%s" - "%s"',
       this._strategyName,
       msg
     );
