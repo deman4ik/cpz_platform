@@ -164,30 +164,40 @@ function deleteEntity(tableName, entity) {
  */
 function queryEntities(tableName, tableQuery) {
   return new Promise((resolve, reject) => {
-    tableService.queryEntities(tableName, tableQuery, null, (error, result) => {
-      if (error)
-        reject(
-          new VError(
-            {
-              name: error.name,
-              cause: error,
-              info: {
-                tableName,
-                tableQuery
-              }
-            },
-            'Failed to query entities from "%s"',
-            tableName
-          )
-        );
-      const entities = [];
-      if (result) {
-        result.entries.forEach(element => {
-          entities.push(entityToObject(element));
-        });
+    const entities = [];
+    let nextContinuationToken = null;
+    tableService.queryEntities(
+      tableName,
+      tableQuery,
+      nextContinuationToken,
+      (error, result) => {
+        if (error)
+          reject(
+            new VError(
+              {
+                name: error.name,
+                cause: error,
+                info: {
+                  tableName,
+                  tableQuery
+                }
+              },
+              'Failed to query entities from "%s"',
+              tableName
+            )
+          );
+
+        if (result) {
+          result.entries.forEach(element => {
+            entities.push(entityToObject(element));
+          });
+        }
+        if (result.continuationToken) {
+          nextContinuationToken = result.continuationToken;
+        }
       }
-      resolve(entities);
-    });
+    );
+    resolve(entities);
   });
 }
 export {
