@@ -12,10 +12,6 @@ RUN npm install tulind --build-from-source && \
     npm run webpack && \
     npm uninstall -D && \
     npm cache clean --force
-RUN apt-get remove -y git && \
-    apt-get remove -y python2.7 && \
-    apt-get remove -y build-essential && \
-    apt-get remove -y gcc      
 
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot

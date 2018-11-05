@@ -13,24 +13,26 @@ services:
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
       - NODE_TLS_REJECT_UNAUTHORIZED
-  # cpz-marketwatcher:
-  #   container_name: cpz-marketwatcher
-  #   build: ./cpz-marketWatcher/
-  #   ports:
-  #     - "8102:80"
-  #   volumes:
-  #    - ./cpz-marketWatcher/:/cpz-marketWatcher/
-  #   environment:
-  #   - AzureWebJobsStorage
-  #   - AZ_STORAGE_CS  
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY 
-  #   - PROXY_ENDPOINT
-  #   restart: always
+  cpz-marketwatcher:
+    container_name: cpz-marketwatcher
+    build:
+      context: .
+      dockerfile: CPZMarketwatcher.Dockerfile
+    ports:
+      - "8102:80"
+    environment:
+    - AzureWebJobsStorage
+    - AZ_STORAGE_CS  
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY 
+    - PROXY_ENDPOINT
+    restart: always
   cpz-candlebatcher:
     container_name: cpz-candlebatcher
-    build: ./cpz-candlebatcher/
+    build:
+      context: .
+      dockerfile: CPZCandlebatcher.Dockerfile
     ports:
       - "8103:80"
     environment:

@@ -4,9 +4,9 @@ RUN apt-get update &&  \
     apt-get install -y python2.7 && \ 
     apt-get install -y build-essential && \
     apt-get install -y gcc
-COPY /cpz-trader /src/cpz-trader
+COPY /cpz-marketwatcher /src/cpz-marketwatcher
 COPY /cpz-shared /src/cpz-shared    
-WORKDIR /src/cpz-trader
+WORKDIR /src/cpz-marketwatcher
 RUN npm install && \
     npm run webpack && \
     npm uninstall -D && \
@@ -14,6 +14,6 @@ RUN npm install && \
 
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
-COPY --from=build ["/src/cpz-trader","/home/site/wwwroot"]
+COPY --from=build ["/src/cpz-marketwatcher","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
   
