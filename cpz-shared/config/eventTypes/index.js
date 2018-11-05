@@ -3,6 +3,7 @@ export * from "./events";
 export * from "./signals";
 export * from "./marketwatcherTasks";
 export * from "./candlebatcherTasks";
+export * from "./importerTasks";
 export * from "./adviserTasks";
 export * from "./traderTasks";
 export * from "./backtesterTasks";

@@ -5,6 +5,8 @@
 const STORAGE_TICKSCACHED_TABLE = "TicksCashed"; // Кэш текущих свечей
 const STORAGE_MARKETWATCHERS_TABLE = "Marketwatchers"; // Наблюдатели за рынком
 
+const STORAGE_CANDLEBATCHERS_TABLE = "Candlebatchers"; // Преобразователи свечей
+const STORAGE_IMPORTERS_TABLE = "Importers"; // Импортеры
 const STORAGE_CANDLESCACHED_TABLE = "CandlesCached"; // Кэш текущих свечей
 
 const STORAGE_ADVISERS_TABLE = "Advisers"; // Советники
@@ -20,6 +22,8 @@ const STORAGE_BACKTESTITEMS_TABLE = "BacktestItems"; // Элементы бэк�
 export {
   STORAGE_TICKSCACHED_TABLE,
   STORAGE_MARKETWATCHERS_TABLE,
+  STORAGE_CANDLEBATCHERS_TABLE,
+  STORAGE_IMPORTERS_TABLE,
   STORAGE_ADVISERS_TABLE,
   STORAGE_TRADERS_TABLE,
   STORAGE_POSITIONS_TABLE,

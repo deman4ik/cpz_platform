@@ -1,3 +1,5 @@
+import { BASE_ERROR } from "./events";
+
 const TASKS_CANDLEBATCHER_START_EVENT = {
   eventType: "CPZ.Tasks.Candlebatcher.Start",
 
@@ -39,7 +41,7 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
 };
 const TASKS_CANDLEBATCHER_STOP_EVENT = {
   eventType: "CPZ.Tasks.Candlebatcher.Stop",
-  subject: "{Exchange}/{Asset}/{Currency}/{TaskId}.{B/E/R}",
+
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
@@ -58,6 +60,7 @@ const TASKS_CANDLEBATCHER_STOP_EVENT = {
     }
   }
 };
+
 const TASKS_CANDLEBATCHER_UPDATE_EVENT = {
   eventType: "CPZ.Tasks.Candlebatcher.Update",
 
@@ -113,29 +116,7 @@ const TASKS_CANDLEBATCHER_STARTED_EVENT = {
       type: "string",
       empty: false
     },
-    error: {
-      type: "object",
-      description: "Error object if something goes wrong.",
-      props: {
-        code: {
-          description: "Error code.",
-          type: "string",
-          empty: false
-        },
-        message: {
-          description: "Error message.",
-          type: "string",
-          empty: false
-        },
-        detail: {
-          description: "Error detail.",
-          type: "string",
-          optional: true,
-          empty: false
-        }
-      },
-      optional: true
-    }
+    error: BASE_ERROR
   }
 };
 const TASKS_CANDLEBATCHER_STOPPED_EVENT = {
@@ -147,29 +128,7 @@ const TASKS_CANDLEBATCHER_STOPPED_EVENT = {
       type: "string",
       empty: false
     },
-    error: {
-      type: "object",
-      description: "Error object if something goes wrong.",
-      props: {
-        code: {
-          description: "Error code.",
-          type: "string",
-          empty: false
-        },
-        message: {
-          description: "Error message.",
-          type: "string",
-          empty: false
-        },
-        detail: {
-          description: "Error detail.",
-          type: "string",
-          optional: true,
-          empty: false
-        }
-      },
-      optional: true
-    }
+    error: BASE_ERROR
   }
 };
 const TASKS_CANDLEBATCHER_UPDATED_EVENT = {
@@ -181,29 +140,7 @@ const TASKS_CANDLEBATCHER_UPDATED_EVENT = {
       type: "string",
       empty: false
     },
-    error: {
-      type: "object",
-      description: "Error object if something goes wrong.",
-      props: {
-        code: {
-          description: "Error code.",
-          type: "string",
-          empty: false
-        },
-        message: {
-          description: "Error message.",
-          type: "string",
-          empty: false
-        },
-        detail: {
-          description: "Error detail.",
-          type: "string",
-          optional: true,
-          empty: false
-        }
-      },
-      optional: true
-    }
+    error: BASE_ERROR
   }
 };
 

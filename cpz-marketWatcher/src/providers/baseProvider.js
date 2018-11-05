@@ -27,7 +27,7 @@ class BaseProvider {
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
     /* Поставщик данных */
-    this._provider = state.provider;
+    this._providerType = state.providerType;
     /* Список подписок */
     this._subscriptions = state.subscriptions || [];
     /* Текущий статус сервиса */
@@ -131,7 +131,7 @@ class BaseProvider {
     }
   }
 
-  async _saveTick(tick) {
+  async _saveTrade(tick) {
     try {
       await saveCachedTick(tick);
     } catch (error) {

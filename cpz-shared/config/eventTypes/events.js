@@ -84,6 +84,10 @@ const LOG_CANDLEBATCHER_EVENT = {
   eventType: "CPZ.Candlebatcher.Log"
 };
 
+const LOG_IMPORTER_EVENT = {
+  eventType: "CPZ.Importer.Log"
+};
+
 const LOG_ADVISER_EVENT = {
   eventType: "CPZ.Adviser.Log"
 };
@@ -100,6 +104,10 @@ const ERROR_CANDLEBATCHER_EVENT = {
   eventType: "CPZ.Candlebatcher.Error"
 };
 
+const ERROR_IMPORTER_EVENT = {
+  eventType: "CPZ.Importer.Error"
+};
+
 const ERROR_ADVISER_EVENT = {
   eventType: "CPZ.Adviser.Error"
 };
@@ -114,10 +122,12 @@ export {
   SUB_VALIDATION_EVENT,
   LOG_ADVISER_EVENT,
   LOG_CANDLEBATCHER_EVENT,
+  LOG_IMPORTER_EVENT,
   LOG_MARKETWATCHER_EVENT,
   LOG_TRADER_EVENT,
   ERROR_ADVISER_EVENT,
   ERROR_CANDLEBATCHER_EVENT,
+  ERROR_IMPORTER_EVENT,
   ERROR_MARKETWATCHER_EVENT,
   ERROR_TRADER_EVENT
 };

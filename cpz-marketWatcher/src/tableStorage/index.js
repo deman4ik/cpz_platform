@@ -65,7 +65,7 @@ async function saveCachedTick(tick) {
     const entity = {
       PartitionKey: entityGenerator.String(
         createCachedTickSlug(
-          tick.exchange,
+          tick.exchange.toLowerCase(),
           tick.asset,
           tick.currency,
           modeToStr(tick.mode)

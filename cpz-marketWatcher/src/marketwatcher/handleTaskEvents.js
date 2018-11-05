@@ -51,7 +51,7 @@ async function handleStart(context, eventData) {
         eventData.hostId
       );
     }
-    createNewProcess(context, eventData.taskId, eventData.provider);
+    createNewProcess(context, eventData.taskId, eventData.providerType);
     sendEventToProcess(eventData.taskId, {
       type: "start",
       context,

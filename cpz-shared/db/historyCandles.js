@@ -1,6 +1,5 @@
 import VError from "verror";
 import client from "./client";
-import { tryParseJSON } from "../utils/helpers";
 
 async function getHistoryCandles(input) {
   let tablename;

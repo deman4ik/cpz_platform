@@ -3,7 +3,9 @@ import azure from "azure-storage";
 import VError from "verror";
 import { entityToObject } from "./utils";
 
-const tableService = azure.createTableService(process.env.AZ_STORAGE_CS);
+const tableService = azure
+  .createTableService(process.env.AZ_STORAGE_CS)
+  .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
 /**
  * Создание таблицы если еще не существует
  *
@@ -165,11 +167,13 @@ function deleteEntity(tableName, entity) {
 function queryEntities(tableName, tableQuery) {
   return new Promise((resolve, reject) => {
     const entities = [];
-    let nextContinuationToken = null;
+    // TODO: Handle nextContinuationToken
+    // let nextContinuationToken = null;
     tableService.queryEntities(
       tableName,
       tableQuery,
-      nextContinuationToken,
+      null,
+      // nextContinuationToken,
       (error, result) => {
         if (error)
           reject(
@@ -192,12 +196,12 @@ function queryEntities(tableName, tableQuery) {
             entities.push(entityToObject(element));
           });
         }
-        if (result.continuationToken) {
+        /* if (result.continuationToken) {
           nextContinuationToken = result.continuationToken;
-        }
+        } */
+        resolve(entities);
       }
     );
-    resolve(entities);
   });
 }
 export {

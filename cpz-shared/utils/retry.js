@@ -2,7 +2,6 @@ import pretry from "p-retry";
 import VError from "verror";
 
 async function retry(
-  name,
   func,
   options = {
     retries: 2,
@@ -19,12 +18,11 @@ async function retry(
         name: "RetryError",
         cause: error,
         info: {
-          name,
           retries: options.retries
         }
       },
-      'Failed to execute function "%s" after "%s" attempts',
-      name,
+      'Failed to execute function after "%s" attempts',
+
       options.retries
     );
   }

@@ -19,33 +19,38 @@ class CryptocompareProvider extends BaseProvider {
     this._subscribeToSocketEvents();
   }
 
+  _getDirection(dir) {
+    switch (dir) {
+      case "1":
+        return "up";
+      case "2":
+        return "down";
+      case "4":
+        return "unchanged";
+      default:
+        return "unknown";
+    }
+  }
+
   _currentToObject(value) {
-    // {Type}~{ExchangeName}~{FromCurrency}~{ToCurrency}~{Flag}~{Price}~{LastUpdate}~{LastVolume}~{LastVolumeTo}~{LastTradeId}~{Volume24h}~{Volume24hTo}~{MaskInt}
     const valuesArray = value.split("~");
-    const getDirection = dir => {
-      switch (dir) {
-        case "1":
-          return "up";
-        case "2":
-          return "down";
-        case "4":
-          return "unchanged";
-        default:
-          return "unknown";
-      }
-    };
 
     const type = valuesArray[0];
     if (type === "2") {
+      // {Type}~{ExchangeName}~{FromCurrency}~{ToCurrency}~{Flag}~{Price}~{LastUpdate}~{LastVolume}~{LastVolumeTo}~{LastTradeId}~{Volume24h}~{Volume24hTo}~{MaskInt}
+
       const mask = valuesArray[valuesArray.length - 1].toString().slice(-1);
       if (mask === "9") {
         const obj = {
+          type: "tick",
           tickId: uuid(),
           exchange: valuesArray[1],
           asset: valuesArray[2],
           currency: valuesArray[3],
-          direction: getDirection(valuesArray[4]),
+          mode: this._mode,
+          direction: this._getDirection(valuesArray[4]),
           price: parseFloat(valuesArray[5]),
+          time: parseInt(valuesArray[6], 10) * 1000,
           timestamp: new Date(
             parseInt(valuesArray[6], 10) * 1000
           ).toISOString(),
@@ -54,6 +59,24 @@ class CryptocompareProvider extends BaseProvider {
         };
         return obj;
       }
+    }
+    if (type === "0") {
+      // {SubscriptionId}~{ExchangeName}~{CurrencySymbol}~{CurrencySymbol}~{Flag}~{TradeId}~{TimeStamp}~{Quantity}~{Price}~{Total}
+      const obj = {
+        type: "trade",
+        tickId: uuid(),
+        exchange: valuesArray[1],
+        asset: valuesArray[2],
+        currency: valuesArray[3],
+        mode: this._mode,
+        direction: this._getDirection(valuesArray[4]),
+        tradeId: valuesArray[5],
+        time: parseInt(valuesArray[6], 10) * 1000,
+        timestamp: new Date(parseInt(valuesArray[6], 10) * 1000).toISOString(),
+        volume: parseFloat(valuesArray[7]),
+        price: parseFloat(valuesArray[8])
+      };
+      return obj;
     }
     return null;
   }
@@ -68,8 +91,8 @@ class CryptocompareProvider extends BaseProvider {
       const currentPrice = this._currentToObject(message);
       if (currentPrice) {
         process.send(JSON.stringify(currentPrice));
-        await this._publishTick(currentPrice);
-        await this._saveTick(currentPrice);
+        if (currentPrice.type === "tick") await this._publishTick(currentPrice);
+        if (currentPrice.type === "trade") await this._saveTrade(currentPrice);
       }
     });
 
@@ -147,10 +170,12 @@ class CryptocompareProvider extends BaseProvider {
 
   async start() {
     try {
-      const activeSubs = this._subscriptions.map(
+      const activeTradeSubs = this._subscriptions.map(
+        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+      );
+      const activeTickSubs = this._subscriptions.map(
         sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
       );
-
       // Если сокет не подключен
       if (this._socketStatus !== "connect") {
         // Ждем секунду
@@ -171,7 +196,9 @@ class CryptocompareProvider extends BaseProvider {
         }, 1000);
       }
 
-      this._socket.emit("SubAdd", { subs: activeSubs });
+      this._socket.emit("SubAdd", {
+        subs: [...activeTradeSubs, ...activeTickSubs]
+      });
       this._status = STATUS_STARTED;
       await this._save();
     } catch (error) {
@@ -213,10 +240,15 @@ class CryptocompareProvider extends BaseProvider {
   async subscribe(subscriptions) {
     try {
       this._subscriptions = [...this._subscriptions, ...subscriptions];
-      const newSubs = subscriptions.map(
+      const newTradeSubs = subscriptions.map(
+        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+      );
+      const newTickSubs = subscriptions.map(
         sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
       );
-      this._socket.emit("SubAdd", { subs: newSubs });
+      this._socket.emit("SubAdd", {
+        subs: [...newTradeSubs, ...newTickSubs]
+      });
       await this._save();
     } catch (error) {
       const errorOutput = createErrorOutput(
@@ -259,10 +291,15 @@ class CryptocompareProvider extends BaseProvider {
           )
       );
 
-      const delSubs = subscriptions.map(
+      const delTradeSubs = subscriptions.map(
+        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+      );
+      const delTickSubs = subscriptions.map(
         sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
       );
-      this._socket.emit("SubRemove", { subs: delSubs });
+      this._socket.emit("SubRemove", {
+        subs: [...delTradeSubs, ...delTickSubs]
+      });
       await this._save();
     } catch (error) {
       const errorOutput = createErrorOutput(

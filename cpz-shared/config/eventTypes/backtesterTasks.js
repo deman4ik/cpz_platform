@@ -40,7 +40,8 @@ const TASKS_BACKTESTER_START_EVENT = {
     currency: { description: "Quote currency.", type: "string", empty: false },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "number"
+      type: "number",
+      empty: false
     },
     settings: {
       description: "Adviser parameters.",
@@ -81,7 +82,7 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "datetime"
     },
     dateTo: {
-      description: "Backtest start date.",
+      description: "Backtest end date.",
       type: "datetime"
     }
   }

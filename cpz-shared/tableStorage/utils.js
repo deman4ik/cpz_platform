@@ -43,6 +43,8 @@ function objectToEntity(object) {
       } else {
         entity[key] = entityGenerator.String(JSON.stringify(element));
       }
+    } else if (key === "timestamp") {
+      entity[key] = entityGenerator.DateTime(element);
     } else if (typeof element === "number") {
       entity[key] = entityGenerator.Double(element);
     } else if (typeof element === "boolean") {
@@ -57,6 +59,11 @@ function objectToEntity(object) {
 function createMarketwatcherSlug(hostId, modeStr = "R") {
   if (modeStr === "R") return hostId;
   return `${hostId}.${modeStr}`;
+}
+
+function createCandlebatcherSlug(exchange, asset, currency, modeStr = "R") {
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
+  return `${exchange}.${asset}.${currency}.${modeStr}`;
 }
 
 function createCachedTickSlug(exchange, asset, currency, modeStr = "R") {
@@ -99,6 +106,7 @@ export {
   entityToObject,
   objectToEntity,
   createMarketwatcherSlug,
+  createCandlebatcherSlug,
   createCachedTickSlug,
   createCachedCandleSlug,
   createAdviserSlug,
