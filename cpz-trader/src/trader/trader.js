@@ -512,7 +512,7 @@ class Trader {
         throw new VError(
           {
             name: "TraderError",
-            cause: error
+            cause: err
           },
           'Failed to end trader "%s" execution',
           this._taskId

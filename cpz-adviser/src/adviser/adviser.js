@@ -86,10 +86,10 @@ class Adviser {
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt || dayjs().toJSON();
+    this._startedAt = state.startedAt || dayjs().toISOString();
     /* Дата и время остановки */
     this._endedAt = this._stopRequested
-      ? dayjs().toJSON()
+      ? dayjs().toISOString()
       : state.endedAt || "";
     /* Признак выполнения инициализации */
     this._initialized = state.initialized || false;
@@ -848,7 +848,7 @@ class Adviser {
         throw new VError(
           {
             name: "AdviserError",
-            cause: error
+            cause: err
           },
           'Failed to end adviser execution for strategy "%s"',
           this._strategyName

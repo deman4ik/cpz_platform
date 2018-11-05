@@ -321,7 +321,7 @@ async function getPositonByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+    return await queryEntities(STORAGE_POSITIONS_TABLE, query)[0];
   } catch (error) {
     throw new VError(
       {
