@@ -1,5 +1,5 @@
 FROM microsoft/dotnet:2.1-sdk AS buildNet
-COPY /cpz-candlebatcher/extensions.csproj /src/cpz-candlebatcher
+COPY /cpz-candlebatcher /src/cpz-candlebatcher
 WORKDIR /src/cpz-candlebatcher
 RUN dotnet restore
 RUN dotnet build -c Release
@@ -20,7 +20,7 @@ RUN npm install && \
    
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
-COPY --from=buildNode ["/src/cpz-candlebatcher","/home/site/wwwroot"]
 COPY --from=buildNet ["/src/cpz-candlebatcher","/home/site/wwwroot"]
+COPY --from=buildNode ["/src/cpz-candlebatcher","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
   
