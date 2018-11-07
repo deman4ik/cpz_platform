@@ -71,6 +71,7 @@ function createCachedTickSlug(exchange, asset, currency, modeStr = "R") {
   return `${exchange}.${asset}.${currency}.${modeStr}`;
 }
 
+// TODO: генерация ID свечей -   exchange,asset,currencyбtimeframe,modeStr,time
 function createCachedCandleSlug(
   exchange,
   asset,

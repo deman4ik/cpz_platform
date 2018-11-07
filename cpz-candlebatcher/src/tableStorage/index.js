@@ -5,6 +5,7 @@ import {
   insertOrMergeEntity,
   mergeEntity,
   deleteEntity,
+  executeBatch,
   queryEntities
 } from "cpzStorage/storage";
 import {
@@ -17,6 +18,7 @@ import {
   STORAGE_CANDLEBATCHERS_TABLE,
   STORAGE_IMPORTERS_TABLE,
   STORAGE_CANDLESCACHED_TABLE,
+  STORAGE_CANDLESTEMP_TABLE,
   STORAGE_TICKSCACHED_TABLE
 } from "cpzStorageTables";
 
@@ -156,6 +158,39 @@ async function saveCandleToCache(candle) {
   }
 }
 
+async function saveCandlesArrayToCache(candles) {
+  try {
+    const batch = new azure.TableBatch();
+    candles.forEach(candle => {
+      const slug = createCachedCandleSlug(
+        candle.exchange,
+        candle.asset,
+        candle.currency,
+        candle.timeframe,
+        modeToStr(candle.mode)
+      );
+      const entity = {
+        PartitionKey: entityGenerator.String(slug),
+        RowKey: entityGenerator.String(candle.id),
+        ...objectToEntity(candle)
+      };
+      batch.insertOrMergeEntity(entity);
+    });
+
+    await executeBatch(STORAGE_CANDLESCACHED_TABLE, batch);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "CandlebatcherStorageError",
+        cause: error,
+        info: {
+          candles
+        }
+      },
+      "Failed to save candles to cache"
+    );
+  }
+}
 /**
  * Удаление тиков ожидающей выполнения
  *
@@ -377,6 +412,7 @@ export {
   saveImporterState,
   updateImporterState,
   saveCandleToCache,
+  saveCandlesArrayToCache,
   clearPrevCachedTicks,
   getStartedCandlebatchers,
   getCandlebatcherByKey,

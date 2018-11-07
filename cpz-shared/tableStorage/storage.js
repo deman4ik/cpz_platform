@@ -157,6 +157,35 @@ function deleteEntity(tableName, entity) {
     });
   });
 }
+
+/**
+ * Выполнение группы задач
+ *
+ * @param {*} tableName
+ * @param {*} batch
+ */
+function executeBatch(tableName, batch) {
+  return new Promise((resolve, reject) => {
+    tableService.executeBatch(tableName, batch, error => {
+      if (error)
+        reject(
+          new VError(
+            {
+              name: error.name,
+              cause: error,
+              info: {
+                tableName,
+                batch
+              }
+            },
+            'Failed to execute batch operations in "%s"',
+            tableName
+          )
+        );
+      resolve(true);
+    });
+  });
+}
 /**
  * Выборка данных из таблицы
  *
@@ -209,5 +238,6 @@ export {
   insertOrMergeEntity,
   mergeEntity,
   deleteEntity,
+  executeBatch,
   queryEntities
 };

@@ -19,23 +19,7 @@ class CryptocompareProvider extends BaseProvider {
         timestamp: dayjs(dateNext || this._dateTo).unix(),
         limit: this._limit
       };
-      let url;
-      switch (this._timeframe) {
-        case 1:
-          url = this._histoMinute(options);
-          break;
-        case 60:
-          url = this._histoHour(options);
-          break;
-        case 3600:
-          url = this._histoDay(options);
-          break;
-        default:
-          throw new VError(
-            { name: "InvalidTimeframe" },
-            "Unknown timeframe. Must be: '1', '60', '3600'."
-          );
-      }
+      const url = this._histoMinute(options);
 
       const response = await retry(async () =>
         fetchJSON(url, this._proxyAgent)
@@ -79,23 +63,8 @@ class CryptocompareProvider extends BaseProvider {
         limit: 1
       };
 
-      let url;
-      switch (this._timeframe) {
-        case 1:
-          url = this._histoMinute(options);
-          break;
-        case 60:
-          url = this._histoHour(options);
-          break;
-        case 3600:
-          url = this._histoDay(options);
-          break;
-        default:
-          throw new VError(
-            { name: "InvalidTimeframe" },
-            "Unknown timeframe. Must be: '1', '60', '3600'."
-          );
-      }
+      const url = this._histoMinute(options);
+
       const response = await retry(async () =>
         fetchJSON(url, this._proxyAgent)
       );

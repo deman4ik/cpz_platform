@@ -7,7 +7,6 @@ class BaseProvider {
     this._exchange = input.exchange;
     this._asset = input.asset;
     this._currency = input.currency;
-    this._timeframe = input.timframe || 1;
     this._limit = input.limit || 500;
     this._dateFrom = input.dateFrom;
     this._dateTo = input.dateTo;

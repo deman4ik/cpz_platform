@@ -135,7 +135,8 @@ function completedPercent(completedDuration, totalDuration) {
  *
  * @param {dayjs} date
  */
-function getPreviousMinuteRange(date = dayjs()) {
+function getPreviousMinuteRange(inputDate) {
+  const date = dayjs(inputDate);
   const prev = date.add(-1, "minute");
   return {
     dateFrom: prev.startOf("minute"),
@@ -149,7 +150,8 @@ function getPreviousMinuteRange(date = dayjs()) {
  * @param {Array} timeframes
  * @param {dayjs} date
  */
-function getCurrentTimeframes(timeframes, date = dayjs()) {
+function getCurrentTimeframes(timeframes, inputDate) {
+  const date = dayjs(inputDate);
   /* Количество часов 0-23 */
   const hour = date.hour();
   /* Количество минут 0-59 */
@@ -179,6 +181,19 @@ function getCurrentTimeframes(timeframes, date = dayjs()) {
   return currentTimeframes;
 }
 
+function createMinutesList(dateFrom, dateTo, dur) {
+  const duration = dur || durationMinutes(dateFrom, dateTo);
+  const list = [];
+  for (let i = 0; i < duration; i += 1) {
+    list.push(dateFrom.add(i, "minute").valueOf());
+  }
+  return list;
+}
+
+function arraysDiff(full, part) {
+  return full.filter(v => !part.includes(v));
+}
+
 export {
   tryParseJSON,
   getModeFromSubject,
@@ -188,5 +203,7 @@ export {
   durationMinutes,
   completedPercent,
   getPreviousMinuteRange,
-  getCurrentTimeframes
+  getCurrentTimeframes,
+  createMinutesList,
+  arraysDiff
 };

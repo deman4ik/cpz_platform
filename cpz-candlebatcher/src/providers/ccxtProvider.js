@@ -7,26 +7,6 @@ import BaseProvider from "./baseProvider";
 class CCXTProvider extends BaseProvider {
   constructor(input) {
     super(input);
-
-    switch (this._timeframe) {
-      case 1:
-        this._timeframeName = `${this._timeframe}m`;
-        this._rangeName = "minute";
-        break;
-      case 60:
-        this._timeframeName = `1h`;
-        this._rangeName = "hour";
-        break;
-      case 3600:
-        this._timeframeName = `1d`;
-        this._rangeName = "day";
-        break;
-      default:
-        throw new VError(
-          { name: "InvalidTimeframe" },
-          "Unknown timeframe. Must be: '1', '60', '3600'."
-        );
-    }
     this._symbol = `${this._asset}/${this._currency}`;
     this._exchangeName = this._exchange.toLowerCase();
     // ? Костыль
@@ -49,7 +29,7 @@ class CCXTProvider extends BaseProvider {
       const response = await retry(async () =>
         this._exchange.fetchOHLCV(
           this._symbol,
-          this._timeframeName,
+          "1m",
           dateStart.valueOf(),
           this._limit
         )
@@ -94,17 +74,17 @@ class CCXTProvider extends BaseProvider {
     try {
       const dateStart = date.add(-2, "minute");
       const response = await retry(async () =>
-        this._exchange.fetchOHLCV(
-          this._symbol,
-          this._timeframeName,
-          dateStart.valueOf(),
-          1
-        )
+        this._exchange.fetchOHLCV(this._symbol, "1m", dateStart.valueOf(), 1)
       );
       if (response) {
         if (response.length > 0) {
           const latestCandle = response[0];
           return {
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode,
             time: latestCandle[0],
             timestamp: dayjs(latestCandle[0]).toISOString(),
             open: latestCandle[1],
