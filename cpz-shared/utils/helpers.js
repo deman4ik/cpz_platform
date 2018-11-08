@@ -1,10 +1,6 @@
 import { v4 as uuid } from "uuid";
-import dayjs from "dayjs";
-import UTCPlugin from "./lib/dayjs/plugin/utc";
+import dayjs from "./lib/dayjs";
 import { REALTIME_MODE, EMULATOR_MODE, BACKTEST_MODE } from "../config/state";
-
-/* dayjs в режиме UTC */
-dayjs.extend(UTCPlugin);
 
 /**
  * Парсинг JSON, если ошибка возвращает false
@@ -144,52 +140,6 @@ function getPreviousMinuteRange(inputDate) {
   };
 }
 
-/**
- * Отбор подходящих по времени таймфреймов для формирования
- *
- * @param {Array} timeframes
- * @param {dayjs} date
- */
-function getCurrentTimeframes(timeframes, inputDate) {
-  const date = dayjs(inputDate);
-  /* Количество часов 0-23 */
-  const hour = date.hour();
-  /* Количество минут 0-59 */
-  const minute = date.minute();
-  /* Инициализируем массив подходящих таймфреймов */
-  let currentTimeframes = [];
-  /* Проверяем все переданные таймфреймы */
-  timeframes.forEach(timeframe => {
-    /* Если одна минута */
-    if (timeframe === 1) {
-      /* Минимально возможный таймфрейм - пропускаем */
-      return;
-    }
-    /* Если меньше часа */
-    if (timeframe < 60) {
-      /* Проверяем текущую минуту */
-      if (minute % timeframe === 0) currentTimeframes.push(timeframe);
-      /* В остальных случаях проверяем текущий час и минуту */
-    } else if (hour % (timeframe / 60) === 0 && minute % timeframe === 0)
-      currentTimeframes.push(timeframe);
-  });
-  /* Если есть хотя бы один подходящий таймфрейм */
-  if (currentTimeframes.length > 0)
-    /* Сортируем в порядке убывания */
-    currentTimeframes = currentTimeframes.sort((a, b) => a < b);
-  /* Возвращаем массив доступных таймфреймов */
-  return currentTimeframes;
-}
-
-function createMinutesList(dateFrom, dateTo, dur) {
-  const duration = dur || durationMinutes(dateFrom, dateTo);
-  const list = [];
-  for (let i = 0; i < duration; i += 1) {
-    list.push(dateFrom.add(i, "minute").valueOf());
-  }
-  return list;
-}
-
 function arraysDiff(full, part) {
   return full.filter(v => !part.includes(v));
 }
@@ -203,7 +153,5 @@ export {
   durationMinutes,
   completedPercent,
   getPreviousMinuteRange,
-  getCurrentTimeframes,
-  createMinutesList,
   arraysDiff
 };
