@@ -42,6 +42,7 @@ class CryptocompareProvider extends BaseProvider {
           modeToStr(this._mode),
           item.time * 1000
         ),
+        importerId: this._importerId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -53,7 +54,8 @@ class CryptocompareProvider extends BaseProvider {
         high: item.high,
         low: item.low,
         close: item.close,
-        volume: item.volumefrom
+        volume: item.volumefrom,
+        type: "imported"
       }));
       return {
         firstDate: data[0].timestamp,
@@ -93,6 +95,7 @@ class CryptocompareProvider extends BaseProvider {
           modeToStr(this._mode),
           latestCandle.time * 1000
         ),
+        importerId: this._importerId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -104,7 +107,8 @@ class CryptocompareProvider extends BaseProvider {
         high: latestCandle.high,
         low: latestCandle.low,
         close: latestCandle.close,
-        volume: latestCandle.volumefrom
+        volume: latestCandle.volumefrom,
+        type: "imported"
       };
     } catch (error) {
       throw new VError(

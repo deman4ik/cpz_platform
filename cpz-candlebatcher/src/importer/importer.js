@@ -10,13 +10,18 @@ import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_FINISHED } from "cpzState";
 import publishEvents from "cpzEvents";
 import { durationMinutes, completedPercent, modeToStr } from "cpzUtils/helpers";
-import { handleCandleGaps, getCurrentTimeframes } from "../utils";
+import {
+  handleCandleGaps,
+  getCurrentTimeframes,
+  generateCandleId
+} from "../utils";
 import { queueImportIteration } from "../queueStorage";
 import {
   saveImporterState,
   saveCandlesArrayToCache,
   saveCandlesArrayToTemp,
-  getTempCandles
+  getTempCandles,
+  clearTempCandles
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
@@ -126,6 +131,7 @@ class Importer {
     this.log(`initProvider()`);
     try {
       const initParams = {
+        importerId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -293,6 +299,30 @@ class Importer {
   }
 
   /**
+   * Очистка временных свечей
+   *
+   * @memberof Importer
+   */
+  async clearTemp() {
+    this.log(`clearTemp()`);
+    try {
+      await clearTempCandles(this._taskId);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "ImporterError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            eventSubject: this._eventSubject
+          }
+        },
+        `Failed to clear temp candles`
+      );
+    }
+  }
+
+  /**
    * Добавление следующей итерации в очередь
    *
    * @memberof Importer
@@ -328,13 +358,13 @@ class Importer {
   }
 
   /**
-   * Загрузка свечей из кэша
+   * Загрузка временных свечей
    *
    * @memberof Importer
    */
-  async loadCachedCandles() {
+  async loadTempCandles() {
     try {
-      this._cachedCandles = await getTempCandles({
+      this._tempCandles = await getTempCandles({
         dateFrom: this._dateFrom,
         dateTo: this._dateTo,
         slug: createCachedCandleSlug(
@@ -355,7 +385,7 @@ class Importer {
             eventSubject: this._eventSubject
           }
         },
-        `Failed to load cached candles`
+        `Failed to load temp candles`
       );
     }
   }
@@ -369,7 +399,7 @@ class Importer {
     this.log("handleGaps()");
     try {
       // Если количество свечей в кэше равно общему количеству свечей - нет пропусков
-      if (this._cachedCandles.length === this._totalDuration) return;
+      if (this._tempCandles.length === this._totalDuration) return;
 
       const { candles, gappedCandles } = handleCandleGaps(
         {
@@ -382,9 +412,9 @@ class Importer {
         this._dateFrom,
         this._dateTo,
         this._totalDuration,
-        this._cachedCandles
+        this._tempCandles
       );
-      if (candles) this._cachedCandles = candles;
+      if (candles) this._tempCandles = candles;
       // Сохраняем сформированные пропущенные свечи
       if (gappedCandles) await saveCandlesArrayToCache(gappedCandles);
     } catch (error) {
@@ -417,7 +447,7 @@ class Importer {
         this._timeframeCandles[timeframe] = [];
       });
       // Список загруженных минут
-      const loadedMinutesList = this._cachedCandles.map(candle => candle.time);
+      const loadedMinutesList = this._tempCandles.map(candle => candle.time);
       loadedMinutesList.forEach(time => {
         const date = dayjs(time);
         const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
@@ -425,11 +455,25 @@ class Importer {
           currentTimeframes.forEach(timeframe => {
             const timeFrom = date.add(-timeframe, "minute").valueOf();
             const timeTo = time;
-            const candles = this._cachedCandles.filter(
+            const candles = this._tempCandles.filter(
               candle => candle.time >= timeFrom && candle.time <= timeTo
             );
             if (candles.length > 0) {
               this._timeframeCandles[timeframe].push({
+                id: generateCandleId(
+                  this._exchange,
+                  this._asset,
+                  this._currency,
+                  timeframe,
+                  modeToStr(this._mode),
+                  this._timeframeCandles[timeframe].time
+                ),
+                importerId: this._taskId,
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                mode: this._mode,
+                timeframe,
                 time, // время в милисекундах
                 timestamp: date.toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи

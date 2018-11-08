@@ -4,7 +4,6 @@ import {
   createTableIfNotExists,
   insertOrMergeEntity,
   mergeEntity,
-  deleteEntity,
   executeBatch,
   queryEntities
 } from "cpzStorage/storage";
@@ -230,29 +229,14 @@ async function saveCandlesArrayToTemp(candles) {
  * Удаление тиков ожидающей выполнения
  *
  * @param {Array} ticks
- * @returns
  */
-async function clearPrevCachedTicks(ticks) {
+async function deletePrevCachedTicksArray(ticks) {
   try {
-    await Promise.all(
-      ticks.map(async tick => {
-        try {
-          await deleteEntity(STORAGE_TICKSCACHED_TABLE, objectToEntity(tick));
-        } catch (error) {
-          throw new VError(
-            {
-              name: "CandlebatcherStorageError",
-              cause: error,
-              info: {
-                tick
-              }
-            },
-            'Failed to delete tick from "%s"',
-            STORAGE_TICKSCACHED_TABLE
-          );
-        }
-      })
-    );
+    const batch = new azure.TableBatch();
+    ticks.forEach(tick => {
+      batch.deleteEntity(objectToEntity(tick));
+    });
+    await executeBatch(STORAGE_TICKSCACHED_TABLE, batch);
   } catch (error) {
     throw new VError(
       {
@@ -264,6 +248,109 @@ async function clearPrevCachedTicks(ticks) {
       },
       'Failed to delete ticks from "%s"',
       STORAGE_TICKSCACHED_TABLE
+    );
+  }
+}
+
+/**
+ * Удаление свечей из кэша
+ *
+ * @param {Array} candles
+ */
+async function deleteCachedCandlesArray(candles) {
+  try {
+    const batch = new azure.TableBatch();
+    candles.forEach(candle => {
+      const slug = createCachedCandleSlug(
+        candle.exchange,
+        candle.asset,
+        candle.currency,
+        candle.timeframe,
+        modeToStr(candle.mode)
+      );
+      const entity = {
+        PartitionKey: entityGenerator.String(slug),
+        RowKey: entityGenerator.String(candle.id),
+        ...objectToEntity(candle)
+      };
+      batch.deleteEntity(objectToEntity(entity));
+    });
+    await executeBatch(STORAGE_CANDLESCACHED_TABLE, batch);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "CandlebatcherStorageError",
+        cause: error
+      },
+      'Failed to delete candles from "%s"',
+      STORAGE_CANDLESCACHED_TABLE
+    );
+  }
+}
+
+/**
+ * Удаление временных свечей
+ *
+ * @param {string} importerId
+ */
+async function clearTempCandles(importerId) {
+  try {
+    const importerIdFilter = TableQuery.stringFilter(
+      "importerId",
+      TableUtilities.QueryComparisons.EQUAL,
+      importerId
+    );
+    const query = new TableQuery().where(importerIdFilter);
+    const candles = await queryEntities(STORAGE_CANDLESTEMP_TABLE, query);
+    const batch = new azure.TableBatch();
+    candles.forEach(candle => {
+      batch.deleteEntity(objectToEntity(candle));
+    });
+    await executeBatch(STORAGE_CANDLESTEMP_TABLE, batch);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "CandlebatcherStorageError",
+        cause: error
+      },
+      'Failed to delete candles from "%s"',
+      STORAGE_CANDLESTEMP_TABLE
+    );
+  }
+}
+
+/**
+ * Удаление временных свечей
+ *
+ * @param {Array} candles
+ */
+async function deleteTempCandlesArray(candles) {
+  try {
+    const batch = new azure.TableBatch();
+    candles.forEach(candle => {
+      const slug = createCachedCandleSlug(
+        candle.exchange,
+        candle.asset,
+        candle.currency,
+        candle.timeframe,
+        modeToStr(candle.mode)
+      );
+      const entity = {
+        PartitionKey: entityGenerator.String(slug),
+        RowKey: entityGenerator.String(candle.id),
+        ...objectToEntity(candle)
+      };
+      batch.deleteEntity(objectToEntity(entity));
+    });
+    await executeBatch(STORAGE_CANDLESTEMP_TABLE, batch);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "CandlebatcherStorageError",
+        cause: error
+      },
+      'Failed to delete candles from "%s"',
+      STORAGE_CANDLESTEMP_TABLE
     );
   }
 }
@@ -491,7 +578,10 @@ export {
   saveCandleToCache,
   saveCandlesArrayToCache,
   saveCandlesArrayToTemp,
-  clearPrevCachedTicks,
+  deletePrevCachedTicksArray,
+  deleteCachedCandlesArray,
+  deleteTempCandlesArray,
+  clearTempCandles,
   getStartedCandlebatchers,
   getCandlebatcherByKey,
   getImporterByKey,

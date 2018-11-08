@@ -56,6 +56,7 @@ class CCXTProvider extends BaseProvider {
               modeToStr(this._mode),
               item[0]
             ),
+            importerId: this._importerId,
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
@@ -67,7 +68,8 @@ class CCXTProvider extends BaseProvider {
             high: item[2],
             low: item[3],
             close: item[4],
-            volume: item[5]
+            volume: item[5],
+            type: "imported"
           }));
           return {
             firstDate: data[0].timestamp,
@@ -103,6 +105,7 @@ class CCXTProvider extends BaseProvider {
               modeToStr(this._mode),
               latestCandle[0]
             ),
+            importerId: this._importerId,
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
@@ -114,7 +117,8 @@ class CCXTProvider extends BaseProvider {
             high: latestCandle[2],
             low: latestCandle[3],
             close: latestCandle[4],
-            volume: latestCandle[5]
+            volume: latestCandle[5],
+            type: "imported"
           };
         }
       }

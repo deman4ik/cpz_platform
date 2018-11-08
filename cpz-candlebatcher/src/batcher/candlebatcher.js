@@ -27,7 +27,7 @@ import {
   saveCandlebatcherState,
   getCachedCandles,
   getPrevCachedTicks,
-  clearPrevCachedTicks
+  deletePrevCachedTicksArray
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
@@ -363,7 +363,7 @@ class Candlebatcher {
     this.log("clearTicks()");
     try {
       if (this._ticks.length > 0) {
-        await clearPrevCachedTicks(this._ticks);
+        await deletePrevCachedTicksArray(this._ticks);
       }
     } catch (error) {
       throw new VError(
@@ -410,6 +410,20 @@ class Candlebatcher {
         if (this._lastCandle) {
           /* Формируем новую свечу по данным из предыдущей */
           this._currentCandle = {
+            id: generateCandleId(
+              this._exchange,
+              this._asset,
+              this._currency,
+              1,
+              modeToStr(this._mode),
+              this._dateFrom.valueOf()
+            ),
+            candlabatcherId: this._taskId,
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            mode: this._mode,
+            timeframe: 1,
             time: this._dateFrom.valueOf(), // время в милисекундах
             timestamp: this._dateFrom.toISOString(), // время в ISO UTC
             open: this._lastCandle.close, // цена открытия = цене закрытия предыдущей
@@ -480,6 +494,20 @@ class Candlebatcher {
             );
             if (candles.length > 0) {
               this._timeframeCandles[timeframe] = {
+                id: generateCandleId(
+                  this._exchange,
+                  this._asset,
+                  this._currency,
+                  timeframe,
+                  modeToStr(this._mode),
+                  this._timeframeCandles[timeframe].time
+                ),
+                candlabatcherId: this._taskId,
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                mode: this._mode,
+                timeframe,
                 time: this._dateFrom.valueOf(), // время в милисекундах
                 timestamp: this._dateFrom.toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи
@@ -499,23 +527,7 @@ class Candlebatcher {
 
         /* Для всех сформированных свечей  */
         Object.keys(this._timeframeCandles).forEach(async timeframe => {
-          /* Инициализируем полный объект свечи */
-          const candle = {
-            id: generateCandleId(
-              this._exchange,
-              this._asset,
-              this._currency,
-              timeframe,
-              modeToStr(this._mode),
-              this._timeframeCandles[timeframe].time
-            ),
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            mode: this._mode,
-            timeframe,
-            ...this._timeframeCandles[timeframe]
-          };
+          const candle = this._timeframeCandles[timeframe];
           /* Если подписаны на данный таймфрейм */
           if (this._timeframes.includes(timeframe)) {
             try {
