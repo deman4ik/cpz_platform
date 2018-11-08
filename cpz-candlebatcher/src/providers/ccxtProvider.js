@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
 import retry from "cpzUtils/retry";

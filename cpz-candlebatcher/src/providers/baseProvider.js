@@ -1,5 +1,5 @@
 import VError from "verror";
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import HttpsProxyAgent from "https-proxy-agent";
 
 class BaseProvider {

@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import VError from "verror";
 import {
   TASKS_CANDLEBATCHER_START_EVENT,

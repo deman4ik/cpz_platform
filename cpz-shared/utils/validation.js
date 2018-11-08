@@ -1,6 +1,6 @@
 import FValidator from "fastest-validator";
 import VError from "verror";
-import dayjs from "dayjs";
+import dayjs from "./lib/dayjs";
 
 const validator = new FValidator({
   messages: {

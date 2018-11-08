@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import VError from "verror";
 import { STATUS_STARTED, STATUS_FINISHED, STATUS_ERROR } from "cpzState";
 import publishEvents from "cpzEvents";

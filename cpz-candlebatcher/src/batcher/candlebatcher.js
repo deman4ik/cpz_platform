@@ -1,5 +1,5 @@
 import VError from "verror";
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { STATUS_STARTED, STATUS_STOPPED } from "cpzState";
 import {
@@ -12,10 +12,7 @@ import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
 import {
   modeToStr,
   getPreviousMinuteRange,
-  getCurrentTimeframes,
-  generateKey,
-  createMinutesList,
-  arraysDiff
+  generateKey
 } from "cpzUtils/helpers";
 import {
   createCandlebatcherSlug,
@@ -23,6 +20,7 @@ import {
 } from "cpzStorage/utils";
 import publishEvents from "cpzEvents";
 import getHistoryCandles from "cpzDB/historyCandles";
+import { handleCandleGaps, getCurrentTimeframes } from "../utils";
 import {
   saveCandleToCache,
   saveCandlesArrayToCache,
@@ -450,61 +448,17 @@ class Candlebatcher {
             )
           });
           if (loadedCandles.length !== maxTimeframe) {
-            // Создаем список с полным количеством минут
-            const fullMinutesList = createMinutesList(
+            const { candles, gappedCandles } = handleCandleGaps(
               loadDateFrom,
               this._dateTo,
-              maxTimeframe
+              maxTimeframe,
+              loadedCandles
             );
-            // Список загруженных минут
-            const loadedMinutesList = loadedCandles.map(candle => candle.time);
-            // Ищем пропуски
-            const diffs = arraysDiff(fullMinutesList, loadedMinutesList).sort(
-              (a, b) => a > b
-            );
-
-            // Если есть пропуски
-            if (diffs.length > 0) {
-              const gappedCandles = [];
-              // Для каждой пропущенный свечи
-              diffs.forEach(diffTime => {
-                // Время предыдущей свечи
-                const previousTime = dayjs(diffTime)
-                  .add(-1, "minute")
-                  .valueOf();
-                // Индекс предыдущей свечи
-                const previousCandleIndex = loadedCandles.findIndex(
-                  candle => candle.time === previousTime
-                );
-                // Предыдущая свеча
-                const previousCandle = loadedCandles[previousCandleIndex];
-                if (previousCandle) {
-                  // Заполняем пропуск
-                  const gappedCandle = {
-                    ...previousCandle,
-                    id: generateKey(),
-                    time: diffTime, // время в милисекундах
-                    timestamp: dayjs(diffTime).toISOString(), // время в ISO UTC
-                    open: previousCandle.close, // цена открытия = цене закрытия предыдущей
-                    high: previousCandle.close, // максимальная цена = цене закрытия предыдущей
-                    low: previousCandle.close, // минимальная цена = цене закрытия предыдущей
-                    close: previousCandle.close, // цена закрытия = цене закрытия предыдущей
-                    volume: 0, // нулевой объем
-                    type: "previous" // признак - предыдущая
-                  };
-                  gappedCandles.push(gappedCandle);
-                  loadedCandles = [
-                    ...loadedCandles.slice(0, previousCandleIndex),
-                    gappedCandle,
-                    ...loadedCandles.slice(previousCandleIndex)
-                  ];
-                }
-              });
-              // Сохраняем сформированные пропущенные свечи
-              if (gappedCandles.length > 0)
-                await saveCandlesArrayToCache(gappedCandles);
-            }
+            if (candles) loadedCandles = candles;
+            // Сохраняем сформированные пропущенные свечи
+            if (gappedCandles) await saveCandlesArrayToCache(gappedCandles);
           }
+
           /* Заполняем массив свечей - загруженные + текущая и сортируем по дате */
           this._candles = [...loadedCandles, this._currentCandle].sort(
             (a, b) => a.time > b.time

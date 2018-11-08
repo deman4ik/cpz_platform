@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "cpzDayjs";
 import VError from "verror";
 import retry from "cpzUtils/retry";
 import { fetchJSON } from "cpzUtils/fetch";
