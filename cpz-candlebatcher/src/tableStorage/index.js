@@ -191,6 +191,41 @@ async function saveCandlesArrayToCache(candles) {
     );
   }
 }
+
+async function saveCandlesArrayToTemp(candles) {
+  try {
+    const batch = new azure.TableBatch();
+    candles.forEach(candle => {
+      const slug = createCachedCandleSlug(
+        candle.exchange,
+        candle.asset,
+        candle.currency,
+        candle.timeframe,
+        modeToStr(candle.mode)
+      );
+      const entity = {
+        PartitionKey: entityGenerator.String(slug),
+        RowKey: entityGenerator.String(candle.id),
+        ...objectToEntity(candle)
+      };
+      batch.insertOrMergeEntity(entity);
+    });
+
+    await executeBatch(STORAGE_CANDLESTEMP_TABLE, batch);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "CandlebatcherStorageError",
+        cause: error,
+        info: {
+          candles
+        }
+      },
+      "Failed to save candles to temp"
+    );
+  }
+}
+
 /**
  * Удаление тиков ожидающей выполнения
  *
@@ -406,6 +441,48 @@ async function getCachedCandles(input) {
   }
 }
 
+async function getTempCandles(input) {
+  try {
+    const dateFromFilter = TableQuery.dateFilter(
+      "timestamp",
+      TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
+      new Date(input.dateFrom.toISOString())
+    );
+    const dateToFilter = TableQuery.dateFilter(
+      "timestamp",
+      TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
+      new Date(input.dateTo.toISOString())
+    );
+    const dateFilter = TableQuery.combineFilters(
+      dateFromFilter,
+      TableUtilities.TableOperators.AND,
+      dateToFilter
+    );
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      input.slug
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        dateFilter,
+        TableUtilities.TableOperators.AND,
+        partitionKeyFilter
+      )
+    );
+    return await queryEntities(STORAGE_CANDLESTEMP_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "ImporterStorageError",
+        cause: error,
+        info: input
+      },
+      "Failed to load cached candles"
+    );
+  }
+}
+
 export {
   saveCandlebatcherState,
   updateCandlebatcherState,
@@ -413,10 +490,12 @@ export {
   updateImporterState,
   saveCandleToCache,
   saveCandlesArrayToCache,
+  saveCandlesArrayToTemp,
   clearPrevCachedTicks,
   getStartedCandlebatchers,
   getCandlebatcherByKey,
   getImporterByKey,
   getPrevCachedTicks,
-  getCachedCandles
+  getCachedCandles,
+  getTempCandles
 };

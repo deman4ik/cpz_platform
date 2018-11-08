@@ -15,7 +15,8 @@ import { queueImportIteration } from "../queueStorage";
 import {
   saveImporterState,
   saveCandlesArrayToCache,
-  getCachedCandles
+  saveCandlesArrayToTemp,
+  getTempCandles
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
@@ -251,8 +252,31 @@ class Importer {
   async saveCandlesToCache() {
     this.log(`saveCandlesToCache()`);
     try {
-      // TODO: duplicate this method to save imported candles
       await saveCandlesArrayToCache(this.candles);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "ImporterError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            eventSubject: this._eventSubject
+          }
+        },
+        `Failed to save candles to temp`
+      );
+    }
+  }
+
+  /**
+   * Сохранение временных свечей
+   *
+   * @memberof Importer
+   */
+  async saveCandlesToTemp() {
+    this.log(`saveCandlesToTemp()`);
+    try {
+      await saveCandlesArrayToTemp(this.candles);
     } catch (error) {
       throw new VError(
         {
@@ -310,8 +334,7 @@ class Importer {
    */
   async loadCachedCandles() {
     try {
-      // TODO: move to imported candles
-      this._cachedCandles = await getCachedCandles({
+      this._cachedCandles = await getTempCandles({
         dateFrom: this._dateFrom,
         dateTo: this._dateTo,
         slug: createCachedCandleSlug(
@@ -349,6 +372,13 @@ class Importer {
       if (this._cachedCandles.length === this._totalDuration) return;
 
       const { candles, gappedCandles } = handleCandleGaps(
+        {
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: 1,
+          modeStr: modeToStr(this._mode)
+        },
         this._dateFrom,
         this._dateTo,
         this._totalDuration,

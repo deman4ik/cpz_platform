@@ -9,18 +9,18 @@ import {
   CANDLES_TOPIC
 } from "cpzEventTypes";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
-import {
-  modeToStr,
-  getPreviousMinuteRange,
-  generateKey
-} from "cpzUtils/helpers";
+import { modeToStr, getPreviousMinuteRange } from "cpzUtils/helpers";
 import {
   createCandlebatcherSlug,
   createCachedCandleSlug
 } from "cpzStorage/utils";
 import publishEvents from "cpzEvents";
 import getHistoryCandles from "cpzDB/historyCandles";
-import { handleCandleGaps, getCurrentTimeframes } from "../utils";
+import {
+  handleCandleGaps,
+  getCurrentTimeframes,
+  generateCandleId
+} from "../utils";
 import {
   saveCandleToCache,
   saveCandlesArrayToCache,
@@ -449,6 +449,13 @@ class Candlebatcher {
           });
           if (loadedCandles.length !== maxTimeframe) {
             const { candles, gappedCandles } = handleCandleGaps(
+              {
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe: 1,
+                modeStr: modeToStr(this._mode)
+              },
               loadDateFrom,
               this._dateTo,
               maxTimeframe,
@@ -494,7 +501,14 @@ class Candlebatcher {
         Object.keys(this._timeframeCandles).forEach(async timeframe => {
           /* Инициализируем полный объект свечи */
           const candle = {
-            id: generateKey(),
+            id: generateCandleId(
+              this._exchange,
+              this._asset,
+              this._currency,
+              timeframe,
+              modeToStr(this._mode),
+              this._timeframeCandles[timeframe].time
+            ),
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,

@@ -81,8 +81,8 @@ function modeToStr(mode) {
 /**
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
  */
-function getInvertedTimestamp() {
-  const inverted = new Date("3000-01-01").valueOf() - new Date().valueOf();
+function getInvertedTimestamp(time) {
+  const inverted = new Date("3000-01-01").valueOf() - dayjs(time).valueOf();
   const invertedString = inverted.toString();
   const pad = "000000000000000";
 
@@ -95,7 +95,7 @@ function getInvertedTimestamp() {
  * Применяется в Azure Table Storage для DESC сортировки строк в таблице по RowKey
  */
 function generateKey() {
-  const inverted = getInvertedTimestamp();
+  const inverted = getInvertedTimestamp(dayjs());
   const uid = uuid();
   return `${inverted}_${uid}`;
 }
@@ -149,6 +149,7 @@ export {
   getModeFromSubject,
   subjectToStr,
   modeToStr,
+  getInvertedTimestamp,
   generateKey,
   durationMinutes,
   completedPercent,

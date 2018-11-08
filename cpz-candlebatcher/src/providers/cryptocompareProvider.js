@@ -2,7 +2,9 @@ import dayjs from "cpzDayjs";
 import VError from "verror";
 import retry from "cpzUtils/retry";
 import { fetchJSON } from "cpzUtils/fetch";
+import { modeToStr } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
+import { generateCandleId } from "../utils";
 
 class CryptocompareProvider extends BaseProvider {
   constructor(input) {
@@ -32,6 +34,19 @@ class CryptocompareProvider extends BaseProvider {
       ).sort((a, b) => a.time > b.time);
       /* Преобразуем объект в массив */
       const data = filteredData.map(item => ({
+        id: generateCandleId(
+          this._exchange,
+          this._asset,
+          this._currency,
+          1,
+          modeToStr(this._mode),
+          item.time * 1000
+        ),
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: 1,
+        mode: this._mode,
         time: item.time * 1000,
         timestamp: dayjs(item.time * 1000).toISOString(),
         open: item.open,
@@ -70,6 +85,19 @@ class CryptocompareProvider extends BaseProvider {
       );
       const latestCandle = response.Data[0];
       return {
+        id: generateCandleId(
+          this._exchange,
+          this._asset,
+          this._currency,
+          1,
+          modeToStr(this._mode),
+          latestCandle.time * 1000
+        ),
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: 1,
+        mode: this._mode,
         time: latestCandle.time * 1000,
         timestamp: dayjs(latestCandle.time * 1000).toISOString(),
         open: latestCandle.open,

@@ -1,5 +1,9 @@
 import dayjs from "cpzDayjs";
-import { durationMinutes, arraysDiff, generateKey } from "cpzUtils/helpers";
+import {
+  durationMinutes,
+  arraysDiff,
+  getInvertedTimestamp
+} from "cpzUtils/helpers";
 /**
  * Отбор подходящих по времени таймфреймов для формирования
  *
@@ -46,7 +50,7 @@ function createMinutesList(dateFrom, dateTo, dur) {
   return list;
 }
 
-function handleCandleGaps(dateFrom, dateTo, maxDuration, candles) {
+function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
   // Создаем список с полным количеством минут
   const fullMinutesList = createMinutesList(dateFrom, dateTo, maxDuration);
   // Список загруженных минут
@@ -75,7 +79,14 @@ function handleCandleGaps(dateFrom, dateTo, maxDuration, candles) {
         // Заполняем пропуск
         const gappedCandle = {
           ...previousCandle,
-          id: generateKey(),
+          id: generateCandleId(
+            info.exchange,
+            info.asset,
+            info.currency,
+            info.timeframe,
+            info.modeStr,
+            diffTime
+          ),
           time: diffTime, // время в милисекундах
           timestamp: dayjs(diffTime).toISOString(), // время в ISO UTC
           open: previousCandle.close, // цена открытия = цене закрытия предыдущей
@@ -99,4 +110,22 @@ function handleCandleGaps(dateFrom, dateTo, maxDuration, candles) {
   return { candles: null, gappedCandles: null };
 }
 
-export { getCurrentTimeframes, createMinutesList, handleCandleGaps };
+function generateCandleId(
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  modeStr = "R",
+  time
+) {
+  const inverted = getInvertedTimestamp(time);
+  if (modeStr === "R")
+    return `${inverted}.${exchange}.${asset}.${currency}.${timeframe}`;
+  return `${inverted}.${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
+}
+export {
+  getCurrentTimeframes,
+  createMinutesList,
+  handleCandleGaps,
+  generateCandleId
+};

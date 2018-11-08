@@ -2,7 +2,9 @@ import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
 import retry from "cpzUtils/retry";
+import { modeToStr } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
+import { generateCandleId } from "../utils";
 
 class CCXTProvider extends BaseProvider {
   constructor(input) {
@@ -46,6 +48,19 @@ class CCXTProvider extends BaseProvider {
             .sort((a, b) => a[0] > b[0]);
           /* Преобразуем объект в массив */
           const data = filteredData.map(item => ({
+            id: generateCandleId(
+              this._exchange,
+              this._asset,
+              this._currency,
+              1,
+              modeToStr(this._mode),
+              item[0]
+            ),
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode,
             time: item[0],
             timestamp: dayjs(item[0]).toISOString(),
             open: item[1],
@@ -80,6 +95,14 @@ class CCXTProvider extends BaseProvider {
         if (response.length > 0) {
           const latestCandle = response[0];
           return {
+            id: generateCandleId(
+              this._exchange,
+              this._asset,
+              this._currency,
+              1,
+              modeToStr(this._mode),
+              latestCandle[0]
+            ),
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
