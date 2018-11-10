@@ -81,7 +81,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
       // Предыдущая свеча
       const previousCandle = candles[previousCandleIndex];
       if (previousCandle) {
-        if (previousCandle !== "previous") {
+        if (previousCandle.type !== "previous") {
           delete previousCandle.PartitionKey;
           delete previousCandle.RowKey;
           delete previousCandle.Timestamp;

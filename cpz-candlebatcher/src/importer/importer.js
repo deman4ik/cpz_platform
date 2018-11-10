@@ -462,7 +462,8 @@ class Importer {
           this._timeframeCandles[1] = this._tempCandles;
         }
       });
-
+      // Если не нужно свертывать свечи - выходим
+      if (!this._requireBatching) return;
       // Создаем список с полным количеством минут
       const fullMinutesList = createMinutesList(
         this._dateFrom,
