@@ -45,7 +45,7 @@ class CCXTProvider extends BaseProvider {
             .filter(
               candle =>
                 dayjs(candle[0]).valueOf() >= this._dateStart.valueOf() &&
-                dayjs(candle[0]).valueOf() <= this._dateEnd.valueOf()
+                dayjs(candle[0]).valueOf() < this._dateEnd.valueOf()
             )
             .sort((a, b) => sortAsc(a[0], b[0]));
           if (filteredData.length > 0) {

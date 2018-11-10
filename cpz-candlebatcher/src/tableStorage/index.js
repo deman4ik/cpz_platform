@@ -216,10 +216,7 @@ async function saveCandlesArrayToTemp(candles) {
     throw new VError(
       {
         name: "CandlebatcherStorageError",
-        cause: error,
-        info: {
-          candles
-        }
+        cause: error
       },
       "Failed to save candles to temp"
     );
@@ -247,10 +244,7 @@ async function deletePrevCachedTicksArray(ticks) {
     throw new VError(
       {
         name: "CandlebatcherStorageError",
-        cause: error,
-        info: {
-          ticks
-        }
+        cause: error
       },
       'Failed to delete ticks from "%s"',
       STORAGE_TICKSCACHED_TABLE

@@ -72,7 +72,7 @@ async function execute(context, state, start = false) {
       // Сохраняем свечи в БД
       await importer.saveCandles();
       // Очищаем временные свечи
-      //   await importer.clearTemp();
+      await importer.clearTemp();
       // Завершаем работу и сохраняем стейт
       await importer.end(STATUS_FINISHED);
     } else {

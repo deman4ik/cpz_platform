@@ -408,7 +408,7 @@ class Candlebatcher {
       if (!this._currentCandle) {
         /* Если есть предыдущая свеча */
         if (this._lastCandle) {
-          /* Формируем новую свечу по данным из предыдущей */
+          /* Формируем новую минутную свечу по данным из предыдущей */
           this._currentCandle = {
             id: generateCandleId(
               this._exchange,
@@ -495,7 +495,7 @@ class Candlebatcher {
             const timeFrom = this._dateFrom.add(-timeframe, "minute").valueOf();
             const timeTo = this._dateFrom.valueOf();
             const candles = this._candles.filter(
-              candle => candle.time >= timeFrom && candle.time <= timeTo
+              candle => candle.time >= timeFrom && candle.time < timeTo
             );
             if (candles.length > 0) {
               this._timeframeCandles[timeframe] = {
@@ -505,7 +505,7 @@ class Candlebatcher {
                   this._currency,
                   timeframe,
                   modeToStr(this._mode),
-                  this._timeframeCandles[timeframe].time
+                  timeFrom
                 ),
                 candlabatcherId: this._taskId,
                 exchange: this._exchange,
@@ -513,15 +513,15 @@ class Candlebatcher {
                 currency: this._currency,
                 mode: this._mode,
                 timeframe,
-                time: this._dateFrom.valueOf(), // время в милисекундах
-                timestamp: this._dateFrom.toISOString(), // время в ISO UTC
+                time: timeFrom, // время в милисекундах
+                timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи
-                high: Math.max(...candles.map(t => t.max)), // максимальная цена
-                low: Math.min(...candles.map(t => t.min)), // минимальная цена
+                high: Math.max(...candles.map(t => t.high)), // максимальная цена
+                low: Math.min(...candles.map(t => t.low)), // минимальная цена
                 close: candles[candles.length - 1].close, // цена закрытия - цена закрытия последней свечи
                 volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
                 count: candles.length,
-                gap: candles.length === timeframe,
+                gap: candles.length !== timeframe,
                 type: "created" // признак - свеча сформирована
               };
             } else {

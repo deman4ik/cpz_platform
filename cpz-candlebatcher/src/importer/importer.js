@@ -9,11 +9,17 @@ import { IMPORTER_SERVICE } from "cpzServices";
 import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_FINISHED } from "cpzState";
 import publishEvents from "cpzEvents";
-import { durationMinutes, completedPercent, modeToStr } from "cpzUtils/helpers";
+import {
+  durationMinutes,
+  completedPercent,
+  modeToStr,
+  sortAsc
+} from "cpzUtils/helpers";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
-  generateCandleId
+  generateCandleId,
+  createMinutesList
 } from "../utils";
 import { queueImportIteration } from "../queueStorage";
 import {
@@ -25,7 +31,6 @@ import {
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
-import { sortAsc } from "../../../cpz-shared/utils/helpers";
 
 class Importer {
   constructor(context, state) {
@@ -54,13 +59,9 @@ class Importer {
     /* Признак прогрева кэша минутными свечами */
     this._warmUpCache = state.warmUpCache || false;
     /* Дата с */
-    this._dateFrom = dayjs(state.dateFrom)
-      .startOf("minute")
-      .toISOString();
+    this._dateFrom = state.dateFrom;
     /* Дата по */
-    this._dateTo = dayjs(state.dateTo)
-      .startOf("minute")
-      .toISOString();
+    this._dateTo = state.dateTo;
     /* Дата начало следующей загрузки */
     this._dateNext = state.dateNext;
     /* Лимит загружаемых свечей */
@@ -422,14 +423,14 @@ class Importer {
         this._tempCandles
       );
       if (gappedCandles.length > 0) {
-        this._tempCandles = [...this._tempCandles, ...gappedCandles].sort(
-          (a, b) => sortAsc(a.time, b.time)
-        );
+        this._tempCandles
+          .concat(gappedCandles)
+          .sort((a, b) => sortAsc(a.time, b.time));
+        this.log("candles", this._tempCandles.length);
+        this.log("gapped", gappedCandles.length);
         // Сохраняем сформированные пропущенные свечи
         await saveCandlesArrayToTemp(gappedCandles);
       }
-      this.log("candles", this._tempCandles.length);
-      this.log("gapped", gappedCandles.length);
     } catch (error) {
       throw new VError(
         {
@@ -451,7 +452,6 @@ class Importer {
    * @memberof Importer
    */
   async batchCandles() {
-    //! FIXME
     this.log("batchCandles()");
     try {
       // Инициализируем объект со свечами в различных таймфреймах
@@ -459,24 +459,27 @@ class Importer {
       this._timeframes.forEach(timeframe => {
         this._timeframeCandles[timeframe] = [];
         if (timeframe === 1) {
-          this._timeframeCandles[timeframe] = this._tempCandles;
+          this._timeframeCandles[1] = this._tempCandles;
         }
       });
-      this.log("TF 1", this._timeframeCandles["1"].length);
-      // Если не нужно свертывать свечи - выходим
-      if (!this._requireBatching) return;
 
-      // Список загруженных минут
-      const loadedMinutesList = this._tempCandles.map(candle => candle.time);
-      loadedMinutesList.forEach(time => {
+      // Создаем список с полным количеством минут
+      const fullMinutesList = createMinutesList(
+        this._dateFrom,
+        this._dateTo,
+        this._totalDuration
+      );
+      fullMinutesList.forEach(time => {
         const date = dayjs(time);
+        // Пропускаем самую первую свечу
+        if (dayjs(this._dateFrom).valueOf() === date.valueOf()) return;
         const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
         if (currentTimeframes.length > 0) {
           currentTimeframes.forEach(timeframe => {
             const timeFrom = date.add(-timeframe, "minute").valueOf();
-            const timeTo = time;
+            const timeTo = date.valueOf();
             const candles = this._tempCandles.filter(
-              candle => candle.time >= timeFrom && candle.time <= timeTo
+              candle => candle.time >= timeFrom && candle.time < timeTo
             );
             if (candles.length > 0) {
               this._timeframeCandles[timeframe].push({
@@ -486,7 +489,7 @@ class Importer {
                   this._currency,
                   timeframe,
                   modeToStr(this._mode),
-                  time
+                  timeFrom
                 ),
                 importerId: this._taskId,
                 exchange: this._exchange,
@@ -494,15 +497,15 @@ class Importer {
                 currency: this._currency,
                 mode: this._mode,
                 timeframe,
-                time, // время в милисекундах
-                timestamp: date.toISOString(), // время в ISO UTC
+                time: timeFrom, // время в милисекундах
+                timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи
-                high: Math.max(...candles.map(t => t.max)), // максимальная цена
-                low: Math.min(...candles.map(t => t.min)), // минимальная цена
+                high: Math.max(...candles.map(t => t.high)), // максимальная цена
+                low: Math.min(...candles.map(t => t.low)), // минимальная цена
                 close: candles[candles.length - 1].close, // цена закрытия - цена закрытия последней свечи
                 volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
                 count: candles.length,
-                gap: candles.length === timeframe,
+                gap: candles.length !== timeframe,
                 type: "created" // признак - свеча сформирована
               });
             }

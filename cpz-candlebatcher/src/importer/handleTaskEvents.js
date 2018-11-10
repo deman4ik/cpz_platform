@@ -1,4 +1,5 @@
 import VError from "verror";
+import dayjs from "cpzDayjs";
 import { IMPORTER_SERVICE } from "cpzServices";
 import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
@@ -28,6 +29,12 @@ async function handleImportStart(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
+    eventData.dateFrom = dayjs(eventData.dateFrom)
+      .startOf("minute")
+      .toISOString();
+    eventData.dateTo = dayjs(eventData.dateTo)
+      .startOf("minute")
+      .toISOString();
     // Запуск
     await execute(context, eventData, true);
     // Публикуем событие - успех

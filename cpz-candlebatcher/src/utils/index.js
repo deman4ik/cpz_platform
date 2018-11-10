@@ -47,7 +47,7 @@ function getCurrentTimeframes(timeframes, inputDate) {
 function createMinutesList(dateFrom, dateTo, dur) {
   const duration = dur || durationMinutes(dateFrom, dateTo);
   const list = [];
-  for (let i = 0; i < duration; i += 1) {
+  for (let i = 0; i <= duration; i += 1) {
     list.push(
       dayjs(dateFrom)
         .add(i, "minute")
@@ -57,7 +57,8 @@ function createMinutesList(dateFrom, dateTo, dur) {
   return list;
 }
 
-function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
+function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
+  const candles = inputCandles;
   // Создаем список с полным количеством минут
   const fullMinutesList = createMinutesList(dateFrom, dateTo, maxDuration);
   // Список загруженных минут
@@ -80,6 +81,13 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
       // Предыдущая свеча
       const previousCandle = candles[previousCandleIndex];
       if (previousCandle) {
+        if (previousCandle !== "previous") {
+          delete previousCandle.PartitionKey;
+          delete previousCandle.RowKey;
+          delete previousCandle.Timestamp;
+          delete previousCandle[".metadata"];
+          delete previousCandle.metadata;
+        }
         // Заполняем пропуск
         const gappedCandle = {
           ...previousCandle,
@@ -100,12 +108,10 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
           volume: 0, // нулевой объем
           type: "previous" // признак - предыдущая
         };
-        delete gappedCandle.PartitionKey;
-        delete gappedCandle.RowKey;
-        delete gappedCandle.Timestamp;
-        delete gappedCandle[".metadata"];
-        delete gappedCandle.metadata;
+
         gappedCandles.push(gappedCandle);
+        candles.push(gappedCandle);
+        candles.sort((a, b) => sortAsc(a.time, b.time));
       }
     });
 
