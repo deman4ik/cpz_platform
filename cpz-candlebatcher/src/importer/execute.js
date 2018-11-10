@@ -11,7 +11,12 @@ import {
 import publishEvents from "cpzEvents";
 import { createCandlebatcherSlug } from "cpzStorage/utils";
 import { modeToStr } from "cpzUtils/helpers";
-import { STATUS_STOPPED, STATUS_ERROR, STATUS_STARTED } from "cpzState";
+import {
+  STATUS_STOPPED,
+  STATUS_ERROR,
+  STATUS_STARTED,
+  STATUS_FINISHED
+} from "cpzState";
 import Importer from "./importer";
 
 async function execute(context, state, start = false) {
@@ -55,14 +60,28 @@ async function execute(context, state, start = false) {
     // Загружаем новые свечи
     await importer.loadCandles();
 
-    // Сохраняем новую загруженную свечу
-    await importer.saveCandlesToDB();
+    // Сохраняем загруженные свечи
+    await importer.saveCandlesToTemp();
 
-    // Если импорт не завершен, добавляем новую задачу в очередь
-    await importer.queueNext();
+    // Если импорт завершен
+    if (importer.finished) {
+      // Убираем пропуски
+      await importer.handleGaps();
+      // Сворачиваем свечи
+      await importer.batchCandles();
+      // Сохраняем свечи в БД
+      await importer.saveCandles();
+      // Очищаем временные свечи
+      //   await importer.clearTemp();
+      // Завершаем работу и сохраняем стейт
+      await importer.end(STATUS_FINISHED);
+    } else {
+      // Если импорт не завершен, добавляем новую задачу в очередь
+      await importer.queueNext();
+      // Завершаем работу и сохраняем стейт
+      await importer.end(STATUS_STARTED);
+    }
 
-    // Завершаем работу и сохраняем стейт
-    await importer.end(STATUS_STARTED);
     // Логируем итерацию
     await importer.logEvent(importer.getCurrentState());
   } catch (error) {

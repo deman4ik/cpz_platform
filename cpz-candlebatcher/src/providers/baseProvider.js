@@ -11,7 +11,7 @@ class BaseProvider {
     this._limit = input.limit || 500;
     this._dateFrom = input.dateFrom;
     this._dateTo = input.dateTo;
-
+    this._mode = input.mode;
     this._proxy = input.proxy || process.env.PROXY_ENDPOINT;
     if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
     // Дата начала импорта

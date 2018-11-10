@@ -2,8 +2,11 @@ import dayjs from "cpzDayjs";
 import {
   durationMinutes,
   arraysDiff,
-  getInvertedTimestamp
+  getInvertedTimestamp,
+  sortDesc,
+  sortAsc
 } from "cpzUtils/helpers";
+
 /**
  * Отбор подходящих по времени таймфреймов для формирования
  *
@@ -36,7 +39,7 @@ function getCurrentTimeframes(timeframes, inputDate) {
   /* Если есть хотя бы один подходящий таймфрейм */
   if (currentTimeframes.length > 0)
     /* Сортируем в порядке убывания */
-    currentTimeframes = currentTimeframes.sort((a, b) => a < b);
+    currentTimeframes = currentTimeframes.sort(sortDesc);
   /* Возвращаем массив доступных таймфреймов */
   return currentTimeframes;
 }
@@ -45,7 +48,11 @@ function createMinutesList(dateFrom, dateTo, dur) {
   const duration = dur || durationMinutes(dateFrom, dateTo);
   const list = [];
   for (let i = 0; i < duration; i += 1) {
-    list.push(dateFrom.add(i, "minute").valueOf());
+    list.push(
+      dayjs(dateFrom)
+        .add(i, "minute")
+        .valueOf()
+    );
   }
   return list;
 }
@@ -56,10 +63,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
   // Список загруженных минут
   const loadedMinutesList = candles.map(candle => candle.time);
   // Ищем пропуски
-  const diffs = arraysDiff(fullMinutesList, loadedMinutesList).sort(
-    (a, b) => a > b
-  );
-
+  const diffs = arraysDiff(fullMinutesList, loadedMinutesList).sort(sortAsc);
   // Если есть пропуски
   if (diffs.length > 0) {
     const gappedCandles = [];
@@ -96,18 +100,18 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, candles) {
           volume: 0, // нулевой объем
           type: "previous" // признак - предыдущая
         };
+        delete gappedCandle.PartitionKey;
+        delete gappedCandle.RowKey;
+        delete gappedCandle.Timestamp;
+        delete gappedCandle[".metadata"];
+        delete gappedCandle.metadata;
         gappedCandles.push(gappedCandle);
-        candles = [
-          ...candles.slice(0, previousCandleIndex),
-          gappedCandle,
-          ...candles.slice(previousCandleIndex)
-        ];
       }
     });
 
-    return { candles, gappedCandles };
+    return gappedCandles;
   }
-  return { candles: null, gappedCandles: null };
+  return [];
 }
 
 function generateCandleId(

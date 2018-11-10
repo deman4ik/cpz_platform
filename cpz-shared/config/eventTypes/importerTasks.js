@@ -26,10 +26,22 @@ const TASKS_IMPORTER_START_EVENT = {
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },
-    timeframe: {
+    timeframes: {
       description: "Timeframe in minutes.",
-      type: "number",
-      empty: false
+      type: "array",
+      values: [1, 5, 15, 30, 60, 120, 240, 1440],
+      empty: false,
+      optional: true
+    },
+    requireBatching: {
+      description: "Batch loading candles",
+      type: "boolean",
+      optional: true
+    },
+    warmUpCache: {
+      dataSchema: "Save current loaded candles to cache",
+      type: "boolean",
+      optional: true
     },
     // TODO: datefrom/dateto custom validation
     dateFrom: {

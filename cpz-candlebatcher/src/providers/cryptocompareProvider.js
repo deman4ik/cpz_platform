@@ -2,7 +2,7 @@ import dayjs from "cpzDayjs";
 import VError from "verror";
 import retry from "cpzUtils/retry";
 import { fetchJSON } from "cpzUtils/fetch";
-import { modeToStr } from "cpzUtils/helpers";
+import { modeToStr, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
 import { generateCandleId } from "../utils";
 
@@ -31,7 +31,7 @@ class CryptocompareProvider extends BaseProvider {
         candle =>
           dayjs(candle.time * 1000).isAfter(this._dateStart) ||
           dayjs(candle.time * 1000).isBefore(this._dateEnd)
-      ).sort((a, b) => a.time > b.time);
+      ).sort((a, b) => sortAsc(a.time, b.time));
       /* Преобразуем объект в массив */
       const data = filteredData.map(item => ({
         id: generateCandleId(

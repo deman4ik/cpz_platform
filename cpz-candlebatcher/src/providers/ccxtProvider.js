@@ -2,7 +2,7 @@ import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
 import retry from "cpzUtils/retry";
-import { modeToStr } from "cpzUtils/helpers";
+import { modeToStr, durationMinutes, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
 import { generateCandleId } from "../utils";
 
@@ -18,7 +18,7 @@ class CCXTProvider extends BaseProvider {
         this._symbol = `${this._asset}/USDT`;
       }
     }
-    this._exchange = new ccxt[this._exchangeName]({
+    this._connector = new ccxt[this._exchangeName]({
       agent: this._proxyAgent
     });
   }
@@ -26,10 +26,12 @@ class CCXTProvider extends BaseProvider {
   async loadCandles(dateNext) {
     try {
       const dateEnd = dateNext || this._dateTo;
-      const dateStart = dayjs(dateEnd).add(-this._limit, this._rangeName);
+      const minutesLeft = durationMinutes(this._dateFrom, dateEnd, true);
+      const limit = minutesLeft > this._limit ? this._limit : minutesLeft;
+      const dateStart = dayjs(dateEnd).add(-limit, "minute");
 
       const response = await retry(async () =>
-        this._exchange.fetchOHLCV(
+        this._connector.fetchOHLCV(
           this._symbol,
           "1m",
           dateStart.valueOf(),
@@ -42,43 +44,51 @@ class CCXTProvider extends BaseProvider {
           const filteredData = response
             .filter(
               candle =>
-                dayjs(candle[0]).isAfter(this._dateStart) ||
-                dayjs(candle[0]).isBefore(this._dateEnd)
+                dayjs(candle[0]).valueOf() >= this._dateStart.valueOf() &&
+                dayjs(candle[0]).valueOf() <= this._dateEnd.valueOf()
             )
-            .sort((a, b) => a[0] > b[0]);
-          /* Преобразуем объект в массив */
-          const data = filteredData.map(item => ({
-            id: generateCandleId(
-              this._exchange,
-              this._asset,
-              this._currency,
-              1,
-              modeToStr(this._mode),
-              item[0]
-            ),
-            importerId: this._importerId,
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            timeframe: 1,
-            mode: this._mode,
-            time: item[0],
-            timestamp: dayjs(item[0]).toISOString(),
-            open: item[1],
-            high: item[2],
-            low: item[3],
-            close: item[4],
-            volume: item[5],
-            type: "imported"
-          }));
+            .sort((a, b) => sortAsc(a[0], b[0]));
+          if (filteredData.length > 0) {
+            /* Преобразуем объект в массив */
+            const data = filteredData.map(item => ({
+              id: generateCandleId(
+                this._exchange,
+                this._asset,
+                this._currency,
+                1,
+                modeToStr(this._mode),
+                item[0]
+              ),
+              importerId: this._importerId,
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: 1,
+              mode: this._mode,
+              time: item[0],
+              timestamp: dayjs(item[0]).toISOString(),
+              open: item[1],
+              high: item[2],
+              low: item[3],
+              close: item[4],
+              volume: item[5],
+              type: "imported"
+            }));
+
+            return {
+              firstDate: data[0].timestamp,
+              lastDate: data[data.length - 1].timestamp,
+              data
+            };
+          }
           return {
-            firstDate: data[0].timestamp,
-            lastDate: data[data.length - 1].timestamp,
-            data
+            firstDate: dateStart,
+            lastDate: dateEnd,
+            data: []
           };
         }
       }
-      return null;
+      throw new Error("Can't load data");
     } catch (error) {
       throw new VError(
         { name: "LoadCandlesError", cause: error, info: this._currentState },
@@ -91,7 +101,7 @@ class CCXTProvider extends BaseProvider {
     try {
       const dateStart = date.add(-2, "minute");
       const response = await retry(async () =>
-        this._exchange.fetchOHLCV(this._symbol, "1m", dateStart.valueOf(), 1)
+        this._connector.fetchOHLCV(this._symbol, "1m", dateStart.valueOf(), 1)
       );
       if (response) {
         if (response.length > 0) {
@@ -106,6 +116,7 @@ class CCXTProvider extends BaseProvider {
               latestCandle[0]
             ),
             importerId: this._importerId,
+            candlebatcherId: this._candlebatcherId,
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,

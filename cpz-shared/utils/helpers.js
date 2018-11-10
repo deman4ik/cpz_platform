@@ -2,6 +2,25 @@ import { v4 as uuid } from "uuid";
 import dayjs from "./lib/dayjs";
 import { REALTIME_MODE, EMULATOR_MODE, BACKTEST_MODE } from "../config/state";
 
+function sortAsc(a, b) {
+  if (a > b) {
+    return 1;
+  }
+  if (b > a) {
+    return -1;
+  }
+  return 0;
+}
+
+function sortDesc(a, b) {
+  if (a > b) {
+    return -1;
+  }
+  if (b > a) {
+    return 1;
+  }
+  return 0;
+}
 /**
  * Парсинг JSON, если ошибка возвращает false
  *
@@ -144,7 +163,18 @@ function arraysDiff(full, part) {
   return full.filter(v => !part.includes(v));
 }
 
+function chunkArray(array, chunkSize) {
+  const results = [];
+
+  while (array.length) {
+    results.push(array.splice(0, chunkSize));
+  }
+
+  return results;
+}
 export {
+  sortAsc,
+  sortDesc,
   tryParseJSON,
   getModeFromSubject,
   subjectToStr,
@@ -154,5 +184,6 @@ export {
   durationMinutes,
   completedPercent,
   getPreviousMinuteRange,
-  arraysDiff
+  arraysDiff,
+  chunkArray
 };

@@ -9,7 +9,7 @@ import {
   CANDLES_TOPIC
 } from "cpzEventTypes";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
-import { modeToStr, getPreviousMinuteRange } from "cpzUtils/helpers";
+import { modeToStr, getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
 import {
   createCandlebatcherSlug,
   createCachedCandleSlug
@@ -56,7 +56,7 @@ class Candlebatcher {
     this._asset = state.asset;
     /* Котировка валюты */
     this._currency = state.currency;
-    /* Массив таймфреймов [1,5,30,60,3600] */
+    /* Массив таймфреймов [1, 5, 15, 30, 60, 120, 240, 1440] */
     this._timeframes = state.timeframes || [];
     /* Текущие тики */
     this._ticks = [];
@@ -325,7 +325,7 @@ class Candlebatcher {
       /* Если были тики */
       if (this._ticks.length > 0) {
         /* Сортируем тики по дате */
-        this._ticks = this._ticks.sort((a, b) => a.time > b.time);
+        this._ticks = this._ticks.sort((a, b) => sortAsc(a.time, b.time));
         /* Формируем свечу */
         this._createdCandle = {
           time: this._dateFrom.valueOf(), // время в милисекундах
@@ -458,11 +458,11 @@ class Candlebatcher {
               this._asset,
               this._currency,
               maxTimeframe,
-              this._mode
+              modeToStr(this._mode)
             )
           });
           if (loadedCandles.length !== maxTimeframe) {
-            const { candles, gappedCandles } = handleCandleGaps(
+            const gappedCandles = handleCandleGaps(
               {
                 exchange: this._exchange,
                 asset: this._asset,
@@ -475,9 +475,14 @@ class Candlebatcher {
               maxTimeframe,
               loadedCandles
             );
-            if (candles) loadedCandles = candles;
+
             // Сохраняем сформированные пропущенные свечи
-            if (gappedCandles) await saveCandlesArrayToCache(gappedCandles);
+            if (gappedCandles.length > 0) {
+              loadedCandles = [...loadedCandles, ...gappedCandles].sort(
+                (a, b) => sortAsc(a.time, b.time)
+              );
+              await saveCandlesArrayToCache(gappedCandles);
+            }
           }
 
           /* Заполняем массив свечей - загруженные + текущая и сортируем по дате */
