@@ -1,4 +1,5 @@
 import VError from "verror";
+import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { STATUS_STARTED, STATUS_STOPPED } from "cpzState";
@@ -9,7 +10,12 @@ import {
   CANDLES_TOPIC
 } from "cpzEventTypes";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
-import { modeToStr, getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
+import {
+  modeToStr,
+  getPreviousMinuteRange,
+  durationMinutes,
+  sortAsc
+} from "cpzUtils/helpers";
 import {
   createCandlebatcherSlug,
   createCachedCandleSlug
@@ -19,18 +25,21 @@ import getHistoryCandles from "cpzDB/historyCandles";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
-  generateCandleId
+  generateCandleId,
+  timeframeToTimeUnit
 } from "../utils";
 import {
   saveCandleToCache,
   saveCandlesArrayToCache,
   saveCandlebatcherState,
   getCachedCandles,
+  countCachedCandles,
   getPrevCachedTicks,
   deletePrevCachedTicksArray
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
+import executeImporter from "../importer/execute";
 /**
  * Класс Candlebatcher
  *
@@ -67,7 +76,7 @@ class Candlebatcher {
     /* Объект с последними свечами в различных таймфреймах */
     this._lastCandles = state.lastCandles || {};
     /* Недавно отправленные свечи в различных таймфреймах */
-    this._sendedCandles = state.sendedCandles || {};
+    this._sendedCandles = [];
     /* Адрес прокси сервера */
     this._proxy = state.proxy;
     /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject,providerType} или false */
@@ -100,10 +109,14 @@ class Candlebatcher {
     this.log(`initProvider()`);
     try {
       const initParams = {
+        candlebatcherId: this._taskId,
+        mode: this._mode,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
-        timeframe: this._timeframe,
+        limit: this._limit,
+        dateFrom: this._dateFrom,
+        dateTo: this._dateTo,
         proxy: this._proxy
       };
       switch (this._providerType) {
@@ -209,34 +222,57 @@ class Candlebatcher {
     this._proxy = updatedFields.proxy || this._proxy;
   }
 
-  async warmUpCache() {
+  async loadHistoryToCache() {
     try {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           try {
-            const candles = await getHistoryCandles({
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              timeframe,
-              dateTo: dayjs().toISOString(),
-              limit: REQUIRED_HISTORY_MAX_BARS
+            const { number, unit } = timeframeToTimeUnit(
+              REQUIRED_HISTORY_MAX_BARS,
+              timeframe
+            );
+            const dateFrom = dayjs()
+              .add(-number, unit)
+              .startOf("day")
+              .toISOString();
+            const dateTo = dayjs().toISOString();
+            const cachedCandlesCount = countCachedCandles({
+              slug: createCachedCandleSlug(
+                this._exchange,
+                this._asset,
+                this._currency,
+                timeframe,
+                modeToStr(this._mode)
+              ),
+              dateFrom,
+              dateTo
             });
-            if (candles.length < REQUIRED_HISTORY_MAX_BARS) {
-              throw new VError(
-                {
-                  name: "HistoryRangeError",
-                  info: {
-                    requiredHistoryMaxBars: REQUIRED_HISTORY_MAX_BARS,
-                    actualHistoryMaxBars: candles.length
-                  }
-                },
-                "Can't load history required: %s bars but loaded: %s bars",
-                REQUIRED_HISTORY_MAX_BARS,
-                candles.length
-              );
+            const warmCandlesCount = durationMinutes(dateFrom, dateTo);
+            if (cachedCandlesCount < warmCandlesCount) {
+              const candles = await getHistoryCandles({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe,
+                dateTo: dayjs().toISOString(),
+                limit: REQUIRED_HISTORY_MAX_BARS
+              });
+              if (candles.length < REQUIRED_HISTORY_MAX_BARS) {
+                throw new VError(
+                  {
+                    name: "HistoryRangeError",
+                    info: {
+                      requiredHistoryMaxBars: REQUIRED_HISTORY_MAX_BARS,
+                      actualHistoryMaxBars: candles.length
+                    }
+                  },
+                  "Can't load history required: %s bars but loaded: %s bars",
+                  REQUIRED_HISTORY_MAX_BARS,
+                  candles.length
+                );
+              }
+              await saveCandlesArrayToCache(candles);
             }
-            await saveCandlesArrayToCache(candles);
           } catch (error) {
             throw new VError(
               {
@@ -254,8 +290,6 @@ class Candlebatcher {
           }
         })
       );
-
-      // TODO: загрузить минутные свечи начиная с 00:00 текущего дня
     } catch (error) {
       throw new VError(
         {
@@ -271,6 +305,55 @@ class Candlebatcher {
     }
   }
 
+  async warmUpCache() {
+    try {
+      const dateFrom = dayjs()
+        .startOf("day")
+        .toISOString();
+      const dateTo = dayjs().toISOString();
+      const cachedCandlesCount = countCachedCandles({
+        slug: createCachedCandleSlug(
+          this._exchange,
+          this._asset,
+          this._currency,
+          1,
+          modeToStr(this._mode)
+        ),
+        dateFrom,
+        dateTo
+      });
+      const warmCandlesCount = durationMinutes(dateFrom, dateTo);
+
+      if (cachedCandlesCount < warmCandlesCount) {
+        /* Загружаем свечи начиная с начала текущих UTC суток  */
+        const importerRequest = {
+          taskId: uuid(),
+          mode: this._mode,
+          debug: this._debug,
+          providerType: this._providerType,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          dateFrom,
+          dateTo
+        };
+        await executeImporter(importerRequest);
+      }
+    } catch (error) {
+      throw new VError(
+        {
+          name: "CandlebatcherError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            eventSubject: this._eventSubject
+          }
+        },
+        `Failed to warm up cache`
+      );
+    }
+  }
+
   /**
    * Загрузка новой минутной свечи
    *
@@ -281,14 +364,18 @@ class Candlebatcher {
     this.log("loadCandle()");
     try {
       // Вызов функции коннектора
-      const result = await this.provider.loadPreviousCandle(this._dateFrom);
+      const result = await this.provider.loadPreviousCandle(this._prevDateFrom);
       // Если еще не было загруженных свечей или дата загруженный свечи не равна дате текущей свечи
       if (
         !Object.prototype.hasOwnProperty.call(this._lastCandle, "time") ||
         this._lastCandle.time !== result.time
       ) {
         // Сохраняем новую загруженную свечу
-        this._loadedCandle = { ...result, type: "loaded" };
+        this._loadedCandle = {
+          ...result,
+          type: "loaded",
+          candlabatcherId: this._taskId
+        };
       }
     } catch (error) {
       throw new VError(
@@ -319,8 +406,8 @@ class Candlebatcher {
           this._currency,
           modeToStr(this._mode)
         ),
-        dateFrom: this._dateFrom.toISOString(),
-        dateTo: this._dateTo.toISOString()
+        dateFrom: this._prevDateFrom.toISOString(),
+        dateTo: this._prevDateTo.toISOString()
       });
       /* Если были тики */
       if (this._ticks.length > 0) {
@@ -328,8 +415,22 @@ class Candlebatcher {
         this._ticks = this._ticks.sort((a, b) => sortAsc(a.time, b.time));
         /* Формируем свечу */
         this._createdCandle = {
-          time: this._dateFrom.valueOf(), // время в милисекундах
-          timestamp: this._dateFrom.toISOString(), // время в ISO UTC
+          id: generateCandleId(
+            this._exchange,
+            this._asset,
+            this._currency,
+            1,
+            modeToStr(this._mode),
+            this._prevDateFrom.valueOf()
+          ),
+          candlabatcherId: this._taskId,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          mode: this._mode,
+          timeframe: 1,
+          time: this._prevDateFrom.valueOf(), // время в милисекундах
+          timestamp: this._prevDateFrom.toISOString(), // время в ISO UTC
           open: this._ticks[0].price, // цена открытия - цена первого тика
           high: Math.max(...this._ticks.map(t => t.price)), // максимальная цена тиков
           low: Math.min(...this._ticks.map(t => t.price)), // минимальная цена тиков
@@ -373,8 +474,8 @@ class Candlebatcher {
           info: {
             taskId: this._taskId,
             eventSubject: this._eventSubject,
-            dateFrom: this._dateFrom.toISOString(),
-            dateTo: this._dateTo.toISOString()
+            dateFrom: this._prevDateFrom.toISOString(),
+            dateTo: this._prevDateTo.toISOString()
           }
         },
         `Failed to clear ticks`
@@ -393,8 +494,9 @@ class Candlebatcher {
       this.log("handleCandle()");
       /* Начало и конец предыдущей минуты */
       const { dateFrom, dateTo } = getPreviousMinuteRange();
-      this._dateFrom = dateFrom;
-      this._dateTo = dateTo;
+      this._prevDateFrom = dateFrom;
+      this._prevDateTo = dateTo;
+      this._currentDate = dayjs().startOf("minute");
       /* Пробуем сформировать минутную свечу */
       await this._createCandle();
       this._currentCandle = this._createdCandle;
@@ -416,7 +518,7 @@ class Candlebatcher {
               this._currency,
               1,
               modeToStr(this._mode),
-              this._dateFrom.valueOf()
+              this._prevDateFrom.valueOf()
             ),
             candlabatcherId: this._taskId,
             exchange: this._exchange,
@@ -424,8 +526,8 @@ class Candlebatcher {
             currency: this._currency,
             mode: this._mode,
             timeframe: 1,
-            time: this._dateFrom.valueOf(), // время в милисекундах
-            timestamp: this._dateFrom.toISOString(), // время в ISO UTC
+            time: this._prevDateFrom.valueOf(), // время в милисекундах
+            timestamp: this._prevDateFrom.toISOString(), // время в ISO UTC
             open: this._lastCandle.close, // цена открытия = цене закрытия предыдущей
             high: this._lastCandle.close, // максимальная цена = цене закрытия предыдущей
             low: this._lastCandle.close, // минимальная цена = цене закрытия предыдущей
@@ -438,29 +540,40 @@ class Candlebatcher {
       /* Если есть текущая свеча */
       if (this._currentCandle) {
         this._timeframeCandles = {};
-        this._events = [];
         this._timeframeCandles[1] = this._currentCandle;
-        this.log(this._currentCandle);
         /* Проверяем какие таймфреймы возможно сформировать */
         const currentTimeframes = getCurrentTimeframes(
           this._timeframes,
-          this._dateFrom
+          this._currentDate
         );
         if (currentTimeframes.length > 0) {
           /* Загружаем максимальный период из кэша */
           const maxTimeframe = currentTimeframes[0];
-          const loadDateFrom = this._dateFrom.add(-maxTimeframe, "minute");
+          const loadDateFrom = this._currentDate
+            .add(-maxTimeframe, "minute")
+            .toISOString();
+          /* Заполняем массив свечей - загруженные + текущая и сортируем по дате */
           let loadedCandles = await getCachedCandles({
             dateFrom: loadDateFrom,
-            dateTo: this._dateTo,
+            dateTo: this._prevDateTo.toISOString(),
             slug: createCachedCandleSlug(
               this._exchange,
               this._asset,
               this._currency,
-              maxTimeframe,
+              1,
               modeToStr(this._mode)
             )
           });
+          /* Добаляем текущую свечу к загруженным */
+          loadedCandles = [...loadedCandles, this._currentCandle].sort((a, b) =>
+            sortAsc(a.time, b.time)
+          );
+          this.log(
+            maxTimeframe,
+            loadDateFrom,
+            this._prevDateTo.toISOString(),
+            loadedCandles
+          );
           if (loadedCandles.length !== maxTimeframe) {
             const gappedCandles = handleCandleGaps(
               {
@@ -468,34 +581,39 @@ class Candlebatcher {
                 asset: this._asset,
                 currency: this._currency,
                 timeframe: 1,
-                modeStr: modeToStr(this._mode)
+                mode: this._mode
               },
               loadDateFrom,
-              this._dateTo,
+              this._prevDateTo,
               maxTimeframe,
               loadedCandles
             );
-
+            this.log(gappedCandles);
             // Сохраняем сформированные пропущенные свечи
             if (gappedCandles.length > 0) {
-              loadedCandles = [...loadedCandles, ...gappedCandles].sort(
-                (a, b) => sortAsc(a.time, b.time)
-              );
+              loadedCandles = loadedCandles
+                .concat(gappedCandles)
+                .sort((a, b) => sortAsc(a.time, b.time));
               await saveCandlesArrayToCache(gappedCandles);
             }
           }
 
-          /* Заполняем массив свечей - загруженные + текущая и сортируем по дате */
-          this._candles = [...loadedCandles, this._currentCandle].sort(
-            (a, b) => a.time > b.time
-          );
+          /* Полный массив свечей */
+          this._candles = loadedCandles;
 
           /* Формируем свечи в необходимых таймфреймах */
           currentTimeframes.forEach(timeframe => {
-            const timeFrom = this._dateFrom.add(-timeframe, "minute").valueOf();
-            const timeTo = this._dateFrom.valueOf();
+            const timeFrom = this._currentDate
+              .add(-timeframe, "minute")
+              .valueOf();
+            const timeTo = this._currentDate.valueOf();
             const candles = this._candles.filter(
               candle => candle.time >= timeFrom && candle.time < timeTo
+            );
+            this.log(
+              dayjs(timeFrom).toISOString(),
+              dayjs(timeTo).toISOString(),
+              candles.length
             );
             if (candles.length > 0) {
               this._timeframeCandles[timeframe] = {
@@ -524,8 +642,6 @@ class Candlebatcher {
                 gap: candles.length !== timeframe,
                 type: "created" // признак - свеча сформирована
               };
-            } else {
-              this._timeframeCandles[timeframe] = null;
             }
           });
         }
@@ -533,48 +649,19 @@ class Candlebatcher {
         /* Для всех сформированных свечей  */
         Object.keys(this._timeframeCandles).forEach(async timeframe => {
           const candle = this._timeframeCandles[timeframe];
+
           /* Если подписаны на данный таймфрейм */
-          if (this._timeframes.includes(timeframe)) {
-            try {
-              /* Отправляем событие */
-              await publishEvents(CANDLES_TOPIC, {
-                service: CANDLEBATCHER_SERVICE,
-                subject: this.createSubject(timeframe),
-                eventType: CANDLES_NEWCANDLE_EVENT,
-                data: candle
-              });
-              this._sendedCandles.push(candle);
-            } catch (error) {
-              throw new VError(
-                {
-                  name: "CandlebatcherError",
-                  cause: error,
-                  info: {
-                    taskId: this._taskId,
-                    eventSubject: this._eventSubject,
-                    candle
-                  }
-                },
-                `Failed to publish candle event`
-              );
-            }
+          if (this._timeframes.includes(parseInt(timeframe, 10))) {
+            /* Отправляем событие */
+            await publishEvents(CANDLES_TOPIC, {
+              service: CANDLEBATCHER_SERVICE,
+              subject: this.createSubject(timeframe),
+              eventType: CANDLES_NEWCANDLE_EVENT,
+              data: candle
+            });
+            this._sendedCandles.push(candle);
           }
-          try {
-            await saveCandleToCache();
-          } catch (error) {
-            throw new VError(
-              {
-                name: "CandlebatcherError",
-                cause: error,
-                info: {
-                  taskId: this._taskId,
-                  eventSubject: this._eventSubject,
-                  candle
-                }
-              },
-              `Failed to save candle to cache`
-            );
-          }
+          await saveCandleToCache(candle);
         });
       }
 

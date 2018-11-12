@@ -4,7 +4,7 @@ const CANDLES_NEWCANDLE_EVENT = {
   eventType: "CPZ.Candles.NewCandle",
 
   dataSchema: {
-    candleId: { description: "Uniq Candle Id.", type: "string", empty: false },
+    id: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },
@@ -15,8 +15,7 @@ const CANDLES_NEWCANDLE_EVENT = {
     time: { description: "Candle time in seconds.", type: "number" },
     timestamp: {
       description: "Candle timestamp in UTC.",
-      type: "datetime",
-      optinal: true // TODO: remove after altering candlebatcher
+      type: "datetime"
     },
     open: { description: "Candle Open Price.", type: "number" },
     close: { description: "Candle Close Price.", type: "number" },
@@ -29,7 +28,7 @@ const CANDLES_HANDLED_EVENT = {
   eventType: "CPZ.Candles.Handled",
 
   dataSchema: {
-    candleId: { description: "Uniq Candle Id.", type: "string", empty: false },
+    id: { description: "Uniq Candle Id.", type: "string", empty: false },
     service: {
       description: "Sevice name handeling event",
       type: "string",

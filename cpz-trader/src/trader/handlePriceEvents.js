@@ -195,11 +195,11 @@ async function handleCandle(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            candleId: eventData.candleId
+            candleId: eventData.id
           }
         },
         'Failed to handle new candle "%s"',
-        eventData.candleId
+        eventData.id
       )
     );
     context.log.error(errorOutput.message, errorOutput);

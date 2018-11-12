@@ -77,7 +77,7 @@ async function publishEvents(topic, eventData) {
     }
     const { client, host } = topicsConfig[topic];
     await client.publishEvents(host, events);
-    /*await retry(
+    /* await retry(
       async () => {
         await client.publishEvents(host, events);
       },

@@ -56,8 +56,6 @@ class Importer {
     this._timeframes = state.timeframes || [1, 5, 15, 30, 60, 120, 240, 1440];
     /* Признак необходимости свертывания свечей */
     this._requireBatching = state.requireBatching || true;
-    /* Признак прогрева кэша минутными свечами */
-    this._warmUpCache = state.warmUpCache || false;
     /* Дата с */
     this._dateFrom = state.dateFrom;
     /* Дата по */
@@ -88,8 +86,11 @@ class Importer {
     this._endedAt = this._stopRequested
       ? dayjs().toISOString()
       : state.endedAt || "";
+    this._initialized = state.initialized || false;
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+    /* Инициализация */
+    this.init();
     /* Запуск инициализации провайдера */
     this.initProvider();
     this.log(`Importer ${this._eventSubject} initialized`);
@@ -124,6 +125,26 @@ class Importer {
         data
       }
     });
+  }
+
+  init() {
+    this.log("init()");
+    if (!this._initialized) {
+      this._dateFrom = dayjs(this._dateFrom)
+        .startOf("minute")
+        .toISOString();
+      const dateTo = dayjs(this._dateTo)
+        .startOf("minute")
+        .valueOf();
+      const currentDate = dayjs()
+        .startOf("minute")
+        .valueOf();
+      this._dateTo =
+        dateTo < currentDate
+          ? dayjs(dateTo).toISOString()
+          : dayjs(currentDate).toISOString();
+      this._initialized = true;
+    }
   }
 
   /**
@@ -217,19 +238,18 @@ class Importer {
   async loadCandles() {
     this.log(`loadCandles()`);
     try {
-      const result = await this.provider.loadCandles(this._dateNext);
+      const { firstDate, data } = await this.provider.loadCandles(
+        this._dateNext
+      );
+      this.log(firstDate);
       // Загруженные свечи
-      this._candles = result.data;
+      this._candles = data;
       this.log("loaded", this._candles.length);
       // Всего минут
       this._totalDuration =
         this._totalDuration || durationMinutes(this._dateFrom, this._dateTo);
       // Осталось минут
-      this._leftDuration = durationMinutes(
-        this._dateFrom,
-        result.firstDate,
-        true
-      );
+      this._leftDuration = durationMinutes(this._dateFrom, firstDate, true);
       // Загружено минут
       this._completedDuration = this._totalDuration - this._leftDuration;
       // Процент выполнения
@@ -240,9 +260,9 @@ class Importer {
 
       // Если дата начала импорта раньше чем дата первой загруженной свечи
       this._dateNext = null;
-      if (dayjs(this._dateFrom).isBefore(dayjs(result.firstDate))) {
+      if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
         // Формируем параметры нового запроса на импорт
-        this._dateNext = result.firstDate;
+        this._dateNext = firstDate;
       }
     } catch (error) {
       throw new VError(
@@ -391,6 +411,7 @@ class Importer {
    * @memberof Importer
    */
   async handleGaps() {
+    // TODO цикл по дням
     this.log("handleGaps()");
     try {
       this._tempCandles = await getTempCandles({
@@ -415,7 +436,7 @@ class Importer {
           asset: this._asset,
           currency: this._currency,
           timeframe: 1,
-          modeStr: modeToStr(this._mode)
+          mode: this._mode
         },
         this._dateFrom,
         this._dateTo,
@@ -541,7 +562,6 @@ class Importer {
       currency: this._currency,
       timeframes: this._timeframes,
       requireBatching: this._requireBatching,
-      warmUpCache: this._warmUpCache,
       limit: this._limit,
       totalDuration: this._totalDuration,
       completedDuration: this._completedDuration,
@@ -549,12 +569,13 @@ class Importer {
       percent: this._percent,
       dateFrom: this._dateFrom,
       dateTo: this._dateTo,
-      nextDate: this._dateNext,
+      dateNext: this._dateNext,
       proxy: this._proxy,
       status: this._status,
       error: this.error,
       startedAt: this._startedAt,
       endedAt: this._endedAt,
+      initialized: this._initialized,
       metadata: this._metadata
     };
     return state;

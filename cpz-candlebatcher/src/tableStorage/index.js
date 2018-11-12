@@ -178,7 +178,6 @@ async function saveCandlesArray(table, candles) {
             RowKey: entityGenerator.String(candle.id),
             ...objectToEntity(candle)
           };
-          // console.log(entity.RowKey);
           batch.insertOrMergeEntity(entity);
         });
         await executeBatch(table, batch);
@@ -547,6 +546,51 @@ async function getCachedCandles(input) {
   }
 }
 
+async function countCachedCandles(input) {
+  try {
+    const dateFromFilter = TableQuery.dateFilter(
+      "timestamp",
+      TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
+      new Date(input.dateFrom)
+    );
+    const dateToFilter = TableQuery.dateFilter(
+      "timestamp",
+      TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
+      new Date(input.dateTo)
+    );
+    const dateFilter = TableQuery.combineFilters(
+      dateFromFilter,
+      TableUtilities.TableOperators.AND,
+      dateToFilter
+    );
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      input.slug
+    );
+    const query = new TableQuery()
+      .where(
+        TableQuery.combineFilters(
+          dateFilter,
+          TableUtilities.TableOperators.AND,
+          partitionKeyFilter
+        )
+      )
+      .select("RowKey");
+    const result = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
+    return result.length;
+  } catch (error) {
+    throw new VError(
+      {
+        name: "ImporterStorageError",
+        cause: error,
+        info: input
+      },
+      "Failed to count cached candles"
+    );
+  }
+}
+
 async function getTempCandles(input) {
   try {
     const dateFromFilter = TableQuery.dateFilter(
@@ -576,7 +620,6 @@ async function getTempCandles(input) {
         partitionKeyFilter
       )
     );
-    console.log(query);
     return await queryEntities(STORAGE_CANDLESTEMP_TABLE, query);
   } catch (error) {
     throw new VError(
@@ -607,5 +650,6 @@ export {
   getImporterByKey,
   getPrevCachedTicks,
   getCachedCandles,
+  countCachedCandles,
   getTempCandles
 };

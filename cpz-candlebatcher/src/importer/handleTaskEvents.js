@@ -29,12 +29,6 @@ async function handleImportStart(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
-    eventData.dateFrom = dayjs(eventData.dateFrom)
-      .startOf("minute")
-      .toISOString();
-    eventData.dateTo = dayjs(eventData.dateTo)
-      .startOf("minute")
-      .toISOString();
     // Запуск
     await execute(context, eventData, true);
     // Публикуем событие - успех

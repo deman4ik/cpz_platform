@@ -35,7 +35,7 @@ class CCXTProvider extends BaseProvider {
           this._symbol,
           "1m",
           dateStart.valueOf(),
-          this._limit
+          limit
         )
       );
 
@@ -60,6 +60,7 @@ class CCXTProvider extends BaseProvider {
                 item[0]
               ),
               importerId: this._importerId,
+              candlebatcherId: this._candlebatcherId,
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
