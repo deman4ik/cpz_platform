@@ -186,23 +186,13 @@ function executeBatch(tableName, batch) {
     });
   });
 }
-/**
- * Выборка данных из таблицы
- *
- * @param {*} tableName
- * @param {*} tableQuery
- * @returns
- */
-function queryEntities(tableName, tableQuery) {
+
+function query(tableName, tableQuery, continuationToken) {
   return new Promise((resolve, reject) => {
-    const entities = [];
-    // TODO: Handle nextContinuationToken
-    // let nextContinuationToken = null;
     tableService.queryEntities(
       tableName,
       tableQuery,
-      null,
-      // nextContinuationToken,
+      continuationToken,
       (error, result) => {
         if (error)
           reject(
@@ -220,18 +210,43 @@ function queryEntities(tableName, tableQuery) {
             )
           );
 
+        const res = { data: [], continuationToken: null };
         if (result) {
           result.entries.forEach(element => {
-            entities.push(entityToObject(element));
+            res.data.push(entityToObject(element));
           });
+          if (result.continuationToken) {
+            res.continuationToken = result.continuationToken;
+          }
         }
-        /* if (result.continuationToken) {
-          nextContinuationToken = result.continuationToken;
-        } */
-        resolve(entities);
+
+        resolve(res);
       }
     );
   });
+}
+/**
+ * Выборка данных из таблицы
+ *
+ * @param {*} tableName
+ * @param {*} tableQuery
+ * @returns
+ */
+async function queryEntities(tableName, tableQuery) {
+  let entities = [];
+  let nextContinuationToken = null;
+  do {
+    /* eslint-disable no-await-in-loop */
+    const { data, continuationToken } = await query(
+      tableName,
+      tableQuery,
+      nextContinuationToken
+    );
+    /* no-wait-in-loop */
+    entities = entities.concat(data);
+    nextContinuationToken = continuationToken;
+  } while (nextContinuationToken);
+  return entities;
 }
 export {
   createTableIfNotExists,
