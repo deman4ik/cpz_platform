@@ -13,7 +13,8 @@ import {
   durationMinutes,
   completedPercent,
   modeToStr,
-  sortAsc
+  sortAsc,
+  divideDateByDays
 } from "cpzUtils/helpers";
 import {
   handleCandleGaps,
@@ -284,14 +285,14 @@ class Importer {
    *
    * @memberof Importer
    */
-  async saveCandles() {
+  async saveCandles(timeframeCandles) {
     this.log(`saveCandles()`);
     try {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           try {
-            await saveCandlesArrayToCache(this._timeframeCandles[timeframe]);
-            // await saveCandlesArray(this._timeframeCandles[timeframe]);
+            await saveCandlesArrayToCache(timeframeCandles[timeframe]);
+            // await saveCandlesArray(timeframeCandles[timeframe]);
           } catch (error) {
             throw new VError(
               {
@@ -351,7 +352,7 @@ class Importer {
    *
    * @memberof Importer
    */
-  async clearTemp() {
+  async _clearTemp() {
     this.log(`clearTemp()`);
     try {
       await clearTempCandles(this._taskId);
@@ -405,30 +406,72 @@ class Importer {
     }
   }
 
+  async finalize() {
+    try {
+      const dates = divideDateByDays(this._dateFrom, this._dateTo);
+      await Promise.all(
+        dates.map(async ({ dateFrom, dateTo, duration }) => {
+          const tempCandles = await getTempCandles({
+            dateFrom,
+            dateTo,
+            slug: createCachedCandleSlug(
+              this._exchange,
+              this._asset,
+              this._currency,
+              1,
+              modeToStr(this._mode)
+            )
+          });
+          const { candles, gappedCandles } = await this._handleGaps(
+            tempCandles,
+            dateFrom,
+            dateTo,
+            duration
+          );
+          if (gappedCandles.length > 0) {
+            // Сохраняем сформированные пропущенные свечи
+            await saveCandlesArrayToTemp(gappedCandles);
+          }
+          const timeframeCandles = this._batchCandles(
+            candles,
+            dateFrom,
+            dateTo,
+            duration
+          );
+
+          if (timeframeCandles) {
+            await this.saveCandles(timeframeCandles);
+            // TODO: Save to PostgreSQL
+          }
+        })
+      );
+      await this._clearTemp();
+    } catch (error) {
+      throw new VError(
+        {
+          name: "ImporterError",
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            eventSubject: this._eventSubject
+          }
+        },
+        `Failed to finalize `
+      );
+    }
+  }
+
   /**
    * Проверка пропусков
    *
    * @memberof Importer
    */
-  async handleGaps() {
-    // TODO цикл по дням
+  async _handleGaps(inputCandles, dateFrom, dateTo, duration) {
+    const candles = inputCandles;
     this.log("handleGaps()");
     try {
-      this._tempCandles = await getTempCandles({
-        dateFrom: this._dateFrom,
-        dateTo: this._dateTo,
-        slug: createCachedCandleSlug(
-          this._exchange,
-          this._asset,
-          this._currency,
-          1,
-          modeToStr(this._mode)
-        )
-      });
-      this.log("temp", this._tempCandles.length);
-      this.log("total", this._totalDuration);
       // Если количество свечей в кэше равно общему количеству свечей - нет пропусков
-      if (this._tempCandles.length === this._totalDuration) return;
+      if (candles.length === duration) return { candles, gappedCandles: [] };
 
       const gappedCandles = handleCandleGaps(
         {
@@ -438,20 +481,17 @@ class Importer {
           timeframe: 1,
           mode: this._mode
         },
-        this._dateFrom,
-        this._dateTo,
-        this._totalDuration,
-        this._tempCandles
+        dateFrom,
+        dateTo,
+        duration,
+        candles
       );
       if (gappedCandles.length > 0) {
-        this._tempCandles
-          .concat(gappedCandles)
-          .sort((a, b) => sortAsc(a.time, b.time));
-        this.log("candles", this._tempCandles.length);
+        candles.concat(gappedCandles).sort((a, b) => sortAsc(a.time, b.time));
+        this.log("candles", candles.length);
         this.log("gapped", gappedCandles.length);
-        // Сохраняем сформированные пропущенные свечи
-        await saveCandlesArrayToTemp(gappedCandles);
       }
+      return { candles, gappedCandles };
     } catch (error) {
       throw new VError(
         {
@@ -472,39 +512,35 @@ class Importer {
    *
    * @memberof Importer
    */
-  async batchCandles() {
+  _batchCandles(tempCandles, dateFrom, dateTo, duration) {
     this.log("batchCandles()");
     try {
       // Инициализируем объект со свечами в различных таймфреймах
-      this._timeframeCandles = {};
+      const timeframeCandles = {};
       this._timeframes.forEach(timeframe => {
-        this._timeframeCandles[timeframe] = [];
+        timeframeCandles[timeframe] = [];
         if (timeframe === 1) {
-          this._timeframeCandles[1] = this._tempCandles;
+          timeframeCandles[1] = tempCandles;
         }
       });
       // Если не нужно свертывать свечи - выходим
-      if (!this._requireBatching) return;
+      if (!this._requireBatching) return null;
       // Создаем список с полным количеством минут
-      const fullMinutesList = createMinutesList(
-        this._dateFrom,
-        this._dateTo,
-        this._totalDuration
-      );
+      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration);
       fullMinutesList.forEach(time => {
         const date = dayjs(time);
         // Пропускаем самую первую свечу
-        if (dayjs(this._dateFrom).valueOf() === date.valueOf()) return;
+        if (dayjs(dateFrom).valueOf() === date.valueOf()) return;
         const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
         if (currentTimeframes.length > 0) {
           currentTimeframes.forEach(timeframe => {
             const timeFrom = date.add(-timeframe, "minute").valueOf();
             const timeTo = date.valueOf();
-            const candles = this._tempCandles.filter(
+            const candles = tempCandles.filter(
               candle => candle.time >= timeFrom && candle.time < timeTo
             );
             if (candles.length > 0) {
-              this._timeframeCandles[timeframe].push({
+              timeframeCandles[timeframe].push({
                 id: generateCandleId(
                   this._exchange,
                   this._asset,
@@ -534,6 +570,7 @@ class Importer {
           });
         }
       });
+      return timeframeCandles;
     } catch (error) {
       throw new VError(
         {

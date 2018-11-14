@@ -65,14 +65,8 @@ async function execute(context, state, start = false) {
 
     // Если импорт завершен
     if (importer.finished) {
-      // Убираем пропуски
-      await importer.handleGaps();
-      // Сворачиваем свечи
-      await importer.batchCandles();
-      // Сохраняем свечи в БД
-      await importer.saveCandles();
-      // Очищаем временные свечи
-      await importer.clearTemp();
+      //  Проверяем пропуски, сворачиваем свечи, сохраняем в БД, очищаем кэш
+      await importer.finalize();
       // Завершаем работу и сохраняем стейт
       await importer.end(STATUS_FINISHED);
     } else {

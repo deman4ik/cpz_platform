@@ -159,6 +159,25 @@ function getPreviousMinuteRange(inputDate) {
   };
 }
 
+function divideDateByDays(inputDateFrom, inputDateTo) {
+  const dateFrom = dayjs(inputDateFrom);
+  const dateTo = dayjs(inputDateTo);
+  const dates = [];
+  const duration = dateTo.diff(dateFrom, "day", true);
+  for (let i = 0; i < duration; i += 1) {
+    const newDateFrom = dateFrom.add(i, "day");
+    let newDateTo = newDateFrom.add(1, "day");
+    newDateTo = newDateTo.valueOf() < dateTo.valueOf() ? newDateTo : dateTo;
+    const minutesDuration = durationMinutes(newDateFrom, newDateTo, true);
+    dates.push({
+      dateFrom: newDateFrom.toISOString(),
+      dateTo: newDateTo.toISOString(),
+      duration: minutesDuration
+    });
+  }
+  return dates;
+}
+
 function arraysDiff(full, part) {
   return full.filter(v => !part.includes(v));
 }
@@ -184,6 +203,7 @@ export {
   durationMinutes,
   completedPercent,
   getPreviousMinuteRange,
+  divideDateByDays,
   arraysDiff,
   chunkArray
 };
