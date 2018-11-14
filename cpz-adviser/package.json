@@ -1,14 +1,17 @@
 {
   "name": "cpz-adviser",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cryptuoso - Strategy runner service",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "dev": "func start",
+    "dev": "func start --port 8104",
     "webpack": "webpack"
   },
-  "author": "",
+  "keywords": [
+    "cryptuoso","cpz","cryptocurrency","bitcoin","trading","azure functions"
+  ],
+  "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.1.2",

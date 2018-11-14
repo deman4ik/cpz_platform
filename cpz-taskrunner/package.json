@@ -1,11 +1,15 @@
 {
   "name": "cpz-taskrunner",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cryptuoso - Task manipulating service",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "func start --port 8107"
   },
-  "author": "",
+  "keywords": [
+    "cryptuoso","cpz","cryptocurrency","bitcoin","trading","azure functions"
+  ],
+  "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC"
 }

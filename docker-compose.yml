@@ -13,77 +13,80 @@ services:
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
       - NODE_TLS_REJECT_UNAUTHORIZED
-  # cpz-marketwatcher:
-  #   container_name: cpz-marketwatcher
-  #   build:
-  #     context: .
-  #     dockerfile: CPZMarketwatcher.Dockerfile
-  #   ports:
-  #     - "8102:80"
-  #   environment:
-  #   - AzureWebJobsStorage
-  #   - AZ_STORAGE_CS  
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY 
-  #   - PROXY_ENDPOINT
-  #   restart: always
-  # cpz-candlebatcher:
-  #   container_name: cpz-candlebatcher
-  #   build:
-  #     context: .
-  #     dockerfile: CPZCandlebatcher.Dockerfile
-  #   ports:
-  #     - "8103:80"
-  #   environment:
-  #   - AzureWebJobsStorage  
-  #   - AZ_STORAGE_CS  
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY 
-  #   - DB_API_ENDPOINT
-  #   - PROXY_ENDPOINT
-  #   - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always
-  # cpz-adviser:
-  #   container_name: cpz-adviser
-  #   build:
-  #     context: .
-  #     dockerfile: CPZAdviser.Dockerfile
-  #   ports:
-  #     - "8104:80"
-  #   environment:
-  #     - AzureWebJobsStorage 
-  #     - AZ_STORAGE_CS
-  #     - API_KEY
-  #     - EG_TEST_ENDPOINT
-  #     - EG_TEST_KEY  
-  #     - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always  
-  cpz-postgraphile:
-    container_name: cpz-postgraphile
-    build: ./cpz-postgraphile/
+  cpz-marketwatcher:
+    container_name: cpz-marketwatcher
+    build:
+      context: .
+      dockerfile: CPZMarketwatcher.Dockerfile
     ports:
-      - "8105:80"
+      - "8102:80"
     environment:
-      - CUSTOMCONNSTR_POSTGRESQL
-      - API_KEY 
-  # cpz-trader:
-  #   container_name: cpz-trader
-  #   build:
-  #     context: .
-  #     dockerfile: CPZTrader.Dockerfile
-  #   ports:
-  #     - "8106:80"
-  #   environment:   
-  #   - AzureWebJobsStorage   
-  #   - AZ_STORAGE_CS
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY  
-  #   - CCXT_ENDPOINT
-  #   - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always
+    - AzureWebJobsStorage
+    - AZ_STORAGE_CS  
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY 
+    - PROXY_ENDPOINT
+    restart: always
+  cpz-candlebatcher:
+    container_name: cpz-candlebatcher
+    build:
+      context: .
+      dockerfile: CPZCandlebatcher.Dockerfile
+    ports:
+      - "8103:80"
+    environment:
+    - AzureWebJobsStorage  
+    - AZ_STORAGE_CS  
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY 
+    - DB_API_ENDPOINT
+    - PROXY_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
+  cpz-adviser:
+    container_name: cpz-adviser
+    build:
+      context: .
+      dockerfile: CPZAdviser.Dockerfile
+    ports:
+      - "8104:80"
+    environment:
+      - AzureWebJobsStorage 
+      - AZ_STORAGE_CS
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY  
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always  
+  graphql-engine:
+    image: hasura/graphql-engine:v1.0.0-alpha28
+    ports:
+    - "8105:8080"
+    restart: always
+    environment:
+      - HASURA_GRAPHQL_DATABASE_URL
+    command:
+      - graphql-engine
+      - serve
+      - --enable-console    
+  cpz-trader:
+    container_name: cpz-trader
+    build:
+      context: .
+      dockerfile: CPZTrader.Dockerfile
+    ports:
+      - "8106:80"
+    environment:   
+    - AzureWebJobsStorage   
+    - AZ_STORAGE_CS
+    - API_KEY
+    - EG_TEST_ENDPOINT
+    - EG_TEST_KEY  
+    - CCXT_ENDPOINT
+    - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
   cpz-backtester:
     container_name: cpz-backtester
     build:
