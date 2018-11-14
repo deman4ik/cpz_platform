@@ -5,7 +5,7 @@ import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
 import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { createCandlebatcherSlug } from "cpzStorage/utils";
+import { createImporterSlug } from "cpzStorage/utils";
 import execute from "./execute";
 import { updateImporterState } from "../tableStorage";
 
@@ -39,7 +39,7 @@ async function handleImportStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: createCandlebatcherSlug(
+        partitionKey: createImporterSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

@@ -4,7 +4,7 @@ import HttpsProxyAgent from "https-proxy-agent";
 
 class BaseProvider {
   constructor(input) {
-    this._importerId = input.importerId;
+    this._taskId = input.taskId;
     this._exchange = input.exchange;
     this._asset = input.asset;
     this._currency = input.currency;

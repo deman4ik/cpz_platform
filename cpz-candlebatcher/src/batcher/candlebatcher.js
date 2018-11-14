@@ -109,7 +109,7 @@ class Candlebatcher {
     this.log(`initProvider()`);
     try {
       const initParams = {
-        candlebatcherId: this._taskId,
+        taskId: this._taskId,
         mode: this._mode,
         exchange: this._exchange,
         asset: this._asset,

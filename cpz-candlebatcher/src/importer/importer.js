@@ -1,10 +1,7 @@
 import VError from "verror";
 import dayjs from "cpzDayjs";
 import { saveCandlesArray } from "cpzDB/saveCandles";
-import {
-  createCandlebatcherSlug,
-  createCachedCandleSlug
-} from "cpzStorage/utils";
+import { createImporterSlug, createCachedCandleSlug } from "cpzStorage/utils";
 import { IMPORTER_SERVICE } from "cpzServices";
 import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_FINISHED } from "cpzState";
@@ -157,7 +154,7 @@ class Importer {
     this.log(`initProvider()`);
     try {
       const initParams = {
-        importerId: this._taskId,
+        taskId: this._taskId,
         mode: this._mode,
         exchange: this._exchange,
         asset: this._asset,
@@ -382,7 +379,7 @@ class Importer {
       if (this._dateNext) {
         const message = {
           rowKey: this._taskId,
-          partitionKey: createCandlebatcherSlug(
+          partitionKey: createImporterSlug(
             this._exchange,
             this._asset,
             this._currency,
@@ -549,7 +546,7 @@ class Importer {
                   modeToStr(this._mode),
                   timeFrom
                 ),
-                importerId: this._taskId,
+                taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,

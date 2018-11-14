@@ -42,7 +42,7 @@ class CryptocompareProvider extends BaseProvider {
           modeToStr(this._mode),
           item.time * 1000
         ),
-        importerId: this._importerId,
+        taskId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -95,7 +95,7 @@ class CryptocompareProvider extends BaseProvider {
           modeToStr(this._mode),
           latestCandle.time * 1000
         ),
-        importerId: this._importerId,
+        taskId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,

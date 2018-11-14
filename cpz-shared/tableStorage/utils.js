@@ -66,6 +66,11 @@ function createCandlebatcherSlug(exchange, asset, currency, modeStr = "R") {
   return `${exchange}.${asset}.${currency}.${modeStr}`;
 }
 
+function createImporterSlug(exchange, asset, currency, modeStr = "R") {
+  if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
+  return `${exchange}.${asset}.${currency}.${modeStr}`;
+}
+
 function createCachedTickSlug(exchange, asset, currency, modeStr = "R") {
   if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
   return `${exchange}.${asset}.${currency}.${modeStr}`;
@@ -107,6 +112,7 @@ export {
   objectToEntity,
   createMarketwatcherSlug,
   createCandlebatcherSlug,
+  createImporterSlug,
   createCachedTickSlug,
   createCachedCandleSlug,
   createAdviserSlug,

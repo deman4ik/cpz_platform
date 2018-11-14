@@ -59,8 +59,7 @@ class CCXTProvider extends BaseProvider {
                 modeToStr(this._mode),
                 item[0]
               ),
-              importerId: this._importerId,
-              candlebatcherId: this._candlebatcherId,
+              taskId: this._taskId,
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
@@ -116,8 +115,7 @@ class CCXTProvider extends BaseProvider {
               modeToStr(this._mode),
               latestCandle[0]
             ),
-            importerId: this._importerId,
-            candlebatcherId: this._candlebatcherId,
+            taskId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,

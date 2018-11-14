@@ -9,7 +9,7 @@ import {
   ERROR_TOPIC
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
-import { createCandlebatcherSlug } from "cpzStorage/utils";
+import { createImporterSlug } from "cpzStorage/utils";
 import { modeToStr } from "cpzUtils/helpers";
 import {
   STATUS_STOPPED,
@@ -48,7 +48,7 @@ async function execute(context, state, start = false) {
           service: IMPORTER_SERVICE,
           taskId: state.taskId,
           rowKey: state.rowKey,
-          partitionKey: createCandlebatcherSlug(
+          partitionKey: createImporterSlug(
             state.exchange,
             state.asset,
             state.currency,
