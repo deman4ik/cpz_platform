@@ -1,6 +1,7 @@
 import dayjs from "cpzDayjs";
 import VError from "verror";
 import retry from "cpzUtils/retry";
+import { CANDLE_IMPORTED } from "cpzState";
 import { fetchJSON } from "cpzUtils/fetch";
 import { modeToStr, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
@@ -55,7 +56,7 @@ class CryptocompareProvider extends BaseProvider {
         low: item.low,
         close: item.close,
         volume: item.volumefrom,
-        type: "imported"
+        type: CANDLE_IMPORTED
       }));
       return {
         firstDate: data[0].timestamp,
@@ -108,7 +109,7 @@ class CryptocompareProvider extends BaseProvider {
         low: latestCandle.low,
         close: latestCandle.close,
         volume: latestCandle.volumefrom,
-        type: "imported"
+        type: CANDLE_IMPORTED
       };
     } catch (error) {
       throw new VError(

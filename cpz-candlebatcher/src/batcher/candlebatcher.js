@@ -2,7 +2,13 @@ import VError from "verror";
 import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
-import { STATUS_STARTED, STATUS_STOPPED } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  CANDLE_CREATED,
+  CANDLE_LOADED,
+  CANDLE_PREVIOUS
+} from "cpzState";
 import {
   LOG_CANDLEBATCHER_EVENT,
   CANDLES_NEWCANDLE_EVENT,
@@ -373,7 +379,7 @@ class Candlebatcher {
         // Сохраняем новую загруженную свечу
         this._loadedCandle = {
           ...result,
-          type: "loaded",
+          type: CANDLE_LOADED,
           candlabatcherId: this._taskId
         };
       }
@@ -436,7 +442,7 @@ class Candlebatcher {
           low: Math.min(...this._ticks.map(t => t.price)), // минимальная цена тиков
           close: this._ticks[this._ticks.length - 1].price, // цена закрытия - цена последнего тика
           volume: this._ticks.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех тиков
-          type: "created" // признак - свеча сформирована
+          type: CANDLE_CREATED // признак - свеча сформирована
         };
       } else {
         /* Если тиков не было - нельзя сформировать свечу */
@@ -533,7 +539,7 @@ class Candlebatcher {
             low: this._lastCandle.close, // минимальная цена = цене закрытия предыдущей
             close: this._lastCandle.close, // цена закрытия = цене закрытия предыдущей
             volume: 0, // нулевой объем
-            type: "previous" // признак - предыдущая
+            type: CANDLE_PREVIOUS // признак - предыдущая
           };
         }
       }
@@ -640,7 +646,7 @@ class Candlebatcher {
                 volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
                 count: candles.length,
                 gap: candles.length !== timeframe,
-                type: "created" // признак - свеча сформирована
+                type: CANDLE_CREATED // признак - свеча сформирована
               };
             }
           });

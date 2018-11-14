@@ -1,6 +1,7 @@
 import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
+import { CANDLE_IMPORTED } from "cpzState";
 import retry from "cpzUtils/retry";
 import { modeToStr, durationMinutes, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
@@ -72,7 +73,7 @@ class CCXTProvider extends BaseProvider {
               low: item[3],
               close: item[4],
               volume: item[5],
-              type: "imported"
+              type: CANDLE_IMPORTED
             }));
 
             return {
@@ -128,7 +129,7 @@ class CCXTProvider extends BaseProvider {
             low: latestCandle[3],
             close: latestCandle[4],
             volume: latestCandle[5],
-            type: "imported"
+            type: CANDLE_IMPORTED
           };
         }
       }

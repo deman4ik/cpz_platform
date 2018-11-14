@@ -4,7 +4,12 @@ import { saveCandlesArray } from "cpzDB/saveCandles";
 import { createImporterSlug, createCachedCandleSlug } from "cpzStorage/utils";
 import { IMPORTER_SERVICE } from "cpzServices";
 import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_FINISHED } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_FINISHED,
+  CANDLE_CREATED
+} from "cpzState";
 import publishEvents from "cpzEvents";
 import {
   durationMinutes,
@@ -561,7 +566,7 @@ class Importer {
                 volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
                 count: candles.length,
                 gap: candles.length !== timeframe,
-                type: "created" // признак - свеча сформирована
+                type: CANDLE_CREATED // признак - свеча сформирована
               });
             }
           });

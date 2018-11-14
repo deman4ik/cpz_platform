@@ -7,6 +7,7 @@ import {
   sortAsc,
   modeToStr
 } from "cpzUtils/helpers";
+import { CANDLE_PREVIOUS } from "cpzState";
 
 /**
  * Отбор подходящих по времени таймфреймов для формирования
@@ -113,7 +114,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
           low: previousCandle.close, // минимальная цена = цене закрытия предыдущей
           close: previousCandle.close, // цена закрытия = цене закрытия предыдущей
           volume: 0, // нулевой объем
-          type: "previous" // признак - предыдущая
+          type: CANDLE_PREVIOUS // признак - предыдущая
         };
 
         gappedCandles.push(gappedCandle);
