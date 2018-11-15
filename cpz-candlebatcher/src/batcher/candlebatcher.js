@@ -41,7 +41,8 @@ import {
   getCachedCandles,
   countCachedCandles,
   getPrevCachedTicks,
-  deletePrevCachedTicksArray
+  deletePrevCachedTicksArray,
+  cleanCachedCandles
 } from "../tableStorage";
 import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
@@ -490,6 +491,40 @@ class Candlebatcher {
   }
 
   /**
+   * Очистка свечей в кэше
+   */
+  async _cleanCachedCandles() {
+    this.log("cleanCachedCandles()");
+    try {
+      await Promise.all(
+        this._timeframes.map(async timeframe => {
+          const { number, unit } = timeframeToTimeUnit(
+            REQUIRED_HISTORY_MAX_BARS,
+            timeframe
+          );
+
+          await cleanCachedCandles(
+            this._taskId,
+            timeframe,
+            dayjs().add(-number, unit)
+          );
+        })
+      );
+    } catch (error) {
+      throw new VError(
+        {
+          name: "CandlebatcherError",
+          cause: error,
+          info: {
+            taskId: this._taskId
+          }
+        },
+        `Failed to clean cached candles`
+      );
+    }
+  }
+
+  /**
    * Обработка свечи
    *
    * @returns
@@ -673,7 +708,7 @@ class Candlebatcher {
 
       this._lastCandle = this._currentCandle;
       await this._clearTicks();
-      // TODO: Clear outdated Cache
+      await this._cleanCachedCandles();
     } catch (error) {
       throw new VError(
         {
