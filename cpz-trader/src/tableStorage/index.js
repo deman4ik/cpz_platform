@@ -244,11 +244,19 @@ async function getTraderByKey(keys) {
 /**
  * Поиск запущенных или занятых проторговщиков по бирже+инструменту+таймфрейму
  *
- * @param {string} slug
+ * @param {object} input
  * @returns
  */
-async function getTradersBySlug(slug) {
+async function getTradersBySlug(input) {
   try {
+    const { exchange, asset, currency, timeframe, mode, modeStr } = input;
+    const slug = tableStorage.createTraderSlug(
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      modeStr || modeToStr(mode)
+    );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
       TableUtilities.QueryComparisons.EQUAL,
@@ -282,12 +290,9 @@ async function getTradersBySlug(slug) {
       {
         name: "TraderStorageError",
         cause: error,
-        info: {
-          slug
-        }
+        info: input
       },
-      'Failed to read traders by slug "%s"',
-      slug
+      "Failed to read traders by slug"
     );
   }
 }
@@ -337,11 +342,19 @@ async function getPositonByKey(keys) {
 /**
  * Поиск открытых позиций по бирже+инструменту+таймфрейму
  *
- * @param {string} slug
+ * @param {object} input
  * @returns
  */
-async function getActivePositions(slug) {
+async function getActivePositions(input) {
   try {
+    const { exchange, asset, currency, timeframe, mode, modeStr } = input;
+    const slug = tableStorage.createTraderSlug(
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      modeStr || modeToStr(mode)
+    );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
       TableUtilities.QueryComparisons.EQUAL,
@@ -365,12 +378,9 @@ async function getActivePositions(slug) {
       {
         name: "TraderStorageError",
         cause: error,
-        info: {
-          slug
-        }
+        info: input
       },
-      'Failed to read open positions by traderId "%s"',
-      slug
+      "Failed to read open positions"
     );
   }
 }

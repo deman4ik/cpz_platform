@@ -193,8 +193,16 @@ async function getAdviserByKey(keys) {
  * @param {string} slug
  * @returns
  */
-async function getAdvisersBySlug(slug) {
+async function getAdvisersBySlug(input) {
   try {
+    const { exchange, asset, currency, timeframe, mode, modeStr } = input;
+    const slug = tableStorage.createAdviserSlug(
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      modeStr || modeToStr(mode)
+    );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
       TableUtilities.QueryComparisons.EQUAL,
@@ -228,12 +236,9 @@ async function getAdvisersBySlug(slug) {
       {
         name: "AdviserStorageError",
         cause: error,
-        info: {
-          slug
-        }
+        info: input
       },
-      'Failed to read advisers by slug "%s"',
-      slug
+      "Failed to read advisers by slug"
     );
   }
 }

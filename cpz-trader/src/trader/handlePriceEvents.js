@@ -31,16 +31,14 @@ async function handlePrice(context, eventData) {
     // genErrorIfExist(validateNewPrice(eventData.currentPrice)); //пока не актуально
     const { eventSubject, currentPrice } = eventData;
     const modeStr = subjectToStr(eventSubject);
-    // Параметры запроса - биржа + инструмент + таймфрейм
-    const slug = tableStorage.createTraderSlug(
-      currentPrice.exchange,
-      currentPrice.asset,
-      currentPrice.currency,
-      currentPrice.timeframe,
-      modeStr
-    );
 
-    const positionsState = await getActivePositions(slug);
+    const positionsState = await getActivePositions({
+      exchange: currentPrice.exchange,
+      asset: currentPrice.asset,
+      currency: currentPrice.currency,
+      timeframe: currentPrice.timeframe,
+      modeStr
+    });
 
     const handlePositionPriceResult = await Promise.all(
       positionsState.map(async state => {

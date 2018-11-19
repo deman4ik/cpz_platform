@@ -3,7 +3,7 @@ import VError from "verror";
 import dayjs from "cpzDayjs";
 import tableStorage from "cpzStorage";
 
-import { chunkArray } from "cpzUtils/helpers";
+import { modeToStr, chunkArray } from "cpzUtils/helpers";
 import { STORAGE_TICKSCACHED_TABLE } from "cpzStorageTables";
 
 const { TableQuery, TableUtilities } = azure;
@@ -40,8 +40,17 @@ async function deletePrevCachedTicksArray(ticks) {
   }
 }
 
-async function getPrevCachedTicks({ dateFrom, dateTo, slug }) {
+async function getPrevCachedTicks(input) {
   try {
+    const {
+      dateFrom,
+      dateTo,
+      exchange,
+      asset,
+      currency,
+      mode,
+      modeStr
+    } = input;
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
@@ -56,6 +65,12 @@ async function getPrevCachedTicks({ dateFrom, dateTo, slug }) {
       dateFromFilter,
       TableUtilities.TableOperators.AND,
       dateToFilter
+    );
+    const slug = tableStorage.createCandlebatcherSlug(
+      exchange,
+      asset,
+      currency,
+      modeStr || modeToStr(mode)
     );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -75,7 +90,7 @@ async function getPrevCachedTicks({ dateFrom, dateTo, slug }) {
       {
         name: "ImporterStorageError",
         cause: error,
-        info: { dateFrom, dateTo, slug }
+        info: input
       },
       "Failed to load previous ticks"
     );

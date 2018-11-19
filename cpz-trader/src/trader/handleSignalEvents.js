@@ -13,7 +13,6 @@ import {
   STATUS_ERROR,
   STATUS_STOPPED
 } from "cpzState";
-import tableStorage from "cpzStorage";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
@@ -142,17 +141,14 @@ async function handleSignal(context, eventData) {
     context.log(modeStr);
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
-    // Параметры запроса - биржа + инструмент + таймфрейм
-    const slug = tableStorage.createTraderSlug(
-      signal.exchange,
-      signal.asset,
-      signal.currency,
-      signal.timeframe,
-      modeStr
-    );
-    context.log(slug);
     // Ищем подходящих проторговщиков
-    const traders = await getTradersBySlug(slug);
+    const traders = await getTradersBySlug({
+      exchange: signal.exchange,
+      asset: signal.asset,
+      currency: signal.currency,
+      timeframe: signal.timeframe,
+      modeStr
+    });
     // Фильтруем только доступные проторговщики
     const startedTraders = traders.filter(
       adviser => adviser.status === STATUS_STARTED

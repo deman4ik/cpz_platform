@@ -322,8 +322,18 @@ async function cleanCachedCandles(taskId, timeframe, dateTo) {
  * @param {string} tableName
  * @param {object} input
  */
-async function _getCandles(tableName, { dateFrom, dateTo, slug }) {
+async function _getCandles(tableName, input) {
   try {
+    const {
+      dateFrom,
+      dateTo,
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      mode,
+      modeStr
+    } = input;
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
@@ -338,6 +348,13 @@ async function _getCandles(tableName, { dateFrom, dateTo, slug }) {
       dateFromFilter,
       TableUtilities.TableOperators.AND,
       dateToFilter
+    );
+    const slug = tableStorage.createCachedCandleSlug(
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      modeStr || modeToStr(mode)
     );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -357,7 +374,7 @@ async function _getCandles(tableName, { dateFrom, dateTo, slug }) {
       {
         name: "ImporterStorageError",
         cause: error,
-        info: { dateFrom, dateTo, slug }
+        info: input
       },
       'Failed to load candles from "%s"',
       tableName
@@ -410,8 +427,18 @@ async function getTempCandles(input) {
  *
  * @param {object} input
  */
-async function countCachedCandles({ dateFrom, dateTo, slug }) {
+async function countCachedCandles(input) {
   try {
+    const {
+      dateFrom,
+      dateTo,
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      mode,
+      modeStr
+    } = input;
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
@@ -426,6 +453,13 @@ async function countCachedCandles({ dateFrom, dateTo, slug }) {
       dateFromFilter,
       TableUtilities.TableOperators.AND,
       dateToFilter
+    );
+    const slug = tableStorage.createCachedCandleSlug(
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      modeStr || modeToStr(mode)
     );
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -451,7 +485,7 @@ async function countCachedCandles({ dateFrom, dateTo, slug }) {
       {
         name: "ImporterStorageError",
         cause: error,
-        info: { dateFrom, dateTo, slug }
+        info: input
       },
       "Failed to count cached candles"
     );

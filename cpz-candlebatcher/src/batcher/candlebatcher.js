@@ -22,7 +22,6 @@ import {
   durationMinutes,
   sortAsc
 } from "cpzUtils/helpers";
-import tableStorage from "cpzStorage";
 import publishEvents from "cpzEvents";
 import getHistoryCandles from "cpzDB/historyCandles";
 import {
@@ -240,16 +239,14 @@ class Candlebatcher {
               .startOf("day")
               .toISOString();
             const dateTo = dayjs().toISOString();
-            const cachedCandlesCount = countCachedCandles({
-              slug: tableStorage.createCachedCandleSlug(
-                this._exchange,
-                this._asset,
-                this._currency,
-                timeframe,
-                modeToStr(this._mode)
-              ),
+            const cachedCandlesCount = await countCachedCandles({
               dateFrom,
-              dateTo
+              dateTo,
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe,
+              mode: this._mode
             });
             const warmCandlesCount = durationMinutes(dateFrom, dateTo);
             if (cachedCandlesCount < warmCandlesCount) {
@@ -315,16 +312,14 @@ class Candlebatcher {
         .startOf("day")
         .toISOString();
       const dateTo = dayjs().toISOString();
-      const cachedCandlesCount = countCachedCandles({
-        slug: tableStorage.createCachedCandleSlug(
-          this._exchange,
-          this._asset,
-          this._currency,
-          1,
-          modeToStr(this._mode)
-        ),
+      const cachedCandlesCount = await countCachedCandles({
         dateFrom,
-        dateTo
+        dateTo,
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: 1,
+        mode: this._mode
       });
       const warmCandlesCount = durationMinutes(dateFrom, dateTo);
 
@@ -404,14 +399,12 @@ class Candlebatcher {
     try {
       /* Считывание тиков за предыдущую минуту */
       this._ticks = await getPrevCachedTicks({
-        slug: tableStorage.createCandlebatcherSlug(
-          this._exchange,
-          this._asset,
-          this._currency,
-          modeToStr(this._mode)
-        ),
         dateFrom: this._prevDateFrom.toISOString(),
-        dateTo: this._prevDateTo.toISOString()
+        dateTo: this._prevDateTo.toISOString(),
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        mode: this._mode
       });
       /* Если были тики */
       if (this._ticks.length > 0) {
@@ -594,13 +587,11 @@ class Candlebatcher {
           let loadedCandles = await getCachedCandles({
             dateFrom: loadDateFrom,
             dateTo: this._prevDateTo.toISOString(),
-            slug: tableStorage.createCachedCandleSlug(
-              this._exchange,
-              this._asset,
-              this._currency,
-              1,
-              modeToStr(this._mode)
-            )
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode
           });
           /* Добаляем текущую свечу к загруженным */
           loadedCandles = [...loadedCandles, this._currentCandle].sort((a, b) =>
