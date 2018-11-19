@@ -22,10 +22,7 @@ import {
   durationMinutes,
   sortAsc
 } from "cpzUtils/helpers";
-import {
-  createCandlebatcherSlug,
-  createCachedCandleSlug
-} from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import publishEvents from "cpzEvents";
 import getHistoryCandles from "cpzDB/historyCandles";
 import {
@@ -244,7 +241,7 @@ class Candlebatcher {
               .toISOString();
             const dateTo = dayjs().toISOString();
             const cachedCandlesCount = countCachedCandles({
-              slug: createCachedCandleSlug(
+              slug: tableStorage.createCachedCandleSlug(
                 this._exchange,
                 this._asset,
                 this._currency,
@@ -319,7 +316,7 @@ class Candlebatcher {
         .toISOString();
       const dateTo = dayjs().toISOString();
       const cachedCandlesCount = countCachedCandles({
-        slug: createCachedCandleSlug(
+        slug: tableStorage.createCachedCandleSlug(
           this._exchange,
           this._asset,
           this._currency,
@@ -407,7 +404,7 @@ class Candlebatcher {
     try {
       /* Считывание тиков за предыдущую минуту */
       this._ticks = await getPrevCachedTicks({
-        slug: createCandlebatcherSlug(
+        slug: tableStorage.createCandlebatcherSlug(
           this._exchange,
           this._asset,
           this._currency,
@@ -597,7 +594,7 @@ class Candlebatcher {
           let loadedCandles = await getCachedCandles({
             dateFrom: loadDateFrom,
             dateTo: this._prevDateTo.toISOString(),
-            slug: createCachedCandleSlug(
+            slug: tableStorage.createCachedCandleSlug(
               this._exchange,
               this._asset,
               this._currency,

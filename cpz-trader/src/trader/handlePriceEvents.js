@@ -1,7 +1,7 @@
 import VError from "verror";
 import { createErrorOutput } from "cpzUtils/error";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { createTraderSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import {
   TICKS_NEWTICK_EVENT,
   CANDLES_NEWCANDLE_EVENT,
@@ -32,7 +32,7 @@ async function handlePrice(context, eventData) {
     const { eventSubject, currentPrice } = eventData;
     const modeStr = subjectToStr(eventSubject);
     // Параметры запроса - биржа + инструмент + таймфрейм
-    const slug = createTraderSlug(
+    const slug = tableStorage.createTraderSlug(
       currentPrice.exchange,
       currentPrice.asset,
       currentPrice.currency,

@@ -15,7 +15,7 @@ import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { createCandlebatcherSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import Candlebatcher from "./candlebatcher";
 import {
   getCandlebatcherByKey,
@@ -51,7 +51,7 @@ async function handleStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: createCandlebatcherSlug(
+        partitionKey: tableStorage.createCandlebatcherSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

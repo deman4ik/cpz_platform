@@ -6,24 +6,16 @@ import {
   STORAGE_MARKETWATCHERS_TABLE,
   STORAGE_TICKSCACHED_TABLE
 } from "cpzStorageTables";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  queryEntities
-} from "cpzStorage/storage";
-import {
-  objectToEntity,
-  createMarketwatcherSlug,
-  createCachedTickSlug
-} from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
+
 import { modeToStr, generateKey } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_MARKETWATCHERS_TABLE);
-createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_MARKETWATCHERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
 /**
  * Сохранение состояния наблюдателя за рынком
  *
@@ -34,12 +26,18 @@ async function saveMarketwatcherState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createMarketwatcherSlug(state.hostId, modeToStr(state.mode))
+        tableStorage.createMarketwatcherSlug(
+          state.hostId,
+          modeToStr(state.mode)
+        )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_MARKETWATCHERS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(
+      STORAGE_MARKETWATCHERS_TABLE,
+      entity
+    );
   } catch (error) {
     throw new VError(
       {
@@ -64,7 +62,7 @@ async function saveCachedTick(tick) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createCachedTickSlug(
+        tableStorage.createCachedTickSlug(
           tick.exchange.toLowerCase(),
           tick.asset,
           tick.currency,
@@ -72,9 +70,9 @@ async function saveCachedTick(tick) {
         )
       ),
       RowKey: entityGenerator.String(generateKey(tick.tickId)),
-      ...objectToEntity(tick)
+      ...tableStorage.objectToEntity(tick)
     };
-    await insertOrMergeEntity(STORAGE_TICKSCACHED_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_TICKSCACHED_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -115,7 +113,10 @@ async function getMarketwatcherByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_MARKETWATCHERS_TABLE, query);
+    return await tableStorage.queryEntities(
+      STORAGE_MARKETWATCHERS_TABLE,
+      query
+    );
   } catch (error) {
     throw new VError(
       {
@@ -157,7 +158,10 @@ async function getMarketwatcherByHostId(hostId) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_MARKETWATCHERS_TABLE, query);
+    return await tableStorage.queryEntities(
+      STORAGE_MARKETWATCHERS_TABLE,
+      query
+    );
   } catch (error) {
     throw new VError(
       {

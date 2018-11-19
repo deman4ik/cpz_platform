@@ -1,13 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 import dayjs from "cpzDayjs";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  executeBatch,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity, createCachedCandleSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr, chunkArray } from "cpzUtils/helpers";
 import {
   STORAGE_CANDLESCACHED_TABLE,
@@ -18,8 +12,8 @@ const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
-createTableIfNotExists(STORAGE_CANDLESTEMP_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_CANDLESTEMP_TABLE);
 
 /**
  * Сохранение одной свечи в кэш
@@ -28,7 +22,7 @@ createTableIfNotExists(STORAGE_CANDLESTEMP_TABLE);
  */
 async function saveCandleToCache(candle) {
   try {
-    const slug = createCachedCandleSlug(
+    const slug = tableStorage.createCachedCandleSlug(
       candle.exchange,
       candle.asset,
       candle.currency,
@@ -38,9 +32,9 @@ async function saveCandleToCache(candle) {
     const entity = {
       PartitionKey: entityGenerator.String(slug),
       RowKey: entityGenerator.String(candle.id),
-      ...objectToEntity(candle)
+      ...tableStorage.objectToEntity(candle)
     };
-    await insertOrMergeEntity(STORAGE_CANDLESCACHED_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_CANDLESCACHED_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -68,7 +62,7 @@ async function _saveCandlesArray(table, candles) {
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          const slug = createCachedCandleSlug(
+          const slug = tableStorage.createCachedCandleSlug(
             candle.exchange,
             candle.asset,
             candle.currency,
@@ -78,11 +72,11 @@ async function _saveCandlesArray(table, candles) {
           const entity = {
             PartitionKey: entityGenerator.String(slug),
             RowKey: entityGenerator.String(candle.id),
-            ...objectToEntity(candle)
+            ...tableStorage.objectToEntity(candle)
           };
           batch.insertOrMergeEntity(entity);
         });
-        await executeBatch(table, batch);
+        await tableStorage.executeBatch(table, batch);
       })
     );
   } catch (error) {
@@ -147,7 +141,7 @@ async function _deleteCandlesArray(tableName, candles) {
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          const slug = createCachedCandleSlug(
+          const slug = tableStorage.createCachedCandleSlug(
             candle.exchange,
             candle.asset,
             candle.currency,
@@ -157,11 +151,11 @@ async function _deleteCandlesArray(tableName, candles) {
           const entity = {
             PartitionKey: entityGenerator.String(slug),
             RowKey: entityGenerator.String(candle.id),
-            ...objectToEntity(candle)
+            ...tableStorage.objectToEntity(candle)
           };
-          batch.deleteEntity(objectToEntity(entity));
+          batch.deleteEntity(tableStorage.objectToEntity(entity));
         });
-        await executeBatch(tableName, batch);
+        await tableStorage.executeBatch(tableName, batch);
       })
     );
   } catch (error) {
@@ -231,15 +225,18 @@ async function clearTempCandles(taskId) {
     const query = new TableQuery()
       .where(taskIdFilter)
       .select("PartitionKey", "RowKey");
-    const candles = await queryEntities(STORAGE_CANDLESTEMP_TABLE, query);
+    const candles = await tableStorage.queryEntities(
+      STORAGE_CANDLESTEMP_TABLE,
+      query
+    );
     const chunks = chunkArray(candles, 100);
     await Promise.all(
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          batch.deleteEntity(objectToEntity(candle));
+          batch.deleteEntity(tableStorage.objectToEntity(candle));
         });
-        await executeBatch(STORAGE_CANDLESTEMP_TABLE, batch);
+        await tableStorage.executeBatch(STORAGE_CANDLESTEMP_TABLE, batch);
       })
     );
   } catch (error) {
@@ -293,15 +290,18 @@ async function cleanCachedCandles(taskId, timeframe, dateTo) {
         )
       )
       .select("PartitionKey", "RowKey");
-    const candles = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
+    const candles = await tableStorage.queryEntities(
+      STORAGE_CANDLESCACHED_TABLE,
+      query
+    );
     const chunks = chunkArray(candles, 100);
     await Promise.all(
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          batch.deleteEntity(objectToEntity(candle));
+          batch.deleteEntity(tableStorage.objectToEntity(candle));
         });
-        await executeBatch(STORAGE_CANDLESCACHED_TABLE, batch);
+        await tableStorage.executeBatch(STORAGE_CANDLESCACHED_TABLE, batch);
       })
     );
   } catch (error) {
@@ -351,7 +351,7 @@ async function _getCandles(tableName, { dateFrom, dateTo, slug }) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(tableName, query);
+    return await tableStorage.queryEntities(tableName, query);
   } catch (error) {
     throw new VError(
       {
@@ -441,7 +441,10 @@ async function countCachedCandles({ dateFrom, dateTo, slug }) {
         )
       )
       .select("RowKey");
-    const result = await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
+    const result = await tableStorage.queryEntities(
+      STORAGE_CANDLESCACHED_TABLE,
+      query
+    );
     return result.length;
   } catch (error) {
     throw new VError(

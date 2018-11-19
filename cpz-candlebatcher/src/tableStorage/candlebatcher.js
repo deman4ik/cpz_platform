@@ -1,12 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  mergeEntity,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity, createCandlebatcherSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 import { STORAGE_CANDLEBATCHERS_TABLE } from "cpzStorageTables";
 
@@ -14,13 +8,13 @@ const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_CANDLEBATCHERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_CANDLEBATCHERS_TABLE);
 
 async function saveCandlebatcherState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createCandlebatcherSlug(
+        tableStorage.createCandlebatcherSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -28,9 +22,12 @@ async function saveCandlebatcherState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_CANDLEBATCHERS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(
+      STORAGE_CANDLEBATCHERS_TABLE,
+      entity
+    );
   } catch (error) {
     throw new VError(
       {
@@ -48,9 +45,9 @@ async function saveCandlebatcherState(state) {
 async function updateCandlebatcherState(state) {
   try {
     const entity = {
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await mergeEntity(STORAGE_CANDLEBATCHERS_TABLE, entity);
+    await tableStorage.mergeEntity(STORAGE_CANDLEBATCHERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -74,7 +71,10 @@ async function getStartedCandlebatchers() {
         "started"
       )
     );
-    return await queryEntities(STORAGE_CANDLEBATCHERS_TABLE, query);
+    return await tableStorage.queryEntities(
+      STORAGE_CANDLEBATCHERS_TABLE,
+      query
+    );
   } catch (error) {
     throw new VError(
       {
@@ -105,7 +105,10 @@ async function getCandlebatcherByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_CANDLEBATCHERS_TABLE, query)[0];
+    return await tableStorage.queryEntities(
+      STORAGE_CANDLEBATCHERS_TABLE,
+      query
+    )[0];
   } catch (error) {
     throw new VError(
       {

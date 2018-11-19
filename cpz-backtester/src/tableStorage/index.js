@@ -4,19 +4,15 @@ import {
   STORAGE_BACKTESTS_TABLE,
   STORAGE_BACKTESTITEMS_TABLE
 } from "cpzStorageTables";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity
-} from "cpzStorage/storage";
-import { objectToEntity, createBacktesterSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { generateKey } from "cpzUtils/helpers";
 
 const { TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
-createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
 
 /**
  * Сохранение состояния бэктеста
@@ -28,7 +24,7 @@ async function saveBacktesterState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createBacktesterSlug(
+        tableStorage.createBacktesterSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -37,9 +33,9 @@ async function saveBacktesterState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -63,9 +59,9 @@ async function saveBacktesterItem(item) {
     const entity = {
       PartitionKey: entityGenerator.String(`${item.taskId}`),
       RowKey: entityGenerator.String(generateKey()),
-      ...objectToEntity(item)
+      ...tableStorage.objectToEntity(item)
     };
-    await insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {

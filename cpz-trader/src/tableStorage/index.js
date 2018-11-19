@@ -7,22 +7,15 @@ import {
   STORAGE_SIGNALSPENDING_TABLE,
   STORAGE_POSITIONS_TABLE
 } from "cpzStorageTables";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  mergeEntity,
-  deleteEntity,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity, createTraderSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_TRADERS_TABLE);
-createTableIfNotExists(STORAGE_SIGNALSPENDING_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_TRADERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_SIGNALSPENDING_TABLE);
 /**
  * Сохранение состояния проторговщика
  *
@@ -33,7 +26,7 @@ async function saveTraderState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createTraderSlug(
+        tableStorage.createTraderSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -42,9 +35,9 @@ async function saveTraderState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_TRADERS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_TRADERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -69,7 +62,7 @@ async function savePositionState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createTraderSlug(
+        tableStorage.createTraderSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -78,9 +71,9 @@ async function savePositionState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.positionId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_POSITIONS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_POSITIONS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -105,9 +98,12 @@ async function savePendingSignal(signal) {
     const entity = {
       PartitionKey: entityGenerator.String(signal.taskId),
       RowKey: entityGenerator.String(signal.signalId.toString()),
-      ...objectToEntity(signal)
+      ...tableStorage.objectToEntity(signal)
     };
-    await insertOrMergeEntity(STORAGE_SIGNALSPENDING_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(
+      STORAGE_SIGNALSPENDING_TABLE,
+      entity
+    );
   } catch (error) {
     throw new VError(
       {
@@ -132,9 +128,9 @@ async function savePendingSignal(signal) {
 async function updateTraderState(state) {
   try {
     const entity = {
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await mergeEntity(STORAGE_TRADERS_TABLE, entity);
+    await tableStorage.mergeEntity(STORAGE_TRADERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -158,9 +154,9 @@ async function updateTraderState(state) {
 async function updatePositionState(state) {
   try {
     const entity = {
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await mergeEntity(STORAGE_POSITIONS_TABLE, entity);
+    await tableStorage.mergeEntity(STORAGE_POSITIONS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -185,9 +181,9 @@ async function deletePendingSignal(signal) {
     const entity = {
       PartitionKey: entityGenerator.String(signal.taskId),
       RowKey: entityGenerator.String(signal.signalId.toString()),
-      ...objectToEntity(signal)
+      ...tableStorage.objectToEntity(signal)
     };
-    await deleteEntity(STORAGE_SIGNALSPENDING_TABLE, entity);
+    await tableStorage.deleteEntity(STORAGE_SIGNALSPENDING_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -228,7 +224,7 @@ async function getTraderByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_TRADERS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -280,7 +276,7 @@ async function getTradersBySlug(slug) {
         statusFilter
       )
     );
-    return await queryEntities(STORAGE_TRADERS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -321,7 +317,7 @@ async function getPositonByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_POSITIONS_TABLE, query)[0];
+    return await tableStorage.queryEntities(STORAGE_POSITIONS_TABLE, query)[0];
   } catch (error) {
     throw new VError(
       {
@@ -363,7 +359,7 @@ async function getActivePositions(slug) {
         openStatusFilter
       )
     );
-    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_POSITIONS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -415,7 +411,7 @@ async function getActivePositionsByTraderId(slug, traderId) {
         openStatusFilter
       )
     );
-    return await queryEntities(STORAGE_POSITIONS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_POSITIONS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -446,7 +442,10 @@ async function getPendingSignalsBySlugAndTraderId(id) {
         id
       )
     );
-    return await queryEntities(STORAGE_SIGNALSPENDING_TABLE, query);
+    return await tableStorage.queryEntities(
+      STORAGE_SIGNALSPENDING_TABLE,
+      query
+    );
   } catch (error) {
     throw new VError(
       {

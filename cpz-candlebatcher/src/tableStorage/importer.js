@@ -1,12 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  mergeEntity,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity, createImporterSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 import { STORAGE_IMPORTERS_TABLE } from "cpzStorageTables";
 
@@ -14,13 +8,13 @@ const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_IMPORTERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_IMPORTERS_TABLE);
 
 async function saveImporterState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createImporterSlug(
+        tableStorage.createImporterSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -28,9 +22,9 @@ async function saveImporterState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await insertOrMergeEntity(STORAGE_IMPORTERS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_IMPORTERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -48,9 +42,9 @@ async function saveImporterState(state) {
 async function updateImporterState(state) {
   try {
     const entity = {
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await mergeEntity(STORAGE_IMPORTERS_TABLE, entity);
+    await tableStorage.mergeEntity(STORAGE_IMPORTERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -84,7 +78,10 @@ async function getImporterByKey(keys) {
         partitionKeyFilter
       )
     );
-    const data = await queryEntities(STORAGE_IMPORTERS_TABLE, query);
+    const data = await tableStorage.queryEntities(
+      STORAGE_IMPORTERS_TABLE,
+      query
+    );
     if (!data) throw new Error("Can't load data");
     return data[0];
   } catch (error) {

@@ -7,7 +7,7 @@ import {
   ERROR_TOPIC
 } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
-import { createAdviserSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
@@ -31,7 +31,7 @@ async function handleCandle(context, eventData) {
     const modeStr = subjectToStr(eventSubject);
 
     // Параметры запроса - биржа + инструмент + таймфрейм
-    const slug = createAdviserSlug(
+    const slug = tableStorage.createAdviserSlug(
       candle.exchange,
       candle.asset,
       candle.currency,

@@ -13,7 +13,7 @@ import {
   STATUS_ERROR,
   STATUS_STOPPED
 } from "cpzState";
-import { createTraderSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
@@ -143,7 +143,7 @@ async function handleSignal(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
     // Параметры запроса - биржа + инструмент + таймфрейм
-    const slug = createTraderSlug(
+    const slug = tableStorage.createTraderSlug(
       signal.exchange,
       signal.asset,
       signal.currency,

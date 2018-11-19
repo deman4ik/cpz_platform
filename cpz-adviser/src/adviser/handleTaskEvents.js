@@ -10,7 +10,7 @@ import {
   TASKS_TOPIC
 } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
-import { createAdviserSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
@@ -45,7 +45,7 @@ async function handleStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: createAdviserSlug(
+        partitionKey: tableStorage.createAdviserSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

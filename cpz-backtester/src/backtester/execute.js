@@ -14,7 +14,7 @@ import {
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import getHistoryCandles from "cpzDB/historyCandles";
-import { createBacktesterSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
 import { saveBacktesterState, saveBacktesterItem } from "../tableStorage";
@@ -81,7 +81,7 @@ async function backtest(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,
       data: {
-        partitionKey: createBacktesterSlug(
+        partitionKey: tableStorage.createBacktesterSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

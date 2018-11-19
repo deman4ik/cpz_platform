@@ -9,25 +9,18 @@ import {
   STORAGE_BACKTESTS_TABLE,
   STORAGE_BACKTESTITEMS_TABLE
 } from "cpzStorageTables";
-import {
-  createTableIfNotExists,
-  insertOrMergeEntity,
-  mergeEntity,
-  deleteEntity,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity, createAdviserSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_ADVISERS_TABLE);
-createTableIfNotExists(STORAGE_CANDLESPENDING_TABLE);
-createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
-createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
-createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_ADVISERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_CANDLESPENDING_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
 /**
  * Сохранение состояния советника
  *
@@ -38,7 +31,7 @@ async function saveAdviserState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        createAdviserSlug(
+        tableStorage.createAdviserSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -47,10 +40,10 @@ async function saveAdviserState(state) {
         )
       ),
       RowKey: entityGenerator.String(state.taskId),
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
     // TODO: отдельно хранить стейт советника, стратегии и индикаторов
-    await insertOrMergeEntity(STORAGE_ADVISERS_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(STORAGE_ADVISERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -76,9 +69,12 @@ async function savePendingCandle(candle) {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
       RowKey: entityGenerator.String(candle.candleId.toString()),
-      ...objectToEntity(candle)
+      ...tableStorage.objectToEntity(candle)
     };
-    await insertOrMergeEntity(STORAGE_CANDLESPENDING_TABLE, entity);
+    await tableStorage.insertOrMergeEntity(
+      STORAGE_CANDLESPENDING_TABLE,
+      entity
+    );
   } catch (error) {
     throw new VError(
       {
@@ -103,9 +99,9 @@ async function savePendingCandle(candle) {
 async function updateAdviserState(state) {
   try {
     const entity = {
-      ...objectToEntity(state)
+      ...tableStorage.objectToEntity(state)
     };
-    await mergeEntity(STORAGE_ADVISERS_TABLE, entity);
+    await tableStorage.mergeEntity(STORAGE_ADVISERS_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -131,9 +127,9 @@ async function deletePendingCandle(candle) {
     const entity = {
       PartitionKey: entityGenerator.String(candle.taskId),
       RowKey: entityGenerator.String(candle.candleId.toString()),
-      ...objectToEntity(candle)
+      ...tableStorage.objectToEntity(candle)
     };
-    await deleteEntity(STORAGE_CANDLESPENDING_TABLE, entity);
+    await tableStorage.deleteEntity(STORAGE_CANDLESPENDING_TABLE, entity);
   } catch (error) {
     throw new VError(
       {
@@ -174,7 +170,7 @@ async function getAdviserByKey(keys) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_ADVISERS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_ADVISERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -226,7 +222,7 @@ async function getAdvisersBySlug(slug) {
         statusFilter
       )
     );
-    return await queryEntities(STORAGE_ADVISERS_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_ADVISERS_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -259,7 +255,7 @@ async function getCachedCandlesByKey(key, limit) {
         )
       )
       .top(limit);
-    return await queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_CANDLESCACHED_TABLE, query);
   } catch (error) {
     throw new VError(
       {
@@ -290,7 +286,10 @@ async function getPendingCandlesByAdviserId(id) {
         id
       )
     );
-    return await queryEntities(STORAGE_CANDLESPENDING_TABLE, query);
+    return await tableStorage.queryEntities(
+      STORAGE_CANDLESPENDING_TABLE,
+      query
+    );
   } catch (error) {
     throw new VError(
       {

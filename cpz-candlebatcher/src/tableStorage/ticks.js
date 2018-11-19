@@ -1,19 +1,15 @@
 import azure from "azure-storage";
 import VError from "verror";
 import dayjs from "cpzDayjs";
-import {
-  createTableIfNotExists,
-  executeBatch,
-  queryEntities
-} from "cpzStorage/storage";
-import { objectToEntity } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
+
 import { chunkArray } from "cpzUtils/helpers";
 import { STORAGE_TICKSCACHED_TABLE } from "cpzStorageTables";
 
 const { TableQuery, TableUtilities } = azure;
 
 // Создать таблицы если не существуют
-createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
 
 /**
  * Удаление тиков ожидающей выполнения
@@ -27,9 +23,9 @@ async function deletePrevCachedTicksArray(ticks) {
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(tick => {
-          batch.deleteEntity(objectToEntity(tick));
+          batch.deleteEntity(tableStorage.objectToEntity(tick));
         });
-        await executeBatch(STORAGE_TICKSCACHED_TABLE, batch);
+        await tableStorage.executeBatch(STORAGE_TICKSCACHED_TABLE, batch);
       })
     );
   } catch (error) {
@@ -73,7 +69,7 @@ async function getPrevCachedTicks({ dateFrom, dateTo, slug }) {
         partitionKeyFilter
       )
     );
-    return await queryEntities(STORAGE_TICKSCACHED_TABLE, query);
+    return await tableStorage.queryEntities(STORAGE_TICKSCACHED_TABLE, query);
   } catch (error) {
     throw new VError(
       {

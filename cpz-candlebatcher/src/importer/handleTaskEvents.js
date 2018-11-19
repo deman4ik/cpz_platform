@@ -1,21 +1,19 @@
 import VError from "verror";
-import dayjs from "cpzDayjs";
 import { IMPORTER_SERVICE } from "cpzServices";
 import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
 import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { createImporterSlug } from "cpzStorage/utils";
-import execute from "./execute";
-import { updateImporterState } from "../tableStorage";
-
-const {
+import {
   TASKS_IMPORTER_START_EVENT,
   TASKS_IMPORTER_STARTED_EVENT,
   TASKS_IMPORTER_STOP_EVENT,
   TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_TOPIC
-} = require("cpzEventTypes");
+} from "cpzEventTypes";
+import execute from "./execute";
+import { updateImporterState } from "../tableStorage";
 
 const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);

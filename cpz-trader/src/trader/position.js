@@ -29,7 +29,7 @@ import {
   BACKTEST_MODE
 } from "cpzState";
 import { TRADES_ORDER_EVENT } from "cpzEventTypes";
-import { createTraderSlug } from "cpzStorage/utils";
+import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 import { savePositionState } from "../tableStorage";
 
@@ -128,7 +128,7 @@ class Position {
    * @memberof Position
    */
   get slug() {
-    return createTraderSlug(
+    return tableStorage.createTraderSlug(
       this._exchange,
       this._asset,
       this._currency,
