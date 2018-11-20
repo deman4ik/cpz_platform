@@ -1,5 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
+import { createImporterSlug } from "cpzState";
 import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 import { STORAGE_IMPORTERS_TABLE } from "cpzStorageTables";
@@ -14,7 +15,7 @@ async function saveImporterState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createImporterSlug(
+        createImporterSlug(
           state.exchange,
           state.asset,
           state.currency,

@@ -9,13 +9,17 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_BUSY,
+  createCandlebatcherSlug
+} from "cpzState";
 import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import tableStorage from "cpzStorage";
 import Candlebatcher from "./candlebatcher";
 import {
   getCandlebatcherByKey,
@@ -51,7 +55,7 @@ async function handleStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: tableStorage.createCandlebatcherSlug(
+        partitionKey: createCandlebatcherSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

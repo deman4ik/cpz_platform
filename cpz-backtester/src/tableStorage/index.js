@@ -4,6 +4,7 @@ import {
   STORAGE_BACKTESTS_TABLE,
   STORAGE_BACKTESTITEMS_TABLE
 } from "cpzStorageTables";
+import { createBacktesterSlug } from "cpzState";
 import tableStorage from "cpzStorage";
 import { generateKey } from "cpzUtils/helpers";
 
@@ -24,7 +25,7 @@ async function saveBacktesterState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createBacktesterSlug(
+        createBacktesterSlug(
           state.exchange,
           state.asset,
           state.currency,

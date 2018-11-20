@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 
-import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import { STATUS_STARTED, STATUS_BUSY, createAdviserSlug } from "cpzState";
 import {
   STORAGE_ADVISERS_TABLE,
   STORAGE_CANDLESPENDING_TABLE,
@@ -31,7 +31,7 @@ async function saveAdviserState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createAdviserSlug(
+        createAdviserSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -196,7 +196,7 @@ async function getAdviserByKey(keys) {
 async function getAdvisersBySlug(input) {
   try {
     const { exchange, asset, currency, timeframe, mode, modeStr } = input;
-    const slug = tableStorage.createAdviserSlug(
+    const slug = createAdviserSlug(
       exchange,
       asset,
       currency,

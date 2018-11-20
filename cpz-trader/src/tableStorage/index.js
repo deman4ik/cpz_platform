@@ -1,7 +1,12 @@
 import azure from "azure-storage";
 import VError from "verror";
 
-import { STATUS_STARTED, STATUS_BUSY, POS_STATUS_OPENED } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_BUSY,
+  POS_STATUS_OPENED,
+  createTraderSlug
+} from "cpzState";
 import {
   STORAGE_TRADERS_TABLE,
   STORAGE_SIGNALSPENDING_TABLE,
@@ -26,7 +31,7 @@ async function saveTraderState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createTraderSlug(
+        createTraderSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -62,7 +67,7 @@ async function savePositionState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createTraderSlug(
+        createTraderSlug(
           state.exchange,
           state.asset,
           state.currency,
@@ -250,7 +255,7 @@ async function getTraderByKey(keys) {
 async function getTradersBySlug(input) {
   try {
     const { exchange, asset, currency, timeframe, mode, modeStr } = input;
-    const slug = tableStorage.createTraderSlug(
+    const slug = createTraderSlug(
       exchange,
       asset,
       currency,
@@ -348,7 +353,7 @@ async function getPositonByKey(keys) {
 async function getActivePositions(input) {
   try {
     const { exchange, asset, currency, timeframe, mode, modeStr } = input;
-    const slug = tableStorage.createTraderSlug(
+    const slug = createTraderSlug(
       exchange,
       asset,
       currency,

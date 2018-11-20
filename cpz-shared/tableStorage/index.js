@@ -69,45 +69,6 @@ class TableStorage {
     return entity;
   }
 
-  createMarketwatcherSlug(hostId, modeStr = "R") {
-    if (modeStr === "R") return hostId;
-    return `${hostId}.${modeStr}`;
-  }
-
-  createCandlebatcherSlug(exchange, asset, currency, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
-    return `${exchange}.${asset}.${currency}.${modeStr}`;
-  }
-
-  createImporterSlug(exchange, asset, currency, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
-    return `${exchange}.${asset}.${currency}.${modeStr}`;
-  }
-
-  createCachedTickSlug(exchange, asset, currency, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}`;
-    return `${exchange}.${asset}.${currency}.${modeStr}`;
-  }
-
-  createCachedCandleSlug(exchange, asset, currency, timeframe, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
-    return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
-  }
-
-  createAdviserSlug(exchange, asset, currency, timeframe, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
-    return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
-  }
-
-  createTraderSlug(exchange, asset, currency, timeframe, modeStr = "R") {
-    if (modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
-    return `${exchange}.${asset}.${currency}.${timeframe}.${modeStr}`;
-  }
-
-  createBacktesterSlug(exchange, asset, currency, timeframe, robotId) {
-    return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
-  }
-
   /**
    * Создание таблицы если еще не существует
    *

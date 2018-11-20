@@ -1,5 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
+import { createCandlebatcherSlug } from "cpzState";
 import tableStorage from "cpzStorage";
 import { modeToStr } from "cpzUtils/helpers";
 import { STORAGE_CANDLEBATCHERS_TABLE } from "cpzStorageTables";
@@ -14,7 +15,7 @@ async function saveCandlebatcherState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createCandlebatcherSlug(
+        createCandlebatcherSlug(
           state.exchange,
           state.asset,
           state.currency,

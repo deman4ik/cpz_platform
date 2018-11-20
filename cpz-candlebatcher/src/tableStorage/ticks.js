@@ -1,6 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 import dayjs from "cpzDayjs";
+import { createCandlebatcherSlug } from "cpzState";
 import tableStorage from "cpzStorage";
 
 import { modeToStr, chunkArray } from "cpzUtils/helpers";
@@ -66,7 +67,7 @@ async function getPrevCachedTicks(input) {
       TableUtilities.TableOperators.AND,
       dateToFilter
     );
-    const slug = tableStorage.createCandlebatcherSlug(
+    const slug = createCandlebatcherSlug(
       exchange,
       asset,
       currency,

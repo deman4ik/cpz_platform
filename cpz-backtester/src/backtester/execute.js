@@ -1,6 +1,11 @@
 import dayjs from "cpzDayjs";
 import VError from "verror";
-import { STATUS_STARTED, STATUS_FINISHED, STATUS_ERROR } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_FINISHED,
+  STATUS_ERROR,
+  createBacktesterSlug
+} from "cpzState";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import {
@@ -14,7 +19,6 @@ import {
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import getHistoryCandles from "cpzDB/historyCandles";
-import tableStorage from "cpzStorage";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
 import { saveBacktesterState, saveBacktesterItem } from "../tableStorage";
@@ -81,7 +85,7 @@ async function backtest(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,
       data: {
-        partitionKey: tableStorage.createBacktesterSlug(
+        partitionKey: createBacktesterSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,

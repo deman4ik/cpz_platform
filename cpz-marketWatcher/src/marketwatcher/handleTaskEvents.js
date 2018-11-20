@@ -10,7 +10,7 @@ import {
   TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import tableStorage from "cpzStorage";
+import { createMarketwatcherSlug } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
@@ -65,7 +65,7 @@ async function handleStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: tableStorage.createMarketwatcherSlug(
+        partitionKey: createMarketwatcherSlug(
           process.env.HOST_ID,
           modeToStr(eventData.mode)
         )

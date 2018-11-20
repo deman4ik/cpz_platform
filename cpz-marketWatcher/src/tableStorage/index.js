@@ -1,7 +1,11 @@
 import azure from "azure-storage";
 import VError from "verror";
 
-import { STATUS_STOPPED } from "cpzState";
+import {
+  STATUS_STOPPED,
+  createMarketwatcherSlug,
+  createCachedTickSlug
+} from "cpzState";
 import {
   STORAGE_MARKETWATCHERS_TABLE,
   STORAGE_TICKSCACHED_TABLE
@@ -26,10 +30,7 @@ async function saveMarketwatcherState(state) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createMarketwatcherSlug(
-          state.hostId,
-          modeToStr(state.mode)
-        )
+        createMarketwatcherSlug(state.hostId, modeToStr(state.mode))
       ),
       RowKey: entityGenerator.String(state.taskId),
       ...tableStorage.objectToEntity(state)
@@ -62,7 +63,7 @@ async function saveCachedTick(tick) {
   try {
     const entity = {
       PartitionKey: entityGenerator.String(
-        tableStorage.createCachedTickSlug(
+        createCachedTickSlug(
           tick.exchange.toLowerCase(),
           tick.asset,
           tick.currency,

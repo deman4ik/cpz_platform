@@ -1,6 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 import dayjs from "cpzDayjs";
+import { createCachedCandleSlug } from "cpzState";
 import tableStorage from "cpzStorage";
 import { modeToStr, chunkArray } from "cpzUtils/helpers";
 import {
@@ -22,7 +23,7 @@ tableStorage.createTableIfNotExists(STORAGE_CANDLESTEMP_TABLE);
  */
 async function saveCandleToCache(candle) {
   try {
-    const slug = tableStorage.createCachedCandleSlug(
+    const slug = createCachedCandleSlug(
       candle.exchange,
       candle.asset,
       candle.currency,
@@ -62,7 +63,7 @@ async function _saveCandlesArray(table, candles) {
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          const slug = tableStorage.createCachedCandleSlug(
+          const slug = createCachedCandleSlug(
             candle.exchange,
             candle.asset,
             candle.currency,
@@ -141,7 +142,7 @@ async function _deleteCandlesArray(tableName, candles) {
       chunks.map(async chunk => {
         const batch = new azure.TableBatch();
         chunk.forEach(candle => {
-          const slug = tableStorage.createCachedCandleSlug(
+          const slug = createCachedCandleSlug(
             candle.exchange,
             candle.asset,
             candle.currency,
@@ -349,7 +350,7 @@ async function _getCandles(tableName, input) {
       TableUtilities.TableOperators.AND,
       dateToFilter
     );
-    const slug = tableStorage.createCachedCandleSlug(
+    const slug = createCachedCandleSlug(
       exchange,
       asset,
       currency,
@@ -454,7 +455,7 @@ async function countCachedCandles(input) {
       TableUtilities.TableOperators.AND,
       dateToFilter
     );
-    const slug = tableStorage.createCachedCandleSlug(
+    const slug = createCachedCandleSlug(
       exchange,
       asset,
       currency,
