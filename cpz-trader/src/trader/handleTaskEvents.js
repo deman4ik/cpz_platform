@@ -9,8 +9,12 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
-import tableStorage from "cpzStorage";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_BUSY,
+  createTraderSlug
+} from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
@@ -45,7 +49,7 @@ async function handleStart(context, eventData) {
       data: {
         taskId: eventData.taskId,
         rowKey: eventData.taskId,
-        partitionKey: tableStorage.createTraderSlug(
+        partitionKey: createTraderSlug(
           eventData.exchange,
           eventData.asset,
           eventData.currency,
