@@ -672,6 +672,7 @@ class Adviser {
       subject: this._createSubject(),
       eventType: SIGNALS_NEWSIGNAL_EVENT.eventType,
       data: {
+        ...signal,
         signalId: uuid(),
         robotId: this._robotId,
         advisorId: this._taskId,
@@ -679,7 +680,7 @@ class Adviser {
         asset: this._asset,
         currency: this._currency,
         service: ADVISER_SERVICE,
-        ...signal
+        timestamp: dayjs().toISOString()
       }
     };
     this._signals = [];

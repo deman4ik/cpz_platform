@@ -13,8 +13,7 @@ const TICKS_NEWTICK_EVENT = {
     price: { description: "Trade Price.", type: "number" },
     timestamp: {
       description: "Trade timestamp in UTC.",
-      type: "datetime",
-      optinal: true // TODO: remove after altering candlebatcher
+      type: "datetime"
     },
     volume: { description: "Trade Volume.", type: "number" },
     tradeId: {

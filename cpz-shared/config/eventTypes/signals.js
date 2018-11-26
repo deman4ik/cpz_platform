@@ -28,8 +28,7 @@ const SIGNALS_NEWSIGNAL_EVENT = {
     },
     timestamp: {
       description: "Signal timestamp in UTC.",
-      type: "datetime",
-      optinal: true // TODO: remove after altering adviser
+      type: "datetime"
     },
     action: {
       description: "Signal type.",
