@@ -1,0 +1,12 @@
+- args:
+    sql: CREATE TABLE "cpz"."candles1"("id" text NOT NULL UNIQUE, "time" integer NOT
+      NULL, "timestamp" timetz NOT NULL, "open" numeric NOT NULL, "high" numeric NOT
+      NULL, "low" numeric NOT NULL, "close" numeric NOT NULL, "volume" numeric NOT
+      NULL, "exchange" text NOT NULL, "asset" text NOT NULL, "currency" text NOT NULL,
+      "type" text NOT NULL, PRIMARY KEY ("id") ); COMMENT ON TABLE "cpz"."candles1"
+      IS 'Candles in 1 minute timeframe'
+  type: run_sql
+- args:
+    name: candles1
+    schema: cpz
+  type: add_existing_table_or_view

@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "cpz"."currencies"
+  type: run_sql
