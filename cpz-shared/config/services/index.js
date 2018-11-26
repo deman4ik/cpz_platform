@@ -1,4 +1,4 @@
-const TASKRUNNER_SERVICE = "taskrunner";
+const CONTROL_SERVICE = "control";
 const MARKETWATCHER_SERVICE = "marketwatcher";
 const CANDLEBATCHER_SERVICE = "candlebatcher";
 const IMPORTER_SERVICE = "importer";
@@ -7,7 +7,7 @@ const TRADER_SERVICE = "trader";
 const BACKTESTER_SERVICE = "backtester";
 
 export {
-  TASKRUNNER_SERVICE,
+  CONTROL_SERVICE,
   MARKETWATCHER_SERVICE,
   CANDLEBATCHER_SERVICE,
   IMPORTER_SERVICE,

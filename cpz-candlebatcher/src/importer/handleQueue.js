@@ -1,10 +1,10 @@
-import { getImporterByKey } from "../tableStorage";
+import { getImporterById } from "cpzStorage";
 import execute from "./execute";
 
-async function handleQueue(context, keys) {
-  const importerState = await getImporterByKey(keys);
+async function handleQueue(context, { taskId }) {
+  const importerState = await getImporterById(taskId);
   await execute(context, importerState);
-  context.log.info(`Finished processing queue request: ${keys}`);
+  context.log.info(`Finished processing queue request: ${taskId}`);
 }
 
 export default handleQueue;

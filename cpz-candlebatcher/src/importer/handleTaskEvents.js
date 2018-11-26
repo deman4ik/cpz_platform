@@ -2,9 +2,7 @@ import VError from "verror";
 import { IMPORTER_SERVICE } from "cpzServices";
 import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
-import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { createImporterSlug } from "cpzStorage/utils";
 import {
   TASKS_IMPORTER_START_EVENT,
   TASKS_IMPORTER_STARTED_EVENT,
@@ -12,8 +10,8 @@ import {
   TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import { updateImporterState, getImporterById } from "cpzStorage";
 import execute from "./execute";
-import { updateImporterState } from "../tableStorage";
 
 const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
@@ -29,22 +27,6 @@ async function handleImportStart(context, eventData) {
     genErrorIfExist(validateStart(eventData));
     // Запуск
     await execute(context, eventData, true);
-    // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: IMPORTER_SERVICE,
-      subject: eventData.eventSubject,
-      eventType: TASKS_IMPORTER_STARTED_EVENT,
-      data: {
-        taskId: eventData.taskId,
-        rowKey: eventData.taskId,
-        partitionKey: createImporterSlug(
-          eventData.exchange,
-          eventData.asset,
-          eventData.currency,
-          modeToStr(eventData.mode)
-        )
-      }
-    });
   } catch (error) {
     const errorOutput = createErrorOutput(
       new VError(
@@ -81,9 +63,10 @@ async function handleImportStop(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
+    const importerState = await getImporterById(eventData.taskId);
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey,
+      RowKey: importerState.RowKey,
+      PartitionKey: importerState.PartitionKey,
       stopRequested: true
     };
     await updateImporterState(newState);

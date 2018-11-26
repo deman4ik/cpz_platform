@@ -7,7 +7,9 @@ import {
   STATUS_STOPPED,
   STATUS_FINISHED,
   INDICATORS_BASE,
-  INDICATORS_TULIP
+  INDICATORS_TULIP,
+  createAdviserSlug,
+  createNewSignalSubject
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import {
@@ -15,12 +17,11 @@ import {
   LOG_ADVISER_EVENT,
   LOG_TOPIC
 } from "cpzEventTypes";
-import { modeToStr } from "cpzUtils/helpers";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
+import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
-import { getCachedCandlesByKey, saveAdviserState } from "../tableStorage";
 
 /**
  * Класс советника
@@ -106,6 +107,16 @@ class Adviser {
       this.initStrategy();
       this._initialized = true;
     }
+  }
+
+  get slug() {
+    return createAdviserSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      mode: this._mode
+    });
   }
 
   /**
@@ -636,9 +647,14 @@ class Adviser {
    * @memberof Candlebatcher
    */
   _createSubject() {
-    return `${this._exchange}/${this._asset}/${this._currency}/${
-      this._timeframe
-    }/${this._taskId}.${modeToStr(this._mode)}`;
+    return createNewSignalSubject({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      taskId: this._taskId,
+      mode: this._mode
+    });
   }
 
   /**
@@ -754,6 +770,8 @@ class Adviser {
     this.getIndicatorsState();
     this.getStrategyState();
     return {
+      PartitionKey: this.slug,
+      RowKey: this._taskId,
       eventSubject: this._eventSubject,
       taskId: this._taskId,
       robotId: this._robotId,
@@ -788,7 +806,6 @@ class Adviser {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setUpdate()`, updatedFields);
-    this._eventSubject = updatedFields.eventSubject || this._eventSubject;
     this._debug = updatedFields.debug || this._debug;
     this._settings = updatedFields.settings || this._settings;
     this._requiredHistoryCache =

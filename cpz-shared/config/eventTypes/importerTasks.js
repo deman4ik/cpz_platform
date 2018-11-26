@@ -21,7 +21,7 @@ const TASKS_IMPORTER_START_EVENT = {
     providerType: {
       description: "Data provider type.",
       type: "string",
-      values: ["cryptocompare", "ccxt"]
+      values: ["ccxt"]
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
@@ -68,16 +68,6 @@ const TASKS_IMPORTER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
-      type: "string",
-      empty: false
     }
   }
 };
@@ -88,16 +78,6 @@ const TASKS_IMPORTER_STARTED_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
       type: "string",
       empty: false
     },

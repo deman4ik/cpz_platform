@@ -10,12 +10,10 @@ import {
   TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import { createMarketwatcherSlug } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { modeToStr } from "cpzUtils/helpers";
 import {
   isProcessExists,
   createNewProcess,
@@ -64,11 +62,7 @@ async function handleStart(context, eventData) {
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
         taskId: eventData.taskId,
-        rowKey: eventData.taskId,
-        partitionKey: createMarketwatcherSlug(
-          process.env.HOST_ID,
-          modeToStr(eventData.mode)
-        )
+        hostId: eventData.hostId
       }
     });
   } catch (error) {

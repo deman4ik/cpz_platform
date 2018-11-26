@@ -43,6 +43,7 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "number",
       empty: false
     },
+    // TODO: adviser/trader settings
     settings: {
       description: "Adviser parameters.",
       type: "object",
@@ -88,6 +89,18 @@ const TASKS_BACKTESTER_START_EVENT = {
   }
 };
 
+const TASKS_BACKTESTER_STOP_EVENT = {
+  eventType: "CPZ.Tasks.Backtester.Stop",
+
+  dataSchema: {
+    taskId: {
+      description: "Uniq task id.",
+      type: "string",
+      empty: false
+    }
+  }
+};
+
 const TASKS_BACKTESTER_STARTED_EVENT = {
   eventType: "CPZ.Tasks.Backtester.Started",
   dataSchema: {
@@ -96,13 +109,16 @@ const TASKS_BACKTESTER_STARTED_EVENT = {
       type: "string",
       empty: false
     },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
+    error: BASE_ERROR
+  }
+};
+
+const TASKS_BACKTESTER_STOPPED_EVENT = {
+  eventType: "CPZ.Tasks.Backtester.Stopped",
+
+  dataSchema: {
+    taskId: {
+      description: "Uniq task id.",
       type: "string",
       empty: false
     },
@@ -124,6 +140,8 @@ const TASKS_BACKTESTER_FINISHED_EVENT = {
 
 export {
   TASKS_BACKTESTER_START_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT,
   TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_BACKTESTER_FINISHED_EVENT
 };

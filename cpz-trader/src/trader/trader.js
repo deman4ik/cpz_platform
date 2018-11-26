@@ -16,11 +16,12 @@ import {
   ORDER_TYPE_MARKET,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT
+  ORDER_TASK_CHECKLIMIT,
+  createTraderSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import { saveTraderState, getPositonByKey } from "../tableStorage";
+import { saveTraderState, getPositonById } from "cpzStorage";
 import Position from "./position";
 /**
  * Класс проторговщика
@@ -90,6 +91,16 @@ class Trader {
 
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+  }
+
+  get slug() {
+    return createTraderSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      mode: this._mode
+    });
   }
 
   /**
@@ -234,9 +245,9 @@ class Trader {
       ) {
         // Запрашиваем из стореджа
         this.log("loading...");
-        const positionsState = await getPositonByKey({
-          partitionKey: this._taskId,
-          rowkey: positionId
+        const positionsState = await getPositonById({
+          traderId: this._taskId,
+          positionId
         });
 
         // Создем экземпяр позиции
@@ -419,6 +430,8 @@ class Trader {
    */
   getCurrentState() {
     return {
+      PartitionKey: this.slug,
+      RowKey: this._taskId,
       eventSubject: this._eventSubject,
       taskId: this._taskId,
       robotId: this._robotId,

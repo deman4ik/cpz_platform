@@ -9,19 +9,13 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY,
-  createTraderSlug
-} from "cpzState";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { modeToStr } from "cpzUtils/helpers";
+import { getTraderById, updateTraderState } from "cpzStorage";
 import Trader from "./trader";
-import { getTraderByKey, updateTraderState } from "../tableStorage";
 
 const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
@@ -47,15 +41,7 @@ async function handleStart(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_TRADER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        rowKey: eventData.taskId,
-        partitionKey: createTraderSlug(
-          eventData.exchange,
-          eventData.asset,
-          eventData.currency,
-          eventData.timeframe,
-          modeToStr(eventData.mode)
-        )
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -96,14 +82,11 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние проторговщика по уникальному ключу
-    const traderState = await getTraderByKey({
-      rowKey: eventData.rowKey,
-      partitionKey: eventData.partitionKey
-    });
+    const traderState = await getTraderById(eventData.taskId);
     // Генерируем новое состояние
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: traderState.RowKey,
+      PartitionKey: traderState.PartitionKey
     };
     // Если занят
     if (traderState.status === STATUS_BUSY) {
@@ -161,20 +144,18 @@ async function handleUpdate(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUpdate(eventData));
-    const traderState = await getTraderByKey(eventData);
+    const traderState = await getTraderById(eventData.taskId);
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: traderState.RowKey,
+      PartitionKey: traderState.PartitionKey
     };
     // Если занят
     if (traderState.status === STATUS_BUSY) {
       newState.updateRequested = {
-        eventSubject: eventData.eventSubject,
         debug: eventData.debug,
         settings: eventData.settings
       };
     } else {
-      newState.eventSubject = eventData.eventSubject;
       newState.debug = eventData.debug;
       newState.settings = eventData.settings;
     }

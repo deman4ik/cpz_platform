@@ -3,8 +3,8 @@ import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
+import { getStartedCandlebatchers } from "cpzStorage";
 import executeCandlebatcher from "./execute";
-import { getStartedCandlebatchers } from "../tableStorage";
 
 async function handleTimer(context) {
   try {

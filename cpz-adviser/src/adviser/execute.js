@@ -11,9 +11,9 @@ import { createErrorOutput } from "cpzUtils/error";
 import Adviser from "./adviser";
 import {
   getPendingCandlesByAdviserId,
-  getAdviserByKey,
+  getAdviserById,
   deletePendingCandle
-} from "../tableStorage";
+} from "cpzStorage";
 
 /**
  * Основная задача советника
@@ -59,10 +59,7 @@ async function execute(context, state, candle, child = false) {
     // Если это основной вызов
     if (!child) {
       // Проверяем ожидающие обработку свечи
-      await handlePendingCandles(context, {
-        partitionKey: state.PartitionKey,
-        rowKey: state.RowKey
-      });
+      await handlePendingCandles(context, state.taskId);
     }
   } catch (error) {
     const err = new VError(
@@ -97,14 +94,14 @@ async function execute(context, state, candle, child = false) {
  *
  * @param {*} taskId
  */
-async function handlePendingCandles(context, keys) {
+async function handlePendingCandles(context, taskId) {
   // Считываем не обработанные свечи
-  const pendingCandles = getPendingCandlesByAdviserId(keys.rowKey);
+  const pendingCandles = getPendingCandlesByAdviserId(taskId);
   /* eslint-disable no-restricted-syntax */
   for (const pendingCandle of pendingCandles) {
     /* eslint-disable no-await-in-loop */
     // Считываем текущее состояние советника
-    const adviserState = await getAdviserByKey(keys);
+    const adviserState = await getAdviserById(taskId);
     // Начинаем обработку
     await execute(context, adviserState, pendingCandle, true);
     // Удаляем свечу из очереди

@@ -9,22 +9,16 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY,
-  createCandlebatcherSlug
-} from "cpzState";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { modeToStr } from "cpzUtils/helpers";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import Candlebatcher from "./candlebatcher";
 import {
-  getCandlebatcherByKey,
+  getCandlebatcherById,
   updateCandlebatcherState
-} from "../tableStorage";
+} from "cpzStorage";
+import Candlebatcher from "./candlebatcher";
 
 const validateStart = createValidator(
   TASKS_CANDLEBATCHER_START_EVENT.dataSchema
@@ -53,14 +47,7 @@ async function handleStart(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        rowKey: eventData.taskId,
-        partitionKey: createCandlebatcherSlug(
-          eventData.exchange,
-          eventData.asset,
-          eventData.currency,
-          modeToStr(eventData.mode)
-        )
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -100,15 +87,12 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние по уникальному ключу
-    const candlebatcherState = await getCandlebatcherByKey({
-      rowKey: eventData.rowKey,
-      partitionKey: eventData.partitionKey
-    });
+    const candlebatcherState = await getCandlebatcherById(eventData.taskId);
 
     // Генерируем новое состояние
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: candlebatcherState.RowKey,
+      PartitionKey: candlebatcherState.PartitionKey
     };
     // Если занят
     if (candlebatcherState.status === STATUS_BUSY) {
@@ -167,26 +151,21 @@ async function handleUpdate(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUpdate(eventData));
-    const candlebatcherState = await getCandlebatcherByKey({
-      rowKey: eventData.rowKey,
-      partitionKey: eventData.partitionKey
-    });
+    const candlebatcherState = await getCandlebatcherById(eventData.taskId);
 
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: candlebatcherState.RowKey,
+      PartitionKey: candlebatcherState.PartitionKey
     };
     // Если занят
     if (candlebatcherState.status === STATUS_BUSY) {
       newState.updateRequested = {
-        eventSubject: eventData.eventSubject,
         providerType: eventData.providerType,
         debug: eventData.debug,
         timeframes: eventData.timeframes,
         proxy: eventData.proxy
       };
     } else {
-      newState.eventSubject = eventData.eventSubject;
       newState.providerType = eventData.providerType;
       newState.debug = eventData.debug;
       newState.timeframes = eventData.timeframes;

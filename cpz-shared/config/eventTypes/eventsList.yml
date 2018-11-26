@@ -44,7 +44,7 @@ endpoints:
   - CPZ.Tasks.Trader.Update
 - name: "trader-signals"
   topic: CPZ-SIGNALS
-  url: "/trader/api/signalEvents"
+  url: "/api/signalEvents"
   types:
   - CPZ.Signals.NewSignal
 # Taskrunner
@@ -90,5 +90,4 @@ endpoints:
   topic: CPZ-ORDERS
   url: "/api/orderEvents"
   types:
-  - CPZ.Orders.NewOpenOrder
-  - CPZ.Orders.NewCloseOrder
+  - CPZ.Orders.NewOrder

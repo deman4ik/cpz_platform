@@ -6,13 +6,13 @@ import {
   CANDLES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import { STATUS_STARTED, STATUS_BUSY, createAdviserSlug } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { subjectToStr } from "cpzUtils/helpers";
-import { getAdvisersBySlug, savePendingCandle } from "../tableStorage";
+import { getActiveAdvisersBySlug, savePendingCandle } from "cpzStorage";
 import execute from "./execute";
 
 const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
@@ -30,13 +30,15 @@ async function handleCandle(context, eventData) {
     const modeStr = subjectToStr(eventSubject);
 
     // Ищем подходящих советников
-    const advisers = await getAdvisersBySlug({
-      exchange: candle.exchange,
-      asset: candle.asset,
-      currency: candle.currency,
-      timeframe: candle.timeframe,
-      modeStr
-    });
+    const advisers = await getActiveAdvisersBySlug(
+      createAdviserSlug({
+        exchange: candle.exchange,
+        asset: candle.asset,
+        currency: candle.currency,
+        timeframe: candle.timeframe,
+        modeStr
+      })
+    );
     // Фильтруем только доступные советники
     const startedAdvisers = advisers.filter(
       adviser => adviser.status === STATUS_STARTED
@@ -66,7 +68,9 @@ async function handleCandle(context, eventData) {
       busyAdvisers.map(async state => {
         const newPendingCandle = {
           ...candle,
-          taskId: state.taskId
+          taskId: state.taskId,
+          PartitionKey: state.taskId,
+          RowKey: candle.id
         };
         try {
           await savePendingCandle(newPendingCandle);
@@ -98,7 +102,9 @@ async function handleCandle(context, eventData) {
       concurrentAdvisers.map(async state => {
         const newPendingCandle = {
           ...candle,
-          taskId: state.taskId
+          taskId: state.taskId,
+          PartitionKey: state.taskId,
+          RowKey: candle.id
         };
         try {
           await savePendingCandle(newPendingCandle);

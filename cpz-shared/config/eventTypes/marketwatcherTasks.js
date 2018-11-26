@@ -8,10 +8,15 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       type: "string",
       empty: false
     },
+    hostId: {
+      description: "Uniq host id.",
+      type: "string",
+      empty: false
+    },
     mode: {
       description: "Service run mode.",
       type: "string",
-      values: ["backtest", "emulator", "realtime"]
+      values: ["emulator", "realtime"]
     },
     debug: {
       description: "Debug mode.",
@@ -56,6 +61,11 @@ const TASKS_MARKETWATCHER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
+    },
+    hostId: {
+      description: "Uniq host id.",
+      type: "string",
+      empty: false
     }
   }
 };
@@ -65,6 +75,11 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
+      type: "string",
+      empty: false
+    },
+    hostId: {
+      description: "Uniq host id.",
       type: "string",
       empty: false
     },
@@ -100,6 +115,11 @@ const TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
+      type: "string",
+      empty: false
+    },
+    hostId: {
+      description: "Uniq host id.",
       type: "string",
       empty: false
     },
@@ -140,16 +160,6 @@ const TASKS_MARKETWATCHER_STARTED_EVENT = {
     },
     hostId: {
       description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
       type: "string",
       empty: false
     },

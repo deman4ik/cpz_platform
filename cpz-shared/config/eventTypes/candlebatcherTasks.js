@@ -12,7 +12,7 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
     mode: {
       description: "Service run mode.",
       type: "string",
-      values: ["backtest", "emulator", "realtime"]
+      values: ["emulator", "realtime"]
     },
     debug: {
       description: "Debug mode.",
@@ -21,7 +21,7 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
     providerType: {
       description: "Data provider type.",
       type: "string",
-      values: ["cryptocompare", "ccxt"]
+      values: ["ccxt"]
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
@@ -47,16 +47,6 @@ const TASKS_CANDLEBATCHER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
-      type: "string",
-      empty: false
     }
   }
 };
@@ -70,20 +60,11 @@ const TASKS_CANDLEBATCHER_UPDATE_EVENT = {
       type: "string",
       empty: false
     },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
-      type: "string",
-      empty: false
-    },
     debug: {
       description: "Debug mode.",
       type: "boolean"
     },
+    // TODO: custom validation
     timeframes: {
       description: "List of timeframes in minutes.",
       type: "array",
@@ -103,16 +84,6 @@ const TASKS_CANDLEBATCHER_STARTED_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
       type: "string",
       empty: false
     },

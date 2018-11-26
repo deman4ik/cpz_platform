@@ -27,11 +27,11 @@ import {
   ORDER_POS_DIR_ENTRY,
   ORDER_POS_DIR_EXIT,
   BACKTEST_MODE,
-  createTraderSlug
+  createTraderSlug,
+  createNewOrderSubject
 } from "cpzState";
 import { TRADES_ORDER_EVENT } from "cpzEventTypes";
-import { modeToStr } from "cpzUtils/helpers";
-import { savePositionState } from "../tableStorage";
+import { savePositionState } from "cpzStorage";
 
 /**
  * Класс позиции
@@ -128,13 +128,13 @@ class Position {
    * @memberof Position
    */
   get slug() {
-    return createTraderSlug(
-      this._exchange,
-      this._asset,
-      this._currency,
-      this._timeframe,
-      modeToStr(this._mode)
-    );
+    return createTraderSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      mode: this._mode
+    });
   }
 
   /**
@@ -399,18 +399,6 @@ class Position {
   }
 
   /**
-   * Генерация темы события Order и Position
-   *
-   * @returns subject
-   * @memberof Position
-   */
-  _createSubject() {
-    return `${this._exchange}/${this._asset}/${this._currency}/${
-      this._timeframe
-    }/${this._traderId}.${modeToStr(this._mode)}`;
-  }
-
-  /**
    * Создать событие Ордер
    *
    * @param {*} order
@@ -420,7 +408,14 @@ class Position {
       id: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
-      subject: this._createSubject(),
+      subject: createNewOrderSubject({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe,
+        traderId: this._traderId,
+        mode: this._mode
+      }),
       eventType: TRADES_ORDER_EVENT.eventType,
       data: {
         ...order,
@@ -441,6 +436,8 @@ class Position {
    */
   getCurrentState() {
     return {
+      PartitionKey: this.slug,
+      RowKey: this._positionId,
       mode: this._mode,
       positionId: this._positionId,
       traderId: this._traderId,

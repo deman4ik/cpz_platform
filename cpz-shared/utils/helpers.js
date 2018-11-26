@@ -1,6 +1,10 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "./lib/dayjs";
-import { REALTIME_MODE, EMULATOR_MODE, BACKTEST_MODE } from "../config/state";
+import {
+  REALTIME_MODE,
+  EMULATOR_MODE,
+  BACKTEST_MODE
+} from "../config/state/types";
 
 function sortAsc(a, b) {
   if (a > b) {
@@ -78,11 +82,6 @@ function subjectToStr(eventSubject) {
   }
 }
 
-/**
- * Сокращение наименования состояния сервиса
- *
- * @param {string} mode
- */
 function modeToStr(mode) {
   switch (mode) {
     case REALTIME_MODE:
@@ -96,7 +95,6 @@ function modeToStr(mode) {
       return "R";
   }
 }
-
 /**
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
  */
@@ -196,8 +194,8 @@ export {
   sortDesc,
   tryParseJSON,
   getModeFromSubject,
-  subjectToStr,
   modeToStr,
+  subjectToStr,
   getInvertedTimestamp,
   generateKey,
   durationMinutes,

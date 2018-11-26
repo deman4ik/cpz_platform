@@ -77,7 +77,7 @@ const SUB_VALIDATION_EVENT = {
 };
 
 const LOG_MARKETWATCHER_EVENT = {
-  eventType: "CPZ.MarketWatcher.Log"
+  eventType: "CPZ.Marketwatcher.Log"
 };
 
 const LOG_CANDLEBATCHER_EVENT = {
@@ -97,7 +97,7 @@ const LOG_TRADER_EVENT = {
 };
 
 const ERROR_MARKETWATCHER_EVENT = {
-  eventType: "CPZ.MarketWatcher.Error"
+  eventType: "CPZ.Marketwatcher.Error"
 };
 
 const ERROR_CANDLEBATCHER_EVENT = {

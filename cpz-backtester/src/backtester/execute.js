@@ -17,15 +17,24 @@ import {
   TASKS_TOPIC,
   TRADES_TOPIC
 } from "cpzEventTypes";
+import { generateKey } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
 import getHistoryCandles from "cpzDB/historyCandles";
+import { saveBacktesterState, saveBacktesterItem } from "cpzStorage";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
-import { saveBacktesterState, saveBacktesterItem } from "../tableStorage";
 
 async function backtest(context, eventData) {
   const backtesterState = {
     ...eventData,
+    PartitionKey: createBacktesterSlug({
+      exchange: eventData.exchange,
+      asset: eventData.asset,
+      currency: eventData.currency,
+      timeframe: eventData.timeframe,
+      robotId: eventData.robotId
+    }),
+    RowKey: eventData.taskId,
     totalBars: 0,
     processedBars: 0,
     leftBars: 0,
@@ -85,14 +94,6 @@ async function backtest(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,
       data: {
-        partitionKey: createBacktesterSlug(
-          eventData.exchange,
-          eventData.asset,
-          eventData.currency,
-          eventData.timeframe,
-          eventData.robotId
-        ),
-        rowKey: eventData.taskId,
         taskId: eventData.taskId
       }
     });
@@ -143,6 +144,8 @@ async function backtest(context, eventData) {
         }
         // Сохраянем состояние итерации
         await saveBacktesterItem({
+          PartitionKey: backtesterState.taskId,
+          RowKey: generateKey(),
           taskId: backtesterState.taskId,
           candle,
           adviserEvents: adviserBacktester.events,
@@ -210,7 +213,6 @@ async function backtest(context, eventData) {
       eventType: ERROR_ADVISER_EVENT,
       data: {
         taskId: eventData.taskId,
-        mode: "backtest",
         error: errorOutput
       }
     });

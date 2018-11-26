@@ -1,5 +1,5 @@
 import VError from "verror";
-import { STATUS_PENDING } from "cpzState";
+import { STATUS_PENDING, createMarketwatcherSlug } from "cpzState";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import {
   TICKS_NEWTICK_EVENT,
@@ -11,8 +11,7 @@ import {
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
-import { modeToStr } from "cpzUtils/helpers";
-import { saveMarketwatcherState, saveCachedTick } from "../tableStorage";
+import { saveMarketwatcherState, saveCachedTick } from "cpzStorage";
 
 class BaseProvider {
   constructor(state) {
@@ -81,17 +80,6 @@ class BaseProvider {
 
     /* eslint-enable */
 
-  /**
-   * Генерация темы события NewSignal
-   *
-   * @returns subject
-   * @memberof Candlebatcher
-   */
-  _createSubject() {
-    return `${this._exchange}/${this._asset}/${this._currency}.${modeToStr(
-      this._mode
-    )}`;
-  }
 
   async _publishTick(tick) {
     try {
@@ -198,6 +186,11 @@ class BaseProvider {
     return {
       taskId: this._taskId,
       hostId: this._hostId,
+      PartitionKey: createMarketwatcherSlug({
+        hostId: this._hostId,
+        mode: this._mode
+      }),
+      RowKey: this._taskId,
       mode: this._mode,
       debug: this._debug,
       subscriptions: this._subscriptions,

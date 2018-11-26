@@ -9,8 +9,6 @@ import {
   ERROR_TOPIC
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
-import { createImporterSlug } from "cpzStorage/utils";
-import { modeToStr } from "cpzUtils/helpers";
 import {
   STATUS_STOPPED,
   STATUS_ERROR,
@@ -45,15 +43,7 @@ async function execute(context, state, start = false) {
         subject: state.eventSubject,
         eventType: TASKS_IMPORTER_STARTED_EVENT,
         data: {
-          service: IMPORTER_SERVICE,
-          taskId: state.taskId,
-          rowKey: state.rowKey,
-          partitionKey: createImporterSlug(
-            state.exchange,
-            state.asset,
-            state.currency,
-            modeToStr(state.mode)
-          )
+          taskId: state.taskId
         }
       });
     }

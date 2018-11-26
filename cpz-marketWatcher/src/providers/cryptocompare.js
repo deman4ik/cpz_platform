@@ -6,7 +6,12 @@ import { MARKETWATCHER_SERVICE } from "cpzServices";
 import { ERROR_MARKETWATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_ERROR,
+  createCachedTickSlug
+} from "cpzState";
 import BaseProvider from "./baseProvider";
 
 let providerInstance;
@@ -41,9 +46,17 @@ class CryptocompareProvider extends BaseProvider {
 
       const mask = valuesArray[valuesArray.length - 1].toString().slice(-1);
       if (mask === "9") {
+        const tickId = uuid();
         const obj = {
           type: "tick",
-          tickId: uuid(),
+          tickId,
+          PartitionKey: createCachedTickSlug({
+            exchange: valuesArray[1].toLowerCase(),
+            asset: valuesArray[2],
+            currency: valuesArray[3],
+            mode: this._mode
+          }),
+          RowKey: tickId,
           exchange: valuesArray[1],
           asset: valuesArray[2],
           currency: valuesArray[3],
@@ -62,9 +75,17 @@ class CryptocompareProvider extends BaseProvider {
     }
     if (type === "0") {
       // {SubscriptionId}~{ExchangeName}~{CurrencySymbol}~{CurrencySymbol}~{Flag}~{TradeId}~{TimeStamp}~{Quantity}~{Price}~{Total}
+      const tickId = uuid();
       const obj = {
         type: "trade",
-        tickId: uuid(),
+        tickId,
+        PartitionKey: createCachedTickSlug({
+          exchange: valuesArray[1].toLowerCase(),
+          asset: valuesArray[2],
+          currency: valuesArray[3],
+          mode: this._mode
+        }),
+        RowKey: tickId,
         exchange: valuesArray[1],
         asset: valuesArray[2],
         currency: valuesArray[3],

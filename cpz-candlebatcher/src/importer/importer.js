@@ -1,23 +1,29 @@
 import VError from "verror";
 import dayjs from "cpzDayjs";
-import { saveCandlesArray } from "cpzDB/saveCandles";
-import { createImporterSlug, createCachedCandleSlug } from "cpzStorage/utils";
 import { IMPORTER_SERVICE } from "cpzServices";
 import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED,
-  CANDLE_CREATED
+  CANDLE_CREATED,
+  createImporterSlug,
+  createCachedCandleSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import {
   durationMinutes,
   completedPercent,
-  modeToStr,
   sortAsc,
   divideDateByDays
 } from "cpzUtils/helpers";
+import {
+  saveImporterState,
+  saveCandlesArrayToCache,
+  saveCandlesArrayToTemp,
+  getTempCandles,
+  clearTempCandles
+} from "cpzStorage";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
@@ -25,14 +31,6 @@ import {
   createMinutesList
 } from "../utils";
 import { queueImportIteration } from "../queueStorage";
-import {
-  saveImporterState,
-  saveCandlesArrayToCache,
-  saveCandlesArrayToTemp,
-  getTempCandles,
-  clearTempCandles
-} from "../tableStorage";
-import CryptocompareProvider from "../providers/cryptocompareProvider";
 import CCXTProvider from "../providers/ccxtProvider";
 
 class Importer {
@@ -47,7 +45,7 @@ class Importer {
     this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
-    /* Тип провайдера ['ccxt','cryptocompare'] */
+    /* Тип провайдера ['ccxt'] */
     this._providerType = state.providerType;
     /* Код биржи */
     this._exchange = state.exchange;
@@ -170,9 +168,6 @@ class Importer {
         proxy: this._proxy
       };
       switch (this._providerType) {
-        case "cryptocompare":
-          this.provider = new CryptocompareProvider(initParams);
-          break;
         case "ccxt":
           this.provider = new CCXTProvider(initParams);
           break;
@@ -383,13 +378,7 @@ class Importer {
     try {
       if (this._dateNext) {
         const message = {
-          rowKey: this._taskId,
-          partitionKey: createImporterSlug(
-            this._exchange,
-            this._asset,
-            this._currency,
-            modeToStr(this._mode)
-          )
+          taskId: this._taskId
         };
         await queueImportIteration(message);
       }
@@ -416,13 +405,13 @@ class Importer {
           const tempCandles = await getTempCandles({
             dateFrom,
             dateTo,
-            slug: createCachedCandleSlug(
-              this._exchange,
-              this._asset,
-              this._currency,
-              1,
-              modeToStr(this._mode)
-            )
+            slug: createCachedCandleSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: 1,
+              mode: this._mode
+            })
           });
           const { candles, gappedCandles } = await this._handleGaps(
             tempCandles,
@@ -543,14 +532,14 @@ class Importer {
             );
             if (candles.length > 0) {
               timeframeCandles[timeframe].push({
-                id: generateCandleId(
-                  this._exchange,
-                  this._asset,
-                  this._currency,
+                id: generateCandleId({
+                  exchange: this._exchange,
+                  asset: this._asset,
+                  currency: this._currency,
                   timeframe,
-                  modeToStr(this._mode),
-                  timeFrom
-                ),
+                  mode: this._mode,
+                  time: timeFrom
+                }),
                 taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
@@ -591,6 +580,13 @@ class Importer {
   getCurrentState() {
     this.log(`getCurrentState()`);
     const state = {
+      PartitionKey: createImporterSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        mode: this._mode
+      }),
+      RowKey: this._taskId,
       taskId: this._taskId,
       eventSubject: this._eventSubject,
       mode: this._mode,

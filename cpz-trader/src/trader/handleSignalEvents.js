@@ -11,7 +11,8 @@ import {
   STATUS_STARTED,
   STATUS_BUSY,
   STATUS_ERROR,
-  STATUS_STOPPED
+  STATUS_STOPPED,
+  createTraderSlug
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
@@ -19,12 +20,12 @@ import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { subjectToStr } from "cpzUtils/helpers";
 import {
-  getTradersBySlug,
-  getTraderByKey,
+  getActiveTradersBySlug,
+  getTraderById,
   savePendingSignal,
-  getPendingSignalsBySlugAndTraderId,
+  getPendingSignalsByTraderId,
   deletePendingSignal
-} from "../tableStorage";
+} from "cpzStorage";
 import Trader from "./trader";
 
 const validateNewCandle = createValidator(SIGNALS_NEWSIGNAL_EVENT.dataSchema);
@@ -74,8 +75,7 @@ async function execute(context, state, signal, child = false) {
     if (!child) {
       // Проверяем ожидающие обработку свечи
       await handlePendingSignals(context, {
-        partitionKey: state.PartitionKey,
-        rowKey: state.RowKey
+        traderId: state.RowKey
       });
     }
   } catch (error) {
@@ -111,14 +111,14 @@ async function execute(context, state, signal, child = false) {
  *
  * @param {*} taskId
  */
-async function handlePendingSignals(context, keys) {
+async function handlePendingSignals(context, { traderId }) {
   // Считываем не обработанные сигналы
-  const pendingSignals = getPendingSignalsBySlugAndTraderId(keys);
+  const pendingSignals = getPendingSignalsByTraderId(traderId);
   /* eslint-disable no-restricted-syntax */
   for (const pendingSignal of pendingSignals) {
     /* eslint-disable no-await-in-loop */
     // Считываем текущее состояние проторговщика
-    const traderState = await getTraderByKey(keys);
+    const traderState = await getTraderById(traderId);
     // Начинаем обработку
     await execute(context, traderState, pendingSignal, true);
     // Удаляем свечу из очереди
@@ -142,13 +142,15 @@ async function handleSignal(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
     // Ищем подходящих проторговщиков
-    const traders = await getTradersBySlug({
-      exchange: signal.exchange,
-      asset: signal.asset,
-      currency: signal.currency,
-      timeframe: signal.timeframe,
-      modeStr
-    });
+    const traders = await getActiveTradersBySlug(
+      createTraderSlug({
+        exchange: signal.exchange,
+        asset: signal.asset,
+        currency: signal.currency,
+        timeframe: signal.timeframe,
+        modeStr
+      })
+    );
     // Фильтруем только доступные проторговщики
     const startedTraders = traders.filter(
       adviser => adviser.status === STATUS_STARTED
@@ -178,7 +180,9 @@ async function handleSignal(context, eventData) {
       busyTraders.map(async state => {
         const newPendingSignal = {
           ...signal,
-          taskId: state.taskId
+          taskId: state.taskId,
+          PartitionKey: state.taskId,
+          RowKey: state.signalId.toString()
         };
         try {
           await savePendingSignal(newPendingSignal);
@@ -210,7 +214,9 @@ async function handleSignal(context, eventData) {
       concurrentTraders.map(async state => {
         const newPendingSignal = {
           ...signal,
-          taskId: state.taskId
+          taskId: state.taskId,
+          PartitionKey: state.taskId,
+          RowKey: state.signalId.toString()
         };
         try {
           await savePendingSignal(newPendingSignal);

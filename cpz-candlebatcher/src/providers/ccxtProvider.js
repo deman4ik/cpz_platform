@@ -1,9 +1,9 @@
 import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
-import { CANDLE_IMPORTED } from "cpzState";
+import { CANDLE_IMPORTED, createCachedCandleSlug } from "cpzState";
 import retry from "cpzUtils/retry";
-import { modeToStr, durationMinutes, sortAsc } from "cpzUtils/helpers";
+import { durationMinutes, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
 import { generateCandleId } from "../utils";
 
@@ -51,30 +51,41 @@ class CCXTProvider extends BaseProvider {
             .sort((a, b) => sortAsc(a[0], b[0]));
           if (filteredData.length > 0) {
             /* Преобразуем объект в массив */
-            const data = filteredData.map(item => ({
-              id: generateCandleId(
-                this._exchange,
-                this._asset,
-                this._currency,
-                1,
-                modeToStr(this._mode),
-                item[0]
-              ),
-              taskId: this._taskId,
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              timeframe: 1,
-              mode: this._mode,
-              time: item[0],
-              timestamp: dayjs(item[0]).toISOString(),
-              open: item[1],
-              high: item[2],
-              low: item[3],
-              close: item[4],
-              volume: item[5],
-              type: CANDLE_IMPORTED
-            }));
+            const data = filteredData.map(item => {
+              const candleId = generateCandleId({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe: 1,
+                mode: this._mode,
+                time: item[0]
+              });
+              return {
+                id: candleId,
+                PartitionKey: createCachedCandleSlug({
+                  exchange: this._exchange,
+                  asset: this._asset,
+                  currency: this._currency,
+                  timeframe: this._timeframe,
+                  mode: this._mode
+                }),
+                RowKey: candleId,
+                taskId: this._taskId,
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe: 1,
+                mode: this._mode,
+                time: item[0],
+                timestamp: dayjs(item[0]).toISOString(),
+                open: item[1],
+                high: item[2],
+                low: item[3],
+                close: item[4],
+                volume: item[5],
+                type: CANDLE_IMPORTED
+              };
+            });
 
             return {
               firstDate: data[0].timestamp,
@@ -107,15 +118,24 @@ class CCXTProvider extends BaseProvider {
       if (response) {
         if (response.length > 0) {
           const latestCandle = response[0];
+          const candleId = generateCandleId({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode,
+            time: latestCandle[0]
+          });
           return {
-            id: generateCandleId(
-              this._exchange,
-              this._asset,
-              this._currency,
-              1,
-              modeToStr(this._mode),
-              latestCandle[0]
-            ),
+            id: candleId,
+            PartitionKey: createCachedCandleSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: this._timeframe,
+              mode: this._mode
+            }),
+            RowKey: candleId,
             taskId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,

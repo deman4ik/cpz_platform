@@ -1,7 +1,6 @@
 import VError from "verror";
 import { createErrorOutput } from "cpzUtils/error";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import tableStorage from "cpzStorage";
 import {
   TICKS_NEWTICK_EVENT,
   CANDLES_NEWCANDLE_EVENT,
@@ -10,10 +9,11 @@ import {
   TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
+import { createTraderSlug } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { subjectToStr } from "cpzUtils/helpers";
-import { getActivePositions, getTraderByKey } from "../tableStorage";
+import { getActivePositionsBySlug, getTraderById } from "cpzStorage";
 import Position from "./position";
 
 // const validateNewPrice = createValidator(PRICES_NEWPRICE.dataSchema);
@@ -32,13 +32,15 @@ async function handlePrice(context, eventData) {
     const { eventSubject, currentPrice } = eventData;
     const modeStr = subjectToStr(eventSubject);
 
-    const positionsState = await getActivePositions({
-      exchange: currentPrice.exchange,
-      asset: currentPrice.asset,
-      currency: currentPrice.currency,
-      timeframe: currentPrice.timeframe,
-      modeStr
-    });
+    const positionsState = await getActivePositionsBySlug(
+      createTraderSlug({
+        exchange: currentPrice.exchange,
+        asset: currentPrice.asset,
+        currency: currentPrice.currency,
+        timeframe: currentPrice.timeframe,
+        modeStr
+      })
+    );
 
     const handlePositionPriceResult = await Promise.all(
       positionsState.map(async state => {
@@ -46,10 +48,7 @@ async function handlePrice(context, eventData) {
           const position = new Position(state);
           const requiredOrders = position.getRequiredOrders(currentPrice.price);
           if (requiredOrders.length > 0) {
-            const trader = getTraderByKey({
-              rowKey: position.traderId,
-              partitionKey: position.slug
-            });
+            const trader = getTraderById(position.traderId);
 
             await trader.executeOrders(requiredOrders);
             // Если есть хотя бы одно событие для отправка

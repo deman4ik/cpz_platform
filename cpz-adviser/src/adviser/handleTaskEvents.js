@@ -9,19 +9,13 @@ import {
   TASKS_ADVISER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY,
-  createAdviserSlug
-} from "cpzState";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { modeToStr } from "cpzUtils/helpers";
+import { getAdviserById, updateAdviserState } from "cpzStorage";
 import Adviser from "./adviser";
-import { getAdviserByKey, updateAdviserState } from "../tableStorage";
 
 const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
@@ -47,15 +41,7 @@ async function handleStart(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        rowKey: eventData.taskId,
-        partitionKey: createAdviserSlug(
-          eventData.exchange,
-          eventData.asset,
-          eventData.currency,
-          eventData.timeframe,
-          modeToStr(eventData.mode)
-        )
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -96,14 +82,11 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние советника по уникальному ключу
-    const adviserState = await getAdviserByKey({
-      rowKey: eventData.rowKey,
-      partitionKey: eventData.partitionKey
-    });
+    const adviserState = await getAdviserById(eventData.taskId);
     // Генерируем новое состояние
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: adviserState.RowKey,
+      PartitionKey: adviserState.PartitionKey
     };
     // Если занят
     if (adviserState.status === STATUS_BUSY) {
@@ -161,22 +144,20 @@ async function handleUpdate(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUpdate(eventData));
-    const adviserState = await getAdviserByKey(eventData);
+    const adviserState = await getAdviserById(eventData.taskId);
     const newState = {
-      RowKey: eventData.rowKey,
-      PartitionKey: eventData.partitionKey
+      RowKey: adviserState.RowKey,
+      PartitionKey: adviserState.PartitionKey
     };
     // Если занят
     if (adviserState.status === STATUS_BUSY) {
       newState.updateRequested = {
-        eventSubject: eventData.eventSubject,
         debug: eventData.debug,
         settings: eventData.settings,
         requiredHistoryCache: eventData.requiredHistoryCache,
         requiredHistoryMaxBars: eventData.requiredHistoryMaxBars
       };
     } else {
-      newState.eventSubject = eventData.eventSubject;
       newState.debug = eventData.debug;
       newState.settings = eventData.settings;
       newState.requiredHistoryCache = eventData.requiredHistoryCache;

@@ -71,16 +71,6 @@ const TASKS_ADVISER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
-      type: "string",
-      empty: false
     }
   }
 };
@@ -96,21 +86,6 @@ const TASKS_ADVISER_UPDATE_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
-      type: "string",
-      empty: false
-    },
-    eventSubject: {
-      description: "Event subject.",
-      type: "string",
-      optional: true
     },
     debug: {
       description: "Debug mode.",
@@ -145,16 +120,6 @@ const TASKS_ADVISER_STARTED_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    rowKey: {
-      description: "Table storage uniq row key.",
-      type: "string",
-      empty: false
-    },
-    partitionKey: {
-      description: "Table storage partition key.",
       type: "string",
       empty: false
     },

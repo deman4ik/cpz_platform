@@ -7,7 +7,10 @@ import {
   STATUS_STOPPED,
   CANDLE_CREATED,
   CANDLE_LOADED,
-  CANDLE_PREVIOUS
+  CANDLE_PREVIOUS,
+  createCandlebatcherSlug,
+  createCachedCandleSlug,
+  createNewCandleSubject
 } from "cpzState";
 import {
   LOG_CANDLEBATCHER_EVENT,
@@ -17,7 +20,16 @@ import {
 } from "cpzEventTypes";
 import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
 import {
-  modeToStr,
+  saveCandleToCache,
+  saveCandlesArrayToCache,
+  saveCandlebatcherState,
+  getCachedCandles,
+  countCachedCandles,
+  getPrevCachedTicks,
+  deletePrevCachedTicksArray,
+  cleanCachedCandles
+} from "cpzStorage";
+import {
   getPreviousMinuteRange,
   durationMinutes,
   sortAsc
@@ -30,17 +42,7 @@ import {
   generateCandleId,
   timeframeToTimeUnit
 } from "../utils";
-import {
-  saveCandleToCache,
-  saveCandlesArrayToCache,
-  saveCandlebatcherState,
-  getCachedCandles,
-  countCachedCandles,
-  getPrevCachedTicks,
-  deletePrevCachedTicksArray,
-  cleanCachedCandles
-} from "../tableStorage";
-import CryptocompareProvider from "../providers/cryptocompareProvider";
+
 import CCXTProvider from "../providers/ccxtProvider";
 import executeImporter from "../importer/execute";
 /**
@@ -60,7 +62,7 @@ class Candlebatcher {
     this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
-    /* Тип провайдера ['ccxt','cryptocompare'] */
+    /* Тип провайдера ['ccxt'] */
     this._providerType = state.providerType;
     /* Код биржи */
     this._exchange = state.exchange;
@@ -123,9 +125,6 @@ class Candlebatcher {
         proxy: this._proxy
       };
       switch (this._providerType) {
-        case "cryptocompare":
-          this.provider = new CryptocompareProvider(initParams);
-          break;
         case "ccxt":
           this.provider = new CCXTProvider(initParams);
           break;
@@ -178,6 +177,15 @@ class Candlebatcher {
     });
   }
 
+  get slug() {
+    return createCandlebatcherSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      mode: this._mode
+    });
+  }
+
   /**
    * Запрос текущего статуса сервиса
    *
@@ -218,7 +226,6 @@ class Candlebatcher {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setStatus()`, updatedFields);
-    this._eventSubject = updatedFields.eventSubject || this._eventSubject;
     this._debug = updatedFields.debug || this._debug;
     this._providerType = updatedFields.providerType || this._providerType;
     this._timeframes = updatedFields.timeframes || this._timeframes;
@@ -373,7 +380,15 @@ class Candlebatcher {
         this._loadedCandle = {
           ...result,
           type: CANDLE_LOADED,
-          candlabatcherId: this._taskId
+          candlabatcherId: this._taskId,
+          PartitionKey: createCachedCandleSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            mode: this._mode
+          }),
+          RowKey: result.id
         };
       }
     } catch (error) {
@@ -401,25 +416,31 @@ class Candlebatcher {
       this._ticks = await getPrevCachedTicks({
         dateFrom: this._prevDateFrom.toISOString(),
         dateTo: this._prevDateTo.toISOString(),
-        exchange: this._exchange,
-        asset: this._asset,
-        currency: this._currency,
-        mode: this._mode
+        slug: this.slug
       });
       /* Если были тики */
       if (this._ticks.length > 0) {
         /* Сортируем тики по дате */
         this._ticks = this._ticks.sort((a, b) => sortAsc(a.time, b.time));
         /* Формируем свечу */
+        const candleId = generateCandleId({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: 1,
+          mode: this._mode,
+          time: this._prevDateFrom.valueOf()
+        });
         this._createdCandle = {
-          id: generateCandleId(
-            this._exchange,
-            this._asset,
-            this._currency,
-            1,
-            modeToStr(this._mode),
-            this._prevDateFrom.valueOf()
-          ),
+          id: candleId,
+          PartitionKey: createCachedCandleSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            mode: this._mode
+          }),
+          RowKey: candleId,
           candlabatcherId: this._taskId,
           exchange: this._exchange,
           asset: this._asset,
@@ -493,11 +514,11 @@ class Candlebatcher {
             timeframe
           );
 
-          await cleanCachedCandles(
-            this._taskId,
+          await cleanCachedCandles({
+            taskId: this._taskId,
             timeframe,
-            dayjs().add(-number, unit)
-          );
+            dateTo: dayjs().add(-number, unit)
+          });
         })
       );
     } catch (error) {
@@ -542,15 +563,24 @@ class Candlebatcher {
         /* Если есть предыдущая свеча */
         if (this._lastCandle) {
           /* Формируем новую минутную свечу по данным из предыдущей */
+          const candleId = generateCandleId({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode,
+            time: this._prevDateFrom.valueOf()
+          });
           this._currentCandle = {
-            id: generateCandleId(
-              this._exchange,
-              this._asset,
-              this._currency,
-              1,
-              modeToStr(this._mode),
-              this._prevDateFrom.valueOf()
-            ),
+            id: candleId,
+            PartitionKey: createCachedCandleSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: this._timeframe,
+              mode: this._mode
+            }),
+            RowKey: candleId,
             candlabatcherId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,
@@ -587,11 +617,13 @@ class Candlebatcher {
           let loadedCandles = await getCachedCandles({
             dateFrom: loadDateFrom,
             dateTo: this._prevDateTo.toISOString(),
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            timeframe: 1,
-            mode: this._mode
+            slug: createCachedCandleSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: 1,
+              mode: this._mode
+            })
           });
           /* Добаляем текущую свечу к загруженным */
           loadedCandles = [...loadedCandles, this._currentCandle].sort((a, b) =>
@@ -645,15 +677,24 @@ class Candlebatcher {
               candles.length
             );
             if (candles.length > 0) {
+              const candleId = generateCandleId({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe,
+                mode: this._mode,
+                time: timeFrom
+              });
               this._timeframeCandles[timeframe] = {
-                id: generateCandleId(
-                  this._exchange,
-                  this._asset,
-                  this._currency,
-                  timeframe,
-                  modeToStr(this._mode),
-                  timeFrom
-                ),
+                id: candleId,
+                PartitionKey: createCachedCandleSlug({
+                  exchange: this._exchange,
+                  asset: this._asset,
+                  currency: this._currency,
+                  timeframe: this._timeframe,
+                  mode: this._mode
+                }),
+                RowKey: candleId,
                 candlabatcherId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
@@ -684,7 +725,14 @@ class Candlebatcher {
             /* Отправляем событие */
             await publishEvents(CANDLES_TOPIC, {
               service: CANDLEBATCHER_SERVICE,
-              subject: this.createSubject(timeframe),
+              subject: createNewCandleSubject({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe,
+                taskId: this._taskId,
+                mode: this._mode
+              }),
               eventType: CANDLES_NEWCANDLE_EVENT,
               data: candle
             });
@@ -713,20 +761,6 @@ class Candlebatcher {
   }
 
   /**
-   * Генерация темы события NewCandle
-   *
-   * @param {*} timeframe
-   * @returns
-   * @memberof Candlebatcher
-   */
-  createSubject(timeframe) {
-    return `${this._exchange}/${this._asset}/${this._currency}/${timeframe ||
-      JSON.stringify(this._timeframes)}/${this._taskId}.${modeToStr(
-      this._mode
-    )}`;
-  }
-
-  /**
    * Запрос всего текущего состояния
    *
    * @returns
@@ -734,6 +768,8 @@ class Candlebatcher {
    */
   getCurrentState() {
     return {
+      RowKey: this._taskId,
+      PartitionKey: this.slug,
       taskId: this._taskId,
       eventSubject: this._eventSubject,
       mode: this._mode,
