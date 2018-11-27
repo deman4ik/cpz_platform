@@ -9,6 +9,7 @@ services:
       - AZ_STORAGE_CS
       - API_KEY 
       - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
       - EG_EMULATOR_MODE
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
@@ -42,6 +43,7 @@ services:
     - EG_TEST_ENDPOINT
     - EG_TEST_KEY 
     - DB_API_ENDPOINT
+    - DB_API_ACCESS_KEY
     - PROXY_ENDPOINT
     - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
@@ -61,7 +63,7 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always  
   graphql-engine:
-    image: hasura/graphql-engine:v1.0.0-alpha28
+    image: hasura/graphql-engine:v1.0.0-alpha30
     ports:
     - "8105:8080"
     restart: always
@@ -101,6 +103,7 @@ services:
     - EG_TEST_ENDPOINT
     - EG_TEST_KEY  
     - DB_API_ENDPOINT
+    - DB_API_ACCESS_KEY
     - CCXT_ENDPOINT
     - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always  
