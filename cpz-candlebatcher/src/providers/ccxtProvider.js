@@ -1,11 +1,12 @@
 import dayjs from "cpzDayjs";
 import ccxt from "ccxt";
 import VError from "verror";
+import { v4 as uuid } from "uuid";
 import { CANDLE_IMPORTED, createCachedCandleSlug } from "cpzState";
 import retry from "cpzUtils/retry";
 import { durationMinutes, sortAsc } from "cpzUtils/helpers";
 import BaseProvider from "./baseProvider";
-import { generateCandleId } from "../utils";
+import { generateCandleRowKey } from "../utils";
 
 class CCXTProvider extends BaseProvider {
   constructor(input) {
@@ -51,17 +52,8 @@ class CCXTProvider extends BaseProvider {
             .sort((a, b) => sortAsc(a[0], b[0]));
           if (filteredData.length > 0) {
             /* Преобразуем объект в массив */
-            const data = filteredData.map(item => {
-              const candleId = generateCandleId({
-                exchange: this._exchange,
-                asset: this._asset,
-                currency: this._currency,
-                timeframe: 1,
-                mode: this._mode,
-                time: item[0]
-              });
-              return {
-                id: candleId,
+            const data = filteredData.map(item => ({
+                id: uuid(),
                 PartitionKey: createCachedCandleSlug({
                   exchange: this._exchange,
                   asset: this._asset,
@@ -69,7 +61,7 @@ class CCXTProvider extends BaseProvider {
                   timeframe: this._timeframe,
                   mode: this._mode
                 }),
-                RowKey: candleId,
+                RowKey: generateCandleRowKey(item[0]),
                 taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
@@ -84,8 +76,7 @@ class CCXTProvider extends BaseProvider {
                 close: item[4],
                 volume: item[5],
                 type: CANDLE_IMPORTED
-              };
-            });
+              }));
 
             return {
               firstDate: data[0].timestamp,
@@ -118,16 +109,8 @@ class CCXTProvider extends BaseProvider {
       if (response) {
         if (response.length > 0) {
           const latestCandle = response[0];
-          const candleId = generateCandleId({
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            timeframe: 1,
-            mode: this._mode,
-            time: latestCandle[0]
-          });
           return {
-            id: candleId,
+            id: uuid(),
             PartitionKey: createCachedCandleSlug({
               exchange: this._exchange,
               asset: this._asset,
@@ -135,7 +118,7 @@ class CCXTProvider extends BaseProvider {
               timeframe: this._timeframe,
               mode: this._mode
             }),
-            RowKey: candleId,
+            RowKey: generateCandleRowKey(latestCandle[0]),
             taskId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,

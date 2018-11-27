@@ -94,7 +94,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
         // Заполняем пропуск
         const gappedCandle = {
           ...previousCandle,
-          id: generateCandleId({
+          id: generateCandleRowKey({
             exchange,
             asset,
             currency,
@@ -128,20 +128,8 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
   return [];
 }
 
-function generateCandleId({
-  exchange,
-  asset,
-  currency,
-  timeframe,
-  mode,
-  modeStr,
-  time
-}) {
-  const inverted = getInvertedTimestamp(time);
-  const _modeStr = modeStr || modeToStr(mode);
-  if (_modeStr === "R")
-    return `${inverted}.${exchange}.${asset}.${currency}.${timeframe}`;
-  return `${inverted}.${exchange}.${asset}.${currency}.${timeframe}.${_modeStr}`;
+function generateCandleRowKey(time) {
+  return getInvertedTimestamp(time);
 }
 
 function timeframeToTimeUnit(number, timeframe) {
@@ -157,6 +145,6 @@ export {
   getCurrentTimeframes,
   createMinutesList,
   handleCandleGaps,
-  generateCandleId,
+  generateCandleRowKey,
   timeframeToTimeUnit
 };

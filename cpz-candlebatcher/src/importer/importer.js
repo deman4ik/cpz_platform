@@ -1,5 +1,6 @@
 import VError from "verror";
 import dayjs from "cpzDayjs";
+import { v4 as uuid } from "uuid";
 import { IMPORTER_SERVICE } from "cpzServices";
 import { LOG_IMPORTER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import {
@@ -27,7 +28,7 @@ import {
 import {
   handleCandleGaps,
   getCurrentTimeframes,
-  generateCandleId,
+  generateCandleRowKey,
   createMinutesList
 } from "../utils";
 import { queueImportIteration } from "../queueStorage";
@@ -532,14 +533,15 @@ class Importer {
             );
             if (candles.length > 0) {
               timeframeCandles[timeframe].push({
-                id: generateCandleId({
+                id: uuid(),
+                PartitionKey: createCachedCandleSlug({
                   exchange: this._exchange,
                   asset: this._asset,
                   currency: this._currency,
-                  timeframe,
-                  mode: this._mode,
-                  time: timeFrom
+                  timeframe: this._timeframe,
+                  mode: this._mode
                 }),
+                RowKey: generateCandleRowKey(timeFrom),
                 taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,

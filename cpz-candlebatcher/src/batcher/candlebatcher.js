@@ -39,7 +39,7 @@ import getHistoryCandles from "cpzDB/historyCandles";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
-  generateCandleId,
+  generateCandleRowKey,
   timeframeToTimeUnit
 } from "../utils";
 
@@ -423,16 +423,8 @@ class Candlebatcher {
         /* Сортируем тики по дате */
         this._ticks = this._ticks.sort((a, b) => sortAsc(a.time, b.time));
         /* Формируем свечу */
-        const candleId = generateCandleId({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: 1,
-          mode: this._mode,
-          time: this._prevDateFrom.valueOf()
-        });
         this._createdCandle = {
-          id: candleId,
+          id: uuid(),
           PartitionKey: createCachedCandleSlug({
             exchange: this._exchange,
             asset: this._asset,
@@ -440,7 +432,7 @@ class Candlebatcher {
             timeframe: this._timeframe,
             mode: this._mode
           }),
-          RowKey: candleId,
+          RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
           candlabatcherId: this._taskId,
           exchange: this._exchange,
           asset: this._asset,
@@ -563,16 +555,8 @@ class Candlebatcher {
         /* Если есть предыдущая свеча */
         if (this._lastCandle) {
           /* Формируем новую минутную свечу по данным из предыдущей */
-          const candleId = generateCandleId({
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            timeframe: 1,
-            mode: this._mode,
-            time: this._prevDateFrom.valueOf()
-          });
           this._currentCandle = {
-            id: candleId,
+            id: uuid(),
             PartitionKey: createCachedCandleSlug({
               exchange: this._exchange,
               asset: this._asset,
@@ -580,7 +564,7 @@ class Candlebatcher {
               timeframe: this._timeframe,
               mode: this._mode
             }),
-            RowKey: candleId,
+            RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
             candlabatcherId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,
@@ -677,16 +661,8 @@ class Candlebatcher {
               candles.length
             );
             if (candles.length > 0) {
-              const candleId = generateCandleId({
-                exchange: this._exchange,
-                asset: this._asset,
-                currency: this._currency,
-                timeframe,
-                mode: this._mode,
-                time: timeFrom
-              });
               this._timeframeCandles[timeframe] = {
-                id: candleId,
+                id: uuid(),
                 PartitionKey: createCachedCandleSlug({
                   exchange: this._exchange,
                   asset: this._asset,
@@ -694,7 +670,7 @@ class Candlebatcher {
                   timeframe: this._timeframe,
                   mode: this._mode
                 }),
-                RowKey: candleId,
+                RowKey: generateCandleRowKey(timeFrom),
                 candlabatcherId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
