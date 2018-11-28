@@ -4,8 +4,7 @@ import {
   arraysDiff,
   getInvertedTimestamp,
   sortDesc,
-  sortAsc,
-  modeToStr
+  sortAsc
 } from "cpzUtils/helpers";
 import { CANDLE_PREVIOUS } from "cpzState";
 

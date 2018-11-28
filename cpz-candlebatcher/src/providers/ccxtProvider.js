@@ -53,30 +53,30 @@ class CCXTProvider extends BaseProvider {
           if (filteredData.length > 0) {
             /* Преобразуем объект в массив */
             const data = filteredData.map(item => ({
-                id: uuid(),
-                PartitionKey: createCachedCandleSlug({
-                  exchange: this._exchange,
-                  asset: this._asset,
-                  currency: this._currency,
-                  timeframe: this._timeframe,
-                  mode: this._mode
-                }),
-                RowKey: generateCandleRowKey(item[0]),
-                taskId: this._taskId,
+              id: uuid(),
+              PartitionKey: createCachedCandleSlug({
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe: 1,
-                mode: this._mode,
-                time: item[0],
-                timestamp: dayjs(item[0]).toISOString(),
-                open: item[1],
-                high: item[2],
-                low: item[3],
-                close: item[4],
-                volume: item[5],
-                type: CANDLE_IMPORTED
-              }));
+                timeframe: this._timeframe,
+                mode: this._mode
+              }),
+              RowKey: generateCandleRowKey(item[0]),
+              taskId: this._taskId,
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: 1,
+              mode: this._mode,
+              time: item[0],
+              timestamp: dayjs(item[0]).toISOString(),
+              open: item[1],
+              high: item[2],
+              low: item[3],
+              close: item[4],
+              volume: item[5],
+              type: CANDLE_IMPORTED
+            }));
 
             return {
               firstDate: data[0].timestamp,
