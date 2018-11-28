@@ -8,7 +8,7 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import execute from "./execute";
+import Backtester from "./backtester";
 
 const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
 
@@ -23,7 +23,8 @@ async function handleStart(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
     // Запускаем бэктест
-    execute(context, eventData);
+    const backtester = new Backtester(context, eventData);
+    await backtester.execute();
   } catch (error) {
     const errorOutput = createErrorOutput(
       new VError(
@@ -52,4 +53,6 @@ async function handleStart(context, eventData) {
 }
 
 // TODO: Handle Stop
+// may be in child process?
+
 export default handleStart;

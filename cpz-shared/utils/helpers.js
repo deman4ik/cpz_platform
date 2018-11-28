@@ -189,6 +189,34 @@ function chunkArray(array, chunkSize) {
 
   return results;
 }
+
+function createRange(to, from = 1) {
+  const range = {
+    from,
+    to
+  };
+  range[Symbol.iterator] = function iterator() {
+    return {
+      current: this.from,
+      last: this.to,
+      next() {
+        if (this.current <= this.last) {
+          this.current += 1;
+          return { done: false, value: this.current };
+        }
+        return { done: true };
+      }
+    };
+  };
+  return range;
+}
+
+function chunkNumberToArray(number, chunkSize) {
+  const range = createRange(number);
+  const array = Array.from(range);
+  const chunked = chunkArray(array, chunkSize).map(val => val.length);
+  return chunked;
+}
 export {
   sortAsc,
   sortDesc,
@@ -203,5 +231,6 @@ export {
   getPreviousMinuteRange,
   divideDateByDays,
   arraysDiff,
-  chunkArray
+  chunkArray,
+  chunkNumberToArray
 };
