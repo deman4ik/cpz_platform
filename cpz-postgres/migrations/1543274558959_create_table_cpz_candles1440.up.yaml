@@ -1,10 +1,13 @@
 - args:
-    sql: CREATE TABLE "cpz"."candles1440"("id" text NOT NULL UNIQUE, "time" integer NOT
-      NULL, "timestamp" timetz NOT NULL, "open" numeric NOT NULL, "high" numeric NOT
+    sql: CREATE TABLE "cpz"."candles1440"("id" uuid NOT NULL UNIQUE, "time" bigint NOT
+      NULL, "timestamp" timestamp NOT NULL, "open" numeric NOT NULL, "high" numeric NOT
       NULL, "low" numeric NOT NULL, "close" numeric NOT NULL, "volume" numeric NOT
       NULL, "exchange" text NOT NULL, "asset" text NOT NULL, "currency" text NOT NULL,
       "type" text NOT NULL, PRIMARY KEY ("id") ); COMMENT ON TABLE "cpz"."candles1440"
-      IS 'Candles in 1440 minute timeframe'
+      IS 'Candles in 1 day timeframe'; ALTER TABLE "cpz"."candles1440" ADD FOREIGN KEY ("asset") REFERENCES "cpz"."assets"
+      ("code"); ALTER TABLE "cpz"."candles1440" ADD FOREIGN KEY ("currency") REFERENCES "cpz"."currencies"
+      ("code"); ALTER TABLE "cpz"."candles1440" ADD FOREIGN KEY ("exchange") REFERENCES "cpz"."exchanges"
+      ("code");
   type: run_sql
 - args:
     name: candles1440

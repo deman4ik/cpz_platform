@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "cpz"."candles60" DROP CONSTRAINT "candles60_exchange_fkey"
-  type: run_sql

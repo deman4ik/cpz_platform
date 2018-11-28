@@ -1,4 +1,0 @@
-- args:
-    sql: ALTER TABLE "cpz"."candles15" ADD FOREIGN KEY ("currency") REFERENCES "cpz"."currencies"
-      ("code")
-  type: run_sql
