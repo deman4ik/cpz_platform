@@ -151,13 +151,9 @@ async function handleUpdate(context, eventData) {
     };
     // Если занят
     if (traderState.status === STATUS_BUSY) {
-      newState.updateRequested = {
-        debug: eventData.debug,
-        settings: eventData.settings
-      };
+      newState.updateRequested = eventData.settings;
     } else {
-      newState.debug = eventData.debug;
-      newState.settings = eventData.settings;
+      newState.settings = { ...traderState.settings, ...eventData.settings };
     }
     await updateTraderState(newState);
 

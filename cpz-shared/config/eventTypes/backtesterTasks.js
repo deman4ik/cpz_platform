@@ -1,4 +1,9 @@
 import { BASE_ERROR } from "./events";
+import {
+  ADVISER_SETTINGS,
+  TRADER_SETTINGS,
+  BACKTESTER_SETTINGS
+} from "./settings";
 
 const TASKS_BACKTESTER_START_EVENT = {
   eventType: "CPZ.Tasks.Backtester.Start",
@@ -24,12 +29,6 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "string",
       empty: false
     },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean",
-      empty: false,
-      optional: true
-    },
     strategyName: {
       description: "Strategy file name.",
       type: "string",
@@ -43,40 +42,6 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "number",
       empty: false
     },
-    // TODO: adviser/trader settings
-    settings: {
-      description: "Adviser parameters.",
-      type: "object",
-      optional: true
-    },
-    slippageStep: {
-      description: "Price Slippage Step.",
-      type: "number",
-      empty: false,
-      optional: true
-    },
-    deviation: {
-      description: "Price deviation",
-      type: "number"
-    },
-    volume: {
-      description: "User trade volume",
-      type: "number",
-      empty: false,
-      optional: true
-    },
-    requiredHistoryCache: {
-      description: "Load history data from cache.",
-      type: "boolean",
-      optional: true,
-      default: true
-    },
-    requiredHistoryMaxBars: {
-      description: "Load history data from cache.",
-      type: "number",
-      integer: true,
-      optional: true
-    },
     // TODO: datefrom/dateto custom validation
     dateFrom: {
       description: "Backtest start date.",
@@ -85,6 +50,21 @@ const TASKS_BACKTESTER_START_EVENT = {
     dateTo: {
       description: "Backtest end date.",
       type: "datetime"
+    },
+    settings: {
+      description: "Backtester settings.",
+      type: "object",
+      props: BACKTESTER_SETTINGS
+    },
+    adviserSettings: {
+      description: "Adviser settings.",
+      type: "object",
+      props: ADVISER_SETTINGS
+    },
+    traderSettings: {
+      description: "Trader settings.",
+      type: "object",
+      props: TRADER_SETTINGS
     }
   }
 };

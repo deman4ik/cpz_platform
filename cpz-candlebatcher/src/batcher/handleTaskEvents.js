@@ -14,10 +14,7 @@ import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import {
-  getCandlebatcherById,
-  updateCandlebatcherState
-} from "cpzStorage";
+import { getCandlebatcherById, updateCandlebatcherState } from "cpzStorage";
 import Candlebatcher from "./candlebatcher";
 
 const validateStart = createValidator(
@@ -159,17 +156,12 @@ async function handleUpdate(context, eventData) {
     };
     // Если занят
     if (candlebatcherState.status === STATUS_BUSY) {
-      newState.updateRequested = {
-        providerType: eventData.providerType,
-        debug: eventData.debug,
-        timeframes: eventData.timeframes,
-        proxy: eventData.proxy
-      };
+      newState.updateRequested = eventData.settings;
     } else {
-      newState.providerType = eventData.providerType;
-      newState.debug = eventData.debug;
-      newState.timeframes = eventData.timeframes;
-      newState.proxy = eventData.proxy;
+      newState.settings = {
+        ...candlebatcherState.settings,
+        ...eventData.settings
+      };
     }
     await updateCandlebatcherState(newState);
 

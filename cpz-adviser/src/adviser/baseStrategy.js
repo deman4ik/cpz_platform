@@ -3,7 +3,7 @@ import { INDICATORS_BASE, INDICATORS_TULIP } from "cpzState";
 class BaseStrategy {
   constructor(state) {
     this._initialized = state.initialized || false; // стратегия инициализирована
-    this._settings = state.settings;
+    this._parameters = state.parameters;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -78,8 +78,8 @@ class BaseStrategy {
     this._initialized = value;
   }
 
-  get settings() {
-    return this._settings;
+  get parameters() {
+    return this._parameters;
   }
 
   get exchange() {

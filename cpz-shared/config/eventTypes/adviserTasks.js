@@ -1,5 +1,5 @@
 import { BASE_ERROR } from "./events";
-
+import { ADVISER_SETTINGS } from "./settings";
 /**
  * Событие - Запуск нового советника
  */
@@ -20,18 +20,7 @@ const TASKS_ADVISER_START_EVENT = {
     mode: {
       description: "Service run mode.",
       type: "string",
-      values: ["backtest", "emulator", "realtime"]
-    },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean",
-      empty: false,
-      optional: true
-    },
-    strategyName: {
-      description: "Strategy file name.",
-      type: "string",
-      empty: false
+      values: ["emulator", "realtime"]
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
@@ -41,21 +30,9 @@ const TASKS_ADVISER_START_EVENT = {
       type: "number"
     },
     settings: {
-      description: "Adviser parameters.",
+      description: "Adviser settings.",
       type: "object",
-      optional: true
-    },
-    requiredHistoryCache: {
-      description: "Load history data from cache.",
-      type: "boolean",
-      optional: true,
-      default: true
-    },
-    requiredHistoryMaxBars: {
-      description: "Load history data from cache.",
-      type: "number",
-      integer: true,
-      optional: true
+      props: ADVISER_SETTINGS
     }
   }
 };
@@ -87,26 +64,10 @@ const TASKS_ADVISER_UPDATE_EVENT = {
       type: "string",
       empty: false
     },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean",
-      optional: true
-    },
     settings: {
-      description: "Adviser parameters.",
+      description: "Adviser settings.",
       type: "object",
-      optional: true
-    },
-    requiredHistoryCache: {
-      description: "Load history data from cache.",
-      type: "boolean",
-      optional: true
-    },
-    requiredHistoryMaxBars: {
-      description: "Load history data from cache.",
-      type: "number",
-      integer: true,
-      optional: true
+      props: ADVISER_SETTINGS
     }
   }
 };

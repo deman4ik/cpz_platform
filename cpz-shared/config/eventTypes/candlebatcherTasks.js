@@ -1,4 +1,5 @@
 import { BASE_ERROR } from "./events";
+import { CANDLEBATCHER_SETTINGS } from "./settings";
 
 const TASKS_CANDLEBATCHER_START_EVENT = {
   eventType: "CPZ.Tasks.Candlebatcher.Start",
@@ -14,10 +15,6 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
       type: "string",
       values: ["emulator", "realtime"]
     },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean"
-    },
     providerType: {
       description: "Data provider type.",
       type: "string",
@@ -31,11 +28,10 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
       type: "array",
       items: "number"
     },
-    proxy: {
-      description: "Proxy endpoint.",
-      type: "string",
-      optional: true,
-      empty: false
+    settings: {
+      description: "Candlebatcher settings.",
+      type: "object",
+      props: CANDLEBATCHER_SETTINGS
     }
   }
 };
@@ -60,21 +56,10 @@ const TASKS_CANDLEBATCHER_UPDATE_EVENT = {
       type: "string",
       empty: false
     },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean"
-    },
-    // TODO: custom validation
-    timeframes: {
-      description: "List of timeframes in minutes.",
-      type: "array",
-      items: "number"
-    },
-    proxy: {
-      description: "Proxy endpoint.",
-      type: "string",
-      optional: true,
-      empty: false
+    settings: {
+      description: "Candlebatcher settings.",
+      type: "object",
+      props: CANDLEBATCHER_SETTINGS
     }
   }
 };

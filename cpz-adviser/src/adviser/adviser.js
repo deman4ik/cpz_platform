@@ -17,7 +17,7 @@ import {
   LOG_ADVISER_EVENT,
   LOG_TOPIC
 } from "cpzEventTypes";
-import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
+import { ADVISER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
@@ -45,10 +45,7 @@ class Adviser {
     this._robotId = state.robotId;
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
-    /* Режима дебага [true,false] */
-    this._debug = state.debug || false;
-    /* Объект настроек из веб-интерфейса */
-    this._settings = state.settings || {};
+
     /* Код биржи */
     this._exchange = state.exchange;
     /* Идентификатор биржи */
@@ -61,11 +58,22 @@ class Adviser {
     this._timeframe = state.timeframe;
     /* Имя файла стратегии */
     this._strategyName = state.strategyName;
-    /* Загружать историю из кэша */
-    this._requiredHistoryCache = state.requiredHistoryCache || true;
-    /* Максимально количество свечей в кэше */
-    this._requiredHistoryMaxBars =
-      state.requiredHistoryMaxBars || REQUIRED_HISTORY_MAX_BARS;
+    /* Настройки */
+    this._settings = {
+      /* Режима дебага [true,false] */
+      debug: state.settings.debug || ADVISER_SETTINGS_DEFAULTS.debug,
+      strategyParameters:
+        state.settings.strategyParameters ||
+        ADVISER_SETTINGS_DEFAULTS.strategyParameters,
+      /* Загружать историю из кэша */
+      requiredHistoryCache:
+        state.settings.requiredHistoryCache ||
+        ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache,
+      /* Максимально количество свечей в кэше */
+      requiredHistoryMaxBars:
+        state.settings.requiredHistoryMaxBars ||
+        ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
+    };
     /* Состояне стратегии */
     this._strategy = state.strategy || { variables: {}, initialized: false };
     /* Состояние индикаторов */
@@ -167,7 +175,7 @@ class Adviser {
    * @memberof Adviser
    */
   log(...args) {
-    if (this._debug) {
+    if (this._settings.debug) {
       this._context.log.info(`Adviser ${this._eventSubject}:`, ...args);
     }
   }
@@ -230,7 +238,7 @@ class Adviser {
       // Создаем новый инстанс класса стратегии
       this._strategyInstance = new BaseStrategy({
         initialized: this._strategy._initialized,
-        settings: this._settings,
+        parameters: this._strategyParameters,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -543,7 +551,7 @@ class Adviser {
     try {
       const cachedCandles = await getCachedCandlesByKey(
         `${this._exchange}.${this._asset}.${this._currency}.${this._timeframe}`,
-        this._requiredHistoryMaxBars
+        this._settings.requiredHistoryMaxBars
       );
 
       this._candles = cachedCandles.reverse();
@@ -602,7 +610,7 @@ class Adviser {
       // Если  свеча уже обрабатывалась - выходим
       if (this._candle.candleId === this._lastCandle.candleId) return;
       // Если нужна история
-      if (this._requiredHistoryCache) {
+      if (this._settings.requiredHistoryCache) {
         // Загрузить свечи из кеша
         await this._loadCandles();
       } else {
@@ -777,16 +785,13 @@ class Adviser {
       taskId: this._taskId,
       robotId: this._robotId,
       mode: this._mode,
-      debug: this._debug,
       settings: this._settings,
       exchange: this._exchange,
-      exchangeId: this._exchangeId,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
       lastCandle: this._lastCandle,
       lastSignals: this._lastSignals,
-      strategyName: this._strategyName,
       strategy: this._strategy,
       indicators: this._indicators,
       updateRequested: this._updateRequested,
@@ -807,12 +812,20 @@ class Adviser {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setUpdate()`, updatedFields);
-    this._debug = updatedFields.debug || this._debug;
-    this._settings = updatedFields.settings || this._settings;
-    this._requiredHistoryCache =
-      updatedFields.requiredHistoryCache || this._requiredHistoryCache;
-    this._requiredHistoryMaxBars =
-      updatedFields.requiredHistoryMaxBars || this._requiredHistoryMaxBars;
+    this._settings = {
+      /* Режима дебага [true,false] */
+      debug: updatedFields.debug || this._settings.debug,
+      strategyParameters:
+        updatedFields.strategyParameters || this._settings.strategyParameters,
+      /* Загружать историю из кэша */
+      requiredHistoryCache:
+        updatedFields.requiredHistoryCache ||
+        this._settings.requiredHistoryCache,
+      /* Максимально количество свечей в кэше */
+      requiredHistoryMaxBars:
+        updatedFields.requiredHistoryMaxBars ||
+        this._settings.requiredHistoryMaxBars
+    };
   }
 
   /**

@@ -18,7 +18,7 @@ import {
   ERROR_CANDLEBATCHER_EVENT,
   CANDLES_TOPIC
 } from "cpzEventTypes";
-import { REQUIRED_HISTORY_MAX_BARS } from "cpzDefaults";
+import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import {
   saveCandleToCache,
   saveCandlesArrayToCache,
@@ -60,8 +60,6 @@ class Candlebatcher {
     this._taskId = state.taskId;
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
-    /* Режима дебага [true,false] */
-    this._debug = state.debug || false;
     /* Тип провайдера ['ccxt'] */
     this._providerType = state.providerType;
     /* Код биржи */
@@ -72,6 +70,15 @@ class Candlebatcher {
     this._currency = state.currency;
     /* Массив таймфреймов [1, 5, 15, 30, 60, 120, 240, 1440] */
     this._timeframes = state.timeframes || [];
+    this._settings = {
+      /* Режима дебага [true,false] */
+      debug: state.settings.debug || CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
+      /* Адрес прокси сервера */
+      proxy: state.settings.proxy || CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
+      requiredHistoryMaxBars:
+        state.settings.requiredHistoryMaxBars ||
+        CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
+    };
     /* Текущие тики */
     this._ticks = [];
     /* Текущие минутные свечи */
@@ -82,8 +89,6 @@ class Candlebatcher {
     this._lastCandles = state.lastCandles || {};
     /* Недавно отправленные свечи в различных таймфреймах */
     this._sendedCandles = [];
-    /* Адрес прокси сервера */
-    this._proxy = state.proxy;
     /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject,providerType} или false */
     this._updateRequested = state.updateRequested || false;
     /* Признак запроса на остановку сервиса [true,false] */
@@ -124,7 +129,7 @@ class Candlebatcher {
         limit: this._limit,
         dateFrom: this._dateFrom,
         dateTo: this._dateTo,
-        proxy: this._proxy
+        proxy: this._settings.proxy
       };
       switch (this._providerType) {
         case "ccxt":
@@ -155,7 +160,7 @@ class Candlebatcher {
    * @memberof Candlebatcher
    */
   log(...args) {
-    if (this._debug) {
+    if (this._settings.debug) {
       this._context.log.info(`Candlebatcher ${this._eventSubject}:`, ...args);
     }
   }
@@ -228,10 +233,13 @@ class Candlebatcher {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setStatus()`, updatedFields);
-    this._debug = updatedFields.debug || this._debug;
-    this._providerType = updatedFields.providerType || this._providerType;
-    this._timeframes = updatedFields.timeframes || this._timeframes;
-    this._proxy = updatedFields.proxy || this._proxy;
+    this._settings = {
+      debug: updatedFields.debug || this._settings.debug,
+      proxy: updatedFields.proxy || this._settings.proxy,
+      requiredHistoryMaxBars:
+        updatedFields.requiredHistoryMaxBars ||
+        this._settings.requiredHistoryMaxBars
+    };
   }
 
   async loadHistoryToCache() {
@@ -240,7 +248,7 @@ class Candlebatcher {
         this._timeframes.map(async timeframe => {
           try {
             const { number, unit } = timeframeToTimeUnit(
-              REQUIRED_HISTORY_MAX_BARS,
+              this._settings.requiredHistoryMaxBars,
               timeframe
             );
             const dateFrom = dayjs()
@@ -265,19 +273,20 @@ class Candlebatcher {
                 currency: this._currency,
                 timeframe,
                 dateTo: dayjs().toISOString(),
-                limit: REQUIRED_HISTORY_MAX_BARS
+                limit: this._settings.requiredHistoryMaxBars
               });
-              if (candles.length < REQUIRED_HISTORY_MAX_BARS) {
+              if (candles.length < this._settings.requiredHistoryMaxBars) {
                 throw new VError(
                   {
                     name: "HistoryRangeError",
                     info: {
-                      requiredHistoryMaxBars: REQUIRED_HISTORY_MAX_BARS,
+                      requiredHistoryMaxBars: this._settings
+                        .requiredHistoryMaxBars,
                       actualHistoryMaxBars: candles.length
                     }
                   },
                   "Can't load history required: %s bars but loaded: %s bars",
-                  REQUIRED_HISTORY_MAX_BARS,
+                  this._settings.requiredHistoryMaxBars,
                   candles.length
                 );
               }
@@ -505,7 +514,7 @@ class Candlebatcher {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           const { number, unit } = timeframeToTimeUnit(
-            REQUIRED_HISTORY_MAX_BARS,
+            this._settings.requiredHistoryMaxBars,
             timeframe
           );
 
@@ -752,15 +761,14 @@ class Candlebatcher {
       taskId: this._taskId,
       eventSubject: this._eventSubject,
       mode: this._mode,
-      debug: this._debug,
       providerType: this._providerType,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
       timeframes: this._timeframes,
+      settings: this._settings,
       lastCandle: this._lastCandle,
       sendedCandles: this._sendedCandles,
-      proxy: this._proxy,
       status: this._status,
       error: this.error,
       startedAt: this._startedAt,

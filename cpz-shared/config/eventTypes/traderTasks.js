@@ -1,11 +1,10 @@
 import { BASE_ERROR } from "./events";
-
+import { TRADER_SETTINGS } from "./settings";
 /**
  * Событие - запуск нового проторговщика
  */
 const TASKS_TRADER_START_EVENT = {
   eventType: "CPZ.Tasks.Trader.Start",
-
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
@@ -30,13 +29,7 @@ const TASKS_TRADER_START_EVENT = {
     mode: {
       description: "Service run mode.",
       type: "string",
-      values: ["backtest", "emulator", "realtime"]
-    },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean",
-      empty: false,
-      optional: true
+      values: ["emulator", "realtime"]
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
@@ -45,21 +38,10 @@ const TASKS_TRADER_START_EVENT = {
       description: "Timeframe in minutes.",
       type: "number"
     },
-    slippageStep: {
-      description: "Price Slippage Step.",
-      type: "number",
-      empty: false,
-      optional: true
-    },
-    deviation: {
-      description: "Price deviation",
-      type: "number"
-    },
-    volume: {
-      description: "User trade volume",
-      type: "number",
-      empty: false,
-      optional: true
+    settings: {
+      description: "Trader settings.",
+      type: "object",
+      props: TRADER_SETTINGS
     }
   }
 };
@@ -91,26 +73,10 @@ const TASKS_TRADER_UPDATE_EVENT = {
       type: "string",
       empty: false
     },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean"
-    },
-    // TODO: move to settings object
-    slippageStep: {
-      description: "Price Slippage Step.",
-      type: "number",
-      empty: false,
-      optional: true
-    },
-    deviation: {
-      description: "Price deviation",
-      type: "number"
-    },
-    volume: {
-      description: "User trade volume",
-      type: "number",
-      empty: false,
-      optional: true
+    settings: {
+      description: "Trader settings.",
+      type: "object",
+      props: TRADER_SETTINGS
     }
   }
 };

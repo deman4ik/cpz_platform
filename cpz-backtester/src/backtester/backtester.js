@@ -19,6 +19,10 @@ import {
   TRADES_TOPIC,
   LOG_TOPIC
 } from "cpzEventTypes";
+import {
+  BACKTESTER_SETTINGS_DEFAULTS,
+  ADVISER_SETTINGS_DEFAULTS
+} from "cpzDefaults";
 import { generateKey, chunkNumberToArray } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
 import { saveBacktesterState, saveBacktesterItem } from "cpzStorage";
@@ -30,7 +34,6 @@ class Backtester {
   constructor(context, state) {
     this.context = context;
     this.initialState = state;
-    this.debug = state.debug;
     this.eventSubject = state.eventSubject;
     this.exchange = state.exchange;
     this.asset = state.asset;
@@ -40,17 +43,32 @@ class Backtester {
     this.robotId = state.robotId;
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
-    this.requiredHistoryCache = state.requiredHistoryCache;
-    this.requiredHistoryMaxBars = state.requiredHistoryMaxBars;
+    this.settings = {
+      debug: state.settings.debug || BACKTESTER_SETTINGS_DEFAULTS.debug
+    };
+    this.adviserSettings = state.adviserSettings;
+    this.traderSettings = state.traderSettings;
+    this.requiredHistoryCache =
+      state.adviserSettings.requiredHistoryCache ||
+      ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache;
+    this.requiredHistoryMaxBars =
+      state.adviserSettings.requiredHistoryMaxBars ||
+      ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars;
     this.totalBars = 0;
     this.processedBars = 0;
     this.leftBars = 0;
     this.percent = 0;
     this.startedAt = dayjs().toJSON();
     this.status = STATUS_STARTED;
-    this.adviserBacktester = new AdviserBacktester(context, state);
-    this.traderBacktester = new TraderBacktester(context, state);
     this.db = state.db || new DB();
+    this.adviserBacktester = new AdviserBacktester(context, {
+      ...state,
+      settings: this.adviserSettings
+    });
+    this.traderBacktester = new TraderBacktester(context, {
+      ...state,
+      settings: this.traderSettings
+    });
   }
 
   /**
@@ -95,6 +113,7 @@ class Backtester {
         robotId: this.robotId
       }),
       RowKey: this.taskId,
+      settings: this.settings,
       totalBars: this.totalBars,
       processedBars: this.processedBars,
       leftBars: this.leftBars,

@@ -21,7 +21,7 @@ class BaseProvider {
     this._taskId = state.taskId;
     /* Уникальный идентификатор хоста */
     this._hostId = process.env.HOST_ID;
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
+    /* Режим работы ['emulator', 'realtime'] */
     this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;

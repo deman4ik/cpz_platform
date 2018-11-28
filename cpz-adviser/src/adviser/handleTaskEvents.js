@@ -151,17 +151,12 @@ async function handleUpdate(context, eventData) {
     };
     // Если занят
     if (adviserState.status === STATUS_BUSY) {
-      newState.updateRequested = {
-        debug: eventData.debug,
-        settings: eventData.settings,
-        requiredHistoryCache: eventData.requiredHistoryCache,
-        requiredHistoryMaxBars: eventData.requiredHistoryMaxBars
-      };
+      newState.updateRequested = eventData.settings;
     } else {
-      newState.debug = eventData.debug;
-      newState.settings = eventData.settings;
-      newState.requiredHistoryCache = eventData.requiredHistoryCache;
-      newState.requiredHistoryMaxBars = eventData.requiredHistoryMaxBars;
+      newState.settings = {
+        ...adviserState.settings,
+        ...eventData.settings
+      };
     }
     await updateAdviserState(newState);
 

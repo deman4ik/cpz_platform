@@ -20,6 +20,7 @@ import {
   createTraderSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
+import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState, getPositonById } from "cpzStorage";
 import Position from "./position";
@@ -49,8 +50,6 @@ class Trader {
     this._adviserId = state.adviserId;
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
-    /* Режима дебага [true,false] */
-    this._debug = state.debug || false;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Идентификатор биржи */
@@ -61,12 +60,17 @@ class Trader {
     this._currency = state.currency;
     /* Таймфрейм */
     this._timeframe = state.timeframe;
-    /* Шаг проскальзывания */
-    this._slippageStep = state.slippageStep || 0;
-    /* Отклонение цены */
-    this._deviation = state.deviation || 0;
-    /* Объем */
-    this._volume = state.volume;
+    this._settings = {
+      /* Режима дебага [true,false] */
+      debug: state.settings.debug || TRADER_SETTINGS_DEFAULTS.debug,
+      /* Шаг проскальзывания */
+      slippageStep:
+        state.settings.slippageStep || TRADER_SETTINGS_DEFAULTS.slippageStep,
+      /* Отклонение цены */
+      deviation: state.settings.deviation || TRADER_SETTINGS_DEFAULTS.deviation,
+      /* Объем */
+      volume: state.settings.volume || TRADER_SETTINGS_DEFAULTS.volume
+    };
     /* Текущий сигнал */
     this._signal = {};
     /* Последнтй сигнал */
@@ -152,7 +156,7 @@ class Trader {
    * @memberof Trader
    */
   log(...args) {
-    if (this._debug) {
+    if (this._settings.debug) {
       this._context.log.info(`Trader ${this._eventSubject}:`, ...args);
     }
   }
@@ -206,8 +210,9 @@ class Trader {
     let slippageStep;
     let deviation;
     if (this._signal.settings) {
-      slippageStep = this._signal.settings.slippageStep || this._slippageStep;
-      deviation = this._signal.settings.deviation || this._deviation;
+      slippageStep =
+        this._signal.settings.slippageStep || this._settings.slippageStep;
+      deviation = this._signal.settings.deviation || this._settings.deviation;
     }
     this._currentPositions[positionId] = new Position({
       mode: this._mode,
@@ -359,13 +364,13 @@ class Trader {
             // Запрашиваем статус ордера с биржи
             // TODO: CheckOrderStatus API CALL
             orderResult.state = ORDER_STATUS_CLOSED;
-            orderResult.executed = this._volume;
+            orderResult.executed = this._settings.volume;
           } else {
             // Если режим - эмуляция или бэктест
             // Считаем, что ордер исполнен
             orderResult.state = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
-            orderResult.executed = this._volume;
+            orderResult.executed = this._settings.volume;
           }
           // Если задача - выставить лимитный или рыночный ордер
         } else if (
@@ -373,7 +378,7 @@ class Trader {
           order.task === ORDER_TASK_OPENBYMARKET
         ) {
           // Устанавливаем объем из параметров
-          const orderToExecute = { ...order, volume: this._volume };
+          const orderToExecute = { ...order, volume: this._settings.volume };
           // Если режим - в реальном времени
           if (this._mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
@@ -438,15 +443,11 @@ class Trader {
       userId: this._userId,
       adviserId: this._adviserId,
       mode: this._mode,
-      debug: this._debug,
       exchange: this._exchange,
-      exchangeId: this._exchangeId,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      slippageStep: this._slippageStep,
-      deviation: this._deviation,
-      volume: this._volume,
+      settings: this._settings,
       lastSignal: this._lastSignal,
       updateRequested: this._updateRequested,
       stopRequested: this._stopRequested,
@@ -466,11 +467,12 @@ class Trader {
    */
   setUpdate(updatedFields = this._updateRequested) {
     this.log(`setUpdate()`, updatedFields);
-    this._eventSubject = updatedFields.eventSubject || this._eventSubject;
-    this._debug = updatedFields.debug || this._debug;
-    this._slippageStep = updatedFields.slippageStep || this._slippageStep;
-    this._deviation = updatedFields.deviation || this._deviation;
-    this._volume = updatedFields.volume || this._volume;
+    this._settings = {
+      debug: updatedFields.debug || this._settings.debug,
+      slippageStep: updatedFields.slippageStep || this._settings.slippageStep,
+      deviation: updatedFields.deviation || this._settings.deviation,
+      volume: updatedFields.volume || this._settings.volume
+    };
   }
 
   /**
