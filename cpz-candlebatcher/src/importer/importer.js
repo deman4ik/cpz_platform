@@ -25,6 +25,7 @@ import {
   getTempCandles,
   clearTempCandles
 } from "cpzStorage";
+import DB from "cpzDB";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
@@ -58,6 +59,7 @@ class Importer {
     this._timeframes = state.timeframes || [1, 5, 15, 30, 60, 120, 240, 1440];
     /* Признак необходимости свертывания свечей */
     this._requireBatching = state.requireBatching || true;
+    this._saveToCache = state.saveToCache || false;
     /* Дата с */
     this._dateFrom = state.dateFrom;
     /* Дата по */
@@ -91,6 +93,7 @@ class Importer {
     this._initialized = state.initialized || false;
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+    this._db = state.db || new DB();
     /* Инициализация */
     this.init();
     /* Запуск инициализации провайдера */
@@ -289,8 +292,9 @@ class Importer {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           try {
-            await saveCandlesArrayToCache(timeframeCandles[timeframe]);
-            // await saveCandlesArray(timeframeCandles[timeframe]);
+            if (this._saveToCache)
+              await saveCandlesArrayToCache(timeframeCandles[timeframe]);
+            await this.db.saveCandles(timeframeCandles[timeframe]);
           } catch (error) {
             throw new VError(
               {
@@ -433,7 +437,6 @@ class Importer {
 
           if (timeframeCandles) {
             await this.saveCandles(timeframeCandles);
-            // TODO: Save to PostgreSQL
           }
         })
       );
