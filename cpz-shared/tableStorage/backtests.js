@@ -5,6 +5,15 @@ tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
 
 /**
+ * Query Backtester State by uniq Task ID
+ *
+ * @param {string} taskId
+ * @returns {BacktesterState}
+ */
+const getBacktesterById = async taskId =>
+  tableStorage.getEntityByRowKey(STORAGE_BACKTESTS_TABLE, taskId);
+
+/**
  * Creates new or update current Backtester State
  *
  * @param {BacktesterState} state
@@ -39,4 +48,9 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
     metadata
   });
 };
-export { saveBacktesterState, saveBacktesterItem, deleteBacktesterState };
+export {
+  getBacktesterById,
+  saveBacktesterState,
+  saveBacktesterItem,
+  deleteBacktesterState
+};

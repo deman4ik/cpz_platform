@@ -17,6 +17,50 @@ const getAdviserById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_ADVISERS_TABLE, taskId);
 
 /**
+ * Check if Adviser exists
+ *
+ * @param {Object} input
+ * @param {string} input.mode - Adviser mode
+ * @param {string} input.robotId - Robot Id
+ * @returns {boolean}
+ */
+const isAdviserExists = async ({ mode, robotId }) => {
+  try {
+    const modeFilter = TableQuery.stringFilter(
+      "mode",
+      TableUtilities.QueryComparisons.EQUAL,
+      mode
+    );
+    const robotIdFilter = TableQuery.stringFilter(
+      "robotId",
+      TableUtilities.QueryComparisons.EQUAL,
+      robotId
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        modeFilter,
+        TableUtilities.TableOperators.AND,
+        robotIdFilter
+      )
+    );
+    const advisers = await tableStorage.queryEntities(
+      STORAGE_ADVISERS_TABLE,
+      query
+    );
+    return advisers.length > 0;
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { mode, robotId }
+      },
+      "Failed to read adviser state"
+    );
+  }
+};
+
+/**
  * Query Active and Busy Advisers by Slug
  *
  * @param {string} slug
@@ -96,6 +140,7 @@ const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getAdviserById,
+  isAdviserExists,
   getActiveAdvisersBySlug,
   saveAdviserState,
   updateAdviserState,

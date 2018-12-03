@@ -1,5 +1,50 @@
 import { modeToStr } from "../../utils/helpers";
 
+function createMarketwatcherTaskSubject({ hostId, taskId, mode }) {
+  return `${hostId}/${taskId}/${modeToStr(mode)}`;
+}
+
+function createCandlebatcherTaskSubject({ exchange, asset, currency, mode }) {
+  return `${exchange}/${asset}/${currency}/${modeToStr(mode)}`;
+}
+
+function createAdviserTaskSubject({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  mode
+}) {
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${modeToStr(
+    mode
+  )}`;
+}
+
+function createTraderTaskSubject({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  mode
+}) {
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${modeToStr(
+    mode
+  )}`;
+}
+
+function createBacktesterTaskSubject({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  userId
+}) {
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}/B}`;
+}
+
 function createNewCandleSubject({
   exchange,
   asset,
@@ -45,6 +90,11 @@ function createNewOrderSubject({
 }
 
 export {
+  createMarketwatcherTaskSubject,
+  createCandlebatcherTaskSubject,
+  createAdviserTaskSubject,
+  createTraderTaskSubject,
+  createBacktesterTaskSubject,
   createNewCandleSubject,
   createNewSignalSubject,
   createNewOrderSubject

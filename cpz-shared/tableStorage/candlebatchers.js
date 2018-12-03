@@ -59,7 +59,7 @@ const isCandlebatcherExists = async ({ slug }) => {
     STORAGE_CANDLEBATCHERS_TABLE,
     slug
   );
-  return candlebatchers.length === 0;
+  return candlebatchers.length > 0;
 };
 
 /**

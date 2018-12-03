@@ -18,6 +18,61 @@ const getTraderById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_TRADERS_TABLE, taskId);
 
 /**
+ * Check if Trader exists
+ *
+ * @param {Object} input
+ * @param {string} input.mode - Trader mode
+ * @param {string} input.robotId - Robot Id
+ * @param {string} input.userId - User Id
+ * @returns {boolean}
+ */
+const isTraderExists = async ({ mode, robotId, userId }) => {
+  try {
+    const modeFilter = TableQuery.stringFilter(
+      "mode",
+      TableUtilities.QueryComparisons.EQUAL,
+      mode
+    );
+    const robotIdFilter = TableQuery.stringFilter(
+      "robotId",
+      TableUtilities.QueryComparisons.EQUAL,
+      robotId
+    );
+    const userIdFilter = TableQuery.stringFilter(
+      "userId",
+      TableUtilities.QueryComparisons.EQUAL,
+      userId
+    );
+    const combinedFilters = TableQuery.combineFilters(
+      userIdFilter,
+      TableUtilities.TableOperators.AND,
+      robotIdFilter
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        modeFilter,
+        TableUtilities.TableOperators.AND,
+        combinedFilters
+      )
+    );
+    const traders = await tableStorage.queryEntities(
+      STORAGE_TRADERS_TABLE,
+      query
+    );
+    return traders.length > 0;
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { mode, robotId, userId }
+      },
+      "Failed to read trader state"
+    );
+  }
+};
+
+/**
  * Query active Traders
  *
  * @param {string} slug
@@ -115,6 +170,7 @@ const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) => {
 
 export {
   getTraderById,
+  isTraderExists,
   getActiveTradersBySlug,
   saveTraderState,
   updateTraderState,

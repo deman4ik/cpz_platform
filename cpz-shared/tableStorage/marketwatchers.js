@@ -59,7 +59,7 @@ const getMarketwatcherById = async ({ taskId, hostId }) => {
  * @param {Object} input
  * @param {string} input.mode - Marketwatcher mode
  * @param {string} input.providerType - Marketwatcher provider type
- * @param {MarketwatcherSubscruption[]} input.subscriptions - Marketwatcher subscriptions
+ * @param {MarketwatcherSubscription[]} input.subscriptions - Marketwatcher subscriptions
  * @returns {boolean}
  */
 const isMarketwatcherExists = async ({ mode, providerType, subscriptions }) => {
