@@ -2,10 +2,13 @@ version: '3'
 services:
   cpz-events-logger:
     container_name: cpz-events-logger
-    build: ./cpz-events-logger/
+     build:
+      context: .
+      dockerfile: CPZEventslogger.Dockerfile
     ports:
       - "8101:80"
     environment:
+      - AzureWebJobsStorage
       - AZ_STORAGE_CS
       - API_KEY 
       - DB_API_ENDPOINT
@@ -62,17 +65,17 @@ services:
       - EG_TEST_KEY  
       - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always  
-  graphql-engine:
-    image: hasura/graphql-engine:v1.0.0-alpha31
-    ports:
-    - "8105:8080"
-    restart: always
-    environment:
-      - HASURA_GRAPHQL_DATABASE_URL
-    command:
-      - graphql-engine
-      - serve
-      - --enable-console    
+  # graphql-engine:
+  #   image: hasura/graphql-engine:v1.0.0-alpha31
+  #   ports:
+  #   - "8105:8080"
+  #   restart: always
+  #   environment:
+  #     - HASURA_GRAPHQL_DATABASE_URL
+  #   command:
+  #     - graphql-engine
+  #     - serve
+  #     - --enable-console    
   cpz-trader:
     container_name: cpz-trader
     build:

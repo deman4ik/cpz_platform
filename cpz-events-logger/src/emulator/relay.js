@@ -1,7 +1,7 @@
-const fetch = require("node-fetch");
-const yaml = require("js-yaml");
-const fs = require("fs");
-const retry = require("../utils/retry");
+import fetch from "node-fetch";
+import yaml from "js-yaml";
+import fs from "fs";
+import retry from "cpzUtils/retry";
 
 const endpointsConfig = yaml.safeLoad(
   fs.readFileSync(`${process.cwd()}/emulator/endpoints.yml`, "utf8")
@@ -33,4 +33,4 @@ async function relay(context, event) {
   }
 }
 
-module.exports = relay;
+export default relay;

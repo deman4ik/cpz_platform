@@ -5,6 +5,7 @@ const IMPORTER_SERVICE = "importer";
 const ADVISER_SERVICE = "adviser";
 const TRADER_SERVICE = "trader";
 const BACKTESTER_SERVICE = "backtester";
+const EVENTS_LOGGER_SERVICE = "eventslogger";
 
 export {
   CONTROL_SERVICE,
@@ -13,5 +14,6 @@ export {
   IMPORTER_SERVICE,
   ADVISER_SERVICE,
   TRADER_SERVICE,
-  BACKTESTER_SERVICE
+  BACKTESTER_SERVICE,
+  EVENTS_LOGGER_SERVICE
 };

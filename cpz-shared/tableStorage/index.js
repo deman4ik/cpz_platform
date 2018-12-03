@@ -8,3 +8,4 @@ export * from "./positions";
 export * from "./signals";
 export * from "./ticks";
 export * from "./traders";
+export * from "./events";
