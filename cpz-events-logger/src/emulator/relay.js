@@ -4,7 +4,7 @@ import fs from "fs";
 import retry from "cpzUtils/retry";
 
 const endpointsConfig = yaml.safeLoad(
-  fs.readFileSync(`${process.cwd()}/emulator/endpoints.yml`, "utf8")
+  fs.readFileSync(`${process.cwd()}/endpoints.yml`, "utf8")
 );
 
 const findEndpoint = eventType =>

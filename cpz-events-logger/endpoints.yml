@@ -48,27 +48,28 @@ endpoints:
   url: "/api/tickEvents"
   types:
   - CPZ.Ticks.NewTick
-# Taskrunner
-# - container_name: "cpz-taskrunner"
-#   url: "/api/taskEvents"
-#   types:
-#   - CPZ.Tasks.MarketWatcher.Started
-#   - CPZ.Tasks.MarketWatcher.Stopped
-#   - CPZ.Tasks.MarketWatcher.Subscribed
-#   - CPZ.Tasks.MarketWatcher.Unsubscribed
-#   - CPZ.Tasks.Candlebatcher.Started
-#   - CPZ.Tasks.Candlebatcher.Stopped
-#   - CPZ.Tasks.Candlebatcher.Updated
-#   - CPZ.Tasks.Adviser.Started
-#   - CPZ.Tasks.Adviser.Stopped
-#   - CPZ.Tasks.Adviser.Updated
-#   - CPZ.Tasks.Trader.Started
-#   - CPZ.Tasks.Trader.Stopped
-#   - CPZ.Tasks.Trader.Updated
-#   - CPZ.Tasks.Backtester.Started
-#   - CPZ.Tasks.Backtester.Stopped
-Backtester
+# Control-api
+- container_name: "cpz-control-api"
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.MarketWatcher.Started
+  - CPZ.Tasks.MarketWatcher.Stopped
+  - CPZ.Tasks.MarketWatcher.Subscribed
+  - CPZ.Tasks.MarketWatcher.Unsubscribed
+  - CPZ.Tasks.Candlebatcher.Started
+  - CPZ.Tasks.Candlebatcher.Stopped
+  - CPZ.Tasks.Candlebatcher.Updated
+  - CPZ.Tasks.Adviser.Started
+  - CPZ.Tasks.Adviser.Stopped
+  - CPZ.Tasks.Adviser.Updated
+  - CPZ.Tasks.Trader.Started
+  - CPZ.Tasks.Trader.Stopped
+  - CPZ.Tasks.Trader.Updated
+  - CPZ.Tasks.Backtester.Started
+  - CPZ.Tasks.Backtester.Stopped
+# Backtester
 - container_name: "cpz-backtester"
   url: "/api/taskEvents"
   types:
   - CPZ.Tasks.Backtester.Start
+  - CPZ.Tasks.Backtester.Stop
