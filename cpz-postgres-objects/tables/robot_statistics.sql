@@ -12,7 +12,9 @@ create table robot_statistics
   long_trades  numeric,
   short_trades numeric,
   sort_order   integer DEFAULT 1 NOT NULL,
-  note varchar(100)
+  note varchar(100),
+  user_robot_id bigint,
+  CONSTRAINT c_robot_statistics_userrobot_fk FOREIGN KEY (user_robot_id) REFERENCES user_robots (id)   
 );
 
 create unique index c_robot_statistics_pk on robot_statistics (id);

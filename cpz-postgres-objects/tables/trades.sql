@@ -12,7 +12,8 @@ CREATE TABLE trades
     quantity numeric,
     roundtrip_id numeric NOT NULL,
     CONSTRAINT c_trades_robot_fk FOREIGN KEY (robot) REFERENCES robots (id) ON UPDATE CASCADE,
-    CONSTRAINT c_trades_roundtrip_fk FOREIGN KEY (roundtrip_id) REFERENCES trade_roundtrips (id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT c_trades_roundtrip_fk FOREIGN KEY (roundtrip_id) REFERENCES trade_roundtrips (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT c_trades_userlist_fk FOREIGN KEY (user_id) REFERENCES userlist (id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX c_trades_pk ON trades (id);
 CREATE UNIQUE INDEX c_trades_date_action_uk ON trades (robot, order_time, action, position, user_id);

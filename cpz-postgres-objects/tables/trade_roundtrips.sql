@@ -20,7 +20,9 @@ create table trade_roundtrips
   historic      integer DEFAULT 0 NOT NULL,
   position      bigint,
   emulator      integer DEFAULT 0 NOT NULL,
-  user_id       uuid
+  user_id       uuid,
+  emulator integer default 0 not null,
+  CONSTRAINT c_trade_roundtrips_userlist_fk FOREIGN KEY (user_id) REFERENCES userlist (id) ON DELETE CASCADE
 );
 
 create unique index c_trade_roundtrips_pk
