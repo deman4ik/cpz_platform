@@ -7,18 +7,22 @@ import {
 } from "cpzEventTypes";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_BUSY,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   STATUS_FINISHED,
   createImporterSlug
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
-import { isActiveImporterExists, getImporterById } from "cpzStorage";
-import BaseServiceRunner from "./baseServiceRunner";
+import { findActiveImporter, getImporterById } from "cpzStorage";
+import BaseRunner from "../baseRunner";
 
-class ImporterRunner extends BaseServiceRunner {
+const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
+const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
+class ImporterRunner extends BaseRunner {
   static async start(props) {
     try {
       let resume;
@@ -26,8 +30,8 @@ class ImporterRunner extends BaseServiceRunner {
         resume = true;
       }
       const taskId = props.taskId || uuid();
-      const validate = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
-      genErrorIfExist(validate({ ...props, taskId }));
+
+      genErrorIfExist(validateStart({ ...props, taskId }));
       const {
         mode,
         debug,
@@ -42,42 +46,29 @@ class ImporterRunner extends BaseServiceRunner {
         dateTo,
         proxy
       } = props;
-      if (resume) {
-        const importer = await getImporterById(taskId);
+
+      const importer = resume
+        ? await getImporterById(taskId)
+        : await findActiveImporter({
+            slug: createImporterSlug({
+              mode,
+              exchange,
+              asset,
+              currency
+            }),
+            dateFrom,
+            dateTo
+          });
+
+      if (importer) {
         if (
           importer.status === STATUS_STARTED ||
           importer.status === STATUS_BUSY
         )
-          throw new VError(
-            {
-              name: "ImporterAlreadyStarted",
-              info: {
-                taskId
-              }
-            },
-            "Importer already started"
-          );
-      } else {
-        const exists = await isActiveImporterExists({
-          slug: createImporterSlug({
-            mode,
-            exchange,
-            asset,
-            currency
-          }),
-          dateFrom,
-          dateTo
-        });
-        if (exists)
-          throw new VError(
-            {
-              name: "ImporterAlreadyExists",
-              info: {
-                taskId
-              }
-            },
-            "Importer already exists"
-          );
+          return {
+            taskId,
+            status: STATUS_STARTED
+          };
       }
 
       await publishEvents(TASKS_TOPIC, {
@@ -100,7 +91,7 @@ class ImporterRunner extends BaseServiceRunner {
           proxy
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -115,31 +106,20 @@ class ImporterRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
-
-      genErrorIfExist(validate(props));
+      genErrorIfExist(validateStop(props));
       const { taskId } = props;
       const importer = await getImporterById(taskId);
-      if (importer.status === STATUS_FINISHED)
-        throw new VError(
-          {
-            name: "ImporteAlreadyFinished",
-            info: {
-              taskId
-            }
-          },
-          "Importe already finished"
-        );
-      if (importer.status === STATUS_STOPPED)
-        throw new VError(
-          {
-            name: "ImporteAlreadyStopped",
-            info: {
-              taskId
-            }
-          },
-          "Importe already stopped"
-        );
+      if (!importer)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      if (
+        importer.status === STATUS_FINISHED ||
+        importer.status === STATUS_STOPPED
+      )
+        return { taskId, status: importer.status };
+
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createImporterSlug({
@@ -153,6 +133,7 @@ class ImporterRunner extends BaseServiceRunner {
           taskId
         }
       });
+      return { taskId, status: STATUS_STOPPING };
     } catch (error) {
       throw new VError(
         {

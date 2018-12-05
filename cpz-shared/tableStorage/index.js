@@ -9,3 +9,4 @@ export * from "./signals";
 export * from "./ticks";
 export * from "./traders";
 export * from "./events";
+export * from "./userRobots";

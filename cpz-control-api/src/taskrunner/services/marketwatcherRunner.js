@@ -9,68 +9,80 @@ import {
 } from "cpzEventTypes";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   STATUS_PENDING,
   createMarketwatcherTaskSubject
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
-import { isMarketwatcherExists, getMarketwatcherById } from "cpzStorage";
-import BaseServiceRunner from "./baseServiceRunner";
+import { CONTROL_SERVICE, MARKETWATCHER_SERVICE } from "cpzServices";
+import {
+  findMarketwatcher,
+  getMarketwatcherById,
+  findOtherActiveUserRobotsByServiceId
+} from "cpzStorage";
+import BaseRunner from "../baseRunner";
 
-class MarketwatcherRunner extends BaseServiceRunner {
+const validateStart = createValidator(
+  TASKS_MARKETWATCHER_START_EVENT.dataSchema
+);
+const validateStop = createValidator(TASKS_MARKETWATCHER_STOP_EVENT.dataSchema);
+const validateSubscribe = createValidator(
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT.dataSchema
+);
+const validateUnsubscribe = createValidator(
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.dataSchema
+);
+class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
       let resume;
       if (props.taskId) {
         resume = true;
       }
-      const taskId = props.taskId || uuid();
-      const validate = createValidator(
-        TASKS_MARKETWATCHER_START_EVENT.dataSchema
-      );
-      genErrorIfExist(validate({ ...props, taskId }));
-      const { hostId, mode, debug, providerType, subscriptions } = props;
-      if (resume) {
-        const marketwatcher = await getMarketwatcherById({
-          hostId,
-          taskId
-        });
+      let taskId = props.taskId || uuid();
+
+      genErrorIfExist(validateStart({ ...props, taskId }));
+      const { mode, debug, exchange, providerType, subscriptions } = props;
+
+      const marketwatcher = resume
+        ? await getMarketwatcherById(taskId)
+        : await findMarketwatcher({
+            mode,
+            providerType,
+            exchange
+          });
+
+      if (marketwatcher) {
+        ({ taskId } = marketwatcher);
 
         if (
           marketwatcher.status === STATUS_STARTED ||
           marketwatcher.state === STATUS_PENDING
-        )
-          throw new VError(
-            {
-              name: "MarketwatcherAlreadyStarted",
-              info: {
-                taskId
-              }
-            },
-            "Marketwatcher already started"
+        ) {
+          const notSubscribed = subscriptions.filter(
+            sub =>
+              !marketwatcher.subscriptions.find(
+                del => del.asset === sub.asset && del.currency === sub.currency
+              )
           );
-      } else {
-        const exists = await isMarketwatcherExists({
-          mode,
-          providerType,
-          subscriptions
-        });
-        if (exists)
-          throw new VError(
-            {
-              name: "MarketwatcherAlreadyExists",
-              info: {
-                taskId
-              }
-            },
-            "Marketwatcher already exists"
-          );
+          if (notSubscribed.length > 0) {
+            this.subscribe({
+              taskId,
+              subscriptions: notSubscribed
+            });
+          }
+          return {
+            taskId,
+            status: STATUS_STARTED
+          };
+        }
       }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: createMarketwatcherTaskSubject({ hostId, taskId, mode }),
+        subject: createMarketwatcherTaskSubject({ exchange, mode }),
         eventType: TASKS_MARKETWATCHER_START_EVENT,
         data: {
           taskId,
@@ -80,7 +92,7 @@ class MarketwatcherRunner extends BaseServiceRunner {
           subscriptions
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -95,40 +107,44 @@ class MarketwatcherRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(
-        TASKS_MARKETWATCHER_STOP_EVENT.dataSchema
-      );
-
-      genErrorIfExist(validate(props));
-      const { hostId, taskId } = props;
-      const marketwatcher = await getMarketwatcherById({
-        hostId,
-        taskId
-      });
+      genErrorIfExist(validateStop(props));
+      const { taskId, userRobotId } = props;
+      const marketwatcher = await getMarketwatcherById(taskId);
+      if (!marketwatcher)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
       if (marketwatcher.status === STATUS_STOPPED)
-        throw new VError(
-          {
-            name: "MarketwatcherAlreadyStopped",
-            info: {
-              taskId
-            }
-          },
-          "Marketwatcher already stopped"
-        );
-      // TODO: Check Robot
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      const userRobots = findOtherActiveUserRobotsByServiceId({
+        userRobotId,
+        taskId,
+        serviceName: MARKETWATCHER_SERVICE
+      });
+
+      if (userRobots.length > 0) {
+        return { taskId, status: marketwatcher.status };
+      }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createMarketwatcherTaskSubject({
-          hostId: marketwatcher.hostId,
-          taskId: marketwatcher.taskId,
+          exchange: marketwatcher.exchange,
           mode: marketwatcher.mode
         }),
         eventType: TASKS_MARKETWATCHER_STOP_EVENT,
         data: {
-          taskId,
-          hostId
+          taskId
         }
       });
+
+      return {
+        taskId,
+        status: STATUS_STOPPING
+      };
     } catch (error) {
       throw new VError(
         {
@@ -143,52 +159,40 @@ class MarketwatcherRunner extends BaseServiceRunner {
 
   static async subscribe(props) {
     try {
-      const validate = createValidator(
-        TASKS_MARKETWATCHER_SUBSCRIBE_EVENT.dataSchema
-      );
-      genErrorIfExist(validate(props));
-      const { hostId, taskId, subscriptions } = props;
-      const marketwatcher = await getMarketwatcherById({
-        hostId,
-        taskId
-      });
-
+      genErrorIfExist(validateSubscribe(props));
+      const { taskId, subscriptions } = props;
+      const marketwatcher = await getMarketwatcherById(taskId);
+      if (!marketwatcher)
+        throw new VError(
+          {
+            name: "MarketwatcherNotFound"
+          },
+          "Failed to find marketwatcher"
+        );
+      const newSubsciptions = [];
       subscriptions.forEach(subscription => {
         const doubles = marketwatcher.subscriptions.find(
           sub =>
-            sub.exchange === subscription.exchange &&
             sub.asset === subscription.asset &&
             sub.currency === subscription.currency
         );
-        if (doubles.length > 0)
-          throw new VError(
-            {
-              name: "MarketwatcherAlreadySubscribed",
-              info: {
-                taskId: marketwatcher.taskId,
-                hostId: marketwatcher.hostId,
-                mode: marketwatcher.mode,
-                subscriptions: marketwatcher.subscriptions
-              }
-            },
-            "Marketwatcher already subscribed"
-          );
+        if (doubles.length === 0) newSubsciptions.add(subscription);
       });
-      // TODO: Check Robot
-      await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
-        subject: createMarketwatcherTaskSubject({
-          hostId: marketwatcher.hostId,
-          taskId: marketwatcher.taskId,
-          mode: marketwatcher.mode
-        }),
-        eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-        data: {
-          taskId,
-          hostId,
-          subscriptions
-        }
-      });
+      if (newSubsciptions.length > 0) {
+        await publishEvents(TASKS_TOPIC, {
+          service: CONTROL_SERVICE,
+          subject: createMarketwatcherTaskSubject({
+            exchange: marketwatcher.exchange,
+            mode: marketwatcher.mode
+          }),
+          eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+          data: {
+            taskId,
+
+            subscriptions
+          }
+        });
+      }
     } catch (error) {
       throw new VError(
         {
@@ -203,28 +207,25 @@ class MarketwatcherRunner extends BaseServiceRunner {
 
   static async unsubscribe(props) {
     try {
-      const validate = createValidator(
-        TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.dataSchema
-      );
-      genErrorIfExist(validate(props));
-      const { hostId, taskId, subscriptions } = props;
-      const marketwatcher = await getMarketwatcherById({
-        hostId,
-        taskId
-      });
-
-      // TODO: Check Robot
+      genErrorIfExist(validateUnsubscribe(props));
+      const { taskId, subscriptions } = props;
+      const marketwatcher = await getMarketwatcherById(taskId);
+      if (!marketwatcher)
+        throw new VError(
+          {
+            name: "MarketwatcherNotFound"
+          },
+          "Failed to find marketwatcher"
+        );
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createMarketwatcherTaskSubject({
-          hostId: marketwatcher.hostId,
-          taskId: marketwatcher.taskId,
+          exchange: marketwatcher.exchange,
           mode: marketwatcher.mode
         }),
         eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
         data: {
           taskId,
-          hostId,
           subscriptions
         }
       });

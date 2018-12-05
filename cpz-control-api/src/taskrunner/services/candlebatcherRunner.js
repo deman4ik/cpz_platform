@@ -8,73 +8,88 @@ import {
 } from "cpzEventTypes";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   STATUS_BUSY,
   createCandlebatcherSlug,
   createCandlebatcherTaskSubject
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
-import { isCandlebatcherExists, getCandlebatcherById } from "cpzStorage";
-import BaseServiceRunner from "./baseServiceRunner";
+import { CONTROL_SERVICE, CANDLEBATCHER_SERVICE } from "cpzServices";
+import {
+  findCandlebatcher,
+  getCandlebatcherById,
+  findOtherActiveUserRobotsByServiceId
+} from "cpzStorage";
+import { arraysDiff } from "cpzUtils/helpers";
+import BaseRunner from "../baseRunner";
 
-class CandlebatcherRunner extends BaseServiceRunner {
+const validateStart = createValidator(
+  TASKS_CANDLEBATCHER_START_EVENT.dataSchema
+);
+const validateStop = createValidator(TASKS_CANDLEBATCHER_STOP_EVENT.dataSchema);
+const validateUpdate = createValidator(
+  TASKS_CANDLEBATCHER_UPDATE_EVENT.dataSchema
+);
+
+class CandlebatcherRunner extends BaseRunner {
   static async start(props) {
     try {
       let resume;
       if (props.taskId) {
         resume = true;
       }
-      const taskId = props.taskId || uuid();
-      const validate = createValidator(
-        TASKS_CANDLEBATCHER_START_EVENT.dataSchema
-      );
-      genErrorIfExist(validate({ ...props, taskId }));
+      let taskId = props.taskId || uuid();
+
+      genErrorIfExist(validateStart({ ...props, taskId }));
       const {
         mode,
-        debug,
+        settings,
         providerType,
         exchange,
         asset,
         currency,
-        timeframes,
-        proxy
+        timeframes
       } = props;
-      if (resume) {
-        const candlebatcher = await getCandlebatcherById(taskId);
+
+      const candlebatcher = resume
+        ? await getCandlebatcherById(taskId)
+        : await findCandlebatcher({
+            slug: createCandlebatcherSlug({
+              mode,
+              exchange,
+              asset,
+              currency
+            })
+          });
+
+      if (candlebatcher) {
+        ({ taskId } = candlebatcher);
+
         if (
           candlebatcher.status === STATUS_STARTED ||
           candlebatcher.status === STATUS_BUSY
-        )
-          throw new VError(
-            {
-              name: "CandlebatcherAlreadyStarted",
-              info: {
-                taskId
-              }
-            },
-            "Candlebatcher already started"
+        ) {
+          const notSubscribedTimeframes = arraysDiff(
+            timeframes,
+            candlebatcher.timeframes
           );
-      } else {
-        const exists = await isCandlebatcherExists({
-          slug: createCandlebatcherSlug({
-            mode,
-            exchange,
-            asset,
-            currency
-          })
-        });
-        if (exists)
-          throw new VError(
-            {
-              name: "CandlebatcherAlreadyExists",
-              info: {
-                taskId
-              }
-            },
-            "Candlebatcher already exists"
-          );
+          if (notSubscribedTimeframes.length > 0) {
+            this.update({
+              taskId,
+              settings,
+              timeframes: [
+                ...new Set([...candlebatcher.timeframes, ...timeframes])
+              ]
+            });
+          }
+          return {
+            taskId,
+            status: STATUS_STARTED
+          };
+        }
       }
 
       await publishEvents(TASKS_TOPIC, {
@@ -89,16 +104,15 @@ class CandlebatcherRunner extends BaseServiceRunner {
         data: {
           taskId,
           mode,
-          debug,
+          settings,
           providerType,
           exchange,
           asset,
           currency,
-          timeframes,
-          proxy
+          timeframes
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -113,24 +127,28 @@ class CandlebatcherRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(
-        TASKS_CANDLEBATCHER_STOP_EVENT.dataSchema
-      );
-
-      genErrorIfExist(validate(props));
-      const { taskId } = props;
+      genErrorIfExist(validateStop(props));
+      const { taskId, userRobotId } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
+      if (!candlebatcher)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
       if (candlebatcher.status === STATUS_STOPPED)
-        throw new VError(
-          {
-            name: "CandlebatcherAlreadyStopped",
-            info: {
-              taskId
-            }
-          },
-          "Candlebatcher already stopped"
-        );
-      // TODO: Check Robot
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      const userRobots = findOtherActiveUserRobotsByServiceId({
+        userRobotId,
+        taskId,
+        serviceName: CANDLEBATCHER_SERVICE
+      });
+
+      if (userRobots.length > 0) {
+        return { taskId, status: candlebatcher.status };
+      }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createCandlebatcherTaskSubject({
@@ -144,6 +162,10 @@ class CandlebatcherRunner extends BaseServiceRunner {
           taskId
         }
       });
+      return {
+        taskId,
+        status: STATUS_STOPPING
+      };
     } catch (error) {
       throw new VError(
         {
@@ -158,14 +180,16 @@ class CandlebatcherRunner extends BaseServiceRunner {
 
   static async update(props) {
     try {
-      const validate = createValidator(
-        TASKS_CANDLEBATCHER_UPDATE_EVENT.dataSchema
-      );
-      genErrorIfExist(validate(props));
-      const { taskId, debug, timeframes, proxy } = props;
+      genErrorIfExist(validateUpdate(props));
+      const { taskId, timeframes, settings } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
-
-      // TODO: Check Robot
+      if (!candlebatcher)
+        throw new VError(
+          {
+            name: "CandlebatcherNotFound"
+          },
+          "Failed to find candlebatcher"
+        );
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createCandlebatcherTaskSubject({
@@ -177,9 +201,8 @@ class CandlebatcherRunner extends BaseServiceRunner {
         eventType: TASKS_CANDLEBATCHER_UPDATE_EVENT,
         data: {
           taskId,
-          debug,
-          timeframes,
-          proxy
+          settings,
+          timeframes
         }
       });
     } catch (error) {

@@ -48,19 +48,14 @@ const getStartedCandlebatchers = async () => {
 };
 
 /**
- * Checks if Candlebatcher with current slug exists
+ * Find Candlebatcher by slug
  *
  * @param {Object} input
  * @param {string} input.slug - Candlebatcher Slug
- * @returns {boolean}
+ * @returns {CandlebatcherState}
  */
-const isCandlebatcherExists = async ({ slug }) => {
-  const candlebatchers = tableStorage.getEntityByPartitionKey(
-    STORAGE_CANDLEBATCHERS_TABLE,
-    slug
-  );
-  return candlebatchers.length > 0;
-};
+const findCandlebatcher = async ({ slug }) =>
+  tableStorage.getEntityByPartitionKey(STORAGE_CANDLEBATCHERS_TABLE, slug);
 
 /**
  * Creates new or update current Candlebatcher State
@@ -95,7 +90,7 @@ const deleteCandlebatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 export {
   getCandlebatcherById,
   getStartedCandlebatchers,
-  isCandlebatcherExists,
+  findCandlebatcher,
   saveCandlebatcherState,
   updateCandlebatcherState,
   deleteCandlebatcherState

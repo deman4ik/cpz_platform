@@ -449,7 +449,9 @@ class TableStorage {
         RowKey
       );
       const query = new TableQuery().where(rowKeyFilter);
-      return await this.queryEntities(table, query)[0];
+      const entities = await this.queryEntities(table, query);
+      if (entities.length > 0) return entities[0];
+      return null;
     } catch (error) {
       throw new VError(
         {
@@ -482,7 +484,7 @@ class TableStorage {
         PartitionKey
       );
       const query = new TableQuery().where(partitionKeyFilter);
-      return await this.queryEntities(table, query)[0];
+      return await this.queryEntities(table, query);
     } catch (error) {
       throw new VError(
         {
@@ -513,7 +515,8 @@ class TableStorage {
         table,
         PartitionKey
       );
-      return entities[0];
+      if (entities.length > 0) return entities[0];
+      return null;
     } catch (error) {
       if (error instanceof VError) throw error;
       throw new VError(
@@ -560,7 +563,9 @@ class TableStorage {
           partitionKeyFilter
         )
       );
-      return await this.queryEntities(table, query)[0];
+      const entities = await this.queryEntities(table, query);
+      if (entities.length > 0) return entities[0];
+      return null;
     } catch (error) {
       throw new VError(
         {

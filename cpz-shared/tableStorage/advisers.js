@@ -17,14 +17,14 @@ const getAdviserById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_ADVISERS_TABLE, taskId);
 
 /**
- * Check if Adviser exists
+ * Find Adviser
  *
  * @param {Object} input
  * @param {string} input.mode - Adviser mode
  * @param {string} input.robotId - Robot Id
  * @returns {boolean}
  */
-const isAdviserExists = async ({ mode, robotId }) => {
+const findAdviser = async ({ mode, robotId }) => {
   try {
     const modeFilter = TableQuery.stringFilter(
       "mode",
@@ -47,7 +47,8 @@ const isAdviserExists = async ({ mode, robotId }) => {
       STORAGE_ADVISERS_TABLE,
       query
     );
-    return advisers.length > 0;
+    if (advisers.length > 0) return advisers[0];
+    return null;
   } catch (error) {
     throw new VError(
       {
@@ -140,7 +141,7 @@ const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getAdviserById,
-  isAdviserExists,
+  findAdviser,
   getActiveAdvisersBySlug,
   saveAdviserState,
   updateAdviserState,

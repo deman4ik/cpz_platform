@@ -8,17 +8,23 @@ import {
 } from "cpzEventTypes";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   STATUS_BUSY,
   createTraderTaskSubject
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
-import { isTraderExists, getTraderById } from "cpzStorage";
-import BaseServiceRunner from "./baseServiceRunner";
+import { findTrader, getTraderById } from "cpzStorage";
+import BaseRunner from "../baseRunner";
 
-class TraderRunner extends BaseServiceRunner {
+const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
+const validateStop = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
+const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
+
+class TraderRunner extends BaseRunner {
   static async start(props) {
     try {
       let resume;
@@ -26,11 +32,10 @@ class TraderRunner extends BaseServiceRunner {
         resume = true;
       }
       const taskId = props.taskId || uuid();
-      const validate = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
-      genErrorIfExist(validate({ ...props, taskId }));
+
+      genErrorIfExist(validateStart({ ...props, taskId }));
       const {
         mode,
-        debug,
         robotId,
         userId,
         adviserId,
@@ -38,40 +43,21 @@ class TraderRunner extends BaseServiceRunner {
         asset,
         currency,
         timeframe,
-        slippageStep,
-        deviation,
-        volume
+        settings
       } = props;
-      if (resume) {
-        const trader = await getTraderById(taskId);
-        if (trader.status === STATUS_STARTED || trader.status === STATUS_BUSY)
-          throw new VError(
-            {
-              name: "TraderAlreadyStarted",
-              info: {
-                taskId
-              }
-            },
-            "Trader already started"
-          );
-      } else {
-        const exists = await isTraderExists({
-          mode,
-          userId,
-          robotId
-        });
 
-        if (exists)
-          throw new VError(
-            {
-              name: "TraderAlreadyExists",
-              info: {
-                taskId
-              }
-            },
-            "Trader already exists"
-          );
+      const trader = resume
+        ? await getTraderById(taskId)
+        : await findTrader({
+            mode,
+            userId,
+            robotId
+          });
+      if (trader) {
+        if (trader.status === STATUS_STARTED || trader.status === STATUS_BUSY)
+          return { taskId, status: STATUS_STARTED };
       }
+
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createTraderTaskSubject({
@@ -86,7 +72,6 @@ class TraderRunner extends BaseServiceRunner {
         data: {
           taskId,
           mode,
-          debug,
           robotId,
           userId,
           adviserId,
@@ -94,12 +79,10 @@ class TraderRunner extends BaseServiceRunner {
           asset,
           currency,
           timeframe,
-          slippageStep,
-          deviation,
-          volume
+          settings
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -114,22 +97,12 @@ class TraderRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
-
-      genErrorIfExist(validate(props));
+      genErrorIfExist(validateStop(props));
       const { taskId } = props;
       const trader = await getTraderById(taskId);
+      if (!trader) return { taskId, status: STATUS_STOPPED };
       if (trader.status === STATUS_STOPPED)
-        throw new VError(
-          {
-            name: "TraderAlreadyStopped",
-            info: {
-              taskId
-            }
-          },
-          "Trader already stopped"
-        );
-      // TODO: Check Robot
+        return { taskId, status: STATUS_STOPPED };
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createTraderTaskSubject({
@@ -145,6 +118,7 @@ class TraderRunner extends BaseServiceRunner {
           taskId
         }
       });
+      return { taskId, status: STATUS_STOPPING };
     } catch (error) {
       throw new VError(
         {
@@ -159,12 +133,16 @@ class TraderRunner extends BaseServiceRunner {
 
   static async update(props) {
     try {
-      const validate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
-      genErrorIfExist(validate(props));
-      const { taskId, debug, slippageStep, deviation, volume } = props;
+      genErrorIfExist(validateUpdate(props));
+      const { taskId, settings } = props;
       const trader = await getTraderById(taskId);
-
-      // TODO: Check Robot
+      if (!trader)
+        throw new VError(
+          {
+            name: "TraderNotFound"
+          },
+          "Failed to find trader"
+        );
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createTraderTaskSubject({
@@ -178,10 +156,7 @@ class TraderRunner extends BaseServiceRunner {
         eventType: TASKS_TRADER_UPDATE_EVENT,
         data: {
           taskId,
-          debug,
-          slippageStep,
-          deviation,
-          volume
+          settings
         }
       });
     } catch (error) {

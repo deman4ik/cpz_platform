@@ -11,3 +11,4 @@ export * from "./ticks";
 export * from "./prices";
 export * from "./topics";
 export * from "./orders";
+export * from "./userRobot";

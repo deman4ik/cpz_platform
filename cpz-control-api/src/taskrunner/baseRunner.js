@@ -1,6 +1,6 @@
 const notImplemented = new Error("Not implemented exception");
 
-class BaseServiceRunner {
+class BaseRunner {
   static async start() {
     throw notImplemented;
   }
@@ -14,4 +14,4 @@ class BaseServiceRunner {
   }
 }
 
-export default BaseServiceRunner;
+export default BaseRunner;

@@ -18,15 +18,15 @@ const getImporterById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_IMPORTERS_TABLE, taskId);
 
 /**
- * Check if Importer exists
+ * Find Active Importer
  *
  * @param {Object} input
  * @param {string} input.slug - Importer slug
  * @param {Date} input.dateFrom - import start date
  * @param {Date} input.dateTo - import end date
- * @return {boolean}
+ * @return {ImporterState}
  */
-const isActiveImporterExists = async ({ slug, dateFrom, dateTo }) => {
+const findActiveImporter = async ({ slug, dateFrom, dateTo }) => {
   try {
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -69,7 +69,8 @@ const isActiveImporterExists = async ({ slug, dateFrom, dateTo }) => {
       STORAGE_IMPORTERS_TABLE,
       query
     );
-    return importers.length > 0;
+    if (importers.length > 0) return importers[0];
+    return null;
   } catch (error) {
     throw new VError(
       {
@@ -114,7 +115,7 @@ const deleteImporterState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getImporterById,
-  isActiveImporterExists,
+  findActiveImporter,
   saveImporterState,
   updateImporterState,
   deleteImporterState

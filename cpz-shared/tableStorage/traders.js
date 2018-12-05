@@ -18,7 +18,7 @@ const getTraderById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_TRADERS_TABLE, taskId);
 
 /**
- * Check if Trader exists
+ * Find Trader
  *
  * @param {Object} input
  * @param {string} input.mode - Trader mode
@@ -26,7 +26,7 @@ const getTraderById = async taskId =>
  * @param {string} input.userId - User Id
  * @returns {boolean}
  */
-const isTraderExists = async ({ mode, robotId, userId }) => {
+const findTrader = async ({ mode, robotId, userId }) => {
   try {
     const modeFilter = TableQuery.stringFilter(
       "mode",
@@ -59,7 +59,8 @@ const isTraderExists = async ({ mode, robotId, userId }) => {
       STORAGE_TRADERS_TABLE,
       query
     );
-    return traders.length > 0;
+    if (traders.length > 0) return traders[0];
+    return null;
   } catch (error) {
     throw new VError(
       {
@@ -170,7 +171,7 @@ const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) => {
 
 export {
   getTraderById,
-  isTraderExists,
+  findTrader,
   getActiveTradersBySlug,
   saveTraderState,
   updateTraderState,

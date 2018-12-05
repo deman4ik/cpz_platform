@@ -5,19 +5,27 @@ import {
   TASKS_BACKTESTER_STOP_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import { createBacktesterTaskSubject } from "cpzState";
+import {
+  STATUS_STARTING,
+  STATUS_STOPPED,
+  STATUS_STOPPING,
+  STATUS_FINISHED,
+  createBacktesterTaskSubject
+} from "cpzState";
 import { getBacktesterById } from "cpzStorage";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
-import BaseServiceRunner from "./baseServiceRunner";
+import BaseRunner from "../baseRunner";
 
-class BacktesterRunner extends BaseServiceRunner {
+const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
+const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
+class BacktesterRunner extends BaseRunner {
   static async start(props) {
     try {
       const taskId = uuid();
-      const validate = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
-      genErrorIfExist(validate({ ...props, taskId, adviserId: taskId }));
+
+      genErrorIfExist(validateStart({ ...props, taskId, adviserId: taskId }));
       const {
         debug,
         strategyName,
@@ -68,7 +76,7 @@ class BacktesterRunner extends BaseServiceRunner {
           dateTo
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -83,14 +91,22 @@ class BacktesterRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
-
-      genErrorIfExist(validate(props));
+      genErrorIfExist(validateStop(props));
       const { taskId } = props;
       const backtester = await getBacktesterById({
         taskId
       });
 
+      if (!backtester)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      if (
+        backtester.status === STATUS_STOPPED ||
+        backtester.status === STATUS_FINISHED
+      )
+        return { taskId, status: backtester.status };
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createBacktesterTaskSubject({
@@ -105,6 +121,7 @@ class BacktesterRunner extends BaseServiceRunner {
           taskId
         }
       });
+      return { taskId, status: STATUS_STOPPING };
     } catch (error) {
       throw new VError(
         {

@@ -1,9 +1,11 @@
 /**
  * Статус сервиса
  */
+const STATUS_STARTING = "starting"; // Запускается
 const STATUS_STARTED = "started"; //  Запущен
 const STATUS_PENDING = "pending"; //  Ожидает обработки
 const STATUS_BUSY = "busy"; //  Занят, выполняет обработку
+const STATUS_STOPPING = "stopping"; // Останавливается
 const STATUS_STOPPED = "stopped"; //  Остановлен
 const STATUS_ERROR = "error"; //  Произошла ошибка во время работы
 const STATUS_FINISHED = "finished"; // Обработка завершена
@@ -40,7 +42,9 @@ export {
   STATUS_FINISHED,
   STATUS_PENDING,
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   POS_STATUS_NONE,
   POS_STATUS_OPENED,
   POS_STATUS_CLOSED,

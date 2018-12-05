@@ -8,17 +8,26 @@ import {
 } from "cpzEventTypes";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPING,
   STATUS_BUSY,
   createAdviserTaskSubject
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
-import { isAdviserExists, getAdviserById } from "cpzStorage";
-import BaseServiceRunner from "./baseServiceRunner";
+import { CONTROL_SERVICE, ADVISER_SERVICE } from "cpzServices";
+import {
+  findAdviser,
+  getAdviserById,
+  findOtherActiveUserRobotsByServiceId
+} from "cpzStorage";
+import BaseRunner from "../baseRunner";
 
-class AdviserRunner extends BaseServiceRunner {
+const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
+const validateStop = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
+const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
+class AdviserRunner extends BaseRunner {
   static async start(props) {
     try {
       let resume;
@@ -26,48 +35,31 @@ class AdviserRunner extends BaseServiceRunner {
         resume = true;
       }
       const taskId = props.taskId || uuid();
-      const validate = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
-      genErrorIfExist(validate({ ...props, taskId }));
+
+      genErrorIfExist(validateStart({ ...props, taskId }));
       const {
         mode,
-        debug,
-        strategyName,
         robotId,
         exchange,
         asset,
         currency,
         timeframe,
-        settings,
-        requiredHistoryCache,
-        requiredHistoryMaxBars
+        settings
       } = props;
-      if (resume) {
-        const adviser = await getAdviserById(taskId);
+
+      const adviser = resume
+        ? await getAdviserById(taskId)
+        : await findAdviser({
+            mode,
+            robotId
+          });
+
+      if (adviser) {
         if (adviser.status === STATUS_STARTED || adviser.status === STATUS_BUSY)
-          throw new VError(
-            {
-              name: "AdviserAlreadyStarted",
-              info: {
-                taskId
-              }
-            },
-            "Adviser already started"
-          );
-      } else {
-        const exists = await isAdviserExists({
-          mode,
-          robotId
-        });
-        if (exists)
-          throw new VError(
-            {
-              name: "AdviserAlreadyExists",
-              info: {
-                taskId
-              }
-            },
-            "Adviser already exists"
-          );
+          return {
+            taskId,
+            status: STATUS_STARTED
+          };
       }
 
       await publishEvents(TASKS_TOPIC, {
@@ -84,19 +76,15 @@ class AdviserRunner extends BaseServiceRunner {
         data: {
           taskId,
           mode,
-          debug,
-          strategyName,
           robotId,
           exchange,
           asset,
           currency,
           timeframe,
-          settings,
-          requiredHistoryCache,
-          requiredHistoryMaxBars
+          settings
         }
       });
-      return { taskId };
+      return { taskId, status: STATUS_STARTING };
     } catch (error) {
       throw new VError(
         {
@@ -111,22 +99,26 @@ class AdviserRunner extends BaseServiceRunner {
 
   static async stop(props) {
     try {
-      const validate = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
-
-      genErrorIfExist(validate(props));
-      const { taskId } = props;
+      genErrorIfExist(validateStop(props));
+      const { taskId, userRobotId } = props;
       const adviser = await getAdviserById(taskId);
+      if (!adviser)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
       if (adviser.status === STATUS_STOPPED)
-        throw new VError(
-          {
-            name: "AdviserAlreadyStopped",
-            info: {
-              taskId
-            }
-          },
-          "Adviser already stopped"
-        );
-      // TODO: Check Robot
+        return { taskId, status: STATUS_STOPPED };
+
+      const userRobots = findOtherActiveUserRobotsByServiceId({
+        userRobotId,
+        taskId,
+        serviceName: ADVISER_SERVICE
+      });
+
+      if (userRobots.length > 0) {
+        return { taskId, status: adviser.status };
+      }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createAdviserTaskSubject({
@@ -142,6 +134,7 @@ class AdviserRunner extends BaseServiceRunner {
           taskId
         }
       });
+      return { taskId, status: STATUS_STOPPING };
     } catch (error) {
       throw new VError(
         {
@@ -156,18 +149,17 @@ class AdviserRunner extends BaseServiceRunner {
 
   static async update(props) {
     try {
-      const validate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
-      genErrorIfExist(validate(props));
-      const {
-        taskId,
-        debug,
-        settings,
-        requiredHistoryCache,
-        requiredHistoryMaxBars
-      } = props;
+      genErrorIfExist(validateUpdate(props));
+      const { taskId, settings } = props;
       const adviser = await getAdviserById(taskId);
+      if (!adviser)
+        throw new VError(
+          {
+            name: "AdviserNotFound"
+          },
+          "Failed to find adviser"
+        );
 
-      // TODO: Check Robot
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createAdviserTaskSubject({
@@ -181,10 +173,7 @@ class AdviserRunner extends BaseServiceRunner {
         eventType: TASKS_ADVISER_UPDATE_EVENT,
         data: {
           taskId,
-          debug,
-          settings,
-          requiredHistoryCache,
-          requiredHistoryMaxBars
+          settings
         }
       });
     } catch (error) {
