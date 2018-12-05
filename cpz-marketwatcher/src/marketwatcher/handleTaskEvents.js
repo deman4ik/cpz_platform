@@ -5,9 +5,8 @@ import {
   TASKS_MARKETWATCHER_STOP_EVENT,
   TASKS_MARKETWATCHER_STOPPED_EVENT,
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
   TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
+  TASKS_MARKETWATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
@@ -225,7 +224,7 @@ async function handleUnsubscribe(context, eventData) {
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
       subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
+      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId
       }
@@ -248,7 +247,7 @@ async function handleUnsubscribe(context, eventData) {
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
       subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
+      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId,
         error: errorOutput

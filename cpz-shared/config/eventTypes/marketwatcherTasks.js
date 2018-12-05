@@ -140,24 +140,12 @@ const TASKS_MARKETWATCHER_STOPPED_EVENT = {
     error: BASE_ERROR
   }
 };
-const TASKS_MARKETWATCHER_SUBSCRIBED_EVENT = {
-  eventType: "CPZ.Tasks.Marketwatcher.Subscribed",
+const TASKS_MARKETWATCHER_UPDATED_EVENT = {
+  eventType: "CPZ.Tasks.Marketwatcher.Updated",
 
   dataSchema: {
     taskId: {
       description: "Uniq task id. - 'nameProvider'",
-      type: "string",
-      empty: false
-    },
-    error: BASE_ERROR
-  }
-};
-const TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT = {
-  eventType: "CPZ.Tasks.Marketwatcher.Unsubscribed",
-
-  dataSchema: {
-    taskId: {
-      description: "Uniq task id.",
       type: "string",
       empty: false
     },
@@ -171,7 +159,6 @@ export {
   TASKS_MARKETWATCHER_STOP_EVENT,
   TASKS_MARKETWATCHER_STOPPED_EVENT,
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
   TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT
+  TASKS_MARKETWATCHER_UPDATED_EVENT
 };
