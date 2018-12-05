@@ -51,13 +51,13 @@ class CryptocompareProvider extends BaseProvider {
           type: "tick",
           tickId,
           PartitionKey: createCachedTickSlug({
-            exchange: valuesArray[1].toLowerCase(),
+            exchange: this._exchange,
             asset: valuesArray[2],
             currency: valuesArray[3],
             mode: this._mode
           }),
           RowKey: tickId,
-          exchange: valuesArray[1],
+          exchange: this._exchange,
           asset: valuesArray[2],
           currency: valuesArray[3],
           mode: this._mode,
@@ -80,13 +80,13 @@ class CryptocompareProvider extends BaseProvider {
         type: "trade",
         tickId,
         PartitionKey: createCachedTickSlug({
-          exchange: valuesArray[1].toLowerCase(),
+          exchange: this._exchange,
           asset: valuesArray[2],
           currency: valuesArray[3],
           mode: this._mode
         }),
         RowKey: tickId,
-        exchange: valuesArray[1],
+        exchange: this._exchange,
         asset: valuesArray[2],
         currency: valuesArray[3],
         mode: this._mode,
@@ -138,9 +138,8 @@ class CryptocompareProvider extends BaseProvider {
             cause: new Error(error),
             info: this._getCurrentState()
           },
-          'Cryptocompare streaming error - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Cryptocompare streaming error - task "%s"',
+          this._taskId
         )
       );
       this.log(errorOutput);
@@ -151,7 +150,6 @@ class CryptocompareProvider extends BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -168,9 +166,8 @@ class CryptocompareProvider extends BaseProvider {
             name: "CryptocompareStreamingError",
             info: this._getCurrentState()
           },
-          'Cryptocompare streaming error - Reconnect failed - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Cryptocompare streaming error - Reconnect failed - task "%s"',
+          this._taskId
         )
       );
       this.log(errorOutput);
@@ -181,7 +178,6 @@ class CryptocompareProvider extends BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -192,10 +188,10 @@ class CryptocompareProvider extends BaseProvider {
   async start() {
     try {
       const activeTradeSubs = this._subscriptions.map(
-        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       const activeTickSubs = this._subscriptions.map(
-        sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       // Если сокет не подключен
       if (this._socketStatus !== "connect") {
@@ -209,9 +205,8 @@ class CryptocompareProvider extends BaseProvider {
                 name: "CryptocompareStreamingError",
                 info: this._getCurrentState()
               },
-              'Can\'t open connection to Cryptocompare - task "%s" on host "%s"',
-              this._taskId,
-              this._hostId
+              'Can\'t open connection to Cryptocompare - task "%s"',
+              this._taskId
             );
           }
         }, 1000);
@@ -230,9 +225,8 @@ class CryptocompareProvider extends BaseProvider {
             cause: error,
             info: this._getCurrentState()
           },
-          'Cryptocompare start streaming error - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Cryptocompare start streaming error - task "%s"',
+          this._taskId
         )
       );
       this.log(errorOutput);
@@ -243,7 +237,6 @@ class CryptocompareProvider extends BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -262,10 +255,10 @@ class CryptocompareProvider extends BaseProvider {
     try {
       this._subscriptions = [...this._subscriptions, ...subscriptions];
       const newTradeSubs = subscriptions.map(
-        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       const newTickSubs = subscriptions.map(
-        sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       this._socket.emit("SubAdd", {
         subs: [...newTradeSubs, ...newTickSubs]
@@ -279,9 +272,8 @@ class CryptocompareProvider extends BaseProvider {
             cause: error,
             info: this._getCurrentState()
           },
-          'Cryptocompare subscribe streaming error - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Cryptocompare subscribe streaming error - task "%s"',
+          this._taskId
         )
       );
       this.log(errorOutput);
@@ -292,7 +284,6 @@ class CryptocompareProvider extends BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -305,18 +296,15 @@ class CryptocompareProvider extends BaseProvider {
       this._subscriptions = this._subscriptions.filter(
         sub =>
           !subscriptions.find(
-            del =>
-              del.exchange === sub.exchange &&
-              del.asset === sub.asset &&
-              del.currency === sub.currency
+            del => del.asset === sub.asset && del.currency === sub.currency
           )
       );
 
       const delTradeSubs = subscriptions.map(
-        sub => `0~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       const delTickSubs = subscriptions.map(
-        sub => `2~${sub.exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
       );
       this._socket.emit("SubRemove", {
         subs: [...delTradeSubs, ...delTickSubs]
@@ -330,9 +318,8 @@ class CryptocompareProvider extends BaseProvider {
             cause: error,
             info: this._getCurrentState()
           },
-          'Cryptocompare unsubscribe streaming error - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Cryptocompare unsubscribe streaming error - task "%s"',
+          this._taskId
         )
       );
       this.log(errorOutput);
@@ -343,7 +330,6 @@ class CryptocompareProvider extends BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });

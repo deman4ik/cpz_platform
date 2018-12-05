@@ -1,9 +1,9 @@
 import { modeToStr } from "../../utils/helpers";
 
-function createMarketwatcherSlug({ hostId, mode, modeStr }) {
+function createMarketwatcherSlug({ exchange, mode, modeStr }) {
   const _modeStr = modeStr || modeToStr(mode);
-  if (_modeStr === "R") return hostId;
-  return `${hostId}.${_modeStr}`;
+  if (_modeStr === "R") return exchange;
+  return `${exchange}.${_modeStr}`;
 }
 
 function createCandlebatcherSlug({ exchange, asset, currency, mode, modeStr }) {
@@ -71,6 +71,19 @@ function createBacktesterSlug({
   return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
 
+function createRobotSlug({
+  exchange,
+  asset,
+  currency,
+  robotId,
+  mode,
+  modeStr
+}) {
+  const _modeStr = modeStr || modeToStr(mode);
+  if (_modeStr === "R") return `${exchange}.${asset}.${currency}.${robotId}`;
+  return `${exchange}.${asset}.${currency}.${robotId}.${_modeStr}`;
+}
+
 export {
   modeToStr,
   createAdviserSlug,
@@ -80,5 +93,6 @@ export {
   createCandlebatcherSlug,
   createImporterSlug,
   createMarketwatcherSlug,
-  createTraderSlug
+  createTraderSlug,
+  createRobotSlug
 };

@@ -19,12 +19,12 @@ class BaseProvider {
     this._eventSubject = state.eventSubject;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
-    /* Уникальный идентификатор хоста */
-    this._hostId = process.env.HOST_ID;
     /* Режим работы ['emulator', 'realtime'] */
     this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
+    /* Биржа */
+    this._exchange = state.exchange;
     /* Поставщик данных */
     this._providerType = state.providerType;
     /* Список подписок */
@@ -63,7 +63,6 @@ class BaseProvider {
       eventType: LOG_MARKETWATCHER_EVENT,
       data: {
         taskId: this._taskId,
-        hostId: this._hostId,
         data
       }
     });
@@ -99,9 +98,8 @@ class BaseProvider {
             cause: new Error(error),
             info: this._getCurrentState()
           },
-          'Failed to send NewTick event - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Failed to send NewTick event - task "%s"',
+          this._taskId
         )
       );
       this._error = errorOutput;
@@ -112,7 +110,6 @@ class BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -130,9 +127,8 @@ class BaseProvider {
             cause: new Error(error),
             info: this._getCurrentState()
           },
-          'Failed to send NewTick event - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Failed to send NewTick event - task "%s"',
+          this._taskId
         )
       );
       this._error = errorOutput;
@@ -143,7 +139,6 @@ class BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -163,9 +158,8 @@ class BaseProvider {
             cause: error,
             info: this._getCurrentState()
           },
-          'Failed to update marketwatcher state - task "%s" on host "%s"',
-          this._taskId,
-          this._hostId
+          'Failed to update marketwatcher state - task "%s"',
+          this._taskId
         )
       );
       this._error = errorOutput;
@@ -175,7 +169,6 @@ class BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          hostId: this._hostId,
           error: errorOutput
         }
       });
@@ -185,14 +178,14 @@ class BaseProvider {
   _getCurrentState() {
     return {
       taskId: this._taskId,
-      hostId: this._hostId,
       PartitionKey: createMarketwatcherSlug({
-        hostId: this._hostId,
+        exchange: this._exchange,
         mode: this._mode
       }),
       RowKey: this._taskId,
       mode: this._mode,
       debug: this._debug,
+      exchange: this._exchange,
       subscriptions: this._subscriptions,
       status: this._status,
       socketStatus: this._socketStatus,

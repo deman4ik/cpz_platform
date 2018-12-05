@@ -1,7 +1,7 @@
 import { modeToStr } from "../../utils/helpers";
 
-function createMarketwatcherTaskSubject({ hostId, taskId, mode }) {
-  return `${hostId}/${taskId}/${modeToStr(mode)}`;
+function createMarketwatcherTaskSubject({ exchange, mode }) {
+  return `${exchange}/${modeToStr(mode)}`;
 }
 
 function createCandlebatcherTaskSubject({ exchange, asset, currency, mode }) {

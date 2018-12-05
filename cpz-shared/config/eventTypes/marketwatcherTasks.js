@@ -8,11 +8,7 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
+    exchange: { description: "Exchange code.", type: "string", empty: false },
     mode: {
       description: "Service run mode.",
       type: "string",
@@ -33,11 +29,6 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       items: {
         type: "object",
         props: {
-          exchange: {
-            description: "Exchange code.",
-            type: "string",
-            empty: false
-          },
           asset: {
             description: "Base currency.",
             type: "string",
@@ -61,11 +52,6 @@ const TASKS_MARKETWATCHER_STOP_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
     }
   }
 };
@@ -78,22 +64,13 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
+    exchange: { description: "Exchange code.", type: "string", empty: false },
     subscriptions: {
       description: "Data subscriptions list",
       type: "array",
       items: {
         type: "object",
         props: {
-          exchange: {
-            description: "Exchange code.",
-            type: "string",
-            empty: false
-          },
           asset: {
             description: "Base currency.",
             type: "string",
@@ -118,22 +95,12 @@ const TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
     subscriptions: {
       description: "Data subscriptions list",
       type: "array",
       items: {
         type: "object",
         props: {
-          exchange: {
-            description: "Exchange code.",
-            type: "string",
-            empty: false
-          },
           asset: {
             description: "Base currency.",
             type: "string",
@@ -158,11 +125,6 @@ const TASKS_MARKETWATCHER_STARTED_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
     error: BASE_ERROR
   }
 };
@@ -172,11 +134,6 @@ const TASKS_MARKETWATCHER_STOPPED_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id. - 'nameProvider'",
-      type: "string",
-      empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
       type: "string",
       empty: false
     },
@@ -192,11 +149,6 @@ const TASKS_MARKETWATCHER_SUBSCRIBED_EVENT = {
       type: "string",
       empty: false
     },
-    hostId: {
-      description: "Uniq host id.",
-      type: "string",
-      empty: false
-    },
     error: BASE_ERROR
   }
 };
@@ -206,11 +158,6 @@ const TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT = {
   dataSchema: {
     taskId: {
       description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    hostId: {
-      description: "Uniq host id.",
       type: "string",
       empty: false
     },

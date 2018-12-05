@@ -44,9 +44,8 @@ async function handleStart(context, eventData) {
     genErrorIfExist(validateStart(eventData));
     if (isProcessExists(eventData.taskId)) {
       throw new VError(
-        'Marketwatcher task "%s" on host "%s" already started',
-        eventData.taskId,
-        eventData.hostId
+        'Marketwatcher task "%s" already started',
+        eventData.taskId
       );
     }
     createNewProcess(context, eventData.taskId, eventData.providerType);
@@ -61,8 +60,7 @@ async function handleStart(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        hostId: eventData.hostId
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -86,7 +84,6 @@ async function handleStart(context, eventData) {
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
         taskId: eventData.taskId,
-        hostId: process.env.HOST_ID,
         error: errorOutput
       }
     });
@@ -104,11 +101,7 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      throw new VError(
-        'Marketwatcher task "%s" on host "%s" not started',
-        eventData.taskId,
-        process.env.HOST_ID
-      );
+      throw new VError('Marketwatcher task "%s" not started', eventData.taskId);
     }
 
     sendEventToProcess(eventData.taskId, {
@@ -120,8 +113,7 @@ async function handleStop(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        hostId: process.env.HOST_ID
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -145,7 +137,6 @@ async function handleStop(context, eventData) {
       eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
       data: {
         taskId: eventData.taskId,
-        hostId: process.env.HOST_ID,
         error: errorOutput
       }
     });
@@ -164,9 +155,8 @@ async function handleSubscribe(context, eventData) {
     genErrorIfExist(validateSubscribe(eventData));
     if (!isProcessExists(eventData.taskId)) {
       throw new VError(
-        'Marketwatcher task "%s" on host "%s" not started',
-        eventData.taskId,
-        process.env.HOST_ID
+        'Marketwatcher task "%s"  not started',
+        eventData.taskId
       );
     }
 
@@ -180,8 +170,7 @@ async function handleSubscribe(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        hostId: process.env.HOST_ID
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -205,7 +194,6 @@ async function handleSubscribe(context, eventData) {
       eventType: TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
       data: {
         taskId: eventData.taskId,
-        hostId: process.env.HOST_ID,
         error: errorOutput
       }
     });
@@ -224,9 +212,8 @@ async function handleUnsubscribe(context, eventData) {
     genErrorIfExist(validateUnsubscribe(eventData));
     if (!isProcessExists(eventData.taskId)) {
       throw new VError(
-        'Marketwatcher task "%s" on host "%s" not started',
-        eventData.taskId,
-        process.env.HOST_ID
+        'Marketwatcher task "%s"  not started',
+        eventData.taskId
       );
     }
 
@@ -240,8 +227,7 @@ async function handleUnsubscribe(context, eventData) {
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
       data: {
-        taskId: eventData.taskId,
-        hostId: process.env.HOST_ID
+        taskId: eventData.taskId
       }
     });
   } catch (error) {
@@ -265,7 +251,6 @@ async function handleUnsubscribe(context, eventData) {
       eventType: TASKS_MARKETWATCHER_UNSUBSCRIBED_EVENT,
       data: {
         taskId: eventData.taskId,
-        hostId: process.env.HOST_ID,
         error: errorOutput
       }
     });

@@ -11,58 +11,20 @@ tableStorage.createTableIfNotExists(STORAGE_MARKETWATCHERS_TABLE);
  *
  * @param {Object} input
  * @param {string} input.taskId - Marketwatcher task id
- * @param {string} input.hostId - Marketwacher host id
  */
-const getMarketwatcherById = async ({ taskId, hostId }) => {
-  try {
-    const rowKeyFilter = TableQuery.stringFilter(
-      "RowKey",
-      TableUtilities.QueryComparisons.EQUAL,
-      taskId
-    );
-    const hostIdFilter = TableQuery.stringFilter(
-      "hostId",
-      TableUtilities.QueryComparisons.EQUAL,
-      hostId
-    );
-    const query = new TableQuery().where(
-      TableQuery.combineFilters(
-        rowKeyFilter,
-        TableUtilities.TableOperators.AND,
-        hostIdFilter
-      )
-    );
-    return await tableStorage.queryEntities(
-      STORAGE_MARKETWATCHERS_TABLE,
-      query
-    )[0];
-  } catch (error) {
-    throw new VError(
-      {
-        name: "MarketwatcherStorageError",
-        cause: error,
-        info: {
-          taskId,
-          hostId
-        }
-      },
-      'Failed to read marketwatcher state "%s", "%s"',
-      hostId,
-      taskId
-    );
-  }
-};
+const getMarketwatcherById = async taskId =>
+  tableStorage.getEntityByRowKey(STORAGE_MARKETWATCHERS_TABLE, taskId);
 
 /**
- * Check if Marketwatcher exists
+ * Finx Marketwatcher
  *
  * @param {Object} input
  * @param {string} input.mode - Marketwatcher mode
  * @param {string} input.providerType - Marketwatcher provider type
- * @param {MarketwatcherSubscription[]} input.subscriptions - Marketwatcher subscriptions
- * @returns {boolean}
+ * @param {string} input.exchange - Marketwatcher exchanges
+ * @returns {MarketwatcherState}
  */
-const isMarketwatcherExists = async ({ mode, providerType, subscriptions }) => {
+const findMarketwatcher = async ({ mode, providerType, exchange }) => {
   try {
     const modeFilter = TableQuery.stringFilter(
       "mode",
@@ -74,38 +36,36 @@ const isMarketwatcherExists = async ({ mode, providerType, subscriptions }) => {
       TableUtilities.QueryComparisons.EQUAL,
       providerType
     );
+    const exchangeFilter = TableQuery.stringFilter(
+      "exchange",
+      TableUtilities.QueryComparisons.EQUAL,
+      exchange
+    );
+    const combinedFilters = TableQuery.combineFilters(
+      modeFilter,
+      TableUtilities.TableOperators.AND,
+      providerTypeFilter
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        modeFilter,
+        combinedFilters,
         TableUtilities.TableOperators.AND,
-        providerTypeFilter
+        exchangeFilter
       )
     );
     const marketwatchers = await tableStorage.queryEntities(
       STORAGE_MARKETWATCHERS_TABLE,
       query
     );
-    if (marketwatchers.length === 0) return false;
 
-    let exist = false;
-    subscriptions.forEach(subscription => {
-      marketwatchers.forEach(marketwatcher => {
-        const dubles = marketwatcher.subscriptions.find(
-          sub =>
-            sub.exchange === subscription.exchange &&
-            sub.asset === subscription.asset &&
-            sub.currency === subscription.currency
-        );
-        exist = dubles.length > 0;
-      });
-    });
-    return exist;
+    if (marketwatchers.length > 0) return marketwatchers[0];
+    return null;
   } catch (error) {
     throw new VError(
       {
         name: "TableStorageError",
         cause: error,
-        info: { mode, providerType, subscriptions }
+        info: { mode, providerType, exchange }
       },
       "Failed to read marketwatcher state"
     );
@@ -136,7 +96,7 @@ const deleteMarketwatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getMarketwatcherById,
-  isMarketwatcherExists,
+  findMarketwatcher,
   saveMarketwatcherState,
   deleteMarketwatcherState
 };
