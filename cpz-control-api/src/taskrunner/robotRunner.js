@@ -27,7 +27,7 @@ class RobotRunner extends BaseRunner {
   static async start(robotParams) {
     try {
       genErrorIfExist(validateStart(robotParams));
-      let userRobotState = getUserRobotById(robotParams.id) || robotParams;
+      let userRobotState = robotParams;
       const userRobot = new UserRobot(userRobotState);
       if (userRobot.status === STATUS_STARTED) {
         return {

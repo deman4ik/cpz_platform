@@ -100,6 +100,10 @@ const LOG_BACKTESTER_EVENT = {
   eventType: "CPZ.Backtester.Log"
 };
 
+const LOG_CONTROL_EVENT = {
+  eventType: "CPZ.Control.Log"
+};
+
 const ERROR_MARKETWATCHER_EVENT = {
   eventType: "CPZ.Marketwatcher.Error"
 };
@@ -124,6 +128,10 @@ const ERROR_BACKTESTER_EVENT = {
   eventType: "CPZ.Backtester.Error"
 };
 
+const ERROR_CONTROL_EVENT = {
+  eventType: "CPZ.Control.Error"
+};
+
 export {
   BASE_EVENT,
   BASE_ERROR,
@@ -134,10 +142,12 @@ export {
   LOG_MARKETWATCHER_EVENT,
   LOG_TRADER_EVENT,
   LOG_BACKTESTER_EVENT,
+  LOG_CONTROL_EVENT,
   ERROR_ADVISER_EVENT,
   ERROR_CANDLEBATCHER_EVENT,
   ERROR_IMPORTER_EVENT,
   ERROR_MARKETWATCHER_EVENT,
   ERROR_TRADER_EVENT,
-  ERROR_BACKTESTER_EVENT
+  ERROR_BACKTESTER_EVENT,
+  ERROR_CONTROL_EVENT
 };

@@ -147,6 +147,7 @@ class CandlebatcherRunner extends BaseRunner {
       });
 
       if (userRobots.length > 0) {
+        // TODO: Unsubscribe to timeframes if not used
         return { taskId, status: candlebatcher.status };
       }
       await publishEvents(TASKS_TOPIC, {

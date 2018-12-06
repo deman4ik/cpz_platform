@@ -5,6 +5,7 @@ import {
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING,
+  STATUS_ERROR,
   createRobotSlug
 } from "cpzState";
 import { saveUserRobotState } from "cpzStorage";
@@ -31,6 +32,7 @@ class UserRobot {
     this._traderId = state.traderId;
     this._traderStatus = state.traderStatus;
     this._status = state.status || STATUS_STOPPED;
+    this._error = state.error;
     this._metadata = state.metadata;
   }
 
@@ -42,6 +44,7 @@ class UserRobot {
       this._marketwatcherStatus === STATUS_STARTED
     ) {
       this._status = STATUS_STARTED;
+      this._error = null;
       return;
     }
 
@@ -52,6 +55,7 @@ class UserRobot {
       this._marketwatcherStatus === STATUS_STARTING
     ) {
       this._status = STATUS_STARTING;
+      this._error = null;
       return;
     }
 
@@ -75,6 +79,15 @@ class UserRobot {
       return;
     }
 
+    if (
+      this._traderStatus === STATUS_ERROR ||
+      this._adviserStatus === STATUS_ERROR ||
+      this._candlebatcherStatus === STATUS_ERROR ||
+      this._marketwatcherStatus === STATUS_ERROR
+    ) {
+      this._status = STATUS_ERROR;
+      return;
+    }
     this._status = STATUS_PENDING;
   }
 
@@ -136,6 +149,10 @@ class UserRobot {
     this._traderSettings = { ...this._traderSettings, ...traderSettings };
   }
 
+  set error(error) {
+    this._error = error;
+  }
+
   getCurrentState() {
     return {
       PartitionKey: createRobotSlug({
@@ -163,6 +180,8 @@ class UserRobot {
       adviserStatus: this._adviserStatus,
       traderId: this._traderId,
       traderStatus: this._traderStatus,
+      status: this._status,
+      error: this._error,
       metadata: this._metadata
     };
   }

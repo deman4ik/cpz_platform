@@ -1,6 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
-import { STATUS_STARTED, STATUS_STARTING } from "cpzState";
+import { STATUS_STARTED, STATUS_STARTING } from "../config/state";
 import { STORAGE_USERROBOTS_TABLE } from "./tables";
 import tableStorage from "./tableStorage";
 

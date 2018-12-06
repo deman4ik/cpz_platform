@@ -127,6 +127,7 @@ class MarketwatcherRunner extends BaseRunner {
       });
 
       if (userRobots.length > 0) {
+        // TODO: Unsubscribe if not used
         return { taskId, status: marketwatcher.status };
       }
       await publishEvents(TASKS_TOPIC, {
