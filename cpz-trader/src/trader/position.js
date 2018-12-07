@@ -30,7 +30,7 @@ import {
   createTraderSlug,
   createNewOrderSubject
 } from "cpzState";
-import { TRADES_ORDER_EVENT } from "cpzEventTypes";
+import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
 import { savePositionState } from "cpzStorage";
 
 /**
@@ -55,8 +55,6 @@ class Position {
     this._adviserId = state.adviserId;
     /* Код биржи */
     this._exchange = state.exchange;
-    /* Идентификатор биржи */
-    this._exchangeId = state.exchangeId;
     /* Базовая валюта */
     this._asset = state.asset;
     /* Котировка валюты */
@@ -429,6 +427,41 @@ class Position {
     };
   }
 
+  createPositionEvent() {
+    return {
+      id: uuid(),
+      dataVersion: "1.0",
+      eventTime: new Date(),
+      subject: createNewOrderSubject({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe,
+        traderId: this._traderId,
+        mode: this._mode
+      }),
+      eventType: TRADES_POSITION_EVENT.eventType,
+      data: {
+        positionId: this._positionId,
+        traderId: this._traderId,
+        robotId: this._robotId,
+        userId: this._userId,
+        adviserId: this._adviserId,
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe,
+        status: this._status,
+        entryStatus: this._entryStatus,
+        exitStatus: this._exitStatus,
+        entryPrice: this._entryPrice,
+        exitPrice: this._exitPrice,
+        entryDate: this._entryDate,
+        exitDate: this._exitDate
+      }
+    };
+  }
+
   /**
    * Запрос всего текущего состояния
    *
@@ -445,7 +478,6 @@ class Position {
       userId: this._userId,
       adviserId: this._adviserId,
       exchange: this._exchange,
-      exchangeId: this._exchangeId,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,

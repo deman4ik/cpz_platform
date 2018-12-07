@@ -52,8 +52,6 @@ class Trader {
     this._mode = state.mode;
     /* Код биржи */
     this._exchange = state.exchange;
-    /* Идентификатор биржи */
-    this._exchangeId = state.exchangeId;
     /* Базовая валюта */
     this._asset = state.asset;
     /* Котировка валюты */
@@ -222,7 +220,6 @@ class Trader {
       userId: this._userId,
       adviserId: this._adviserId,
       exchange: this._exchange,
-      exchangeId: this._exchangeId,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
@@ -403,9 +400,12 @@ class Trader {
         // Загружаем позицию
         this._loadPosition(order.positionId);
 
-        // Сохраняем ордер в позиции и генерируем событие
+        // Сохраняем ордер в позиции и генерируем события
         this._events.push(
           this._currentPositions[order.positionId].handleOrder(orderResult)
+        );
+        this._events.push(
+          this._currentPositions[order.positionId].createPositionEvent()
         );
         // Сохраняем состояние позиции в сторедж
         await this._currentPositions[order.positionId].save();

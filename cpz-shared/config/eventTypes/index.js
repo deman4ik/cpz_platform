@@ -10,5 +10,5 @@ export * from "./backtesterTasks";
 export * from "./ticks";
 export * from "./prices";
 export * from "./topics";
-export * from "./orders";
+export * from "./trades";
 export * from "./userRobot";
