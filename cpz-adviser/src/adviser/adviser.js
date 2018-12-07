@@ -19,6 +19,7 @@ import {
 } from "cpzEventTypes";
 import { ADVISER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
+import { runInThisContext } from "vm";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
@@ -72,7 +73,11 @@ class Adviser {
         ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
     };
     /* Состояне стратегии */
-    this._strategy = state.strategy || { variables: {}, initialized: false };
+    this._strategy = state.strategy || {
+      variables: {},
+      positions: {},
+      initialized: false
+    };
     /* Состояние индикаторов */
     this._indicators = state.indicators || {};
     /* Текущая свеча */
@@ -235,6 +240,7 @@ class Adviser {
       // Создаем новый инстанс класса стратегии
       this._strategyInstance = new BaseStrategy({
         initialized: this._strategy._initialized,
+        positions: this._strategy._positions,
         parameters: this._strategyParameters,
         exchange: this._exchange,
         asset: this._asset,
@@ -741,6 +747,7 @@ class Adviser {
   getStrategyState() {
     try {
       this._strategy.initialized = this._strategyInstance.initialized;
+      this._strategy.positions = this._strategyInstance.positions;
       // Все свойства инстанса стратегии
       Object.keys(this._strategyInstance)
         .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
