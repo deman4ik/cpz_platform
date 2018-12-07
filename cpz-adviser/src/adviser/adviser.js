@@ -45,11 +45,8 @@ class Adviser {
     this._robotId = state.robotId;
     /* Режим работы ['backtest', 'emulator', 'realtime'] */
     this._mode = state.mode;
-
     /* Код биржи */
     this._exchange = state.exchange;
-    /* Идентификатор биржи */
-    this._exchangeId = state.exchangeId;
     /* Базовая валюта */
     this._asset = state.asset;
     /* Котировка валюты */

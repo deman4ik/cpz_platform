@@ -194,7 +194,7 @@ class Backtester {
       });
 
       this.totalBars = await this.db.countCandles({
-        exchange: this.exchangeId,
+        exchange: this.exchange,
         asset: this.asset,
         currency: this.currency,
         timeframe: this.timeframe,
@@ -207,7 +207,7 @@ class Backtester {
       this.iterations.forEach(async iteration => {
         /* eslint-disable no-await-in-loop */
         const historyCandles = await this.db.getCandles({
-          exchange: this.exchangeId,
+          exchange: this.exchange,
           asset: this.asset,
           currency: this.currency,
           timeframe: this.timeframe,

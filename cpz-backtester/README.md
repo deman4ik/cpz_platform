@@ -13,7 +13,6 @@
       "debug": true,
       "strategyName":"STR_ROBOT_1",
       "exchange": "bitfinex",
-      "exchangeId": 1,
       "asset": "BTC",
       "currency": "USD",
       "timeframe": 1,
