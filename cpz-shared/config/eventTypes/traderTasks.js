@@ -11,6 +11,11 @@ const TASKS_TRADER_START_EVENT = {
       type: "string",
       empty: false
     },
+    mode: {
+      description: "Service run mode.",
+      type: "string",
+      values: ["emulator", "realtime"]
+    },
     robotId: {
       description: "Robot uniq Id. - 'AdvisorName'",
       type: "string",
@@ -25,11 +30,6 @@ const TASKS_TRADER_START_EVENT = {
       description: "Adviser task Id.",
       type: "string",
       empty: false
-    },
-    mode: {
-      description: "Service run mode.",
-      type: "string",
-      values: ["emulator", "realtime"]
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },

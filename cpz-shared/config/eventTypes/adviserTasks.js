@@ -12,15 +12,15 @@ const TASKS_ADVISER_START_EVENT = {
       type: "string",
       empty: false
     },
-    robotId: {
-      description: "Robot uniq Id.",
-      type: "string",
-      empty: false
-    },
     mode: {
       description: "Service run mode.",
       type: "string",
       values: ["emulator", "realtime"]
+    },
+    robotId: {
+      description: "Robot uniq Id.",
+      type: "string",
+      empty: false
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
@@ -28,6 +28,11 @@ const TASKS_ADVISER_START_EVENT = {
     timeframe: {
       description: "Timeframe in minutes.",
       type: "number"
+    },
+    strategyName: {
+      description: "Strategy file name.",
+      type: "string",
+      empty: false
     },
     settings: {
       description: "Adviser settings.",

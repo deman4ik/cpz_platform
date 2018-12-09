@@ -19,7 +19,6 @@ import {
 } from "cpzEventTypes";
 import { ADVISER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
-import { runInThisContext } from "vm";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";

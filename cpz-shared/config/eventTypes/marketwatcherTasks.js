@@ -16,7 +16,8 @@ const TASKS_MARKETWATCHER_START_EVENT = {
     },
     debug: {
       description: "Debug mode.",
-      type: "boolean"
+      type: "boolean",
+      optional: true
     },
     providerType: {
       description: "Data provider type.",
