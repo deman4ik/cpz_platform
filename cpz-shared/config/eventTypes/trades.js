@@ -24,7 +24,7 @@ const TRADES_ORDER_EVENT = {
       empty: false
     },
 
-    orderId: { description: "Uniq Candle Id.", type: "string", empty: false },
+    orderId: { description: "Uniq Order Id.", type: "string", empty: false },
     signalId: { description: "Uniq Single Id.", type: "string", empty: false },
     orderType: {
       description: "Order type.",
