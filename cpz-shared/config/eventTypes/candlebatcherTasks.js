@@ -26,7 +26,8 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
     timeframes: {
       description: "List of timeframes in minutes.",
       type: "array",
-      items: "number"
+      items: "number",
+      enum: [1, 5, 15, 30, 60, 120, 240, 1440]
     },
     settings: {
       description: "Candlebatcher settings.",

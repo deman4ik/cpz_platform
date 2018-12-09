@@ -17,8 +17,7 @@ const BASE_EVENT = {
     },
     data: {
       description: "Event data specific to the event type.",
-      type: "object",
-      empty: false
+      type: "object"
     },
     eventType: {
       description: "The type of the event that occurred.",

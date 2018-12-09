@@ -4,7 +4,6 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   TICKS_NEWTICK_EVENT,
   CANDLES_NEWCANDLE_EVENT,
-  // PRICES_NEWPRICE,
   ERROR_TRADER_EVENT,
   TRADES_TOPIC,
   ERROR_TOPIC
@@ -16,7 +15,6 @@ import { subjectToStr } from "cpzUtils/helpers";
 import { getActivePositionsBySlug, getTraderById } from "cpzStorage";
 import Position from "./position";
 
-// const validateNewPrice = createValidator(PRICES_NEWPRICE.dataSchema);
 const validateNewTick = createValidator(TICKS_NEWTICK_EVENT.dataSchema);
 const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
 /**

@@ -1,3 +1,5 @@
+import { BASE_ERROR } from "./events";
+
 const TICKS_NEWTICK_EVENT = {
   eventType: "CPZ.Ticks.NewTick",
 
@@ -37,7 +39,8 @@ const TICKS_HANDLED_EVENT = {
     success: {
       description: "Success execution list",
       type: "array",
-      items: "string"
+      items: "string",
+      optional: true
     },
     error: {
       description: "Error execution list",
@@ -46,31 +49,10 @@ const TICKS_HANDLED_EVENT = {
         type: "object",
         props: {
           taskId: { type: "string", empty: false },
-          error: {
-            type: "object",
-            description: "Error object if something goes wrong.",
-            props: {
-              code: {
-                description: "Error code.",
-                type: "string",
-                empty: false
-              },
-              message: {
-                description: "Error message.",
-                type: "string",
-                empty: false
-              },
-              detail: {
-                description: "Error detail.",
-                type: "string",
-                optional: true,
-                empty: false
-              }
-            },
-            optional: true
-          }
+          error: BASE_ERROR
         }
-      }
+      },
+      optional: true
     }
   }
 };

@@ -24,11 +24,6 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "string",
       empty: false
     },
-    adviserId: {
-      description: "Adviser task Id.",
-      type: "string",
-      empty: false
-    },
     strategyName: {
       description: "Strategy file name.",
       type: "string",
@@ -39,8 +34,7 @@ const TASKS_BACKTESTER_START_EVENT = {
     currency: { description: "Quote currency.", type: "string", empty: false },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "number",
-      empty: false
+      type: "number"
     },
     // TODO: datefrom/dateto custom validation
     dateFrom: {

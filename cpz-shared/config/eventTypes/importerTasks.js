@@ -29,8 +29,7 @@ const TASKS_IMPORTER_START_EVENT = {
     timeframes: {
       description: "Timeframe in minutes.",
       type: "array",
-      values: [1, 5, 15, 30, 60, 120, 240, 1440],
-      empty: false,
+      enum: [1, 5, 15, 30, 60, 120, 240, 1440],
       optional: true
     },
     requireBatching: {

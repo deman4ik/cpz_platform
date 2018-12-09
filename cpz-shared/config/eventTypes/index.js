@@ -8,7 +8,6 @@ export * from "./adviserTasks";
 export * from "./traderTasks";
 export * from "./backtesterTasks";
 export * from "./ticks";
-export * from "./prices";
 export * from "./topics";
 export * from "./trades";
 export * from "./userRobot";

@@ -205,8 +205,7 @@ class Trader {
    */
   _createPosition(positionId) {
     this.log("_createPosition()");
-    let slippageStep;
-    let deviation;
+    let { slippageStep, deviation } = this._settings;
     if (this._signal.settings) {
       slippageStep =
         this._signal.settings.slippageStep || this._settings.slippageStep;
@@ -223,8 +222,7 @@ class Trader {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      slippageStep,
-      deviation,
+      settings: { ...this._settings, slippageStep, deviation },
       log: this.log.bind(this),
       logEvent: this.logEvent.bind(this)
     });

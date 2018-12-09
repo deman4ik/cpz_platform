@@ -686,7 +686,7 @@ class Adviser {
         ...signal,
         signalId: uuid(),
         robotId: this._robotId,
-        advisorId: this._taskId,
+        adviserId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,

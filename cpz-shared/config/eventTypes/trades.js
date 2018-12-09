@@ -1,3 +1,32 @@
+import { TRADER_SETTINGS } from "./settings";
+import {
+  ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
+  ORDER_TYPE_STOP,
+  ORDER_DIRECTION_BUY,
+  ORDER_DIRECTION_SELL,
+  ORDER_POS_DIR_ENTRY,
+  ORDER_POS_DIR_EXIT,
+  TRADE_ACTION_LONG,
+  TRADE_ACTION_CLOSE_LONG,
+  TRADE_ACTION_SHORT,
+  TRADE_ACTION_CLOSE_SHORT
+} from "../state/types";
+
+import {
+  POS_STATUS_NONE,
+  POS_STATUS_OPENED,
+  POS_STATUS_CLOSED,
+  POS_STATUS_CANCELED,
+  POS_STATUS_ERROR,
+  ORDER_STATUS_NONE,
+  ORDER_STATUS_OPENED,
+  ORDER_STATUS_CLOSED,
+  ORDER_STATUS_POSTED,
+  ORDER_STATUS_CANCELED,
+  ORDER_STATUS_ERROR
+} from "../state/status";
+
 const TRADES_ORDER_EVENT = {
   eventType: "CPZ.Trades.Order",
 
@@ -29,55 +58,87 @@ const TRADES_ORDER_EVENT = {
     orderType: {
       description: "Order type.",
       type: "string",
-      values: ["stop", "limit", "market"],
-      empty: false,
+      values: [ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET, ORDER_TYPE_STOP],
       optional: true
     },
     price: {
       description: "Price in quote currency.",
-      type: "number",
-      empty: false
+      type: "number"
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "number",
-      empty: false
+      type: "number"
     },
     createdAt: {
       description: "Order created timestamp in UTC.",
-      type: "datetime",
-      empty: false
+      type: "datetime"
     },
     status: {
       description: "Order status.",
       type: "string",
-      values: ["none", "opened", "posted", "closed", "canceled", "error"],
-      empty: false
+      values: [
+        ORDER_STATUS_NONE,
+        ORDER_STATUS_OPENED,
+        ORDER_STATUS_CLOSED,
+        ORDER_STATUS_POSTED,
+        ORDER_STATUS_CANCELED,
+        ORDER_STATUS_ERROR
+      ]
     },
     direction: {
       description: "Order direction.",
       type: "string",
-      empty: false
+      values: [ORDER_DIRECTION_BUY, ORDER_DIRECTION_SELL]
     },
     positionDirection: {
       description: "Order position direction.",
       type: "string",
-      empty: false
+      values: [ORDER_POS_DIR_ENTRY, ORDER_POS_DIR_EXIT]
     },
     action: {
-      description: "Signal type.",
+      description: "Signal action.",
       type: "string",
-      values: ["long", "closeLong", "short", "closeShort"],
-      empty: false
+      values: [
+        TRADE_ACTION_LONG,
+        TRADE_ACTION_CLOSE_LONG,
+        TRADE_ACTION_SHORT,
+        TRADE_ACTION_CLOSE_SHORT
+      ]
     },
     executed: {
       description: "Executed volume.",
-      type: "number",
-      optional: true
+      type: "number"
     }
+  }
+};
+
+const _positionStep = {
+  status: {
+    description: "Position status.",
+    type: "string",
+    values: [
+      ORDER_STATUS_NONE,
+      ORDER_STATUS_OPENED,
+      ORDER_STATUS_CLOSED,
+      ORDER_STATUS_POSTED,
+      ORDER_STATUS_CANCELED,
+      ORDER_STATUS_ERROR
+    ]
+  },
+  price: {
+    description: "Position price in quote currency.",
+    type: "number"
+  },
+  date: {
+    description: "Position timestamp in UTC.",
+    type: "datetime"
+  },
+  executed: {
+    description: "Position executed volume.",
+    type: "number"
   }
 };
 
@@ -91,6 +152,11 @@ const TRADES_POSITION_EVENT = {
       empty: false
     },
     traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
+    mode: {
+      description: "Service run mode.",
+      type: "string",
+      values: ["backtest", "emulator", "realtime"]
+    },
     robotId: {
       description: "Robot uniq Id.",
       type: "string",
@@ -116,40 +182,33 @@ const TRADES_POSITION_EVENT = {
     status: {
       description: "Position status.",
       type: "string",
-      values: ["none", "opened", "closed", "canceled", "error"],
-      empty: false
+      values: [
+        POS_STATUS_NONE,
+        POS_STATUS_OPENED,
+        POS_STATUS_CLOSED,
+        POS_STATUS_CANCELED,
+        POS_STATUS_ERROR
+      ]
     },
-    entryStatus: {
-      description: "Position entry status.",
-      type: "string",
-      values: ["none", "opened", "posted", "closed", "canceled", "error"],
-      empty: false
+    options: {
+      description: "Position options.",
+      type: "object",
+      optional: true
     },
-    exitStatus: {
-      description: "Position exit status.",
-      type: "string",
-      values: ["none", "opened", "posted", "closed", "canceled", "error"],
-      empty: false
+    settings: {
+      description: "Position settings.",
+      type: "object",
+      props: TRADER_SETTINGS
     },
-    entryPrice: {
-      description: "Position entry price in quote currency.",
-      type: "number",
-      empty: false
+    entry: {
+      description: "Position entry.",
+      type: "object",
+      props: _positionStep
     },
-    exitPrice: {
-      description: "Position exit price in quote currency.",
-      type: "number",
-      empty: false
-    },
-    entryDate: {
-      description: "Position entry timestamp in UTC.",
-      type: "datetime",
-      empty: false
-    },
-    exitDate: {
-      description: "Position exit timestamp in UTC.",
-      type: "datetime",
-      empty: false
+    exit: {
+      description: "Position exit.",
+      type: "object",
+      props: _positionStep
     }
   }
 };

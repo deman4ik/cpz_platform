@@ -1,4 +1,6 @@
 import { BASE_ERROR } from "./events";
+import { CANDLES_NEWCANDLE_EVENT } from "./candles";
+import { TRADER_SETTINGS } from "./settings";
 
 const SIGNALS_NEWSIGNAL_EVENT = {
   eventType: "CPZ.Signals.NewSignal",
@@ -22,10 +24,6 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       type: "string",
       empty: false
     },
-    alertTime: {
-      description: "Signal time in seconds.",
-      type: "number"
-    },
     timestamp: {
       description: "Signal timestamp in UTC.",
       type: "datetime"
@@ -34,11 +32,6 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       description: "Signal type.",
       type: "string",
       values: ["long", "closeLong", "short", "closeShort"]
-    },
-    qty: {
-      description: "Volume.",
-      type: "number",
-      optional: true
     },
     orderType: {
       description: "Order type.",
@@ -53,37 +46,31 @@ const SIGNALS_NEWSIGNAL_EVENT = {
     priceSource: {
       description: "Candle field.",
       type: "string",
-      values: ["open", "close", "high", "low", "stop"]
+      values: ["open", "close", "high", "low", "stop"],
+      optional: true
     },
     positionId: {
       description: "Uniq position Id",
       type: "number"
     },
+    positionOptions: {
+      description: "Position options.",
+      type: "object",
+      optional: true
+    },
     candle: {
       description: "Signal from Candle.",
       type: "object",
-      props: {
-        time: { description: "Candle time in seconds.", type: "number" },
-        open: { description: "Candle Open Price.", type: "number" },
-        close: { description: "Candle Close Price.", type: "number" },
-        high: { description: "Candle Highest Price.", type: "number" },
-        low: { description: "Trade Lowest Price.", type: "number" },
-        volume: { description: "Candle Volume.", type: "number" }
-      },
+      props: CANDLES_NEWCANDLE_EVENT.dataSchema,
       optional: true
     },
     settings: {
       description: "Trader parameters.",
       type: "object",
       props: {
-        slippageStep: {
-          description: "Price Slippage Step.",
-          type: "number"
-        },
-        deviation: {
-          description: "Price deviation",
-          type: "number"
-        }
+        slippageStep: TRADER_SETTINGS.slippageStep,
+        deviation: TRADER_SETTINGS.deviation,
+        volume: TRADER_SETTINGS.volume
       },
       optional: true
     }
@@ -102,7 +89,8 @@ const SIGNALS_HANDLED_EVENT = {
     success: {
       description: "Success execution list",
       type: "array",
-      items: "string"
+      items: "string",
+      optional: true
     },
     error: {
       description: "Error execution list",
@@ -113,13 +101,15 @@ const SIGNALS_HANDLED_EVENT = {
           taskId: { type: "string", empty: false },
           error: BASE_ERROR
         }
-      }
+      },
+      optional: true
     }
   },
   successPending: {
     description: "Success queued list",
     type: "array",
-    items: "string"
+    items: "string",
+    optional: true
   },
   errorPending: {
     description: "Error queued list",
@@ -130,7 +120,8 @@ const SIGNALS_HANDLED_EVENT = {
         taskId: { type: "string", empty: false },
         error: BASE_ERROR
       }
-    }
+    },
+    optional: true
   }
 };
 

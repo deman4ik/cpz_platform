@@ -2,7 +2,6 @@ const CANDLEBATCHER_SETTINGS = {
   debug: {
     description: "Debug mode.",
     type: "boolean",
-    empty: false,
     optional: true
   },
   proxy: {
@@ -23,7 +22,6 @@ const ADVISER_SETTINGS = {
   debug: {
     description: "Debug mode.",
     type: "boolean",
-    empty: false,
     optional: true
   },
   strategyParameters: {
@@ -49,25 +47,21 @@ const TRADER_SETTINGS = {
   debug: {
     description: "Debug mode.",
     type: "boolean",
-    empty: false,
     optional: true
   },
   slippageStep: {
     description: "Price Slippage Step.",
     type: "number",
-    empty: false,
     optional: true
   },
   deviation: {
     description: "Price deviation",
     type: "number",
-    empty: false,
     optional: true
   },
   volume: {
     description: "User trade volume",
     type: "number",
-    empty: false,
     optional: true
   }
 };
@@ -76,7 +70,6 @@ const BACKTESTER_SETTINGS = {
   debug: {
     description: "Debug mode.",
     type: "boolean",
-    empty: false,
     optional: true
   }
 };

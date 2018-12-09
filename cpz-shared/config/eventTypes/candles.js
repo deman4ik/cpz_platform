@@ -37,7 +37,8 @@ const CANDLES_HANDLED_EVENT = {
     success: {
       description: "Success execution list",
       type: "array",
-      items: "string"
+      items: "string",
+      optional: true
     },
     error: {
       description: "Error execution list",
@@ -48,13 +49,15 @@ const CANDLES_HANDLED_EVENT = {
           taskId: { type: "string", empty: false },
           error: BASE_ERROR
         }
-      }
+      },
+      optional: true
     }
   },
   successPending: {
     description: "Success queued list",
     type: "array",
-    items: "string"
+    items: "string",
+    optional: true
   },
   errorPending: {
     description: "Error queued list",
@@ -65,7 +68,8 @@ const CANDLES_HANDLED_EVENT = {
         taskId: { type: "string", empty: false },
         error: BASE_ERROR
       }
-    }
+    },
+    optional: true
   }
 };
 

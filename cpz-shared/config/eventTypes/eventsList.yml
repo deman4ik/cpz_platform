@@ -17,10 +17,8 @@ endpoints:
   - CPZ.Tasks.Candlebatcher.Start
   - CPZ.Tasks.Candlebatcher.Stop
   - CPZ.Tasks.Candlebatcher.Update
-  - CPZ.Tasks.Candlebatcher.StartImport
-  - CPZ.Tasks.Candlebatcher.StopImport
-  - CPZ.Tasks.Candlebatcher.StartBacktest
-  - CPZ.Tasks.Candlebatcher.StopBacktest
+  - CPZ.Tasks.Importer.Start
+  - CPZ.Tasks.Importer.Stop
 # Adviser  
 - name: "adviser-tasks"
   topic: CPZ-TASKS
@@ -47,6 +45,16 @@ endpoints:
   url: "/api/signalEvents"
   types:
   - CPZ.Signals.NewSignal
+- name: "trader-candles"
+  topic: CPZ-CANDLES
+  url: "/api/candleEvents"
+  types:
+  - CPZ.Candles.NewCandle
+- name: "trader-ticks"
+  topic: CPZ-TICKS
+  url: "/api/tickEvents"
+  types:
+  - CPZ.Ticks.NewTick
 # Taskrunner
 - name: "taskrunner-tasks"
   topic: CPZ-TASKS
@@ -74,20 +82,3 @@ endpoints:
   types:
   - CPZ.Tasks.Backtester.Start
   - CPZ.Tasks.Backtester.Stop
-- name: "backtester-candles"
-  topic: CPZ-CANDLES
-  url: "/api/candleEvents"
-  types:
-  - CPZ.Candles.NewCandle
-  - CPZ.Candles.Handled
-- name: "backtester-signals"
-  topic: CPZ-SIGNALS
-  url: "/api/signalEvents"
-  types:
-  - CPZ.Signals.NewSignal
-  - CPZ.Signals.Handled
-- name: "backtester-orders"
-  topic: CPZ-ORDERS
-  url: "/api/orderEvents"
-  types:
-  - CPZ.Orders.NewOrder
