@@ -1,0 +1,15 @@
+input AdviserParams {
+    mode: String!
+    robotId: ID!
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframe: Int!
+    strategyName: String!
+    settings: AdviserSettings
+}
+
+input AdviserUpdateParams {
+    taskId: ID!
+    settings: AdviserSettings!
+}

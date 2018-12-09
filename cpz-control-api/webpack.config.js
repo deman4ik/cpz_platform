@@ -61,6 +61,11 @@ const config = {
         },
         test: /\.js$/,
         exclude: /node_modules/
+      },
+      {
+        exclude: /node_modules/,
+        test: /\.graphql$/,
+        use: [{ loader: "graphql-import-loader" }]
       }
     ]
   },

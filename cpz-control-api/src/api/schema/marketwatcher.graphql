@@ -1,0 +1,17 @@
+type MarketwatcherSubscription {
+    asset: String!
+    currency: String!
+}
+
+input MarketwatcherParams {
+    mode: String!
+    debug: Boolean!
+    exchange: String!
+    subscriptions: [MarketwatcherSubscription!]!
+}
+
+input MarketwatcherSubParams {
+    taskId: ID!
+    exchange: String!
+    subscriptions: [MarketwatcherSubscription!]!
+}

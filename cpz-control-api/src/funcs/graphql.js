@@ -1,16 +1,14 @@
-import { gql, ApolloServer } from "apollo-server-azure-functions";
-
-// Construct a schema, using GraphQL schema language
-const typeDefs = gql`
-  type Query {
-    hello: String
-  }
-`;
+import { ApolloServer } from "apollo-server-azure-functions";
+import GraphQLJSON from "graphql-type-json";
+import { GraphQLDateTime } from "graphql-iso-date";
+import typeDefs from "../api/schema/schema.graphql";
 
 // A map of functions which return data for the schema.
 const resolvers = {
+  JSON: GraphQLJSON,
+  Datetime: GraphQLDateTime,
   Query: {
-    hello: () => "world"
+    ping: () => new Date().toISOString()
   }
 };
 

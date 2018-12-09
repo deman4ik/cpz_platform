@@ -1,0 +1,14 @@
+input BacktesterParams {
+    robotId: ID!
+    userId: ID!
+    strategyName: String!
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframe: Int!
+    dateFrom: Datetime!
+    dateTo: Datetime!
+    settings: BacktesterSettings
+    adviserSettings: AdviserSettings
+    traderSettings: TraderSettings
+}

@@ -1,0 +1,53 @@
+# import { MarketwatcherSubscription, MarketwatcherParams, MarketwatcherSubParams } from "src/api/schema/marketwatcher.graphql"
+# import { CandlebatcherParams, CandlebatcherUpdateParams  } from "src/api/schema/candlebatcher.graphql"
+# import { AdviserParams, AdviserUpdateParams } from "src/api/schema/adviser.graphql"
+# import { TraderParams, TraderUpdateParams } from "src/api/schema/trader.graphql"
+# import { BacktesterParams } from "src/api/schema/backtester.graphql"
+# import { UserRobotParams } from "src/api/schema/userRobot.graphql"
+# import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
+
+scalar Datetime
+scalar JSON
+
+type Query {
+    ping: String
+  }
+
+type Mutation {
+    # Marketwatcher
+    startMarketwatcher(params: MarketwatcherParams!): ServiceRunnerResponse!
+    stopMarketwatcher(taskId: String!): ServiceRunnerResponse!
+    subscribeMarketwatcher(params: MarketwatcherSubParams!): Response!
+    unsubscribeMarketwatcher(params: MarketwatcherSubParams!): Response!
+    # Candlebatcher
+    startCandlebatcher(params: CandlebatcherParams!): ServiceRunnerResponse!
+    stopCandlebatcher(taskId: String!): ServiceRunnerResponse!
+    updateCandlebatcher(params: CandlebatcherUpdateParams!): Response!
+    # Adviser
+    startAdviser(params: AdviserParams!): ServiceRunnerResponse!
+    stopAdviser(taskId: String!): ServiceRunnerResponse!
+    updateAdviser(params: AdviserUpdateParams!): Response!
+    # Trader
+    startTrader(params: TraderParams!): ServiceRunnerResponse!
+    stopTrader(taskId: String!): ServiceRunnerResponse!
+    updateTrader(params: TraderUpdateParams!): Response!
+    # Backtester 
+    startBacktester(params: BacktesterParams!): ServiceRunnerResponse!
+    stopBacktester(taskId: String!): ServiceRunnerResponse!
+    # UserRobot
+    startUserRobot(id: String!): ServiceRunnerResponse!
+    stopUserRobot(id: String!): ServiceRunnerResponse!
+    updateUserRobot(id: String!): Response!
+}
+
+type Response {
+    success: Boolean!
+    error: String
+}
+
+type ServiceRunnerResponse {
+    success: Boolean!
+    error: String
+    taskId: ID
+    status: String
+}

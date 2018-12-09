@@ -1,0 +1,14 @@
+
+input CandlebatcherParams {
+    mode: String!
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframes: [Int!]!
+    settings: CandlebatcherSettings
+}
+
+input CandlebatcherUpdateParams {
+    taskId: ID!
+    settings: CandlebatcherSettings!
+}

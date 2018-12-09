@@ -1,0 +1,16 @@
+input TraderParams {
+    mode: String!
+    robotId: ID!
+    userId: ID!
+    adviserId: ID!
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframe: Int!
+    settings: TraderSettings
+}
+
+input TraderUpdateParams {
+    taskId: ID!
+    settings: TraderSettings!
+}
