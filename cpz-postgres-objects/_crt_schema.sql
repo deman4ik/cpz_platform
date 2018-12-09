@@ -1,30 +1,9 @@
-CREATE USER cpz WITH
-	LOGIN
-	NOSUPERUSER
-	NOCREATEDB
-	NOCREATEROLE
-	INHERIT
-	NOREPLICATION
-	CONNECTION LIMIT -1
-	PASSWORD 'sys';
-
-grant azure_pg_admin to cpz;
-
--- connect under cpz
-CREATE SCHEMA "cpz-platform"
+-- create schema
+CREATE SCHEMA "cpz"
     AUTHORIZATION cpz;
 
+-- set current (default) schema
 ALTER ROLE cpz IN DATABASE postgres
-    SET search_path TO 'cpz-platform';
+    SET search_path TO 'cpz';
 
-CREATE TABLESPACE cpz_platform_data
-  OWNER cpz;
-
-ALTER TABLESPACE cpz_platform_data
-  OWNER TO cpz;
-
-CREATE TABLESPACE cpz_platform_index
-  OWNER cpz;
-
-ALTER TABLESPACE cpz_platform_index
-  OWNER TO cpz;
+create sequence cpz_id_seq;

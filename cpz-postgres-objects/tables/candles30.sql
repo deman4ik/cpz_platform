@@ -1,34 +1,42 @@
-
-create sequence candles30_id_seq;
-
-CREATE TABLE candles30
+create table candles30
 (
-    id bigint DEFAULT nextval('candles30_id_seq'::regclass) NOT NULL,
-    time_start timestamp NOT NULL,
-    time_end timestamp NOT NULL,
-    start integer NOT NULL,
-    "end" integer NOT NULL,
-    open numeric NOT NULL,
-    high numeric NOT NULL,
-    low numeric NOT NULL,
-    close numeric NOT NULL,
-    volume numeric NOT NULL,
-    trades integer,
-    vwp numeric,
-    currency varchar(10) NOT NULL,
-    asset varchar(10) NOT NULL,
-    exchange integer NOT NULL,
-    gap integer NOT NULL,
-    "timestamp" timestamp,
-    CONSTRAINT c_candle5_currency_fk FOREIGN KEY (currency) REFERENCES currency (code),
-    CONSTRAINT c_candle5_assets_fk FOREIGN KEY (asset) REFERENCES assets (code),
-    CONSTRAINT c_candle5_exchange_fk FOREIGN KEY (exchange) REFERENCES exchanges (id),
-    CONSTRAINT c_candle5_gap check (gap in (0,1))
-);
-ALTER TABLE candles30 ADD CONSTRAINT c_candles30_pk PRIMARY KEY (id);
---CREATE UNIQUE INDEX c_candles30_pk ON candles30 (id);
-CREATE UNIQUE INDEX c_candles30_uk ON candles30 (start, currency, asset, exchange);
-CREATE INDEX i_candles30_currency_fk ON candles30 (currency);
-CREATE INDEX i_candles30_asset_fk ON candles30 (asset);
-CREATE INDEX i_candles30_select1 ON candles30 (exchange, currency, asset);
-CREATE INDEX i_candles30_exchange_fk ON candles30 (exchange);
+  id        uuid      not null
+    constraint c_candles30_pk
+    primary key,
+  time      bigint    not null,
+  timestamp timestamp not null,
+  open      numeric   not null,
+  high      numeric   not null,
+  low       numeric   not null,
+  close     numeric   not null,
+  volume    numeric   not null,
+  exchange  varchar(10)      not null
+    constraint c_candles30_exchange_fk
+    references exchange,
+  asset     varchar(10)      not null
+    constraint c_candles30_asset_fk
+    references asset,
+  currency  varchar(10)      not null
+    constraint c_candles30_currency_fk
+    references currency,
+  type      varchar(10)      not null
+)
+with OIDS;
+
+alter table candles30
+  add constraint c_candles30_type_chk
+    check (type in ('created', 'loaded', 'previous'));
+
+alter table candles30
+  add constraint c_candles30_uk
+    unique (time, currency, asset, exchange);
+
+create index i_candles30_currency_fk on candles30 (currency);
+create index i_candles30_asset_fk on candles30 (asset);
+create index i_candles30_exchange_fk on candles30 (exchange);
+create index i_candles30_select1 on candles30 (exchange, currency, asset);
+
+comment on table candles30 is 'Candles in 30 minutes timeframe';
+    
+alter table candles30 owner to cpz;
+

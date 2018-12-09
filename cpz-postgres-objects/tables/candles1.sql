@@ -1,7 +1,7 @@
-create table candles5
+create table candles1
 (
   id        uuid      not null
-    constraint c_candles5_pk
+    constraint c_candles1_pk
     primary key,
   time      bigint    not null,
   timestamp timestamp not null,
@@ -11,32 +11,32 @@ create table candles5
   close     numeric   not null,
   volume    numeric   not null,
   exchange  varchar(10)      not null
-    constraint c_candles5_exchange_fk
+    constraint c_candles1_exchange_fk
     references exchange,
   asset     varchar(10)      not null
-    constraint c_candles5_asset_fk
+    constraint c_candles1_asset_fk
     references asset,
   currency  varchar(10)      not null
-    constraint c_candles5_currency_fk
+    constraint c_candles1_currency_fk
     references currency,
   type      varchar(10)      not null
 )
 with OIDS;
 
-alter table candles5
-  add constraint c_candles5_type_chk
+alter table candles1
+  add constraint c_candles1_type_chk
     check (type in ('created', 'loaded', 'previous'));
 
-alter table candles5
-  add constraint c_candles5_uk
+alter table candles1
+  add constraint c_candles1_uk
     unique (time, currency, asset, exchange);
 
-create index i_candles5_currency_fk on candles5 (currency);
-create index i_candles5_asset_fk on candles5 (asset);
-create index i_candles5_exchange_fk on candles5 (exchange);
-create index i_candles5_select1 on candles5 (exchange, currency, asset);
+create index i_candles1_currency_fk on candles1 (currency);
+create index i_candles1_asset_fk on candles1 (asset);
+create index i_candles1_exchange_fk on candles1 (exchange);
+create index i_candles1_select1 on candles1 (exchange, currency, asset);
 
-comment on table candles5 is 'Candles in 5 minutes timeframe';
+comment on table candles1 is 'Candles in 1 minute timeframe';
     
-alter table candles5 owner to cpz;
+alter table candles1 owner to cpz;
 

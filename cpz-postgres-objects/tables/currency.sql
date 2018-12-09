@@ -1,21 +1,18 @@
--- Table: "cpz-platform".currency
-
--- DROP TABLE "cpz-platform".currency;
-
-CREATE TABLE "cpz-platform".currency
+create table currency
 (
-    code character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    name character varying(160) COLLATE pg_catalog."default",
-    country_name character varying(160) COLLATE pg_catalog."default",
-    CONSTRAINT c_currency_pk PRIMARY KEY (code)
-        USING INDEX TABLESPACE pg_default,
-    CONSTRAINT c_currency_code_uk UNIQUE (code)
-        USING INDEX TABLESPACE pg_default
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+    code         varchar(10) not null
+      constraint c_currency_pk primary key,
+    name         varchar(160) not null,
+    country_name varchar(160),
+  	enabled 		 integer not null default 20
+);
+alter table currency
+	add constraint c_currency_enabled_chk
+		check (enabled in (0,10,20));
+		
+comment on column currency.enabled is '
+0 - disabled
+10 - admin only
+20 - public';
 
-ALTER TABLE "cpz-platform".currency
-    OWNER to cpz;
+alter table currency owner to cpz;

@@ -7,7 +7,8 @@ create table userlist
   reg_date date default CURRENT_DATE not null,
   status integer default 1 not null,
   phone varchar(20),
-  telegram varchar(80)
+  telegram varchar(160)
 );
+
 
 
