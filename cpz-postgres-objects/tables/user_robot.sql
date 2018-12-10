@@ -6,16 +6,17 @@ create table user_robot
 	robot_id        numeric(17) not null
 			constraint c_user_robot_robot_fk
 			references robot,
-	user_id uuid
+	user_id         uuid not null
 			constraint c_user_robot_userlist_fk
 			references userlist,	
 	robot_status    integer default 0 not null,
-	quantity        numeric           not null,		
+	quantity        numeric default 0 not null,		
 	balance_init    numeric default 0 not null,
 	balance_current numeric default 0 not null,
 	last_started    timestamp default CURRENT_DATE not null,
 	dt_from					timestamp not null,
-	dt_to						timestamp not null			
+	dt_to						timestamp not null,
+	user_params			jsonb	
 );
 
 alter table user_robot
