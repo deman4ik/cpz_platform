@@ -1,22 +1,65 @@
-CREATE TABLE trades
+create table trades
 (
-    id bigint DEFAULT nextval('trades_id_seq'::regclass) NOT NULL,
-    order_time timestamp,
-    action varchar(10) NOT NULL,
-    price numeric NOT NULL,
-    robot bigint NOT NULL,
-    ordertype varchar(10),
-    order_num integer,
-    --position bigint,
-    user_id uuid,
-    quantity numeric,
-    roundtrip_id numeric NOT NULL,
-    CONSTRAINT c_trades_robot_fk FOREIGN KEY (robot) REFERENCES robots (id) ON UPDATE CASCADE,
-    CONSTRAINT c_trades_roundtrip_fk FOREIGN KEY (roundtrip_id) REFERENCES trade_roundtrips (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT c_trades_userlist_fk FOREIGN KEY (user_id) REFERENCES userlist (id) ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX c_trades_pk ON trades (id);
-CREATE UNIQUE INDEX c_trades_date_action_uk ON trades (robot, order_time, action, position, user_id);
-COMMENT ON COLUMN trades.order_time IS 'Время ордера';
-COMMENT ON COLUMN trades.quantity IS 'Объем ордера';
-comment on table trades is E'@omit create,update,delete';
+    id            uuid 
+        constraint c_trades_pk
+        primary key not null,
+    position_id   uuid not null
+        constraint c_trades_position_fk
+        references positions not null,
+    user_id       uuid 
+        constraint c_trades_userlist_fk
+        references userlist not null,
+    robot_id      numeric(17)     not null
+        constraint c_trades_robot_fk
+        references robot,
+    exchange      varchar(10)     not null
+        constraint c_trades_exchange_fk
+        references exchange,
+    asset         varchar(10)     not null
+        constraint c_trades_asset_fk
+        references asset,
+    currency      varchar(10)     not null
+        constraint c_trades_currency_fk
+        references currency,
+    timeframe     integer         not null,
+    
+    created_at    timestamp       not null,
+    order_time    timestamp,
+    order_num     varchar(160),
+    status        varchar(10)     not null default 'none',
+    action        varchar(10)     not null,
+    price         numeric         not null,
+    exec_quantity numeric,
+    signal_id     uuid
+)
+with OIDS;
+
+alter table trades
+  add constraint c_trades_action_chk
+    check (action in ('long','closeLong','short','closeShort'));
+    
+create index i_trades_userlist_fk
+  on trades (user_id);
+create index i_trades_robot_fk
+  on trades (robot_id);
+create index i_trades_exchange_fk
+  on trades (exchange);
+create index i_trades_asset_fk
+  on trades (asset);
+create index i_trades_currency_fk
+  on trades (currency);
+
+create index i_trades_positions_fk
+  on trades (position_id);
+create index i_trades_signal_fk
+  on trades (signal_id);
+create index i_trades_sel_user_date
+  on trades (user_id, created_at);
+
+comment on column trades.created_at is 'time of issuing order inside the system';
+comment on column trades.order_time is 'order time from Exchange';
+comment on column trades.order_num is 'external order number from Exchange';
+comment on column trades.price is 'order price from Exchange, not the signal price';
+comment on column trades.exec_quantity is 'volume of asset in the order posted to Exchange';
+
+comment on table trades is 'Orders for position';

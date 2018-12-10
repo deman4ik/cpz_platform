@@ -1,22 +1,24 @@
--- auto-generated definition
-CREATE TABLE strat
+create table strat
 (
-  id           bigserial    NOT NULL
-    CONSTRAINT c_strat_pk
-    PRIMARY KEY,
-  code         varchar(100) NOT NULL,
+  id           numeric(17)  not null default nextval('cpz_id_seq'::regclass)
+    constraint c_strat_pk
+    primary key,
+  code         varchar(100) not null
+  	constraint c_strat_code_uk
+      unique,
+  source 			 varchar(10)  not null default 'cpz'::character varying,
+  filename		 varchar(240) not null
+  	constraint c_strat_filename_uk
+      unique,
   descr        varchar(1000),
   dt_start_use timestamp,
-  source varchar(10) DEFAULT 'cpz'::character varying
+  author			 uuid
 );
 
-CREATE UNIQUE INDEX c_strat_code_uk
-  ON strat (code);
+comment on table strat is 'Base strategies';
 
-COMMENT ON TABLE strat
-IS 'base strategies';
-
-COMMENT ON COLUMN "cpz-platform".strat.source IS 'cpz | gekko | external';
+comment on column strat.source is 'cpz | gekko | user';
+comment on column strat.author is 'link to userlist without fk!';
 
 
 
