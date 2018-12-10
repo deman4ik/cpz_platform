@@ -1,9 +1,0 @@
-- args:
-    sql: CREATE TABLE "cpz"."assets"("code" text NOT NULL UNIQUE, "name" text NOT
-      NULL, PRIMARY KEY ("code") ); COMMENT ON TABLE "cpz"."assets" IS 'Cryptocurrency
-      assets'
-  type: run_sql
-- args:
-    name: assets
-    schema: cpz
-  type: add_existing_table_or_view

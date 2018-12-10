@@ -1,9 +1,0 @@
-- args:
-    sql: CREATE TABLE "cpz"."strategies"("id" uuid NOT NULL, "code" text NOT NULL,
-      "fileName" text NOT NULL UNIQUE, "desc" text , "started_use_at" timestamp , "authorId"
-      uuid , PRIMARY KEY ("id") );
-  type: run_sql
-- args:
-    name: strategies
-    schema: cpz
-  type: add_existing_table_or_view

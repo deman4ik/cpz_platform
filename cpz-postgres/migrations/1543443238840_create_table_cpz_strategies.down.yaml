@@ -1,3 +1,0 @@
-- args:
-    sql: DROP TABLE "cpz"."strategies"
-  type: run_sql

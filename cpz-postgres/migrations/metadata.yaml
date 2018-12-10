@@ -1,0 +1,893 @@
+query_templates: []
+remote_schemas: []
+tables:
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  - comment: null
+    name: positionsBypositionId
+    using:
+      foreign_key_constraint_on: position_id
+  - comment: null
+    name: robotByrobotId
+    using:
+      foreign_key_constraint_on: robot_id
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: trades
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: robotByrobotId
+    using:
+      foreign_key_constraint_on: robot_id
+  - comment: null
+    name: userRobotByuserRobotId
+    using:
+      foreign_key_constraint_on: user_robot_id
+  select_permissions: []
+  table:
+    name: robot_statistics
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles1440
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetBybalanceEquvDisplay
+    using:
+      foreign_key_constraint_on: balance_equv_display
+  - comment: null
+    name: currencyBypreferredCurrency
+    using:
+      foreign_key_constraint_on: preferred_currency
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: user_settings
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles1
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles240
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: user_exchacc
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: robotStatisticssByuserRobotId
+    using:
+      foreign_key_constraint_on:
+        column: user_robot_id
+        table:
+          name: robot_statistics
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: robotByrobotId
+    using:
+      foreign_key_constraint_on: robot_id
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: user_robot
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles5
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: candles1sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles1
+          schema: cpz
+  - comment: null
+    name: candles120sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles120
+          schema: cpz
+  - comment: null
+    name: candles1440sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles1440
+          schema: cpz
+  - comment: null
+    name: candles15sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles15
+          schema: cpz
+  - comment: null
+    name: candles240sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles240
+          schema: cpz
+  - comment: null
+    name: candles30sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles30
+          schema: cpz
+  - comment: null
+    name: candles5sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles5
+          schema: cpz
+  - comment: null
+    name: candles60sByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: candles60
+          schema: cpz
+  - comment: null
+    name: exchangePairsByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: exchange_pair
+          schema: cpz
+  - comment: null
+    name: positionssByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: positions
+          schema: cpz
+  - comment: null
+    name: robotsByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: robot
+          schema: cpz
+  - comment: null
+    name: tradessByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: trades
+          schema: cpz
+  - comment: null
+    name: userExchaccsByasset
+    using:
+      foreign_key_constraint_on:
+        column: asset
+        table:
+          name: user_exchacc
+          schema: cpz
+  - comment: null
+    name: userSettingssBybalanceEquvDisplay
+    using:
+      foreign_key_constraint_on:
+        column: balance_equv_display
+        table:
+          name: user_settings
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships: []
+  select_permissions: []
+  table:
+    name: asset
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles15
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: exchange_pair
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: robotByrobotId
+    using:
+      foreign_key_constraint_on: robot_id
+  select_permissions: []
+  table:
+    name: signal
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: candles1sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles1
+          schema: cpz
+  - comment: null
+    name: candles120sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles120
+          schema: cpz
+  - comment: null
+    name: candles1440sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles1440
+          schema: cpz
+  - comment: null
+    name: candles15sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles15
+          schema: cpz
+  - comment: null
+    name: candles240sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles240
+          schema: cpz
+  - comment: null
+    name: candles30sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles30
+          schema: cpz
+  - comment: null
+    name: candles5sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles5
+          schema: cpz
+  - comment: null
+    name: candles60sByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: candles60
+          schema: cpz
+  - comment: null
+    name: exchangePairsByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: exchange_pair
+          schema: cpz
+  - comment: null
+    name: positionssByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: positions
+          schema: cpz
+  - comment: null
+    name: robotsByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: robot
+          schema: cpz
+  - comment: null
+    name: tradessByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: trades
+          schema: cpz
+  - comment: null
+    name: userExchaccsByexchange
+    using:
+      foreign_key_constraint_on:
+        column: exchange
+        table:
+          name: user_exchacc
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships: []
+  select_permissions: []
+  table:
+    name: exchange
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: positionssByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: positions
+          schema: cpz
+  - comment: null
+    name: tradessByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: trades
+          schema: cpz
+  - comment: null
+    name: userExchaccsByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_exchacc
+          schema: cpz
+  - comment: null
+    name: userIntaccsByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_intacc
+          schema: cpz
+  - comment: null
+    name: userRobotsByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_robot
+          schema: cpz
+  - comment: null
+    name: userSettingssByuserId
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_settings
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships: []
+  select_permissions: []
+  table:
+    name: userlist
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: user_intacc
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles60
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: positionssByrobotId
+    using:
+      foreign_key_constraint_on:
+        column: robot_id
+        table:
+          name: positions
+          schema: cpz
+  - comment: null
+    name: robotStatisticssByrobotId
+    using:
+      foreign_key_constraint_on:
+        column: robot_id
+        table:
+          name: robot_statistics
+          schema: cpz
+  - comment: null
+    name: signalsByrobotId
+    using:
+      foreign_key_constraint_on:
+        column: robot_id
+        table:
+          name: signal
+          schema: cpz
+  - comment: null
+    name: tradessByrobotId
+    using:
+      foreign_key_constraint_on:
+        column: robot_id
+        table:
+          name: trades
+          schema: cpz
+  - comment: null
+    name: userRobotsByrobotId
+    using:
+      foreign_key_constraint_on:
+        column: robot_id
+        table:
+          name: user_robot
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  - comment: null
+    name: stratBystrat
+    using:
+      foreign_key_constraint_on: strat
+  select_permissions: []
+  table:
+    name: robot
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles120
+    schema: cpz
+  update_permissions: []
+- array_relationships: []
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  select_permissions: []
+  table:
+    name: candles30
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: tradessBypositionId
+    using:
+      foreign_key_constraint_on:
+        column: position_id
+        table:
+          name: trades
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships:
+  - comment: null
+    name: assetByasset
+    using:
+      foreign_key_constraint_on: asset
+  - comment: null
+    name: currencyBycurrency
+    using:
+      foreign_key_constraint_on: currency
+  - comment: null
+    name: exchangeByexchange
+    using:
+      foreign_key_constraint_on: exchange
+  - comment: null
+    name: robotByrobotId
+    using:
+      foreign_key_constraint_on: robot_id
+  - comment: null
+    name: userlistByuserId
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions: []
+  table:
+    name: positions
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: candles1sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles1
+          schema: cpz
+  - comment: null
+    name: candles120sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles120
+          schema: cpz
+  - comment: null
+    name: candles1440sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles1440
+          schema: cpz
+  - comment: null
+    name: candles15sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles15
+          schema: cpz
+  - comment: null
+    name: candles240sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles240
+          schema: cpz
+  - comment: null
+    name: candles30sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles30
+          schema: cpz
+  - comment: null
+    name: candles5sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles5
+          schema: cpz
+  - comment: null
+    name: candles60sBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: candles60
+          schema: cpz
+  - comment: null
+    name: exchangePairsBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: exchange_pair
+          schema: cpz
+  - comment: null
+    name: positionssBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: positions
+          schema: cpz
+  - comment: null
+    name: robotsBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: robot
+          schema: cpz
+  - comment: null
+    name: tradessBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: trades
+          schema: cpz
+  - comment: null
+    name: userIntaccsBycurrency
+    using:
+      foreign_key_constraint_on:
+        column: currency
+        table:
+          name: user_intacc
+          schema: cpz
+  - comment: null
+    name: userSettingssBypreferredCurrency
+    using:
+      foreign_key_constraint_on:
+        column: preferred_currency
+        table:
+          name: user_settings
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships: []
+  select_permissions: []
+  table:
+    name: currency
+    schema: cpz
+  update_permissions: []
+- array_relationships:
+  - comment: null
+    name: robotsBystrat
+    using:
+      foreign_key_constraint_on:
+        column: strat
+        table:
+          name: robot
+          schema: cpz
+  delete_permissions: []
+  event_triggers: []
+  insert_permissions: []
+  object_relationships: []
+  select_permissions: []
+  table:
+    name: strat
+    schema: cpz
+  update_permissions: []
