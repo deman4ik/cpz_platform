@@ -25,7 +25,7 @@ with OIDS;
 
 alter table candles1440
   add constraint c_candles1440_type_chk
-    check (type in ('created', 'loaded', 'previous'));
+    check (type in ('created', 'loaded', 'previous', 'imported'));
 
 alter table candles1440
   add constraint c_candles1440_uk
