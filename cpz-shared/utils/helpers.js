@@ -181,10 +181,10 @@ function arraysDiff(full, part) {
 }
 
 function chunkArray(array, chunkSize) {
+  const arrayToChunk = [...array];
   const results = [];
-
-  while (array.length) {
-    results.push(array.splice(0, chunkSize));
+  while (arrayToChunk.length) {
+    results.push(arrayToChunk.splice(0, chunkSize));
   }
 
   return results;

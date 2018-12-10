@@ -58,7 +58,7 @@ class CCXTProvider extends BaseProvider {
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe: this._timeframe,
+                timeframe: 1,
                 mode: this._mode
               }),
               RowKey: generateCandleRowKey(item[0]),
@@ -115,7 +115,7 @@ class CCXTProvider extends BaseProvider {
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
-              timeframe: this._timeframe,
+              timeframe: 1,
               mode: this._mode
             }),
             RowKey: generateCandleRowKey(latestCandle[0]),
@@ -151,7 +151,7 @@ class CCXTProvider extends BaseProvider {
       asset: this._asset,
       currency: this._currency,
       exchange: this._exchange,
-      timframe: this._timeframe,
+      timframe: 1,
       limit: this._limit,
       dateFrom: this._dateFrom,
       dateTo: this._dateTo,

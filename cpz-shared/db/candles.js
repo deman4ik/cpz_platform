@@ -7,9 +7,7 @@ async function saveCandles({ timeframe, candles }) {
           objects: $objects
           on_conflict: { constraint: c_candles${timeframe}_uk }
         ) {
-          returning {
-            id
-          }
+          affected_rows
         }
       }
       `;
@@ -35,7 +33,11 @@ async function saveCandles({ timeframe, candles }) {
     throw new VError(
       {
         name: "DBError",
-        cause: error
+        cause: error,
+        info: {
+          timeframe,
+          candles
+        }
       },
       "Failed to save candles to DB;"
     );

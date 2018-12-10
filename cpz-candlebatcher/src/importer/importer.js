@@ -292,9 +292,14 @@ class Importer {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           try {
-            if (this._saveToCache)
-              await saveCandlesArrayToCache(timeframeCandles[timeframe]);
-            await this.db.saveCandles(timeframeCandles[timeframe]);
+            if (timeframeCandles[timeframe].length > 0) {
+              if (this._saveToCache)
+                await saveCandlesArrayToCache(timeframeCandles[timeframe]);
+              await this._db.saveCandles({
+                timeframe,
+                candles: timeframeCandles[timeframe]
+              });
+            }
           } catch (error) {
             throw new VError(
               {
@@ -418,12 +423,14 @@ class Importer {
               mode: this._mode
             })
           });
+          this.log(tempCandles.length);
           const { candles, gappedCandles } = await this._handleGaps(
             tempCandles,
             dateFrom,
             dateTo,
             duration
           );
+
           if (gappedCandles.length > 0) {
             // Сохраняем сформированные пропущенные свечи
             await saveCandlesArrayToTemp(gappedCandles);
@@ -440,7 +447,7 @@ class Importer {
           }
         })
       );
-      await this._clearTemp();
+      //  await this._clearTemp();
     } catch (error) {
       throw new VError(
         {

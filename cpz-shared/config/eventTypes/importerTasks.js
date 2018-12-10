@@ -37,7 +37,7 @@ const TASKS_IMPORTER_START_EVENT = {
       type: "boolean",
       optional: true
     },
-    warmUpCache: {
+    saveToCache: {
       dataSchema: "Save current loaded candles to cache",
       type: "boolean",
       optional: true
