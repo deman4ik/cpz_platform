@@ -447,7 +447,7 @@ class Importer {
           }
         })
       );
-      //  await this._clearTemp();
+      await this._clearTemp();
     } catch (error) {
       throw new VError(
         {
