@@ -16,13 +16,18 @@ create table user_robot
 	last_started    timestamp default CURRENT_DATE not null,
 	dt_from					timestamp not null,
 	dt_to						timestamp not null,
+	run_mode      	varchar(10) not null,
 	user_params			jsonb	
 );
 
 alter table user_robot
   add constraint c_user_robot_uk
     unique (robot_id,user_id);
-    	
+    
+alter table user_robot
+  add constraint c_user_robot_run_mode_chk
+    check (run_mode in ('backtest','emulator','realtime'));
+        	
 create index i_user_robot_userlist_fk on user_robot (user_id);
 
 alter table user_robot add constraint c_user_robot_status_chk check (robot_status in (-1, 0, 1, 10, 20));
