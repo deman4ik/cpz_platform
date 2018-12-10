@@ -18,7 +18,7 @@ async function startMarketwatcher(_, { params }) {
 
 async function stopMarketwatcher(_, { taskId }) {
   try {
-    const { status } = await MarketwatcherRunner.stop(taskId);
+    const { status } = await MarketwatcherRunner.stop({taskId});
     return {
       success: true,
       taskId,

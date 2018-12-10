@@ -18,7 +18,8 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
     providerType: {
       description: "Data provider type.",
       type: "string",
-      values: ["ccxt"]
+      values: ["ccxt"],
+      optional: true
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },

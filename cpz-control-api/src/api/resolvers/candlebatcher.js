@@ -18,7 +18,7 @@ async function startCandlebatcher(_, { params }) {
 
 async function stopCandlebatcher(_, { taskId }) {
   try {
-    const { status } = await CandlebatcherRunner.stop(taskId);
+    const { status } = await CandlebatcherRunner.stop({ taskId });
     return {
       success: true,
       taskId,

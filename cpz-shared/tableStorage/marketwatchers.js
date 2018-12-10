@@ -20,35 +20,24 @@ const getMarketwatcherById = async taskId =>
  *
  * @param {Object} input
  * @param {string} input.mode - Marketwatcher mode
- * @param {string} input.providerType - Marketwatcher provider type
  * @param {string} input.exchange - Marketwatcher exchanges
  * @returns {MarketwatcherState}
  */
-const findMarketwatcher = async ({ mode, providerType, exchange }) => {
+const findMarketwatcher = async ({ mode,  exchange }) => {
   try {
     const modeFilter = TableQuery.stringFilter(
       "mode",
       TableUtilities.QueryComparisons.EQUAL,
       mode
     );
-    const providerTypeFilter = TableQuery.stringFilter(
-      "providerType",
-      TableUtilities.QueryComparisons.EQUAL,
-      providerType
-    );
     const exchangeFilter = TableQuery.stringFilter(
       "exchange",
       TableUtilities.QueryComparisons.EQUAL,
       exchange
     );
-    const combinedFilters = TableQuery.combineFilters(
-      modeFilter,
-      TableUtilities.TableOperators.AND,
-      providerTypeFilter
-    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        combinedFilters,
+        modeFilter,
         TableUtilities.TableOperators.AND,
         exchangeFilter
       )

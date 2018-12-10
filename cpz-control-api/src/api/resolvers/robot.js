@@ -3,7 +3,7 @@ import DB from "cpzDB";
 
 const db = new DB();
 
-async function startRobot(_, { params }, { dataSources }) {
+async function startRobot(_, { params }) {
   try {
     const userRobot = db.getUserRobot(params);
     const { taskId, status } = await RobotRunner.start(userRobot);
@@ -20,10 +20,9 @@ async function startRobot(_, { params }, { dataSources }) {
   }
 }
 
-async function stopRobot(_, { id }, { dataSources }) {
+async function stopRobot(_, { id }) {
   try {
-    // TODO: Update robot status in DB
-    const { status } = await RobotRunner.stop(id);
+    const { status } = await RobotRunner.stop({ id });
     return {
       success: true,
       taskId: id,
@@ -37,7 +36,7 @@ async function stopRobot(_, { id }, { dataSources }) {
   }
 }
 
-async function updateRobot(_, { params }, { dataSources }) {
+async function updateRobot(_, { params }) {
   try {
     await RobotRunner.update(params);
     return {

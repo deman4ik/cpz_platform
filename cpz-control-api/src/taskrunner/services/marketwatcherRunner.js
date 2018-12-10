@@ -52,7 +52,6 @@ class MarketwatcherRunner extends BaseRunner {
         ? await getMarketwatcherById(taskId)
         : await findMarketwatcher({
             mode,
-            providerType,
             exchange
           });
 

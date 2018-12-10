@@ -18,7 +18,7 @@ async function startBacktester(_, { params }) {
 
 async function stopBacktester(_, { taskId }) {
   try {
-    const { status } = await BacktesterRunner.stop(taskId);
+    const { status } = await BacktesterRunner.stop({ taskId });
     return {
       success: true,
       taskId,

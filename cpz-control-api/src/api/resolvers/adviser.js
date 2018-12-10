@@ -18,7 +18,7 @@ async function startAdviser(_, { params }) {
 
 async function stopAdviser(_, { taskId }) {
   try {
-    const { status } = await AdviserRunner.stop(taskId);
+    const { status } = await AdviserRunner.stop({ taskId });
     return {
       success: true,
       taskId,

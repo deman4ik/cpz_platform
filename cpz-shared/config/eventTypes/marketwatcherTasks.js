@@ -22,7 +22,8 @@ const TASKS_MARKETWATCHER_START_EVENT = {
     providerType: {
       description: "Data provider type.",
       type: "string",
-      values: ["сryptoсompare"]
+      values: ["сryptoсompare"],
+      optional: true
     },
     subscriptions: {
       description: "Data subscriptions list",

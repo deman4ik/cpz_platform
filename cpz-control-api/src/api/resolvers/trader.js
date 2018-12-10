@@ -18,7 +18,7 @@ async function startTrader(_, { params }) {
 
 async function stopTrader(_, { taskId }) {
   try {
-    const { status } = await TraderRunner.stop(taskId);
+    const { status } = await TraderRunner.stop({ taskId });
     return {
       success: true,
       taskId,
