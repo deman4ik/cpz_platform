@@ -19,7 +19,6 @@ create table positions
     constraint c_positions_currency_fk
     references currency,
   code          varchar(20),    
-  signal_id     uuid,
   timeframe     integer         not null,
   status        varchar(10)     not null default 'none',
   entry_status  varchar(10)     not null default 'none',
@@ -39,13 +38,15 @@ create table positions
   entry_balance numeric,
   exit_balance  numeric,
   profit        numeric,
-  historic      integer DEFAULT 0 NOT NULL,
-  /*temporary*/
-  trader_id     uuid,
-  adviser_id    uuid  
+  historic      integer         not null default 0,
+  signal_id     uuid,      
+  trader_id     uuid 
 ) 
 with OIDS;
 
+alter table positions
+  add constraint c_positions_uk
+    unique ( user_id, robot_id, entry_date, entry_price, signal_id);
 
 alter table positions
   add constraint c_positions_status_chk
@@ -73,11 +74,11 @@ create index i_positions_asset_fk
 create index i_positions_currency_fk
   on positions (currency);
 
-comment on column positions.action is 'short | long';
+comment on column positions.action is 'short | closeShort | long | closeLong';
 comment on column positions.bars_held is '= duration / candle size';
 comment on column positions.entry_balance is '= entry_price * quantity';
 comment on column positions.exit_balance is '= exit_price * quantity';
-comment on column positions.historic IS '1 - uploaded historic data, not generated';
+comment on column positions.historic is '0 - normal, 1 - uploaded historic data, not generated inside the system';
 
-comment on table positions is '= round trips';
+comment on table positions is 'Positions = round trips';
 

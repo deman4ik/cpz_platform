@@ -1,34 +1,36 @@
--- Table: "cpz-platform".exchange_pair
-
--- DROP TABLE "cpz-platform".exchange_pair;
-
-CREATE TABLE "cpz-platform".exchange_pair
+create table exchange_pair
 (
-    id integer NOT NULL DEFAULT nextval('"cpz-platform".exchange_pair_id_seq'::regclass),
-    exchange integer NOT NULL,
-    currency character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    asset character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT c_exchange_pair_pk PRIMARY KEY (id),
-    CONSTRAINT c_exchange_pair_uk UNIQUE (exchange, currency, asset),
-    CONSTRAINT c_exchange_pair_asset_fk FOREIGN KEY (asset)
-        REFERENCES "cpz-platform".assets (code) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT c_exchange_pair_currency_fk FOREIGN KEY (currency)
-        REFERENCES "cpz-platform".currency (code) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT c_exchange_pair_exchange_fk FOREIGN KEY (exchange)
-        REFERENCES "cpz-platform".exchanges (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+  id         numeric(17)  not null default nextval('cpz_id_seq'::regclass)
+    constraint c_exchange_pair_pk
+    primary key,
+  exchange   varchar(10)  not null
+    constraint c_exchange_pair_exchange_fk
+    references exchange,
+  currency   varchar(10)  not null
+    constraint c_exchange_pair_currency_fk
+    references currency,
+  asset      varchar(10)  not null
+    constraint c_exchange_pair_asset_fk
+    references asset,
+  enabled    integer       not null default 20    
+);
 
-ALTER TABLE "cpz-platform".exchange_pair
-    OWNER to cpz;
-COMMENT ON TABLE "cpz-platform".exchange_pair
-    IS 'asset-currency pairs supported by exchange';
+alter table exchange_pair
+  add constraint c_exchange_pair_uk
+    unique ( exchange, currency, asset);
+
+alter table exchange_pair
+  add constraint c_exchange_pair_enabled_chk
+    check (enabled in (0,10,20));
+    
+comment on column exchange_pair.enabled is '
+0 - disabled
+10 - admin only
+20 - public';
+
+create index i_exchange_pair_currency_fk on exchange_pair (currency);
+create index i_exchange_pair_exchange_fk on exchange_pair (exchange);
+create index i_exchange_pair_asset_fk on exchange_pair (asset);
+    
+alter table exchange_pair owner to cpz;
+comment on table exchange_pair is 'asset-currency pairs supported by exchange';

@@ -20,7 +20,7 @@ create table user_exchacc
 
 alter table user_exchacc add constraint c_user_exchacc_status_chk check (acc_status in (-1, 0, 1));
 
-create index i_user_exchacc_userlist_fk on userlist (id);
+create index i_user_exchacc_userlist_fk on user_exchacc (user_id);
 	
 comment on column user_exchacc.acc_status is '
 -1 - disabled

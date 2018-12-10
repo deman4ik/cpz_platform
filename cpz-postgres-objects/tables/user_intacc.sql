@@ -21,8 +21,8 @@ comment on column user_intacc.acc_status is '
 -1 - disabled
 1  - enabled';
 
-create index i_user_intacc_userlist_fk on userlist (id);
-
+create index i_user_intacc_userlist_fk on user_exchacc (user_id);
+	
 comment on table user_intacc is 'user internal account (1:1)';
 
 

@@ -10,5 +10,18 @@ create table userlist
   telegram varchar(160)
 );
 
+alter table userlist
+  add constraint c_userlist_uk1
+    unique (email);
 
+alter table userlist
+  add constraint c_userlist_uk2
+    unique (first_name, last_name);
+    
+alter table userlist
+  add constraint c_userlist_uk3
+    unique (phone);    
 
+alter table userlist
+  add constraint c_userlist_uk4
+    unique (telegram);

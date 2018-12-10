@@ -12,8 +12,8 @@ create table signal
     price_source varchar(10) not null default 'close',
     is_archive numeric(1)  not null default 0,
     candle     jsonb,
-    params     jsonb
-
+    settings   jsonb,
+    adviser_id uuid 
 )
 with OIDS;
 

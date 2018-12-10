@@ -23,7 +23,8 @@ create table robot
   enabled    integer       not null default 20, 
   descr      text,
   advisersettings  jsonb,
-  tradersettings   jsonb  
+  tradersettings   jsonb,
+  candlebatchersettings jsonb  
 );
 
 alter table robot
