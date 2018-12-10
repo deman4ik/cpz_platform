@@ -1,3 +1,0 @@
-input UserRobotParams {
-    id: ID!
-}

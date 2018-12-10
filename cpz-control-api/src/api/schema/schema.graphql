@@ -3,7 +3,7 @@
 # import { AdviserParams, AdviserUpdateParams } from "src/api/schema/adviser.graphql"
 # import { TraderParams, TraderUpdateParams } from "src/api/schema/trader.graphql"
 # import { BacktesterParams } from "src/api/schema/backtester.graphql"
-# import { UserRobotParams } from "src/api/schema/userRobot.graphql"
+# import { UserRobotParams } from "src/api/schema/robot.graphql"
 # import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
 
 scalar Datetime
@@ -35,9 +35,9 @@ type Mutation {
     startBacktester(params: BacktesterParams!): ServiceRunnerResponse!
     stopBacktester(taskId: String!): ServiceRunnerResponse!
     # UserRobot
-    startUserRobot(id: String!): ServiceRunnerResponse!
-    stopUserRobot(id: String!): ServiceRunnerResponse!
-    updateUserRobot(id: String!): Response!
+    startRobot(id: String!): ServiceRunnerResponse!
+    stopRobot(id: String!): ServiceRunnerResponse!
+    updateRobot(id: String!): Response!
 }
 
 type Response {

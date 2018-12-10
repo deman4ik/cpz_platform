@@ -25,6 +25,7 @@ const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 class ImporterRunner extends BaseRunner {
   static async start(props) {
     try {
+      // TODO: resume в отдельный метод
       let resume;
       if (props.taskId) {
         resume = true;

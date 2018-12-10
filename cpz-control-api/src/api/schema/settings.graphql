@@ -1,23 +1,23 @@
-type CandlebatcherSettings {
+input CandlebatcherSettings {
     debug: Boolean
     proxy: String
     requiredHistoryMaxBars: Int
 }
 
-type AdviserSettings {
+input AdviserSettings {
     debug: Boolean
     strategyParameters: JSON
     requiredHistoryCache: Boolean
     requiredHistoryMaxBars: Int
 }
 
-type TraderSettings {
+input TraderSettings {
     debug: Boolean
     slippageStep: Float
     deviation: Float
     volume: Float
 }
 
-type BacktesterSettings {
+input BacktesterSettings {
     debug: Boolean
 }

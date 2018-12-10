@@ -32,9 +32,26 @@ const USER_ROBOT_START_PARAMS = {
     description: "Timeframe in minutes.",
     type: "number"
   },
-  candlebatcherSettings: CANDLEBATCHER_SETTINGS,
-  adviserSettings: ADVISER_SETTINGS,
-  traderSettings: TRADER_SETTINGS
+  strategyName: {
+    description: "Strategy file name.",
+    type: "string",
+    empty: false
+  },
+  candlebatcherSettings: {
+    description: "Candlebatcher settings.",
+    type: "object",
+    props: CANDLEBATCHER_SETTINGS
+  },
+  adviserSettings: {
+    description: "Adviser settings.",
+    type: "object",
+    props: ADVISER_SETTINGS
+  },
+  traderSettings: {
+    description: "Trader settings.",
+    type: "object",
+    props: TRADER_SETTINGS
+  }
 };
 
 const USER_ROBOT_STOP_PARAMS = {
@@ -51,7 +68,11 @@ const USER_ROBOT_UPDATE_PARAMS = {
     type: "string",
     empty: false
   },
-  traderSettings: TRADER_SETTINGS
+  traderSettings: {
+    description: "Trader settings.",
+    type: "object",
+    props: TRADER_SETTINGS
+  }
 };
 
 export {

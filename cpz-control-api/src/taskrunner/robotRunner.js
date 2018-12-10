@@ -92,6 +92,7 @@ class RobotRunner extends BaseRunner {
           asset: userRobotState.asset,
           currency: userRobotState.currency,
           timeframe: userRobotState.timeframe,
+          strategyName: userRobotState.strategyName,
           settings: userRobotState.adviserSettings
         };
 

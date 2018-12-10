@@ -15,11 +15,13 @@ class UserRobot {
     this._id = state.id;
     this._robotId = state.robotId;
     this._userId = state.userId;
+    this._userRobotId = state.userRobotId;
     this._mode = state.mode;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
     this._timeframe = state.timeframe;
+    this._strategyName = state.strategyName;
     this._candlebatcherSettings = state.candlebatcherSettings;
     this._adviserSettings = state.adviserSettings;
     this._traderSettings = state.traderSettings;
@@ -160,7 +162,8 @@ class UserRobot {
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
-        robotId: this._robotId
+        robotId: this._robotId,
+        mode: this._mode
       }),
       RowKey: this._id,
       robotId: this._robotId,
@@ -170,6 +173,7 @@ class UserRobot {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
+      strategyName: this._strategyName,
       candlebatcherSettings: this._candlebatcherSettings,
       adviserSettings: this._adviserSettings,
       traderSettings: this._traderSettings,

@@ -27,6 +27,7 @@ const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
 class TraderRunner extends BaseRunner {
   static async start(props) {
     try {
+      // TODO: resume в отдельный метод
       let resume;
       if (props.taskId) {
         resume = true;

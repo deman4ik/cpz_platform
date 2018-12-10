@@ -6,7 +6,7 @@ import { saveSignal } from "./signals";
 import { saveOrder } from "./orders";
 import { saveLogEvent } from "./logsEvents";
 import { saveErrorEvent } from "./errorsEvents";
-import { getUserRobot, saveUserRobot } from "./userRobots";
+import { getUserRobot } from "./userRobots";
 
 class DataBaseAPI {
   constructor() {
@@ -22,7 +22,6 @@ class DataBaseAPI {
     this.countCandles = countCandles;
 
     this.getUserRobot = getUserRobot;
-    this.saveUserRobot = saveUserRobot;
 
     this.saveTasksEvent = saveTasksEvent;
     this.saveSignal = saveSignal;

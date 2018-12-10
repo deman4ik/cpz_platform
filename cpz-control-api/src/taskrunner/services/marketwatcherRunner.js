@@ -38,6 +38,7 @@ const validateUnsubscribe = createValidator(
 class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
+      // TODO: resume в отдельный метод
       let resume;
       if (props.taskId) {
         resume = true;
