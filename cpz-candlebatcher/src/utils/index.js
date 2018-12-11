@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import {
   durationMinutes,
@@ -6,7 +7,7 @@ import {
   sortDesc,
   sortAsc
 } from "cpzUtils/helpers";
-import { CANDLE_PREVIOUS } from "cpzState";
+import { CANDLE_PREVIOUS, createCachedCandleSlug } from "cpzState";
 
 /**
  * Отбор подходящих по времени таймфреймов для формирования
@@ -93,14 +94,15 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
         // Заполняем пропуск
         const gappedCandle = {
           ...previousCandle,
-          id: generateCandleRowKey({
+          PartitionKey: createCachedCandleSlug({
             exchange,
             asset,
             currency,
             timeframe,
-            mode,
-            time: diffTime
+            mode
           }),
+          RowKey: generateCandleRowKey(diffTime),
+          id: uuid(),
           exchange,
           asset,
           currency,

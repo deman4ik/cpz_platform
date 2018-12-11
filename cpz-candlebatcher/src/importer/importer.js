@@ -243,10 +243,10 @@ class Importer {
       const { firstDate, data } = await this.provider.loadCandles(
         this._dateNext
       );
-      this.log(firstDate);
+      this.log("loading: ", dayjs(firstDate).toISOString());
       // Загруженные свечи
       this._candles = data;
-      this.log("loaded", this._candles.length);
+      this.log("loaded: ", this._candles.length);
       // Всего минут
       this._totalDuration =
         this._totalDuration || durationMinutes(this._dateFrom, this._dateTo);
@@ -265,6 +265,7 @@ class Importer {
       if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
         // Формируем параметры нового запроса на импорт
         this._dateNext = firstDate;
+        this.log("next: ", dayjs(this._dateNext).toISOString());
       }
     } catch (error) {
       throw new VError(

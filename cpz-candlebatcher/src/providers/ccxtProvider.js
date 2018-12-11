@@ -31,14 +31,24 @@ class CCXTProvider extends BaseProvider {
       const minutesLeft = durationMinutes(this._dateFrom, dateEnd, true);
       const limit = minutesLeft > this._limit ? this._limit : minutesLeft;
       const dateStart = dayjs(dateEnd).add(-limit, "minute");
-
-      const response = await retry(async () =>
-        this._connector.fetchOHLCV(
-          this._symbol,
-          "1m",
-          dateStart.valueOf(),
-          limit
-        )
+      let attempt = 1;
+      const response = await retry(
+        async () => {
+          if (attempt > 1) console.log(attempt);
+          attempt += 1;
+          const result = await this._connector.fetchOHLCV(
+            this._symbol,
+            "1m",
+            dateStart.valueOf(),
+            limit
+          );
+          return result;
+        },
+        {
+          retries: 5,
+          minTimeout: 100,
+          maxTimeout: 500
+        }
       );
 
       if (response) {

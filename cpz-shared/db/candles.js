@@ -1,4 +1,5 @@
 import VError from "verror";
+import { chunkArray } from "../utils/helpers";
 
 async function saveCandles({ timeframe, candles }) {
   try {
@@ -11,24 +12,32 @@ async function saveCandles({ timeframe, candles }) {
         }
       }
       `;
-    const variables = {
-      objects: candles.map(candle => ({
-        id: candle.id,
-        exchange: candle.exchange,
-        asset: candle.asset,
-        currency: candle.currency,
-        open: candle.open,
-        high: candle.high,
-        low: candle.low,
-        close: candle.close,
-        volume: candle.volume,
-        time: candle.time,
-        timestamp: candle.timestamp,
-        type: candle.type
-      }))
-    };
+    const chunks = chunkArray(candles, 50);
+    for (let i = 0; i < chunks.length; i += 1) {
+      try {
+        const chunk = chunks[i];
+        const variables = {
+          objects: chunk.map(candle => ({
+            id: candle.id,
+            exchange: candle.exchange,
+            asset: candle.asset,
+            currency: candle.currency,
+            open: candle.open,
+            high: candle.high,
+            low: candle.low,
+            close: candle.close,
+            volume: candle.volume,
+            time: candle.time,
+            timestamp: candle.timestamp,
+            type: candle.type
+          }))
+        };
 
-    await this.client.request(query, variables);
+        await this.client.request(query, variables);
+      } catch (error) {
+        console.log(error);
+      }
+    }
   } catch (error) {
     throw new VError(
       {
@@ -100,6 +109,7 @@ async function getCandles({
       offset,
       limit
     };
+    console.log(variables);
     const response = await this.client.request(query, variables);
     return response[table];
   } catch (error) {
@@ -151,7 +161,7 @@ async function countCandles({
       dateTo
     };
     const response = await this.client.request(query, variables);
-    return response[`${table}_aggregate`].aggreagate.count;
+    return response[`${table}_aggregate`].aggregate.count;
   } catch (error) {
     throw new VError(
       {
