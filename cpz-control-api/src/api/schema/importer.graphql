@@ -1,0 +1,16 @@
+
+input ImporterParams {
+    mode: String!
+    debug: Boolean
+    providerType: String
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframes: [Int!]
+    requireBatching: Boolean
+    saveToCache: Boolean
+    dateFrom: Datetime!
+    dateTo: Datetime!
+    proxy: String
+}
+

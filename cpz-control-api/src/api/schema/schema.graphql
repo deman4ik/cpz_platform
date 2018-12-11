@@ -1,5 +1,6 @@
 # import { MarketwatcherSubscription, MarketwatcherParams, MarketwatcherSubParams } from "src/api/schema/marketwatcher.graphql"
 # import { CandlebatcherParams, CandlebatcherUpdateParams  } from "src/api/schema/candlebatcher.graphql"
+# import { ImporterParams } from "src/api/schema/importer.graphql"
 # import { AdviserParams, AdviserUpdateParams } from "src/api/schema/adviser.graphql"
 # import { TraderParams, TraderUpdateParams } from "src/api/schema/trader.graphql"
 # import { BacktesterParams } from "src/api/schema/backtester.graphql"
@@ -23,6 +24,9 @@ type Mutation {
     startCandlebatcher(params: CandlebatcherParams!): ServiceRunnerResponse!
     stopCandlebatcher(taskId: String!): ServiceRunnerResponse!
     updateCandlebatcher(params: CandlebatcherUpdateParams!): Response!
+    # Importer 
+    startImporter(params: ImporterParams!): ServiceRunnerResponse!
+    stopImporter(taskId: String!): ServiceRunnerResponse!
     # Adviser
     startAdviser(params: AdviserParams!): ServiceRunnerResponse!
     stopAdviser(taskId: String!): ServiceRunnerResponse!
