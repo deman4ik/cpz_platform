@@ -34,6 +34,7 @@ const StrRobot1 = {
         volume: 1
       } */
     };
+    this.logEvent(newSignal);
     this.advice(newSignal);
   }
 };

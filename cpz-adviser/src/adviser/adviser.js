@@ -85,6 +85,7 @@ class Adviser {
     this._lastCandle = state.lastCandle || { candleId: null };
     /* Массив сигналов к отправке */
     this._signals = [];
+    this._logEvents = [];
     /* Массив последних сигналов */
     this._lastSignals = state.lastSignals || [];
     /* Объект запроса на обновление параметров {debug,proxy,timeframes,eventSubject} или false */
@@ -153,8 +154,12 @@ class Adviser {
    *
    * @memberof Adviser
    */
-  get events() {
+  get signals() {
     return this._signals;
+  }
+
+  get logEvents() {
+    return this._logEvents;
   }
 
   /**
@@ -189,15 +194,19 @@ class Adviser {
    */
   logEvent(data) {
     // Публикуем событие
-    publishEvents(LOG_TOPIC, {
-      service: ADVISER_SERVICE,
+    const newLogEvent = {
+      id: uuid(),
+      dataVersion: "1.0",
+      eventTime: new Date(),
       subject: this._eventSubject,
       eventType: LOG_ADVISER_EVENT,
       data: {
         taskId: this._taskId,
-        data
+        service: ADVISER_SERVICE,
+        ...data
       }
-    });
+    };
+    this._logEvents.push(newLogEvent);
   }
 
   /**
@@ -693,7 +702,6 @@ class Adviser {
         timestamp: dayjs().toISOString()
       }
     };
-    this._signals = [];
     this._signals.push(newSignal);
   }
 

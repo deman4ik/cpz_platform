@@ -13,10 +13,10 @@ import {
   TASKS_BACKTESTER_FINISHED_EVENT,
   ERROR_BACKTESTER_EVENT,
   LOG_BACKTESTER_EVENT,
-  SIGNALS_TOPIC,
+  TRADES_POSITION_EVENT,
+  TRADES_ORDER_EVENT,
   ERROR_TOPIC,
   TASKS_TOPIC,
-  TRADES_TOPIC,
   LOG_TOPIC
 } from "cpzEventTypes";
 import {
@@ -25,7 +25,13 @@ import {
 } from "cpzDefaults";
 import { generateKey, chunkNumberToArray } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
-import { saveBacktesterState, saveBacktesterItem } from "cpzStorage";
+import {
+  saveBacktesterState,
+  saveBacktesterStratLog,
+  saveBacktesterSignal,
+  saveBacktesterOrder,
+  saveBacktesterPosition
+} from "cpzStorage";
 import DB from "cpzDB";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
@@ -37,7 +43,7 @@ class Backtester {
     this.eventSubject = state.eventSubject;
     this.exchange = state.exchange;
     this.asset = state.asset;
-    this.ccurrency = state.currency;
+    this.currency = state.currency;
     this.timeframe = state.timeframe;
     this.taskId = state.taskId;
     this.robotId = state.robotId;
@@ -78,8 +84,8 @@ class Backtester {
    * @memberof Adviser
    */
   log(...args) {
-    if (this._debug) {
-      this._context.log.info(`Adviser ${this._eventSubject}:`, ...args);
+    if (this.debug) {
+      this.context.log.info(`Adviser ${this.eventSubject}:`, ...args);
     }
   }
 
@@ -93,10 +99,10 @@ class Backtester {
     // Публикуем событие
     publishEvents(LOG_TOPIC, {
       service: BACKTESTER_SERVICE,
-      subject: this._eventSubject,
+      subject: this.eventSubject,
       eventType: LOG_BACKTESTER_EVENT,
       data: {
-        taskId: this._taskId,
+        taskId: this.taskId,
         data
       }
     });
@@ -144,7 +150,7 @@ class Backtester {
 
   async execute() {
     try {
-      context.log.info(`Starting backtest ${this.taskId}...`);
+      this.context.log.info(`Starting backtest ${this.taskId}...`);
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
         // Формируем параметры запроса
@@ -153,7 +159,9 @@ class Backtester {
           asset: this.asset,
           currency: this.currency,
           timeframe: this.timeframe,
-          dateTo: dayjs(this.dateFrom).add(-1, "minute"),
+          dateTo: dayjs(this.dateFrom)
+            .add(-1, "minute")
+            .toISOString(),
           limit: this.requiredHistoryMaxBars,
           orderBy: "{ timestamp: desc }"
         };
@@ -226,30 +234,65 @@ class Backtester {
             price: candle.close
           });
 
-          for (const event of this.adviserBacktester.events) {
-            await this.traderBacktester.handleSignal(event.data);
+          for (const signal of this.adviserBacktester.signals) {
+            await this.traderBacktester.handleSignal(signal.data);
           }
-          if (this.debug) {
-            // Если есть хотя бы одно событие для отправка
-            if (this.adviserBacktester.events.length > 0) {
-              // Отправляем
-              await publishEvents(SIGNALS_TOPIC, this.adviserBacktester.events);
-            }
-            // Если есть хотя бы одно событие для отправка
-            if (this.traderBacktester.events.length > 0) {
-              // Отправляем
-              await publishEvents(TRADES_TOPIC, this.traderBacktester.events);
-            }
+
+          // Если есть хотя бы одно событие для отправка
+          if (this.adviserBacktester.signals.length > 0) {
+            // Отправляем
+            this.adviserBacktester.signals.forEach(async signalEvent => {
+              await saveBacktesterSignal({
+                ...signalEvent.data,
+                backtesterId: this.taskId,
+                backtesterCandleId: candle.id,
+                RowKey: generateKey(),
+                PartitionKey: this.taskId
+              });
+            });
           }
-          // Сохраянем состояние итерации
-          await saveBacktesterItem({
-            PartitionKey: this.taskId,
-            RowKey: generateKey(),
-            taskId: this.taskId,
-            candle,
-            adviserEvents: this.adviserBacktester.events,
-            traderEvents: this.traderBacktester.events
-          });
+
+          if (this.adviserBacktester.logEvents.length > 0) {
+            this.adviserBacktester.logEvents.forEach(async logEvent => {
+              await saveBacktesterStratLog({
+                ...logEvent,
+                backtesterId: this.taskId,
+                backtesterCandleId: candle.id,
+                RowKey: generateKey(),
+                PartitionKey: this.taskId
+              });
+            });
+          }
+          // Если есть хотя бы одно событие для отправка
+          if (this.traderBacktester.events.length > 0) {
+            const positions = this.traderBacktester.events.filter(
+              event => event.eventType === TRADES_POSITION_EVENT.eventType
+            );
+            const orders = this.traderBacktester.events.filter(
+              event => event.eventType === TRADES_ORDER_EVENT.eventType
+            );
+            positions.forEach(async positionEvent => {
+              await saveBacktesterPosition({
+                ...positionEvent.data,
+                backtesterId: this.taskId,
+                backtesterCandleId: candle.id,
+                RowKey: generateKey(),
+                PartitionKey: this.taskId
+              });
+            });
+            orders.forEach(async orderEvent => {
+              await saveBacktesterOrder({
+                ...orderEvent.data,
+                backtesterId: this.taskId,
+                backtesterCandleId: candle.id,
+                RowKey: generateKey(),
+                PartitionKey: this.taskId
+              });
+            });
+          }
+
+          this.adviserBacktester.clearEvents();
+          this.traderBacktester.clearEvents();
 
           // Обновляем статистику
           this.processedBars += 1;
@@ -257,6 +300,10 @@ class Backtester {
           this.percent = Math.round(
             (this.processedBars / this.totalBars) * 100
           );
+
+          this.log("processedBars: ", this.processedBars);
+          this.log("leftBars: ", this.leftBars);
+          this.log(`${this.percent} %`);
         }
         // Сохраняем состояние пачки
         await this.save();

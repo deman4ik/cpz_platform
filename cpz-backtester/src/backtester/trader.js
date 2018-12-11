@@ -3,6 +3,11 @@ import Trader from "cpzTrader/trader";
 import { POS_STATUS_OPENED } from "cpzState";
 
 class TraderBacktester extends Trader {
+  clearEvents() {
+    this._signals = [];
+    this._logEvents = [];
+  }
+
   async handlePrice(currentPrice) {
     try {
       this.log("handlePrice()");

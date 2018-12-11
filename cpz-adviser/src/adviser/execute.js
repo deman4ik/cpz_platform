@@ -6,14 +6,14 @@ import {
   STATUS_ERROR
 } from "cpzState";
 import publishEvents from "cpzEvents";
-import { SIGNALS_TOPIC } from "cpzEventTypes";
+import { SIGNALS_TOPIC, LOG_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
-import Adviser from "./adviser";
 import {
   getPendingCandlesByAdviserId,
   getAdviserById,
   deletePendingCandle
 } from "cpzStorage";
+import Adviser from "./adviser";
 
 /**
  * Основная задача советника
@@ -47,9 +47,13 @@ async function execute(context, state, candle, child = false) {
     // Обработка новой свечи и запуск стратегии
     await adviser.handleCandle(candle);
     // Если есть хотя бы одно событие для отправка
-    if (adviser.events.length > 0) {
+    if (adviser.signals.length > 0) {
       // Отправляем
-      await publishEvents(SIGNALS_TOPIC, adviser.events);
+      await publishEvents(SIGNALS_TOPIC, adviser.signals);
+    }
+    if (adviser.logEvents.length > 0) {
+      // Отправляем
+      await publishEvents(LOG_TOPIC, adviser.logEvents);
     }
     // Завершаем работу и сохраняем стейт
     await adviser.end(STATUS_STARTED);

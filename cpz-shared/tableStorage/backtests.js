@@ -1,9 +1,17 @@
-import { STORAGE_BACKTESTS_TABLE, STORAGE_BACKTESTITEMS_TABLE } from "./tables";
+import {
+  STORAGE_BACKTESTS_TABLE,
+  STORAGE_BACKTESTSTRATLOG_TABLE,
+  STORAGE_BACKTESTSIGNALS_TABLE,
+  STORAGE_BACKTESTORDERS_TABLE,
+  STORAGE_BACKTESTPOSITIONS_TABLE
+} from "./tables";
 import tableStorage from "./tableStorage";
 
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
-
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTSTRATLOG_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTSIGNALS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTORDERS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTPOSITIONS_TABLE);
 /**
  * Query Backtester State by uniq Task ID
  *
@@ -22,13 +30,36 @@ const saveBacktesterState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, state);
 
 /**
- * Updates current Backtester State
+ * Saves backtest strategy logs
  *
- * @param {BacktesterState} state
+ * @param {object} state
  */
-const saveBacktesterItem = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, item);
+const saveBacktesterStratLog = async item =>
+  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTSTRATLOG_TABLE, item);
 
+/**
+ * Saves backtest signals
+ *
+ * @param {SignalState} state
+ */
+const saveBacktesterSignal = async item =>
+  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTSIGNALS_TABLE, item);
+
+/**
+ * Saves backtest orders
+ *
+ * @param {OderState} state
+ */
+const saveBacktesterOrder = async item =>
+  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTORDERS_TABLE, item);
+
+/**
+ * Saves backtest positions
+ *
+ * @param {PositionState} state
+ */
+const saveBacktesterPosition = async item =>
+  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTPOSITIONS_TABLE, item);
 /**
  * Delete Backtester state and all Backtester Items
  *
@@ -37,11 +68,30 @@ const saveBacktesterItem = async item =>
  * @param {string} input.PartitionKey
  */
 const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
-  const items = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTITEMS_TABLE,
+  const strLogs = await tableStorage.getEntitiesByPartitionKey(
+    STORAGE_BACKTESTSTRATLOG_TABLE,
     RowKey
   );
-  await tableStorage.deleteArray(STORAGE_BACKTESTITEMS_TABLE, items);
+  await tableStorage.deleteArray(STORAGE_BACKTESTSTRATLOG_TABLE, strLogs);
+
+  const signals = await tableStorage.getEntitiesByPartitionKey(
+    STORAGE_BACKTESTSIGNALS_TABLE,
+    RowKey
+  );
+  await tableStorage.deleteArray(STORAGE_BACKTESTSIGNALS_TABLE, signals);
+
+  const orders = await tableStorage.getEntitiesByPartitionKey(
+    STORAGE_BACKTESTORDERS_TABLE,
+    RowKey
+  );
+  await tableStorage.deleteArray(STORAGE_BACKTESTORDERS_TABLE, orders);
+
+  const positions = await tableStorage.getEntitiesByPartitionKey(
+    STORAGE_BACKTESTPOSITIONS_TABLE,
+    RowKey
+  );
+  await tableStorage.deleteArray(STORAGE_BACKTESTPOSITIONS_TABLE, positions);
+
   await tableStorage.deleteEntity(STORAGE_BACKTESTS_TABLE, {
     RowKey,
     PartitionKey,
@@ -51,6 +101,9 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
 export {
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterItem,
+  saveBacktesterStratLog,
+  saveBacktesterSignal,
+  saveBacktesterOrder,
+  saveBacktesterPosition,
   deleteBacktesterState
 };

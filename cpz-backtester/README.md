@@ -1,5 +1,18 @@
-### Start
+```javascript
+npm i -g webpack
+npm install
+```
 
+```javascript
+webpack --watch
+```
+
+```javascript
+npm run dev
+```
+
+### Start
+POST - http://localhost:8108/api/taskEvents
 ```javascript
 [{
   "id": "968a8f13-bd77-40d8-ba83-5cf4364ec2a9",
@@ -10,19 +23,27 @@
   	  "robotId": "robot1",
   	  "userId": "SYSTEM_USER_1",
   	  "adviserId": "backtest1",
-      "debug": true,
-      "strategyName":"STR_ROBOT_1",
+  	  "strategyName":"STR_ROBOT_1",
       "exchange": "bitfinex",
       "asset": "BTC",
       "currency": "USD",
       "timeframe": 1,
-      "slippageStep": 1000,
-      "deviation": 10,
-      "volume": 1,
-      "dateFrom": "2018-03-01T00:00:00.000Z",
-      "dateTo": "2018-03-01T00:05:00.000Z",
-      "requiredHistoryCache": true,
-      "requiredHistoryMaxBars": 10
+      "dateFrom": "2018-12-10T00:00:00.000Z",
+      "dateTo": "2018-12-10T01:00:00.000Z",
+      "settings": {
+      "debug": true
+      },
+      "adviserSettings": {
+       "debug": false,
+       "requiredHistoryCache": true,
+       "requiredHistoryMaxBars": 10
+      },
+      "traderSettings": {
+       "debug": false,
+       "slippageStep": 1000,
+       "deviation": 10,
+       "volume": 1
+      }
     },
   "eventType": "CPZ.Tasks.Backtester.Start",
   "eventTime": "2018-10-09T15:12:33.859Z",

@@ -13,6 +13,11 @@ class AdviserBacktester extends Adviser {
     this._loadedHistoryCacheBars = this._candles.length;
   }
 
+  clearEvents() {
+    this._signals = [];
+    this._logEvents = [];
+  }
+
   /**
    * Обработка новой свечи
    *
