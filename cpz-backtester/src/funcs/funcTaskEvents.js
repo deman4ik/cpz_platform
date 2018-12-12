@@ -2,11 +2,11 @@ import "babel-polyfill";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
-  TASKS_BACKTESTER_START_EVENT
+  TASKS_BACKTESTER_START_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { BACKTEST_MODE } from "cpzState";
-import handleStart from "../backtester/handleTaskEvents";
+import { handleStart, handleStop } from "../backtester/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -50,8 +50,19 @@ function eventHandler(context, req) {
           );
           handleStart(context, {
             ...eventData,
-            eventSubject,
-            mode: BACKTEST_MODE
+            eventSubject
+          });
+          break;
+        }
+        case TASKS_BACKTESTER_STOP_EVENT.eventType: {
+          context.log.info(
+            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+              eventData
+            )}`
+          );
+          handleStop(context, {
+            ...eventData,
+            eventSubject
           });
           break;
         }

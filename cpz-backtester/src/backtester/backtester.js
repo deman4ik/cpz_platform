@@ -40,8 +40,7 @@ import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
 
 class Backtester {
-  constructor(context, state) {
-    this.context = context;
+  constructor(state) {
     this.initialState = state;
     this.eventSubject = state.eventSubject;
     this.exchange = state.exchange;
@@ -67,18 +66,25 @@ class Backtester {
     this.processedBars = 0;
     this.leftBars = 0;
     this.percent = 0;
+    this.oldPercent = 0;
     this.startedAt = "";
     this.endedAt = "";
     this.status = STATUS_STARTED;
     this.db = state.db || new DB();
-    this.adviserBacktester = new AdviserBacktester(context, {
-      ...state,
-      settings: this.adviserSettings
-    });
-    this.traderBacktester = new TraderBacktester(context, {
-      ...state,
-      settings: this.traderSettings
-    });
+    this.adviserBacktester = new AdviserBacktester(
+      {},
+      {
+        ...state,
+        settings: this.adviserSettings
+      }
+    );
+    this.traderBacktester = new TraderBacktester(
+      {},
+      {
+        ...state,
+        settings: this.traderSettings
+      }
+    );
   }
 
   /**
@@ -89,7 +95,7 @@ class Backtester {
    */
   log(...args) {
     if (this.settings.debug) {
-      this.context.log.info(`Backtester ${this.eventSubject}:`, ...args);
+      process.send(`Backtester ${this.eventSubject}: ${args.join(" ")}`);
     }
   }
 
@@ -336,15 +342,19 @@ class Backtester {
           this.traderBacktester.clearEvents();
 
           // Обновляем статистику
+
           this.processedBars += 1;
           this.leftBars = this.totalBars - this.processedBars;
           this.percent = Math.round(
             (this.processedBars / this.totalBars) * 100
           );
 
-          this.log("processedBars: ", this.processedBars);
-          this.log("leftBars: ", this.leftBars);
-          this.log(`${this.percent} %`);
+          if (this.percent > this.oldPercent) {
+            this.log("processedBars: ", this.processedBars);
+            this.log("leftBars: ", this.leftBars);
+            this.log(`${this.percent} %`);
+            this.oldPercent = this.percent;
+          }
         }
         // Сохраняем состояние пачки
         await this.save();
@@ -375,7 +385,7 @@ class Backtester {
         this.taskId
       );
       const errorOutput = createErrorOutput(err);
-      this.context.log.error(JSON.stringify(errorOutput));
+      this.log(JSON.stringify(errorOutput));
       // Если есть экземпляр класса
       this.status = STATUS_ERROR;
       this.error = errorOutput;

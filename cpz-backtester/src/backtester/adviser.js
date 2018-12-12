@@ -7,6 +7,12 @@ class AdviserBacktester extends Adviser {
     this._loadedHistoryCacheBars = state.loadedHistoryCacheBars || 0;
   }
 
+  log(...args) {
+    if (this._settings.debug) {
+      process.send(`Adviser ${this.eventSubject}: ${args.join(" ")}`);
+    }
+  }
+
   get indicators() {
     return this._indicators;
   }

@@ -8,6 +8,12 @@ class TraderBacktester extends Trader {
     this._logEvents = [];
   }
 
+  log(...args) {
+    if (this._settings.debug) {
+      process.send(`Trader ${this.eventSubject}: ${args.join(" ")}`);
+    }
+  }
+
   async handlePrice(currentPrice) {
     try {
       this.log("handlePrice()");

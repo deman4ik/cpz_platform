@@ -14,7 +14,9 @@ const pathsToClean = [path.resolve(__dirname, "dist")];
  * @returns {object} entry
  */
 function findEntryPoints() {
-  const entry = {};
+  const entry = {
+    process: path.resolve(__dirname, "src/process.js")
+  };
   fs.readdirSync(path.resolve(__dirname, "src/funcs")).forEach(file => {
     const key = file.replace(".js", "");
     entry[key] = path.resolve(__dirname, `src/funcs/${file}`);

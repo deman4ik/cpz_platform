@@ -2,18 +2,24 @@ import VError from "verror";
 import {
   TASKS_BACKTESTER_START_EVENT,
   TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import Backtester from "./backtester";
+import {
+  isProcessExists,
+  createNewProcess,
+  sendEventToProcess
+} from "../global";
 
 const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
-
+const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
 /**
- * Запуск нового советника в режиме бэктеста
+ * Запуск бэктеста
  *
  * @param {*} context
  * @param {*} eventData
@@ -22,9 +28,11 @@ async function handleStart(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
-    // Запускаем бэктест
-    const backtester = new Backtester(context, eventData);
-    await backtester.execute();
+    createNewProcess(context, eventData.taskId);
+    sendEventToProcess(eventData.taskId, {
+      type: "start",
+      state: eventData
+    });
   } catch (error) {
     const errorOutput = createErrorOutput(
       new VError(
@@ -35,7 +43,7 @@ async function handleStart(context, eventData) {
             eventData
           }
         },
-        "Failed to start backtester mode"
+        "Failed to start backtester"
       )
     );
     context.log.error(errorOutput.message, errorOutput);
@@ -52,7 +60,60 @@ async function handleStart(context, eventData) {
   }
 }
 
-// TODO: Handle Stop
-// may be in child process?
+/**
+ * Остановка бэктеста
+ *
+ * @param {*} context
+ * @param {*} eventData
+ */
+async function handleStop(context, eventData) {
+  try {
+    // Валидация входных параметров
+    genErrorIfExist(validateStop(eventData));
+    if (!isProcessExists(eventData.taskId)) {
+      context.log.warn('Backtester task "%s" not started', eventData.taskId);
+      return;
+    }
 
-export default handleStart;
+    sendEventToProcess(eventData.taskId, {
+      type: "stop",
+      taskId: eventData.taskId
+    });
+
+    // Публикуем событие - успех
+    await publishEvents(TASKS_TOPIC, {
+      service: BACKTESTER_SERVICE,
+      subject: eventData.eventSubject,
+      eventType: TASKS_BACKTESTER_STOPPED_EVENT,
+      data: {
+        taskId: eventData.taskId
+      }
+    });
+  } catch (error) {
+    const errorOutput = createErrorOutput(
+      new VError(
+        {
+          name: "BacktesterError",
+          cause: error,
+          info: {
+            eventData
+          }
+        },
+        "Failed to stop backtester"
+      )
+    );
+    context.log.error(errorOutput.message, errorOutput);
+    // Публикуем событие - ошибка
+    await publishEvents(TASKS_TOPIC, {
+      service: BACKTESTER_SERVICE,
+      subject: eventData.eventSubject,
+      eventType: TASKS_BACKTESTER_STOPPED_EVENT,
+      data: {
+        taskId: eventData.taskId,
+        error: errorOutput
+      }
+    });
+  }
+}
+
+export { handleStart, handleStop };
