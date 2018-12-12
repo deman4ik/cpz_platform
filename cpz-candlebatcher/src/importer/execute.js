@@ -69,12 +69,20 @@ async function execute(context, state, start = false) {
     // Логируем итерацию
     await importer.logEvent(importer.getCurrentState());
   } catch (error) {
-    // Все необработанные ошибки
-    context.log.error(error);
+    const errorOutput = createErrorOutput(
+      new VError(
+        {
+          name: "CandlebatcherError",
+          cause: error
+        },
+        "Failed to execute candlebatcher"
+      )
+    );
+    context.log.error(errorOutput.message, errorOutput);
     // Если есть экземпляр класса
     if (importer) {
       // Сохраняем ошибку в сторедже
-      await importer.end(STATUS_ERROR, error);
+      await importer.end(STATUS_ERROR, errorOutput);
     }
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
@@ -83,7 +91,7 @@ async function execute(context, state, start = false) {
       eventType: ERROR_IMPORTER_EVENT,
       data: {
         taskId: state.taskId,
-        error
+        errorOutput
       }
     });
     // Передаем ошибку в рантайм, чтобы попробовать отработать сообщение в очереди

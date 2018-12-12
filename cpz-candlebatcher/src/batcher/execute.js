@@ -66,6 +66,7 @@ async function execute(context, state) {
       subject: "CandlebatcherTimerError",
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {
+        taskId: state.taskId,
         error: errorOutput
       }
     });
