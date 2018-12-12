@@ -252,6 +252,20 @@ class TableStorage {
     });
   }
 
+  static async _executeDeleteChunk(table, chunk) {
+    const batch = new azure.TableBatch();
+    chunk.forEach(entity => {
+      batch.deleteEntity(
+        this.objectToEntity({
+          PartitionKey: entity.PartitionKey,
+          RowKey: entity.RowKey,
+          metadata: entity.metadata
+        })
+      );
+    });
+    await this.executeBatch(table, batch);
+  }
+
   /**
    * Delete array of entities
    *
@@ -261,20 +275,31 @@ class TableStorage {
   static async deleteArray(table, array) {
     try {
       const chunks = chunkArray(array, 100);
-        for (const chunk of chunks) {
-          const batch = new azure.TableBatch();
-          chunk.forEach(entity => {
-            batch.deleteEntity(this.objectToEntity(entity));
-          });
-          await this.executeBatch(table, batch);
+      if (chunks.length > 10) {
+        const bigChunks = chunkArray(chunks, 10);
+        /* eslint-disable no-restricted-syntax, no-await-in-loop */
+        for (const bigChunk of bigChunks) {
+          await Promise.all(
+            bigChunk.map(async chunk => {
+              await this._executeDeleteChunk(table, chunk);
+            })
+          );
         }
+        /* no-restricted-syntax, no-await-in-loop */
+      } else {
+        await Promise.all(
+          chunks.map(async chunk => {
+            await this._executeDeleteChunk(table, chunk);
+          })
+        );
+      }
     } catch (error) {
       throw new VError(
         {
           name: "TableStorageError",
           cause: error
         },
-        'Failed to save array to "%s"',
+        'Failed to delete array from "%s"',
         table
       );
     }
