@@ -50,7 +50,6 @@ async function handleStart(context, eventData) {
     createNewProcess(context, eventData.taskId, eventData.providerType);
     sendEventToProcess(eventData.taskId, {
       type: "start",
-      context,
       state: eventData
     });
     // Публикуем событие - успех
@@ -167,7 +166,7 @@ async function handleSubscribe(context, eventData) {
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
       subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
+      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId
       }
@@ -190,7 +189,7 @@ async function handleSubscribe(context, eventData) {
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
       subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_SUBSCRIBED_EVENT,
+      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId,
         error: errorOutput
