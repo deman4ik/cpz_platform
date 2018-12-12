@@ -4,7 +4,10 @@ create table exchange
     constraint c_exchange_pk
     primary key,
   name               text    not null,
-  enabled 					 integer not null default 20
+  enabled 					 integer not null default 20,
+  import_limit			 integer not null default 0,
+  country_code		   text,
+  proxy_country_code text
 );
 alter table exchange
 	add constraint c_exchange_enabled_chk
