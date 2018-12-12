@@ -67,7 +67,8 @@ class Backtester {
     this.processedBars = 0;
     this.leftBars = 0;
     this.percent = 0;
-    this.startedAt = dayjs().toJSON();
+    this.startedAt = "";
+    this.endedAt = "";
     this.status = STATUS_STARTED;
     this.db = state.db || new DB();
     this.adviserBacktester = new AdviserBacktester(context, {
@@ -128,6 +129,7 @@ class Backtester {
       leftBars: this.leftBars,
       percent: this.percent,
       startedAt: this.startedAt,
+      endedAt: this.endedAt,
       status: this.status
     };
   }
@@ -173,7 +175,7 @@ class Backtester {
       }
 
       this.log(`Starting ${this.taskId}...`);
-
+      this.startedAt = dayjs().toJSON();
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
         // Формируем параметры запроса
