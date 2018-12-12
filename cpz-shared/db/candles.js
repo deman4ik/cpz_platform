@@ -12,31 +12,34 @@ async function saveCandles({ timeframe, candles }) {
         }
       }
       `;
-    const chunks = chunkArray(candles, 50);
-    for (let i = 0; i < chunks.length; i += 1) {
-      try {
-        const chunk = chunks[i];
-        const variables = {
-          objects: chunk.map(candle => ({
-            id: candle.id,
-            exchange: candle.exchange,
-            asset: candle.asset,
-            currency: candle.currency,
-            open: candle.open,
-            high: candle.high,
-            low: candle.low,
-            close: candle.close,
-            volume: candle.volume,
-            time: candle.time,
-            timestamp: candle.timestamp,
-            type: candle.type
-          }))
-        };
+    if (candles && candles.length > 0) {
+      const chunks = chunkArray(candles, 100);
+      await Promise.all(
+        chunks.map(async chunk => {
+          try {
+            const variables = {
+              objects: chunk.map(candle => ({
+                id: candle.id,
+                exchange: candle.exchange,
+                asset: candle.asset,
+                currency: candle.currency,
+                open: candle.open,
+                high: candle.high,
+                low: candle.low,
+                close: candle.close,
+                volume: candle.volume,
+                time: candle.time,
+                timestamp: candle.timestamp,
+                type: candle.type
+              }))
+            };
 
-        await this.client.request(query, variables);
-      } catch (error) {
-        console.log(error);
-      }
+            await this.client.request(query, variables);
+          } catch (error) {
+            throw error;
+          }
+        })
+      );
     }
   } catch (error) {
     throw new VError(
