@@ -1,5 +1,6 @@
 import {
   STORAGE_BACKTESTS_TABLE,
+  STORAGE_BACKTESTITEMS_TABLE,
   STORAGE_BACKTESTSTRATLOG_TABLE,
   STORAGE_BACKTESTSIGNALS_TABLE,
   STORAGE_BACKTESTORDERS_TABLE,
@@ -8,6 +9,7 @@ import {
 import tableStorage from "./tableStorage";
 
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
+tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTSTRATLOG_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTSIGNALS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTORDERS_TABLE);
@@ -28,6 +30,14 @@ const getBacktesterById = async taskId =>
  */
 const saveBacktesterState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, state);
+
+/**
+ * Saves backtestitem
+ *
+ * @param {object} state
+ */
+const saveBacktesterItem = async item =>
+  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, item);
 
 /**
  * Saves backtest strategy logs
@@ -67,7 +77,13 @@ const saveBacktesterPosition = async item =>
  * @param {string} input.RowKey
  * @param {string} input.PartitionKey
  */
-const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
+const deleteBacktesterState = async ({ RowKey, PartitionKey }) => {
+  const items = await tableStorage.getEntitiesByPartitionKey(
+    STORAGE_BACKTESTITEMS_TABLE,
+    RowKey
+  );
+  await tableStorage.deleteArray(STORAGE_BACKTESTITEMS_TABLE, items);
+
   const strLogs = await tableStorage.getEntitiesByPartitionKey(
     STORAGE_BACKTESTSTRATLOG_TABLE,
     RowKey
@@ -94,13 +110,13 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
 
   await tableStorage.deleteEntity(STORAGE_BACKTESTS_TABLE, {
     RowKey,
-    PartitionKey,
-    metadata
+    PartitionKey
   });
 };
 export {
   getBacktesterById,
   saveBacktesterState,
+  saveBacktesterItem,
   saveBacktesterStratLog,
   saveBacktesterSignal,
   saveBacktesterOrder,

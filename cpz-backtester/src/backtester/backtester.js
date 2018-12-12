@@ -26,11 +26,14 @@ import {
 import { generateKey, chunkNumberToArray } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
 import {
+  getBacktesterById,
   saveBacktesterState,
+  saveBacktesterItem,
   saveBacktesterStratLog,
   saveBacktesterSignal,
   saveBacktesterOrder,
-  saveBacktesterPosition
+  saveBacktesterPosition,
+  deleteBacktesterState
 } from "cpzStorage";
 import DB from "cpzDB";
 import AdviserBacktester from "./adviser";
@@ -84,8 +87,8 @@ class Backtester {
    * @memberof Adviser
    */
   log(...args) {
-    if (this.debug) {
-      this.context.log.info(`Adviser ${this.eventSubject}:`, ...args);
+    if (this.settings.debug) {
+      this.context.log.info(`Backtester ${this.eventSubject}:`, ...args);
     }
   }
 
@@ -150,7 +153,27 @@ class Backtester {
 
   async execute() {
     try {
-      this.context.log.info(`Starting backtest ${this.taskId}...`);
+      const backtester = await getBacktesterById(this.taskId);
+      if (backtester) {
+        this.log(
+          `Previous backtest state with taskId ${
+            this.taskId
+          } found. Deleting...`
+        );
+        await deleteBacktesterState({
+          RowKey: this.taskId,
+          PartitionKey: createBacktesterSlug({
+            exchange: this.exchange,
+            asset: this.asset,
+            currency: this.currency,
+            timeframe: this.timeframe,
+            robotId: this.robotId
+          })
+        });
+      }
+
+      this.log(`Starting ${this.taskId}...`);
+
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
         // Формируем параметры запроса
@@ -212,8 +235,8 @@ class Backtester {
 
       this.iterations = chunkNumberToArray(this.totalBars, 1440);
       this.prevIteration = 0;
-      this.iterations.forEach(async iteration => {
-        /* eslint-disable no-await-in-loop */
+      /* eslint-disable no-restricted-syntax, no-await-in-loop */
+      for (const iteration of this.iterations) {
         const historyCandles = await this.db.getCandles({
           exchange: this.exchange,
           asset: this.asset,
@@ -225,9 +248,7 @@ class Backtester {
           offset: this.prevIteration
         });
         this.prevIteration = iteration;
-        /* no-await-in-loop */
 
-        /* eslint-disable no-restricted-syntax */
         for (const candle of historyCandles) {
           await this.adviserBacktester.handleCandle(candle);
           await this.traderBacktester.handlePrice({
@@ -238,6 +259,24 @@ class Backtester {
             await this.traderBacktester.handleSignal(signal.data);
           }
 
+          const indicators = {};
+          Object.keys(this.adviserBacktester.indicators).forEach(key => {
+            indicators[key] = this.adviserBacktester.indicators[key].result;
+          });
+
+          await saveBacktesterItem({
+            ...indicators,
+            backtesterId: this.taskId,
+            backtesterCandleId: candle.id,
+            backtesterCandleTimestamp: candle.timestamp,
+            backtesterCandleTime: candle.time,
+            backtesterCandleHigh: candle.high,
+            backtesterCandleOpen: candle.open,
+            backtesterCandleClose: candle.close,
+            backtesterCandleLow: candle.low,
+            RowKey: generateKey(),
+            PartitionKey: this.taskId
+          });
           // Если есть хотя бы одно событие для отправка
           if (this.adviserBacktester.signals.length > 0) {
             // Отправляем
@@ -307,9 +346,8 @@ class Backtester {
         }
         // Сохраняем состояние пачки
         await this.save();
-        /* no-restricted-syntax */
-      });
-
+      }
+      /* no-restricted-syntax, no-await-in-loop  */
       // Закончили обработку
       this.status = STATUS_FINISHED;
       this.endedAt = dayjs().toJSON();
@@ -324,7 +362,7 @@ class Backtester {
           taskId: this.taskId
         }
       });
-      this.context.log.info(`Backtest ${this.taskId} finished!`);
+      this.log(`Backtest ${this.taskId} finished!`);
     } catch (error) {
       const err = new VError(
         {

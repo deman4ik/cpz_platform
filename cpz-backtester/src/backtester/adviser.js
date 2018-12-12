@@ -7,6 +7,10 @@ class AdviserBacktester extends Adviser {
     this._loadedHistoryCacheBars = state.loadedHistoryCacheBars || 0;
   }
 
+  get indicators() {
+    return this._indicators;
+  }
+
   setCachedCandles(candles) {
     this._candles = candles;
     this._lastCandle = this._candles[this._candles.length - 1];

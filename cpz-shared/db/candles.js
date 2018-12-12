@@ -115,7 +115,6 @@ async function getCandles({
       offset,
       limit
     };
-    console.log(variables);
     const response = await this.client.request(query, variables);
     return response[table];
   } catch (error) {
