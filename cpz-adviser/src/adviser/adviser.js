@@ -11,12 +11,7 @@ import {
   createAdviserSlug,
   createNewSignalSubject
 } from "cpzState";
-import publishEvents from "cpzEvents";
-import {
-  SIGNALS_NEWSIGNAL_EVENT,
-  LOG_ADVISER_EVENT,
-  LOG_TOPIC
-} from "cpzEventTypes";
+import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
 import { ADVISER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
 import BaseStrategy from "./baseStrategy";
