@@ -14,8 +14,10 @@ async function saveCandles({ timeframe, candles }) {
       `;
     if (candles && candles.length > 0) {
       const chunks = chunkArray(candles, 100);
-      await Promise.all(
-        chunks.map(async chunk => {
+
+      /* eslint-disable no-restricted-syntax, no-await-in-loop */
+      for (const chunk of chunks) {
+        if (chunk.length > 0) {
           try {
             const variables = {
               objects: chunk.map(candle => ({
@@ -38,8 +40,9 @@ async function saveCandles({ timeframe, candles }) {
           } catch (error) {
             throw error;
           }
-        })
-      );
+        }
+      }
+      /* no-restricted-syntax, no-await-in-loop */
     }
   } catch (error) {
     throw new VError(

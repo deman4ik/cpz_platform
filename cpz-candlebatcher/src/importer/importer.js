@@ -240,13 +240,18 @@ class Importer {
   async loadCandles() {
     this.log(`loadCandles()`);
     try {
+      this.log(
+        "Loading",
+        this._limit,
+        "candles date to",
+        dayjs(this._dateNext).toISOString()
+      );
       const { firstDate, data } = await this.provider.loadCandles(
         this._dateNext
       );
-      this.log("loading: ", dayjs(firstDate).toISOString());
       // Загруженные свечи
       this._candles = data;
-      this.log("loaded: ", this._candles.length);
+      this.log("Loaded:", this._candles.length);
       // Всего минут
       this._totalDuration =
         this._totalDuration || durationMinutes(this._dateFrom, this._dateTo);
@@ -265,7 +270,7 @@ class Importer {
       if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
         // Формируем параметры нового запроса на импорт
         this._dateNext = firstDate;
-        this.log("next: ", dayjs(this._dateNext).toISOString());
+        this.log("Next date to:", dayjs(this._dateNext).toISOString());
       }
     } catch (error) {
       throw new VError(
@@ -292,27 +297,27 @@ class Importer {
     try {
       await Promise.all(
         this._timeframes.map(async timeframe => {
-          try {
-            if (timeframeCandles[timeframe].length > 0) {
+          if (timeframeCandles[timeframe].length > 0) {
+            try {
               if (this._saveToCache)
                 await saveCandlesArrayToCache(timeframeCandles[timeframe]);
               await this._db.saveCandles({
                 timeframe,
                 candles: timeframeCandles[timeframe]
               });
+            } catch (error) {
+              throw new VError(
+                {
+                  name: "ImporterError",
+                  cause: error,
+                  info: {
+                    taskId: this._taskId,
+                    eventSubject: this._eventSubject
+                  }
+                },
+                `Failed to save timeframed candles to db`
+              );
             }
-          } catch (error) {
-            throw new VError(
-              {
-                name: "ImporterError",
-                cause: error,
-                info: {
-                  taskId: this._taskId,
-                  eventSubject: this._eventSubject
-                }
-              },
-              `Failed to save timeframed candles to db`
-            );
           }
         })
       );
@@ -339,7 +344,7 @@ class Importer {
   async saveCandlesToTemp() {
     this.log(`saveCandlesToTemp()`);
     try {
-      await saveCandlesArrayToTemp(this._candles);
+      if (this._candles.length > 0) await saveCandlesArrayToTemp(this._candles);
     } catch (error) {
       throw new VError(
         {
@@ -411,43 +416,54 @@ class Importer {
   async finalize() {
     try {
       const dates = divideDateByDays(this._dateFrom, this._dateTo);
-      await Promise.all(
-        dates.map(async ({ dateFrom, dateTo, duration }) => {
-          const tempCandles = await getTempCandles({
-            dateFrom,
-            dateTo,
-            slug: createCachedCandleSlug({
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              timeframe: 1,
-              mode: this._mode
-            })
-          });
-          this.log(tempCandles.length);
-          const { candles, gappedCandles } = await this._handleGaps(
-            tempCandles,
-            dateFrom,
-            dateTo,
-            duration
-          );
+      /* eslint-disable no-restricted-syntax, no-await-in-loop */
+      for (const { dateFrom, dateTo, duration } of dates) {
+        this.log(
+          "Processing from",
+          dayjs(dateFrom).toISOString(),
+          "to",
+          dayjs(dateTo).toISOString()
+        );
+        const tempCandles = await getTempCandles({
+          dateFrom,
+          dateTo,
+          slug: createCachedCandleSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1,
+            mode: this._mode
+          })
+        });
+        const { candles, gappedCandles } = await this._handleGaps(
+          tempCandles,
+          dateFrom,
+          dateTo,
+          duration
+        );
 
-          if (gappedCandles.length > 0) {
-            // Сохраняем сформированные пропущенные свечи
-            await saveCandlesArrayToTemp(gappedCandles);
-          }
-          const timeframeCandles = this._batchCandles(
-            candles,
-            dateFrom,
-            dateTo,
-            duration
-          );
+        if (gappedCandles.length > 0) {
+          // Сохраняем сформированные пропущенные свечи
+          await saveCandlesArrayToTemp(gappedCandles);
+        }
+        const timeframeCandles = this._batchCandles(
+          candles,
+          dateFrom,
+          dateTo,
+          duration
+        );
 
-          if (timeframeCandles) {
-            await this.saveCandles(timeframeCandles);
-          }
-        })
-      );
+        if (timeframeCandles) {
+          await this.saveCandles(timeframeCandles);
+        }
+        this.log(
+          "Finished processing from",
+          dayjs(dateFrom).toISOString(),
+          "to",
+          dayjs(dateTo).toISOString()
+        );
+      }
+      /* no-restricted-syntax, no-await-in-loop */
       await this._clearTemp();
     } catch (error) {
       throw new VError(
@@ -491,8 +507,7 @@ class Importer {
       );
       if (gappedCandles.length > 0) {
         candles.concat(gappedCandles).sort((a, b) => sortAsc(a.time, b.time));
-        this.log("candles", candles.length);
-        this.log("gapped", gappedCandles.length);
+        this.log("gapped candles:", gappedCandles.length);
       }
       return { candles, gappedCandles };
     } catch (error) {

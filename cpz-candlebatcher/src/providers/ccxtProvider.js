@@ -45,7 +45,7 @@ class CCXTProvider extends BaseProvider {
           return result;
         },
         {
-          retries: 5,
+          retries: 10,
           minTimeout: 100,
           maxTimeout: 500
         }
@@ -94,14 +94,12 @@ class CCXTProvider extends BaseProvider {
               data
             };
           }
-          return {
-            firstDate: dateStart,
-            lastDate: dateEnd,
-            data: []
-          };
         }
       }
-      throw new Error("Can't load data");
+      return {
+        firstDate: dateEnd,
+        data: []
+      };
     } catch (error) {
       throw new VError(
         { name: "LoadCandlesError", cause: error, info: this._currentState },
