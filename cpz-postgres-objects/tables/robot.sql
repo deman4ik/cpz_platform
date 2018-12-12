@@ -10,7 +10,7 @@ create table robot
   strat      numeric(17)  not null
     constraint c_robot_strat_fk
     references strat,
-  exchange   varchar(10)  not null
+  exchange   varchar(30)  not null
     constraint c_robot_exchange_fk
     references exchange,
   currency   varchar(10)  not null

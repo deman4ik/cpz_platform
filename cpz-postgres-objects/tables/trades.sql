@@ -12,7 +12,7 @@ create table trades
     robot_id      numeric(17)     not null
         constraint c_trades_robot_fk
         references robot,
-    exchange      varchar(10)     not null
+    exchange      varchar(30)     not null
         constraint c_trades_exchange_fk
         references exchange,
     asset         varchar(10)     not null

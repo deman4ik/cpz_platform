@@ -3,7 +3,7 @@ create table exchange_pair
   id         numeric(17)  not null default nextval('cpz_id_seq'::regclass)
     constraint c_exchange_pair_pk
     primary key,
-  exchange   varchar(10)  not null
+  exchange   varchar(30)  not null
     constraint c_exchange_pair_exchange_fk
     references exchange,
   currency   varchar(10)  not null

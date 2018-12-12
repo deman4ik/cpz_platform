@@ -10,7 +10,7 @@ create table candles15
   low       numeric   not null,
   close     numeric   not null,
   volume    numeric   not null,
-  exchange  varchar(10)      not null
+  exchange  varchar(30)      not null
     constraint c_candles15_exchange_fk
     references exchange,
   asset     varchar(10)      not null

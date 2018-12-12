@@ -1,6 +1,6 @@
 create table exchange
 (
-  code               varchar(10)    not null
+  code               varchar(30)    not null
     constraint c_exchange_pk
     primary key,
   name               text    not null,

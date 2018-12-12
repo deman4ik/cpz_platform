@@ -11,7 +11,7 @@ create table user_exchacc
   asset      		  varchar(10)  not null
     constraint c_user_exchacc_asset_fk
     references asset,
-	exchange   			varchar(10)  not null
+	exchange   			varchar(30)  not null
     constraint c_user_exchacc_exchange_fk
     references exchange,
 	dt_added    		timestamp    not null default CURRENT_DATE, 
