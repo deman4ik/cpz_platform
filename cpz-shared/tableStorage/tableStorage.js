@@ -261,15 +261,13 @@ class TableStorage {
   static async deleteArray(table, array) {
     try {
       const chunks = chunkArray(array, 100);
-      await Promise.all(
-        chunks.map(async chunk => {
+        for (const chunk of chunks) {
           const batch = new azure.TableBatch();
           chunk.forEach(entity => {
             batch.deleteEntity(this.objectToEntity(entity));
           });
           await this.executeBatch(table, batch);
-        })
-      );
+        }
     } catch (error) {
       throw new VError(
         {
