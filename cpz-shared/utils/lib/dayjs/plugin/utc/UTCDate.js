@@ -1,9 +1,9 @@
-/* 
- * Plugin for dayjs 
+/*
+ * Plugin for dayjs
  * https://github.com/iamkun/dayjs/pull/168
  */
 
-const { LOCAL_TIMEZONE_OFFSET } = require("./util");
+import { LOCAL_TIMEZONE_OFFSET } from "./util";
 
 const padStart = (string, length, pad) => {
   const s = String(string);
@@ -125,4 +125,5 @@ class UTCDate {
       .replace(/GMT(.*)$/, `GMT${padZoneStr(this.$timezoneOffset)}`);
   };
 });
-module.exports = UTCDate;
+
+export default UTCDate;

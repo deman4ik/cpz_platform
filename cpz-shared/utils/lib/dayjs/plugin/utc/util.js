@@ -1,5 +1,5 @@
-/* 
- * Plugin for dayjs 
+/*
+ * Plugin for dayjs
  * https://github.com/iamkun/dayjs/pull/168
  */
 
@@ -22,4 +22,4 @@ function parseTimezoneOffset(tz) {
 }
 const LOCAL_TIMEZONE_OFFSET = new Date().getTimezoneOffset();
 
-module.exports = { parseTimezoneOffset, LOCAL_TIMEZONE_OFFSET };
+export { parseTimezoneOffset, LOCAL_TIMEZONE_OFFSET };

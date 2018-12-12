@@ -1,11 +1,11 @@
-/* 
- * Plugin for dayjs 
+/*
+ * Plugin for dayjs
  * https://github.com/iamkun/dayjs/pull/168
  * FIXME: Remove this when pull request will be merged with master
  */
 
-const UTCDate = require("./UTCDate");
-const { parseTimezoneOffset, LOCAL_TIMEZONE_OFFSET } = require("./util");
+import UTCDate from "./UTCDate";
+import { parseTimezoneOffset, LOCAL_TIMEZONE_OFFSET } from "./util";
 
 let RETURN_LOCAL_INSTANCE = false;
 function injectDayjsClass(pluginPrototype, $super) {
@@ -56,7 +56,7 @@ function injectDayjsClass(pluginPrototype, $super) {
     this.init();
   };
 }
-module.exports = (option = {}, Dayjs, dayjs) => {
+export default (option = {}, Dayjs, dayjs) => {
   RETURN_LOCAL_INSTANCE = !!option.parseToLocal;
   const $super = Dayjs.prototype;
   const PluginClass = function() {};

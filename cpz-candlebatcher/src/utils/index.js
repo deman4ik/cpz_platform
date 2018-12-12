@@ -16,7 +16,7 @@ import { CANDLE_PREVIOUS, createCachedCandleSlug } from "cpzState";
  * @param {dayjs} date
  */
 function getCurrentTimeframes(timeframes, inputDate) {
-  const date = dayjs(inputDate);
+  const date = dayjs(inputDate).utc();
   /* Количество часов 0-23 */
   const hour = date.hour();
   /* Количество минут 0-59 */
@@ -35,8 +35,9 @@ function getCurrentTimeframes(timeframes, inputDate) {
       /* Проверяем текущую минуту */
       if (minute % timeframe === 0) currentTimeframes.push(timeframe);
       /* В остальных случаях проверяем текущий час и минуту */
-    } else if (hour % (timeframe / 60) === 0 && minute % timeframe === 0)
+    } else if (hour % (timeframe / 60) === 0 && minute % timeframe === 0) {
       currentTimeframes.push(timeframe);
+    }
   });
   /* Если есть хотя бы один подходящий таймфрейм */
   if (currentTimeframes.length > 0)
