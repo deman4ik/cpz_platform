@@ -27,9 +27,10 @@ class CCXTProvider extends BaseProvider {
 
   async loadCandles(dateNext) {
     try {
-      const minutesLeft = durationMinutes(this._dateFrom, dateNext, true);
+      const dateEnd = dayjs(dateNext);
+      const minutesLeft = durationMinutes(this._dateFrom, dateEnd, true);
       const limit = minutesLeft > this._limit ? this._limit : minutesLeft;
-      const dateStart = dayjs(dateNext).add(-limit, "minute");
+      const dateStart = dayjs(dateEnd).add(-limit, "minute");
       let attempt = 1;
       const response = await retry(
         async () => {
@@ -56,7 +57,7 @@ class CCXTProvider extends BaseProvider {
             .filter(
               candle =>
                 dayjs(candle[0]).valueOf() >= this._dateStart.valueOf() &&
-                dayjs(candle[0]).valueOf() < this._dateNext.valueOf()
+                dayjs(candle[0]).valueOf() < this._dateEnd.valueOf()
             )
             .sort((a, b) => sortAsc(a[0], b[0]));
           if (filteredData.length > 0) {
@@ -96,7 +97,7 @@ class CCXTProvider extends BaseProvider {
         }
       }
       return {
-        firstDate: dateNext,
+        firstDate: dateEnd,
         data: []
       };
     } catch (error) {

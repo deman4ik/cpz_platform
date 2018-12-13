@@ -270,7 +270,7 @@ class Importer {
         );
 
         // Если дата начала импорта раньше чем дата первой загруженной свечи
-        this._loadDateNext = null;
+        this._loadDateNext = false;
         if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
           // Формируем параметры нового запроса на импорт
           this._loadDateNext = firstDate;
@@ -420,12 +420,12 @@ class Importer {
       const fullDates = divideDateByDays(saveDateNext, this._dateTo);
 
       let dates = [];
-      if (fullDates.length > 10) {
-        dates = fullDates.slice(0, 10);
-        this._saveDateNext = fullDates[9].dateTo;
+      if (fullDates.length > 1) {
+        dates.push(fullDates[0]);
+        this._saveDateNext = fullDates[0].dateTo;
       } else {
         dates = fullDates;
-        this._saveDateNext = null;
+        this._saveDateNext = false;
       }
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const { dateFrom, dateTo, duration } of dates) {
@@ -685,6 +685,18 @@ class Importer {
   async end(status, error) {
     try {
       this._status = status;
+      if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED) {
+        this._endedAt = dayjs().toISOString();
+        this.log(
+          "Finished! Imported from",
+          dayjs(this._dateFrom).toISOString(),
+          "to",
+          dayjs(this._dateTo).toISOString(),
+          "in",
+          dayjs(this._endedAt).diff(dayjs(this._startedAt), "minute"),
+          "minutes"
+        );
+      }
       this._error = error;
       this._updateRequested = false; // Обнуляем запрос на обновление параметров
       this._stopRequested = false; // Обнуляем запрос на остановку сервиса
