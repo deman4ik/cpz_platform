@@ -1,46 +1,77 @@
 const robot4 = {
   adviceEx(sAction, sOrderType, sPriceSource, nPrice) {
+    // check params
     if (!sAction || !sOrderType) return;
 
-    if (sAction !== "short" && sAction !== "long") return;
+    if (
+      sAction !== this.CONSTS.TRADE_ACTION_SHORT &&
+      sAction !== this.CONSTS.TRADE_ACTION_LONG
+    )
+      return;
 
-    if (sOrderType !== "stop" && sOrderType !== "market") return;
+    if (
+      sOrderType !== this.CONSTS.ORDER_TYPE_STOP &&
+      sOrderType !== this.CONSTS.ORDER_TYPE_MARKET
+    )
+      return;
 
-    let price;
-    let source;
+    let price_;
+    let source_;
+    let action_;
+
+    // define price source if we got price
     if (sPriceSource && nPrice) {
-      price = nPrice;
-      source = "stop";
+      price_ = nPrice;
+      source_ = "stop";
     } else {
-      if (sPriceSource === "open") price = this.candle.open;
-      if (sPriceSource === "close") price = this.candle.close;
-      if (sPriceSource === "high") price = this.candle.high;
-      if (sPriceSource === "low") price = this.candle.low;
-      if (!price) return;
-      source = sPriceSource;
+      if (sPriceSource === "open") price_ = this.candle.open;
+      if (sPriceSource === "close") price_ = this.candle.close;
+      if (sPriceSource === "high") price_ = this.candle.high;
+      if (sPriceSource === "low") price_ = this.candle.low;
+      source_ = sPriceSource;
 
       if (!sPriceSource && !nPrice) {
-        price = this.candle.close;
-        source = "close";
+        price_ = this.candle.close;
+        source_ = "close";
       }
+
+      if (!price_) return;
     }
 
-    this.positionId += 1;
+    // do we need to close previously opened position or create new one
+    if (this.prevAction === this.CONSTS.TRADE_ACTION_LONG) {
+      action_ = this.CONSTS.TRADE_ACTION_CLOSE_LONG;
+    } else if (this.prevAction === this.CONSTS.TRADE_ACTION_SHORT) {
+      action_ = this.CONSTS.TRADE_ACTION_CLOSE_SHORT;
+    } else {
+      this.positionId += 1;
+      this.createPosition({ code: `p${this.positionId}` });
+      action_ = sAction;
+    }
+
+    this.prevAction = action_;
+
+    // preparing signal
     const newSignal = {
-      alertTime: new Date().toISOString,
-      action: sAction,
-      // qty: 1,
+      action: action_,
       orderType: sOrderType,
-      price,
-      priceSource: source,
-      positionId: this.positionId
+      price: price_,
+      priceSource: source_,
+      positionId: this.positions[`p${this.positionId}`].positionId,
+      positionOptions: {
+        code: `p${this.positionId}`
+      }
     };
+
+    // issue signal
     this.advice(newSignal);
   },
   init() {
     this.log("init");
     this.requiredHistory = 15; // just for info
     this.positionId = 0;
+    this.myPropSignal = 0;
+    this.prevAction = "#";
     this.addIndicator("sma1", "SMA", { windowLength: 10 });
     this.addIndicator("sma2", "SMA", { windowLength: 20 });
     this.addIndicator("sma3", "SMA", { windowLength: 30 });
@@ -61,15 +92,20 @@ const robot4 = {
       price
     });
 
-    if (
-      this.indicators.sma1.result === 0 ||
-      this.indicators.sma2 === 0 ||
-      this.indicators.sma3 === 0
-    )
-      return;
+    if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
 
-    if (this.myPropSignal === 1) this.adviceEx("long", "open");
-    if (this.myPropSignal === 2) this.adviceEx("short", "open");
+    if (this.myPropSignal === 1)
+      this.adviceEx(
+        this.CONSTS.TRADE_ACTION_LONG,
+        this.CONSTS.ORDER_TYPE_MARKET,
+        "open"
+      );
+    if (this.myPropSignal === 2)
+      this.adviceEx(
+        this.CONSTS.TRADE_ACTION_SHORT,
+        this.CONSTS.ORDER_TYPE_MARKET,
+        "open"
+      );
 
     if (
       this.candle.close > sma1 &&

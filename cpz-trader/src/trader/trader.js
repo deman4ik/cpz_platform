@@ -13,7 +13,6 @@ import {
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_POSTED,
   ORDER_TYPE_LIMIT,
-  ORDER_TYPE_MARKET,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
@@ -203,7 +202,7 @@ class Trader {
    * @param {*} positionId
    * @memberof Trader
    */
-  _createPosition(positionId) {
+  _createPosition(positionId, options) {
     this.log("_createPosition()");
     let { slippageStep, deviation } = this._settings;
     if (this._signal.settings) {
@@ -222,6 +221,7 @@ class Trader {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
+      options,
       settings: { ...this._settings, slippageStep, deviation },
       log: this.log.bind(this),
       logEvent: this.logEvent.bind(this)
@@ -291,7 +291,10 @@ class Trader {
         this._signal.action === TRADE_ACTION_SHORT
       ) {
         // Создаем новую позицию
-        this._createPosition(this._signal.positionId);
+        this._createPosition(
+          this._signal.positionId,
+          this._signal.positionOptions
+        );
         // Создаем ордер на открытие позиции
         this._currentPositions[this._signal.positionId].createEntryOrder(
           this._signal
@@ -309,8 +312,8 @@ class Trader {
       // Созданный ордер
       const createdOrder = this._currentPositions[this._signal.positionId]
         .currentOrder;
-      // Если тип созданного ордера - рыночнй ордер
-      if (createdOrder.orderType === ORDER_TYPE_MARKET) {
+      // Если есть залача для ордера
+      if (createdOrder.task) {
         // Немедленно исполянем ордер
         await this.executeOrders([createdOrder]);
       } else {
@@ -358,12 +361,12 @@ class Trader {
           if (this._mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
             // TODO: CheckOrderStatus API CALL
-            orderResult.state = ORDER_STATUS_CLOSED;
+            orderResult.status = ORDER_STATUS_CLOSED;
             orderResult.executed = this._settings.volume;
           } else {
             // Если режим - эмуляция или бэктест
             // Считаем, что ордер исполнен
-            orderResult.state = ORDER_STATUS_CLOSED;
+            orderResult.status = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
             orderResult.executed = this._settings.volume;
           }
@@ -379,18 +382,18 @@ class Trader {
             // Публикуем ордер на биржу
             // TODO: SendOrder API CALL
             const result = { externalId: uuid() };
-            orderResult.state = ORDER_STATUS_POSTED;
+            orderResult.status = ORDER_STATUS_POSTED;
             orderResult.externalId = result.externalId;
           } else if (order.orderType === ORDER_TYPE_LIMIT) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - лимитный
             // Считаем, что ордер успешно выставлен на биржу
-            orderResult.state = ORDER_STATUS_POSTED;
+            orderResult.status = ORDER_STATUS_POSTED;
           } else {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - по рынку
             // Считаем, что ордер исполнен
-            orderResult.state = ORDER_STATUS_CLOSED;
+            orderResult.status = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
             orderResult.executed = orderToExecute.volume;
           }

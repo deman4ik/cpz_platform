@@ -9,7 +9,7 @@ class AdviserBacktester extends Adviser {
 
   log(...args) {
     if (this._settings.debug) {
-      process.send(`Adviser ${this.eventSubject}: ${args.join(" ")}`);
+      process.send(`Adviser ${this._eventSubject}: ${args.join(" ")}`);
     }
   }
 

@@ -4,17 +4,24 @@ import { POS_STATUS_OPENED } from "cpzState";
 
 class TraderBacktester extends Trader {
   clearEvents() {
-    this._signals = [];
-    this._logEvents = [];
+    this._events = [];
   }
 
   log(...args) {
     if (this._settings.debug) {
-      process.send(`Trader ${this.eventSubject}: ${args.join(" ")}`);
+      let argsString = "";
+      args.forEach(arg => {
+        if (typeof arg === "object") {
+          argsString = `${argsString}${JSON.stringify(arg)}`;
+        } else {
+          argsString += arg;
+        }
+      });
+      process.send(`Trader ${this._eventSubject}: ${argsString}`);
     }
   }
 
-  async handlePrice(currentPrice) {
+  async handlePrice({ price }) {
     try {
       this.log("handlePrice()");
       /* eslint-disable no-restricted-syntax */
@@ -22,8 +29,7 @@ class TraderBacktester extends Trader {
         /* eslint-disable no-await-in-loop */
         const position = this._currentPositions[key];
         if (position.status === POS_STATUS_OPENED) {
-          const requiredOrders = position.getRequiredOrders(currentPrice.price);
-          this.log(requiredOrders);
+          const requiredOrders = position.getRequiredOrders(price);
           if (requiredOrders.length > 0) {
             await this.executeOrders(requiredOrders);
           }

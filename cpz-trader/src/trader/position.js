@@ -210,7 +210,8 @@ class Position {
           : ORDER_DIRECTION_SELL, // Направление торговли ордера
       positionDirection, // Место ордера в позиции
       action: signal.action, // Торговое действие
-      task: null // Задача ордера
+      task:
+        signal.orderType === ORDER_TYPE_MARKET ? ORDER_TASK_OPENBYMARKET : null // Задача ордера
     };
   }
 
@@ -270,6 +271,8 @@ class Position {
    */
   _checkOrder(order, price) {
     this.log("_checkOrder()");
+    this.log("Order:", order);
+    this.log("Price:", price);
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_OPENED) {
       // Тип ордера - лимитный

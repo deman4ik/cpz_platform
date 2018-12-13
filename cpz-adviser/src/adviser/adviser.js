@@ -73,7 +73,7 @@ class Adviser {
       initialized: false
     };
     /* Состояние индикаторов */
-    this._indicators = {};
+    this._indicators = state.indicators || {};
     /* Текущая свеча */
     this._candle = {};
     /* Последняя свеча */

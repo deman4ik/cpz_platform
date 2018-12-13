@@ -302,7 +302,7 @@ class Backtester {
           if (this.adviserBacktester.logEvents.length > 0) {
             this.adviserBacktester.logEvents.forEach(async logEvent => {
               await saveBacktesterStratLog({
-                ...logEvent,
+                ...logEvent.data,
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
                 RowKey: generateKey(),
