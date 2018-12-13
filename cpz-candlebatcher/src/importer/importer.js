@@ -65,7 +65,8 @@ class Importer {
     /* Дата по */
     this._dateTo = state.dateTo;
     /* Дата начало следующей загрузки */
-    this._dateNext = state.dateNext;
+    this._loadDateNext = state.loadDateNext || false;
+    this._saveDateNext = state.saveDateNext || false;
     /* Лимит загружаемых свечей */
     this._limit = state.limit || 500;
     /* Всего свечей для загрузки */
@@ -98,7 +99,7 @@ class Importer {
     this.init();
     /* Запуск инициализации провайдера */
     this.initProvider();
-    this.log(`Importer ${this._eventSubject} initialized`);
+    this.log(`Importer initialized`);
   }
 
   /**
@@ -133,7 +134,6 @@ class Importer {
   }
 
   init() {
-    this.log("init()");
     if (!this._initialized) {
       this._dateFrom = dayjs(this._dateFrom)
         .startOf("minute")
@@ -148,6 +148,7 @@ class Importer {
         dateTo < currentDate
           ? dayjs(dateTo).toISOString()
           : dayjs(currentDate).toISOString();
+      this._loadDateNext = this._dateTo;
       this._initialized = true;
     }
   }
@@ -158,7 +159,6 @@ class Importer {
    * @memberof Importer
    */
   initProvider() {
-    this.log(`initProvider()`);
     try {
       const initParams = {
         taskId: this._taskId,
@@ -213,8 +213,12 @@ class Importer {
     return this._updateRequested;
   }
 
-  get finished() {
-    return !this._dateNext;
+  get loaded() {
+    return !this._loadDateNext;
+  }
+
+  get saved() {
+    return !this._saveDateNext;
   }
 
   /**
@@ -225,7 +229,7 @@ class Importer {
    */
   set status(status) {
     if (status) this._status = status;
-    if (!this._dateNext) {
+    if (this.loaded && this.saved) {
       this._status = STATUS_FINISHED;
     }
     if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
@@ -238,52 +242,53 @@ class Importer {
    * @memberof Importer
    */
   async loadCandles() {
-    this.log(`loadCandles()`);
-    try {
-      this.log(
-        "Loading",
-        this._limit,
-        "candles date to",
-        dayjs(this._dateNext).toISOString()
-      );
-      const { firstDate, data } = await this.provider.loadCandles(
-        this._dateNext
-      );
-      // Загруженные свечи
-      this._candles = data;
-      this.log("Loaded:", this._candles.length);
-      // Всего минут
-      this._totalDuration =
-        this._totalDuration || durationMinutes(this._dateFrom, this._dateTo);
-      // Осталось минут
-      this._leftDuration = durationMinutes(this._dateFrom, firstDate, true);
-      // Загружено минут
-      this._completedDuration = this._totalDuration - this._leftDuration;
-      // Процент выполнения
-      this._percent = completedPercent(
-        this._completedDuration,
-        this._totalDuration
-      );
+    if (!this.loaded) {
+      try {
+        this.log(
+          "Loading",
+          this._limit,
+          "candles date to",
+          dayjs(this._loadDateNext).toISOString()
+        );
+        const { firstDate, data } = await this.provider.loadCandles(
+          this._loadDateNext
+        );
+        // Загруженные свечи
+        this._candles = data;
+        this.log("Loaded:", this._candles.length);
+        // Всего минут
+        this._totalDuration =
+          this._totalDuration || durationMinutes(this._dateFrom, this._dateTo);
+        // Осталось минут
+        this._leftDuration = durationMinutes(this._dateFrom, firstDate, true);
+        // Загружено минут
+        this._completedDuration = this._totalDuration - this._leftDuration;
+        // Процент выполнения
+        this._percent = completedPercent(
+          this._completedDuration,
+          this._totalDuration
+        );
 
-      // Если дата начала импорта раньше чем дата первой загруженной свечи
-      this._dateNext = null;
-      if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
-        // Формируем параметры нового запроса на импорт
-        this._dateNext = firstDate;
-        this.log("Next date to:", dayjs(this._dateNext).toISOString());
+        // Если дата начала импорта раньше чем дата первой загруженной свечи
+        this._loadDateNext = null;
+        if (dayjs(this._dateFrom).isBefore(dayjs(firstDate))) {
+          // Формируем параметры нового запроса на импорт
+          this._loadDateNext = firstDate;
+          this.log("Next date to:", dayjs(this._loadDateNext).toISOString());
+        }
+      } catch (error) {
+        throw new VError(
+          {
+            name: "ImporterError",
+            cause: error,
+            info: {
+              taskId: this._taskId,
+              eventSubject: this._eventSubject
+            }
+          },
+          `Failed to load candles`
+        );
       }
-    } catch (error) {
-      throw new VError(
-        {
-          name: "ImporterError",
-          cause: error,
-          info: {
-            taskId: this._taskId,
-            eventSubject: this._eventSubject
-          }
-        },
-        `Failed to load candles`
-      );
     }
   }
 
@@ -293,7 +298,6 @@ class Importer {
    * @memberof Importer
    */
   async saveCandles(timeframeCandles) {
-    this.log(`saveCandles()`);
     try {
       await Promise.all(
         this._timeframes.map(async timeframe => {
@@ -342,7 +346,6 @@ class Importer {
    * @memberof Importer
    */
   async saveCandlesToTemp() {
-    this.log(`saveCandlesToTemp()`);
     try {
       if (this._candles.length > 0) await saveCandlesArrayToTemp(this._candles);
     } catch (error) {
@@ -366,7 +369,6 @@ class Importer {
    * @memberof Importer
    */
   async _clearTemp() {
-    this.log(`clearTemp()`);
     try {
       await clearTempCandles(this._taskId);
     } catch (error) {
@@ -390,9 +392,8 @@ class Importer {
    * @memberof Importer
    */
   async queueNext() {
-    this.log(`queueNext()`);
     try {
-      if (this._dateNext) {
+      if (!this.loaded || !this.saved) {
         const message = {
           taskId: this._taskId
         };
@@ -415,7 +416,17 @@ class Importer {
 
   async finalize() {
     try {
-      const dates = divideDateByDays(this._dateFrom, this._dateTo);
+      const saveDateNext = this._saveDateNext || this._dateFrom;
+      const fullDates = divideDateByDays(saveDateNext, this._dateTo);
+
+      let dates = [];
+      if (fullDates.length > 10) {
+        dates = fullDates.slice(0, 10);
+        this._saveDateNext = fullDates[9].dateTo;
+      } else {
+        dates = fullDates;
+        this._saveDateNext = null;
+      }
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const { dateFrom, dateTo, duration } of dates) {
         this.log(
@@ -424,7 +435,7 @@ class Importer {
           "to",
           dayjs(dateTo).toISOString()
         );
-        const tempCandles = await getTempCandles({
+        let tempCandles = await getTempCandles({
           dateFrom,
           dateTo,
           slug: createCachedCandleSlug({
@@ -435,6 +446,8 @@ class Importer {
             mode: this._mode
           })
         });
+        tempCandles = tempCandles.sort((a, b) => sortAsc(a.time, b.time));
+
         const { candles, gappedCandles } = await this._handleGaps(
           tempCandles,
           dateFrom,
@@ -463,8 +476,10 @@ class Importer {
           dayjs(dateTo).toISOString()
         );
       }
+      if (this._saveDateNext)
+        this.log("Next date to save:", dayjs(this._saveDateNext).toISOString());
       /* no-restricted-syntax, no-await-in-loop */
-      await this._clearTemp();
+      if (this.saved) await this._clearTemp();
     } catch (error) {
       throw new VError(
         {
@@ -487,7 +502,6 @@ class Importer {
    */
   async _handleGaps(inputCandles, dateFrom, dateTo, duration) {
     const candles = inputCandles;
-    this.log("handleGaps()");
     try {
       // Если количество свечей в кэше равно общему количеству свечей - нет пропусков
       if (candles.length === duration) return { candles, gappedCandles: [] };
@@ -507,7 +521,7 @@ class Importer {
       );
       if (gappedCandles.length > 0) {
         candles.concat(gappedCandles).sort((a, b) => sortAsc(a.time, b.time));
-        this.log("gapped candles:", gappedCandles.length);
+        this.log("Gapped candles:", gappedCandles.length);
       }
       return { candles, gappedCandles };
     } catch (error) {
@@ -531,7 +545,6 @@ class Importer {
    * @memberof Importer
    */
   _batchCandles(tempCandles, dateFrom, dateTo, duration) {
-    this.log("batchCandles()");
     try {
       // Инициализируем объект со свечами в различных таймфреймах
       const timeframeCandles = {};
@@ -554,9 +567,9 @@ class Importer {
           currentTimeframes.forEach(timeframe => {
             const timeFrom = date.add(-timeframe, "minute").valueOf();
             const timeTo = date.valueOf();
-            const candles = tempCandles.filter(
-              candle => candle.time >= timeFrom && candle.time < timeTo
-            );
+            const candles = tempCandles
+              .filter(candle => candle.time >= timeFrom && candle.time < timeTo)
+              .sort((a, b) => sortAsc(a.time, b.time));
             if (candles.length > 0) {
               timeframeCandles[timeframe].push({
                 id: uuid(),
@@ -606,7 +619,6 @@ class Importer {
   }
 
   getCurrentState() {
-    this.log(`getCurrentState()`);
     const state = {
       PartitionKey: createImporterSlug({
         exchange: this._exchange,
@@ -632,7 +644,8 @@ class Importer {
       percent: this._percent,
       dateFrom: this._dateFrom,
       dateTo: this._dateTo,
-      dateNext: this._dateNext,
+      loadDateNext: this._loadDateNext,
+      saveDateNext: this._saveDateNext,
       proxy: this._proxy,
       status: this._status,
       error: this.error,
@@ -645,7 +658,6 @@ class Importer {
   }
 
   async save() {
-    this.log(`save()`);
     try {
       await saveImporterState(this.getCurrentState());
     } catch (error) {
@@ -672,7 +684,6 @@ class Importer {
    */
   async end(status, error) {
     try {
-      this.log(`end()`);
       this._status = status;
       this._error = error;
       this._updateRequested = false; // Обнуляем запрос на обновление параметров

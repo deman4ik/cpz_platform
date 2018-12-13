@@ -1,6 +1,7 @@
 /*
  * Обработка очередной итерации импорта
  */
+import { VError } from "verror";
 import { IMPORTER_SERVICE } from "cpzServices";
 import {
   ERROR_IMPORTER_EVENT,
@@ -15,6 +16,7 @@ import {
   STATUS_STARTED,
   STATUS_FINISHED
 } from "cpzState";
+import { createErrorOutput } from "cpzUtils/error";
 import Importer from "./importer";
 
 async function execute(context, state, start = false) {
@@ -47,19 +49,25 @@ async function execute(context, state, start = false) {
         }
       });
     }
-    // Загружаем новые свечи
-    await importer.loadCandles();
+    if (!importer.loaded) {
+      // Загружаем новые свечи
+      await importer.loadCandles();
 
-    // Сохраняем загруженные свечи
-    await importer.saveCandlesToTemp();
-
-    // Если импорт завершен
-    if (importer.finished) {
+      // Сохраняем загруженные свечи
+      await importer.saveCandlesToTemp();
+    }
+    if (importer.loaded) {
+      // Если импорт завершен
       //  Проверяем пропуски, сворачиваем свечи, сохраняем в БД, очищаем кэш
       await importer.finalize();
-      // Завершаем работу и сохраняем стейт
-      await importer.end(STATUS_FINISHED);
-    } else {
+
+      if (importer.saved) {
+        // Завершаем работу и сохраняем стейт
+        await importer.end(STATUS_FINISHED);
+      }
+    }
+
+    if (!importer.loaded || !importer.saved) {
       // Если импорт не завершен, добавляем новую задачу в очередь
       await importer.queueNext();
       // Завершаем работу и сохраняем стейт
