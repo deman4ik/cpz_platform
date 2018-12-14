@@ -71,30 +71,30 @@ const robot4 = {
     this.positionId = 0;
     this.myPropSignal = 0;
     this.prevAction = "#";
-    this.minBarsToHold = 3; // param  
-    this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least 
+    this.minBarsToHold = 3; // param
+    this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least
     this.addIndicator("sma1", "SMA", { windowLength: 10 });
     this.addIndicator("sma2", "SMA", { windowLength: 20 });
     this.addIndicator("sma3", "SMA", { windowLength: 30 });
   },
   check() {
-    //this.log("check");
-    //this.log(this.candle);
+    // this.log("check");
+    // this.log(this.candle);
 
     const price = this.candle.close;
     const sma1 = this.indicators.sma1.result;
     const sma2 = this.indicators.sma2.result;
     const sma3 = this.indicators.sma3.result;
-    
-    /*this.logEvent({
+
+    this.logEvent({
       sma1,
       sma2,
       sma3,
       price
-    });*/
-    
-    if ( this.heldEnoughBars > 0) this.heldEnoughBars++;
-    
+    });
+
+    if (this.heldEnoughBars > 0) this.heldEnoughBars += 1;
+
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
 
     if (this.myPropSignal === 1)
@@ -110,9 +110,11 @@ const robot4 = {
         "open"
       );
 
-    if (this.heldEnoughBars == 0 && 
-        this.candle.close > sma1 &&
-        (sma1 > sma2 && sma1 > sma3) &&  sma2 > sma3
+    if (
+      this.heldEnoughBars === 0 &&
+      this.candle.close > sma1 &&
+      (sma1 > sma2 && sma1 > sma3) &&
+      sma2 > sma3
     ) {
       this.myPropSignal = 1; // buy
       this.heldEnoughBars = 1; // open bar counter
@@ -120,7 +122,7 @@ const robot4 = {
       this.myPropSignal = 2; // sell
     } else {
       this.myPropSignal = 0;
-      this.heldEnoughBars = 0; //clear bar counter 
+      this.heldEnoughBars = 0; // clear bar counter
     }
   }
 };

@@ -53,7 +53,7 @@ class TableStorage {
         } else {
           entity[key] = entityGenerator.String(JSON.stringify(element));
         }
-      } else if (key === "timestamp") {
+      } else if (key.toLowerCase().includes("timestamp")) {
         entity[key] = entityGenerator.DateTime(element);
       } else if (typeof element === "number") {
         entity[key] = entityGenerator.Double(element);

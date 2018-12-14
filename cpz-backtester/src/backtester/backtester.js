@@ -179,7 +179,7 @@ class Backtester {
       }
 
       this.log(`Starting ${this.taskId}...`);
-      this.startedAt = dayjs().toJSON();
+      this.startedAt = dayjs().toISOString();
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
         // Формируем параметры запроса
@@ -241,7 +241,7 @@ class Backtester {
 
       this.iterations = chunkNumberToArray(this.totalBars, 1440);
       this.prevIteration = 0;
-      const tasksToSave = [];
+
       const itemsToSave = [];
       const logsToSave = [];
       const signalsToSave = [];
@@ -304,6 +304,7 @@ class Backtester {
                 backtesterCandleId: candle.id,
                 backtesterCandleTimestamp: candle.timestamp,
                 signalId: signalEvent.data.signalId,
+                signalTimestamp: signalEvent.data.timestamp,
                 action: signalEvent.data.action,
                 orderType: signalEvent.data.orderType,
                 price: signalEvent.data.price,
@@ -346,11 +347,11 @@ class Backtester {
                 positionCode: positionEvent.data.options.code,
                 entryStatus: positionEvent.data.entry.status,
                 entryPrice: positionEvent.data.entry.price,
-                entryDate: positionEvent.data.entry.date,
+                entryDate: new Date(positionEvent.data.entry.date),
                 entryExecuted: positionEvent.data.entry.executed,
                 exitStatus: positionEvent.data.exit.status,
                 exitPrice: positionEvent.data.exit.price,
-                exitDate: positionEvent.data.exit.date,
+                exitDate: new Date(positionEvent.data.exit.date),
                 exitExecuted: positionEvent.data.exit.executed,
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
@@ -362,6 +363,7 @@ class Backtester {
                 backtesterCandleId: candle.id,
                 backtesterCandleTimestamp: candle.timestamp,
                 orderId: orderEvent.data.orderId,
+                createdAt: new Date(orderEvent.data.createdAt),
                 action: orderEvent.data.action,
                 orderType: orderEvent.data.orderType,
                 price: orderEvent.data.price,
@@ -406,7 +408,7 @@ class Backtester {
       /* no-restricted-syntax, no-await-in-loop  */
       // Закончили обработку
       this.status = STATUS_FINISHED;
-      this.endedAt = dayjs().toJSON();
+      this.endedAt = dayjs().toISOString();
       // Сохраняем состояние пачки
       await this.save();
 
