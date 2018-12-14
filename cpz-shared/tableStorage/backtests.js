@@ -36,40 +36,40 @@ const saveBacktesterState = async state =>
  *
  * @param {object} state
  */
-const saveBacktesterItem = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTITEMS_TABLE, item);
+const saveBacktesterItems = async items =>
+  tableStorage.insertOrMergeArray(STORAGE_BACKTESTITEMS_TABLE, items);
 
 /**
  * Saves backtest strategy logs
  *
  * @param {object} state
  */
-const saveBacktesterStratLog = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTSTRATLOG_TABLE, item);
+const saveBacktesterStratLogs = async items =>
+  tableStorage.insertOrMergeArray(STORAGE_BACKTESTSTRATLOG_TABLE, items);
 
 /**
  * Saves backtest signals
  *
  * @param {SignalState} state
  */
-const saveBacktesterSignal = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTSIGNALS_TABLE, item);
+const saveBacktesterSignals = async items =>
+  tableStorage.insertOrMergeArray(STORAGE_BACKTESTSIGNALS_TABLE, items);
 
 /**
  * Saves backtest orders
  *
  * @param {OderState} state
  */
-const saveBacktesterOrder = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTORDERS_TABLE, item);
+const saveBacktesterOrders = async items =>
+  tableStorage.insertOrMergeArray(STORAGE_BACKTESTORDERS_TABLE, items);
 
 /**
  * Saves backtest positions
  *
  * @param {PositionState} state
  */
-const saveBacktesterPosition = async item =>
-  tableStorage.insertOrMergeEntity(STORAGE_BACKTESTPOSITIONS_TABLE, item);
+const saveBacktesterPositions = async items =>
+  tableStorage.insertOrMergeArray(STORAGE_BACKTESTPOSITIONS_TABLE, items);
 /**
  * Delete Backtester state and all Backtester Items
  *
@@ -116,10 +116,10 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey }) => {
 export {
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterItem,
-  saveBacktesterStratLog,
-  saveBacktesterSignal,
-  saveBacktesterOrder,
-  saveBacktesterPosition,
+  saveBacktesterItems,
+  saveBacktesterStratLogs,
+  saveBacktesterSignals,
+  saveBacktesterOrders,
+  saveBacktesterPositions,
   deleteBacktesterState
 };

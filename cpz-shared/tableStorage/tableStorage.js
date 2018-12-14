@@ -80,10 +80,7 @@ class TableStorage {
             new VError(
               {
                 name: error.name,
-                cause: error,
-                info: {
-                  tableName
-                }
+                cause: error
               },
               'Failed to create table "%s"',
               tableName
@@ -113,11 +110,7 @@ class TableStorage {
             err = new VError(
               {
                 name: "StorageEntityMutation",
-                cause: error,
-                info: {
-                  tableName,
-                  entity
-                }
+                cause: error
               },
               'Entity mutation in "%s"',
               tableName
@@ -126,11 +119,7 @@ class TableStorage {
             err = new VError(
               {
                 name: error.name,
-                cause: error,
-                info: {
-                  tableName,
-                  entity
-                }
+                cause: error
               },
               'Failed to insert or merge entity in "%s"',
               tableName
@@ -203,11 +192,7 @@ class TableStorage {
             err = new VError(
               {
                 name: error.name,
-                cause: error,
-                info: {
-                  tableName,
-                  entity
-                }
+                cause: error
               },
               'Failed to merge entity in "%s"',
               tableName
@@ -237,11 +222,7 @@ class TableStorage {
             new VError(
               {
                 name: error.name,
-                cause: error,
-                info: {
-                  tableName,
-                  entity
-                }
+                cause: error
               },
               'Failed to delete entity from "%s"',
               tableName
@@ -319,11 +300,7 @@ class TableStorage {
             new VError(
               {
                 name: error.name,
-                cause: error,
-                info: {
-                  tableName,
-                  batch
-                }
+                cause: error
               },
               'Failed to execute batch operations in "%s"',
               tableName
@@ -354,11 +331,7 @@ class TableStorage {
               new VError(
                 {
                   name: error.name,
-                  cause: error,
-                  info: {
-                    tableName,
-                    tableQuery
-                  }
+                  cause: error
                 },
                 'Failed to query entities from "%s"',
                 tableName
@@ -408,10 +381,7 @@ class TableStorage {
       throw new VError(
         {
           name: "TableStorageError",
-          cause: error,
-          info: {
-            tableName
-          }
+          cause: error
         },
         'Failed to read from "%s"',
         tableName
@@ -446,10 +416,7 @@ class TableStorage {
       throw new VError(
         {
           name: "TableStorageError",
-          cause: error,
-          info: {
-            tableName
-          }
+          cause: error
         },
         'Failed to count entities in "%s"',
         tableName

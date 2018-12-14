@@ -4,7 +4,8 @@ import {
   STATUS_STARTED,
   STATUS_FINISHED,
   STATUS_ERROR,
-  createBacktesterSlug
+  createBacktesterSlug,
+  BACKTEST_MODE
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
@@ -28,11 +29,11 @@ import { createErrorOutput } from "cpzUtils/error";
 import {
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterItem,
-  saveBacktesterStratLog,
-  saveBacktesterSignal,
-  saveBacktesterOrder,
-  saveBacktesterPosition,
+  saveBacktesterItems,
+  saveBacktesterStratLogs,
+  saveBacktesterSignals,
+  saveBacktesterOrders,
+  saveBacktesterPositions,
   deleteBacktesterState
 } from "cpzStorage";
 import DB from "cpzDB";
@@ -70,11 +71,19 @@ class Backtester {
     this.startedAt = "";
     this.endedAt = "";
     this.status = STATUS_STARTED;
+    this.slug = createBacktesterSlug({
+      exchange: this.exchange,
+      asset: this.asset,
+      currency: this.currency,
+      timeframe: this.timeframe,
+      robotId: this.robotId
+    });
     this.db = state.db || new DB();
     this.adviserBacktester = new AdviserBacktester(
       {},
       {
         ...state,
+        mode: BACKTEST_MODE,
         settings: this.adviserSettings
       }
     );
@@ -82,6 +91,7 @@ class Backtester {
       {},
       {
         ...state,
+        mode: BACKTEST_MODE,
         settings: this.traderSettings
       }
     );
@@ -121,13 +131,7 @@ class Backtester {
   getCurrentState() {
     return {
       ...this.initialState,
-      PartitionKey: createBacktesterSlug({
-        exchange: this.exchange,
-        asset: this.asset,
-        currency: this.currency,
-        timeframe: this.timeframe,
-        robotId: this.robotId
-      }),
+      PartitionKey: this.slug,
       RowKey: this.taskId,
       settings: this.settings,
       totalBars: this.totalBars,
@@ -170,13 +174,7 @@ class Backtester {
         );
         await deleteBacktesterState({
           RowKey: this.taskId,
-          PartitionKey: createBacktesterSlug({
-            exchange: this.exchange,
-            asset: this.asset,
-            currency: this.currency,
-            timeframe: this.timeframe,
-            robotId: this.robotId
-          })
+          PartitionKey: this.slug
         });
       }
 
@@ -243,6 +241,12 @@ class Backtester {
 
       this.iterations = chunkNumberToArray(this.totalBars, 1440);
       this.prevIteration = 0;
+      const tasksToSave = [];
+      const itemsToSave = [];
+      const logsToSave = [];
+      const signalsToSave = [];
+      const ordersToSave = [];
+      const positionsToSave = [];
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const iteration of this.iterations) {
         const historyCandles = await this.db.getCandles({
@@ -272,7 +276,9 @@ class Backtester {
             indicators[key] = this.adviserBacktester.indicators[key].result;
           });
 
-          await saveBacktesterItem({
+          /*
+
+          itemsToSave.push({
             ...indicators,
             backtesterId: this.taskId,
             backtesterCandleId: candle.id,
@@ -285,26 +291,39 @@ class Backtester {
             RowKey: generateKey(),
             PartitionKey: this.taskId
           });
+          */
           // Если есть хотя бы одно событие для отправка
           if (this.adviserBacktester.signals.length > 0) {
             // Отправляем
+
             this.adviserBacktester.signals.forEach(async signalEvent => {
-              await saveBacktesterSignal({
-                ...signalEvent.data,
+              signalsToSave.push({
+                RowKey: generateKey(),
+                PartitionKey: this.taskId,
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
-                RowKey: generateKey(),
-                PartitionKey: this.taskId
+                backtesterCandleTimestamp: candle.timestamp,
+                signalId: signalEvent.data.signalId,
+                action: signalEvent.data.action,
+                orderType: signalEvent.data.orderType,
+                price: signalEvent.data.price,
+                priceSource: signalEvent.data.priceSource
               });
             });
           }
 
           if (this.adviserBacktester.logEvents.length > 0) {
-            this.adviserBacktester.logEvents.forEach(async logEvent => {
-              await saveBacktesterStratLog({
+            this.adviserBacktester.logEvents.forEach(logEvent => {
+              logsToSave.push({
                 ...logEvent.data,
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
+                backtesterCandleTimestamp: candle.timestamp,
+                backtesterCandleTime: candle.time,
+                backtesterCandleHigh: candle.high,
+                backtesterCandleOpen: candle.open,
+                backtesterCandleClose: candle.close,
+                backtesterCandleLow: candle.low,
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
               });
@@ -318,20 +337,37 @@ class Backtester {
             const orders = this.traderBacktester.events.filter(
               event => event.eventType === TRADES_ORDER_EVENT.eventType
             );
-            positions.forEach(async positionEvent => {
-              await saveBacktesterPosition({
-                ...positionEvent.data,
+            positions.forEach(positionEvent => {
+              positionsToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
+                backtesterCandleTimestamp: candle.timestamp,
+                positionId: positionEvent.data.positionId,
+                positionCode: positionEvent.data.options.code,
+                entryStatus: positionEvent.data.entry.status,
+                entryPrice: positionEvent.data.entry.price,
+                entryDate: positionEvent.data.entry.date,
+                entryExecuted: positionEvent.data.entry.executed,
+                exitStatus: positionEvent.data.exit.status,
+                exitPrice: positionEvent.data.exit.price,
+                exitDate: positionEvent.data.exit.date,
+                exitExecuted: positionEvent.data.exit.executed,
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
               });
             });
-            orders.forEach(async orderEvent => {
-              await saveBacktesterOrder({
-                ...orderEvent.data,
+            orders.forEach(orderEvent => {
+              ordersToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
+                backtesterCandleTimestamp: candle.timestamp,
+                orderId: orderEvent.data.orderId,
+                action: orderEvent.data.action,
+                orderType: orderEvent.data.orderType,
+                price: orderEvent.data.price,
+                status: orderEvent.data.status,
+                executed: orderEvent.data.executed,
+                signalId: orderEvent.data.signalId,
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
               });
@@ -356,6 +392,14 @@ class Backtester {
             this.oldPercent = this.percent;
           }
         }
+
+        if (signalsToSave.length > 0)
+          await saveBacktesterSignals(signalsToSave);
+        if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
+        if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
+        if (positionsToSave.length > 0)
+          await saveBacktesterPositions(positionsToSave);
+
         // Сохраняем состояние пачки
         await this.save();
       }
@@ -366,15 +410,28 @@ class Backtester {
       // Сохраняем состояние пачки
       await this.save();
 
+      const duration = dayjs(this.endedAt).diff(
+        dayjs(this.startedAt),
+        "minute"
+      );
       await publishEvents(TASKS_TOPIC, {
         service: BACKTESTER_SERVICE,
         subject: this.eventSubject,
         eventType: TASKS_BACKTESTER_FINISHED_EVENT,
         data: {
-          taskId: this.taskId
+          taskId: this.taskId,
+          duration
         }
       });
-      this.log(`Backtest ${this.taskId} finished!`);
+      this.log(
+        `Backtest finished! From`,
+        dayjs(this.dateFrom).toISOString(),
+        "to",
+        dayjs(this.dateTo).toISOString(),
+        "in",
+        duration,
+        "minutes"
+      );
     } catch (error) {
       const err = new VError(
         {
@@ -385,7 +442,7 @@ class Backtester {
         this.taskId
       );
       const errorOutput = createErrorOutput(err);
-      this.log(JSON.stringify(errorOutput));
+      this.log(errorOutput.name, errorOutput.message);
       // Если есть экземпляр класса
       this.status = STATUS_ERROR;
       this.error = errorOutput;
@@ -397,7 +454,7 @@ class Backtester {
         eventType: ERROR_BACKTESTER_EVENT,
         data: {
           taskId: this.taskId,
-          error: errorOutput
+          error: errorOutput.message
         }
       });
     }
