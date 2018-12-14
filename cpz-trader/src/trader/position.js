@@ -389,20 +389,23 @@ class Position {
     this.log("handleOrder()");
     // Если ордер на открытие позиции
     if (order.positionDirection === ORDER_POS_DIR_ENTRY) {
-      // Изменяем статус открытия позиции
-      this._entry.status = order.status;
       // Сохраянем ордер в списке ордеров на открытие позиции
       this._entryOrders[order.orderId] = order;
+      // Изменяем статус открытия позиции
+      this._entry.status = order.status;
       this._entry.price = order.price;
       this._entry.date = order.createdAt;
+      this._entry.executed = order.executed;
     } else {
       // Если ордер на закрытие позиции
-      // Изменяем статус закрытия позиции
-      this._exit.status = order.status;
+
       // Сохраянем ордер в списке ордеров на закрытие позиции
       this._exitOrders[order.orderId] = order;
+      // Изменяем статус закрытия позиции
+      this._exit.status = order.status;
       this._exit.price = order.price;
       this._exit.date = order.createdAt;
+      this._exit.executed = order.executed;
     }
     // Устанавливаем статус позиции
     this.setStatus();
