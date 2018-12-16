@@ -246,7 +246,9 @@ class Backtester {
       const logsToSave = [];
       const signalsToSave = [];
       const ordersToSave = [];
+      const ordersToSaveDB = [];
       const positionsToSave = [];
+      const positionsToSaveDB = [];
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const iteration of this.iterations) {
         const historyCandles = await this.db.getCandles({
@@ -339,12 +341,14 @@ class Backtester {
               event => event.eventType === TRADES_ORDER_EVENT.eventType
             );
             positions.forEach(positionEvent => {
+              positionsToSaveDB.push(positionEvent.data);
               positionsToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
                 backtesterCandleTimestamp: candle.timestamp,
                 positionId: positionEvent.data.positionId,
                 positionCode: positionEvent.data.options.code,
+                direction: positionEvent.data.direction,
                 entryStatus: positionEvent.data.entry.status,
                 entryPrice: positionEvent.data.entry.price,
                 entryDate: new Date(positionEvent.data.entry.date),
@@ -357,7 +361,9 @@ class Backtester {
                 PartitionKey: this.taskId
               });
             });
+
             orders.forEach(orderEvent => {
+              ordersToSaveDB.push(orderEvent.data);
               ordersToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
@@ -401,6 +407,13 @@ class Backtester {
         if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
         if (positionsToSave.length > 0)
           await saveBacktesterPositions(positionsToSave);
+
+        /*
+        if (positionsToSaveDB.length > 0)
+          await this.db.savePositions(positionsToSaveDB);
+
+        if (ordersToSaveDB.length > 0) await this.db.saveOrders(ordersToSaveDB);
+        */
 
         // Сохраняем состояние пачки
         await this.save();

@@ -66,7 +66,7 @@ class Position {
     this._options = state.options;
     /* Текущий статус ["none","opened","closed","canceled","error"] */
     this._status = state.status || POS_STATUS_NONE;
-
+    this._direction = state.direction;
     this._entry = state.entry || {
       /* Текущий статус открытия ["none","opened","posted","closed","canceled","error"] */
       status: ORDER_STATUS_NONE,
@@ -470,6 +470,7 @@ class Position {
         currency: this._currency,
         timeframe: this._timeframe,
         status: this._status,
+        direction: this._direction,
         options: this._options,
         settings: this._settings,
         entry: this._entry,
@@ -500,6 +501,7 @@ class Position {
       options: this._options,
       settings: this._settings,
       status: this._status,
+      direction: this._direction,
       entry: this._entry,
       exit: this._exit,
       entryOrders: this._entryOrders,

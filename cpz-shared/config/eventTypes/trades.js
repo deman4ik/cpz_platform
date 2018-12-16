@@ -52,7 +52,6 @@ const TRADES_ORDER_EVENT = {
       type: "string",
       empty: false
     },
-
     orderId: { description: "Uniq Order Id.", type: "string", empty: false },
     signalId: { description: "Uniq Single Id.", type: "string", empty: false },
     orderType: {
@@ -151,12 +150,12 @@ const TRADES_POSITION_EVENT = {
       type: "string",
       empty: false
     },
-    traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     mode: {
       description: "Service run mode.",
       type: "string",
       values: ["backtest", "emulator", "realtime"]
     },
+    traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     robotId: {
       description: "Robot uniq Id.",
       type: "string",
@@ -189,6 +188,11 @@ const TRADES_POSITION_EVENT = {
         POS_STATUS_CANCELED,
         POS_STATUS_ERROR
       ]
+    },
+    direction: {
+      description: "Position direction.",
+      type: "string",
+      values: [ORDER_DIRECTION_BUY, ORDER_DIRECTION_SELL]
     },
     options: {
       description: "Position options.",

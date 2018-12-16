@@ -3,7 +3,8 @@ import { GraphQLClient } from "graphql-request";
 import { saveCandles, getCandles, countCandles } from "./candles";
 import { saveTasksEvent } from "./tasksEvents";
 import { saveSignal } from "./signals";
-import { saveOrder } from "./orders";
+import { saveOrders } from "./orders";
+import { savePositions } from "./positions";
 import { saveLogEvent } from "./logsEvents";
 import { saveErrorEvent } from "./errorsEvents";
 import { getUserRobot } from "./userRobots";
@@ -25,7 +26,8 @@ class DataBaseAPI {
 
     this.saveTasksEvent = saveTasksEvent;
     this.saveSignal = saveSignal;
-    this.saveOrder = saveOrder;
+    this.saveOrders = saveOrders;
+    this.savePositions = savePositions;
     this.saveLogEvent = saveLogEvent;
     this.saveErrorEvent = saveErrorEvent;
   }

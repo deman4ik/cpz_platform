@@ -48,11 +48,7 @@ async function saveCandles({ timeframe, candles }) {
     throw new VError(
       {
         name: "DBError",
-        cause: error,
-        info: {
-          timeframe,
-          candles
-        }
+        cause: error
       },
       "Failed to save candles to DB;"
     );

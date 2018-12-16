@@ -10,8 +10,11 @@ import {
   STATUS_FINISHED,
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
+  TRADE_ACTION_CLOSE_SHORT,
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_POSTED,
+  ORDER_DIRECTION_BUY,
+  ORDER_DIRECTION_SELL,
   ORDER_TYPE_LIMIT,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
@@ -221,6 +224,11 @@ class Trader {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
+      direction:
+        this._signal.action === TRADE_ACTION_CLOSE_SHORT ||
+        this._signal.action === TRADE_ACTION_LONG
+          ? ORDER_DIRECTION_BUY
+          : ORDER_DIRECTION_SELL,
       options,
       settings: { ...this._settings, slippageStep, deviation },
       log: this.log.bind(this),
