@@ -93,37 +93,45 @@ const robot4 = {
       price
     });
 
-    if (this.heldEnoughBars > 0) this.heldEnoughBars += 1;
+    if (this.heldEnoughBars > 0) this.heldEnoughBars ++;
 
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
-
-    if (this.myPropSignal === 1)
+    
+    // advice at bar+1 of signal
+    if (this.myPropSignal == 1) {
       this.adviceEx(
         this.CONSTS.TRADE_ACTION_LONG,
         this.CONSTS.ORDER_TYPE_MARKET,
         "open"
       );
-    if (this.myPropSignal === 2)
+      this.myPropSignal = 0;
+    }
+    if (this.myPropSignal == 2) {
       this.adviceEx(
         this.CONSTS.TRADE_ACTION_SHORT,
         this.CONSTS.ORDER_TYPE_MARKET,
         "open"
       );
-
-    if (
-      this.heldEnoughBars === 0 &&
-      this.candle.close > sma1 &&
-      (sma1 > sma2 && sma1 > sma3) &&
-      sma2 > sma3
-    ) {
-      this.myPropSignal = 1; // buy
-      this.heldEnoughBars = 1; // open bar counter
-    } else if (this.candle.close < sma1) {
-      this.myPropSignal = 2; // sell
-    } else {
       this.myPropSignal = 0;
-      this.heldEnoughBars = 0; // clear bar counter
     }
+    
+    // if last position opened
+    if (this.prevAction == this.CONSTS.TRADE_ACTION_LONG) {
+      // exit condition
+      if (this.candle.close < sma1 && this.heldEnoughBars >= this.minBarsToHold) {
+            this.myPropSignal = 2; // sell
+            this.heldEnoughBars = 0; // clear bars counter
+      }       
+    }
+    else {
+      // enter condition
+      if (this.candle.close > sma1 && (sma1 > sma2 && sma1 > sma3) && sma2 > sma3) {
+        this.myPropSignal = 1; // buy
+        this.heldEnoughBars = 1; // open bar counter
+      }   
+    }
+    
+    
   }
 };
 
