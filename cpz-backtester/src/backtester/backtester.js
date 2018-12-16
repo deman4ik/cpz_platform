@@ -353,7 +353,7 @@ class Backtester {
                 exitPrice: positionEvent.data.exit.price,
                 exitDate: new Date(positionEvent.data.exit.date),
                 exitExecuted: positionEvent.data.exit.executed,
-                RowKey: generateKey(),
+                RowKey: positionEvent.data.positionId,
                 PartitionKey: this.taskId
               });
             });
