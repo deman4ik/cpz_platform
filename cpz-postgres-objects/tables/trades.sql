@@ -57,7 +57,7 @@ create index i_trades_currency_fk
 
 create index i_trades_positions_fk
   on trades (position_id);
-create index i_trades_signal_fk
+create index i_trades_signal
   on trades (signal_id);
 create index i_trades_sel_user_date
   on trades (user_id, created_at);

@@ -30,7 +30,6 @@ create table positions
   slippage_step numeric         not null default 0,
   deviation     numeric         not null default 0,
   quantity      numeric         not null,
-  run_mode      varchar(10)     not null,
   action        varchar(10),
   /*calculated*/
   bars_held     integer,
@@ -56,10 +55,6 @@ alter table positions
     check (status in ('none','opened','closed','error'));
 
 alter table positions
-  add constraint c_positions_run_mode_chk
-    check (run_mode in ('backtest','emulator','realtime'));
-
-alter table positions
   add constraint c_positions_action_chk
     check (action in ('long','closeLong','short','closeShort'));
 
@@ -80,7 +75,9 @@ create index i_positions_asset_fk
   on positions (asset);
 create index i_positions_currency_fk
   on positions (currency);
-
+create index i_positions_backtest_fk
+  on positions (backtest_id);
+  
 comment on column positions.action is 'short | closeShort | long | closeLong';
 comment on column positions.bars_held is '= duration / candle size';
 comment on column positions.entry_balance is '= entry_price * quantity';
@@ -88,6 +85,7 @@ comment on column positions.exit_balance is '= exit_price * quantity';
 comment on column positions.historic is '0 - normal, 1 - uploaded historic data, not generated inside the system';
 comment on column positions.trader_id is 'trader process id | becktester process id';
 comment on column positions.code is 'user code/number for particular position, comes from strategy';
+comment on column positions.signal_id is 'last signal for open or close';
 
 comment on table positions is 'Positions = round trips';
 

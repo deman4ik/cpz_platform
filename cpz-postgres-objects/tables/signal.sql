@@ -13,7 +13,12 @@ create table signal
     is_archive numeric(1)  not null default 0,
     candle     jsonb,
     settings   jsonb,
-    adviser_id uuid 
+    adviser_id uuid,
+    backtest_id   uuid
+      constraint c_positions_backtest_fk
+      references backtest
+        ON DELETE CASCADE  
+     
 )
 with OIDS;
 
@@ -30,7 +35,8 @@ alter table signal
     check (price_source in ('open','close','high','low','stop'));    
 
 create index i_signal_robot_fk on signal (robot_id);
-create index i_signal_alert_time_fk on signal (alert_time);
-create index i_signal_is_archive_fk on signal (is_archive);
-
+create index i_signal_alert_time on signal (alert_time);
+create index i_signal_is_archive on signal (is_archive);
+create index i_signal_backtest_fk   on signal (backtest_id);
+  
 comment on table signal is 'current active signals';
