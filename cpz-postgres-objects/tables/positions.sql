@@ -21,8 +21,7 @@ create table positions
   code          varchar(20),    
   timeframe     integer         not null,
   status        varchar(10)     not null default 'none',
-  entry_status  varchar(10)     not null default 'none',
-  exit_status   varchar(10)     not null default 'none',
+  direction     varchar(10)     not null,
   entry_date    timestamp       not null,
   entry_price   numeric,
   exit_date     timestamp,
@@ -50,7 +49,7 @@ alter table positions
 
 alter table positions
   add constraint c_positions_status_chk
-    check (status in ('none','opened','posted','closed','canceled','error'));
+    check (status in ('none','opened','closed','error'));
 
 alter table positions
   add constraint c_positions_run_mode_chk
@@ -60,6 +59,10 @@ alter table positions
   add constraint c_positions_action_chk
     check (action in ('long','closeLong','short','closeShort'));
 
+alter table positions
+  add constraint c_positions_direction_chk
+    check (direction in ('buy','sell'));
+    
 create index i_positions_dates
   on positions (robot_id, entry_date, exit_date);
 

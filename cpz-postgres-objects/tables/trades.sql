@@ -26,6 +26,7 @@ create table trades
     created_at    timestamp       not null,
     order_time    timestamp,
     order_num     varchar(160),
+    order_type    varchar(10)     not null,
     status        varchar(10)     not null default 'none',
     action        varchar(10)     not null,
     price         numeric         not null,
@@ -37,7 +38,11 @@ with OIDS;
 alter table trades
   add constraint c_trades_action_chk
     check (action in ('long','closeLong','short','closeShort'));
-    
+
+alter table trades
+  add constraint c_trades_order_type_chk
+    check (order_type in ('limit','market','stop'));
+        
 create index i_trades_userlist_fk
   on trades (user_id);
 create index i_trades_robot_fk
