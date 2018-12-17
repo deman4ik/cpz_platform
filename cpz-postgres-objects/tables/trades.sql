@@ -5,7 +5,8 @@ create table trades
         primary key not null,
     position_id   uuid not null
         constraint c_trades_position_fk
-        references positions not null,
+        references positions not null
+          ON DELETE CASCADE,
     user_id       uuid 
         constraint c_trades_userlist_fk
         references userlist not null,

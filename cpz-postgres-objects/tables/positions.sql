@@ -39,13 +39,17 @@ create table positions
   profit        numeric,
   historic      integer         not null default 0,
   signal_id     uuid,      
-  trader_id     uuid 
+  trader_id     uuid,
+  backtest_id   uuid
+    constraint c_positions_backtest_fk
+      references backtest
+        ON DELETE CASCADE  
 ) 
 with OIDS;
 
 alter table positions
   add constraint c_positions_uk
-    unique ( user_id, robot_id, entry_date, entry_price, signal_id, trader_id);
+    unique ( user_id, robot_id, entry_date, entry_price, signal_id, trader_id, backtest_id);
 
 alter table positions
   add constraint c_positions_status_chk
