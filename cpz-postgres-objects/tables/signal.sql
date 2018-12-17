@@ -7,7 +7,6 @@ create table signal
     alert_time timestamp,        
     action     varchar(10) not null,
     price      numeric     not null,
-    quantity   numeric     not null,
     order_type varchar(10) not null,
     price_source varchar(10) not null default 'close',
     is_archive numeric(1)  not null default 0,
@@ -17,7 +16,8 @@ create table signal
     backtest_id   uuid
       constraint c_positions_backtest_fk
       references backtest
-        ON DELETE CASCADE  
+        ON DELETE CASCADE,
+    position_id uuid not null          
      
 )
 with OIDS;
@@ -38,5 +38,6 @@ create index i_signal_robot_fk on signal (robot_id);
 create index i_signal_alert_time on signal (alert_time);
 create index i_signal_is_archive on signal (is_archive);
 create index i_signal_backtest_fk   on signal (backtest_id);
+create index i_signal_position_id   on signal (position_id);
   
 comment on table signal is 'current active signals';
