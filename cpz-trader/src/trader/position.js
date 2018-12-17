@@ -30,6 +30,7 @@ import {
   createTraderSlug,
   createNewOrderSubject
 } from "cpzState";
+import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
 import { savePositionState } from "cpzStorage";
 
@@ -62,8 +63,6 @@ class Position {
     this._timeframe = state.timeframe;
     /* Настройки */
     this._settings = state.settings;
-    /* Опции */
-    this._options = state.options;
     /* Текущий статус ["none","opened","closed","canceled","error"] */
     this._status = state.status || POS_STATUS_NONE;
     this._direction = state.direction;
@@ -471,7 +470,6 @@ class Position {
         timeframe: this._timeframe,
         status: this._status,
         direction: this._direction,
-        options: this._options,
         settings: this._settings,
         entry: this._entry,
         exit: this._exit
@@ -498,7 +496,6 @@ class Position {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      options: this._options,
       settings: this._settings,
       status: this._status,
       direction: this._direction,

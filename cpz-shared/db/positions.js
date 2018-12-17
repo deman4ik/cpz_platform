@@ -19,16 +19,16 @@ async function savePositions(data) {
             const variables = {
               objects: chunk.map(position => ({
                 id: position.positionId,
-                run_mode: position.mode,
                 robot_id: position.robotId,
                 user_id: position.userId,
                 trader_id: position.traderId,
+                backtest_id: position.backtesterId,
                 exchange: position.exchange,
                 asset: position.asset,
                 currency: position.currency,
                 timeframe: position.timeframe,
                 status: position.status,
-                code: position.options.code,
+                code: position.settings.positionCode,
                 direction: position.direction,
                 entry_date: position.entry.date,
                 entry_price: position.entry.price,

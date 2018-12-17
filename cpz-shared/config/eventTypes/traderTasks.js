@@ -18,7 +18,7 @@ const TASKS_TRADER_START_EVENT = {
     },
     robotId: {
       description: "Robot uniq Id. - 'AdvisorName'",
-      type: "string",
+      type: "number",
       empty: false
     },
     userId: {

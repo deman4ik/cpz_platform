@@ -14,7 +14,7 @@ function eventHandler(context, req) {
   try {
     const parsedReq = JSON.parse(req.rawBody);
     context.log.info(
-      `CPZ Adviser processed a request.${JSON.stringify(parsedReq)}`
+      `CPZ Backtester processed a request.${JSON.stringify(parsedReq)}`
     );
     // TODO: SENDER ENDPOINT VALIDATION
     // check req.originalUrl

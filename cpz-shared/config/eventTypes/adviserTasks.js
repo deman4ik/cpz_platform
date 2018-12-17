@@ -19,7 +19,7 @@ const TASKS_ADVISER_START_EVENT = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "string",
+      type: "number",
       empty: false
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },

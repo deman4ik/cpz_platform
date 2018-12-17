@@ -205,14 +205,8 @@ class Trader {
    * @param {*} positionId
    * @memberof Trader
    */
-  _createPosition(positionId, options) {
+  _createPosition(positionId) {
     this.log("_createPosition()");
-    let { slippageStep, deviation } = this._settings;
-    if (this._signal.settings) {
-      slippageStep =
-        this._signal.settings.slippageStep || this._settings.slippageStep;
-      deviation = this._signal.settings.deviation || this._settings.deviation;
-    }
     this._currentPositions[positionId] = new Position({
       mode: this._mode,
       positionId,
@@ -229,8 +223,7 @@ class Trader {
         this._signal.action === TRADE_ACTION_LONG
           ? ORDER_DIRECTION_BUY
           : ORDER_DIRECTION_SELL,
-      options,
-      settings: { ...this._settings, slippageStep, deviation },
+      settings: { ...this._settings, ...this._signal.settings },
       log: this.log.bind(this),
       logEvent: this.logEvent.bind(this)
     });
@@ -299,10 +292,7 @@ class Trader {
         this._signal.action === TRADE_ACTION_SHORT
       ) {
         // Создаем новую позицию
-        this._createPosition(
-          this._signal.positionId,
-          this._signal.positionOptions
-        );
+        this._createPosition(this._signal.positionId);
         // Создаем ордер на открытие позиции
         this._currentPositions[this._signal.positionId].createEntryOrder(
           this._signal

@@ -11,8 +11,8 @@ const USER_ROBOT_START_PARAMS = {
     empty: false
   },
   robotId: {
-    description: "Robot uniq Id. - 'AdvisorName'",
-    type: "string",
+    description: "Robot uniq Id.",
+    type: "number",
     empty: false
   },
   userId: {

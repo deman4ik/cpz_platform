@@ -27,7 +27,7 @@ async function saveOrders(data) {
                 currency: order.currency,
                 timeframe: order.timeframe,
                 created_at: order.createdAt,
-                // FIXME: type: order.orderType,
+                order_type: order.orderType,
                 // TODO: order_time: order.ex.time,
                 // TODO: order_num order.ex.id,
                 status: order.status,
@@ -35,7 +35,6 @@ async function saveOrders(data) {
                 price: order.price,
                 exec_quantity: order.executed,
                 signal_id: order.signalId
-                // ? run_mode: order.mode,
               }))
             };
 
@@ -52,7 +51,7 @@ async function saveOrders(data) {
         name: "DBError",
         cause: error
       },
-      "Failed to save positions to DB"
+      "Failed to save orders to DB"
     );
   }
 }

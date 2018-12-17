@@ -16,7 +16,7 @@ const TASKS_BACKTESTER_START_EVENT = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "string",
+      type: "number",
       empty: false
     },
     userId: {

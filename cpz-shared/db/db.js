@@ -2,12 +2,13 @@ import { GraphQLClient } from "graphql-request";
 
 import { saveCandles, getCandles, countCandles } from "./candles";
 import { saveTasksEvent } from "./tasksEvents";
-import { saveSignal } from "./signals";
+import { saveSignals } from "./signals";
 import { saveOrders } from "./orders";
 import { savePositions } from "./positions";
 import { saveLogEvent } from "./logsEvents";
 import { saveErrorEvent } from "./errorsEvents";
 import { getUserRobot } from "./userRobots";
+import { isBacktestExists, saveBacktests, deleteBacktest } from "./backtests";
 
 class DataBaseAPI {
   constructor() {
@@ -18,6 +19,7 @@ class DataBaseAPI {
         // TODO: Authorization
       }
     });
+
     this.saveCandles = saveCandles;
     this.getCandles = getCandles;
     this.countCandles = countCandles;
@@ -25,11 +27,15 @@ class DataBaseAPI {
     this.getUserRobot = getUserRobot;
 
     this.saveTasksEvent = saveTasksEvent;
-    this.saveSignal = saveSignal;
+    this.saveSignals = saveSignals;
     this.saveOrders = saveOrders;
     this.savePositions = savePositions;
     this.saveLogEvent = saveLogEvent;
     this.saveErrorEvent = saveErrorEvent;
+
+    this.saveBacktests = saveBacktests;
+    this.isBacktestExists = isBacktestExists;
+    this.deleteBacktest = deleteBacktest;
   }
 }
 

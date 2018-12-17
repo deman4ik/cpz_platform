@@ -14,14 +14,14 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       description: "Timeframe in minutes.",
       type: "number"
     },
-    robotId: {
-      description: "Robot uniq Id.",
-      type: "string",
-      empty: false
-    },
     adviserId: {
       description: "Adviser task Id.",
       type: "string",
+      empty: false
+    },
+    robotId: {
+      description: "Robot uniq Id.",
+      type: "number",
       empty: false
     },
     timestamp: {
@@ -49,20 +49,15 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       values: ["open", "close", "high", "low", "stop"],
       optional: true
     },
-    positionId: {
-      description: "Uniq position Id",
-      type: "number"
-    },
-    positionOptions: {
-      description: "Position options.",
-      type: "object",
-      optional: true
-    },
     candle: {
       description: "Signal from Candle.",
       type: "object",
       props: CANDLES_NEWCANDLE_EVENT.dataSchema,
       optional: true
+    },
+    positionId: {
+      description: "Uniq position Id",
+      type: "number"
     },
     settings: {
       description: "Trader parameters.",
@@ -70,7 +65,13 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       props: {
         slippageStep: TRADER_SETTINGS.slippageStep,
         deviation: TRADER_SETTINGS.deviation,
-        volume: TRADER_SETTINGS.volume
+        volume: TRADER_SETTINGS.volume,
+        positionCode: {
+          description: "Position code.",
+          type: "string",
+          optional: true,
+          empty: false
+        }
       },
       optional: true
     }

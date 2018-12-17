@@ -39,7 +39,7 @@ const TRADES_ORDER_EVENT = {
     traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     robotId: {
       description: "Robot uniq Id.",
-      type: "string",
+      type: "number",
       empty: false
     },
     userId: {
@@ -158,7 +158,7 @@ const TRADES_POSITION_EVENT = {
     traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     robotId: {
       description: "Robot uniq Id.",
-      type: "string",
+      type: "number",
       empty: false
     },
     userId: {

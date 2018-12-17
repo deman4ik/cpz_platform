@@ -29,7 +29,6 @@ import { createErrorOutput } from "cpzUtils/error";
 import {
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterItems,
   saveBacktesterStratLogs,
   saveBacktesterSignals,
   saveBacktesterOrders,
@@ -68,8 +67,8 @@ class Backtester {
     this.leftBars = 0;
     this.percent = 0;
     this.oldPercent = 0;
-    this.startedAt = "";
-    this.endedAt = "";
+    this.startedAt = null;
+    this.endedAt = null;
     this.status = STATUS_STARTED;
     this.slug = createBacktesterSlug({
       exchange: this.exchange,
@@ -148,6 +147,7 @@ class Backtester {
     try {
       // Сохраняем состояние в локальном хранилище
       await saveBacktesterState(this.getCurrentState());
+      await this.db.saveBacktests([this.getCurrentState()]);
     } catch (error) {
       throw new VError(
         {
@@ -165,6 +165,7 @@ class Backtester {
 
   async execute() {
     try {
+      this.startedAt = dayjs().toISOString();
       const backtester = await getBacktesterById(this.taskId);
       if (backtester) {
         this.log(
@@ -177,9 +178,17 @@ class Backtester {
           PartitionKey: this.slug
         });
       }
+      if (this.db.isBacktestExists(this.taskId)) {
+        this.log(
+          `Previous backtest state with id ${
+            this.taskId
+          } found in DB. Deleting...`
+        );
+        await this.db.deleteBacktest(this.taskId);
+      }
 
       this.log(`Starting ${this.taskId}...`);
-      this.startedAt = dayjs().toISOString();
+
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
         // Формируем параметры запроса
@@ -242,9 +251,9 @@ class Backtester {
       this.iterations = chunkNumberToArray(this.totalBars, 1440);
       this.prevIteration = 0;
 
-      const itemsToSave = [];
       const logsToSave = [];
       const signalsToSave = [];
+      const signalsToSaveDB = [];
       const ordersToSave = [];
       const ordersToSaveDB = [];
       const positionsToSave = [];
@@ -278,27 +287,16 @@ class Backtester {
             indicators[key] = this.adviserBacktester.indicators[key].result;
           });
 
-          /*
-
-          itemsToSave.push({
-            ...indicators,
-            backtesterId: this.taskId,
-            backtesterCandleId: candle.id,
-            backtesterCandleTimestamp: candle.timestamp,
-            backtesterCandleTime: candle.time,
-            backtesterCandleHigh: candle.high,
-            backtesterCandleOpen: candle.open,
-            backtesterCandleClose: candle.close,
-            backtesterCandleLow: candle.low,
-            RowKey: generateKey(),
-            PartitionKey: this.taskId
-          });
-          */
           // Если есть хотя бы одно событие для отправка
           if (this.adviserBacktester.signals.length > 0) {
             // Отправляем
 
             this.adviserBacktester.signals.forEach(async signalEvent => {
+              signalsToSaveDB.push({
+                ...signalEvent.data,
+                backtesterId: this.taskId
+              });
+              /* Disabled save to storage
               signalsToSave.push({
                 RowKey: generateKey(),
                 PartitionKey: this.taskId,
@@ -312,6 +310,7 @@ class Backtester {
                 price: signalEvent.data.price,
                 priceSource: signalEvent.data.priceSource
               });
+              */
             });
           }
 
@@ -341,13 +340,29 @@ class Backtester {
               event => event.eventType === TRADES_ORDER_EVENT.eventType
             );
             positions.forEach(positionEvent => {
-              positionsToSaveDB.push(positionEvent.data);
-              positionsToSave.push({
+              const positionsToSaveDBIndex = positionsToSaveDB.findIndex(
+                position =>
+                  position.positionId === positionEvent.data.positionId
+              );
+              if (positionsToSaveDBIndex === -1) {
+                positionsToSaveDB.push({
+                  ...positionEvent.data,
+                  backtesterId: this.taskId
+                });
+              } else {
+                positionsToSaveDB[positionsToSaveDBIndex] = {
+                  ...positionEvent.data,
+                  backtesterId: this.taskId
+                };
+              }
+
+              /* Disabled save to storage
+              const positionStorageData = {
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
                 backtesterCandleTimestamp: candle.timestamp,
                 positionId: positionEvent.data.positionId,
-                positionCode: positionEvent.data.options.code,
+                positionCode: positionEvent.data.settings.positionCode,
                 direction: positionEvent.data.direction,
                 entryStatus: positionEvent.data.entry.status,
                 entryPrice: positionEvent.data.entry.price,
@@ -359,11 +374,26 @@ class Backtester {
                 exitExecuted: positionEvent.data.exit.executed,
                 RowKey: positionEvent.data.positionId,
                 PartitionKey: this.taskId
-              });
+              };
+              const positionsToSaveIndex = positionsToSave.findIndex(
+                position =>
+                  position.positionId === positionEvent.data.positionId
+              );
+              if (positionsToSaveIndex === -1) {
+                positionsToSave.push(positionStorageData);
+              } else {
+                positionsToSave[positionsToSaveIndex] = positionStorageData;
+              }
+              */
             });
 
             orders.forEach(orderEvent => {
-              ordersToSaveDB.push(orderEvent.data);
+              ordersToSaveDB.push({
+                ...orderEvent.data,
+                backtesterId: this.taskId
+              });
+
+              /* Disabled save to storage
               ordersToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
@@ -379,6 +409,7 @@ class Backtester {
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
               });
+              */
             });
           }
 
@@ -401,19 +432,21 @@ class Backtester {
           }
         }
 
+        if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
+        /* Disabled save to storage
         if (signalsToSave.length > 0)
           await saveBacktesterSignals(signalsToSave);
-        if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
         if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
         if (positionsToSave.length > 0)
           await saveBacktesterPositions(positionsToSave);
+        */
 
-        /*
+        if (signalsToSaveDB.length > 0)
+          await this.db.saveSignals(signalsToSaveDB);
         if (positionsToSaveDB.length > 0)
           await this.db.savePositions(positionsToSaveDB);
 
         if (ordersToSaveDB.length > 0) await this.db.saveOrders(ordersToSaveDB);
-        */
 
         // Сохраняем состояние пачки
         await this.save();
