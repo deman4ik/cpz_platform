@@ -50,11 +50,12 @@ async function saveBacktests(data) {
           run_mode: "backtest", // TODO: DELETE!
           status: backtester.status,
           started_at: backtester.startedAt,
-          ended_at: backtester.enededAt,
+          ended_at: backtester.endedAt,
           total_bars: backtester.totalBars,
           processed_bars: backtester.processedBars,
           advisersettings: backtester.adviserSettings,
-          tradersettings: backtester.traderSettings
+          tradersettings: backtester.traderSettings,
+          note: backtester.eventSubject
         }))
       };
 

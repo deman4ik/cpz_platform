@@ -30,9 +30,6 @@ import {
   getBacktesterById,
   saveBacktesterState,
   saveBacktesterStratLogs,
-  saveBacktesterSignals,
-  saveBacktesterOrders,
-  saveBacktesterPositions,
   deleteBacktesterState
 } from "cpzStorage";
 import DB from "cpzDB";
@@ -251,15 +248,16 @@ class Backtester {
       this.iterations = chunkNumberToArray(this.totalBars, 1440);
       this.prevIteration = 0;
 
-      const logsToSave = [];
-      const signalsToSave = [];
-      const signalsToSaveDB = [];
-      const ordersToSave = [];
-      const ordersToSaveDB = [];
-      const positionsToSave = [];
-      const positionsToSaveDB = [];
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const iteration of this.iterations) {
+        const logsToSave = [];
+        // const signalsToSave = [];
+        const signalsToSaveDB = [];
+        // const ordersToSave = [];
+        const ordersToSaveDB = [];
+        // const positionsToSave = [];
+        const positionsToSaveDB = [];
+
         const historyCandles = await this.db.getCandles({
           exchange: this.exchange,
           asset: this.asset,
@@ -340,20 +338,19 @@ class Backtester {
               event => event.eventType === TRADES_ORDER_EVENT.eventType
             );
             positions.forEach(positionEvent => {
+              const positionData = {
+                ...positionEvent.data,
+                backtesterId: this.taskId
+              };
+
               const positionsToSaveDBIndex = positionsToSaveDB.findIndex(
                 position =>
                   position.positionId === positionEvent.data.positionId
               );
               if (positionsToSaveDBIndex === -1) {
-                positionsToSaveDB.push({
-                  ...positionEvent.data,
-                  backtesterId: this.taskId
-                });
+                positionsToSaveDB.push(positionData);
               } else {
-                positionsToSaveDB[positionsToSaveDBIndex] = {
-                  ...positionEvent.data,
-                  backtesterId: this.taskId
-                };
+                positionsToSaveDB[positionsToSaveDBIndex] = positionData;
               }
 
               /* Disabled save to storage
