@@ -354,6 +354,8 @@ class Backtester {
                   }
                 });
               } else {
+                positionsToSaveDB[positionsToSaveDBIndex].status =
+                  positionEvent.data.status;
                 positionsToSaveDB[positionsToSaveDBIndex].exit = {
                   ...positionEvent.data.exit,
                   date: candle.timestamp

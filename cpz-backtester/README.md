@@ -17,12 +17,11 @@ POST - http://localhost:8108/api/taskEvents
 [{
   "id": "968a8f13-bd77-40d8-ba83-5cf4364ec2a9",
   "topic": "/subscriptions/785b39f5-bf28-45bd-b2a3-65beea8e153e/resourceGroups/cpz/providers/Microsoft.EventGrid/topics/cpz-test-topic",
-  "subject":"bitfinex/BTC/USD/1/backtest1.B",
+  "subject":"bitfinex/BTC/USD/1/UUID.B",
   "data": {
-  	  "taskId": "backtest1",
-  	  "robotId": "robot1",
-  	  "userId": "SYSTEM_USER_1",
-  	  "adviserId": "backtest1",
+  	  "taskId": "UUID",
+  	  "robotId": 1,
+  	  "userId": "UUID",
   	  "strategyName":"STR_ROBOT_1",
       "exchange": "bitfinex",
       "asset": "BTC",
