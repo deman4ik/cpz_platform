@@ -340,23 +340,24 @@ class Backtester {
               event => event.eventType === TRADES_ORDER_EVENT.eventType
             );
             positions.forEach(positionEvent => {
-              const positionData = {
-                ...positionEvent.data,
-                backtesterId: this.taskId,
-                exit: {
-                  ...positionEvent.data.exit,
-                  date: positionEvent.data.exit.date ? candle.timestamp : null
-                }
-              };
-
               const positionsToSaveDBIndex = positionsToSaveDB.findIndex(
                 position =>
                   position.positionId === positionEvent.data.positionId
               );
               if (positionsToSaveDBIndex === -1) {
-                positionsToSaveDB.push(positionData);
+                positionsToSaveDB.push({
+                  ...positionEvent.data,
+                  backtesterId: this.taskId,
+                  entry: {
+                    ...positionEvent.data.entry,
+                    date: candle.timestamp
+                  }
+                });
               } else {
-                positionsToSaveDB[positionsToSaveDBIndex] = positionData;
+                positionsToSaveDB[positionsToSaveDBIndex].exit = {
+                  ...positionEvent.data.exit,
+                  date: candle.timestamp
+                };
               }
 
               /* Disabled save to storage
