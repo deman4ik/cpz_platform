@@ -45,15 +45,15 @@ class EventsLogger {
       }
       if (type.includes("CPZ.Signals")) {
         if (this.logToStorage) await saveSignalsEvent(eventData);
-        // if (this.logToPostgre) await this.db.saveSignal(eventData);
+        if (this.logToPostgre) await this.db.saveSignals([eventData]);
       }
       if (type.includes("CPZ.Orders")) {
         if (this.logToStorage) await saveOrdersEvent(eventData);
-        //  if (this.logToPostgre) await this.db.saveOrder(eventData);
+        if (this.logToPostgre) await this.db.saveOrders([eventData]);
       }
       if (type.includes("CPZ.Positions")) {
         if (this.logToStorage) await savePositionsEvent(eventData);
-        //  if (this.logToPostgre) await this.db.savePosition(eventData);
+        if (this.logToPostgre) await this.db.savePositions([eventData]);
       }
       if (type.includes(".Log")) {
         if (this.logToStorage) await saveLogsEvent(eventData);
