@@ -32,7 +32,8 @@ create table trades
     action        varchar(10)     not null,
     price         numeric         not null,
     exec_quantity numeric,
-    signal_id     uuid
+    signal_id     uuid,
+    candle_timestamp timestamp
 )
 with OIDS;
 

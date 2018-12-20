@@ -19,6 +19,12 @@ begin
       new.profit := new.exit_balance-new.entry_balance;
     end if;
   end if;
+  
+  if (new.bars_held is null) then
+      if (new.action in ('closeLong','closeShort')) then
+        new.bars_held := EXTRACT(EPOCH FROM (new.exit_date - new.entry_date))::int/60/new.timeframe; -- all timeframes are in minutes
+      end if;
+  end if;
 
  return new;
 end;

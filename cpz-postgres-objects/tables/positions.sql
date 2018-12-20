@@ -81,6 +81,8 @@ comment on column positions.action is 'short | closeShort | long | closeLong';
 comment on column positions.bars_held is '= duration / candle size';
 comment on column positions.entry_balance is '= entry_price * quantity';
 comment on column positions.exit_balance is '= exit_price * quantity';
+comment on column positions.entry_date is 'entry CANDLE date';
+comment on column positions.exit_date is 'exit CANDLE date';
 comment on column positions.historic is '0 - normal, 1 - uploaded historic data, not generated inside the system';
 comment on column positions.trader_id is 'trader process id | becktester process id';
 comment on column positions.code is 'user code/number for particular position, comes from strategy';

@@ -21,7 +21,6 @@ create table backtest
   timeframe       integer       not null,  
   dt_from         timestamp     not null,
   dt_to           timestamp     not null,  
-  run_mode        varchar(10)   not null,
   status          varchar(10)   not null,
   started_at      timestamp     default CURRENT_DATE not null,
   ended_at        timestamp,
