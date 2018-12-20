@@ -5,15 +5,14 @@ import { TRADER_SERVICE } from "cpzServices";
 import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_SHORT,
-  POS_STATUS_NONE,
-  POS_STATUS_OPENED,
+  POS_STATUS_NEW,
+  POS_STATUS_OPEN,
   POS_STATUS_CLOSED,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
-  ORDER_STATUS_NONE,
-  ORDER_STATUS_OPENED,
+  ORDER_STATUS_NEW,
+  ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
-  ORDER_STATUS_POSTED,
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR,
   ORDER_TYPE_LIMIT,
@@ -30,7 +29,6 @@ import {
   createTraderSlug,
   createNewOrderSubject
 } from "cpzState";
-import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
 import { savePositionState } from "cpzStorage";
 
@@ -63,20 +61,20 @@ class Position {
     this._timeframe = state.timeframe;
     /* Настройки */
     this._settings = state.settings;
-    /* Текущий статус ["none","opened","closed","canceled","error"] */
-    this._status = state.status || POS_STATUS_NONE;
+    /* Текущий статус ["new","open","closed","canceled","error"] */
+    this._status = state.status || POS_STATUS_NEW;
     this._direction = state.direction;
     this._entry = state.entry || {
-      /* Текущий статус открытия ["none","opened","posted","closed","canceled","error"] */
-      status: ORDER_STATUS_NONE,
+      /* Текущий статус открытия ["new","open","closed","canceled","error"] */
+      status: ORDER_STATUS_NEW,
       price: null,
       date: null,
       executed: null
     };
 
     this._exit = state.exit || {
-      /* Текущий статус закрытия ["none","opened","posted","closed","canceled","error"] */
-      status: ORDER_STATUS_NONE,
+      /* Текущий статус закрытия ["new","open","closed","canceled","error"] */
+      status: ORDER_STATUS_NEW,
       price: null,
       date: null,
       executed: null
@@ -158,12 +156,10 @@ class Position {
    */
   setStatus() {
     if (
-      this._entry.status === ORDER_STATUS_OPENED ||
-      this._exit.status === ORDER_STATUS_OPENED ||
-      this._entry.status === ORDER_STATUS_POSTED ||
-      this._exit.status === ORDER_STATUS_POSTED
+      this._entry.status === ORDER_STATUS_OPEN ||
+      this._exit.status === ORDER_STATUS_OPEN
     ) {
-      this._status = POS_STATUS_OPENED;
+      this._status = POS_STATUS_OPEN;
     } else if (
       this._entry.status === ORDER_STATUS_CLOSED &&
       this._exit.status === ORDER_STATUS_CLOSED
@@ -201,7 +197,7 @@ class Position {
       currency: this._currency, // Котировка валюты
       timeframe: this._timeframe, // Таймфрейм
       createdAt: dayjs().toJSON(), // Дата и время создания
-      status: ORDER_STATUS_OPENED, // Статус ордера
+      status: ORDER_STATUS_NEW, // Статус ордера
       direction:
         signal.action === TRADE_ACTION_CLOSE_SHORT ||
         signal.action === TRADE_ACTION_LONG
@@ -273,7 +269,7 @@ class Position {
     this.log("Order:", order);
     this.log("Price:", price);
     // Ордер ожидает обработки
-    if (order.status === ORDER_STATUS_OPENED) {
+    if (order.status === ORDER_STATUS_NEW) {
       // Тип ордера - лимитный
       if (order.orderType === ORDER_TYPE_LIMIT) {
         // Если покупаем
@@ -330,7 +326,7 @@ class Position {
         }
       }
       // Ордер уже выставлен
-    } else if (order.status === ORDER_STATUS_POSTED) {
+    } else if (order.status === ORDER_STATUS_OPEN) {
       // Если покупаем и текущая цена ниже цены сигнала
       // Если продаем и текущая цена выше цены сигнала
       if (
@@ -356,7 +352,7 @@ class Position {
     this.log("getRequiredOrders()");
     this._requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
-    if (this._entry.status === ORDER_STATUS_OPENED) {
+    if (this._entry.status === ORDER_STATUS_NEW) {
       // Проверяем все ордера на открытие позиции ожидающие обработки
       Object.keys(this._entryOrders).forEach(key => {
         const order = this._entryOrders[key];
@@ -365,7 +361,7 @@ class Position {
       });
     }
     // Если ордера на закрытие позиции ожидают обработки
-    if (this._exit.status === ORDER_STATUS_OPENED) {
+    if (this._exit.status === ORDER_STATUS_NEW) {
       // Проверяем все ордера на открытие позиции ожидающие обработки
       Object.keys(this._exitOrders).forEach(key => {
         const order = this._exitOrders[key];

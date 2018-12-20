@@ -1,6 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
-import { POS_STATUS_OPENED } from "../config/state";
+import { POS_STATUS_OPEN } from "../config/state";
 import { STORAGE_POSITIONS_TABLE } from "./tables";
 import tableStorage from "./tableStorage";
 
@@ -68,7 +68,7 @@ async function getActivePositionsBySlug(slug) {
     const openStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
-      POS_STATUS_OPENED
+      POS_STATUS_OPEN
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(

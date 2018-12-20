@@ -11,8 +11,8 @@ import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_SHORT,
+  ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
-  ORDER_STATUS_POSTED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
   ORDER_TYPE_LIMIT,
@@ -380,13 +380,13 @@ class Trader {
             // Публикуем ордер на биржу
             // TODO: SendOrder API CALL
             const result = { externalId: uuid() };
-            orderResult.status = ORDER_STATUS_POSTED;
+            orderResult.status = ORDER_STATUS_OPEN;
             orderResult.externalId = result.externalId;
           } else if (order.orderType === ORDER_TYPE_LIMIT) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - лимитный
             // Считаем, что ордер успешно выставлен на биржу
-            orderResult.status = ORDER_STATUS_POSTED;
+            orderResult.status = ORDER_STATUS_OPEN;
           } else {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - по рынку

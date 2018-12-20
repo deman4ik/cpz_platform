@@ -14,15 +14,14 @@ import {
 } from "../state/types";
 
 import {
-  POS_STATUS_NONE,
-  POS_STATUS_OPENED,
+  POS_STATUS_NEW,
+  POS_STATUS_OPEN,
   POS_STATUS_CLOSED,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
-  ORDER_STATUS_NONE,
-  ORDER_STATUS_OPENED,
+  ORDER_STATUS_NEW,
+  ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
-  ORDER_STATUS_POSTED,
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR
 } from "../state/status";
@@ -79,10 +78,9 @@ const TRADES_ORDER_EVENT = {
       description: "Order status.",
       type: "string",
       values: [
-        ORDER_STATUS_NONE,
-        ORDER_STATUS_OPENED,
+        ORDER_STATUS_NEW,
+        ORDER_STATUS_OPEN,
         ORDER_STATUS_CLOSED,
-        ORDER_STATUS_POSTED,
         ORDER_STATUS_CANCELED,
         ORDER_STATUS_ERROR
       ]
@@ -119,10 +117,9 @@ const _positionStep = {
     description: "Position status.",
     type: "string",
     values: [
-      ORDER_STATUS_NONE,
-      ORDER_STATUS_OPENED,
+      ORDER_STATUS_NEW,
+      ORDER_STATUS_OPEN,
       ORDER_STATUS_CLOSED,
-      ORDER_STATUS_POSTED,
       ORDER_STATUS_CANCELED,
       ORDER_STATUS_ERROR
     ]
@@ -182,8 +179,8 @@ const TRADES_POSITION_EVENT = {
       description: "Position status.",
       type: "string",
       values: [
-        POS_STATUS_NONE,
-        POS_STATUS_OPENED,
+        POS_STATUS_NEW,
+        POS_STATUS_OPEN,
         POS_STATUS_CLOSED,
         POS_STATUS_CANCELED,
         POS_STATUS_ERROR

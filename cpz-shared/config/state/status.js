@@ -13,8 +13,8 @@ const STATUS_FINISHED = "finished"; // Обработка завершена
 /**
  * Статус позиции
  */
-const POS_STATUS_NONE = "none"; // Не определен
-const POS_STATUS_OPENED = "opened"; // Позиция открыта (активна)
+const POS_STATUS_NEW = "new"; // Не определен (создана в системе)
+const POS_STATUS_OPEN = "open"; // Позиция открыта (активна) ордер на открытие выставлен
 const POS_STATUS_CLOSED = "closed"; // Позиция закрыта (завершена)
 const POS_STATUS_CANCELED = "canceled"; // Позиция отменена
 const POS_STATUS_ERROR = "error"; // Произошла ошибка во время обработки позиции
@@ -22,10 +22,9 @@ const POS_STATUS_ERROR = "error"; // Произошла ошибка во вре
 /**
  * Статус ордера
  */
-const ORDER_STATUS_NONE = "none"; // Не определен
-const ORDER_STATUS_OPENED = "opened"; // Ордер открыт (создан в системе)
+const ORDER_STATUS_NEW = "new"; // Не определен (создан в системе)
+const ORDER_STATUS_OPEN = "open"; // Ордер открыт (создан на бирже)
 const ORDER_STATUS_CLOSED = "closed"; // Ордер закрыт (исполнен на бирже)
-const ORDER_STATUS_POSTED = "posted"; // Ордер выставлен на биржу
 const ORDER_STATUS_CANCELED = "canceled"; // Ордер отменен
 const ORDER_STATUS_ERROR = "error"; // Произошла ошибка во время обработки ордера
 
@@ -45,15 +44,14 @@ export {
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
-  POS_STATUS_NONE,
-  POS_STATUS_OPENED,
+  POS_STATUS_NEW,
+  POS_STATUS_OPEN,
   POS_STATUS_CLOSED,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
-  ORDER_STATUS_NONE,
-  ORDER_STATUS_OPENED,
+  ORDER_STATUS_NEW,
+  ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
-  ORDER_STATUS_POSTED,
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR,
   ORDER_TASK_OPENBYMARKET,

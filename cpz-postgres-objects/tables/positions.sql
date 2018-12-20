@@ -51,7 +51,7 @@ alter table positions
 
 alter table positions
   add constraint c_positions_status_chk
-    check (status in ('none','opened','closed','error'));
+    check (status in ('new','open','closed','canceled','error'));
 
 alter table positions
   add constraint c_positions_action_chk
