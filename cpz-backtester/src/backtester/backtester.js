@@ -292,7 +292,9 @@ class Backtester {
             this.adviserBacktester.signals.forEach(async signalEvent => {
               signalsToSaveDB.push({
                 ...signalEvent.data,
-                backtesterId: this.taskId
+                backtesterId: this.taskId,
+                candleId: candle.id,
+                candleTimestamp: candle.timestamp                
               });
               /* Disabled save to storage
               signalsToSave.push({
@@ -387,7 +389,8 @@ class Backtester {
             orders.forEach(orderEvent => {
               ordersToSaveDB.push({
                 ...orderEvent.data,
-                backtesterId: this.taskId
+                backtesterId: this.taskId,
+                candleTimestamp: candle.timestamp
               });
 
               /* Disabled save to storage

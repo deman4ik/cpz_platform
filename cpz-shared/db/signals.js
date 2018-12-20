@@ -29,7 +29,9 @@ async function saveSignals(data) {
                 price_source: signal.priceSource,
                 candle: signal.candle,
                 params: signal.settings,
-                position_id: signal.positionId
+                position_id: signal.positionId,
+                candle_id: signal.candleId,
+                candle_timestamp: signal.candleTimestamp
               }))
             };
 

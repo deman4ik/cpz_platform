@@ -47,7 +47,6 @@ async function saveBacktests(data) {
           timeframe: backtester.timeframe,
           dt_from: backtester.dateFrom,
           dt_to: backtester.dateTo,
-          run_mode: "backtest", // TODO: DELETE!
           status: backtester.status,
           started_at: backtester.startedAt,
           ended_at: backtester.endedAt,

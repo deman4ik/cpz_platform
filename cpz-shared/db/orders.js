@@ -34,7 +34,8 @@ async function saveOrders(data) {
                 action: order.action,
                 price: order.price,
                 exec_quantity: order.executed,
-                signal_id: order.signalId
+                signal_id: order.signalId,
+                candle_timestamp: order.candleTimestamp
               }))
             };
 
