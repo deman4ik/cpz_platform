@@ -144,7 +144,7 @@ class Backtester {
     try {
       // Сохраняем состояние в локальном хранилище
       await saveBacktesterState(this.getCurrentState());
-      await this.db.saveBacktests([this.getCurrentState()]);
+      await this.db.saveBacktests(this.getCurrentState());
     } catch (error) {
       throw new VError(
         {
@@ -294,7 +294,7 @@ class Backtester {
                 ...signalEvent.data,
                 backtesterId: this.taskId,
                 candleId: candle.id,
-                candleTimestamp: candle.timestamp                
+                candleTimestamp: candle.timestamp
               });
               /* Disabled save to storage
               signalsToSave.push({
@@ -342,7 +342,11 @@ class Backtester {
             positions.forEach(positionEvent => {
               const positionData = {
                 ...positionEvent.data,
-                backtesterId: this.taskId
+                backtesterId: this.taskId,
+                exit: {
+                  ...positionEvent.data.exit,
+                  date: positionEvent.data.exit.date ? candle.timestamp : null
+                }
               };
 
               const positionsToSaveDBIndex = positionsToSaveDB.findIndex(

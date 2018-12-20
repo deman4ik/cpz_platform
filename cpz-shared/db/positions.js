@@ -1,6 +1,29 @@
 import VError from "verror";
 import { chunkArray } from "../utils/helpers";
 
+function mapForDB(position) {
+  return {
+    id: position.positionId,
+    robot_id: position.robotId,
+    user_id: position.userId,
+    trader_id: position.traderId,
+    backtest_id: position.backtesterId,
+    exchange: position.exchange,
+    asset: position.asset,
+    currency: position.currency,
+    timeframe: position.timeframe,
+    status: position.status,
+    code: position.settings.positionCode,
+    direction: position.direction,
+    entry_date: position.entry.date,
+    entry_price: position.entry.price,
+    exit_date: position.exit.date,
+    exit_price: position.exit.price,
+    slippage_step: position.settings.slippageStep,
+    deviation: position.settings.deviation,
+    quantity: position.settings.volume
+  };
+}
 async function savePositions(data) {
   try {
     const query = `mutation insert_positions($objects: [cpz_positions_insert_input!]!){
@@ -17,27 +40,7 @@ async function savePositions(data) {
         if (chunk.length > 0) {
           try {
             const variables = {
-              objects: chunk.map(position => ({
-                id: position.positionId,
-                robot_id: position.robotId,
-                user_id: position.userId,
-                trader_id: position.traderId,
-                backtest_id: position.backtesterId,
-                exchange: position.exchange,
-                asset: position.asset,
-                currency: position.currency,
-                timeframe: position.timeframe,
-                status: position.status,
-                code: position.settings.positionCode,
-                direction: position.direction,
-                entry_date: position.entry.date,
-                entry_price: position.entry.price,
-                exit_date: position.exit.date,
-                exit_price: position.exit.price,
-                slippage_step: position.settings.slippageStep,
-                deviation: position.settings.deviation,
-                quantity: position.settings.volume
-              }))
+              objects: chunk.map(position => mapForDB(position))
             };
 
             await this.client.request(query, variables);

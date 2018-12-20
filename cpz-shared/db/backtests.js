@@ -1,5 +1,27 @@
 import VError from "verror";
 
+function mapForDB(backtester) {
+  return {
+    id: backtester.taskId,
+    user_id: backtester.userId,
+    robot_id: backtester.robotId,
+    exchange: backtester.exchange,
+    asset: backtester.asset,
+    currency: backtester.currency,
+    timeframe: backtester.timeframe,
+    dt_from: backtester.dateFrom,
+    dt_to: backtester.dateTo,
+    status: backtester.status,
+    started_at: backtester.startedAt,
+    ended_at: backtester.endedAt,
+    total_bars: backtester.totalBars,
+    processed_bars: backtester.processedBars,
+    advisersettings: backtester.adviserSettings,
+    tradersettings: backtester.traderSettings,
+    note: backtester.eventSubject
+  };
+}
+
 async function isBacktestExists(id) {
   try {
     const query = `query backtest_by_id($id: uuid!){
@@ -36,27 +58,16 @@ async function saveBacktests(data) {
 
     /* eslint-disable no-restricted-syntax, no-await-in-loop */
     try {
-      const variables = {
-        objects: data.map(backtester => ({
-          id: backtester.taskId,
-          user_id: backtester.userId,
-          robot_id: backtester.robotId,
-          exchange: backtester.exchange,
-          asset: backtester.asset,
-          currency: backtester.currency,
-          timeframe: backtester.timeframe,
-          dt_from: backtester.dateFrom,
-          dt_to: backtester.dateTo,
-          status: backtester.status,
-          started_at: backtester.startedAt,
-          ended_at: backtester.endedAt,
-          total_bars: backtester.totalBars,
-          processed_bars: backtester.processedBars,
-          advisersettings: backtester.adviserSettings,
-          tradersettings: backtester.traderSettings,
-          note: backtester.eventSubject
-        }))
-      };
+      let variables;
+      if (Array.isArray(data)) {
+        variables = {
+          objects: data.map(backtester => mapForDB(backtester))
+        };
+      } else {
+        variables = {
+          objects: [mapForDB(data)]
+        };
+      }
 
       await this.client.request(query, variables);
     } catch (error) {
