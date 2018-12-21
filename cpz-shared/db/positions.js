@@ -26,11 +26,18 @@ function mapForDB(position) {
 }
 async function savePositions(data) {
   try {
-    const query = `mutation insert_positions($objects: [cpz_positions_insert_input!]!){
-      insert_cpz_positions(objects:$objects){
+    const query = `mutation insert_positions($objects: [cpz_positions_insert_input!]!) {
+      insert_cpz_positions(
+        objects: $objects
+        on_conflict: {
+          constraint: c_positions_uk
+          update_columns: [status, exit_date, exit_price]
+        }
+      ) {
         affected_rows
       }
-    }`;
+    }
+    `;
 
     if (data && data.length > 0) {
       const chunks = chunkArray(data, 100);

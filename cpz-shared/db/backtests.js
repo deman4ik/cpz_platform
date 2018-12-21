@@ -51,6 +51,7 @@ async function saveBacktests(data) {
       insert_cpz_backtest(objects:$objects,
       on_conflict: {
         constraint: c_backtest_pk
+        update_columns: [ended_at, processed_bars, status]
       }){
         affected_rows
       }

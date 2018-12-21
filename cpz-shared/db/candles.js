@@ -6,8 +6,10 @@ async function saveCandles({ timeframe, candles }) {
     const query = `mutation insert_candles${timeframe}($objects: [cpz_candles${timeframe}_insert_input!]!) {
         insert_cpz_candles${timeframe}(
           objects: $objects
-          on_conflict: { constraint: c_candles${timeframe}_uk }
-        ) {
+          on_conflict: { 
+            constraint: c_candles${timeframe}_uk
+            update_columns: [open, high, low, close, volume] 
+        }) {
           affected_rows
         }
       }
