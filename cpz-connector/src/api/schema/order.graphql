@@ -1,0 +1,31 @@
+input OrderFindInput {
+    exId: ID!
+    asset: String!
+    currency: String!
+}
+
+input OrderInput {
+    direction: String!
+    volume: Float!
+    price: Float!
+    asset: String!
+    currency: String!
+    params: JSON
+}
+
+type Order {
+    exId: ID
+    exTimestamp: Datetime
+    status: String
+    price: Float
+    average: Float
+    amount: Float
+    remaining: Float
+    executed: Float
+}
+
+type OrderResponse {
+    success: Boolean!
+    error: String
+    order: JSON
+}

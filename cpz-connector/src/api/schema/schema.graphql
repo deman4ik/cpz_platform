@@ -1,0 +1,31 @@
+# import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/order.graphql"
+
+scalar Datetime
+scalar JSON
+
+type Query {
+    balance(connectorInput: ConnectorInput!): BalanceResponse
+    order(connectorInput: ConnectorInput!, order: OrderFindInput!): OrderResponse
+}
+
+type Mutation {
+    createOrder(connectorInput: ConnectorInput!, order: OrderInput!): OrderResponse
+    cancelOrder(connectorInput: ConnectorInput!, order: OrderFindInput!): Response
+}
+
+input ConnectorInput {
+    userId: ID!
+    exchange: String!
+    proxy: String
+}
+
+type BalanceResponse {
+    success: Boolean!
+    error: String
+    balance: JSON
+}
+
+type Response {
+    success: Boolean!
+    error: String
+}
