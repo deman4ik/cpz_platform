@@ -63,6 +63,10 @@ const TRADES_ORDER_EVENT = {
       description: "Price in quote currency.",
       type: "number"
     },
+    volume: {
+      description: "Order planned volume.",
+      type: "number"
+    },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },

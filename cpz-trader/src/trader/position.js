@@ -192,6 +192,7 @@ class Position {
       positionId: this._positionId, // Идентификатор позиции
       orderType: signal.orderType, // Тип ордера
       price: signal.price, // Цена ордера
+      volume: this._settings.volume,
       exchange: this._exchange, // Код биржи
       asset: this._asset, // Базовая валюта
       currency: this._currency, // Котировка валюты
@@ -224,7 +225,6 @@ class Position {
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
     this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
-    // TODO: несколько ордеров на открытие?
     this._entry.status = this._currentOrder.status;
     this._entry.price = this._currentOrder.price;
     this._entry.date = this._currentOrder.createdAt;
@@ -247,7 +247,6 @@ class Position {
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
     this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
-    // TODO: несколько ордеров на закрытие?
     this._exit.status = this._currentOrder.status;
     this._exit.price = this._currentOrder.price;
     this._exit.date = this._currentOrder.createdAt;
@@ -266,8 +265,6 @@ class Position {
    */
   _checkOrder(order, price) {
     this.log("_checkOrder()");
-    this.log("Order:", order);
-    this.log("Price:", price);
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
       // Тип ордера - лимитный

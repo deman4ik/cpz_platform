@@ -366,7 +366,7 @@ class Trader {
             // Считаем, что ордер исполнен
             orderResult.status = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
-            orderResult.executed = this._settings.volume;
+            orderResult.executed = order.volume;
           }
           // Если задача - выставить лимитный или рыночный ордер
         } else if (
@@ -374,7 +374,7 @@ class Trader {
           order.task === ORDER_TASK_OPENBYMARKET
         ) {
           // Устанавливаем объем из параметров
-          const orderToExecute = { ...order, volume: this._settings.volume };
+          const orderToExecute = { ...order };
           // Если режим - в реальном времени
           if (this._mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
