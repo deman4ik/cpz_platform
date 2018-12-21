@@ -1,6 +1,6 @@
 import VError from "verror";
 import Trader from "cpzTrader/trader";
-import { POS_STATUS_OPEN } from "cpzState";
+import { POS_STATUS_NEW, POS_STATUS_OPEN } from "cpzState";
 
 class TraderBacktester extends Trader {
   clearEvents() {
@@ -28,7 +28,10 @@ class TraderBacktester extends Trader {
       for (const key of Object.keys(this._currentPositions)) {
         /* eslint-disable no-await-in-loop */
         const position = this._currentPositions[key];
-        if (position.status === POS_STATUS_OPEN) {
+        if (
+          position.status === POS_STATUS_NEW ||
+          position.status === POS_STATUS_OPEN
+        ) {
           const requiredOrders = position.getRequiredOrders(price);
           if (requiredOrders.length > 0) {
             await this.executeOrders(requiredOrders);
