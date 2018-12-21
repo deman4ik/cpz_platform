@@ -13,7 +13,7 @@ begin
   end if;
 
   if (new.profit is null) then
-    if (new.action in ('closeLong','short')) then
+    if (new.direction = 'sell') then -- 'closeLong','short'
       new.profit := new.entry_balance-new.exit_balance;
     else
       new.profit := new.exit_balance-new.entry_balance;
@@ -21,8 +21,8 @@ begin
   end if;
   
   if (new.bars_held is null) then
-      if (new.action in ('closeLong','closeShort')) then
-        new.bars_held := EXTRACT(EPOCH FROM (new.exit_date - new.entry_date))::int/60/new.timeframe; -- all timeframes are in minutes
+      if (new.status = 'closed') then
+        new.bars_held := (EXTRACT(EPOCH FROM (new.exit_date - new.entry_date))::int/60/new.timeframe) + 1; -- all timeframes are in minutes, +1 for count exitBar
       end if;
   end if;
 
