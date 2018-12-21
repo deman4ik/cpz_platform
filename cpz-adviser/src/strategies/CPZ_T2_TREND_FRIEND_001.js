@@ -44,8 +44,8 @@ const robot4 = {
     } else if (this.prevAction === this.CONSTS.TRADE_ACTION_SHORT) {
       action_ = this.CONSTS.TRADE_ACTION_CLOSE_SHORT;
     } else {
-      this.positionId += 1;
-      this.createPosition({ code: `p${this.positionId}` });
+      this.positionNum += 1;
+      this.createPosition({ code: `p${this.positionNum}` });
       action_ = sAction;
     }
 
@@ -57,9 +57,9 @@ const robot4 = {
       orderType: sOrderType,
       price: price_,
       priceSource: source_,
-      positionId: this.positions[`p${this.positionId}`].positionId,
+      positionId: this.positions[`p${this.positionNum}`].positionId,
       settings: {
-        positionCode: this.positions[`p${this.positionId}`].code
+        positionCode: this.positions[`p${this.positionNum}`].code
       }
     };
 
@@ -68,7 +68,7 @@ const robot4 = {
   },
   init() {
     this.log("init");
-    this.positionId = 0;
+    this.positionNum = 0;
     this.myPropSignal = 0;
     this.prevAction = "#";
     this.minBarsToHold = 3; // param
@@ -120,7 +120,7 @@ const robot4 = {
       // exit condition
       if (
         this.candle.close < sma1 &&
-        this.heldEnoughBars >= this.minBarsToHold
+        this.heldEnoughBars > this.minBarsToHold // > - do not count entry bar
       ) {
         this.myPropSignal = 2; // sell
         this.heldEnoughBars = 0; // clear bars counter
