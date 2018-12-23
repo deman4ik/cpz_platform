@@ -13,7 +13,8 @@
         "no-console": "off",
         "no-param-reassign": "off",
         "no-underscore-dangle": "off",
-        "no-use-before-define": ["error", { "functions": false }]
+        "no-use-before-define": ["error", { "functions": false }],
+        "consistent-return": "off"
     },
     "settings": {
         "import/resolver": "webpack"

@@ -26,6 +26,6 @@ type Order {
 
 type OrderResponse {
     success: Boolean!
-    error: String
+    error: Error
     order: JSON
 }

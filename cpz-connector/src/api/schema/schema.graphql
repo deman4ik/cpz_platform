@@ -19,13 +19,19 @@ input ConnectorInput {
     proxy: String
 }
 
+type Error {
+    code: String!
+    message: String!
+    info: JSON
+}
+
 type BalanceResponse {
     success: Boolean!
-    error: String
+    error: Error
     balance: JSON
 }
 
 type Response {
     success: Boolean!
-    error: String
+    error: Error
 }

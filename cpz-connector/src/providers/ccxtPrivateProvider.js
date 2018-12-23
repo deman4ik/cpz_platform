@@ -1,9 +1,7 @@
-import VError from "verror";
 import ccxt from "ccxt";
-import { ORDER_STATUS_CANCELED } from "cpzState";
+import pretry from "p-retry";
 import BasePrivateProvider from "./basePrivateProvider";
 
-// TODO: Retry!!!
 class CCXTPrivateProvider extends BasePrivateProvider {
   constructor(input) {
     super(input);
@@ -11,6 +9,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     this._exchangeName = this._exchange.toLowerCase();
 
     this.ccxt = {};
+    this._retryOptions = {
+      retries: 10,
+      minTimeout: 100,
+      maxTimeout: 500
+    };
   }
 
   async init() {
@@ -31,20 +34,20 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 
   getSymbol(asset, currency) {
-    // ? Костыль
-    if (this._exchangeName === "bitfinex") {
-      if (this.currency === "USD") {
-        return `${asset}/USDT`;
-      }
-    }
     return `${asset}/${currency}`;
   }
 
   async getBalance() {
     try {
       console.log("getBalance()");
-      const response = await this.ccxt.fetchBalance();
-      console.log(response);
+      const call = async () => {
+        try {
+          return await this.ccxt.fetchBalance();
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+        }
+      };
+      const response = await pretry(call, this._retryOptions);
       // TODO: filter by coin
       return {
         success: true,
@@ -55,11 +58,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
     } catch (error) {
-      console.log(error);
-      // TODO: error handling
       return {
         success: false,
-        error
+        error: { code: error.constructor.name, message: error.message }
       };
     }
   }
@@ -83,19 +84,26 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       /* 
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
+      // TODO: Params
       console.log("createOrder()");
       const { direction, volume, price, asset, currency, params } = order;
       const orderParams = { ...this.getOrderParams(), ...params };
       this.clearOrderCache();
-      const response = await this.ccxt.createOrder(
-        this.getSymbol(asset, currency),
-        "limit",
-        direction,
-        volume,
-        price,
-        orderParams
-      );
-      console.log(response);
+      const call = async () => {
+        try {
+          return await this.ccxt.createOrder(
+            this.getSymbol(asset, currency),
+            "limit",
+            direction,
+            volume,
+            price,
+            orderParams
+          );
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+        }
+      };
+      const response = await pretry(call, this._retryOptions);
       return {
         success: true,
         order: {
@@ -123,17 +131,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 } */
     } catch (error) {
-      console.log(error);
-      // TODO: error handling
-      /*
-      "AuthenticationError"
-"InvalidOrder"
-"InsufficientFunds"
-"NetworkError"
-      */
       return {
         success: false,
-        error
+        error: { code: error.constructor.name, message: error.message }
       };
     }
   }
@@ -141,11 +141,17 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async checkOrder({ exId, asset, currency }) {
     try {
       console.log("checkOrder()");
-      const response = await this.ccxt.fetchOrder(
-        exId,
-        this.getSymbol(asset, currency)
-      );
-      console.log(response);
+      const call = async () => {
+        try {
+          return await this.ccxt.fetchOrder(
+            exId,
+            this.getSymbol(asset, currency)
+          );
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+        }
+      };
+      const response = await pretry(call, this._retryOptions);
       return {
         success: true,
         order: {
@@ -180,16 +186,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 }
 */
     } catch (error) {
-      console.log(error);
-      // TODO: error handling
-      /*
-      "AuthenticationError"
-"OrderNotFound"
-"NetworkError"
-      */
       return {
         success: false,
-        error
+        error: { code: error.constructor.name, message: error.message }
       };
     }
   }
@@ -197,11 +196,18 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async cancelOrder({ exId, asset, currency }) {
     try {
       console.log("cancelOrder()");
-      const response = await this.ccxt.cancelOrder(
-        exId,
-        this.getSymbol(asset, currency)
-      );
-      console.log(response);
+      const call = async () => {
+        try {
+          return await this.ccxt.cancelOrder(
+            exId,
+            this.getSymbol(asset, currency)
+          );
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+        }
+      };
+      await pretry(call, this._retryOptions);
+
       /*
       {
   "data": {
@@ -216,16 +222,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         success: true
       };
     } catch (error) {
-      console.log(error);
-      // TODO: error handling
-      /*
-      "AuthenticationError"
-"OrderNotFound"
-"NetworkError"
-      */
       return {
         success: false,
-        error
+        error: { code: error.constructor.name, message: error.message }
       };
     }
   }
