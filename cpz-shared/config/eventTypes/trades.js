@@ -109,6 +109,22 @@ const TRADES_ORDER_EVENT = {
         TRADE_ACTION_CLOSE_SHORT
       ]
     },
+    exId: {
+      description: "Exchange order id.",
+      type: "string"
+    },
+    exTimestamp: {
+      description: "Order created in exchange timestamp UTC.",
+      type: "datetime"
+    },
+    average: {
+      description: "Average executed price.",
+      type: "number"
+    },
+    remaining: {
+      description: "Temaining amount to fill.",
+      type: "number"
+    },
     executed: {
       description: "Executed volume.",
       type: "number"

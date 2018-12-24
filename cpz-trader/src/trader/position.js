@@ -274,7 +274,11 @@ class Position {
           // Если проскальзывание текущей цены меньше или равно заданного
           if (price - order.price <= this._settings.slippageStep) {
             // Нужно выставить лимитный ордер
-            return { ...order, price, task: ORDER_TASK_SETLIMIT };
+            return {
+              ...order,
+              price: order.price + this._settings.slippageStep,
+              task: ORDER_TASK_SETLIMIT
+            };
           }
         }
         // Если продаем
@@ -282,7 +286,11 @@ class Position {
           // Если проскальзывание текущей цены меньше или равно заданного
           if (order.price - price <= this._settings.slippageStep) {
             // Нужно выставить лимитный ордер
-            return { ...order, price, task: ORDER_TASK_SETLIMIT };
+            return {
+              ...order,
+              price: order.price - this._settings.slippageStep,
+              task: ORDER_TASK_SETLIMIT
+            };
           }
         }
         // Тип ордера - стоп
@@ -327,8 +335,8 @@ class Position {
       // Если покупаем и текущая цена ниже цены сигнала
       // Если продаем и текущая цена выше цены сигнала
       if (
-        (order.direction === ORDER_DIRECTION_BUY && price < order.price) ||
-        (order.durection === ORDER_DIRECTION_SELL && price > order.price)
+        (order.direction === ORDER_DIRECTION_BUY && price <= order.price) ||
+        (order.durection === ORDER_DIRECTION_SELL && price >= order.price)
       ) {
         // Нужно проверить ордер на бирже
         return { ...order, task: ORDER_TASK_CHECKLIMIT };

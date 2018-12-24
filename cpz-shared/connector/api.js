@@ -1,6 +1,6 @@
 import { GraphQLClient } from "graphql-request";
 
-class ConnectorAPI {
+class BaseConnectorAPI {
   constructor() {
     const { CONNECTOR_API_ENDPOINT, CONNECTOR_API_KEY } = process.env;
     this.client = new GraphQLClient(CONNECTOR_API_ENDPOINT, {
@@ -12,4 +12,4 @@ class ConnectorAPI {
   }
 }
 
-export default ConnectorAPI;
+export default BaseConnectorAPI;

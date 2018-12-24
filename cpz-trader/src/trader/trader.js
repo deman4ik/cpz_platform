@@ -25,6 +25,7 @@ import publishEvents from "cpzEvents";
 import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState, getPositonById } from "cpzStorage";
+import ConnectorAPI from "../connector";
 import Position from "./position";
 /**
  * Класс проторговщика
@@ -69,7 +70,11 @@ class Trader {
       /* Отклонение цены */
       deviation: state.settings.deviation || TRADER_SETTINGS_DEFAULTS.deviation,
       /* Объем */
-      volume: state.settings.volume || TRADER_SETTINGS_DEFAULTS.volume
+      volume: state.settings.volume || TRADER_SETTINGS_DEFAULTS.volume,
+      /* Order execution timeout */
+      openOrderTimeout:
+        state.settings.openOrderTimeout ||
+        TRADER_SETTINGS_DEFAULTS.openOrderTimeout
     };
     /* Текущий сигнал */
     this._signal = {};
@@ -95,6 +100,8 @@ class Trader {
 
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+
+    this.connector = new ConnectorAPI();
   }
 
   get slug() {
@@ -352,15 +359,47 @@ class Trader {
     for (const order of orders) {
       /* eslint-disable no-await-in-loop */
       try {
-        const orderResult = { ...order };
+        let orderResult = { ...order };
         // Если задача - проверить исполнения объема
         if (order.task === ORDER_TASK_CHECKLIMIT) {
           // Если режим - в реальном времени
           if (this._mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
-            // TODO: CheckOrderStatus API CALL
-            orderResult.status = ORDER_STATUS_CLOSED;
-            orderResult.executed = this._settings.volume;
+            let response = await this.connector.checkOrder({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              userId: this._userId,
+              exId: order.exId
+            });
+            let currentOrder = {};
+            if (response.success && response.order) {
+              currentOrder = response.order;
+              if (
+                response.order.status === ORDER_STATUS_OPEN &&
+                dayjs().diff(dayjs(response.order.exTimestamp), "minute") >
+                  this._settings.openOrderTimeout
+              ) {
+                response = await this.connector.cancelOrder({
+                  exchange: this._exchange,
+                  asset: this._asset,
+                  currency: this._currency,
+                  userId: this._userId,
+                  exId: order.exId
+                });
+                if (response.success && response.order) {
+                  currentOrder = response.order;
+                }
+              }
+              orderResult = { ...orderResult, ...currentOrder };
+            } else if (response.error)
+              throw new VError(
+                {
+                  name: response.error.code,
+                  info: response.error.info
+                },
+                response.error.message
+              );
           } else {
             // Если режим - эмуляция или бэктест
             // Считаем, что ордер исполнен
@@ -378,10 +417,29 @@ class Trader {
           // Если режим - в реальном времени
           if (this._mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
-            // TODO: SendOrder API CALL
-            const result = { externalId: uuid() };
-            orderResult.status = ORDER_STATUS_OPEN;
-            orderResult.externalId = result.externalId;
+            const response = await this.connector.createOrder({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              userId: this._userId,
+              order: {
+                direction: orderToExecute.direction,
+                volume: orderToExecute.volume,
+                price: orderToExecute.price,
+                params: {} // TODO
+              }
+            });
+
+            if (response.success && response.order) {
+              orderResult = { ...orderResult, ...response.order };
+            } else if (response.error)
+              throw new VError(
+                {
+                  name: response.error.code,
+                  info: response.error.info
+                },
+                response.error.message
+              );
           } else if (order.orderType === ORDER_TYPE_LIMIT) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - лимитный

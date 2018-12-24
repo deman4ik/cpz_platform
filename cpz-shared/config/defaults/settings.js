@@ -13,6 +13,7 @@ const ADVISER_SETTINGS_DEFAULTS = {
 
 const TRADER_SETTINGS_DEFAULTS = {
   debug: false,
+  openOrderTimeout: 10, // minutes
   slippageStep: 0,
   deviation: 0,
   volume: 1
