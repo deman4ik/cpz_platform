@@ -8,7 +8,7 @@ import {
   TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { createTraderSlug } from "cpzState";
+import { createTraderSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { subjectToStr } from "cpzUtils/helpers";
@@ -47,12 +47,17 @@ async function handlePrice(context, eventData) {
           const requiredOrders = position.getRequiredOrders(currentPrice.price);
           if (requiredOrders.length > 0) {
             const trader = getTraderById(position.traderId);
+            if (trader.status === STATUS_STARTED) {
+              trader.status = STATUS_BUSY;
+              await trader.save();
+              await trader.executeOrders(requiredOrders);
 
-            await trader.executeOrders(requiredOrders);
-            // Если есть хотя бы одно событие для отправка
-            if (trader.events.length > 0) {
-              // Отправляем
-              await publishEvents(TRADES_TOPIC, trader.events);
+              // Если есть хотя бы одно событие для отправка
+              if (trader.events.length > 0) {
+                // Отправляем
+                await publishEvents(TRADES_TOPIC, trader.events);
+              }
+              await trader.end(STATUS_STARTED);
             }
           }
         } catch (error) {

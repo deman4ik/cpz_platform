@@ -56,7 +56,7 @@ async function execute(context, state, signal, child = false) {
       trader.setUpdate();
     }
     // Устанавливаем статус "Занят"
-    trader.status(STATUS_BUSY);
+    trader.status = STATUS_BUSY;
     await trader.save();
     // Обработка нового сигнала
     await trader.handleSignal(signal);

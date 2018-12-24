@@ -355,27 +355,69 @@ class Position {
    */
   getRequiredOrders(price) {
     this.log("getRequiredOrders()");
-    this._requiredOrders = [];
+    const requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
-    if (this._entry.status === ORDER_STATUS_NEW) {
+    if (
+      this._entry.status === ORDER_STATUS_NEW ||
+      this._entry.status === ORDER_STATUS_OPEN
+    ) {
       // Проверяем все ордера на открытие позиции ожидающие обработки
       Object.keys(this._entryOrders).forEach(key => {
         const order = this._entryOrders[key];
         const checkedOrder = this._checkOrder(order, price);
-        if (checkedOrder) this._requiredOrders.push(checkedOrder);
+        if (checkedOrder) requiredOrders.push(checkedOrder);
       });
     }
     // Если ордера на закрытие позиции ожидают обработки
-    if (this._exit.status === ORDER_STATUS_NEW) {
-      // Проверяем все ордера на открытие позиции ожидающие обработки
+    if (
+      this._exit.status === ORDER_STATUS_NEW ||
+      this._entry.status === ORDER_STATUS_OPEN
+    ) {
+      // Проверяем все ордера на закрытие позиции ожидающие обработки
       Object.keys(this._exitOrders).forEach(key => {
         const order = this._exitOrders[key];
         const checkedOrder = this._checkOrder(order, price);
-        if (checkedOrder) this._requiredOrders.push(checkedOrder);
+        if (checkedOrder) requiredOrders.push(checkedOrder);
       });
     }
     // Возвращаем массив ордеров для дальнейшей обработки
-    return this._requiredOrders;
+    return requiredOrders;
+  }
+
+  _checkOpenOrder(order) {
+    this.log("_checkOpenOrder()");
+    // Ордер ожидает обработки
+    if (order.status === ORDER_STATUS_OPEN) {
+      // Нужно проверить ордер на бирже
+      return { ...order, task: ORDER_TASK_CHECKLIMIT };
+    }
+    // Не нужно ничего делать
+    return null;
+  }
+
+  getOpenOrders() {
+    this.log("getOpenOrders()");
+    const openOrders = [];
+    // Если ордера на открытие позиции ожидают обработки
+    if (this._entry.status === ORDER_STATUS_OPEN) {
+      // Проверяем все ордера на открытие позиции ожидающие обработки
+      Object.keys(this._entryOrders).forEach(key => {
+        const order = this._entryOrders[key];
+        const checkedOrder = this._checkOpenOrder(order);
+        if (checkedOrder) openOrders.push(checkedOrder);
+      });
+    }
+    // Если ордера на закрытие позиции ожидают обработки
+    if (this._entry.status === ORDER_STATUS_OPEN) {
+      // Проверяем все ордера на закрытие позиции ожидающие обработки
+      Object.keys(this._exitOrders).forEach(key => {
+        const order = this._exitOrders[key];
+        const checkedOrder = this._checkOpenOrder(order);
+        if (checkedOrder) openOrders.push(checkedOrder);
+      });
+    }
+    // Возвращаем массив ордеров для дальнейшей обработки
+    return openOrders;
   }
 
   /**
