@@ -10,7 +10,7 @@ type Query {
 
 type Mutation {
     createOrder(connectorInput: ConnectorInput!, order: OrderInput!): OrderResponse
-    cancelOrder(connectorInput: ConnectorInput!, order: OrderFindInput!): Response
+    cancelOrder(connectorInput: ConnectorInput!, order: OrderFindInput!): OrderResponse
 }
 
 input ConnectorInput {
@@ -31,7 +31,3 @@ type BalanceResponse {
     balance: JSON
 }
 
-type Response {
-    success: Boolean!
-    error: Error
-}

@@ -112,7 +112,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           status: response.status,
           price: response.price,
           average: response.average,
-          amount: response.amount,
+          volume: response.amount,
           remaining: response.remaining,
           executed: response.filled || response.amount - response.remaining
         }
@@ -160,7 +160,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           status: response.status,
           price: response.price,
           average: response.average,
-          amount: response.amount,
+          volume: response.amount,
           remaining: response.remaining,
           executed: response.filled || response.amount - response.remaining
         }
@@ -177,7 +177,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         "status": "open",
         "price": 10000,
         "average": 0,
-        "amount": 0.002,
+        "volume": 0.002,
         "remaining": 0.002,
         "executed": 0
       }
@@ -198,29 +198,13 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       console.log("cancelOrder()");
       const call = async () => {
         try {
-          return await this.ccxt.cancelOrder(
-            exId,
-            this.getSymbol(asset, currency)
-          );
+          await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
         }
       };
       await pretry(call, this._retryOptions);
-
-      /*
-      {
-  "data": {
-    "cancelOrder": {
-      "success": true,
-      "error": null
-    }
-  }
-}
-*/
-      return {
-        success: true
-      };
+      return await this.checkOrder({ exId, asset, currency });
     } catch (error) {
       return {
         success: false,

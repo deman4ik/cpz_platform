@@ -19,7 +19,7 @@ type Order {
     status: String
     price: Float
     average: Float
-    amount: Float
+    volume: Float
     remaining: Float
     executed: Float
 }
