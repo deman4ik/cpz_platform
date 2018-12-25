@@ -1,7 +1,7 @@
 const robot4 = {
   adviceEx(sAction, sOrderType, sPriceSource, nPrice) {
     // check params
-    if (!sAction || !sOrderType) return;
+/*    if (!sAction || !sOrderType) return;
 
     if (
       sAction !== this.CONSTS.TRADE_ACTION_SHORT &&
@@ -11,10 +11,11 @@ const robot4 = {
 
     if (
       sOrderType !== this.CONSTS.ORDER_TYPE_STOP &&
-      sOrderType !== this.CONSTS.ORDER_TYPE_MARKET
+      sOrderType !== this.CONSTS.ORDER_TYPE_MARKET &&
+      sOrderType !== this.CONSTS.ORDER_TYPE_LIMIT 
     )
       return;
-
+*/
     let price_;
     let source_;
     let action_;
@@ -35,7 +36,7 @@ const robot4 = {
         source_ = "close";
       }
 
-      if (!price_) return;
+      if (!price_) { this.log("Wrong parameters, cannot define price"); return; }
     }
 
     // do we need to close previously opened position or create new one
@@ -85,35 +86,17 @@ const robot4 = {
     const sma1 = this.indicators.sma1.result;
     const sma2 = this.indicators.sma2.result;
     const sma3 = this.indicators.sma3.result;
-
+    /*
     this.logEvent({
       sma1,
       sma2,
       sma3,
       price
-    });
+    });*/
 
     if (this.heldEnoughBars > 0) this.heldEnoughBars += 1;
 
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
-
-    // advice at bar+1 of signal
-    if (this.myPropSignal === 1) {
-      this.adviceEx(
-        this.CONSTS.TRADE_ACTION_LONG,
-        this.CONSTS.ORDER_TYPE_MARKET,
-        "open"
-      );
-      this.myPropSignal = 0;
-    }
-    if (this.myPropSignal === 2) {
-      this.adviceEx(
-        this.CONSTS.TRADE_ACTION_SHORT,
-        this.CONSTS.ORDER_TYPE_MARKET,
-        "open"
-      );
-      this.myPropSignal = 0;
-    }
 
     // if last position opened
     if (this.prevAction === this.CONSTS.TRADE_ACTION_LONG) {
@@ -122,8 +105,13 @@ const robot4 = {
         this.candle.close < sma1 &&
         this.heldEnoughBars > this.minBarsToHold // > - do not count entry bar
       ) {
-        this.myPropSignal = 2; // sell
-        this.heldEnoughBars = 0; // clear bars counter
+          this.heldEnoughBars = 0; // clear bars counter
+          this.adviceEx(
+            this.CONSTS.TRADE_ACTION_SHORT,
+            this.CONSTS.ORDER_TYPE_LIMIT,
+            "open"
+          );
+        
       }
     }
     // enter condition
@@ -132,8 +120,12 @@ const robot4 = {
       (sma1 > sma2 && sma1 > sma3) &&
       sma2 > sma3
     ) {
-      this.myPropSignal = 1; // buy
       this.heldEnoughBars = 1; // open bar counter
+      this.adviceEx(
+        this.CONSTS.TRADE_ACTION_LONG,
+        this.CONSTS.ORDER_TYPE_LIMIT,
+        "open"
+      );      
     }
   }
 };
