@@ -8,7 +8,7 @@ import {
   TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { createTraderSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import { createPositionSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { subjectToStr } from "cpzUtils/helpers";
@@ -31,7 +31,7 @@ async function handlePrice(context, eventData) {
     const modeStr = subjectToStr(eventSubject);
 
     const positionsState = await getActivePositionsBySlug(
-      createTraderSlug({
+      createPositionSlug({
         exchange: currentPrice.exchange,
         asset: currentPrice.asset,
         currency: currentPrice.currency,

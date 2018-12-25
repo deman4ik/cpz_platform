@@ -110,6 +110,7 @@ class Trader {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
+      robotId: this._robotId,
       mode: this._mode
     });
   }

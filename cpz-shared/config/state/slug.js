@@ -47,8 +47,22 @@ function createAdviserSlug({
   if (_modeStr === "R") return `${exchange}.${asset}.${currency}.${timeframe}`;
   return `${exchange}.${asset}.${currency}.${timeframe}.${_modeStr}`;
 }
-
 function createTraderSlug({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  mode,
+  modeStr
+}) {
+  const _modeStr = modeStr || modeToStr(mode);
+  if (_modeStr === "R")
+    return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
+  return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}.${_modeStr}`;
+}
+
+function createPositionSlug({
   exchange,
   asset,
   currency,
@@ -94,5 +108,6 @@ export {
   createImporterSlug,
   createMarketwatcherSlug,
   createTraderSlug,
+  createPositionSlug,
   createRobotSlug
 };

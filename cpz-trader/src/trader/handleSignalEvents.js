@@ -148,6 +148,7 @@ async function handleSignal(context, eventData) {
         asset: signal.asset,
         currency: signal.currency,
         timeframe: signal.timeframe,
+        robotId: signal.robotId,
         modeStr
       })
     );

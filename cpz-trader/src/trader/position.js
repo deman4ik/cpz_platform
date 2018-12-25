@@ -26,7 +26,7 @@ import {
   ORDER_POS_DIR_ENTRY,
   ORDER_POS_DIR_EXIT,
   BACKTEST_MODE,
-  createTraderSlug,
+  createPositionSlug,
   createNewOrderSubject
 } from "cpzState";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
@@ -130,7 +130,7 @@ class Position {
    * @memberof Position
    */
   get slug() {
-    return createTraderSlug({
+    return createPositionSlug({
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
