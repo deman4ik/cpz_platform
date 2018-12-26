@@ -1,11 +1,5 @@
-import { modeToStr } from "../../utils/helpers";
-
-function createMarketwatcherTaskSubject({ exchange, mode }) {
-  return `${exchange}/${modeToStr(mode)}`;
-}
-
-function createCandlebatcherTaskSubject({ exchange, asset, currency, mode }) {
-  return `${exchange}/${asset}/${currency}/${modeToStr(mode)}`;
+function createCandlebatcherTaskSubject({ exchange, asset, currency }) {
+  return `${exchange}/${asset}/${currency}`;
 }
 
 function createAdviserTaskSubject({
@@ -13,12 +7,9 @@ function createAdviserTaskSubject({
   asset,
   currency,
   timeframe,
-  robotId,
-  mode
+  robotId
 }) {
-  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${modeToStr(
-    mode
-  )}`;
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}`;
 }
 
 function createTraderTaskSubject({
@@ -27,11 +18,9 @@ function createTraderTaskSubject({
   currency,
   timeframe,
   robotId,
-  mode
+  userId
 }) {
-  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${modeToStr(
-    mode
-  )}`;
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
 }
 
 function createBacktesterTaskSubject({
@@ -42,20 +31,11 @@ function createBacktesterTaskSubject({
   robotId,
   userId
 }) {
-  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}/B}`;
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
 }
 
-function createNewCandleSubject({
-  exchange,
-  asset,
-  currency,
-  timeframe,
-  taskId,
-  mode
-}) {
-  return `${exchange}/${asset}/${currency}/${timeframe}/${taskId}.${modeToStr(
-    mode
-  )}`;
+function createNewCandleSubject({ exchange, asset, currency, timeframe }) {
+  return `${exchange}/${asset}/${currency}/${timeframe}`;
 }
 
 function createNewSignalSubject({
@@ -63,39 +43,28 @@ function createNewSignalSubject({
   asset,
   currency,
   timeframe,
-  taskId,
-  mode
+  robotId
 }) {
-  return createNewCandleSubject({
-    exchange,
-    asset,
-    currency,
-    timeframe,
-    taskId,
-    mode
-  });
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}`;
 }
 
-function createNewOrderSubject({
+function createNewTradeSubject({
   exchange,
   asset,
   currency,
   timeframe,
-  traderId,
-  mode
+  robotId,
+  userId
 }) {
-  return `${exchange}/${asset}/${currency}/${timeframe}/${traderId}.${modeToStr(
-    mode
-  )}`;
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
 }
 
 export {
-  createMarketwatcherTaskSubject,
   createCandlebatcherTaskSubject,
   createAdviserTaskSubject,
   createTraderTaskSubject,
   createBacktesterTaskSubject,
   createNewCandleSubject,
   createNewSignalSubject,
-  createNewOrderSubject
+  createNewTradeSubject
 };

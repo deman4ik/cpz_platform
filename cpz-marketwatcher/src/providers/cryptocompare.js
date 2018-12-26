@@ -54,14 +54,12 @@ class CryptocompareProvider extends BaseProvider {
           PartitionKey: createCachedTickSlug({
             exchange: this._exchange,
             asset: valuesArray[2],
-            currency: valuesArray[3],
-            mode: this._mode
+            currency: valuesArray[3]
           }),
           RowKey: tickId,
           exchange: this._exchange,
           asset: valuesArray[2],
           currency: valuesArray[3],
-          mode: this._mode,
           direction: this._getDirection(valuesArray[4]),
           price: parseFloat(valuesArray[5]),
           time: parseInt(valuesArray[6], 10) * 1000,
@@ -83,14 +81,12 @@ class CryptocompareProvider extends BaseProvider {
         PartitionKey: createCachedTickSlug({
           exchange: this._exchange,
           asset: valuesArray[2],
-          currency: valuesArray[3],
-          mode: this._mode
+          currency: valuesArray[3]
         }),
         RowKey: tickId,
         exchange: this._exchange,
         asset: valuesArray[2],
         currency: valuesArray[3],
-        mode: this._mode,
         direction: this._getDirection(valuesArray[4]),
         tradeId: valuesArray[5],
         time: parseInt(valuesArray[6], 10) * 1000,

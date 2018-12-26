@@ -12,11 +12,6 @@ const TASKS_ADVISER_START_EVENT = {
       type: "string",
       empty: false
     },
-    mode: {
-      description: "Service run mode.",
-      type: "string",
-      values: ["emulator", "realtime"]
-    },
     robotId: {
       description: "Robot uniq Id.",
       type: "number",

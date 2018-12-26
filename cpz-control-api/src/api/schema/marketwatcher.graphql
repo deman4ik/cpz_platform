@@ -4,7 +4,6 @@ input MarketwatcherSubscription {
 }
 
 input MarketwatcherParams {
-    mode: String!
     debug: Boolean!
     exchange: String!
     subscriptions: [MarketwatcherSubscription!]!

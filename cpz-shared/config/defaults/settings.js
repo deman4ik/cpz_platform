@@ -1,3 +1,5 @@
+import { EMULATOR_MODE } from "../state";
+
 const CANDLEBATCHER_SETTINGS_DEFAULTS = {
   debug: false,
   proxy: process.env.PROXY_ENDPOINT,
@@ -13,6 +15,7 @@ const ADVISER_SETTINGS_DEFAULTS = {
 
 const TRADER_SETTINGS_DEFAULTS = {
   debug: false,
+  mode: EMULATOR_MODE,
   openOrderTimeout: 10, // minutes
   slippageStep: 0,
   deviation: 0,

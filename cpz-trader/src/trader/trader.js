@@ -51,8 +51,6 @@ class Trader {
     this._userId = state.userId;
     /* Идентификатор советника */
     this._adviserId = state.adviserId;
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -64,6 +62,7 @@ class Trader {
     this._settings = {
       /* Режима дебага [true,false] */
       debug: state.settings.debug || TRADER_SETTINGS_DEFAULTS.debug,
+      mode: state.settings.mode || TRADER_SETTINGS_DEFAULTS.mode,
       /* Шаг проскальзывания */
       slippageStep:
         state.settings.slippageStep || TRADER_SETTINGS_DEFAULTS.slippageStep,
@@ -102,17 +101,6 @@ class Trader {
     this._metadata = state.metadata;
 
     this.connector = new ConnectorAPI();
-  }
-
-  get slug() {
-    return createTraderSlug({
-      exchange: this._exchange,
-      asset: this._asset,
-      currency: this._currency,
-      timeframe: this._timeframe,
-      robotId: this._robotId,
-      mode: this._mode
-    });
   }
 
   /**
@@ -216,7 +204,6 @@ class Trader {
   _createPosition(positionId) {
     this.log("_createPosition()");
     this._currentPositions[positionId] = new Position({
-      mode: this._mode,
       positionId,
       traderId: this._taskId,
       robotId: this._robotId,
@@ -364,7 +351,7 @@ class Trader {
         // Если задача - проверить исполнения объема
         if (order.task === ORDER_TASK_CHECKLIMIT) {
           // Если режим - в реальном времени
-          if (this._mode === REALTIME_MODE) {
+          if (this.settings.mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
             let response = await this.connector.checkOrder({
               exchange: this._exchange,
@@ -416,7 +403,7 @@ class Trader {
           // Устанавливаем объем из параметров
           const orderToExecute = { ...order };
           // Если режим - в реальном времени
-          if (this._mode === REALTIME_MODE) {
+          if (this.settings.mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
             const response = await this.connector.createOrder({
               exchange: this._exchange,
@@ -493,14 +480,19 @@ class Trader {
    */
   getCurrentState() {
     return {
-      PartitionKey: this.slug,
+      PartitionKey: createTraderSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe,
+        robotId: this._robotId
+      }),
       RowKey: this._taskId,
       eventSubject: this._eventSubject,
       taskId: this._taskId,
       robotId: this._robotId,
       userId: this._userId,
       adviserId: this._adviserId,
-      mode: this._mode,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

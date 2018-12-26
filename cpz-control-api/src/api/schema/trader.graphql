@@ -1,5 +1,4 @@
 input TraderParams {
-    mode: String!
     robotId: ID!
     userId: ID!
     adviserId: ID!

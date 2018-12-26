@@ -27,7 +27,7 @@ import {
   ORDER_POS_DIR_EXIT,
   BACKTEST_MODE,
   createPositionSlug,
-  createNewOrderSubject
+  createNewTradeSubject
 } from "cpzState";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
 import { savePositionState } from "cpzStorage";
@@ -39,8 +39,6 @@ import { savePositionState } from "cpzStorage";
  */
 class Position {
   constructor(state) {
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Уникальный идентификатор позиции */
     this._positionId = state.positionId;
     /* Идентификатор проторговщика */
@@ -121,22 +119,6 @@ class Position {
 
   get status() {
     return this._status;
-  }
-
-  /**
-   * Общий идентификатор позиции (биржа+инструмент+таймфрейм+режим)
-   *
-   * @readonly
-   * @memberof Position
-   */
-  get slug() {
-    return createPositionSlug({
-      exchange: this._exchange,
-      asset: this._asset,
-      currency: this._currency,
-      timeframe: this._timeframe,
-      mode: this._mode
-    });
   }
 
   /**
@@ -465,19 +447,20 @@ class Position {
       id: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
-      subject: createNewOrderSubject({
+      subject: createNewTradeSubject({
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
-        traderId: this._traderId,
-        mode: this._mode
+        robotId: this._robotId,
+        userId: this._userId
       }),
       eventType: TRADES_ORDER_EVENT.eventType,
       data: {
         ...order,
         positionId: this._positionId,
         traderId: this._traderId,
+        mode: this._settings.mode,
         robotId: this._robotId,
         userId: this._userId,
         adviserId: this._adviserId,
@@ -491,19 +474,19 @@ class Position {
       id: uuid(),
       dataVersion: "1.0",
       eventTime: new Date(),
-      subject: createNewOrderSubject({
+      subject: createNewTradeSubject({
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
-        traderId: this._traderId,
-        mode: this._mode
+        robotId: this._robotId,
+        userId: this._userId
       }),
       eventType: TRADES_POSITION_EVENT.eventType,
       data: {
         positionId: this._positionId,
         traderId: this._traderId,
-        mode: this._mode,
+        mode: this._settings.mode,
         robotId: this._robotId,
         userId: this._userId,
         adviserId: this._adviserId,
@@ -527,9 +510,14 @@ class Position {
    */
   getCurrentState() {
     return {
-      PartitionKey: this.slug,
+      PartitionKey: createPositionSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe
+      }),
       RowKey: this._positionId,
-      mode: this._mode,
+      mode: this._settings.mode,
       positionId: this._positionId,
       traderId: this._traderId,
       robotId: this._robotId,
@@ -558,7 +546,7 @@ class Position {
     this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
-      if (this._mode !== BACKTEST_MODE)
+      if (this._settings.mode !== BACKTEST_MODE)
         await savePositionState(this.getCurrentState());
     } catch (error) {
       throw new VError(

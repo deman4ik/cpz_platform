@@ -62,7 +62,7 @@ function createMinutesList(dateFrom, dateTo, dur) {
 
 function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
   const candles = inputCandles;
-  const { exchange, asset, currency, mode, timeframe } = info;
+  const { exchange, asset, currency, timeframe } = info;
   // Создаем список с полным количеством минут
   const fullMinutesList = createMinutesList(dateFrom, dateTo, maxDuration);
   // Список загруженных минут
@@ -99,8 +99,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
             exchange,
             asset,
             currency,
-            timeframe,
-            mode
+            timeframe
           }),
           RowKey: generateCandleRowKey(diffTime),
           id: uuid(),
@@ -108,7 +107,6 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
           asset,
           currency,
           timeframe,
-          mode,
           time: diffTime, // время в милисекундах
           timestamp: dayjs(diffTime).toISOString(), // время в ISO UTC
           open: previousCandle.close, // цена открытия = цене закрытия предыдущей

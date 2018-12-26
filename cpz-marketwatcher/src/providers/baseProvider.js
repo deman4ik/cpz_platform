@@ -1,5 +1,5 @@
 import VError from "verror";
-import { STATUS_PENDING, createMarketwatcherSlug } from "cpzState";
+import { STATUS_PENDING } from "cpzState";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import {
   TICKS_NEWTICK_EVENT,
@@ -19,8 +19,6 @@ class BaseProvider {
     this._eventSubject = state.eventSubject;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
-    /* Режим работы ['emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
     /* Биржа */
@@ -178,12 +176,8 @@ class BaseProvider {
   _getCurrentState() {
     return {
       taskId: this._taskId,
-      PartitionKey: createMarketwatcherSlug({
-        exchange: this._exchange,
-        mode: this._mode
-      }),
+      PartitionKey: this._exchange,
       RowKey: this._taskId,
-      mode: this._mode,
       debug: this._debug,
       exchange: this._exchange,
       subscriptions: this._subscriptions,

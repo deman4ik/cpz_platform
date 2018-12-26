@@ -75,8 +75,7 @@ class CCXTProvider extends BaseProvider {
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe: 1,
-                mode: this._mode
+                timeframe: 1
               }),
               RowKey: generateCandleRowKey(item[0]),
               taskId: this._taskId,
@@ -84,7 +83,6 @@ class CCXTProvider extends BaseProvider {
               asset: this._asset,
               currency: this._currency,
               timeframe: 1,
-              mode: this._mode,
               time: item[0],
               timestamp: dayjs(item[0]).toISOString(),
               open: item[1],
@@ -129,8 +127,7 @@ class CCXTProvider extends BaseProvider {
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
-              timeframe: 1,
-              mode: this._mode
+              timeframe: 1
             }),
             RowKey: generateCandleRowKey(latestCandle[0]),
             taskId: this._taskId,
@@ -138,7 +135,6 @@ class CCXTProvider extends BaseProvider {
             asset: this._asset,
             currency: this._currency,
             timeframe: 1,
-            mode: this._mode,
             time: latestCandle[0],
             timestamp: dayjs(latestCandle[0]).toISOString(),
             open: latestCandle[1],

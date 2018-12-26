@@ -1,6 +1,5 @@
 
 input CandlebatcherParams {
-    mode: String!
     exchange: String!
     asset: String!
     currency: String!

@@ -1,5 +1,4 @@
 input AdviserParams {
-    mode: String!
     robotId: ID!
     exchange: String!
     asset: String!

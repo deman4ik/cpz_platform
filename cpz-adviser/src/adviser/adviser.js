@@ -38,8 +38,6 @@ class Adviser {
     this._taskId = state.taskId;
     /* Идентификатор робота */
     this._robotId = state.robotId;
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -112,16 +110,6 @@ class Adviser {
       this.initStrategy();
       this._initialized = true;
     }
-  }
-
-  get slug() {
-    return createAdviserSlug({
-      exchange: this._exchange,
-      asset: this._asset,
-      currency: this._currency,
-      timeframe: this._timeframe,
-      mode: this._mode
-    });
   }
 
   /**
@@ -666,8 +654,7 @@ class Adviser {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      taskId: this._taskId,
-      mode: this._mode
+      robotId: this._robotId
     });
   }
 
@@ -785,12 +772,16 @@ class Adviser {
     this.getIndicatorsState();
     this.getStrategyState();
     return {
-      PartitionKey: this.slug,
+      PartitionKey: createAdviserSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe
+      }),
       RowKey: this._taskId,
       eventSubject: this._eventSubject,
       taskId: this._taskId,
       robotId: this._robotId,
-      mode: this._mode,
       settings: this._settings,
       exchange: this._exchange,
       asset: this._asset,

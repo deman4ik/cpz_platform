@@ -3,7 +3,6 @@ POST /api/taskEvents
 [{
   "data": {
   	  "taskId": "test170918_1500",
-      "mode": "emulator",
       "debug": true,
       "providerType": "cryptocompare",
       "exchange": "bitfinex",
@@ -46,7 +45,6 @@ POST /api/taskEvents
 [{
   "data": {
   	  "taskId": "test170918_1500",
-      "mode": "emulator",
       "debug": true,
       "providerType": "ccxt",
       "exchange": "bitfinex",

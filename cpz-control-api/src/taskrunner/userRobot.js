@@ -16,7 +16,6 @@ class UserRobot {
     this._robotId = state.robotId;
     this._userId = state.userId;
     this._userRobotId = state.userRobotId;
-    this._mode = state.mode;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -162,13 +161,11 @@ class UserRobot {
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
-        robotId: this._robotId,
-        mode: this._mode
+        robotId: this._robotId
       }),
       RowKey: this._id,
       robotId: this._robotId,
       userId: this._userId,
-      mode: this._mode,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

@@ -43,59 +43,6 @@ function tryParseJSON(jsonString) {
 }
 
 /**
- * Считывание текущего режима работы из темы события EventGrid
- * Возвращает полный вариант
- *
- * @param {string} eventSubject
- */
-function getModeFromSubject(eventSubject) {
-  const str = eventSubject.slice(-1);
-  switch (str) {
-    case "R":
-      return REALTIME_MODE;
-    case "E":
-      return EMULATOR_MODE;
-    case "B":
-      return BACKTEST_MODE;
-    default:
-      return REALTIME_MODE;
-  }
-}
-
-/**
- * Считывание текущего режима работы из темы события EventGrid
- * Возвращает сокращенный вариант
- *
- * @param {string} eventSubject
- */
-function subjectToStr(eventSubject) {
-  const str = eventSubject.slice(-1);
-  switch (str) {
-    case "R":
-      return "R";
-    case "E":
-      return "E";
-    case "B":
-      return "B";
-    default:
-      return "R";
-  }
-}
-
-function modeToStr(mode) {
-  switch (mode) {
-    case REALTIME_MODE:
-      return "R";
-    case EMULATOR_MODE:
-      return "E";
-    case BACKTEST_MODE:
-      return "B";
-
-    default:
-      return "R";
-  }
-}
-/**
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
  */
 function getInvertedTimestamp(time) {
@@ -225,9 +172,6 @@ export {
   sortAsc,
   sortDesc,
   tryParseJSON,
-  getModeFromSubject,
-  modeToStr,
-  subjectToStr,
   getInvertedTimestamp,
   generateKey,
   durationMinutes,

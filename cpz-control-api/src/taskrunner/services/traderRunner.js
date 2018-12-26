@@ -36,7 +36,6 @@ class TraderRunner extends BaseRunner {
 
       genErrorIfExist(validateStart({ ...props, taskId }));
       const {
-        mode,
         robotId,
         userId,
         adviserId,
@@ -50,7 +49,6 @@ class TraderRunner extends BaseRunner {
       const trader = resume
         ? await getTraderById(taskId)
         : await findTrader({
-            mode,
             userId,
             robotId
           });
@@ -67,12 +65,11 @@ class TraderRunner extends BaseRunner {
           currency,
           timeframe,
           robotId,
-          mode
+          userId
         }),
         eventType: TASKS_TRADER_START_EVENT,
         data: {
           taskId,
-          mode,
           robotId,
           userId,
           adviserId,
@@ -112,7 +109,7 @@ class TraderRunner extends BaseRunner {
           currency: trader.currency,
           timeframe: trader.timeframe,
           robotId: trader.robotId,
-          mode: trader.mode
+          userId: trader.userId
         }),
         eventType: TASKS_TRADER_STOP_EVENT,
         data: {
@@ -152,7 +149,7 @@ class TraderRunner extends BaseRunner {
           currency: trader.currency,
           timeframe: trader.timeframe,
           robotId: trader.robotId,
-          mode: trader.mode
+          userId: trader.userId
         }),
         eventType: TASKS_TRADER_UPDATE_EVENT,
         data: {

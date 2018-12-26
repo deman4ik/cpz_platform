@@ -38,20 +38,11 @@ class AdviserRunner extends BaseRunner {
       const taskId = props.taskId || uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
-      const {
-        mode,
-        robotId,
-        exchange,
-        asset,
-        currency,
-        timeframe,
-        settings
-      } = props;
+      const { robotId, exchange, asset, currency, timeframe, settings } = props;
 
       const adviser = resume
         ? await getAdviserById(taskId)
         : await findAdviser({
-            mode,
             robotId
           });
 
@@ -70,13 +61,11 @@ class AdviserRunner extends BaseRunner {
           asset,
           currency,
           timeframe,
-          robotId,
-          mode
+          robotId
         }),
         eventType: TASKS_ADVISER_START_EVENT,
         data: {
           taskId,
-          mode,
           robotId,
           exchange,
           asset,
@@ -127,8 +116,7 @@ class AdviserRunner extends BaseRunner {
           asset: adviser.asset,
           currency: adviser.currency,
           timeframe: adviser.timeframe,
-          robotId: adviser.robotId,
-          mode: adviser.mode
+          robotId: adviser.robotId
         }),
         eventType: TASKS_ADVISER_STOP_EVENT,
         data: {
@@ -168,8 +156,7 @@ class AdviserRunner extends BaseRunner {
           asset: adviser.asset,
           currency: adviser.currency,
           timeframe: adviser.timeframe,
-          robotId: adviser.robotId,
-          mode: adviser.mode
+          robotId: adviser.robotId
         }),
         eventType: TASKS_ADVISER_UPDATE_EVENT,
         data: {

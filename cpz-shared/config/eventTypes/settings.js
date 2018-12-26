@@ -44,6 +44,12 @@ const ADVISER_SETTINGS = {
 };
 
 const TRADER_SETTINGS = {
+  mode: {
+    description: "Service run mode.",
+    type: "string",
+    values: ["emulator", "realtime"],
+    optional: true
+  },
   debug: {
     description: "Debug mode.",
     type: "boolean",

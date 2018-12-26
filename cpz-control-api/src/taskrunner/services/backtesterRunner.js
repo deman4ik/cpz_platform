@@ -52,7 +52,8 @@ class BacktesterRunner extends BaseRunner {
           asset,
           currency,
           timeframe,
-          robotId
+          robotId,
+          userId
         }),
         eventType: TASKS_BACKTESTER_START_EVENT,
         data: {
@@ -114,7 +115,8 @@ class BacktesterRunner extends BaseRunner {
           asset: backtester.asset,
           currency: backtester.currency,
           timeframe: backtester.timeframe,
-          robotId: backtester.robotId
+          robotId: backtester.robotId,
+          userId: backtester.userId
         }),
         eventType: TASKS_BACKTESTER_STOP_EVENT,
         data: {

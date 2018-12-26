@@ -58,8 +58,6 @@ class Candlebatcher {
     this._eventSubject = state.eventSubject;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Тип провайдера ['ccxt'] */
     this._providerType = state.providerType || "ccxt";
     /* Код биржи */
@@ -122,7 +120,6 @@ class Candlebatcher {
     try {
       const initParams = {
         taskId: this._taskId,
-        mode: this._mode,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -188,8 +185,7 @@ class Candlebatcher {
     return createCandlebatcherSlug({
       exchange: this._exchange,
       asset: this._asset,
-      currency: this._currency,
-      mode: this._mode
+      currency: this._currency
     });
   }
 
@@ -263,8 +259,7 @@ class Candlebatcher {
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
-              timeframe,
-              mode: this._mode
+              timeframe
             });
             const warmCandlesCount = durationMinutes(dateFrom, dateTo);
             if (cachedCandlesCount < warmCandlesCount) {
@@ -338,8 +333,7 @@ class Candlebatcher {
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
-        timeframe: 1,
-        mode: this._mode
+        timeframe: 1
       });
       const warmCandlesCount = durationMinutes(dateFrom, dateTo);
 
@@ -347,7 +341,6 @@ class Candlebatcher {
         /* Загружаем свечи начиная с начала текущих UTC суток  */
         const importerRequest = {
           taskId: uuid(),
-          mode: this._mode,
           debug: this._debug,
           providerType: this._providerType,
           exchange: this._exchange,
@@ -399,8 +392,7 @@ class Candlebatcher {
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
-            timeframe: result.timeframe,
-            mode: this._mode
+            timeframe: result.timeframe
           }),
           RowKey: result.id
         };
@@ -442,8 +434,7 @@ class Candlebatcher {
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
-            timeframe: this._timeframe,
-            mode: this._mode
+            timeframe: this._timeframe
           }),
           RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
           id: uuid(),
@@ -451,7 +442,6 @@ class Candlebatcher {
           exchange: this._exchange,
           asset: this._asset,
           currency: this._currency,
-          mode: this._mode,
           timeframe: 1,
           time: this._prevDateFrom.valueOf(), // время в милисекундах
           timestamp: this._prevDateFrom.toISOString(), // время в ISO UTC
@@ -574,8 +564,7 @@ class Candlebatcher {
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
-              timeframe: 1,
-              mode: this._mode
+              timeframe: 1
             }),
             RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
             id: uuid(),
@@ -583,7 +572,6 @@ class Candlebatcher {
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
-            mode: this._mode,
             timeframe: 1,
             time: this._prevDateFrom.valueOf(), // время в милисекундах
             timestamp: this._prevDateFrom.toISOString(), // время в ISO UTC
@@ -619,8 +607,7 @@ class Candlebatcher {
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
-              timeframe: 1,
-              mode: this._mode
+              timeframe: 1
             })
           });
           /* Добаляем текущую свечу к загруженным */
@@ -639,8 +626,7 @@ class Candlebatcher {
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe: 1,
-                mode: this._mode
+                timeframe: 1
               },
               loadDateFrom,
               this._prevDateTo,
@@ -681,15 +667,13 @@ class Candlebatcher {
                   exchange: this._exchange,
                   asset: this._asset,
                   currency: this._currency,
-                  timeframe,
-                  mode: this._mode
+                  timeframe
                 }),
                 RowKey: generateCandleRowKey(timeFrom),
                 candlabatcherId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                mode: this._mode,
                 timeframe,
                 time: timeFrom, // время в милисекундах
                 timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
@@ -719,9 +703,7 @@ class Candlebatcher {
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe,
-                taskId: this._taskId,
-                mode: this._mode
+                timeframe
               }),
               eventType: CANDLES_NEWCANDLE_EVENT,
               data: candle
@@ -762,7 +744,6 @@ class Candlebatcher {
       PartitionKey: this.slug,
       taskId: this._taskId,
       eventSubject: this._eventSubject,
-      mode: this._mode,
       providerType: this._providerType,
       exchange: this._exchange,
       asset: this._asset,

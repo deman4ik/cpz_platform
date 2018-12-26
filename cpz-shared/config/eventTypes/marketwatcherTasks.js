@@ -9,11 +9,6 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       empty: false
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
-    mode: {
-      description: "Service run mode.",
-      type: "string",
-      values: ["emulator", "realtime"]
-    },
     debug: {
       description: "Debug mode.",
       type: "boolean",

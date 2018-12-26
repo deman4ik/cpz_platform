@@ -11,7 +11,6 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { subjectToStr } from "cpzUtils/helpers";
 import { getActiveAdvisersBySlug, savePendingCandle } from "cpzStorage";
 import execute from "./execute";
 
@@ -26,8 +25,7 @@ async function handleCandle(context, eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(eventData.candle));
-    const { eventSubject, candle } = eventData;
-    const modeStr = subjectToStr(eventSubject);
+    const { candle } = eventData;
 
     // Ищем подходящих советников
     const advisers = await getActiveAdvisersBySlug(
@@ -35,8 +33,7 @@ async function handleCandle(context, eventData) {
         exchange: candle.exchange,
         asset: candle.asset,
         currency: candle.currency,
-        timeframe: candle.timeframe,
-        modeStr
+        timeframe: candle.timeframe
       })
     );
     // Фильтруем только доступные советники

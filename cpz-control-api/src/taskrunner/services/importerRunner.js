@@ -34,7 +34,6 @@ class ImporterRunner extends BaseRunner {
 
       genErrorIfExist(validateStart({ ...props, taskId }));
       const {
-        mode,
         debug,
         providerType,
         exchange,
@@ -52,7 +51,6 @@ class ImporterRunner extends BaseRunner {
         ? await getImporterById(taskId)
         : await findActiveImporter({
             slug: createImporterSlug({
-              mode,
               exchange,
               asset,
               currency
@@ -74,11 +72,10 @@ class ImporterRunner extends BaseRunner {
 
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: createImporterSlug({ exchange, asset, currency, mode }),
+        subject: createImporterSlug({ exchange, asset, currency }),
         eventType: TASKS_IMPORTER_START_EVENT,
         data: {
           taskId,
-          mode,
           debug,
           providerType,
           exchange,
@@ -126,8 +123,7 @@ class ImporterRunner extends BaseRunner {
         subject: createImporterSlug({
           exchange: importer.exchange,
           asset: importer.asset,
-          currency: importer.currency,
-          mode: importer.mode
+          currency: importer.currency
         }),
         eventType: TASKS_IMPORTER_STOP_EVENT,
         data: {

@@ -12,6 +12,7 @@ input AdviserSettings {
 }
 
 input TraderSettings {
+    mode: String
     debug: Boolean
     slippageStep: Float
     deviation: Float

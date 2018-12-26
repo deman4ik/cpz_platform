@@ -43,8 +43,6 @@ class Importer {
     this._eventSubject = state.eventSubject;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
-    /* Режим работы ['backtest', 'emulator', 'realtime'] */
-    this._mode = state.mode;
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
     /* Тип провайдера ['ccxt'] */
@@ -162,7 +160,6 @@ class Importer {
     try {
       const initParams = {
         taskId: this._taskId,
-        mode: this._mode,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
@@ -445,8 +442,7 @@ class Importer {
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
-            timeframe: 1,
-            mode: this._mode
+            timeframe: 1
           })
         });
         tempCandles = tempCandles.sort((a, b) => sortAsc(a.time, b.time));
@@ -514,8 +510,7 @@ class Importer {
           exchange: this._exchange,
           asset: this._asset,
           currency: this._currency,
-          timeframe: 1,
-          mode: this._mode
+          timeframe: 1
         },
         dateFrom,
         dateTo,
@@ -580,15 +575,13 @@ class Importer {
                   exchange: this._exchange,
                   asset: this._asset,
                   currency: this._currency,
-                  timeframe: this._timeframe,
-                  mode: this._mode
+                  timeframe: this._timeframe
                 }),
                 RowKey: generateCandleRowKey(timeFrom),
                 taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                mode: this._mode,
                 timeframe,
                 time: timeFrom, // время в милисекундах
                 timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
@@ -626,13 +619,11 @@ class Importer {
       PartitionKey: createImporterSlug({
         exchange: this._exchange,
         asset: this._asset,
-        currency: this._currency,
-        mode: this._mode
+        currency: this._currency
       }),
       RowKey: this._taskId,
       taskId: this._taskId,
       eventSubject: this._eventSubject,
-      mode: this._mode,
       debug: this._debug,
       providerType: this._providerType,
       exchange: this._exchange,

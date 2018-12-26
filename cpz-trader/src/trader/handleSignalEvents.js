@@ -18,7 +18,6 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { subjectToStr } from "cpzUtils/helpers";
 import {
   getActiveTradersBySlug,
   getTraderById,
@@ -136,9 +135,7 @@ async function handlePendingSignals(context, { traderId }) {
  */
 async function handleSignal(context, eventData) {
   try {
-    const { eventSubject, signal } = eventData;
-    const modeStr = subjectToStr(eventSubject);
-    context.log(modeStr);
+    const { signal } = eventData;
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
     // Ищем подходящих проторговщиков
@@ -148,8 +145,7 @@ async function handleSignal(context, eventData) {
         asset: signal.asset,
         currency: signal.currency,
         timeframe: signal.timeframe,
-        robotId: signal.robotId,
-        modeStr
+        robotId: signal.robotId
       })
     );
     // Фильтруем только доступные проторговщики

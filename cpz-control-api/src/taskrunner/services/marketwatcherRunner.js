@@ -12,8 +12,7 @@ import {
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
-  STATUS_PENDING,
-  createMarketwatcherTaskSubject
+  STATUS_PENDING
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
@@ -46,14 +45,11 @@ class MarketwatcherRunner extends BaseRunner {
       let taskId = props.taskId || uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
-      const { mode, debug, exchange, providerType, subscriptions } = props;
+      const { debug, exchange, providerType, subscriptions } = props;
 
       const marketwatcher = resume
         ? await getMarketwatcherById(taskId)
-        : await findMarketwatcher({
-            mode,
-            exchange
-          });
+        : await findMarketwatcher(exchange);
 
       if (marketwatcher) {
         ({ taskId } = marketwatcher);
@@ -82,11 +78,10 @@ class MarketwatcherRunner extends BaseRunner {
       }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: createMarketwatcherTaskSubject({ exchange, mode }),
+        subject: exchange,
         eventType: TASKS_MARKETWATCHER_START_EVENT,
         data: {
           taskId,
-          mode,
           debug,
           providerType,
           subscriptions
@@ -132,10 +127,7 @@ class MarketwatcherRunner extends BaseRunner {
       }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: createMarketwatcherTaskSubject({
-          exchange: marketwatcher.exchange,
-          mode: marketwatcher.mode
-        }),
+        subject: exchange,
         eventType: TASKS_MARKETWATCHER_STOP_EVENT,
         data: {
           taskId
@@ -182,10 +174,7 @@ class MarketwatcherRunner extends BaseRunner {
       if (newSubsciptions.length > 0) {
         await publishEvents(TASKS_TOPIC, {
           service: CONTROL_SERVICE,
-          subject: createMarketwatcherTaskSubject({
-            exchange: marketwatcher.exchange,
-            mode: marketwatcher.mode
-          }),
+          subject: exchange,
           eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
           data: {
             taskId,
@@ -220,10 +209,7 @@ class MarketwatcherRunner extends BaseRunner {
         );
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: createMarketwatcherTaskSubject({
-          exchange: marketwatcher.exchange,
-          mode: marketwatcher.mode
-        }),
+        subject: exchange,
         eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
         data: {
           taskId,

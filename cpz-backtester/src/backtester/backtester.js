@@ -79,7 +79,6 @@ class Backtester {
       {},
       {
         ...state,
-        mode: BACKTEST_MODE,
         settings: this.adviserSettings
       }
     );
@@ -87,8 +86,7 @@ class Backtester {
       {},
       {
         ...state,
-        mode: BACKTEST_MODE,
-        settings: this.traderSettings
+        settings: { ...this.traderSettings, mode: BACKTEST_MODE }
       }
     );
   }

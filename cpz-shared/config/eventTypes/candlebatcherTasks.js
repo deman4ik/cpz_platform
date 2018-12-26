@@ -10,11 +10,6 @@ const TASKS_CANDLEBATCHER_START_EVENT = {
       type: "string",
       empty: false
     },
-    mode: {
-      description: "Service run mode.",
-      type: "string",
-      values: ["emulator", "realtime"]
-    },
     providerType: {
       description: "Data provider type.",
       type: "string",

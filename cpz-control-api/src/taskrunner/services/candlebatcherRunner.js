@@ -46,7 +46,6 @@ class CandlebatcherRunner extends BaseRunner {
 
       genErrorIfExist(validateStart({ ...props, taskId }));
       const {
-        mode,
         settings,
         providerType,
         exchange,
@@ -59,7 +58,6 @@ class CandlebatcherRunner extends BaseRunner {
         ? await getCandlebatcherById(taskId)
         : await findCandlebatcher({
             slug: createCandlebatcherSlug({
-              mode,
               exchange,
               asset,
               currency
@@ -98,13 +96,11 @@ class CandlebatcherRunner extends BaseRunner {
         subject: createCandlebatcherTaskSubject({
           exchange,
           asset,
-          currency,
-          mode
+          currency
         }),
         eventType: TASKS_CANDLEBATCHER_START_EVENT,
         data: {
           taskId,
-          mode,
           settings,
           providerType,
           exchange,
@@ -156,8 +152,7 @@ class CandlebatcherRunner extends BaseRunner {
         subject: createCandlebatcherTaskSubject({
           exchange: candlebatcher.exchange,
           asset: candlebatcher.asset,
-          currency: candlebatcher.currency,
-          mode: candlebatcher.mode
+          currency: candlebatcher.currency
         }),
         eventType: TASKS_CANDLEBATCHER_STOP_EVENT,
         data: {
@@ -197,8 +192,7 @@ class CandlebatcherRunner extends BaseRunner {
         subject: createCandlebatcherTaskSubject({
           exchange: candlebatcher.exchange,
           asset: candlebatcher.asset,
-          currency: candlebatcher.currency,
-          mode: candlebatcher.mode
+          currency: candlebatcher.currency
         }),
         eventType: TASKS_CANDLEBATCHER_UPDATE_EVENT,
         data: {

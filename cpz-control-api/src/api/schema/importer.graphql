@@ -1,6 +1,5 @@
 
 input ImporterParams {
-    mode: String!
     debug: Boolean
     providerType: String
     exchange: String!

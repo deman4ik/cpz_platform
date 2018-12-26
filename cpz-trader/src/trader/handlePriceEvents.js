@@ -11,7 +11,6 @@ import {
 import { createPositionSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
-import { subjectToStr } from "cpzUtils/helpers";
 import { getActivePositionsBySlug, getTraderById } from "cpzStorage";
 import Position from "./position";
 
@@ -27,16 +26,14 @@ async function handlePrice(context, eventData) {
   try {
     // Валидация входных параметров
     // genErrorIfExist(validateNewPrice(eventData.currentPrice)); //пока не актуально
-    const { eventSubject, currentPrice } = eventData;
-    const modeStr = subjectToStr(eventSubject);
+    const { currentPrice } = eventData;
 
     const positionsState = await getActivePositionsBySlug(
       createPositionSlug({
         exchange: currentPrice.exchange,
         asset: currentPrice.asset,
         currency: currentPrice.currency,
-        timeframe: currentPrice.timeframe,
-        modeStr
+        timeframe: currentPrice.timeframe
       })
     );
 

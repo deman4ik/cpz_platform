@@ -21,18 +21,12 @@ const getTraderById = async taskId =>
  * Find Trader
  *
  * @param {Object} input
- * @param {string} input.mode - Trader mode
  * @param {string} input.robotId - Robot Id
  * @param {string} input.userId - User Id
  * @returns {boolean}
  */
-const findTrader = async ({ mode, robotId, userId }) => {
+const findTrader = async ({ robotId, userId }) => {
   try {
-    const modeFilter = TableQuery.stringFilter(
-      "mode",
-      TableUtilities.QueryComparisons.EQUAL,
-      mode
-    );
     const robotIdFilter = TableQuery.stringFilter(
       "robotId",
       TableUtilities.QueryComparisons.EQUAL,
@@ -43,16 +37,11 @@ const findTrader = async ({ mode, robotId, userId }) => {
       TableUtilities.QueryComparisons.EQUAL,
       userId
     );
-    const combinedFilters = TableQuery.combineFilters(
-      userIdFilter,
-      TableUtilities.TableOperators.AND,
-      robotIdFilter
-    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        modeFilter,
+        userIdFilter,
         TableUtilities.TableOperators.AND,
-        combinedFilters
+        robotIdFilter
       )
     );
     const traders = await tableStorage.queryEntities(
@@ -66,7 +55,7 @@ const findTrader = async ({ mode, robotId, userId }) => {
       {
         name: "TableStorageError",
         cause: error,
-        info: { mode, robotId, userId }
+        info: { robotId, userId }
       },
       "Failed to read trader state"
     );

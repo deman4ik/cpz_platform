@@ -9,11 +9,6 @@ const TASKS_IMPORTER_START_EVENT = {
       type: "string",
       empty: false
     },
-    mode: {
-      description: "Service run mode.",
-      type: "string",
-      values: ["backtest", "emulator", "realtime"]
-    },
     debug: {
       description: "Debug mode.",
       type: "boolean"

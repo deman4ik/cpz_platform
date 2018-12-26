@@ -39,7 +39,6 @@ class RobotRunner extends BaseRunner {
       let skip = false;
       if (userRobotState.marketwatcherStatus !== STATUS_STARTED) {
         const marketwatcherParams = {
-          mode: userRobotState.mode,
           exchange: userRobotState.exchange,
           providerType: userRobotState.providerType || "cryptocompare",
           subsriptions: [
@@ -64,7 +63,6 @@ class RobotRunner extends BaseRunner {
           userRobotState.candlebatcherStatus !== STATUS_STARTING)
       ) {
         const candlebatcherParams = {
-          mode: userRobotState.mode,
           providerType: userRobotState.providerType || "ccxt",
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
@@ -86,7 +84,6 @@ class RobotRunner extends BaseRunner {
           userRobotState.adviserStatus !== STATUS_STARTING)
       ) {
         const adviserParams = {
-          mode: userRobotState.mode,
           robotId: userRobotState.robotId,
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
@@ -109,8 +106,6 @@ class RobotRunner extends BaseRunner {
           userRobotState.traderStatus !== STATUS_STARTING)
       ) {
         const traderParams = {
-          mode: userRobotState.mode,
-          debug: userRobotState.debug,
           robotId: userRobotState.robotId,
           userId: userRobotState.userId,
           adviserId: userRobotState.adviserId,

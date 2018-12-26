@@ -35,11 +35,6 @@ with OIDS;
 alter table backtest
   add constraint c_backtest_status_chk
     check (status in ('started','stopped','finished','error'));
-
-alter table backtest
-  add constraint c_backtest_run_mode_chk
-    check (run_mode in ('backtest','emulator','realtime'));
-
     
 create index i_backtest_status
   on backtest (status);

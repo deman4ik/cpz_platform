@@ -20,29 +20,17 @@ const getAdviserById = async taskId =>
  * Find Adviser
  *
  * @param {Object} input
- * @param {string} input.mode - Adviser mode
  * @param {string} input.robotId - Robot Id
  * @returns {boolean}
  */
-const findAdviser = async ({ mode, robotId }) => {
+const findAdviser = async ({ robotId }) => {
   try {
-    const modeFilter = TableQuery.stringFilter(
-      "mode",
-      TableUtilities.QueryComparisons.EQUAL,
-      mode
-    );
     const robotIdFilter = TableQuery.stringFilter(
       "robotId",
       TableUtilities.QueryComparisons.EQUAL,
       robotId
     );
-    const query = new TableQuery().where(
-      TableQuery.combineFilters(
-        modeFilter,
-        TableUtilities.TableOperators.AND,
-        robotIdFilter
-      )
-    );
+    const query = new TableQuery().where(robotIdFilter);
     const advisers = await tableStorage.queryEntities(
       STORAGE_ADVISERS_TABLE,
       query
@@ -54,7 +42,7 @@ const findAdviser = async ({ mode, robotId }) => {
       {
         name: "TableStorageError",
         cause: error,
-        info: { mode, robotId }
+        info: { robotId }
       },
       "Failed to read adviser state"
     );

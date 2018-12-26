@@ -7,7 +7,6 @@
   "subject":"host1.marketwatcher1.E",
   "data": {
   	  "taskId": "marketwatcher1",
-  	  "mode": "emulator",
       "debug": true,
       "providerType": "cryptocompare",
       "exchange":"bitfinex",

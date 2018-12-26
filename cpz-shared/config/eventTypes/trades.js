@@ -30,6 +30,11 @@ const TRADES_ORDER_EVENT = {
   eventType: "CPZ.Trades.Order",
 
   dataSchema: {
+    mode: {
+      description: "Service run mode.",
+      type: "string",
+      values: ["backtest", "emulator", "realtime"]
+    },
     positionId: {
       description: "Uniq Position Id.",
       type: "string",
