@@ -88,7 +88,7 @@ async function handlePrice(context, eventData) {
       .filter(result => result.isSuccess === false)
       .map(result => ({ positionId: result.positionId, error: result.error }));
 
-    if (errorPositions) {
+    if (errorPositions && errorPositions.length > 0) {
       throw new VError(
         {
           name: "TradersExecutionError",

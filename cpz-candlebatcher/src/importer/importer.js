@@ -48,7 +48,7 @@ class Importer {
     /* Режима дебага [true,false] */
     this._debug = state.debug || false;
     /* Тип провайдера ['ccxt'] */
-    this._providerType = state.providerType;
+    this._providerType = state.providerType || "ccxt";
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -250,11 +250,13 @@ class Importer {
           "candles date to",
           dayjs(this._loadDateNext).toISOString()
         );
-        const { firstDate, data } = await this.provider.loadCandles(
+        const { firstDate, lastDate, data } = await this.provider.loadCandles(
           this._loadDateNext
         );
         // Загруженные свечи
         this._candles = data;
+        this.log("firstDate:", dayjs(firstDate).toISOString());
+        this.log("lastDate:", dayjs(lastDate).toISOString());
         this.log("Loaded:", this._candles.length);
         // Всего минут
         this._totalDuration =
@@ -370,6 +372,7 @@ class Importer {
    */
   async _clearTemp() {
     try {
+      this.log("Clearing temp data...");
       await clearTempCandles(this._taskId);
     } catch (error) {
       throw new VError(

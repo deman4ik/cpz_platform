@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import { ERROR_MARKETWATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
+import { capitalize } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
 import {
   STATUS_STARTED,
@@ -188,10 +189,10 @@ class CryptocompareProvider extends BaseProvider {
   async start() {
     try {
       const activeTradeSubs = this._subscriptions.map(
-        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       const activeTickSubs = this._subscriptions.map(
-        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       // Если сокет не подключен
       if (this._socketStatus !== "connect") {
@@ -255,10 +256,10 @@ class CryptocompareProvider extends BaseProvider {
     try {
       this._subscriptions = [...this._subscriptions, ...subscriptions];
       const newTradeSubs = subscriptions.map(
-        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       const newTickSubs = subscriptions.map(
-        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       this._socket.emit("SubAdd", {
         subs: [...newTradeSubs, ...newTickSubs]
@@ -301,10 +302,10 @@ class CryptocompareProvider extends BaseProvider {
       );
 
       const delTradeSubs = subscriptions.map(
-        sub => `0~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `0~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       const delTickSubs = subscriptions.map(
-        sub => `2~${this._exchange}~${sub.asset}~${sub.currency}`
+        sub => `2~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
       this._socket.emit("SubRemove", {
         subs: [...delTradeSubs, ...delTickSubs]

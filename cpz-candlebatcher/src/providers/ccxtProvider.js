@@ -31,11 +31,13 @@ class CCXTProvider extends BaseProvider {
       const minutesLeft = durationMinutes(this._dateFrom, dateEnd, true);
       const limit = minutesLeft > this._limit ? this._limit : minutesLeft;
       const dateStart = dayjs(dateEnd).add(-limit, "minute");
+
       let attempt = 1;
       const response = await retry(
         async () => {
           if (attempt > 1) console.log(attempt);
           attempt += 1;
+          console.log("from:", dateStart.toISOString());
           const result = await this._connector.fetchOHLCV(
             this._symbol,
             "1m",
@@ -53,6 +55,11 @@ class CCXTProvider extends BaseProvider {
 
       if (response) {
         if (response.length > 0) {
+          console.log("first:", dayjs(response[0][0]).toISOString());
+          console.log(
+            "last:",
+            dayjs(response[response.length - 1][0]).toISOString()
+          );
           const filteredData = response
             .filter(
               candle =>
@@ -87,7 +94,6 @@ class CCXTProvider extends BaseProvider {
               volume: item[5],
               type: CANDLE_IMPORTED
             }));
-
             return {
               firstDate: data[0].timestamp,
               lastDate: data[data.length - 1].timestamp,

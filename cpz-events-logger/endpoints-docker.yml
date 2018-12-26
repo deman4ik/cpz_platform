@@ -1,14 +1,16 @@
 endpoints:
 # Marketwatcher
-- container_name: "cpz-marketwatcher"
+- host: "cpz-marketwatcher"
+  port: 80
   url: "/api/taskEvents"
   types:
-  - CPZ.Tasks.MarketWatcher.Start
-  - CPZ.Tasks.MarketWatcher.Stop
-  - CPZ.Tasks.MarketWatcher.Subscribe
-  - CPZ.Tasks.MarketWatcher.Unsubscribe
+  - CPZ.Tasks.Marketwatcher.Start
+  - CPZ.Tasks.Marketwatcher.Stop
+  - CPZ.Tasks.Marketwatcher.Subscribe
+  - CPZ.Tasks.Marketwatcher.Unsubscribe
 # Candlebatcher  
-- container_name: "cpz-candlebatcher"
+- host: "cpz-candlebatcher"
+  port: 80
   url: "/api/taskEvents"
   types:
   - CPZ.Tasks.Candlebatcher.Start
@@ -17,42 +19,47 @@ endpoints:
   - CPZ.Tasks.Importer.Start
   - CPZ.Tasks.Importer.Stop
 # Adviser  
-- container_name: "cpz-adviser"
+- host: "cpz-adviser"
+  port: 80
   url: "/api/taskEvents"
   types:
   - CPZ.Tasks.Adviser.Start
   - CPZ.Tasks.Adviser.Stop
   - CPZ.Tasks.Adviser.Update
-- container_name: "cpz-adviser"
+- host: "cpz-adviser"
+  port: 80
   url: "/api/candleEvents"
   types:
   - CPZ.Candles.NewCandle
 # Trader  
-- container_name: "cpz-trader"
+- host: "cpz-trader"
+  port: 80
   url: "/api/taskEvents"
   types:
   - CPZ.Tasks.Trader.Start
   - CPZ.Tasks.Trader.Stop
   - CPZ.Tasks.Trader.Update
-- container_name: "cpz-trader"
+- host: "cpz-trader"
+  port: 80
   url: "/api/signalEvents"
   types:
   - CPZ.Signals.NewSignal
-- container_name: "cpz-trader"
+- host: "cpz-trader"
   url: "/api/candleEvents"
   types:
   - CPZ.Candles.NewCandle
-- container_name: "cpz-trader"
+- host: "cpz-trader"
   url: "/api/tickEvents"
   types:
   - CPZ.Ticks.NewTick
 # Control-api
-- container_name: "cpz-control-api"
+- host: "cpz-control-api"
+  port: 80
   url: "/api/taskEvents"
   types:
-  - CPZ.Tasks.MarketWatcher.Started
-  - CPZ.Tasks.MarketWatcher.Stopped
-  - CPZ.Tasks.MarketWatcher.Updated
+  - CPZ.Tasks.Marketwatcher.Started
+  - CPZ.Tasks.Marketwatcher.Stopped
+  - CPZ.Tasks.Marketwatcher.Updated
   - CPZ.Tasks.Candlebatcher.Started
   - CPZ.Tasks.Candlebatcher.Stopped
   - CPZ.Tasks.Candlebatcher.Updated
@@ -65,7 +72,8 @@ endpoints:
   - CPZ.Tasks.Backtester.Started
   - CPZ.Tasks.Backtester.Stopped
 # Backtester
-- container_name: "cpz-backtester"
+- host: "cpz-backtester"
+  port: 80
   url: "/api/taskEvents"
   types:
   - CPZ.Tasks.Backtester.Start

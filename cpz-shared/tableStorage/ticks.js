@@ -13,7 +13,8 @@ tableStorage.createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
  *
  * @param {Ticks} ticks
  */
-const deletePrevCachedTicksArray = ticks => tableStorage.deleteArray(ticks);
+const deletePrevCachedTicksArray = ticks =>
+  tableStorage.deleteArray(STORAGE_TICKSCACHED_TABLE, ticks);
 
 /**
  * Query cached ticks for previous minute

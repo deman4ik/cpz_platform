@@ -8,7 +8,7 @@ async function saveCandles({ timeframe, candles }) {
           objects: $objects
           on_conflict: { 
             constraint: c_candles${timeframe}_uk
-            update_columns: [open, high, low, close, volume] 
+            update_columns: [open, high, low, close, volume, type] 
         }) {
           affected_rows
         }

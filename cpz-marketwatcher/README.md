@@ -9,8 +9,9 @@
   	  "taskId": "marketwatcher1",
   	  "mode": "emulator",
       "debug": true,
-      "provider": "cryptocompare",
-      "subscriptions": [{"exchange":"Bitfinex","asset":"ETH","currency":"USD"},{"exchange":"Kraken","asset":"BTC","currency":"USD"},{"exchange":"Kraken","asset":"ETH","currency":"USD"}]
+      "providerType": "cryptocompare",
+      "exchange":"bitfinex",
+      "subscriptions": [{"asset":"BTC","currency":"USD"}]
     },
   "eventType": "CPZ.Tasks.Marketwatcher.Start",
   "eventTime": "2018-10-09T15:12:33.859Z",
@@ -44,8 +45,9 @@
   "topic": "/subscriptions/785b39f5-bf28-45bd-b2a3-65beea8e153e/resourceGroups/cpz/providers/Microsoft.EventGrid/topics/cpz-test-topic",
   "subject":"host1.marketwatcher1.E",
   "data": {
-  	  "taskId": "marketwatcher1",
-      "subscriptions": [{"exchange":"Bitfinex","asset":"BTC","currency":"USD"}]
+      "taskId": "marketwatcher1",
+      "exchange":"bitfinex"
+      "subscriptions": [{"asset":"BTC","currency":"USD"}]
     },
   "eventType": "CPZ.Tasks.Marketwatcher.Subscribe",
   "eventTime": "2018-10-09T15:12:33.859Z",
@@ -62,8 +64,9 @@
   "topic": "/subscriptions/785b39f5-bf28-45bd-b2a3-65beea8e153e/resourceGroups/cpz/providers/Microsoft.EventGrid/topics/cpz-test-topic",
   "subject":"host1.marketwatcher1.E",
   "data": {
-  	  "taskId": "marketwatcher1",
-      "subscriptions": [{"exchange":"Bitfinex","asset":"BTC","currency":"USD"}]
+      "taskId": "marketwatcher1",
+      "exchange":"bitfinex"
+      "subscriptions": [{"asset":"BTC","currency":"USD"}]
     },
   "eventType": "CPZ.Tasks.Marketwatcher.Unsubscribe",
   "eventTime": "2018-10-09T15:12:33.859Z",

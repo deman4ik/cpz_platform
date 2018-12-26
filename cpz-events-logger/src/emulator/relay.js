@@ -3,8 +3,10 @@ import yaml from "js-yaml";
 import fs from "fs";
 import retry from "cpzUtils/retry";
 
+const { EG_EMULATOR_MODE } = process.env;
+
 const endpointsConfig = yaml.safeLoad(
-  fs.readFileSync(`${process.cwd()}/endpoints.yml`, "utf8")
+  fs.readFileSync(`${process.cwd()}/endpoints-${EG_EMULATOR_MODE}.yml`, "utf8")
 );
 
 const findEndpoint = eventType =>
@@ -15,15 +17,20 @@ const findEndpoint = eventType =>
 async function relay(context, event) {
   try {
     const endpoint = findEndpoint(event.eventType);
-
     if (endpoint) {
-      const url = `http://${endpoint.container_name}:80${endpoint.url}`;
+      const host =
+        EG_EMULATOR_MODE === "docker"
+          ? `${endpoint.endpoint}:${endpoint.port}`
+          : `localhost:${endpoint.port}`;
+      const url = `http://${host}${endpoint.url}`;
       context.log.info(url);
       context.log.info(event);
       retry(async () => {
         await fetch(url, {
           method: "POST",
-          body: JSON.stringify([event]),
+          body: JSON.stringify([
+            { ...event, topic: "cpz-events-logger", metadataVersion: "1" }
+          ]),
           headers: { "Content-Type": "application/json" }
         });
       });

@@ -67,6 +67,7 @@ async function publishEvents(topic, eventData) {
       // TODO: validate event data
       const newEvent = {
         id: uuid(),
+        metadataVersion: "1",
         dataVersion: "1.0",
         eventTime: new Date(),
         subject: eventData.subject,

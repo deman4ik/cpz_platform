@@ -20,48 +20,66 @@ class EventsLogger {
   async save(event) {
     try {
       const type = event.eventType;
-      const eventData = {
-        RowKey: event.id,
-        PartitionKey: event.subject,
-        eventId: event.id,
-        eventTopic: event.topic,
-        eventSubject: event.subject,
-        eventType: event.eventType,
-        eventTime: event.eventTime,
-        eventMetadataVersion: event.metadataVersion,
-        eventDataVersion: event.dataVersion,
-        ...event.data
-      };
       if (type === CANDLES_NEWCANDLE_EVENT.eventType) {
         if (this.logToPostgre)
           await this.db.saveCandles({
             timeframe: event.data.timeframe,
             candles: [event.data]
           });
+        return;
       }
+      const baseEventData = {
+        RowKey: event.id,
+        PartitionKey: type
+          .split(".")
+          .slice(-2)
+          .join("."),
+        eventId: event.id,
+        eventTopic: event.topic,
+        eventSubject: event.subject,
+        eventType: event.eventType,
+        eventTime: event.eventTime,
+        eventMetadataVersion: event.metadataVersion,
+        eventDataVersion: event.dataVersion
+      };
+      const fullEventData = {
+        ...baseEventData,
+        ...event.data
+      };
+
       if (type.includes("CPZ.Tasks")) {
-        if (this.logToStorage) await saveTasksEvent(eventData);
+        if (this.logToStorage)
+          await saveTasksEvent({
+            ...baseEventData,
+            data: event.data
+          });
         //  if (this.logToPostgre) await this.db.saveTasksEvent(eventData);
+        return;
       }
       if (type.includes("CPZ.Signals")) {
-        if (this.logToStorage) await saveSignalsEvent(eventData);
-        if (this.logToPostgre) await this.db.saveSignals([eventData]);
+        if (this.logToStorage) await saveSignalsEvent(fullEventData);
+        if (this.logToPostgre) await this.db.saveSignals([fullEventData]);
+        return;
       }
       if (type.includes("CPZ.Orders")) {
-        if (this.logToStorage) await saveOrdersEvent(eventData);
-        if (this.logToPostgre) await this.db.saveOrders([eventData]);
+        if (this.logToStorage) await saveOrdersEvent(fullEventData);
+        if (this.logToPostgre) await this.db.saveOrders([fullEventData]);
+        return;
       }
       if (type.includes("CPZ.Positions")) {
-        if (this.logToStorage) await savePositionsEvent(eventData);
-        if (this.logToPostgre) await this.db.savePositions([eventData]);
+        if (this.logToStorage) await savePositionsEvent(fullEventData);
+        if (this.logToPostgre) await this.db.savePositions([fullEventData]);
+        return;
       }
       if (type.includes(".Log")) {
-        if (this.logToStorage) await saveLogsEvent(eventData);
+        if (this.logToStorage) await saveLogsEvent(fullEventData);
         // if (this.logToPostgre) await this.db.saveLogEvent(eventData);
+        return;
       }
       if (type.includes(".Error")) {
-        if (this.logToStorage) await saveErrorsEvent(eventData);
+        if (this.logToStorage) await saveErrorsEvent(fullEventData);
         // if (this.logToPostgre) await this.db.saveErrorEvent(eventData);
+        return;
       }
     } catch (error) {
       this.context.log.error(error);

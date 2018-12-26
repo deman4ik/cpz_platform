@@ -217,6 +217,10 @@ function chunkNumberToArray(number, chunkSize) {
   const chunked = chunkArray(array, chunkSize).map(val => val.length);
   return chunked;
 }
+
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 export {
   sortAsc,
   sortDesc,
@@ -232,5 +236,6 @@ export {
   divideDateByDays,
   arraysDiff,
   chunkArray,
-  chunkNumberToArray
+  chunkNumberToArray,
+  capitalize
 };

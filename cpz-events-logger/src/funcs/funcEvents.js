@@ -45,4 +45,4 @@ function handleEvent(context, req) {
   context.done();
 }
 
-module.exports = handleEvent;
+export default handleEvent;
