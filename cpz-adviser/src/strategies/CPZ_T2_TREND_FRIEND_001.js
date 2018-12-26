@@ -77,6 +77,8 @@ const robot4 = {
     this.addIndicator("sma1", "SMA", { windowLength: 10 });
     this.addIndicator("sma2", "SMA", { windowLength: 20 });
     this.addIndicator("sma3", "SMA", { windowLength: 30 });
+    //this.addIndicator("activePosition", "activePosition", {debug:1, highestSeriesSize:20, lowestSeriesSize:20});
+    //this.activePosition = null;
   },
   check() {
     // this.log("check");
@@ -86,6 +88,7 @@ const robot4 = {
     const sma1 = this.indicators.sma1.result;
     const sma2 = this.indicators.sma2.result;
     const sma3 = this.indicators.sma3.result;
+    //this.activePosition = this.indicators.activePosition;
     /*
     this.logEvent({
       sma1,
