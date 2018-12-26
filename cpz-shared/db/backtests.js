@@ -1,4 +1,5 @@
 import VError from "verror";
+import db from "./db";
 
 function mapForDB(backtester) {
   return {
@@ -22,14 +23,14 @@ function mapForDB(backtester) {
   };
 }
 
-async function isBacktestExists(id) {
+async function isBacktestExistsDB(id) {
   try {
     const query = `query backtest_by_id($id: uuid!){
   cpz_backtest_by_pk(id:$id){
     id
   }
 }`;
-    const response = await this.client.request(query, { id });
+    const response = await db.request(query, { id });
 
     return response && response.cpz_backtest_by_pk;
   } catch (error) {
@@ -45,7 +46,7 @@ async function isBacktestExists(id) {
     );
   }
 }
-async function saveBacktests(data) {
+async function saveBacktestsDB(data) {
   try {
     const query = `mutation insert_backtest($objects: [cpz_backtest_insert_input!]!){
       insert_cpz_backtest(objects:$objects,
@@ -70,7 +71,7 @@ async function saveBacktests(data) {
         };
       }
 
-      await this.client.request(query, variables);
+      await db.request(query, variables);
     } catch (error) {
       throw error;
     }
@@ -85,7 +86,7 @@ async function saveBacktests(data) {
   }
 }
 
-async function deleteBacktest(id) {
+async function deleteBacktestDB(id) {
   try {
     const query = `mutation delete_backtest($id: uuid!){
       delete_cpz_backtest(where:{
@@ -96,7 +97,7 @@ async function deleteBacktest(id) {
         affected_rows
       }
     }`;
-    await this.client.request(query, { id });
+    await db.request(query, { id });
   } catch (error) {
     throw new VError(
       {
@@ -110,4 +111,4 @@ async function deleteBacktest(id) {
     );
   }
 }
-export { isBacktestExists, saveBacktests, deleteBacktest };
+export { isBacktestExistsDB, saveBacktestsDB, deleteBacktestDB };

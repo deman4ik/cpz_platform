@@ -35,7 +35,7 @@ import {
   sortAsc
 } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
-import DB from "cpzDB";
+import { getCandlesDB } from "cpzDB";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
@@ -103,8 +103,6 @@ class Candlebatcher {
       : state.endedAt || ""; // Дата и время остановки
     /* Метаданные стореджа */
     this._metadata = state.metadata;
-    /* API базы данных */
-    this._db = state.db || new DB();
     /* Запуск инициализациия провайдера */
     this.initProvider();
     this.log(`Candlebatcher ${this._eventSubject} initialized`);
@@ -263,7 +261,7 @@ class Candlebatcher {
             });
             const warmCandlesCount = durationMinutes(dateFrom, dateTo);
             if (cachedCandlesCount < warmCandlesCount) {
-              const candles = await this._db.getCandles({
+              const candles = await getCandlesDB({
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,

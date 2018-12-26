@@ -1,7 +1,8 @@
 import VError from "verror";
 import { chunkArray } from "../utils/helpers";
+import db from "./db";
 
-async function saveSignals(data) {
+async function saveSignalsDB(data) {
   try {
     const query = `mutation insert_signals($objects: [cpz_signal_insert_input!]!){
       insert_cpz_signal(objects:$objects){
@@ -35,7 +36,7 @@ async function saveSignals(data) {
               }))
             };
 
-            await this.client.request(query, variables);
+            await db.request(query, variables);
           } catch (error) {
             throw error;
           }
@@ -53,4 +54,4 @@ async function saveSignals(data) {
   }
 }
 
-export { saveSignals };
+export { saveSignalsDB };

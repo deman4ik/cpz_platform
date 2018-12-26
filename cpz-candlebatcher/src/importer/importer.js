@@ -25,7 +25,7 @@ import {
   getTempCandles,
   clearTempCandles
 } from "cpzStorage";
-import DB from "cpzDB";
+import { saveCandlesDB } from "cpzDB";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
@@ -92,7 +92,6 @@ class Importer {
     this._initialized = state.initialized || false;
     /* Метаданные стореджа */
     this._metadata = state.metadata;
-    this._db = state.db || new DB();
     /* Инициализация */
     this.init();
     /* Запуск инициализации провайдера */
@@ -304,7 +303,7 @@ class Importer {
             try {
               if (this._saveToCache)
                 await saveCandlesArrayToCache(timeframeCandles[timeframe]);
-              await this._db.saveCandles({
+              await saveCandlesDB({
                 timeframe,
                 candles: timeframeCandles[timeframe]
               });

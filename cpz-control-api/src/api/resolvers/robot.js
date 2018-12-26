@@ -1,11 +1,11 @@
+import { getUserRobotDB} from "cpzDB";
 import RobotRunner from "../../taskrunner/robotRunner";
-import DB from "cpzDB";
 
-const db = new DB();
+
 
 async function startRobot(_, { params }) {
   try {
-    const userRobot = db.getUserRobot(params);
+    const userRobot = getUserRobotDB(params);
     const { taskId, status } = await RobotRunner.start(userRobot);
     return {
       success: true,

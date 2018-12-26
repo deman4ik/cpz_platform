@@ -1,5 +1,6 @@
 import VError from "verror";
 import { chunkArray } from "../utils/helpers";
+import db from "./db";
 
 function mapForDB(order) {
   return {
@@ -23,7 +24,7 @@ function mapForDB(order) {
     candle_timestamp: order.candleTimestamp
   };
 }
-async function saveOrders(data) {
+async function saveOrdersDB(data) {
   try {
     const query = `mutation insert_orders($objects: [cpz_trades_insert_input!]!){
       insert_cpz_trades(objects:$objects
@@ -47,7 +48,7 @@ async function saveOrders(data) {
               objects: chunk.map(order => mapForDB(order))
             };
 
-            await this.client.request(query, variables);
+            await db.request(query, variables);
           } catch (error) {
             throw error;
           }
@@ -65,4 +66,4 @@ async function saveOrders(data) {
   }
 }
 
-export { saveOrders };
+export { saveOrdersDB };

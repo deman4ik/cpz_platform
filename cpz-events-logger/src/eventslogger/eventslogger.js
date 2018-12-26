@@ -1,4 +1,3 @@
-import DB from "cpzDB";
 import {
   saveTasksEvent,
   saveSignalsEvent,
@@ -8,11 +7,16 @@ import {
   saveErrorsEvent
 } from "cpzStorage";
 import { CANDLES_NEWCANDLE_EVENT } from "cpzEventTypes";
+import {
+  saveCandlesDB,
+  saveSignalsDB,
+  saveOrdersDB,
+  savePositionsDB
+} from "cpzDB";
 
 class EventsLogger {
   constructor(context) {
     this.context = context;
-    this.db = new DB();
     this.logToStorage = process.env.LOG_TABLE_STORAGE;
     this.logToPostgre = process.env.LOG_POSTGRE;
   }
@@ -22,7 +26,7 @@ class EventsLogger {
       const type = event.eventType;
       if (type === CANDLES_NEWCANDLE_EVENT.eventType) {
         if (this.logToPostgre)
-          await this.db.saveCandles({
+          await saveCandlesDB({
             timeframe: event.data.timeframe,
             candles: [event.data]
           });
@@ -53,32 +57,32 @@ class EventsLogger {
             ...baseEventData,
             data: event.data
           });
-        //  if (this.logToPostgre) await this.db.saveTasksEvent(eventData);
+        //  if (this.logToPostgre) await saveTasksEventDB(eventData);
         return;
       }
       if (type.includes("CPZ.Signals")) {
         if (this.logToStorage) await saveSignalsEvent(fullEventData);
-        if (this.logToPostgre) await this.db.saveSignals([fullEventData]);
+        if (this.logToPostgre) await saveSignalsDB([fullEventData]);
         return;
       }
       if (type.includes("CPZ.Orders")) {
         if (this.logToStorage) await saveOrdersEvent(fullEventData);
-        if (this.logToPostgre) await this.db.saveOrders([fullEventData]);
+        if (this.logToPostgre) await saveOrdersDB([fullEventData]);
         return;
       }
       if (type.includes("CPZ.Positions")) {
         if (this.logToStorage) await savePositionsEvent(fullEventData);
-        if (this.logToPostgre) await this.db.savePositions([fullEventData]);
+        if (this.logToPostgre) await savePositionsDB([fullEventData]);
         return;
       }
       if (type.includes(".Log")) {
         if (this.logToStorage) await saveLogsEvent(fullEventData);
-        // if (this.logToPostgre) await this.db.saveLogEvent(eventData);
+        // if (this.logToPostgre) await saveLogEventDB(eventData);
         return;
       }
       if (type.includes(".Error")) {
         if (this.logToStorage) await saveErrorsEvent(fullEventData);
-        // if (this.logToPostgre) await this.db.saveErrorEvent(eventData);
+        // if (this.logToPostgre) await saveErrorEventDB(eventData);
         return;
       }
     } catch (error) {

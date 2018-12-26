@@ -1,5 +1,5 @@
-async function saveLogEvent(data) {
+async function saveLogEventDB(data) {
   //! TODO
 }
 
-export { saveLogEvent };
+export { saveLogEventDB };

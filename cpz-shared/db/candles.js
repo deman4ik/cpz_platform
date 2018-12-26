@@ -1,7 +1,8 @@
 import VError from "verror";
 import { chunkArray } from "../utils/helpers";
+import db from "./db";
 
-async function saveCandles({ timeframe, candles }) {
+async function saveCandlesDB({ timeframe, candles }) {
   try {
     const query = `mutation insert_candles${timeframe}($objects: [cpz_candles${timeframe}_insert_input!]!) {
         insert_cpz_candles${timeframe}(
@@ -38,7 +39,7 @@ async function saveCandles({ timeframe, candles }) {
               }))
             };
 
-            await this.client.request(query, variables);
+            await db.request(query, variables);
           } catch (error) {
             throw error;
           }
@@ -57,7 +58,7 @@ async function saveCandles({ timeframe, candles }) {
   }
 }
 
-async function getCandles({
+async function getCandlesDB({
   exchange,
   asset,
   currency,
@@ -113,7 +114,7 @@ async function getCandles({
       offset,
       limit
     };
-    const response = await this.client.request(query, variables);
+    const response = await db.request(query, variables);
     return response[table];
   } catch (error) {
     throw new VError(
@@ -126,7 +127,7 @@ async function getCandles({
   }
 }
 
-async function countCandles({
+async function countCandlesDB({
   exchange,
   asset,
   currency,
@@ -163,7 +164,7 @@ async function countCandles({
       dateFrom,
       dateTo
     };
-    const response = await this.client.request(query, variables);
+    const response = await db.request(query, variables);
     return response[`${table}_aggregate`].aggregate.count;
   } catch (error) {
     throw new VError(
@@ -176,4 +177,4 @@ async function countCandles({
   }
 }
 
-export { saveCandles, getCandles, countCandles };
+export { saveCandlesDB, getCandlesDB, countCandlesDB };

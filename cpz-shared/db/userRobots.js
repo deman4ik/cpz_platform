@@ -1,6 +1,7 @@
 import VError from "verror";
+import db from "./db";
 
-async function getUserRobot({ id }) {
+async function getUserRobotDB({ id }) {
   try {
     const query = `query user_robot_by_pk($userRobotId: uuid!){
   cpz_user_robot_by_pk(id: $userRobotId){
@@ -27,7 +28,7 @@ async function getUserRobot({ id }) {
     const variables = {
       userRobotId: id
     };
-    const response = await this.client.request(query, variables);
+    const response = await db.request(query, variables);
     if (response.cpz_user_robot_by_pk) {
       const { robotByrobotId } = response.cpz_user_robot_by_pk;
       return {
@@ -61,4 +62,4 @@ async function getUserRobot({ id }) {
   }
 }
 
-export { getUserRobot };
+export { getUserRobotDB };

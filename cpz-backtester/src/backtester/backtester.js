@@ -32,7 +32,16 @@ import {
   saveBacktesterStratLogs,
   deleteBacktesterState
 } from "cpzStorage";
-import DB from "cpzDB";
+import {
+  saveBacktestsDB,
+  isBacktestExistsDB,
+  deleteBacktestDB,
+  countCandlesDB,
+  getCandlesDB,
+  saveSignalsDB,
+  savePositionsDB,
+  saveOrdersDB
+} from "cpzDB";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
 
@@ -74,7 +83,6 @@ class Backtester {
       timeframe: this.timeframe,
       robotId: this.robotId
     });
-    this.db = state.db || new DB();
     this.adviserBacktester = new AdviserBacktester(
       {},
       {
@@ -142,7 +150,7 @@ class Backtester {
     try {
       // Сохраняем состояние в локальном хранилище
       await saveBacktesterState(this.getCurrentState());
-      await this.db.saveBacktests(this.getCurrentState());
+      await saveBacktestsDB(this.getCurrentState());
     } catch (error) {
       throw new VError(
         {
@@ -173,13 +181,14 @@ class Backtester {
           PartitionKey: this.slug
         });
       }
-      if (this.db.isBacktestExists(this.taskId)) {
+      const backtesterExistsDB = await isBacktestExistsDB(this.taskId);
+      if (backtesterExistsDB) {
         this.log(
           `Previous backtest state with id ${
             this.taskId
           } found in DB. Deleting...`
         );
-        await this.db.deleteBacktest(this.taskId);
+        await deleteBacktestDB(this.taskId);
       }
 
       this.log(`Starting ${this.taskId}...`);
@@ -199,7 +208,7 @@ class Backtester {
           orderBy: "{ timestamp: desc }"
         };
         // Запрашиваем свечи из БД
-        const getRequiredHistoryResult = await this.db.getCandles(
+        const getRequiredHistoryResult = await getCandlesDB(
           requiredHistoryRequest
         );
 
@@ -234,7 +243,7 @@ class Backtester {
         }
       });
 
-      this.totalBars = await this.db.countCandles({
+      this.totalBars = await countCandlesDB({
         exchange: this.exchange,
         asset: this.asset,
         currency: this.currency,
@@ -256,7 +265,7 @@ class Backtester {
         // const positionsToSave = [];
         const positionsToSaveDB = [];
 
-        const historyCandles = await this.db.getCandles({
+        const historyCandles = await getCandlesDB({
           exchange: this.exchange,
           asset: this.asset,
           currency: this.currency,
@@ -446,12 +455,11 @@ class Backtester {
           await saveBacktesterPositions(positionsToSave);
         */
 
-        if (signalsToSaveDB.length > 0)
-          await this.db.saveSignals(signalsToSaveDB);
+        if (signalsToSaveDB.length > 0) await saveSignalsDB(signalsToSaveDB);
         if (positionsToSaveDB.length > 0)
-          await this.db.savePositions(positionsToSaveDB);
+          await savePositionsDB(positionsToSaveDB);
 
-        if (ordersToSaveDB.length > 0) await this.db.saveOrders(ordersToSaveDB);
+        if (ordersToSaveDB.length > 0) await saveOrdersDB(ordersToSaveDB);
 
         // Сохраняем состояние пачки
         await this.save();

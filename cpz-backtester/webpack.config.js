@@ -42,7 +42,7 @@ const config = {
       cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
       cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
       cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
-      cpzDB: path.resolve(__dirname, "../cpz-shared/db/db"),
+      cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
       cpzConnector: path.resolve(__dirname, "../cpz-shared/connector"),
       cpzAdviser: path.resolve(__dirname, "../cpz-adviser/src/adviser"),
       cpzTrader: path.resolve(__dirname, "../cpz-trader/src/trader")

@@ -1,5 +1,6 @@
 import VError from "verror";
 import { chunkArray } from "../utils/helpers";
+import db from "./db";
 
 function mapForDB(position) {
   return {
@@ -24,7 +25,7 @@ function mapForDB(position) {
     quantity: position.settings.volume
   };
 }
-async function savePositions(data) {
+async function savePositionsDB(data) {
   try {
     const query = `mutation insert_positions($objects: [cpz_positions_insert_input!]!) {
       insert_cpz_positions(
@@ -50,7 +51,7 @@ async function savePositions(data) {
               objects: chunk.map(position => mapForDB(position))
             };
 
-            await this.client.request(query, variables);
+            await db.request(query, variables);
           } catch (error) {
             throw error;
           }
@@ -68,4 +69,4 @@ async function savePositions(data) {
   }
 }
 
-export { savePositions };
+export { savePositionsDB };

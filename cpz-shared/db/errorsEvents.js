@@ -1,5 +1,5 @@
-async function saveErrorEvent(data) {
+async function saveErrorEventDB(data) {
   //! TODO
 }
 
-export { saveErrorEvent };
+export { saveErrorEventDB };
