@@ -142,13 +142,18 @@ const getCachedCandles = ({ dateFrom, dateTo, slug }) =>
  * Count cached candles
  *
  * @param {Object} input - input object
+ * @param {string} input.slug - slug
  * @param {Date} input.dateFrom - date from
  * @param {Date} input.dateTo - date to
- * @param {string} input.slug - slug
  * @returns {int} - cached candles count
  */
-const countCachedCandles = async ({ dateFrom, dateTo, slug }) => {
+const countCachedCandles = async ({ slug, dateFrom, dateTo }) => {
   try {
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
@@ -163,11 +168,6 @@ const countCachedCandles = async ({ dateFrom, dateTo, slug }) => {
       dateFromFilter,
       TableUtilities.TableOperators.AND,
       dateToFilter
-    );
-    const partitionKeyFilter = TableQuery.stringFilter(
-      "PartitionKey",
-      TableUtilities.QueryComparisons.EQUAL,
-      slug
     );
     const query = new TableQuery()
       .where(
@@ -220,39 +220,28 @@ const deleteCachedCandlesArray = candles =>
  * Clean outdated cached candles
  *
  * @param {Object} input
- * @param {string} input.taskId - service task id
- * @param {int} input.timeframe - timeframe in minutes
+ * @param {string} input.slug - slug
  * @param {Date} input.dateTo -  delete all before this date
  */
-const cleanCachedCandles = async ({ taskId, timeframe, dateTo }) => {
+const cleanCachedCandles = async ({ slug, dateTo }) => {
   try {
-    const taskIdFilter = TableQuery.stringFilter(
-      "taskId",
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
       TableUtilities.QueryComparisons.EQUAL,
-      taskId
-    );
-    const timeframeFilter = TableQuery.doubleFilter(
-      "timeframe",
-      TableUtilities.QueryComparisons.EQUAL,
-      timeframe
+      slug
     );
     const dateToFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.LESS_THAN,
       dayjs(dateTo).toDate()
     );
-    const combinedFilters = TableQuery.combineFilters(
-      timeframeFilter,
-      TableUtilities.TableOperators.AND,
-      dateToFilter
-    );
 
     const query = new TableQuery()
       .where(
         TableQuery.combineFilters(
-          taskIdFilter,
+          partitionKeyFilter,
           TableUtilities.TableOperators.AND,
-          combinedFilters
+          dateToFilter
         )
       )
       .select("PartitionKey", "RowKey");

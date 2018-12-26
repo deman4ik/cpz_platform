@@ -115,7 +115,12 @@ async function getCandlesDB({
       limit
     };
     const response = await db.request(query, variables);
-    return response[table];
+    const candles = response[table];
+    return candles.map(candle => ({
+      ...candle,
+      timeframe,
+      time: parseInt(candle.time, 10)
+    }));
   } catch (error) {
     throw new VError(
       {

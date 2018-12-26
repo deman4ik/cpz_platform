@@ -36,9 +36,9 @@ async function handleStart(context, eventData) {
     genErrorIfExist(validateStart(eventData));
     // Инициализируем новый загрузчик
     const candlebatcher = new Candlebatcher(context, eventData);
-    /* await candlebatcher.warmUpCache();
     await candlebatcher.loadHistoryToCache();
-*/
+    await candlebatcher.warmUpCache();
+
     // Сохраняем состояние
     candlebatcher.end(STATUS_STARTED);
     // Публикуем событие - успех

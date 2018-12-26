@@ -237,7 +237,6 @@ class Candlebatcher {
   }
 
   async loadHistoryToCache() {
-    // ! FIXME
     try {
       await Promise.all(
         this._timeframes.map(async timeframe => {
@@ -252,12 +251,14 @@ class Candlebatcher {
               .toISOString();
             const dateTo = dayjs().toISOString();
             const cachedCandlesCount = await countCachedCandles({
+              slug: createCachedCandleSlug({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe
+              }),
               dateFrom,
-              dateTo,
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              timeframe
+              dateTo
             });
             const warmCandlesCount = durationMinutes(dateFrom, dateTo);
             if (cachedCandlesCount < warmCandlesCount) {
@@ -284,7 +285,19 @@ class Candlebatcher {
                   candles.length
                 );
               }
-              await saveCandlesArrayToCache(candles);
+
+              const candlesToSave = candles.map(candle => ({
+                ...candle,
+                PartitionKey: createCachedCandleSlug({
+                  exchange: candle.exchange,
+                  asset: candle.asset,
+                  currency: candle.currency,
+                  timeframe: candle.timeframe
+                }),
+                RowKey: generateCandleRowKey(candle.time)
+              }));
+
+              await saveCandlesArrayToCache(candlesToSave);
             }
           } catch (error) {
             throw new VError(
@@ -297,7 +310,7 @@ class Candlebatcher {
                   timeframe
                 }
               },
-              `Failed to warm up cached candles for timeframe "%s"`,
+              `Failed to process timeframe "%s"`,
               timeframe
             );
           }
@@ -313,25 +326,26 @@ class Candlebatcher {
             eventSubject: this._eventSubject
           }
         },
-        `Failed to warm up cached candles from history`
+        `Failed to load history candles to cache`
       );
     }
   }
 
   async warmUpCache() {
-    // ! FIXME
     try {
       const dateFrom = dayjs()
         .startOf("day")
         .toISOString();
       const dateTo = dayjs().toISOString();
       const cachedCandlesCount = await countCachedCandles({
+        slug: createCachedCandleSlug({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: 1
+        }),
         dateFrom,
-        dateTo,
-        exchange: this._exchange,
-        asset: this._asset,
-        currency: this._currency,
-        timeframe: 1
+        dateTo
       });
       const warmCandlesCount = durationMinutes(dateFrom, dateTo);
 
@@ -385,14 +399,7 @@ class Candlebatcher {
         this._loadedCandle = {
           ...result,
           type: CANDLE_LOADED,
-          candlabatcherId: this._taskId,
-          PartitionKey: createCachedCandleSlug({
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency,
-            timeframe: result.timeframe
-          }),
-          RowKey: result.id
+          candlabatcherId: this._taskId
         };
       }
     } catch (error) {
@@ -509,8 +516,12 @@ class Candlebatcher {
           );
 
           await cleanCachedCandles({
-            taskId: this._taskId,
-            timeframe,
+            slug: createCachedCandleSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe
+            }),
             dateTo: dayjs().add(-number, unit)
           });
         })
