@@ -26,7 +26,12 @@ function mapForDB(order) {
 async function saveOrders(data) {
   try {
     const query = `mutation insert_orders($objects: [cpz_trades_insert_input!]!){
-      insert_cpz_trades(objects:$objects){
+      insert_cpz_trades(objects:$objects
+        on_conflict: {
+          constraint: c_trades_pk
+          update_columns: [status, price, exec_quantity]
+        }
+        ){
         affected_rows
       }
     }`;
