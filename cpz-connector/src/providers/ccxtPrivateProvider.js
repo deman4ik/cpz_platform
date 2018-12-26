@@ -5,7 +5,6 @@ import BasePrivateProvider from "./basePrivateProvider";
 class CCXTPrivateProvider extends BasePrivateProvider {
   constructor(input) {
     super(input);
-    this._symbol = `${this._asset}/${this._currency}`;
     this._exchangeName = this._exchange.toLowerCase();
 
     this.ccxt = {};

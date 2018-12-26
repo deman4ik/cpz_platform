@@ -21,7 +21,7 @@ const context = async ({ req }) => {
 // A map of functions which return data for the schema.
 const resolvers = {
   JSON: GraphQLJSON,
-  Datetime: GraphQLDateTime,
+  DateTime: GraphQLDateTime,
   Query: queries,
   Mutation: mutations
 };

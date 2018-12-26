@@ -13,17 +13,6 @@ input OrderInput {
     params: JSON
 }
 
-type Order {
-    exId: ID
-    exTimestamp: Datetime
-    status: String
-    price: Float
-    average: Float
-    volume: Float
-    remaining: Float
-    executed: Float
-}
-
 type OrderResponse {
     success: Boolean!
     error: Error

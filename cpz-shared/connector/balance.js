@@ -1,9 +1,9 @@
 import VError from "verror";
 import client from "./connector";
 
-async function getBalanceEX({ exchange, userId }) {
+async function getBalanceEX({ exchange, proxy, userId }) {
   try {
-    const query = `query balance($connectorInput: ConnectorInput!){
+    const query = `query balance($connectorInput: PrivateConnectorInput!){
         balance(connectorInput: $connectorInput){
           success
           error {
@@ -17,7 +17,8 @@ async function getBalanceEX({ exchange, userId }) {
     const variables = {
       connectorInput: {
         userId,
-        exchange
+        exchange,
+        proxy
       }
     };
 

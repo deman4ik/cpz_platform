@@ -1,0 +1,11 @@
+type CandleResponse {
+    success: Boolean!
+    error: Error
+    candle: JSON
+}
+
+type CandlesResponse {
+    success: Boolean!
+    error: Error
+    candles: [JSON]
+}

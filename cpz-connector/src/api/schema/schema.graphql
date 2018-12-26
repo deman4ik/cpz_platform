@@ -1,19 +1,27 @@
 # import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/order.graphql"
+# import { CandleResponse, CandlesResponse} from "src/api/schema/candle.graphql"
 
-scalar Datetime
+scalar DateTime
 scalar JSON
 
 type Query {
-    balance(connectorInput: ConnectorInput!): BalanceResponse
-    order(connectorInput: ConnectorInput!, order: OrderFindInput!): OrderResponse
+    balance(connectorInput: PrivateConnectorInput!): BalanceResponse
+    order(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse
+    lastMinuteCandle(connectorInput: PublicConnectorInput!, date: DateTime, asset: String!, currency: String!): CandleResponse
+    minuteCandles(connectorInput: PublicConnectorInput!, date: DateTime, limit: Int, asset: String!, currency: String!) : CandlesResponse
 }
 
 type Mutation {
-    createOrder(connectorInput: ConnectorInput!, order: OrderInput!): OrderResponse
-    cancelOrder(connectorInput: ConnectorInput!, order: OrderFindInput!): OrderResponse
+    createOrder(connectorInput: PrivateConnectorInput!, order: OrderInput!): OrderResponse
+    cancelOrder(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse
 }
 
-input ConnectorInput {
+input PublicConnectorInput {
+    exchange: String!
+    proxy: String
+}
+
+input PrivateConnectorInput {
     userId: ID!
     exchange: String!
     proxy: String
