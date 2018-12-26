@@ -1,6 +1,7 @@
 import VError from "verror";
+import client from "./connector";
 
-async function createOrder({ exchange, asset, currency, userId, order }) {
+async function createOrderEX({ exchange, asset, currency, userId, order }) {
   try {
     const query = `mutation createOrder($connectorInput: ConnectorInput!, $order: OrderInput!){
     createOrder(connectorInput: $connectorInput, order: $order){
@@ -27,7 +28,7 @@ async function createOrder({ exchange, asset, currency, userId, order }) {
       }
     };
 
-    return await this.client.request(query, variables);
+    return await client.request(query, variables);
   } catch (error) {
     throw new VError(
       {
@@ -39,7 +40,7 @@ async function createOrder({ exchange, asset, currency, userId, order }) {
   }
 }
 
-async function cancelOrder({ exchange, asset, currency, userId, exId }) {
+async function cancelOrderEX({ exchange, asset, currency, userId, exId }) {
   try {
     const query = `mutation cancelOrder(
         $connectorInput: ConnectorInput!
@@ -67,7 +68,7 @@ async function cancelOrder({ exchange, asset, currency, userId, exId }) {
       }
     };
 
-    return await this.client.request(query, variables);
+    return await client.request(query, variables);
   } catch (error) {
     throw new VError(
       {
@@ -79,7 +80,7 @@ async function cancelOrder({ exchange, asset, currency, userId, exId }) {
   }
 }
 
-async function checkOrder({ exchange, asset, currency, userId, exId }) {
+async function checkOrderEX({ exchange, asset, currency, userId, exId }) {
   try {
     const query = `query order($connectorInput: ConnectorInput!, $order: OrderFindInput!) {
         order(connectorInput: $connectorInput, order: $order) {
@@ -106,7 +107,7 @@ async function checkOrder({ exchange, asset, currency, userId, exId }) {
       }
     };
 
-    return await this.client.request(query, variables);
+    return await tclient.request(query, variables);
   } catch (error) {
     throw new VError(
       {
@@ -118,4 +119,4 @@ async function checkOrder({ exchange, asset, currency, userId, exId }) {
   }
 }
 
-export { createOrder, cancelOrder, checkOrder };
+export { createOrderEX, cancelOrderEX, checkOrderEX };

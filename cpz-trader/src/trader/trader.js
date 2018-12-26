@@ -25,7 +25,7 @@ import publishEvents from "cpzEvents";
 import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState, getPositonById } from "cpzStorage";
-import ConnectorAPI from "../connector";
+import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
 /**
  * Класс проторговщика
@@ -99,8 +99,6 @@ class Trader {
 
     /* Метаданные стореджа */
     this._metadata = state.metadata;
-
-    this.connector = new ConnectorAPI();
   }
 
   /**
@@ -353,7 +351,7 @@ class Trader {
           // Если режим - в реальном времени
           if (this.settings.mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
-            let response = await this.connector.checkOrder({
+            let response = await checkOrderEX({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
@@ -368,7 +366,7 @@ class Trader {
                 dayjs().diff(dayjs(response.order.exTimestamp), "minute") >
                   this._settings.openOrderTimeout
               ) {
-                response = await this.connector.cancelOrder({
+                response = await cancelOrderEX({
                   exchange: this._exchange,
                   asset: this._asset,
                   currency: this._currency,
@@ -405,7 +403,7 @@ class Trader {
           // Если режим - в реальном времени
           if (this.settings.mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
-            const response = await this.connector.createOrder({
+            const response = await createOrderEX({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
