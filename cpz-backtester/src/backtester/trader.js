@@ -9,15 +9,8 @@ class TraderBacktester extends Trader {
 
   log(...args) {
     if (this._settings.debug) {
-      let argsString = "";
-      args.forEach(arg => {
-        if (typeof arg === "object") {
-          argsString = `${argsString}${JSON.stringify(arg)}`;
-        } else {
-          argsString += arg;
-        }
-      });
-      process.send(`Trader ${this._eventSubject}: ${argsString}`);
+      const logData = args.map(arg => JSON.stringify(arg));
+      process.send([`Trader ${this._eventSubject}:`, ...logData]);
     }
   }
 

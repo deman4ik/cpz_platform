@@ -8,9 +8,9 @@ process.on("message", async m => {
     await backtester.execute();
     process.exit(0);
   } else if (eventData.type === "stop") {
-    process.send(`Backtester ${eventData.taskId} stopped!`);
+    process.send([`Backtester ${eventData.taskId} stopped!`]);
     process.exit(0);
   } else {
-    process.send("Unknown child process event type");
+    process.send(["Unknown child process event type"]);
   }
 });
