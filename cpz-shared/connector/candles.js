@@ -29,14 +29,17 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
         exchange,
         proxy
       },
-      order: {
-        date,
-        asset,
-        currency
-      }
+      date,
+      asset,
+      currency
     };
 
-    return await client.request(query, variables);
+    const { lastMinuteCandle } = await client.request(query, variables);
+    if (!lastMinuteCandle.success) {
+      const { code, info, message } = lastMinuteCandle.error;
+      throw new VError({ name: code, info }, message);
+    }
+    return lastMinuteCandle.candle;
   } catch (error) {
     throw new VError(
       {
@@ -86,15 +89,18 @@ async function minuteCandlesEX({
         exchange,
         proxy
       },
-      order: {
-        date,
-        limit,
-        asset,
-        currency
-      }
+      date,
+      limit,
+      asset,
+      currency
     };
 
-    return await client.request(query, variables);
+    const { minuteCandles } = await client.request(query, variables);
+    if (!minuteCandles.success) {
+      const { code, info, message } = minuteCandles.error;
+      throw new VError({ name: code, info }, message);
+    }
+    return minuteCandles.candles;
   } catch (error) {
     throw new VError(
       {
