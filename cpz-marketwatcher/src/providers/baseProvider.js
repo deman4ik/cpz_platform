@@ -41,9 +41,10 @@ class BaseProvider {
    * @param {*} args
    * @memberof Adviser
    */
-  log(msg) {
-    if (this._debug) {
-      process.send(`Marketwatcher ${this._eventSubject}: ${msg}`);
+  log(...args) {
+    if (this.debug) {
+      const logData = args.map(arg => JSON.stringify(arg));
+      process.send([`Marketwatcher ${this.eventSubject}:`, ...logData]);
     }
   }
 

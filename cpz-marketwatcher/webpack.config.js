@@ -15,7 +15,8 @@ const pathsToClean = [path.resolve(__dirname, "dist")];
  */
 function findEntryPoints() {
   const entry = {
-    cryptocompare: path.resolve(__dirname, "src/providers/cryptocompare.js")
+    cryptocompare: path.resolve(__dirname, "src/providers/cryptocompare.js"),
+    importerProcess: path.resolve(__dirname, "src/importer/process.js")
   };
   fs.readdirSync(path.resolve(__dirname, "src/funcs")).forEach(file => {
     const key = file.replace(".js", "");
@@ -42,7 +43,8 @@ const config = {
       cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
       cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
       cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
-      cpzDB: path.resolve(__dirname, "../cpz-shared/db")
+      cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
+      cpzConnector: path.resolve(__dirname, "../cpz-shared/connector")
     }
   },
   output: {

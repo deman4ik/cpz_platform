@@ -108,7 +108,7 @@ class CryptocompareProvider extends BaseProvider {
     this._socket.on("m", async message => {
       const currentPrice = this._currentToObject(message);
       if (currentPrice) {
-        process.send(JSON.stringify(currentPrice));
+        this.log(currentPrice);
         if (currentPrice.type === "tick") await this._publishTick(currentPrice);
         if (currentPrice.type === "trade") await this._saveTrade(currentPrice);
       }
@@ -352,7 +352,7 @@ process.on("message", async m => {
       await providerInstance.unsubscribe(eventData.subscriptions);
       break;
     default:
-      process.send("Unknown child process event type");
+      process.send(["Unknown child process event type"]);
       break;
   }
 });

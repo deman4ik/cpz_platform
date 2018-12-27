@@ -26,6 +26,7 @@
     "base-64": "^0.1.0",
     "dayjs": "^1.7.7",
     "fastest-validator": "^0.6.12",
+    "graphql-request": "^1.8.2",
     "ms-rest-azure": "^2.5.9",
     "p-retry": "^2.0.0",
     "socket.io": "^2.2.0",

@@ -17,7 +17,7 @@ import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
-} from "../global";
+} from "../globalMarketwatchers";
 
 const validateStart = createValidator(
   TASKS_MARKETWATCHER_START_EVENT.dataSchema

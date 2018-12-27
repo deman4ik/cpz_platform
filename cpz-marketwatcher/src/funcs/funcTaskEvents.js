@@ -5,7 +5,9 @@ import {
   TASKS_MARKETWATCHER_START_EVENT,
   TASKS_MARKETWATCHER_STOP_EVENT,
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
+  TASKS_IMPORTER_START_EVENT,
+  TASKS_IMPORTER_STOP_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
@@ -14,6 +16,10 @@ import {
   handleSubscribe,
   handleUnsubscribe
 } from "../marketwatcher/handleTaskEvents";
+import {
+  handleImportStart,
+  handleImportStop
+} from "../importer/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -82,6 +88,24 @@ function eventHandler(context, req) {
             )}`
           );
           handleUnsubscribe(context, { eventSubject, ...eventData });
+          break;
+        }
+        case TASKS_IMPORTER_START_EVENT.eventType: {
+          context.log.info(
+            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+              eventData
+            )}`
+          );
+          handleImportStart(context, { eventSubject, ...eventData });
+          break;
+        }
+        case TASKS_IMPORTER_STOP_EVENT.eventType: {
+          context.log.info(
+            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+              eventData
+            )}`
+          );
+          handleImportStop(context, { eventSubject, ...eventData });
           break;
         }
         default: {

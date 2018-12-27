@@ -8,6 +8,8 @@ endpoints:
   - CPZ.Tasks.Marketwatcher.Stop
   - CPZ.Tasks.Marketwatcher.Subscribe
   - CPZ.Tasks.Marketwatcher.Unsubscribe
+  - CPZ.Tasks.Importer.Start
+  - CPZ.Tasks.Importer.Stop
 # Candlebatcher  
 - host: "cpz-candlebatcher"
   port: 80
@@ -16,8 +18,6 @@ endpoints:
   - CPZ.Tasks.Candlebatcher.Start
   - CPZ.Tasks.Candlebatcher.Stop
   - CPZ.Tasks.Candlebatcher.Update
-  - CPZ.Tasks.Importer.Start
-  - CPZ.Tasks.Importer.Stop
 # Adviser  
 - host: "cpz-adviser"
   port: 80

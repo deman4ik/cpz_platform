@@ -99,8 +99,7 @@ const TASKS_IMPORTER_FINISHED_EVENT = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    error: BASE_ERROR
+    }
   }
 };
 
