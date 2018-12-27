@@ -108,7 +108,11 @@ class CryptocompareProvider extends BaseProvider {
     this._socket.on("m", async message => {
       const currentPrice = this._currentToObject(message);
       if (currentPrice) {
-        this.log(currentPrice);
+        this.log(
+          `${currentPrice.asset}/${currentPrice.currency} ${
+            currentPrice.type
+          } ${currentPrice.price}`
+        );
         if (currentPrice.type === "tick") await this._publishTick(currentPrice);
         if (currentPrice.type === "trade") await this._saveTrade(currentPrice);
       }
@@ -214,6 +218,7 @@ class CryptocompareProvider extends BaseProvider {
       });
       this._status = STATUS_STARTED;
       await this._save();
+      this.log(`Marketwatcher ${this._exchange} started!`);
     } catch (error) {
       const errorOutput = createErrorOutput(
         new VError(
