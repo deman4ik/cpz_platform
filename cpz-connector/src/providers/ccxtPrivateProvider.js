@@ -44,6 +44,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           return await this.ccxt.fetchBalance();
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -100,6 +101,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           );
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -148,6 +150,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           );
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -200,6 +203,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       await pretry(call, this._retryOptions);

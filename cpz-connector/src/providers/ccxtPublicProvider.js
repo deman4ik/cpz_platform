@@ -1,6 +1,5 @@
 import ccxt from "ccxt";
 import pretry from "p-retry";
-import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import BasePublicProvider from "./basePublicProvider";
 
@@ -11,14 +10,12 @@ class CCXTPublicProvider extends BasePublicProvider {
 
     this.ccxt = {};
     this._retryOptions = {
-      retries: 10,
-      minTimeout: 100,
-      maxTimeout: 500
+      retries: 100,
+      minTimeout: 100
     };
   }
 
   async init() {
-    // TODO: Load keys from Azure Key Vault
     this.ccxt = new ccxt[this._exchangeName]({
       agent: this._proxyAgent
     });
@@ -41,6 +38,7 @@ class CCXTPublicProvider extends BasePublicProvider {
           );
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -48,7 +46,6 @@ class CCXTPublicProvider extends BasePublicProvider {
       return {
         success: true,
         candle: {
-          id: uuid(),
           exchange: this._exchangeName,
           asset,
           currency,
@@ -87,11 +84,19 @@ class CCXTPublicProvider extends BasePublicProvider {
           );
         } catch (e) {
           if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
         }
       };
       const response = await pretry(call, this._retryOptions);
+      if (!response)
+        return {
+          success: false,
+          error: {
+            code: "NetworkError",
+            message: "Failed to get response from exchange"
+          }
+        };
       const candles = response.map(candle => ({
-        id: uuid(),
         exchange: this._exchangeName,
         asset,
         currency,
