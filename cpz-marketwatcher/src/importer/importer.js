@@ -223,7 +223,8 @@ class Importer {
           exchange: this.exchange,
           asset: this.asset,
           currency: this.currency,
-          timeframe: 1
+          timeframe: 1,
+          taskId: this._taskId
         },
         dateFrom,
         dateTo,
