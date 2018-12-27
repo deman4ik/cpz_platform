@@ -65,8 +65,8 @@ function generateCandleRowKey(time) {
 }
 
 function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
-  const candles = inputCandles;
-  const { exchange, asset, currency, timeframe } = info;
+  let candles = inputCandles;
+  const { exchange, asset, currency, timeframe, taskId } = info;
   // Создаем список с полным количеством минут
   const fullMinutesList = createMinutesList(dateFrom, dateTo, maxDuration);
   // Список загруженных минут
@@ -103,6 +103,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
           asset,
           currency,
           timeframe,
+          taskId,
           time: diffTime, // время в милисекундах
           timestamp: dayjs(diffTime).toISOString(), // время в ISO UTC
           open: previousCandle.close, // цена открытия = цене закрытия предыдущей
@@ -115,7 +116,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
 
         gappedCandles.push(gappedCandle);
         candles.push(gappedCandle);
-        candles.sort((a, b) => sortAsc(a.time, b.time));
+        candles = candles.sort((a, b) => sortAsc(a.time, b.time));
       }
     });
 

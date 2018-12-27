@@ -41,10 +41,9 @@ import {
   getCurrentTimeframes,
   generateCandleRowKey,
   timeframeToTimeUnit
-} from "../utils";
+} from "cpzUtils/candlesUtils";
+import { lastMinuteCandleEX } from "cpzConnector";
 
-import CCXTProvider from "../providers/ccxtProvider";
-import executeImporter from "../importer/execute";
 /**
  * Класс Candlebatcher
  *
@@ -104,48 +103,7 @@ class Candlebatcher {
     /* Метаданные стореджа */
     this._metadata = state.metadata;
     /* Запуск инициализациия провайдера */
-    this.initProvider();
     this.log(`Candlebatcher ${this._eventSubject} initialized`);
-  }
-
-  /**
-   * Инициализация функции коннектора
-   *
-   * @memberof Candlebatcher
-   */
-  initProvider() {
-    this.log(`initProvider()`);
-    try {
-      const initParams = {
-        taskId: this._taskId,
-        exchange: this._exchange,
-        asset: this._asset,
-        currency: this._currency,
-        limit: this._limit,
-        dateFrom: this._dateFrom,
-        dateTo: this._dateTo,
-        proxy: this._settings.proxy
-      };
-      switch (this._providerType) {
-        case "ccxt":
-          this.provider = new CCXTProvider(initParams);
-          break;
-        default:
-          throw new Error(`Unknown provider "${this._providerType}"`);
-      }
-    } catch (error) {
-      throw new VError(
-        {
-          name: "CandlebatcherError",
-          cause: error,
-          info: {
-            taskId: this._taskId,
-            eventSubject: this._eventSubject
-          }
-        },
-        `Failed to init provider "${this._providerType}"`
-      );
-    }
   }
 
   /**
@@ -236,6 +194,7 @@ class Candlebatcher {
     };
   }
 
+  /*
   async loadHistoryToCache() {
     try {
       await Promise.all(
@@ -350,7 +309,7 @@ class Candlebatcher {
       const warmCandlesCount = durationMinutes(dateFrom, dateTo);
 
       if (cachedCandlesCount < warmCandlesCount) {
-        /* Загружаем свечи начиная с начала текущих UTC суток  */
+   
         const importerRequest = {
           taskId: uuid(),
           debug: this._debug,
@@ -378,6 +337,7 @@ class Candlebatcher {
       );
     }
   }
+*/
 
   /**
    * Загрузка новой минутной свечи
@@ -389,7 +349,13 @@ class Candlebatcher {
     this.log("loadCandle()");
     try {
       // Вызов функции коннектора
-      const result = await this.provider.loadPreviousCandle(this._prevDateFrom);
+      const result = await lastMinuteCandleEX({
+        exchange: this._exchange,
+        proxy: this._proxy,
+        asset: this._asset,
+        currency: this._currency,
+        date: this._prevDateFrom
+      });
       // Если еще не было загруженных свечей или дата загруженный свечи не равна дате текущей свечи
       if (
         !Object.prototype.hasOwnProperty.call(this._lastCandle, "time") ||
@@ -398,8 +364,16 @@ class Candlebatcher {
         // Сохраняем новую загруженную свечу
         this._loadedCandle = {
           ...result,
-          type: CANDLE_LOADED,
-          candlabatcherId: this._taskId
+          id: uuid(),
+          PartitionKey: createCachedCandleSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: 1
+          }),
+          RowKey: generateCandleRowKey(result.time),
+          taskId: this._taskId,
+          type: CANDLE_LOADED
         };
       }
     } catch (error) {
@@ -443,7 +417,7 @@ class Candlebatcher {
           }),
           RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
           id: uuid(),
-          candlabatcherId: this._taskId,
+          taskId: this._taskId,
           exchange: this._exchange,
           asset: this._asset,
           currency: this._currency,
@@ -577,7 +551,7 @@ class Candlebatcher {
             }),
             RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
             id: uuid(),
-            candlabatcherId: this._taskId,
+            taskId: this._taskId,
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
@@ -635,7 +609,8 @@ class Candlebatcher {
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,
-                timeframe: 1
+                timeframe: 1,
+                taskId: this._taskId
               },
               loadDateFrom,
               this._prevDateTo,
@@ -679,7 +654,7 @@ class Candlebatcher {
                   timeframe
                 }),
                 RowKey: generateCandleRowKey(timeFrom),
-                candlabatcherId: this._taskId,
+                taskId: this._taskId,
                 exchange: this._exchange,
                 asset: this._asset,
                 currency: this._currency,

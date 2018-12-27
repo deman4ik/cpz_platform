@@ -4,9 +4,7 @@ import {
   SUB_VALIDATION_EVENT,
   TASKS_CANDLEBATCHER_START_EVENT,
   TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT,
-  TASKS_IMPORTER_START_EVENT,
-  TASKS_IMPORTER_STOP_EVENT
+  TASKS_CANDLEBATCHER_UPDATE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
@@ -14,10 +12,6 @@ import {
   handleStop,
   handleUpdate
 } from "../batcher/handleTaskEvents";
-import {
-  handleImportStart,
-  handleImportStop
-} from "../importer/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -75,24 +69,6 @@ function eventHandler(context, req) {
           )}`
         );
         handleUpdate(context, { eventSubject, ...eventData });
-        break;
-      }
-      case TASKS_IMPORTER_START_EVENT.eventType: {
-        context.log.info(
-          `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-            eventData
-          )}`
-        );
-        handleImportStart(context, { eventSubject, ...eventData });
-        break;
-      }
-      case TASKS_IMPORTER_STOP_EVENT.eventType: {
-        context.log.info(
-          `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-            eventData
-          )}`
-        );
-        handleImportStop(context, { eventSubject, ...eventData });
         break;
       }
       default: {
