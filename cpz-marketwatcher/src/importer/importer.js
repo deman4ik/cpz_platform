@@ -190,7 +190,7 @@ class Importer {
             response.filter(
               candle =>
                 candle.time >= dateFrom.valueOf() &&
-                candle.time < dateTo.valueOf()
+                candle.time <= dateTo.valueOf()
             )
           )
         ].sort((a, b) => sortAsc(a.time, b.time));
@@ -208,6 +208,7 @@ class Importer {
             taskId: this.taskId,
             type: CANDLE_IMPORTED
           }));
+
           if (data)
             return {
               success: true,
@@ -301,7 +302,7 @@ class Importer {
       // Если не нужно свертывать свечи - выходим
       if (!this.requireBatching) return null;
       // Создаем список с полным количеством минут
-      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration + 1); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
+      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
       fullMinutesList.forEach(time => {
         const date = dayjs(time).utc();
         // Пропускаем самую первую свечу

@@ -72,11 +72,11 @@ function chunkDates(dateFrom, dateTo, chunkSize) {
     chunks.push({
       dateFrom: dayjs(chunk[0]).utc(),
       dateTo: dayjs(chunk[chunk.length - 1]).utc(),
-      duration: chunk.length - 1
+      duration: chunk.length
     });
   }
 
-  return { chunks, total: list.length - 1 };
+  return { chunks, total: list.length };
 }
 
 function generateCandleRowKey(time) {
