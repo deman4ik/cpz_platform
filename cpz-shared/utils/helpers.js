@@ -1,10 +1,5 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "./lib/dayjs";
-import {
-  REALTIME_MODE,
-  EMULATOR_MODE,
-  BACKTEST_MODE
-} from "../config/state/types";
 
 function sortAsc(a, b) {
   if (a > b) {
@@ -46,7 +41,11 @@ function tryParseJSON(jsonString) {
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
  */
 function getInvertedTimestamp(time) {
-  const inverted = new Date("3000-01-01").valueOf() - dayjs(time).valueOf();
+  const inverted =
+    new Date("3000-01-01").valueOf() -
+    dayjs(time)
+      .utc()
+      .valueOf();
   const invertedString = inverted.toString();
   const pad = "000000000000000";
 
@@ -59,7 +58,7 @@ function getInvertedTimestamp(time) {
  * Применяется в Azure Table Storage для DESC сортировки строк в таблице по RowKey
  */
 function generateKey() {
-  const inverted = getInvertedTimestamp(dayjs());
+  const inverted = getInvertedTimestamp(dayjs().utc());
   const uid = uuid();
   return `${inverted}_${uid}`;
 }
@@ -72,7 +71,9 @@ function generateKey() {
  * @param {boolean} positive
  */
 function durationMinutes(dateFrom, dateTo, positive = false) {
-  const duration = dayjs(dateTo).diff(dayjs(dateFrom), "minutes");
+  const duration = dayjs(dateTo)
+    .utc()
+    .diff(dayjs(dateFrom).utc(), "minutes");
   if (positive) return duration > 0 ? duration : 0;
   return duration;
 }
@@ -96,7 +97,7 @@ function completedPercent(completedDuration, totalDuration) {
  * @param {dayjs} date
  */
 function getPreviousMinuteRange(inputDate) {
-  const date = dayjs(inputDate);
+  const date = dayjs(inputDate).utc();
   const prev = date.add(-1, "minute");
   return {
     dateFrom: prev.startOf("minute"),
@@ -105,8 +106,8 @@ function getPreviousMinuteRange(inputDate) {
 }
 
 function divideDateByDays(inputDateFrom, inputDateTo) {
-  const dateFrom = dayjs(inputDateFrom);
-  const dateTo = dayjs(inputDateTo);
+  const dateFrom = dayjs(inputDateFrom).utc();
+  const dateTo = dayjs(inputDateTo).utc();
   const dates = [];
   const duration = dateTo.diff(dateFrom, "day", true);
   for (let i = 0; i < duration; i += 1) {
@@ -168,6 +169,13 @@ function chunkNumberToArray(number, chunkSize) {
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+function filterOutNonUnique(arr) {
+  const arrToFilter = [...arr];
+  return arrToFilter.filter(
+    i => arrToFilter.indexOf(i) !== arrToFilter.lastIndexOf(i)
+  );
+}
 export {
   sortAsc,
   sortDesc,
@@ -181,5 +189,6 @@ export {
   arraysDiff,
   chunkArray,
   chunkNumberToArray,
-  capitalize
+  capitalize,
+  filterOutNonUnique
 };

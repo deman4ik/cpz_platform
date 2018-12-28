@@ -43,7 +43,8 @@ import {
   handleCandleGaps,
   getCurrentTimeframes,
   generateCandleRowKey,
-  createMinutesList
+  createMinutesList,
+  chunkDates
 } from "cpzUtils/candlesUtils";
 
 class Importer {
@@ -68,27 +69,43 @@ class Importer {
     this.requireBatching = state.requireBatching || true;
     this.saveToCache = state.saveToCache || false;
     this.dateFrom = dayjs(state.dateFrom)
+      .utc()
       .startOf("minute")
       .toISOString();
     this.dateTo =
       dayjs(state.dateTo)
+        .utc()
         .startOf("minute")
         .valueOf() <
       dayjs()
+        .utc()
         .startOf("minute")
         .valueOf()
-        ? dayjs(state.dateTo).toISOString()
-        : dayjs().toISOString();
+        ? dayjs(state.dateTo)
+            .utc()
+            .startOf("minute")
+            .toISOString()
+        : dayjs()
+            .utc()
+            .startOf("minute")
+            .toISOString();
     /* Лимит загружаемых свечей */
     this.limit = this.getLimit();
+    this.loadDurationChunks = chunkDates(
+      this.dateFrom,
+      this.dateTo,
+      this.limit
+    );
     /* Всего свечей для загрузки */
-    this.loadTotalDuration = durationMinutes(this.dateFrom, this.dateTo);
+    this.loadTotalDuration = this.loadDurationChunks.total;
     /* Загружено свечей */
     this.loadCompletedDuration = 0;
     /* Осталось загрузить свечей */
     this.loadLeftDuration = this.loadTotalDuration;
     /* Процент выполнения */
     this.loadPercent = 0;
+    this.loadedCount = 0;
+    this.gaps = 0;
     /* Всего свечей для загрузки */
     this.processTotalDuration = this.loadTotalDuration;
     /* Загружено свечей */
@@ -102,11 +119,14 @@ class Importer {
     /* Текущий статус сервиса */
     this.status = STATUS_STARTED;
     /* Дата и время запуска */
-    this.startedAt = dayjs().toISOString();
+    this.startedAt = dayjs()
+      .utc()
+      .toISOString();
     /* Дата и время остановки */
     this.endedAt = null;
     /* Метаданные стореджа */
     this.metadata = state.metadata;
+    this.candles = [];
   }
 
   /**
@@ -154,24 +174,26 @@ class Importer {
     }
   }
 
-  async loadAndSaveCandles({ date, limit }) {
+  async loadAndSaveCandles({ dateFrom, dateTo, duration }) {
     try {
       const response = await minuteCandlesEX({
         proxy: this.proxy,
         exchange: this.exchange,
         asset: this.asset,
         currency: this.currency,
-        date: date.toISOString(),
-        limit
+        date: dateFrom.toISOString(),
+        limit: duration
       });
       if (response && response.length > 0) {
-        const filteredData = response
-          .filter(
-            candle =>
-              candle.time >= dayjs(this.dateFrom).valueOf() &&
-              candle.time < dayjs(this.dateTo).valueOf()
+        const filteredData = [
+          ...new Set(
+            response.filter(
+              candle =>
+                candle.time >= dateFrom.valueOf() &&
+                candle.time < dateTo.valueOf()
+            )
           )
-          .sort((a, b) => sortAsc(a.time, b.time));
+        ].sort((a, b) => sortAsc(a.time, b.time));
         if (filteredData && filteredData.length > 0) {
           const data = filteredData.map(candle => ({
             ...candle,
@@ -186,22 +208,29 @@ class Importer {
             taskId: this.taskId,
             type: CANDLE_IMPORTED
           }));
-          if (data) await saveCandlesArrayToTemp(data);
-          return { success: true, date, limit };
+          if (data)
+            return {
+              success: true,
+              date: dateFrom,
+              duration,
+              count: data.length,
+              data
+            };
         }
       }
       return {
         success: false,
-        date,
-        limit,
+        date: dateFrom,
+        duration,
+        count: 0,
         error: "Empty response"
       };
     } catch (error) {
-      this.log(`loadAndSaveCandles() error: ${error.message}`, error);
       return {
         success: false,
-        date,
-        limit,
+        date: dateFrom,
+        duration,
+        count: 0,
         error
       };
     }
@@ -212,9 +241,10 @@ class Importer {
    *
    * @memberof Importer
    */
-  async handleGaps(inputCandles, dateFrom, dateTo, duration) {
-    const candles = inputCandles;
+  async handleGaps(inputCandles, dateFrom, dateTo) {
     try {
+      let candles = [...inputCandles];
+      const duration = durationMinutes(dateFrom, dateTo);
       // Если количество свечей в кэше равно общему количеству свечей - нет пропусков
       if (candles.length === duration) return { candles, gappedCandles: [] };
 
@@ -232,9 +262,11 @@ class Importer {
         candles
       );
       if (gappedCandles.length > 0) {
-        candles.concat(gappedCandles).sort((a, b) => sortAsc(a.time, b.time));
-        this.log(`Gapped candles: ${gappedCandles.length}`);
+        candles = [...new Set(candles.concat(gappedCandles))].sort((a, b) =>
+          sortAsc(a.time, b.time)
+        );
       }
+
       return { candles, gappedCandles };
     } catch (error) {
       throw new VError(
@@ -263,17 +295,22 @@ class Importer {
       this.timeframes.forEach(timeframe => {
         timeframeCandles[timeframe] = [];
         if (timeframe === 1) {
-          timeframeCandles[1] = tempCandles;
+          timeframeCandles[1] = [...tempCandles];
         }
       });
       // Если не нужно свертывать свечи - выходим
       if (!this.requireBatching) return null;
       // Создаем список с полным количеством минут
-      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration);
+      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration + 1); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
       fullMinutesList.forEach(time => {
-        const date = dayjs(time);
+        const date = dayjs(time).utc();
         // Пропускаем самую первую свечу
-        if (dayjs(dateFrom).valueOf() === date.valueOf()) return;
+        if (
+          dayjs(dateFrom)
+            .utc()
+            .valueOf() === date.valueOf()
+        )
+          return;
         const currentTimeframes = getCurrentTimeframes(this.timeframes, time);
         if (currentTimeframes.length > 0) {
           currentTimeframes.forEach(timeframe => {
@@ -298,7 +335,9 @@ class Importer {
                 currency: this.currency,
                 timeframe,
                 time: timeFrom, // время в милисекундах
-                timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
+                timestamp: dayjs(timeFrom)
+                  .utc()
+                  .toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи
                 high: Math.max(...candles.map(t => t.high)), // максимальная цена
                 low: Math.min(...candles.map(t => t.low)), // минимальная цена
@@ -410,28 +449,13 @@ class Importer {
           taskId: this.taskId
         }
       });
-
-      const loadDurationChunks = chunkNumberToArray(
-        this.loadTotalDuration,
-        this.limit
-      );
-      const loadFullChunks = [];
-      let dateNext;
-      loadDurationChunks.forEach(loadDurationChunk => {
-        dateNext = dateNext
-          ? dateNext.add(loadDurationChunk, "minute")
-          : dayjs(this.dateFrom);
-
-        loadFullChunks.push({ date: dateNext, limit: loadDurationChunk });
-      });
-
-      const loadChunks = chunkArray(loadFullChunks, 10);
+      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 10);
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       this.log("Starting loading candles...");
       for (const loadChunk of loadChunks) {
         const loadIterationResult = await Promise.all(
-          loadChunk.map(async ({ date, limit }) =>
-            this.loadAndSaveCandles({ date, limit })
+          loadChunk.map(async ({ dateFrom, dateTo, duration }) =>
+            this.loadAndSaveCandles({ dateFrom, dateTo, duration })
           )
         );
 
@@ -440,8 +464,8 @@ class Importer {
         );
 
         const retryLoadIterationResult = await Promise.all(
-          errorLoads.map(async ({ date, limit }) =>
-            this.loadAndSaveCandles({ date, limit })
+          errorLoads.map(async ({ date, duration }) =>
+            this.loadAndSaveCandles({ date, duration })
           )
         );
 
@@ -469,11 +493,19 @@ class Importer {
           ...retryLoadIterationResult.filter(result => result.success === true)
         ];
 
-        this.loadCompletedDuration =
-          this.loadCompletedDuration +
-          successLoads
-            .map(load => load.limit)
-            .reduce((acc, curr) => acc + curr);
+        const duration = successLoads
+          .map(load => load.duration)
+          .reduce((acc, curr) => acc + curr);
+        const loaded = successLoads
+          .map(load => load.count)
+          .reduce((acc, curr) => acc + curr);
+        const data = successLoads
+          .map(load => load.data)
+          .reduce((acc, curr) => acc.concat(curr), []);
+        this.candles = [...new Set(this.candles.concat(data))].sort((a, b) =>
+          sortAsc(a.time, b.time)
+        );
+        this.loadCompletedDuration = this.loadCompletedDuration + duration;
         this.loadLeftDuration =
           this.loadTotalDuration - this.loadCompletedDuration;
 
@@ -482,11 +514,16 @@ class Importer {
           this.loadCompletedDuration,
           this.loadTotalDuration
         );
-
+        this.loadedCount = this.loadedCount + loaded;
+        let gaps = 0;
+        if (loaded < duration) {
+          gaps = duration - loaded;
+        }
+        this.gaps = this.gaps + gaps;
         await this.save();
         this.log(
-          `Loaded ${this.loadCompletedDuration} of ${
-            this.loadTotalDuration
+          `Loaded ${this.loadCompletedDuration} of ${this.loadTotalDuration}${
+            gaps > 0 ? ` but gapped: ${gaps}` : ""
           } - ${this.loadPercent}%`
         );
       }
@@ -495,12 +532,19 @@ class Importer {
       const fullDays = divideDateByDays(this.dateFrom, this.dateTo);
       this.log("Starting processing loaded candles...");
       for (const { dateFrom, dateTo, duration } of fullDays) {
-        this.log(
-          `Processing from ${dayjs(dateFrom).toISOString()} to ${dayjs(
-            dateTo
-          ).toISOString()} duration ${duration}`
+        let tempCandles = this.candles.filter(
+          candle =>
+            candle.time >=
+              dayjs(dateFrom)
+                .utc()
+                .valueOf() &&
+            candle.time <
+              dayjs(dateTo)
+                .utc()
+                .valueOf()
         );
-        let tempCandles = await getTempCandles({
+        /*
+        await getTempCandles({
           dateFrom,
           dateTo,
           slug: createCachedCandleSlug({
@@ -509,14 +553,13 @@ class Importer {
             currency: this.currency,
             timeframe: 1
           })
-        });
+        }); */
         tempCandles = tempCandles.sort((a, b) => sortAsc(a.time, b.time));
 
         const { candles, gappedCandles } = await this.handleGaps(
           tempCandles,
           dateFrom,
-          dateTo,
-          duration
+          dateTo
         );
 
         if (gappedCandles.length > 0) {
@@ -546,21 +589,22 @@ class Importer {
         );
         await this.save();
         this.log(
-          `Finished processing ${this.processPercent}% from ${dayjs(
-            dateFrom
-          ).toISOString()} to ${dayjs(dateTo).toISOString()}`
+          `Processed ${this.processCompletedDuration} of ${
+            this.processTotalDuration
+          } - ${this.processPercent}%`
         );
       }
 
-      await this.clearTemp();
-      this.endedAt = dayjs().toISOString();
+      // await this.clearTemp();
+      this.endedAt = dayjs()
+        .utc()
+        .toISOString();
       this.status = STATUS_FINISHED;
 
       await this.save();
-      const duration = dayjs(this.endedAt).diff(
-        dayjs(this.startedAt),
-        "minute"
-      );
+      const duration = dayjs(this.endedAt)
+        .utc()
+        .diff(dayjs(this.startedAt).utc(), "minute");
       this.log(`Finished import in ${duration} minutes!!!`);
       await publishEvents(TASKS_TOPIC, {
         service: IMPORTER_SERVICE,

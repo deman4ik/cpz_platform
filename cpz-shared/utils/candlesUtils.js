@@ -5,7 +5,8 @@ import {
   arraysDiff,
   getInvertedTimestamp,
   sortDesc,
-  sortAsc
+  sortAsc,
+  filterOutNonUnique
 } from "./helpers";
 import { CANDLE_PREVIOUS, createCachedCandleSlug } from "../config/state";
 
@@ -50,7 +51,7 @@ function getCurrentTimeframes(timeframes, inputDate) {
 function createMinutesList(dateFrom, dateTo, dur) {
   const duration = dur || durationMinutes(dateFrom, dateTo);
   const list = [];
-  for (let i = 0; i <= duration; i += 1) {
+  for (let i = 0; i < duration; i += 1) {
     list.push(
       dayjs(dateFrom)
         .add(i, "minute")
@@ -60,17 +61,37 @@ function createMinutesList(dateFrom, dateTo, dur) {
   return list;
 }
 
+/* Возвращает объект с массивом пачек дат исключая последнюю дату dateTo */
+function chunkDates(dateFrom, dateTo, chunkSize) {
+  const list = createMinutesList(dateFrom, dateTo);
+
+  const arrayToChunk = [...list];
+  const chunks = [];
+  while (arrayToChunk.length) {
+    const chunk = arrayToChunk.splice(0, chunkSize);
+    chunks.push({
+      dateFrom: dayjs(chunk[0]).utc(),
+      dateTo: dayjs(chunk[chunk.length - 1]).utc(),
+      duration: chunk.length - 1
+    });
+  }
+
+  return { chunks, total: list.length - 1 };
+}
+
 function generateCandleRowKey(time) {
   return getInvertedTimestamp(time);
 }
 
 function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
-  let candles = inputCandles;
+  let candles = [...inputCandles];
   const { exchange, asset, currency, timeframe, taskId } = info;
   // Создаем список с полным количеством минут
-  const fullMinutesList = createMinutesList(dateFrom, dateTo, maxDuration);
+  const fullMinutesList = [
+    ...new Set(createMinutesList(dateFrom, dateTo, maxDuration))
+  ];
   // Список загруженных минут
-  const loadedMinutesList = candles.map(candle => candle.time);
+  const loadedMinutesList = [...new Set(candles.map(candle => candle.time))];
   // Ищем пропуски
   const diffs = arraysDiff(fullMinutesList, loadedMinutesList).sort(sortAsc);
   // Если есть пропуски
@@ -80,6 +101,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
     diffs.forEach(diffTime => {
       // Время предыдущей свечи
       const previousTime = dayjs(diffTime)
+        .utc()
         .add(-1, "minute")
         .valueOf();
       // Индекс предыдущей свечи
@@ -105,7 +127,9 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
           timeframe,
           taskId,
           time: diffTime, // время в милисекундах
-          timestamp: dayjs(diffTime).toISOString(), // время в ISO UTC
+          timestamp: dayjs(diffTime)
+            .utc()
+            .toISOString(), // время в ISO UTC
           open: previousCandle.close, // цена открытия = цене закрытия предыдущей
           high: previousCandle.close, // максимальная цена = цене закрытия предыдущей
           low: previousCandle.close, // минимальная цена = цене закрытия предыдущей
@@ -137,6 +161,7 @@ function timeframeToTimeUnit(number, timeframe) {
 export {
   getCurrentTimeframes,
   createMinutesList,
+  chunkDates,
   handleCandleGaps,
   generateCandleRowKey,
   timeframeToTimeUnit
