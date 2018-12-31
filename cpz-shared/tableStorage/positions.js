@@ -12,16 +12,27 @@ tableStorage.createTableIfNotExists(STORAGE_POSITIONS_TABLE);
  * Query Position state by uniq id
  *
  * @param {Object} input
+ * @param {string} input.slug
  * @param {string} input.traderId - Trader task id
  * @param {string} input.positionId - Position id
  * @returns {PositionState}
  */
-const getPositonById = async ({ traderId, positionId }) => {
+const getPosition = async ({ slug, traderId, positionId }) => {
   try {
     const rowKeyFilter = TableQuery.stringFilter(
       "RowKey",
       TableUtilities.QueryComparisons.EQUAL,
       positionId
+    );
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
+    const keysFilter = TableQuery.combineFilters(
+      rowKeyFilter,
+      TableUtilities.TableOperators.AND,
+      partitionKeyFilter
     );
     const traderIdFilter = TableQuery.stringFilter(
       "traderId",
@@ -30,12 +41,16 @@ const getPositonById = async ({ traderId, positionId }) => {
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        rowKeyFilter,
+        keysFilter,
         TableUtilities.TableOperators.AND,
         traderIdFilter
       )
     );
-    return await tableStorage.queryEntities(STORAGE_POSITIONS_TABLE, query)[0];
+    const response = await tableStorage.queryEntities(
+      STORAGE_POSITIONS_TABLE,
+      query
+    );
+    return response[0];
   } catch (error) {
     throw new VError(
       {
@@ -78,7 +93,7 @@ async function getActivePositionsBySlug(slug) {
     );
     const statusFilter = TableQuery.combineFilters(
       newStatusFilter,
-      TableUtilities.TableOperators.AND,
+      TableUtilities.TableOperators.OR,
       openStatusFilter
     );
 
@@ -192,7 +207,7 @@ const deletePositionsState = async traderId => {
   }
 };
 export {
-  getPositonById,
+  getPosition,
   getActivePositionsBySlug,
   getIdledOpenPositions,
   savePositionState,

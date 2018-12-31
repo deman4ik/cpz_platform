@@ -126,7 +126,7 @@ class Backtester {
       eventType: LOG_BACKTESTER_EVENT,
       data: {
         taskId: this.taskId,
-        data
+        ...data
       }
     });
   }

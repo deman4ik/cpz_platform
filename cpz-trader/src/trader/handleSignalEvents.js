@@ -113,18 +113,20 @@ async function execute(context, state, signal, child = false) {
 async function handlePendingSignals(context, { traderId }) {
   // Считываем не обработанные сигналы
   const pendingSignals = getPendingSignalsByTraderId(traderId);
-  /* eslint-disable no-restricted-syntax */
-  for (const pendingSignal of pendingSignals) {
-    /* eslint-disable no-await-in-loop */
-    // Считываем текущее состояние проторговщика
-    const traderState = await getTraderById(traderId);
-    // Начинаем обработку
-    await execute(context, traderState, pendingSignal, true);
-    // Удаляем свечу из очереди
-    await deletePendingSignal(pendingSignal);
-    /*  no-await-in-loop */
+  if (pendingSignals && pendingSignals.length > 0) {
+    /* eslint-disable no-restricted-syntax */
+    for (const pendingSignal of pendingSignals) {
+      /* eslint-disable no-await-in-loop */
+      // Считываем текущее состояние проторговщика
+      const traderState = await getTraderById(traderId);
+      // Начинаем обработку
+      await execute(context, traderState, pendingSignal, true);
+      // Удаляем свечу из очереди
+      await deletePendingSignal(pendingSignal);
+      /*  no-await-in-loop */
+    }
+    /*  no-restricted-syntax */
   }
-  /*  no-restricted-syntax */
 }
 
 /**
@@ -179,7 +181,7 @@ async function handleSignal(context, eventData) {
           ...signal,
           taskId: state.taskId,
           PartitionKey: state.taskId,
-          RowKey: state.signalId.toString()
+          RowKey: state.signalId
         };
         try {
           await savePendingSignal(newPendingSignal);
@@ -213,7 +215,7 @@ async function handleSignal(context, eventData) {
           ...signal,
           taskId: state.taskId,
           PartitionKey: state.taskId,
-          RowKey: state.signalId.toString()
+          RowKey: state.signalId
         };
         try {
           await savePendingSignal(newPendingSignal);

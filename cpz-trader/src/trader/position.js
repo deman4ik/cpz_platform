@@ -513,8 +513,7 @@ class Position {
       PartitionKey: createPositionSlug({
         exchange: this._exchange,
         asset: this._asset,
-        currency: this._currency,
-        timeframe: this._timeframe
+        currency: this._currency
       }),
       RowKey: this._positionId,
       mode: this._settings.mode,

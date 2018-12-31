@@ -13,6 +13,7 @@ import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { getActivePositionsBySlug, getTraderById } from "cpzStorage";
 import Position from "./position";
+import Trader from "./trader";
 
 const validateNewTick = createValidator(TICKS_NEWTICK_EVENT.dataSchema);
 const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
@@ -27,13 +28,12 @@ async function handlePrice(context, eventData) {
     // Валидация входных параметров
     // genErrorIfExist(validateNewPrice(eventData.currentPrice)); //пока не актуально
     const { currentPrice } = eventData;
-
+    context.log.info("handlesPrice()", currentPrice.price);
     const positionsState = await getActivePositionsBySlug(
       createPositionSlug({
         exchange: currentPrice.exchange,
         asset: currentPrice.asset,
-        currency: currentPrice.currency,
-        timeframe: currentPrice.timeframe
+        currency: currentPrice.currency
       })
     );
 
@@ -42,9 +42,12 @@ async function handlePrice(context, eventData) {
         try {
           const position = new Position(state);
           const requiredOrders = position.getRequiredOrders(currentPrice.price);
+
           if (requiredOrders.length > 0) {
-            const trader = getTraderById(position.traderId);
-            if (trader.status === STATUS_STARTED) {
+            const traderState = await getTraderById(position.traderId);
+
+            if (traderState.status === STATUS_STARTED) {
+              const trader = new Trader(context, traderState);
               trader.status = STATUS_BUSY;
               await trader.save();
               await trader.executeOrders(requiredOrders);
@@ -58,6 +61,7 @@ async function handlePrice(context, eventData) {
             }
           }
         } catch (error) {
+          context.log.error(error);
           return {
             isSuccess: false,
             taskId: state.traderId,

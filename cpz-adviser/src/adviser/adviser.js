@@ -75,7 +75,7 @@ class Adviser {
     /* Текущая свеча */
     this._candle = {};
     /* Последняя свеча */
-    this._lastCandle = state.lastCandle || { candleId: null };
+    this._lastCandle = state.lastCandle || { id: null };
     /* Массив сигналов к отправке */
     this._signals = [];
     this._logEvents = [];
@@ -182,7 +182,7 @@ class Adviser {
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._eventSubject,
-      eventType: LOG_ADVISER_EVENT,
+      eventType: LOG_ADVISER_EVENT.eventType,
       data: {
         taskId: this._taskId,
         service: ADVISER_SERVICE,
@@ -514,6 +514,7 @@ class Adviser {
    */
   runStrategy() {
     try {
+      this.log("runStrategy()");
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandle(this._candle, this._indicators);
       // Запустить проверку стратегии
@@ -602,7 +603,7 @@ class Adviser {
       // Обновить текущую свечу
       this._candle = candle;
       // Если  свеча уже обрабатывалась - выходим
-      if (this._candle.candleId === this._lastCandle.candleId) return;
+      if (this._candle.id === this._lastCandle.id) return;
       // Если нужна история
       if (this._settings.requiredHistoryCache) {
         // Загрузить свечи из кеша
@@ -680,6 +681,7 @@ class Adviser {
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
+        timeframe: this._timeframe,
         service: ADVISER_SERVICE,
         timestamp: dayjs().toISOString()
       }
@@ -789,6 +791,7 @@ class Adviser {
       timeframe: this._timeframe,
       lastCandle: this._lastCandle,
       lastSignals: this._lastSignals,
+      strategyName: this._strategyName,
       strategy: this._strategy,
       indicators: this._indicators,
       updateRequested: this._updateRequested,

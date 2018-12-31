@@ -18,23 +18,23 @@ const StrRobot1 = {
     // this.log(this.indicators.MyEMA.result);
     // this.userDefinedFunc();
     this.count += 1;
+    const first = this.count % 2 !== 0;
+    if (first) {
+      this.createPosition({ code: `p${this.count}` });
+    }
+
     const newSignal = {
-      alertTime: new Date().toISOString(),
-      action: this.count % 2 !== 0 ? "short" : "closeShort",
-      qty: 1,
+      action: first ? "long" : "closeLong",
       orderType: "limit",
       price: this.candle.close,
-      priceSource: "close",
-      positionId:
-        this.count % 2 !== 0
-          ? this.count.toString()
-          : (this.count - 1).toString()
+      positionId: this.positions[`p${first ? this.count : this.count - 1}`]
+        .positionId
       /* settings: {
         slippageStep: 11,
         volume: 1
       } */
     };
-    this.logEvent(newSignal);
+    // this.logEvent(newSignal);
     this.advice(newSignal);
   }
 };

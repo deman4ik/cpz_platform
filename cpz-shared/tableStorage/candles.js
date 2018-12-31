@@ -74,7 +74,10 @@ const _getCandles = async (tableName, { dateFrom, dateTo, slug }) => {
  * @returns {PendingCandle[]}
  */
 const getPendingCandlesByAdviserId = adviserId =>
-  tableStorage.getEntityByPartitionKey(STORAGE_CANDLESPENDING_TABLE, adviserId);
+  tableStorage.getEntitiesByPartitionKey(
+    STORAGE_CANDLESPENDING_TABLE,
+    adviserId
+  );
 
 /**
  * Save pending candle

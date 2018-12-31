@@ -21,8 +21,8 @@ function createTraderSlug({ exchange, asset, currency, timeframe, robotId }) {
   return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
 
-function createPositionSlug({ exchange, asset, currency, timeframe }) {
-  return `${exchange}.${asset}.${currency}.${timeframe}`;
+function createPositionSlug({ exchange, asset, currency }) {
+  return `${exchange}.${asset}.${currency}`;
 }
 
 function createBacktesterSlug({

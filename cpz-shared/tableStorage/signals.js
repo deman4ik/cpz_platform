@@ -10,7 +10,10 @@ tableStorage.createTableIfNotExists(STORAGE_SIGNALSPENDING_TABLE);
  * @returns {PendingSignal}
  */
 const getPendingSignalsByTraderId = async traderId =>
-  tableStorage.getEntityByPartitionKey(STORAGE_SIGNALSPENDING_TABLE, traderId);
+  tableStorage.getEntitiesByPartitionKey(
+    STORAGE_SIGNALSPENDING_TABLE,
+    traderId
+  );
 
 /**
  * Save pending signal

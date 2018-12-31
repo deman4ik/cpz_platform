@@ -6,7 +6,12 @@ import {
   saveLogsEvent,
   saveErrorsEvent
 } from "cpzStorage";
-import { CANDLES_NEWCANDLE_EVENT } from "cpzEventTypes";
+import {
+  CANDLES_NEWCANDLE_EVENT,
+  SIGNALS_NEWSIGNAL_EVENT,
+  TRADES_ORDER_EVENT,
+  TRADES_POSITION_EVENT
+} from "cpzEventTypes";
 import {
   saveCandlesDB,
   saveSignalsDB,
@@ -62,15 +67,17 @@ class EventsLogger {
       }
       if (type.includes("CPZ.Signals")) {
         if (this.logToStorage) await saveSignalsEvent(fullEventData);
-        if (this.logToPostgre) await saveSignalsDB([fullEventData]);
+        if (type === SIGNALS_NEWSIGNAL_EVENT.eventType) {
+          if (this.logToPostgre) await saveSignalsDB([fullEventData]);
+        }
         return;
       }
-      if (type.includes("CPZ.Orders")) {
+      if (type === TRADES_ORDER_EVENT.eventType) {
         if (this.logToStorage) await saveOrdersEvent(fullEventData);
         if (this.logToPostgre) await saveOrdersDB([fullEventData]);
         return;
       }
-      if (type.includes("CPZ.Positions")) {
+      if (type === TRADES_POSITION_EVENT.eventType) {
         if (this.logToStorage) await savePositionsEvent(fullEventData);
         if (this.logToPostgre) await savePositionsDB([fullEventData]);
         return;

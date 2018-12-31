@@ -137,7 +137,7 @@ async function handleCandle(context, eventData) {
       }`,
       eventType: CANDLES_HANDLED_EVENT,
       data: {
-        candleId: candle.candleId,
+        candleId: candle.id,
         success: successAdvisers,
         error: errorAdvisers,
         successPending: successPendingAdvisers,
@@ -164,7 +164,7 @@ async function handleCandle(context, eventData) {
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,
       data: {
-        candleId: eventData.candle.candleId,
+        candleId: eventData.candle.id,
         error: errorOutput
       }
     });

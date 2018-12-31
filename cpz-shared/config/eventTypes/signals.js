@@ -57,7 +57,7 @@ const SIGNALS_NEWSIGNAL_EVENT = {
     },
     positionId: {
       description: "Uniq position Id",
-      type: "number"
+      type: "string"
     },
     settings: {
       description: "Trader parameters.",

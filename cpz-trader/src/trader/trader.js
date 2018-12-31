@@ -19,12 +19,13 @@ import {
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
-  createTraderSlug
+  createTraderSlug,
+  createPositionSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import { saveTraderState, getPositonById } from "cpzStorage";
+import { saveTraderState, getPosition } from "cpzStorage";
 import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
 /**
@@ -169,7 +170,7 @@ class Trader {
       eventType: LOG_TRADER_EVENT,
       data: {
         taskId: this._taskId,
-        data
+        ...data
       }
     });
   }
@@ -239,14 +240,19 @@ class Trader {
       ) {
         // Запрашиваем из стореджа
         this.log("loading...");
-        const positionsState = await getPositonById({
+
+        const positionState = await getPosition({
+          slug: createPositionSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          }),
           traderId: this._taskId,
           positionId
         });
-
         // Создем экземпяр позиции
-        this._currentPositions[positionsState.positionId] = new Position({
-          ...positionsState,
+        this._currentPositions[positionState.positionId] = new Position({
+          ...positionState,
           log: this.log.bind(this),
           logEvent: this.logEvent.bind(this)
         });
@@ -349,7 +355,7 @@ class Trader {
         // Если задача - проверить исполнения объема
         if (order.task === ORDER_TASK_CHECKLIMIT) {
           // Если режим - в реальном времени
-          if (this.settings.mode === REALTIME_MODE) {
+          if (this._settings.mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
             let response = await checkOrderEX({
               exchange: this._exchange,
@@ -401,7 +407,7 @@ class Trader {
           // Устанавливаем объем из параметров
           const orderToExecute = { ...order };
           // Если режим - в реальном времени
-          if (this.settings.mode === REALTIME_MODE) {
+          if (this._settings.mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
             const response = await createOrderEX({
               exchange: this._exchange,
@@ -441,7 +447,7 @@ class Trader {
           }
         }
         // Загружаем позицию
-        this._loadPosition(order.positionId);
+        await this._loadPosition(order.positionId);
 
         // Сохраняем ордер в позиции и генерируем события
         this._events.push(

@@ -413,7 +413,7 @@ class Candlebatcher {
             exchange: this._exchange,
             asset: this._asset,
             currency: this._currency,
-            timeframe: this._timeframe
+            timeframe: 1
           }),
           RowKey: generateCandleRowKey(this._prevDateFrom.valueOf()),
           id: uuid(),
