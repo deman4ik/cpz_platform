@@ -7,6 +7,7 @@ import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import Position from "./position";
+import Trader from "./trader";
 
 async function handleTimer(context) {
   try {
@@ -18,8 +19,9 @@ async function handleTimer(context) {
           const position = new Position(state);
           const openOrders = position.getOpenOrders();
           if (openOrders.length > 0) {
-            const trader = getTraderById(position.traderId);
-            if (trader.status === STATUS_STARTED) {
+            const traderState = getTraderById(position.traderId);
+            if (traderState && traderState.status === STATUS_STARTED) {
+              const trader = new Trader(context, traderState);
               trader.status = STATUS_BUSY;
               await trader.save();
               await trader.executeOrders(openOrders);

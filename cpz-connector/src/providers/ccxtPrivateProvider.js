@@ -206,8 +206,19 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           throw e;
         }
       };
-      await pretry(call, this._retryOptions);
-      return await this.checkOrder({ exId, asset, currency });
+      let err;
+      try {
+        await pretry(call, this._retryOptions);
+      } catch (error) {
+        err = { code: error.constructor.name, message: error.message };
+      }
+
+      const checkOrder = await this.checkOrder({ exId, asset, currency });
+      return {
+        success: true,
+        error: err,
+        ...checkOrder
+      };
     } catch (error) {
       return {
         success: false,

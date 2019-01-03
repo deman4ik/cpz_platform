@@ -22,7 +22,8 @@ async function getBalanceEX({ exchange, proxy, userId }) {
       }
     };
 
-    return await client.request(query, variables);
+    const response = await client.request(query, variables);
+    return response.balance;
   } catch (error) {
     throw new VError(
       {

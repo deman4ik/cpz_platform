@@ -359,7 +359,10 @@ class Position {
       Object.keys(this._exitOrders).forEach(key => {
         const order = this._exitOrders[key];
         const checkedOrder = this._checkOrder(order, price);
-        if (checkedOrder) requiredOrders.push(checkedOrder);
+        if (checkedOrder) {
+          this.log(checkedOrder);
+          requiredOrders.push(checkedOrder);
+        }
       });
     }
     // Возвращаем массив ордеров для дальнейшей обработки
@@ -410,7 +413,7 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
-    this.log("handleOrder()");
+    this.log("handleOrder()", order);
     // Если ордер на открытие позиции
     if (order.positionDirection === ORDER_POS_DIR_ENTRY) {
       // Сохраянем ордер в списке ордеров на открытие позиции
@@ -542,7 +545,7 @@ class Position {
    * @memberof Position
    */
   async save() {
-    this.log(`save()`);
+    this.log(`position save()`);
     try {
       // Сохраняем состояние в локальном хранилище
       if (this._settings.mode !== BACKTEST_MODE)

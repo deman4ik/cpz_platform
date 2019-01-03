@@ -36,7 +36,12 @@ async function createOrderEX({
       }
     };
 
-    return await client.request(query, variables);
+    const { createOrder } = await client.request(query, variables);
+    if (!createOrder.success) {
+      const { code, info, message } = createOrder.error;
+      throw new VError({ name: code, info }, message);
+    }
+    return createOrder.order;
   } catch (error) {
     throw new VError(
       {
@@ -68,6 +73,7 @@ async function cancelOrderEX({
             message
             info
           }
+          order
         }
       }
       `;
@@ -84,7 +90,12 @@ async function cancelOrderEX({
       }
     };
 
-    return await client.request(query, variables);
+    const { cancelOrder } = await client.request(query, variables);
+    if (!cancelOrder.success) {
+      const { code, info, message } = cancelOrder.error;
+      throw new VError({ name: code, info }, message);
+    }
+    return cancelOrder.order;
   } catch (error) {
     throw new VError(
       {
@@ -131,7 +142,12 @@ async function checkOrderEX({
       }
     };
 
-    return await client.request(query, variables);
+    const { order } = await client.request(query, variables);
+    if (!order.success) {
+      const { code, info, message } = order.error;
+      throw new VError({ name: code, info }, message);
+    }
+    return order.order;
   } catch (error) {
     throw new VError(
       {

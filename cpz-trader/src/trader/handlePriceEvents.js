@@ -46,7 +46,7 @@ async function handlePrice(context, eventData) {
           if (requiredOrders.length > 0) {
             const traderState = await getTraderById(position.traderId);
 
-            if (traderState.status === STATUS_STARTED) {
+            if (traderState && traderState.status === STATUS_STARTED) {
               const trader = new Trader(context, traderState);
               trader.status = STATUS_BUSY;
               await trader.save();

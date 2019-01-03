@@ -357,41 +357,30 @@ class Trader {
           // Если режим - в реальном времени
           if (this._settings.mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
-            let response = await checkOrderEX({
+            let currentOrder = await checkOrderEX({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
               userId: this._userId,
               exId: order.exId
             });
-            let currentOrder = {};
-            if (response.success && response.order) {
-              currentOrder = response.order;
-              if (
-                response.order.status === ORDER_STATUS_OPEN &&
-                dayjs().diff(dayjs(response.order.exTimestamp), "minute") >
-                  this._settings.openOrderTimeout
-              ) {
-                response = await cancelOrderEX({
-                  exchange: this._exchange,
-                  asset: this._asset,
-                  currency: this._currency,
-                  userId: this._userId,
-                  exId: order.exId
-                });
-                if (response.success && response.order) {
-                  currentOrder = response.order;
-                }
-              }
-              orderResult = { ...orderResult, ...currentOrder };
-            } else if (response.error)
-              throw new VError(
-                {
-                  name: response.error.code,
-                  info: response.error.info
-                },
-                response.error.message
-              );
+            this.log("checkOrderEX", currentOrder);
+
+            if (
+              currentOrder.status === ORDER_STATUS_OPEN &&
+              dayjs().diff(dayjs(currentOrder.exTimestamp), "minute") >
+                this._settings.openOrderTimeout
+            ) {
+              currentOrder = await cancelOrderEX({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                userId: this._userId,
+                exId: order.exId
+              });
+              this.log("cancelOrderEX", currentOrder);
+            }
+            orderResult = { ...orderResult, ...currentOrder };
           } else {
             // Если режим - эмуляция или бэктест
             // Считаем, что ордер исполнен
@@ -409,7 +398,7 @@ class Trader {
           // Если режим - в реальном времени
           if (this._settings.mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
-            const response = await createOrderEX({
+            const currentOrder = await createOrderEX({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
@@ -421,17 +410,13 @@ class Trader {
                 params: {} // TODO
               }
             });
+            this.log("createOrderEX", currentOrder);
 
-            if (response.success && response.order) {
-              orderResult = { ...orderResult, ...response.order };
-            } else if (response.error)
-              throw new VError(
-                {
-                  name: response.error.code,
-                  info: response.error.info
-                },
-                response.error.message
-              );
+            orderResult = {
+              ...orderResult,
+              ...currentOrder,
+              status: ORDER_STATUS_OPEN
+            };
           } else if (order.orderType === ORDER_TYPE_LIMIT) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - лимитный

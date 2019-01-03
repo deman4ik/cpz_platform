@@ -31,7 +31,7 @@ async function savePositionsDB(data) {
       insert_cpz_positions(
         objects: $objects
         on_conflict: {
-          constraint: c_positions_uk
+          constraint: c_positions_pk
           update_columns: [status, exit_date, exit_price]
         }
       ) {
