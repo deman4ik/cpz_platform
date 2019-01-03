@@ -25,8 +25,8 @@ const StrRobot1 = {
 
     const newSignal = {
       action: first ? "long" : "closeLong",
-      orderType: "limit",
-      price: this.candle.close,
+      orderType: "market",
+      price: first ? 100 : 10000,
       positionId: this.positions[`p${first ? this.count : this.count - 1}`]
         .positionId
       /* settings: {
