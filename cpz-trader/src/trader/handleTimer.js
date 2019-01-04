@@ -19,7 +19,7 @@ async function handleTimer(context) {
           const position = new Position(state);
           const openOrders = position.getOpenOrders();
           if (openOrders.length > 0) {
-            const traderState = getTraderById(position.traderId);
+            const traderState = await getTraderById(position.traderId);
             if (traderState && traderState.status === STATUS_STARTED) {
               const trader = new Trader(context, traderState);
               trader.status = STATUS_BUSY;

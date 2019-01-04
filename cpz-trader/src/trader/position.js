@@ -393,7 +393,7 @@ class Position {
       });
     }
     // Если ордера на закрытие позиции ожидают обработки
-    if (this._entry.status === ORDER_STATUS_OPEN) {
+    if (this._exit.status === ORDER_STATUS_OPEN) {
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       Object.keys(this._exitOrders).forEach(key => {
         const order = this._exitOrders[key];
