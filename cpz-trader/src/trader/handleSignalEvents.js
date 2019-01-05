@@ -42,13 +42,6 @@ async function execute(context, state, signal, child = false) {
   try {
     // Создаем экземпляр класса
     trader = new Trader(context, state);
-    // Если задача остановлена
-    if (trader.status === STATUS_STOPPED || trader.status === STATUS_ERROR) {
-      // Сохраняем состояние и завершаем работу
-      trader.end(trader.status);
-
-      return;
-    }
     // Если есть запрос на обновление параметров
     if (trader.updateRequested) {
       // Обновляем параметры

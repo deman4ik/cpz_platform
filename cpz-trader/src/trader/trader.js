@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import VError from "verror";
 
@@ -11,6 +10,8 @@ import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_SHORT,
+  POS_STATUS_NEW,
+  POS_STATUS_CANCELED,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
@@ -305,18 +306,33 @@ class Trader {
         this._currentPositions[this._signal.positionId].createExitOrder(
           this._signal
         );
+        // Если текущая позиция еще не открыта
+        if (
+          this._currentPositions[this._signal.positionId].status ===
+          POS_STATUS_NEW
+        ) {
+          // Отменяем позицию
+          this._currentPositions[
+            this._signal.positionId
+          ].status = POS_STATUS_CANCELED;
+        }
       }
-      // Созданный ордер
-      const createdOrder = this._currentPositions[this._signal.positionId]
-        .currentOrder;
-      // Если есть залача для ордера
-      if (createdOrder.task) {
-        // Немедленно исполянем ордер
-        await this.executeOrders([createdOrder]);
-      } else {
-        // Если любой другой тип ордера
-        // Сохраняем позицию в сторедж
-        await this._currentPositions[this._signal.positionId].save();
+      if (
+        this._currentPositions[this._signal.positionId].status !==
+        POS_STATUS_CANCELED
+      ) {
+        // Созданный ордер
+        const createdOrder = this._currentPositions[this._signal.positionId]
+          .currentOrder;
+        // Если есть залача для ордера
+        if (createdOrder.task) {
+          // Немедленно исполянем ордер
+          await this.executeOrders([createdOrder]);
+        } else {
+          // Если любой другой тип ордера
+          // Сохраняем позицию в сторедж
+          await this._currentPositions[this._signal.positionId].save();
+        }
       }
       // Последний обработанный сигнал
       this._lastSignal = this._signal;

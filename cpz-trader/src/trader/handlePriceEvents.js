@@ -49,6 +49,11 @@ async function handlePrice(context, eventData) {
             if (traderState && traderState.status === STATUS_STARTED) {
               const trader = new Trader(context, traderState);
               trader.status = STATUS_BUSY;
+              // Если есть запрос на обновление параметров
+              if (trader.updateRequested) {
+                // Обновляем параметры
+                trader.setUpdate();
+              }
               await trader.save();
               await trader.executeOrders(requiredOrders);
 

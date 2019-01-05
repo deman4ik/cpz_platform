@@ -121,6 +121,10 @@ class Position {
     return this._status;
   }
 
+  set status(status) {
+    this._status = status;
+  }
+
   /**
    * Текущий обрабатываемый ордер
    *
@@ -350,10 +354,11 @@ class Position {
         if (checkedOrder) requiredOrders.push(checkedOrder);
       });
     }
-    // Если ордера на закрытие позиции ожидают обработки
+    // Если ордера на открытие позиции выставлены и ордера на закрытие позиции ожидают обработки
     if (
-      this._exit.status === ORDER_STATUS_NEW ||
-      this._entry.status === ORDER_STATUS_OPEN
+      this._entry.status !== ORDER_STATUS_NEW &&
+      (this._exit.status === ORDER_STATUS_NEW ||
+        this._entry.status === ORDER_STATUS_OPEN)
     ) {
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       Object.keys(this._exitOrders).forEach(key => {
@@ -380,6 +385,12 @@ class Position {
     return null;
   }
 
+  /**
+   * Выборка открытых ордеров, которые необходимо проверить не бирже
+   *
+   * @returns
+   * @memberof Position
+   */
   getOpenOrders() {
     this.log("getOpenOrders()");
     const openOrders = [];
