@@ -25,11 +25,6 @@ const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 class ImporterRunner extends BaseRunner {
   static async start(props) {
     try {
-      // TODO: resume в отдельный метод
-      let resume;
-      if (props.taskId) {
-        resume = true;
-      }
       const taskId = props.taskId || uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
@@ -47,17 +42,15 @@ class ImporterRunner extends BaseRunner {
         proxy
       } = props;
 
-      const importer = resume
-        ? await getImporterById(taskId)
-        : await findActiveImporter({
-            slug: createImporterSlug({
-              exchange,
-              asset,
-              currency
-            }),
-            dateFrom,
-            dateTo
-          });
+      const importer = await findActiveImporter({
+        slug: createImporterSlug({
+          exchange,
+          asset,
+          currency
+        }),
+        dateFrom,
+        dateTo
+      });
 
       if (importer) {
         if (

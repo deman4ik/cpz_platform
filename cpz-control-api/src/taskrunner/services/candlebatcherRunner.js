@@ -21,7 +21,7 @@ import { CONTROL_SERVICE, CANDLEBATCHER_SERVICE } from "cpzServices";
 import {
   findCandlebatcher,
   getCandlebatcherById,
-  findOtherActiveUserRobotsByServiceId
+  getExWatcherById
 } from "cpzStorage";
 import { arraysDiff } from "cpzUtils/helpers";
 import BaseRunner from "../baseRunner";
@@ -125,7 +125,7 @@ class CandlebatcherRunner extends BaseRunner {
   static async stop(props) {
     try {
       genErrorIfExist(validateStop(props));
-      const { taskId, userRobotId } = props;
+      const { taskId, exWatcherId } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
       if (!candlebatcher)
         return {
@@ -137,16 +137,13 @@ class CandlebatcherRunner extends BaseRunner {
           taskId,
           status: STATUS_STOPPED
         };
-      const userRobots = findOtherActiveUserRobotsByServiceId({
-        userRobotId,
-        taskId,
-        serviceName: CANDLEBATCHER_SERVICE
-      });
 
-      if (userRobots.length > 0) {
-        // TODO: Unsubscribe to timeframes if not used
+      const exWatcher = getExWatcherById(exWatcherId);
+
+      if (exWatcher) {
         return { taskId, status: candlebatcher.status };
       }
+
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: createCandlebatcherTaskSubject({

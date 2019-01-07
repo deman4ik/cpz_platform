@@ -6,6 +6,7 @@
 # import { BacktesterParams } from "src/api/schema/backtester.graphql"
 # import { UserRobotParams } from "src/api/schema/robot.graphql"
 # import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
+# import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
 
 scalar Datetime
 scalar JSON
@@ -38,10 +39,14 @@ type Mutation {
     # Backtester 
     startBacktester(params: BacktesterParams!): ServiceRunnerResponse!
     stopBacktester(taskId: String!): ServiceRunnerResponse!
+    # Exchange Data Watcher
+    startExWatcher(params: ExWatcherParams!): ServiceRunnerResponse!
+    stopExWatcher(taskId: String!): ServiceRunnerResponse!
+    updateExWatcher(taskId: String!, params: CandlebatcherUpdateParams!): Response!
     # UserRobot
     startRobot(id: String!): ServiceRunnerResponse!
     stopRobot(id: String!): ServiceRunnerResponse!
-    updateRobot(id: String!): Response!
+    updateRobot(id: String!, params: TraderUpdateParams!): Response!
 }
 
 type Response {

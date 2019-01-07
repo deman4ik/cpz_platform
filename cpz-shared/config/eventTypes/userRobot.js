@@ -40,17 +40,20 @@ const USER_ROBOT_START_PARAMS = {
   candlebatcherSettings: {
     description: "Candlebatcher settings.",
     type: "object",
-    props: CANDLEBATCHER_SETTINGS
+    props: CANDLEBATCHER_SETTINGS,
+    optional: true
   },
   adviserSettings: {
     description: "Adviser settings.",
     type: "object",
-    props: ADVISER_SETTINGS
+    props: ADVISER_SETTINGS,
+    optional: true
   },
   traderSettings: {
     description: "Trader settings.",
     type: "object",
-    props: TRADER_SETTINGS
+    props: TRADER_SETTINGS,
+    optional: true
   }
 };
 

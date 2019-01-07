@@ -17,6 +17,7 @@ function createCachedCandleSlug({ exchange, asset, currency, timeframe }) {
 function createAdviserSlug({ exchange, asset, currency, timeframe }) {
   return `${exchange}.${asset}.${currency}.${timeframe}`;
 }
+
 function createTraderSlug({ exchange, asset, currency, timeframe, robotId }) {
   return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
@@ -39,6 +40,10 @@ function createRobotSlug({ exchange, asset, currency, robotId }) {
   return `${exchange}.${asset}.${currency}.${robotId}`;
 }
 
+function createWatcherSlug({ exchange, asset, currency }) {
+  return `${exchange}.${asset}.${currency}`;
+}
+
 export {
   createAdviserSlug,
   createBacktesterSlug,
@@ -48,5 +53,6 @@ export {
   createImporterSlug,
   createTraderSlug,
   createPositionSlug,
-  createRobotSlug
+  createRobotSlug,
+  createWatcherSlug
 };

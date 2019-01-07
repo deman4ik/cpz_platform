@@ -20,7 +20,7 @@ import { CONTROL_SERVICE, MARKETWATCHER_SERVICE } from "cpzServices";
 import {
   findMarketwatcher,
   getMarketwatcherById,
-  findOtherActiveUserRobotsByServiceId
+  getExWatcherById
 } from "cpzStorage";
 import BaseRunner from "../baseRunner";
 
@@ -103,7 +103,7 @@ class MarketwatcherRunner extends BaseRunner {
   static async stop(props) {
     try {
       genErrorIfExist(validateStop(props));
-      const { taskId, userRobotId } = props;
+      const { taskId, exWatcherId } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
         return {
@@ -115,19 +115,14 @@ class MarketwatcherRunner extends BaseRunner {
           taskId,
           status: STATUS_STOPPED
         };
-      const userRobots = findOtherActiveUserRobotsByServiceId({
-        userRobotId,
-        taskId,
-        serviceName: MARKETWATCHER_SERVICE
-      });
+      const exWatcher = getExWatcherById(exWatcherId);
 
-      if (userRobots.length > 0) {
-        // TODO: Unsubscribe if not used
+      if (exWatcher) {
         return { taskId, status: marketwatcher.status };
       }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: exchange,
+        subject: marketwatcher.exchange,
         eventType: TASKS_MARKETWATCHER_STOP_EVENT,
         data: {
           taskId
@@ -174,7 +169,7 @@ class MarketwatcherRunner extends BaseRunner {
       if (newSubsciptions.length > 0) {
         await publishEvents(TASKS_TOPIC, {
           service: CONTROL_SERVICE,
-          subject: exchange,
+          subject: marketwatcher.exchange,
           eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
           data: {
             taskId,
@@ -209,7 +204,7 @@ class MarketwatcherRunner extends BaseRunner {
         );
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
-        subject: exchange,
+        subject: marketwatcher.exchange,
         eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
         data: {
           taskId,

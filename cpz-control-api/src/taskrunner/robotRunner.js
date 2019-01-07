@@ -13,11 +13,10 @@ import {
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import BaseRunner from "./baseRunner";
-import UserRobot from "./userRobot";
+import UserRobot from "./userrobot";
 import TraderRunner from "./services/traderRunner";
 import AdviserRunner from "./services/adviserRunner";
-import CandlebatcherRunner from "./services/candlebatcherRunner";
-import MarketwatcherRunner from "./services/marketwatcherRunner";
+import ExWatcherRunner from "./exwatcherRunner";
 
 const validateStart = createValidator(USER_ROBOT_START_PARAMS);
 const validateStop = createValidator(USER_ROBOT_STOP_PARAMS);
@@ -36,52 +35,26 @@ class RobotRunner extends BaseRunner {
         };
       }
       userRobotState = userRobot.getCurrentState();
-      let skip = false;
-      if (userRobotState.marketwatcherStatus !== STATUS_STARTED) {
-        const marketwatcherParams = {
-          exchange: userRobotState.exchange,
-          providerType: userRobotState.providerType || "cryptocompare",
-          subsriptions: [
-            {
-              asset: userRobotState.asset,
-              currency: userRobotState.currency
-            }
-          ]
-        };
 
-        const result = await MarketwatcherRunner.start(marketwatcherParams);
-        userRobot.marketwatcherId = result.taskId;
-        userRobot.marketwatcherStatus = result.status;
-        await userRobot.save();
-        userRobotState = userRobot.getCurrentState();
-        skip = result.status === STATUS_STARTING;
-      }
-
-      if (
-        !skip &&
-        (userRobotState.candlebatcherStatus !== STATUS_STARTED &&
-          userRobotState.candlebatcherStatus !== STATUS_STARTING)
-      ) {
-        const candlebatcherParams = {
-          providerType: userRobotState.providerType || "ccxt",
+      if (userRobotState.exwatcherStatus !== STATUS_STARTED) {
+        const exwatcherParams = {
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
           currency: userRobotState.currency,
-          timeframes: [userRobotState.timeframe],
-          settings: userRobotState.candlebatcherSettings
+          candlebatcherSettings: userRobotState.candlebatcherSettings
         };
 
-        const result = await CandlebatcherRunner.start(candlebatcherParams);
-        userRobot.candlebatcherId = result.taskId;
-        userRobot.candlebatcherStatus = result.status;
+        const result = await ExWatcherRunner.start(exwatcherParams);
+        userRobot.exwatcherId = result.taskId;
+        userRobot.exwatcherStatus = result.status;
+        await userRobot.save();
         userRobotState = userRobot.getCurrentState();
-        skip = result.status === STATUS_STARTING;
       }
 
       if (
-        !skip &&
-        (userRobotState.adviserStatus !== STATUS_STARTED &&
-          userRobotState.adviserStatus !== STATUS_STARTING)
+        userRobotState.exwatcherStatus === STATUS_STARTED &&
+        userRobotState.adviserStatus !== STATUS_STARTED &&
+        userRobotState.adviserStatus !== STATUS_STARTING
       ) {
         const adviserParams = {
           robotId: userRobotState.robotId,
@@ -96,14 +69,15 @@ class RobotRunner extends BaseRunner {
         const result = AdviserRunner.start(adviserParams);
         userRobot.adviserId = result.taskId;
         userRobot.adviserStatus = result.status;
+        await userRobot.save();
         userRobotState = userRobot.getCurrentState();
-        skip = result.status === STATUS_STARTING;
       }
 
       if (
-        !skip &&
-        (userRobotState.traderStatus !== STATUS_STARTED &&
-          userRobotState.traderStatus !== STATUS_STARTING)
+        userRobotState.exwatcherStatus === STATUS_STARTED &&
+        userRobotState.adviserStatus === STATUS_STARTED &&
+        userRobotState.traderStatus !== STATUS_STARTED &&
+        userRobotState.traderStatus !== STATUS_STARTING
       ) {
         const traderParams = {
           robotId: userRobotState.robotId,
@@ -120,6 +94,7 @@ class RobotRunner extends BaseRunner {
         userRobot.traderId = result.taskId;
         userRobot.traderStatus = result.status;
         await userRobot.save();
+        userRobotState = userRobot.getCurrentState();
       }
 
       return {
@@ -173,29 +148,6 @@ class RobotRunner extends BaseRunner {
         userRobot.adviserStatus = result.status;
       }
 
-      if (
-        userRobotState.candlebatcherStatus !== STATUS_STOPPED ||
-        userRobotState.candlebatcherStatus !== STATUS_STOPPING
-      ) {
-        const result = await CandlebatcherRunner.stop({
-          taskId: userRobotState.candlebatcherId,
-          userRobotId: userRobot.id
-        });
-        userRobot.candlebatcherId = result.taskId;
-        userRobot.candlebatcherStatus = result.status;
-      }
-
-      if (
-        userRobotState.marketwatcherStatus !== STATUS_STOPPED ||
-        userRobotState.marketwatcherStatus !== STATUS_STOPPING
-      ) {
-        const result = await MarketwatcherRunner.stop({
-          taskId: userRobotState.marketwatcherId,
-          userRobotId: userRobot.id
-        });
-        userRobot.marketwatcherId = result.taskId;
-        userRobot.marketwatcherStatus = result.status;
-      }
       await userRobot.save();
 
       return { id: userRobot.id, status: userRobot.status };

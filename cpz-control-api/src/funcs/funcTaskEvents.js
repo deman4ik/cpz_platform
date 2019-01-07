@@ -4,7 +4,8 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleStarted,
   handleStopped,
-  handleUpdated
+  handleUpdated,
+  handleFinished
 } from "../taskrunner/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
@@ -51,6 +52,11 @@ function eventHandler(context, req) {
         `Got ${eventType} event data ${JSON.stringify(eventData)}`
       );
       handleUpdated(context, { eventSubject, eventType, ...eventData });
+    } else if (eventType.includes(".Finished")) {
+      context.log.info(
+        `Got ${eventType} event data ${JSON.stringify(eventData)}`
+      );
+      handleFinished(context, { eventSubject, eventType, ...eventData });
     } else {
       context.log.error(`Unknown Event Type: ${eventType}`);
     }

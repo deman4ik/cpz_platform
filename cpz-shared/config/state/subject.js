@@ -1,3 +1,7 @@
+function createExWatcherTaskSubject({ exchange, asset, currency }) {
+  return `${exchange}/${asset}/${currency}`;
+}
+
 function createCandlebatcherTaskSubject({ exchange, asset, currency }) {
   return `${exchange}/${asset}/${currency}`;
 }
@@ -60,6 +64,7 @@ function createNewTradeSubject({
 }
 
 export {
+  createExWatcherTaskSubject,
   createCandlebatcherTaskSubject,
   createAdviserTaskSubject,
   createTraderTaskSubject,

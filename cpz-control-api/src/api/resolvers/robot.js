@@ -1,15 +1,13 @@
-import { getUserRobotDB} from "cpzDB";
+import { getUserRobotDB } from "cpzDB";
 import RobotRunner from "../../taskrunner/robotRunner";
-
-
 
 async function startRobot(_, { params }) {
   try {
     const userRobot = getUserRobotDB(params);
-    const { taskId, status } = await RobotRunner.start(userRobot);
+    const { id, status } = await RobotRunner.start(userRobot);
     return {
       success: true,
-      taskId,
+      taskId: id,
       status
     };
   } catch (error) {
@@ -36,9 +34,9 @@ async function stopRobot(_, { id }) {
   }
 }
 
-async function updateRobot(_, { params }) {
+async function updateRobot(_, { id, params }) {
   try {
-    await RobotRunner.update(params);
+    await RobotRunner.update({ id, ...params });
     return {
       success: true
     };

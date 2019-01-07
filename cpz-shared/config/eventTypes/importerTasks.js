@@ -11,12 +11,14 @@ const TASKS_IMPORTER_START_EVENT = {
     },
     debug: {
       description: "Debug mode.",
-      type: "boolean"
+      type: "boolean",
+      optional: true
     },
     providerType: {
       description: "Data provider type.",
       type: "string",
-      values: ["ccxt"]
+      values: ["ccxt"],
+      optional: true
     },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },

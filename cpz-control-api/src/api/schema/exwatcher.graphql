@@ -1,0 +1,9 @@
+input ExWatcherParams {
+    exchange: String!
+    asset: String!
+    currency: String!
+    timeframes: [Int!]
+    marketwatcherProviderType: String
+    candlebatcherProviderType: String
+    candlebatcherSettings: CandlebatcherSettings
+}
