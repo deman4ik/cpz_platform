@@ -101,6 +101,7 @@ class CryptocompareProvider extends BaseProvider {
 
   _subscribeToSocketEvents() {
     this._socket.on("connect", async () => {
+      this.log("connect");
       this._socketStatus = "connect";
       await this._save();
     });
@@ -120,18 +121,21 @@ class CryptocompareProvider extends BaseProvider {
 
     // При disconnectе
     this._socket.on("disconnect", async reason => {
+      this.log("disconnect", reason);
       this._socketStatus = reason;
-      if (reason === "io server disconnect") {
-        // the disconnection was initiated by the server, you need to reconnect manually
-        this._socket.connect();
-      }
+      //  if (reason === "io server disconnect") {
+      // the disconnection was initiated by the server, you need to reconnect manually
+      this._socket.connect();
+      // }
       await this._save();
       // else the socket will automatically try to reconnect
     });
 
     // Если произошла ошибка
     this._socket.on("error", async error => {
+      this.log("error", error);
       this._socketStatus = "error";
+      this._status = STATUS_ERROR;
       const errorOutput = createErrorOutput(
         new VError(
           {
@@ -155,10 +159,12 @@ class CryptocompareProvider extends BaseProvider {
         }
       });
       await this._save();
+      process.exit(0);
     });
 
     // Если все попытки переподключения исчерпаны
     this._socket.on("reconnect_failed", async () => {
+      this.log("reconnect_failed");
       this._socketStatus = "reconnect_failed";
       this._status = STATUS_ERROR;
       const errorOutput = createErrorOutput(
@@ -183,6 +189,7 @@ class CryptocompareProvider extends BaseProvider {
         }
       });
       await this._save();
+      process.exit(0);
     });
   }
 
@@ -232,6 +239,7 @@ class CryptocompareProvider extends BaseProvider {
         )
       );
       this.log(errorOutput);
+      this._status = STATUS_ERROR;
       this._error = errorOutput;
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
@@ -243,6 +251,7 @@ class CryptocompareProvider extends BaseProvider {
         }
       });
       await this._save();
+      process.exit(0);
     }
   }
 
