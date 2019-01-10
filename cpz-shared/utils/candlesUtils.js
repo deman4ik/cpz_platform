@@ -158,11 +158,27 @@ function timeframeToTimeUnit(number, timeframe) {
   }
   return { number: number * (timeframe / 1440), unit: "day" };
 }
+
+function getMaxTimeframe(timeframes) {
+  return Math.max(...Object.keys(timeframes).map(key => parseInt(key, 10)));
+}
+
+function getMaxTimeframeDateFrom(timeframes, maxBars) {
+  const maxTimeframe = getMaxTimeframe(timeframes);
+  const { number, unit } = timeframeToTimeUnit(maxBars, maxTimeframe);
+  return dayjs()
+    .utc()
+    .add(-number, unit)
+    .toISOString();
+}
+
 export {
   getCurrentTimeframes,
   createMinutesList,
   chunkDates,
   handleCandleGaps,
   generateCandleRowKey,
-  timeframeToTimeUnit
+  timeframeToTimeUnit,
+  getMaxTimeframe,
+  getMaxTimeframeDateFrom
 };

@@ -28,7 +28,7 @@ const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
 const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
 class AdviserRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
       // TODO: resume в отдельный метод
       let resume;
@@ -87,7 +87,7 @@ class AdviserRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId, userRobotId } = props;
@@ -136,7 +136,7 @@ class AdviserRunner extends BaseRunner {
     }
   }
 
-  static async update(props) {
+  static async update(context, props) {
     try {
       genErrorIfExist(validateUpdate(props));
       const { taskId, settings } = props;

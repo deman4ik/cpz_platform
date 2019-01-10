@@ -6,14 +6,9 @@ import {
   STATUS_STOPPING,
   STATUS_STOPPED,
   STATUS_FINISHED,
-  createCachedCandleSlug,
   createExWatcherTaskSubject
 } from "cpzState";
-import {
-  getExWatcherById,
-  saveCandlesArrayToCache,
-  countCachedCandles
-} from "cpzStorage";
+import { getExWatcherById } from "cpzStorage";
 import { CONTROL_SERVICE } from "cpzServices";
 import publishEvents from "cpzEvents";
 import {
@@ -24,12 +19,7 @@ import {
   TASKS_EXWATCHER_STARTED_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import {
-  generateCandleRowKey,
-  timeframeToTimeUnit
-} from "cpzUtils/candlesUtils";
-import { durationMinutes } from "cpzUtils/helpers";
-import { getCandlesDB } from "cpzDB";
+import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
 import BaseRunner from "./baseRunner";
 import ExWatcher from "./exwatcher";
 import CandlebatcherRunner from "./services/candlebatcherRunner";
@@ -41,143 +31,57 @@ const validateStop = createValidator(EXWATCHER_STOP_PARAMS);
 const validateUpdate = createValidator(EXWATCHER_UPDATE_PARAMS);
 
 class ExWatcherRunner extends BaseRunner {
-  static async loadHistoryToCache({
-    exchange,
-    asset,
-    currency,
-    timeframes,
-    candlebatcherParams
-  }) {
-    try {
-      const result = { importRequired: false, timeframes: {} };
-      await Promise.all(
-        timeframes.map(async timeframe => {
-          try {
-            const { number, unit } = timeframeToTimeUnit(
-              candlebatcherParams.requiredHistoryMaxBars,
-              timeframe
-            );
-            const dateFrom = `${dayjs()
-              .utc()
-              .add(-number, unit)
-              .format("YYYY-MM-DD")}T00:00:00.000Z`;
-            const dateTo = `${dayjs()
-              .utc()
-              .format("YYYY-MM-DD")}T00:00:00.000Z`;
-            const cachedCandlesCount = await countCachedCandles({
-              slug: createCachedCandleSlug({
-                exchange,
-                asset,
-                currency,
-                timeframe
-              }),
-              dateFrom,
-              dateTo
-            });
-            const warmCandlesCount = durationMinutes(dateFrom, dateTo);
-            if (cachedCandlesCount < warmCandlesCount) {
-              const candles = await getCandlesDB({
-                exchange,
-                asset,
-                currency,
-                timeframe,
-                dateTo,
-                limit: candlebatcherParams.requiredHistoryMaxBars,
-                orderBy: "{ timestamp: desc }"
-              });
-              if (
-                candles.length >= candlebatcherParams.requiredHistoryMaxBars
-              ) {
-                const candlesToSave = candles.reverse().map(candle => ({
-                  ...candle,
-                  PartitionKey: createCachedCandleSlug({
-                    exchange: candle.exchange,
-                    asset: candle.asset,
-                    currency: candle.currency,
-                    timeframe: candle.timeframe
-                  }),
-                  RowKey: generateCandleRowKey(candle.time)
-                }));
-
-                await saveCandlesArrayToCache(candlesToSave);
-              } else {
-                result.importRequired = true;
-                result.timeframes[timeframe] = {
-                  dateFrom,
-                  dateTo
-                };
-              }
-            }
-          } catch (error) {
-            throw new VError(
-              {
-                name: "CandlebatcherError",
-                cause: error,
-                info: {
-                  taskId: this._taskId,
-                  eventSubject: this._eventSubject,
-                  timeframe
-                }
-              },
-              `Failed to process timeframe "%s"`,
-              timeframe
-            );
-          }
-        })
-      );
-
-      return result;
-    } catch (error) {
-      throw new VError(
-        {
-          name: "LoadHistoryToCache",
-          cause: error
-        },
-        `Failed to load history candles to cache`
-      );
-    }
-  }
-
-  static async start(params) {
+  static async start(context, params) {
     try {
       genErrorIfExist(validateStart(params));
       let exWatcherState = params;
       const exWatcher = new ExWatcher(exWatcherState);
-      if (exWatcher.status === STATUS_STARTED) {
-        return {
-          taskId: exWatcher.taskId,
-          status: STATUS_STARTED
-        };
-      }
+      context.log.info(`ExWatcher ${exWatcher.taskId}: start`);
+
       exWatcherState = exWatcher.getCurrentState();
 
       if (
         exWatcherState.importerHistoryStatus !== STATUS_STARTED &&
         exWatcherState.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        const historyStatus = await this.loadHistoryToCache(exWatcherState);
-        if (historyStatus.importRequired) {
-          const maxTimeframe = Math.max(
-            Object.keys(historyStatus.timeframes).map(key => parseInt(key, 10))
+        context.log.info("Importer History!");
+        if (exWatcherState.candlebatcherSettings.requiredHistoryMaxBars > 0) {
+          const dateFrom = getMaxTimeframeDateFrom(
+            exWatcherState.timeframes,
+            exWatcherState.candlebatcherSettings.requiredHistoryMaxBars
           );
-          const { dateFrom, dateTo } = historyStatus.timeframes[maxTimeframe];
-          const importerHistoryParams = {
-            providerType: exWatcherState.candlebatcherProviderType,
-            exchange: exWatcherState.exchange,
-            asset: exWatcherState.asset,
-            currency: exWatcherState.currency,
-            timeframes: exWatcherState.timeframes,
-            dateFrom,
-            dateTo,
-            saveToCache: true,
-            proxy: exWatcherState.candlebatcherParams.proxy
-          };
+          const dateTo = dayjs(
+            `${dayjs()
+              .utc()
+              .format("YYYY-MM-DD")}T00:00:00.000Z`
+          ).toISOString();
 
-          const result = await ImporterRunner.start(importerHistoryParams);
-          exWatcher.importerHistoryId = result.taskId;
-          exWatcher.importerHistoryStatus = result.status;
-          await exWatcher.save();
-          exWatcherState = exWatcher.getCurrentState();
+          if (dayjs(dateFrom).valueOf() <= dayjs(dateTo).valueOf()) {
+            const importerHistoryParams = {
+              providerType: exWatcherState.candlebatcherProviderType,
+              exchange: exWatcherState.exchange,
+              asset: exWatcherState.asset,
+              currency: exWatcherState.currency,
+              timeframes: exWatcherState.timeframes,
+              dateFrom,
+              dateTo,
+              saveToCache: true,
+              proxy: exWatcherState.candlebatcherSettings.proxy
+            };
+
+            const result = await ImporterRunner.start(
+              context,
+              importerHistoryParams
+            );
+            exWatcher.importerHistoryId = result.taskId;
+            exWatcher.importerHistoryStatus = result.status;
+            await exWatcher.save();
+            exWatcherState = exWatcher.getCurrentState();
+          } else {
+            exWatcher.importerHistoryStatus = STATUS_FINISHED;
+            await exWatcher.save();
+            exWatcherState = exWatcher.getCurrentState();
+          }
         } else {
           exWatcher.importerHistoryStatus = STATUS_FINISHED;
           await exWatcher.save();
@@ -190,10 +94,11 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.marketwatcherStatus !== STATUS_STARTED &&
         exWatcherState.marketwatcherStatus !== STATUS_STARTING
       ) {
+        context.log.info("Marketwatcher!");
         const marketwatcherParams = {
           exchange: exWatcherState.exchange,
           providerType: exWatcherState.marketwatcherProviderType,
-          subsriptions: [
+          subscriptions: [
             {
               asset: exWatcherState.asset,
               currency: exWatcherState.currency
@@ -201,7 +106,10 @@ class ExWatcherRunner extends BaseRunner {
           ]
         };
 
-        const result = await MarketwatcherRunner.start(marketwatcherParams);
+        const result = await MarketwatcherRunner.start(
+          context,
+          marketwatcherParams
+        );
         exWatcher.marketwatcherId = result.taskId;
         exWatcher.marketwatcherStatus = result.status;
         await exWatcher.save();
@@ -209,11 +117,11 @@ class ExWatcherRunner extends BaseRunner {
       }
 
       if (
-        exWatcherState.importerHistoryStatus === STATUS_FINISHED &&
         exWatcherState.marketwatcherStatus === STATUS_STARTED &&
-        (exWatcherState.candlebatcherStatus !== STATUS_STARTED &&
-          exWatcherState.candlebatcherStatus !== STATUS_STARTING)
+        exWatcherState.candlebatcherStatus !== STATUS_STARTED &&
+        exWatcherState.candlebatcherStatus !== STATUS_STARTING
       ) {
+        context.log.info("Candlebatcher!");
         const candlebatcherParams = {
           providerType: exWatcherState.candlebatcherProviderType,
           exchange: exWatcherState.exchange,
@@ -223,38 +131,43 @@ class ExWatcherRunner extends BaseRunner {
           settings: exWatcherState.candlebatcherSettings
         };
 
-        const result = await CandlebatcherRunner.start(candlebatcherParams);
+        const result = await CandlebatcherRunner.start(
+          context,
+          candlebatcherParams
+        );
         exWatcher.candlebatcherId = result.taskId;
         exWatcher.candlebatcherStatus = result.status;
         await exWatcher.save();
         exWatcherState = exWatcher.getCurrentState();
       }
-
       if (
-        exWatcherState.importerHistoryStatus === STATUS_FINISHED &&
-        exWatcherState.marketwatcherStatus === STATUS_STARTED &&
         exWatcherState.candlebatcherStatus === STATUS_STARTED &&
-        (exWatcherState.importerCurrentStatus !== STATUS_STARTED &&
-          exWatcherState.importerCurrentStatus !== STATUS_FINISHED)
+        exWatcherState.importerCurrentStatus !== STATUS_STARTED &&
+        exWatcherState.importerCurrentStatus !== STATUS_FINISHED
       ) {
+        context.log.info("Importer Current!");
         const importerCurrentParams = {
           providerType: exWatcherState.candlebatcherProviderType,
           exchange: exWatcherState.exchange,
           asset: exWatcherState.asset,
           currency: exWatcherState.currency,
           timeframes: exWatcherState.timeframes,
-          dateFrom: `${dayjs()
-            .utc()
-            .format("YYYY-MM-DD")}T00:00:00.000Z`,
+          dateFrom: dayjs(
+            `${dayjs()
+              .utc()
+              .format("YYYY-MM-DD")}T00:00:00.000Z`
+          ).toISOString(),
           dateTo: dayjs()
             .utc()
-            .startOf("minute")
             .toISOString(),
           saveToCache: true,
-          proxy: exWatcherState.candlebatcherParams.proxy
+          proxy: exWatcherState.candlebatcherSettings.proxy
         };
 
-        const result = await ImporterRunner.start(importerCurrentParams);
+        const result = await ImporterRunner.start(
+          context,
+          importerCurrentParams
+        );
         exWatcher.importerCurrentId = result.taskId;
         exWatcher.importerCurrentStatus = result.status;
         await exWatcher.save();
@@ -279,7 +192,7 @@ class ExWatcherRunner extends BaseRunner {
         status: exWatcher.status
       };
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "ExWatcherRunnerError",
           cause: error,
@@ -287,15 +200,18 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to start Exchange Data Watcher"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 
-  static async stop(params) {
+  static async stop(context, params) {
     try {
       genErrorIfExist(validateStop(params));
       const exWatcherState = getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(exWatcherState);
+      context.log.info(`ExWatcher ${params.taskId} stop`);
       if (exWatcher.status === STATUS_STOPPED)
         return {
           taskId: exWatcher.taskId,
@@ -306,7 +222,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.importerHistoryStatus !== STATUS_STOPPED &&
         exWatcherState.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        const result = await ImporterRunner.stop({
+        const result = await ImporterRunner.stop(context, {
           taskId: exWatcherState.importerHistoryId
         });
         exWatcher.importerHistoryId = result.taskId;
@@ -317,7 +233,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.importerCurrentStatus !== STATUS_STOPPED &&
         exWatcherState.importerCurrentStatus !== STATUS_FINISHED
       ) {
-        const result = await ImporterRunner.stop({
+        const result = await ImporterRunner.stop(context, {
           taskId: exWatcherState.importerCurrentId
         });
         exWatcher.importerCurrentId = result.taskId;
@@ -328,7 +244,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.candlebatcherStatus !== STATUS_STOPPED ||
         exWatcherState.candlebatcherStatus !== STATUS_STOPPING
       ) {
-        const result = await CandlebatcherRunner.stop({
+        const result = await CandlebatcherRunner.stop(context, {
           taskId: exWatcherState.candlebatcherId,
           exWatcherId: exWatcher.taskId
         });
@@ -340,7 +256,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.marketwatcherStatus !== STATUS_STOPPED ||
         exWatcherState.marketwatcherStatus !== STATUS_STOPPING
       ) {
-        const result = await MarketwatcherRunner.stop({
+        const result = await MarketwatcherRunner.stop(context, {
           taskId: exWatcherState.marketwatcherId,
           exWatcherId: exWatcher.taskId
         });
@@ -351,7 +267,7 @@ class ExWatcherRunner extends BaseRunner {
 
       return { taskId: exWatcher.taskId, status: exWatcher.status };
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "ExWatcherRunnerError",
           cause: error,
@@ -359,6 +275,8 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to stop Exchange Data Watcher"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 
@@ -368,10 +286,10 @@ class ExWatcherRunner extends BaseRunner {
       const exWatcherState = getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(exWatcherState);
-
+      context.log.info(`ExWatcher ${params.taskId} update`);
       if (params.candlebatcherSettings) {
         exWatcher.candlebatcherSettings = params.candlebatcherSettings;
-        await CandlebatcherRunner.update({
+        await CandlebatcherRunner.update(context, {
           taskId: exWatcherState.candlebatcherId,
           settings: params.candlebatcherSettings
         });
@@ -379,7 +297,7 @@ class ExWatcherRunner extends BaseRunner {
 
       await exWatcher.save();
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "ExWathcerRunnerError",
           cause: error,
@@ -387,6 +305,8 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to update Exchange Data Watcher"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 }

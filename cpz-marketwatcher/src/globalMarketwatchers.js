@@ -24,8 +24,9 @@ function log(context, m) {
   );
 }
 function createNewProcess(context, taskId, provider) {
-  context.log("Creating new process ", taskId);
-  marketwatcherProcesses[taskId] = fork(`./dist/${provider}.js`);
+  const providerName = provider || "cryptocompare";
+  context.log("Creating new process ", taskId, providerName);
+  marketwatcherProcesses[taskId] = fork(`./dist/${providerName}.js`);
   marketwatcherProcesses[taskId].on("message", m => {
     log(context, m);
   });
@@ -33,7 +34,7 @@ function createNewProcess(context, taskId, provider) {
     delete marketwatcherProcesses[taskId];
     const marketwatcherState = await getMarketwatcherById(taskId);
     if (marketwatcherState.status !== STATUS_STOPPED) {
-      createNewProcess(context, taskId, provider);
+      createNewProcess(context, taskId, providerName);
       sendEventToProcess(taskId, {
         type: "start",
         state: marketwatcherState

@@ -1,8 +1,8 @@
 import CandlebatcherRunner from "../../taskrunner/services/candlebatcherRunner";
 
-async function startCandlebatcher(_, { params }) {
+async function startCandlebatcher(_, { params }, { context }) {
   try {
-    const { taskId, status } = await CandlebatcherRunner.start(params);
+    const { taskId, status } = await CandlebatcherRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -16,9 +16,9 @@ async function startCandlebatcher(_, { params }) {
   }
 }
 
-async function stopCandlebatcher(_, { taskId }) {
+async function stopCandlebatcher(_, { taskId }, { context }) {
   try {
-    const { status } = await CandlebatcherRunner.stop({ taskId });
+    const { status } = await CandlebatcherRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -34,7 +34,7 @@ async function stopCandlebatcher(_, { taskId }) {
 
 async function updateCandlebatcher(_, { params }) {
   try {
-    await CandlebatcherRunner.update(params);
+    await CandlebatcherRunner.update(context, params);
     return {
       success: true
     };

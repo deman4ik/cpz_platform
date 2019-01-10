@@ -132,8 +132,16 @@ class UserRobot {
     return this._status;
   }
 
+  get exwatcherId() {
+    return this._exwatcherId;
+  }
+
   set exwatcherId(exwatcherId) {
     this._exwatcherId = exwatcherId;
+  }
+
+  get exwatcherStatus() {
+    return this._exwatcherStatus;
   }
 
   set exwatcherStatus(exwatcherStatus) {
@@ -149,13 +157,34 @@ class UserRobot {
     this._adviserId = adviserId;
   }
 
+  get adviserStatus() {
+    return this._adviserStatus;
+  }
+
   set adviserStatus(adviserStatus) {
     this._adviserStatus = adviserStatus;
     this._setStatus();
   }
 
+  get traderId() {
+    return this._traderId;
+  }
+
   set traderId(traderId) {
     this._traderId = traderId;
+  }
+
+  get traderStatus() {
+    return this._traderStatus;
+  }
+
+  set traderStatus(traderStatus) {
+    this._traderStatus = traderStatus;
+    this._setStatus();
+  }
+
+  get candlebatcherSettings() {
+    return this._candlebatcherSettings;
   }
 
   set candlebatcherSettings(candlebatcherSettings) {
@@ -165,8 +194,16 @@ class UserRobot {
     };
   }
 
+  get adviserSettings() {
+    return this._adviserSettings;
+  }
+
   set adviserSettings(adviserSettings) {
     this._adviserSettings = { ...this._adviserSettings, ...adviserSettings };
+  }
+
+  get traderSettings() {
+    return this._traderSettings;
   }
 
   set traderSettings(traderSettings) {

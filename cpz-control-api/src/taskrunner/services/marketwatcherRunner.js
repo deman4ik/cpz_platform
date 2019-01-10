@@ -35,28 +35,21 @@ const validateUnsubscribe = createValidator(
   TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.dataSchema
 );
 class MarketwatcherRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
-      // TODO: resume в отдельный метод
-      let resume;
-      if (props.taskId) {
-        resume = true;
-      }
-      let taskId = props.taskId || uuid();
-
+      let taskId = uuid();
+      context.log(taskId);
       genErrorIfExist(validateStart({ ...props, taskId }));
       const { debug, exchange, providerType, subscriptions } = props;
 
-      const marketwatcher = resume
-        ? await getMarketwatcherById(taskId)
-        : await findMarketwatcher(exchange);
-
+      const marketwatcher = await findMarketwatcher(exchange);
+      context.log(marketwatcher);
       if (marketwatcher) {
         ({ taskId } = marketwatcher);
-
+        context.log(taskId);
         if (
           marketwatcher.status === STATUS_STARTED ||
-          marketwatcher.state === STATUS_PENDING
+          marketwatcher.status === STATUS_PENDING
         ) {
           const notSubscribed = subscriptions.filter(
             sub =>
@@ -76,6 +69,7 @@ class MarketwatcherRunner extends BaseRunner {
           };
         }
       }
+      context.log(taskId);
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: exchange,
@@ -83,6 +77,7 @@ class MarketwatcherRunner extends BaseRunner {
         data: {
           taskId,
           debug,
+          exchange,
           providerType,
           subscriptions
         }
@@ -100,7 +95,7 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId, exWatcherId } = props;
@@ -145,7 +140,7 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async subscribe(props) {
+  static async subscribe(context, props) {
     try {
       genErrorIfExist(validateSubscribe(props));
       const { taskId, subscriptions } = props;
@@ -190,7 +185,7 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async unsubscribe(props) {
+  static async unsubscribe(context, props) {
     try {
       genErrorIfExist(validateUnsubscribe(props));
       const { taskId, subscriptions } = props;

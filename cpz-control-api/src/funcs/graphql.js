@@ -4,8 +4,6 @@ import { GraphQLDateTime } from "graphql-iso-date";
 import typeDefs from "../api/schema/schema.graphql";
 import mutations from "../api/resolvers/mutations";
 
-
-
 /*
 import PostgreAPI from "../api/datasources/postgre";
 const dataSources = () => ({
@@ -29,6 +27,12 @@ const resolvers = {
   Mutation: mutations
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ctx => ({
+    context: ctx.context
+  })
+});
 
 export default server.createHandler();

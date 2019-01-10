@@ -1,8 +1,8 @@
 import BacktesterRunner from "../../taskrunner/services/backtesterRunner";
 
-async function startBacktester(_, { params }) {
+async function startBacktester(_, { params }, { context }) {
   try {
-    const { taskId, status } = await BacktesterRunner.start(params);
+    const { taskId, status } = await BacktesterRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -16,9 +16,9 @@ async function startBacktester(_, { params }) {
   }
 }
 
-async function stopBacktester(_, { taskId }) {
+async function stopBacktester(_, { taskId }, { context }) {
   try {
-    const { status } = await BacktesterRunner.stop({ taskId });
+    const { status } = await BacktesterRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,

@@ -1,8 +1,8 @@
 import AdviserRunner from "../../taskrunner/services/adviserRunner";
 
-async function startAdviser(_, { params }) {
+async function startAdviser(_, { params }, { context }) {
   try {
-    const { taskId, status } = await AdviserRunner.start(params);
+    const { taskId, status } = await AdviserRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -16,9 +16,9 @@ async function startAdviser(_, { params }) {
   }
 }
 
-async function stopAdviser(_, { taskId }) {
+async function stopAdviser(_, { taskId }, { context }) {
   try {
-    const { status } = await AdviserRunner.stop({ taskId });
+    const { status } = await AdviserRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -32,9 +32,9 @@ async function stopAdviser(_, { taskId }) {
   }
 }
 
-async function updateAdviser(_, { params }) {
+async function updateAdviser(_, { params }, { context }) {
   try {
-    await AdviserRunner.update(params);
+    await AdviserRunner.update(context, params);
     return {
       success: true
     };

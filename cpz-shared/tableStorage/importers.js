@@ -1,5 +1,6 @@
 import azure from "azure-storage";
 import VError from "verror";
+import dayjs from "../utils/lib/dayjs";
 import { STATUS_STARTED } from "../config/state";
 import { STORAGE_IMPORTERS_TABLE } from "./tables";
 import tableStorage from "./tableStorage";
@@ -46,12 +47,12 @@ const findActiveImporter = async ({ slug, dateFrom, dateTo }) => {
     const dateFromFilter = TableQuery.dateFilter(
       "dateFrom",
       TableUtilities.QueryComparisons.EQUAL,
-      dateFrom
+      dayjs(dateFrom).toDate()
     );
     const dateToFilter = TableQuery.dateFilter(
-      "dateTp",
+      "dateTo",
       TableUtilities.QueryComparisons.EQUAL,
-      dateTo
+      dayjs(dateTo).toDate()
     );
     const dateFilter = TableQuery.combineFilters(
       dateFromFilter,

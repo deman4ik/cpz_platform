@@ -73,6 +73,9 @@ endpoints:
   - CPZ.Tasks.Trader.Updated
   - CPZ.Tasks.Backtester.Started
   - CPZ.Tasks.Backtester.Stopped
+  - CPZ.Tasks.Importer.Started
+  - CPZ.Tasks.Importer.Stopped
+  - CPZ.Tasks.Importer.Finished
 # Backtester
 - host: "cpz-backtester"
   port: 8108

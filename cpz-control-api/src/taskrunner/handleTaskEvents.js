@@ -2,6 +2,8 @@ import { VError } from "verror";
 import {
   TASKS_EXWATCHER_STARTED_EVENT,
   TASKS_EXWATCHER_STOPPED_EVENT,
+  TASKS_IMPORTER_STARTED_EVENT,
+  TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_IMPORTER_FINISHED_EVENT,
   TASKS_MARKETWATCHER_STARTED_EVENT,
   TASKS_MARKETWATCHER_STOPPED_EVENT,
@@ -23,12 +25,11 @@ import {
   MARKETWATCHER_SERVICE,
   CANDLEBATCHER_SERVICE,
   ADVISER_SERVICE,
-  TRADER_SERVICE,
-  IMPORTER_SERVICE
+  TRADER_SERVICE
 } from "cpzServices";
 import {
   STATUS_STARTED,
-  STATUS_STARTING,
+  STATUS_PENDING,
   STATUS_STOPPED,
   STATUS_ERROR,
   STATUS_FINISHED
@@ -37,14 +38,17 @@ import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
 import {
   findExWatchersByServiceId,
+  findExWatchersByImporterId,
   findUserRobotsByServiceId
 } from "cpzStorage";
 import UserRobot from "./userrobot";
 import RobotRunner from "./robotRunner";
 import ExWatcher from "./exwatcher";
+import ExWatcherRunner from "./exwatcherRunner";
 
 async function handleStarted(context, eventData) {
   try {
+    context.log.info("handleStarted", eventData);
     const { eventType, taskId, error } = eventData;
     let serviceName;
 
@@ -78,10 +82,41 @@ async function handleStarted(context, eventData) {
           } else {
             exWatcher[`${serviceName}Status`] = STATUS_STARTED;
             await exWatcher.save();
-            if (exWatcher.status === STATUS_STARTING) {
+            if (exWatcher.status === STATUS_PENDING) {
               const newState = exWatcher.getCurrentState();
-              await ExWatcher.start(newState);
+              await ExWatcherRunner.start(context, newState);
             }
+          }
+        })
+      );
+    }
+
+    if (eventType === TASKS_IMPORTER_STARTED_EVENT.eventType) {
+      const exWatchers = await findExWatchersByImporterId({
+        taskId
+      });
+
+      await Promise.all(
+        exWatchers.map(async exWatcherState => {
+          const exWatcher = new ExWatcher(exWatcherState);
+          if (exWatcher.importerHistoryId === taskId) {
+            serviceName = "importerHistory";
+          } else if (exWatcher.importerCurrentId === taskId) {
+            serviceName = "importerCurrent";
+          } else {
+            context.log.error(
+              `Importer ${taskId} not found in ExWatcher ${
+                exWatcherState.taskId
+              } state`
+            );
+          }
+          if (error) {
+            exWatcher.error = error;
+            exWatcher[`${serviceName}Status`] = STATUS_ERROR;
+            await exWatcher.save();
+          } else {
+            exWatcher[`${serviceName}Status`] = STATUS_STARTED;
+            await exWatcher.save();
           }
         })
       );
@@ -120,9 +155,9 @@ async function handleStarted(context, eventData) {
           } else {
             userRobot[`${serviceName}Status`] = STATUS_STARTED;
             await userRobot.save();
-            if (userRobot.status === STATUS_STARTING) {
+            if (userRobot.status === STATUS_PENDING) {
               const newState = userRobot.getCurrentState();
-              await RobotRunner.start(newState);
+              await RobotRunner.start(context, newState);
             }
           }
         })
@@ -141,14 +176,18 @@ async function handleStarted(context, eventData) {
         "Failed to handle started events"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_CONTROL_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -160,16 +199,18 @@ async function handleFinished(context, eventData) {
     let serviceName;
 
     if (eventType === TASKS_IMPORTER_FINISHED_EVENT.eventType) {
-      serviceName = IMPORTER_SERVICE;
-
-      const exWatchers = await findExWatchersByServiceId({
-        taskId,
-        serviceName
+      const exWatchers = await findExWatchersByImporterId({
+        taskId
       });
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
           const exWatcher = new ExWatcher(exWatcherState);
+          if (exWatcher.importerHistoryId === taskId) {
+            serviceName = "importerHistory";
+          } else {
+            serviceName = "importerCurrent";
+          }
           if (error) {
             exWatcher.error = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
@@ -179,7 +220,7 @@ async function handleFinished(context, eventData) {
             await exWatcher.save();
 
             const newState = exWatcher.getCurrentState();
-            await ExWatcher.start(newState);
+            await ExWatcherRunner.start(context, newState);
           }
         })
       );
@@ -197,20 +238,24 @@ async function handleFinished(context, eventData) {
         "Failed to handle started events"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_CONTROL_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
 }
 
-async function handleStopped(eventData) {
+async function handleStopped(context, eventData) {
   try {
     const { eventType, taskId, error } = eventData;
     let serviceName;
@@ -238,6 +283,31 @@ async function handleStopped(eventData) {
       await Promise.all(
         exWatchers.map(async exWatcherState => {
           const exWatcher = new ExWatcher(exWatcherState);
+          if (error) {
+            exWatcher.error = error;
+            exWatcher[`${serviceName}Status`] = STATUS_ERROR;
+            await exWatcher.save();
+          } else {
+            exWatcher[`${serviceName}Status`] = STATUS_STOPPED;
+            await exWatcher.save();
+          }
+        })
+      );
+    }
+
+    if (eventType === TASKS_IMPORTER_STOPPED_EVENT.eventType) {
+      const exWatchers = await findExWatchersByImporterId({
+        taskId
+      });
+
+      await Promise.all(
+        exWatchers.map(async exWatcherState => {
+          const exWatcher = new ExWatcher(exWatcherState);
+          if (exWatcher.importerHistoryId === taskId) {
+            serviceName = "importerHistory";
+          } else {
+            serviceName = "importerCurrent";
+          }
           if (error) {
             exWatcher.error = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
@@ -300,20 +370,24 @@ async function handleStopped(eventData) {
         "Failed to handle stopped events"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_CONTROL_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
 }
 
-async function handleUpdated(eventData) {
+async function handleUpdated(context, eventData) {
   try {
     const { eventType, taskId, error } = eventData;
     if (error) {
@@ -392,14 +466,18 @@ async function handleUpdated(eventData) {
         "Failed to handle updated events"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
       subject: eventData.eventSubject,
       eventType: ERROR_CONTROL_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

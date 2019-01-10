@@ -45,6 +45,41 @@ const findExWatchersByServiceId = async ({ taskId, serviceName }) => {
 };
 
 /**
+ * Find Exchange Data Watchers by any Importer Id
+ *
+ * @param {object} input
+ * @param {string} input.taskId Importer taskId
+ */
+const findExWatchersByImporterId = async ({ taskId }) => {
+  try {
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        TableQuery.stringFilter(
+          `importerHistoryId`,
+          TableUtilities.QueryComparisons.EQUAL,
+          taskId
+        ),
+        TableUtilities.TableOperators.OR,
+        TableQuery.stringFilter(
+          `importerCurrentId`,
+          TableUtilities.QueryComparisons.EQUAL,
+          taskId
+        )
+      )
+    );
+    return await tableStorage.queryEntities(STORAGE_EXWATCHERS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { taskId }
+      },
+      "Failed to read exchange data watchers state"
+    );
+  }
+};
+/**
  * Save Exchange Data Watcher state
  *
  * @param {UserRobotState} state
@@ -52,4 +87,9 @@ const findExWatchersByServiceId = async ({ taskId, serviceName }) => {
 const saveExWatcherState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_EXWATCHERS_TABLE, state);
 
-export { getExWatcherById, findExWatchersByServiceId, saveExWatcherState };
+export {
+  getExWatcherById,
+  findExWatchersByServiceId,
+  findExWatchersByImporterId,
+  saveExWatcherState
+};

@@ -35,7 +35,7 @@ const validateUpdate = createValidator(
 );
 
 class CandlebatcherRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
       // TODO: resume в отдельный метод
       let resume;
@@ -122,7 +122,7 @@ class CandlebatcherRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId, exWatcherId } = props;
@@ -172,7 +172,7 @@ class CandlebatcherRunner extends BaseRunner {
     }
   }
 
-  static async update(props) {
+  static async update(context, props) {
     try {
       genErrorIfExist(validateUpdate(props));
       const { taskId, timeframes, settings } = props;

@@ -25,7 +25,7 @@ const validateStop = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
 const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
 
 class TraderRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
       // TODO: resume в отдельный метод
       let resume;
@@ -93,7 +93,7 @@ class TraderRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId } = props;
@@ -129,7 +129,7 @@ class TraderRunner extends BaseRunner {
     }
   }
 
-  static async update(props) {
+  static async update(context, props) {
     try {
       genErrorIfExist(validateUpdate(props));
       const { taskId, settings } = props;

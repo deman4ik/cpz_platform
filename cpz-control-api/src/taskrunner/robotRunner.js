@@ -23,11 +23,12 @@ const validateStop = createValidator(USER_ROBOT_STOP_PARAMS);
 const validateUpdate = createValidator(USER_ROBOT_UPDATE_PARAMS);
 
 class RobotRunner extends BaseRunner {
-  static async start(robotParams) {
+  static async start(context, robotParams) {
     try {
       genErrorIfExist(validateStart(robotParams));
       let userRobotState = robotParams;
       const userRobot = new UserRobot(userRobotState);
+      context.log.info(`UserRobot ${userRobot.id} start`);
       if (userRobot.status === STATUS_STARTED) {
         return {
           id: userRobot.id,
@@ -44,7 +45,7 @@ class RobotRunner extends BaseRunner {
           candlebatcherSettings: userRobotState.candlebatcherSettings
         };
 
-        const result = await ExWatcherRunner.start(exwatcherParams);
+        const result = await ExWatcherRunner.start(context, exwatcherParams);
         userRobot.exwatcherId = result.taskId;
         userRobot.exwatcherStatus = result.status;
         await userRobot.save();
@@ -66,7 +67,7 @@ class RobotRunner extends BaseRunner {
           settings: userRobotState.adviserSettings
         };
 
-        const result = AdviserRunner.start(adviserParams);
+        const result = AdviserRunner.start(context, adviserParams);
         userRobot.adviserId = result.taskId;
         userRobot.adviserStatus = result.status;
         await userRobot.save();
@@ -90,7 +91,7 @@ class RobotRunner extends BaseRunner {
           settings: userRobotState.traderSettings
         };
 
-        const result = await TraderRunner.start(traderParams);
+        const result = await TraderRunner.start(context, traderParams);
         userRobot.traderId = result.taskId;
         userRobot.traderStatus = result.status;
         await userRobot.save();
@@ -102,7 +103,7 @@ class RobotRunner extends BaseRunner {
         status: userRobot.status
       };
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "RobotRunnerError",
           cause: error,
@@ -110,6 +111,8 @@ class RobotRunner extends BaseRunner {
         },
         "Failed to start robot"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 
@@ -119,6 +122,7 @@ class RobotRunner extends BaseRunner {
       const userRobotState = getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(userRobotState);
+      context.log.info(`UserRobot ${userRobot.id} stop`);
       if (userRobot.status === STATUS_STOPPED)
         return {
           id: userRobot.id,
@@ -129,7 +133,7 @@ class RobotRunner extends BaseRunner {
         userRobotState.traderStatus !== STATUS_STOPPED ||
         userRobotState.traderStatus !== STATUS_STOPPING
       ) {
-        const result = await TraderRunner.stop({
+        const result = await TraderRunner.stop(context, {
           taskId: userRobotState.traderId
         });
         userRobot.traderId = result.taskId;
@@ -140,7 +144,7 @@ class RobotRunner extends BaseRunner {
         userRobotState.adviserStatus !== STATUS_STOPPED ||
         userRobotState.adviserStatus !== STATUS_STOPPING
       ) {
-        const result = await AdviserRunner.stop({
+        const result = await AdviserRunner.stop(context, {
           taskId: userRobotState.adviserId,
           userRobotId: userRobot.id
         });
@@ -152,7 +156,7 @@ class RobotRunner extends BaseRunner {
 
       return { id: userRobot.id, status: userRobot.status };
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "RobotRunnerError",
           cause: error,
@@ -160,6 +164,8 @@ class RobotRunner extends BaseRunner {
         },
         "Failed to stop robot"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 
@@ -169,10 +175,10 @@ class RobotRunner extends BaseRunner {
       const userRobotState = getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(userRobotState);
-
+      context.log.info(`UserRobot ${userRobot.id} update`);
       if (robotParams.traderSettings) {
         userRobot.traderSettings = robotParams.traderSettings;
-        await TraderRunner.update({
+        await TraderRunner.update(context, {
           taskId: userRobotState.traderId,
           settings: robotParams.traderSettings
         });
@@ -180,7 +186,7 @@ class RobotRunner extends BaseRunner {
 
       await userRobot.save();
     } catch (error) {
-      throw new VError(
+      const err = new VError(
         {
           name: "RobotRunnerError",
           cause: error,
@@ -188,6 +194,8 @@ class RobotRunner extends BaseRunner {
         },
         "Failed to update robot"
       );
+      context.log.error(err);
+      throw err;
     }
   }
 }

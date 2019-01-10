@@ -1,10 +1,10 @@
 import { getUserRobotDB } from "cpzDB";
 import RobotRunner from "../../taskrunner/robotRunner";
 
-async function startRobot(_, { params }) {
+async function startRobot(_, { params }, { context }) {
   try {
     const userRobot = getUserRobotDB(params);
-    const { id, status } = await RobotRunner.start(userRobot);
+    const { id, status } = await RobotRunner.start(context, userRobot);
     return {
       success: true,
       taskId: id,
@@ -18,9 +18,9 @@ async function startRobot(_, { params }) {
   }
 }
 
-async function stopRobot(_, { id }) {
+async function stopRobot(_, { id }, { context }) {
   try {
-    const { status } = await RobotRunner.stop({ id });
+    const { status } = await RobotRunner.stop(context, { id });
     return {
       success: true,
       taskId: id,
@@ -34,9 +34,9 @@ async function stopRobot(_, { id }) {
   }
 }
 
-async function updateRobot(_, { id, params }) {
+async function updateRobot(_, { id, params }, { context }) {
   try {
-    await RobotRunner.update({ id, ...params });
+    await RobotRunner.update(context, { id, ...params });
     return {
       success: true
     };

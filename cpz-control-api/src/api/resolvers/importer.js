@@ -1,8 +1,8 @@
 import ImporterRunner from "../../taskrunner/services/importerRunner";
 
-async function startImporter(_, { params }) {
+async function startImporter(_, { params }, { context }) {
   try {
-    const { taskId, status } = await ImporterRunner.start(params);
+    const { taskId, status } = await ImporterRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -16,9 +16,9 @@ async function startImporter(_, { params }) {
   }
 }
 
-async function stopImporter(_, { taskId }) {
+async function stopImporter(_, { taskId }, { context }) {
   try {
-    const { status } = await ImporterRunner.stop({ taskId });
+    const { status } = await ImporterRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,

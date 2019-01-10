@@ -21,7 +21,7 @@ import BaseRunner from "../baseRunner";
 const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
 class BacktesterRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
       const taskId = uuid();
 
@@ -90,7 +90,7 @@ class BacktesterRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId } = props;

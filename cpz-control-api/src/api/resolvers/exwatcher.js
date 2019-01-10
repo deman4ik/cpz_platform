@@ -1,8 +1,8 @@
 import ExWatcherRunner from "../../taskrunner/exwatcherRunner";
 
-async function startExWatcher(_, { params }) {
+async function startExWatcher(_, { params }, { context }) {
   try {
-    const { taskId, status } = await ExWatcherRunner.start(params);
+    const { taskId, status } = await ExWatcherRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -16,9 +16,9 @@ async function startExWatcher(_, { params }) {
   }
 }
 
-async function stopExWatcher(_, { taskId }) {
+async function stopExWatcher(_, { taskId }, { context }) {
   try {
-    const { status } = await ExWatcherRunner.stop({ taskId });
+    const { status } = await ExWatcherRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -32,9 +32,9 @@ async function stopExWatcher(_, { taskId }) {
   }
 }
 
-async function updateExWatcher(_, { taskId, params }) {
+async function updateExWatcher(_, { taskId, params }, { context }) {
   try {
-    await ExWatcherRunner.update({ taskId, ...params });
+    await ExWatcherRunner.update(context, { taskId, ...params });
     return {
       success: true
     };

@@ -20,7 +20,7 @@ class BaseProvider {
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
     /* Режима дебага [true,false] */
-    this._debug = state.debug || false;
+    this._debug = state.debug || process.env.DEBUG;
     /* Биржа */
     this._exchange = state.exchange;
     /* Поставщик данных */

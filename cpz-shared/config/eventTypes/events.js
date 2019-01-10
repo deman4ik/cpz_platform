@@ -61,12 +61,6 @@ const BASE_ERROR = {
       description: "Error details.",
       type: "object",
       optional: true
-    },
-    stack: {
-      description: "Error stack.",
-      type: "string",
-      optional: true,
-      empty: false
     }
   }
 };

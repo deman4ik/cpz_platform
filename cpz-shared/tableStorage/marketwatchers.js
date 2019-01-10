@@ -16,17 +16,14 @@ const getMarketwatcherById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_MARKETWATCHERS_TABLE, taskId);
 
 /**
- * Finx Marketwatcher
+ * Find Marketwatcher
  *
  * @param {Object} input
- * @param {string} input.exchange - Marketwatcher exchanges
+ * @param {string} input.exchange - Marketwatcher exchange
  * @returns {MarketwatcherState}
  */
 const findMarketwatcher = async exchange =>
-  tableStorage.getEntitiesByPartitionKey(
-    STORAGE_MARKETWATCHERS_TABLE,
-    exchange
-  );
+  tableStorage.getEntityByPartitionKey(STORAGE_MARKETWATCHERS_TABLE, exchange);
 
 /**
  * Save Marketwatcher state

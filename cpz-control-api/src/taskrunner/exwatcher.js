@@ -24,28 +24,29 @@ class ExWatcher {
     });
     this._timeframes = state.timeframs || [1, 5, 15, 30, 60, 120, 240, 1440];
     this._marketwatcherProviderType =
-      state.marketwatcherProviderType || "сryptoсompare";
+      state.marketwatcherProviderType || "cryptocompare";
     this._candlebatcherProviderType = state.candlebatcherProviderType || "ccxt";
     this._candlebatcherSettings = {
       debug:
-        state._candlebatcherSettings.debug ||
+        (state.candlebatcherSettings && state.candlebatcherSettings.debug) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
       proxy:
-        state._candlebatcherSettings.proxy ||
+        (state.candlebatcherSettings && state.candlebatcherSettings.proxy) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
       requiredHistoryMaxBars:
-        state._candlebatcherSettings.requiredHistoryMaxBars ||
+        (state.candlebatcherSettings &&
+          state.candlebatcherSettings.requiredHistoryMaxBars) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
     };
     this._marketwatcherId = state.marketwatcherId;
-    this._marketwatcherStatus = state.marketwatcherStatus;
+    this._marketwatcherStatus = state.marketwatcherStatus || STATUS_PENDING;
     this._candlebatcherId = state.candlebatcherId;
-    this._candlebatcherStatus = state.candlebatcherStatus;
+    this._candlebatcherStatus = state.candlebatcherStatus || STATUS_PENDING;
     this._importerHistoryId = state.importerHistoryId;
-    this._importerHistoryStatus = state.importerHistoryStatus;
+    this._importerHistoryStatus = state.importerHistoryStatus || STATUS_PENDING;
     this._importerCurrentId = state.importerCurrentId;
-    this._importerCurrentStatus = state.importerCurrentStatus;
-    this._status = state.status || STATUS_STOPPED;
+    this._importerCurrentStatus = state.importerCurrentStatus || STATUS_PENDING;
+    this._status = state.status || STATUS_PENDING;
     this._error = state.error;
     this._metadata = state.metadata;
   }
@@ -58,17 +59,6 @@ class ExWatcher {
       this._importerCurrentStatus === STATUS_FINISHED
     ) {
       this._status = STATUS_STARTED;
-      this._error = null;
-      return;
-    }
-
-    if (
-      this._importerHistoryStatus === STATUS_STARTED ||
-      this._candlebatcherStatus === STATUS_STARTING ||
-      this._marketwatcherStatus === STATUS_STARTING ||
-      this._importerCurrentStatus === STATUS_STARTED
-    ) {
-      this._status = STATUS_STARTING;
       this._error = null;
       return;
     }
@@ -107,8 +97,16 @@ class ExWatcher {
     return this._status;
   }
 
+  get marketwatcherId() {
+    return this._marketwatcherId;
+  }
+
   set marketwatcherId(marketwatcherId) {
     this._marketwatcherId = marketwatcherId;
+  }
+
+  get marketwatcherStatus() {
+    return this._marketwatcherStatus;
   }
 
   set marketwatcherStatus(marketwatcherStatus) {
@@ -116,13 +114,59 @@ class ExWatcher {
     this._setStatus();
   }
 
+  get candlebatcherId() {
+    return this._candlebatcherId;
+  }
+
   set candlebatcherId(candlebatcherId) {
     this._candlebatcherId = candlebatcherId;
+  }
+
+  get candlebatcherStatus() {
+    return this._candlebatcherStatus;
   }
 
   set candlebatcherStatus(candlebatcherStatus) {
     this._candlebatcherStatus = candlebatcherStatus;
     this._setStatus();
+  }
+
+  get importerHistoryId() {
+    return this._importerHistoryId;
+  }
+
+  set importerHistoryId(importerHistoryId) {
+    this._importerHistoryId = importerHistoryId;
+  }
+
+  get importerHistoryStatus() {
+    return this._importerHistoryStatus;
+  }
+
+  set importerHistoryStatus(importerHistoryStatus) {
+    this._importerHistoryStatus = importerHistoryStatus;
+    this._setStatus();
+  }
+
+  get importerCurrentId() {
+    return this._importerCurrentId;
+  }
+
+  set importerCurrentId(importerCurrentId) {
+    this._importerCurrentId = importerCurrentId;
+  }
+
+  get importerCurrentStatus() {
+    return this._importerCurrentStatus;
+  }
+
+  set importerCurrentStatus(importerCurrentStatus) {
+    this._importerCurrentStatus = importerCurrentStatus;
+    this._setStatus();
+  }
+
+  get candlebatcherSettings() {
+    return this._candlebatcherSettings;
   }
 
   set candlebatcherSettings(candlebatcherSettings) {
@@ -154,7 +198,7 @@ class ExWatcher {
       importerHistoryId: this._importerHistoryId,
       importerHistoryStatus: this._importerHistoryStatus,
       importerCurrentId: this._importerCurrentId,
-      importerCurrentStatus: this._importerCurrenctStatus,
+      importerCurrentStatus: this._importerCurrentStatus,
       status: this._status,
       error: this._error,
       metadata: this._metadata

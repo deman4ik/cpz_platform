@@ -1,4 +1,5 @@
 import VError from "verror";
+import dayjs from "cpzDayjs";
 import { v4 as uuid } from "uuid";
 import {
   TASKS_IMPORTER_START_EVENT,
@@ -23,7 +24,7 @@ import BaseRunner from "../baseRunner";
 const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 class ImporterRunner extends BaseRunner {
-  static async start(props) {
+  static async start(context, props) {
     try {
       const taskId = props.taskId || uuid();
 
@@ -95,7 +96,7 @@ class ImporterRunner extends BaseRunner {
     }
   }
 
-  static async stop(props) {
+  static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
       const { taskId } = props;
