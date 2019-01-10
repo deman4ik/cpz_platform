@@ -54,11 +54,13 @@ async function execute(context, state) {
         "Failed to execute candlebatcher"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+
     // Если есть экземпляр класса
     if (candlebatcher) {
       // Сохраняем ошибку в сторедже и продолжаем работу
       await candlebatcher.end(STATUS_STARTED, errorOutput);
+    } else {
+      context.log.error(errorOutput);
     }
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
@@ -67,7 +69,11 @@ async function execute(context, state) {
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {
         taskId: state.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

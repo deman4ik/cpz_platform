@@ -6,7 +6,13 @@ import {
   STATUS_ERROR
 } from "cpzState";
 import publishEvents from "cpzEvents";
-import { SIGNALS_TOPIC, LOG_TOPIC } from "cpzEventTypes";
+import {
+  SIGNALS_TOPIC,
+  LOG_TOPIC,
+  ERROR_TOPIC,
+  ERROR_ADVISER_EVENT
+} from "cpzEventTypes";
+import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {
   getPendingCandlesByAdviserId,
@@ -24,7 +30,6 @@ import Adviser from "./adviser";
  * @param {boolean} child признак вызовая функции повторно
  */
 async function execute(context, state, candle, child = false) {
-  context.log("execute");
   let adviser;
   try {
     // Создаем экземпляр класса Adviser
@@ -79,7 +84,7 @@ async function execute(context, state, candle, child = false) {
       state.taskId
     );
     const errorOutput = createErrorOutput(err);
-    context.log.error(errorOutput.message, errorOutput);
+
     // Если есть экземпляр класса
     if (adviser) {
       // По умолчанию продолжаем работу после ошибки
@@ -89,7 +94,25 @@ async function execute(context, state, candle, child = false) {
         status = STATUS_ERROR;
       // Сохраняем ошибку в сторедже
       await adviser.end(status, errorOutput);
+    } else {
+      context.log.error(errorOutput);
     }
+
+    // Публикуем событие - ошибка
+    await publishEvents(ERROR_TOPIC, {
+      service: ADVISER_SERVICE,
+      subject: "AdviserExecutionError",
+      eventType: ERROR_ADVISER_EVENT,
+      data: {
+        taskId: state.taskId,
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
+      }
+    });
+    throw err;
   }
 }
 

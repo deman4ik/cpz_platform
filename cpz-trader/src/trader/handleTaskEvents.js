@@ -57,7 +57,7 @@ async function handleStart(context, eventData) {
         "Failed to start trader"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
@@ -65,7 +65,11 @@ async function handleStart(context, eventData) {
       eventType: TASKS_TRADER_STARTED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -121,7 +125,7 @@ async function handleStop(context, eventData) {
         "Failed to stop trader"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
@@ -129,7 +133,11 @@ async function handleStop(context, eventData) {
       eventType: TASKS_TRADER_STOPPED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -179,7 +187,7 @@ async function handleUpdate(context, eventData) {
         "Failed to update trader"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
@@ -187,7 +195,11 @@ async function handleUpdate(context, eventData) {
       eventType: TASKS_TRADER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

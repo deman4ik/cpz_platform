@@ -202,11 +202,13 @@ class Backtester {
           asset: this.asset,
           currency: this.currency,
           timeframe: this.timeframe,
+          dateFrom: dayjs(this.dateFrom)
+            .add(-this.requiredHistoryMaxBars / this.timeframe, "minute")
+            .toISOString(),
           dateTo: dayjs(this.dateFrom)
             .add(-1, "minute")
             .toISOString(),
-          limit: this.requiredHistoryMaxBars,
-          orderBy: "{ timestamp: desc }"
+          limit: this.requiredHistoryMaxBars
         };
         // Запрашиваем свечи из БД
         const getRequiredHistoryResult = await getCandlesDB(
@@ -504,10 +506,14 @@ class Backtester {
         this.taskId
       );
       const errorOutput = createErrorOutput(err);
-      this.log(errorOutput.name, errorOutput.message);
+      this.log(errorOutput);
       // Если есть экземпляр класса
       this.status = STATUS_ERROR;
-      this.error = errorOutput;
+      this.error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await this.save();
       // Публикуем событие - ошибка
       await publishEvents(ERROR_TOPIC, {
@@ -516,7 +522,11 @@ class Backtester {
         eventType: ERROR_BACKTESTER_EVENT,
         data: {
           taskId: this.taskId,
-          error: errorOutput.message
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
     }

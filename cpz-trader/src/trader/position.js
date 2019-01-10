@@ -172,6 +172,7 @@ class Position {
    * @memberof Position
    */
   _createOrder(signal, positionDirection) {
+    this.log("Creating new order...");
     this._currentOrder = {
       orderId: uuid(), // Уникальный идентификатор ордера
       signalId: signal.signalId, // Идентификатор сигнала
@@ -205,7 +206,6 @@ class Position {
    * @memberof Position
    */
   createEntryOrder(signal) {
-    this.log("createEntryOrder()");
     // Создаем ордер на открытие позиции
     this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
@@ -227,7 +227,6 @@ class Position {
    * @memberof Position
    */
   createExitOrder(signal) {
-    this.log("createExitOrder()");
     // Создаем ордер на закрытие позиции
     this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
@@ -250,7 +249,7 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price) {
-    this.log("_checkOrder()");
+    this.log("Checking order", order.orderId);
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
       // Тип ордера - лимитный
@@ -340,7 +339,7 @@ class Position {
    * @memberof Position
    */
   getRequiredOrders(price) {
-    this.log("getRequiredOrders()");
+    this.log("Checking required orders for price", price);
     const requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
     if (
@@ -365,7 +364,6 @@ class Position {
         const order = this._exitOrders[key];
         const checkedOrder = this._checkOrder(order, price);
         if (checkedOrder) {
-          this.log(checkedOrder);
           requiredOrders.push(checkedOrder);
         }
       });
@@ -375,7 +373,6 @@ class Position {
   }
 
   _checkOpenOrder(order) {
-    this.log("_checkOpenOrder()");
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_OPEN) {
       // Нужно проверить ордер на бирже
@@ -392,7 +389,7 @@ class Position {
    * @memberof Position
    */
   getOpenOrders() {
-    this.log("getOpenOrders()");
+    this.log("Checking open orders...");
     const openOrders = [];
     // Если ордера на открытие позиции ожидают обработки
     if (this._entry.status === ORDER_STATUS_OPEN) {
@@ -424,7 +421,6 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
-    this.log("handleOrder()", order);
     // Если ордер на открытие позиции
     if (order.positionDirection === ORDER_POS_DIR_ENTRY) {
       // Сохраянем ордер в списке ордеров на открытие позиции
@@ -556,7 +552,7 @@ class Position {
    * @memberof Position
    */
   async save() {
-    this.log(`position save()`);
+    this.log("Saving position state...");
     try {
       // Сохраняем состояние в локальном хранилище
       if (this._settings.mode !== BACKTEST_MODE)

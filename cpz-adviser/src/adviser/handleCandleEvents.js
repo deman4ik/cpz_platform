@@ -51,12 +51,12 @@ async function handleCandle(context, eventData) {
           await execute(context, state, candle);
         } catch (error) {
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
             error: createErrorOutput(error)
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
 
@@ -73,22 +73,22 @@ async function handleCandle(context, eventData) {
           await savePendingCandle(newPendingCandle);
         } catch (error) {
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
             error: createErrorOutput(error)
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
 
     // Отбираем из результата выполнения только успешные
     const successAdvisers = adviserExecutionResults
-      .filter(result => result.isSuccess === true)
+      .filter(result => result.success === true)
       .map(result => result.taskId);
     // Отбираем из результата выполнения только не успешные
     const errorAdvisers = adviserExecutionResults
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
     // Отбираем из не успешных только с ошибкой мутации стореджа
     const concurrentAdvisers = errorAdvisers.filter(adviser =>
@@ -107,12 +107,12 @@ async function handleCandle(context, eventData) {
           await savePendingCandle(newPendingCandle);
         } catch (error) {
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
             error: createErrorOutput(error)
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
     // Список советников для которых есть сообщения в очереди
@@ -122,11 +122,11 @@ async function handleCandle(context, eventData) {
     ];
     // Отбираем из результата выполнения только успешные
     const successPendingAdvisers = pendingAdvisers
-      .filter(result => result.isSuccess === true)
+      .filter(result => result.success === true)
       .map(result => result.taskId);
     // Отбираем из результата выполнения только не успешные
     const errorPendingAdvisers = pendingAdvisers
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
     // Публикуем событие - успех
@@ -157,7 +157,7 @@ async function handleCandle(context, eventData) {
         "Failed to handle candle"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: ADVISER_SERVICE,
@@ -165,7 +165,11 @@ async function handleCandle(context, eventData) {
       eventType: ERROR_ADVISER_EVENT,
       data: {
         candleId: eventData.candle.id,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

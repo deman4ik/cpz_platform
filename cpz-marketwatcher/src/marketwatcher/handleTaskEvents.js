@@ -74,7 +74,7 @@ async function handleStart(context, eventData) {
         "Failed to start marketwatcher"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -82,7 +82,11 @@ async function handleStart(context, eventData) {
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -127,7 +131,7 @@ async function handleStop(context, eventData) {
         "Failed to stop marketwatcher"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -135,7 +139,11 @@ async function handleStop(context, eventData) {
       eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -184,7 +192,7 @@ async function handleSubscribe(context, eventData) {
         "Failed to subscribe"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -192,7 +200,11 @@ async function handleSubscribe(context, eventData) {
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -241,7 +253,7 @@ async function handleUnsubscribe(context, eventData) {
         "Failed to unsubscribe"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -249,7 +261,11 @@ async function handleUnsubscribe(context, eventData) {
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

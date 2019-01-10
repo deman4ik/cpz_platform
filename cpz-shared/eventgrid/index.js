@@ -102,7 +102,7 @@ async function publishEvents(topic, eventData) {
       topic
     );
     const errorOutput = createErrorOutput(err);
-    console.error(errorOutput.message, errorOutput);
+    console.error(errorOutput);
     throw err;
   }
 }

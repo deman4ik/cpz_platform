@@ -84,7 +84,7 @@ async function execute(context, state, signal, child = false) {
       state.taskId
     );
     const errorOutput = createErrorOutput(err);
-    context.log.error(errorOutput.message, errorOutput);
+
     // Если есть экземпляр класса
     if (trader) {
       // По умолчанию продолжаем работу после ошибки
@@ -94,7 +94,10 @@ async function execute(context, state, signal, child = false) {
         status = STATUS_ERROR;
       // Сохраняем ошибку в сторедже
       await trader.end(status, errorOutput);
+    } else {
+      context.log.error(errorOutput);
     }
+    throw err;
   }
 }
 
@@ -104,21 +107,34 @@ async function execute(context, state, signal, child = false) {
  * @param {*} taskId
  */
 async function handlePendingSignals(context, { traderId }) {
-  // Считываем не обработанные сигналы
-  const pendingSignals = getPendingSignalsByTraderId(traderId);
-  if (pendingSignals && pendingSignals.length > 0) {
-    /* eslint-disable no-restricted-syntax */
-    for (const pendingSignal of pendingSignals) {
-      /* eslint-disable no-await-in-loop */
-      // Считываем текущее состояние проторговщика
-      const traderState = await getTraderById(traderId);
-      // Начинаем обработку
-      await execute(context, traderState, pendingSignal, true);
-      // Удаляем свечу из очереди
-      await deletePendingSignal(pendingSignal);
-      /*  no-await-in-loop */
+  try {
+    // Считываем не обработанные сигналы
+    const pendingSignals = getPendingSignalsByTraderId(traderId);
+    if (pendingSignals && pendingSignals.length > 0) {
+      /* eslint-disable no-restricted-syntax */
+      for (const pendingSignal of pendingSignals) {
+        /* eslint-disable no-await-in-loop */
+        // Считываем текущее состояние проторговщика
+        const traderState = await getTraderById(traderId);
+        // Начинаем обработку
+        await execute(context, traderState, pendingSignal, true);
+        // Удаляем свечу из очереди
+        await deletePendingSignal(pendingSignal);
+        /*  no-await-in-loop */
+      }
+      /*  no-restricted-syntax */
     }
-    /*  no-restricted-syntax */
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderPendingCandlesError",
+        cause: error,
+        info: {
+          traderId
+        }
+      },
+      "Failed to handle pending candles"
+    );
   }
 }
 
@@ -130,7 +146,7 @@ async function handlePendingSignals(context, { traderId }) {
  */
 async function handleSignal(context, eventData) {
   try {
-    const { signal } = eventData;
+    const { eventSubject, signal } = eventData;
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
     // Ищем подходящих проторговщиков
@@ -155,15 +171,20 @@ async function handleSignal(context, eventData) {
     const traderExecutionResults = await Promise.all(
       startedTraders.map(async state => {
         try {
-          await execute(context, state, signal);
+          await execute(context, eventSubject, state, signal);
         } catch (error) {
+          const errorOutput = createErrorOutput(error);
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
-            error: createErrorOutput(error)
+            error: {
+              name: errorOutput.name,
+              message: errorOutput.message,
+              info: errorOutput.info
+            }
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
 
@@ -179,23 +200,28 @@ async function handleSignal(context, eventData) {
         try {
           await savePendingSignal(newPendingSignal);
         } catch (error) {
+          const errorOutput = createErrorOutput(error);
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
-            error: createErrorOutput(error)
+            error: {
+              name: errorOutput.name,
+              message: errorOutput.message,
+              info: errorOutput.info
+            }
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
 
     // Отбираем из результата выполнения только успешные
     const successTaders = traderExecutionResults
-      .filter(result => result.isSuccess === true)
+      .filter(result => result.success === true)
       .map(result => result.taskId);
     // Отбираем из результата выполнения только не успешные
     const errorTraders = traderExecutionResults
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
     // Отбираем из не успешных только с ошибкой мутации стореджа
     const concurrentTraders = errorTraders.filter(trader =>
@@ -214,12 +240,12 @@ async function handleSignal(context, eventData) {
           await savePendingSignal(newPendingSignal);
         } catch (error) {
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.taskId,
             error: createErrorOutput(error)
           };
         }
-        return { isSuccess: true, taskId: state.taskId };
+        return { success: true, taskId: state.taskId };
       })
     );
     // Список проторговщиков для которых есть сообщения в очереди
@@ -229,11 +255,11 @@ async function handleSignal(context, eventData) {
     ];
     // Отбираем из результата выполнения только успешные
     const successPendingTraders = pendingTraders
-      .filter(result => result.isSuccess === true)
+      .filter(result => result.success === true)
       .map(result => result.taskId);
     // Отбираем из результата выполнения только не успешные
     const errorPendingTraders = pendingTraders
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ taskId: result.taskId, error: result.error }));
 
     // Публикуем событие - успех
@@ -264,7 +290,7 @@ async function handleSignal(context, eventData) {
         "Failed to handle signal"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -272,7 +298,11 @@ async function handleSignal(context, eventData) {
       eventType: ERROR_TRADER_EVENT,
       data: {
         signalId: eventData.signal.signalId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

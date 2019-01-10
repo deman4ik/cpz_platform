@@ -5,8 +5,8 @@ function createErrorOutput(error) {
     name: error.name,
     message: error.message,
     info: VError.info(error),
-    cause: VError.cause(error)
-    // stack: VError.fullStack(error)
+    cause: VError.cause(error),
+    stack: VError.fullStack(error)
   };
 }
 

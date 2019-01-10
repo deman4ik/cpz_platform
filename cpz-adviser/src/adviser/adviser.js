@@ -169,6 +169,10 @@ class Adviser {
     }
   }
 
+  logError(...args) {
+    this._context.log.error(`Adviser ${this._eventSubject}:`, ...args);
+  }
+
   /**
    * Логирование в EventGrid в топик CPZ-LOGS
    *
@@ -199,7 +203,6 @@ class Adviser {
    * @memberof Adviser
    */
   crash(msg) {
-    this.log("crash()");
     throw new VError(
       {
         name: "AdviserCrashError"
@@ -216,7 +219,6 @@ class Adviser {
    * @memberof Adviser
    */
   loadStrategy() {
-    this.log("loadStrategy()");
     try {
       // Считываем стратегию
       /* eslint-disable import/no-dynamic-require, global-require */
@@ -268,7 +270,6 @@ class Adviser {
    * @memberof Adviser
    */
   loadIndicators() {
-    this.log("loadIndicators()");
     try {
       // Идем по всем свойствам в объекте индикаторов
       Object.keys(this._indicators).forEach(key => {
@@ -378,7 +379,6 @@ class Adviser {
    * @memberof Adviser
    */
   initStrategy() {
-    this.log("initStrategy()");
     try {
       // Если стратегия еще не проинициализирована
       if (!this._strategyInstance.initialized) {
@@ -416,7 +416,6 @@ class Adviser {
    * @memberof Adviser
    */
   initIndicators() {
-    this.log("initIndicators()");
     try {
       Object.keys(this._indicators).forEach(key => {
         this.log(key);
@@ -463,7 +462,7 @@ class Adviser {
    * @memberof Adviser
    */
   async calcIndicators() {
-    this.log("calcIndicators()");
+    this.log("Calculating indicators...");
     try {
       await Promise.all(
         Object.keys(this._indicators).map(async key => {
@@ -514,7 +513,7 @@ class Adviser {
    */
   runStrategy() {
     try {
-      this.log("runStrategy()");
+      this.log("Running strategy...");
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandle(this._candle, this._indicators);
       // Запустить проверку стратегии
@@ -598,8 +597,6 @@ class Adviser {
    */
   async handleCandle(candle) {
     try {
-      this.log("handleCandle()");
-
       // Обновить текущую свечу
       this._candle = candle;
       // Если  свеча уже обрабатывалась - выходим
@@ -666,7 +663,7 @@ class Adviser {
    * @memberof Adviser
    */
   advice(signal) {
-    this.log("advice()");
+    this.log("New Signal!", signal.action, signal.price);
     const newSignal = {
       id: uuid(),
       dataVersion: "1.0",
@@ -695,7 +692,6 @@ class Adviser {
    * @memberof Adviser
    */
   getIndicatorsState() {
-    this.log("getIndicatorsState()");
     try {
       Object.keys(this._indicators).forEach(ind => {
         this._indicators[ind].initialized = this[
@@ -811,7 +807,6 @@ class Adviser {
    * @memberof Adviser
    */
   setUpdate(updatedFields = this._updateRequested) {
-    this.log(`setUpdate()`, updatedFields);
     this._settings = {
       /* Режима дебага [true,false] */
       debug: updatedFields.debug || this._settings.debug,
@@ -834,7 +829,6 @@ class Adviser {
    * @memberof Adviser
    */
   async save() {
-    this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
       await saveAdviserState(this.getCurrentState());
@@ -865,9 +859,18 @@ class Adviser {
    */
   async end(status, error) {
     try {
-      this.log(`end()`);
+      this.log(`Finished execution! Current status: ${status}`);
       this._status = status;
-      this._error = error;
+      this._error = error
+        ? {
+            name: error.name,
+            message: error.message,
+            info: error.info
+          }
+        : null;
+      if (this._error) {
+        this.logError(error);
+      }
       this._updateRequested = false; // Обнуляем запрос на обновление параметров
       this._stopRequested = false; // Обнуляем запрос на остановку сервиса
 

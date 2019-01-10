@@ -54,7 +54,7 @@ class Importer {
     /* Уникальный идентификатор задачи */
     this.taskId = state.taskId;
     /* Режима дебага [true,false] */
-    this.debug = state.debug || false;
+    this.debug = state.debug || process.env.DEBUG;
     /* Тип провайдера ['ccxt'] */
     this.providerType = state.providerType || "ccxt";
     /* Код биржи */
@@ -68,10 +68,11 @@ class Importer {
     /* Признак необходимости свертывания свечей */
     this.requireBatching = state.requireBatching || true;
     this.saveToCache = state.saveToCache || false;
-    this.dateFrom = dayjs(state.dateFrom)
-      .utc()
-      .startOf("minute")
-      .toISOString();
+    this.dateFrom = dayjs(
+      `${dayjs(state.dateFrom)
+        .utc()
+        .format("YYYY-MM-DD")}T00:00:00.000Z`
+    ).toISOString();
     this.dateTo =
       dayjs(state.dateTo)
         .utc()
@@ -138,7 +139,7 @@ class Importer {
   log(...args) {
     if (this.debug) {
       const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Backtester ${this.eventSubject}:`, ...logData]);
+      process.send([`Importer ${this.eventSubject}:`, ...logData]);
     }
   }
 
@@ -629,7 +630,11 @@ class Importer {
       this.log(errorOutput);
       // Если есть экземпляр класса
       this.status = STATUS_ERROR;
-      this.error = { code: errorOutput.name, message: errorOutput.message };
+      this.error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await this.save();
       // Публикуем событие - ошибка
       await publishEvents(ERROR_TOPIC, {
@@ -639,7 +644,11 @@ class Importer {
         data: {
           taskId: this.taskId,
           eventSubject: this.eventSubject,
-          error: { code: errorOutput.name, message: errorOutput.message }
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
     }

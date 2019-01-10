@@ -68,14 +68,14 @@ async function handlePrice(context, eventData) {
         } catch (error) {
           context.log.error(error);
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.traderId,
             positionId: state.positionId,
             error: createErrorOutput(error)
           };
         }
         return {
-          isSuccess: true,
+          success: true,
           positionId: state.positionId,
           taskId: state.traderId
         };
@@ -84,14 +84,14 @@ async function handlePrice(context, eventData) {
 
     // ? TODO: price handled event
     /* const successPositions = handlePositionPriceResult
-      .filter(result => result.isSuccess === true)
+      .filter(result => result.success === true)
       .map(result => ({
         positionId: result.positionId,
         taskId: result.taskId
       })); */
 
     const errorPositions = handlePositionPriceResult
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ positionId: result.positionId, error: result.error }));
 
     if (errorPositions && errorPositions.length > 0) {
@@ -118,7 +118,7 @@ async function handlePrice(context, eventData) {
         "Failed to handle current price"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -126,7 +126,11 @@ async function handlePrice(context, eventData) {
       eventType: ERROR_TRADER_EVENT,
       data: {
         eventData,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -163,7 +167,7 @@ async function handleTick(context, eventData) {
         eventData.tradeId
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -171,7 +175,11 @@ async function handleTick(context, eventData) {
       eventType: ERROR_TRADER_EVENT,
       data: {
         eventData,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -208,7 +216,7 @@ async function handleCandle(context, eventData) {
         eventData.id
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -216,7 +224,11 @@ async function handleCandle(context, eventData) {
       eventType: ERROR_TRADER_EVENT,
       data: {
         eventData,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

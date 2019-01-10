@@ -7,7 +7,7 @@ function createQueueIfNotExists(queueName) {
   return new Promise((resolve, reject) => {
     queueService.createQueueIfNotExists(queueName, error => {
       if (error) reject(error);
-      resolve({ isSuccess: true });
+      resolve({ success: true });
     });
   });
 }
@@ -16,7 +16,7 @@ function createMessage(queueName, message) {
   return new Promise((resolve, reject) => {
     queueService.createMessage(queueName, message, (error, result) => {
       if (error) reject(error);
-      resolve({ isSuccess: true, messageResult: result });
+      resolve({ success: true, messageResult: result });
     });
   });
 }

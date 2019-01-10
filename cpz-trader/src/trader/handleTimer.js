@@ -35,15 +35,20 @@ async function handleTimer(context) {
             }
           }
         } catch (error) {
+          const errorOutput = createErrorOutput(error);
           return {
-            isSuccess: false,
+            success: false,
             taskId: state.traderId,
             positionId: state.positionId,
-            error: createErrorOutput(error)
+            error: {
+              name: errorOutput.name,
+              message: errorOutput.message,
+              info: errorOutput.info
+            }
           };
         }
         return {
-          isSuccess: true,
+          success: true,
           positionId: state.positionId,
           taskId: state.traderId
         };
@@ -51,7 +56,7 @@ async function handleTimer(context) {
     );
 
     const errorPositions = handlePositionIdleOrdersResult
-      .filter(result => result.isSuccess === false)
+      .filter(result => result.success === false)
       .map(result => ({ positionId: result.positionId, error: result.error }));
 
     if (errorPositions && errorPositions.length > 0) {
@@ -75,14 +80,18 @@ async function handleTimer(context) {
         "Failed to handle timer"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
       subject: "Trader.Timer",
       eventType: ERROR_TRADER_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

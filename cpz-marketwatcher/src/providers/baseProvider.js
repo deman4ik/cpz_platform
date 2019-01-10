@@ -48,6 +48,11 @@ class BaseProvider {
     }
   }
 
+  logError(...args) {
+    const logData = args.map(arg => JSON.stringify(arg));
+    process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
+  }
+
   /**
    * Логирование в EventGrid в топик CPZ-LOGS
    *
@@ -101,7 +106,12 @@ class BaseProvider {
           this._taskId
         )
       );
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await this._save();
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
@@ -109,7 +119,11 @@ class BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
     }
@@ -130,7 +144,12 @@ class BaseProvider {
           this._taskId
         )
       );
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await this._save();
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
@@ -138,7 +157,11 @@ class BaseProvider {
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
     }
@@ -161,14 +184,23 @@ class BaseProvider {
           this._taskId
         )
       );
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
     }

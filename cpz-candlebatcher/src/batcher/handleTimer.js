@@ -26,14 +26,18 @@ async function handleTimer(context) {
         "Failed to stop candlebatcher"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CANDLEBATCHER_SERVICE,
       subject: "CandlebatcherTimerError",
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

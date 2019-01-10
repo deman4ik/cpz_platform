@@ -46,7 +46,7 @@ async function handleImportStart(context, eventData) {
         "Failed to start importer"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,
@@ -54,7 +54,11 @@ async function handleImportStart(context, eventData) {
       eventType: TASKS_IMPORTER_STARTED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }
@@ -101,7 +105,7 @@ async function handleImportStop(context, eventData) {
         "Failed to stop importer"
       )
     );
-    context.log.error(errorOutput.message, errorOutput);
+    context.log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,
@@ -109,7 +113,11 @@ async function handleImportStop(context, eventData) {
       eventType: TASKS_IMPORTER_STOPPED_EVENT,
       data: {
         taskId: eventData.taskId,
-        error: errorOutput
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
       }
     });
   }

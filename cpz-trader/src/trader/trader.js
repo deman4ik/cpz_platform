@@ -101,6 +101,7 @@ class Trader {
 
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+    this.log("Initialized");
   }
 
   /**
@@ -157,6 +158,10 @@ class Trader {
     }
   }
 
+  logError(...args) {
+    this._context.log.error(`Trader ${this._eventSubject}:`, ...args);
+  }
+
   /**
    * Логирование в EventGrid в топик CPZ-LOGS
    *
@@ -183,7 +188,6 @@ class Trader {
    * @memberof Trader
    */
   crash(msg) {
-    this.log("crash()");
     throw new VError(
       {
         name: "TraderCrashError"
@@ -202,7 +206,7 @@ class Trader {
    * @memberof Trader
    */
   _createPosition(positionId) {
-    this.log("_createPosition()");
+    this.log("Creating new Position...");
     this._currentPositions[positionId] = new Position({
       positionId,
       traderId: this._taskId,
@@ -230,7 +234,7 @@ class Trader {
    * @memberof Trader
    */
   async _loadPosition(positionId) {
-    this.log("_loadPosition()");
+    this.log(`Loading position ${positionId}...`);
     try {
       // Если позиция еще не загружена
       if (
@@ -240,8 +244,6 @@ class Trader {
         )
       ) {
         // Запрашиваем из стореджа
-        this.log("loading...");
-
         const positionState = await getPosition({
           slug: createPositionSlug({
             exchange: this._exchange,
@@ -280,7 +282,6 @@ class Trader {
    * @memberof Trader
    */
   async handleSignal(signal) {
-    this.log("handleSignal()");
     try {
       // Обновить текущий сигнал
       this._signal = signal;
@@ -361,7 +362,7 @@ class Trader {
    * @param {*} orders
    */
   async executeOrders(orders) {
-    this.log("executeOrders()");
+    this.log("Executiong orders...");
     // Для каждого ордера
     /* eslint-disable no-restricted-syntax */
     for (const order of orders) {
@@ -521,7 +522,6 @@ class Trader {
    * @memberof Trader
    */
   setUpdate(updatedFields = this._updateRequested) {
-    this.log(`setUpdate()`, updatedFields);
     this._settings = {
       debug: updatedFields.debug || this._settings.debug,
       slippageStep: updatedFields.slippageStep || this._settings.slippageStep,
@@ -536,7 +536,6 @@ class Trader {
    * @memberof Trader
    */
   async save() {
-    this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
       await saveTraderState(this.getCurrentState());
@@ -568,9 +567,18 @@ class Trader {
    */
   async end(status, error) {
     try {
-      this.log(`end()`);
+      this.log(`Finished execution! Current status: ${status}`);
       this._status = status;
-      this._error = error;
+      this._error = error
+        ? {
+            name: error.name,
+            message: error.message,
+            info: error.info
+          }
+        : null;
+      if (this._error) {
+        this.logError(error);
+      }
       this._updateRequested = false; // Обнуляем запрос на обновление параметров
       this._stopRequested = false; // Обнуляем запрос на остановку сервиса
 

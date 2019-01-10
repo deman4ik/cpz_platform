@@ -147,15 +147,23 @@ class CryptocompareProvider extends BaseProvider {
           this._taskId
         )
       );
-      this.log(errorOutput);
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
       await this._save();
@@ -177,15 +185,23 @@ class CryptocompareProvider extends BaseProvider {
           this._taskId
         )
       );
-      this.log(errorOutput);
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
       await this._save();
@@ -238,16 +254,24 @@ class CryptocompareProvider extends BaseProvider {
           this._taskId
         )
       );
-      this.log(errorOutput);
+      this.logError(errorOutput);
       this._status = STATUS_ERROR;
-      this._error = errorOutput;
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
       await this._save();
@@ -287,15 +311,23 @@ class CryptocompareProvider extends BaseProvider {
           this._taskId
         )
       );
-      this.log(errorOutput);
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
       await this._save();
@@ -333,15 +365,23 @@ class CryptocompareProvider extends BaseProvider {
           this._taskId
         )
       );
-      this.log(errorOutput);
-      this._error = errorOutput;
+      this.logError(errorOutput);
+      this._error = {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      };
       await publishEvents(ERROR_TOPIC, {
         service: MARKETWATCHER_SERVICE,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
           taskId: this._taskId,
-          error: errorOutput
+          error: {
+            name: errorOutput.name,
+            message: errorOutput.message,
+            info: errorOutput.info
+          }
         }
       });
       await this._save();
