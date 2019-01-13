@@ -1,6 +1,7 @@
 const CONTROL_SERVICE = "control";
 const MARKETWATCHER_SERVICE = "marketwatcher";
 const CANDLEBATCHER_SERVICE = "candlebatcher";
+const EXWATCHER_SERVICE = "exwatcher";
 const IMPORTER_SERVICE = "importer";
 const ADVISER_SERVICE = "adviser";
 const TRADER_SERVICE = "trader";
@@ -11,6 +12,7 @@ export {
   CONTROL_SERVICE,
   MARKETWATCHER_SERVICE,
   CANDLEBATCHER_SERVICE,
+  EXWATCHER_SERVICE,
   IMPORTER_SERVICE,
   ADVISER_SERVICE,
   TRADER_SERVICE,

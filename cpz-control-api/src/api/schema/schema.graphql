@@ -44,19 +44,25 @@ type Mutation {
     stopExWatcher(taskId: String!): ServiceRunnerResponse!
     updateExWatcher(taskId: String!, params: CandlebatcherUpdateParams!): Response!
     # UserRobot
-    startRobot(id: String!): ServiceRunnerResponse!
-    stopRobot(id: String!): ServiceRunnerResponse!
-    updateRobot(id: String!, params: TraderUpdateParams!): Response!
+    startRobot(userRobotId: String!): ServiceRunnerResponse!
+    stopRobot(userRobotId: String!): ServiceRunnerResponse!
+    updateRobot(userRobotId: String!, params: TraderUpdateParams!): Response!
+}
+
+type Error {
+    name: String!
+    message: String!
+    info: JSON
 }
 
 type Response {
     success: Boolean!
-    error: String
+    error: Error
 }
 
 type ServiceRunnerResponse {
     success: Boolean!
-    error: String
+    error: Error
     taskId: ID
     status: String
 }

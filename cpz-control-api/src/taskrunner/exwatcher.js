@@ -1,14 +1,17 @@
 import VError from "verror";
+import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
-  STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING,
   STATUS_ERROR,
   STATUS_FINISHED,
-  createWatcherSlug
+  createWatcherSlug,
+  createExWatcherTaskSubject
 } from "cpzState";
+import { TASKS_TOPIC, TASKS_EXWATCHER_STARTED_EVENT } from "cpzEventTypes";
+import publishEvents from "cpzEvents";
 import { saveExWatcherState } from "cpzStorage";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
 
@@ -49,6 +52,7 @@ class ExWatcher {
     this._status = state.status || STATUS_PENDING;
     this._error = state.error;
     this._metadata = state.metadata;
+    this._events = [];
   }
 
   _setStatus() {
@@ -60,6 +64,20 @@ class ExWatcher {
     ) {
       this._status = STATUS_STARTED;
       this._error = null;
+      this._events.push({
+        id: uuid(),
+        dataVersion: "1.0",
+        eventTime: new Date(),
+        subject: createExWatcherTaskSubject({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency
+        }),
+        eventType: TASKS_EXWATCHER_STARTED_EVENT.eventType,
+        data: {
+          taskId: this._taskId
+        }
+      });
       return;
     }
 
@@ -180,6 +198,10 @@ class ExWatcher {
     this._error = error;
   }
 
+  get events() {
+    return this._events;
+  }
+
   getCurrentState() {
     return {
       PartitionKey: this._taskId,
@@ -208,6 +230,10 @@ class ExWatcher {
   async save() {
     try {
       await saveExWatcherState(this.getCurrentState());
+      if (this._events.length > 0) {
+        await publishEvents(TASKS_TOPIC, this._events);
+        this._events = [];
+      }
     } catch (error) {
       throw new VError(
         {

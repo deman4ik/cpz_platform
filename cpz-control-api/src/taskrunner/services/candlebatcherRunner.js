@@ -37,12 +37,7 @@ const validateUpdate = createValidator(
 class CandlebatcherRunner extends BaseRunner {
   static async start(context, props) {
     try {
-      // TODO: resume в отдельный метод
-      let resume;
-      if (props.taskId) {
-        resume = true;
-      }
-      let taskId = props.taskId || uuid();
+      let taskId = uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
       const {
@@ -54,15 +49,13 @@ class CandlebatcherRunner extends BaseRunner {
         timeframes
       } = props;
 
-      const candlebatcher = resume
-        ? await getCandlebatcherById(taskId)
-        : await findCandlebatcher({
-            slug: createCandlebatcherSlug({
-              exchange,
-              asset,
-              currency
-            })
-          });
+      const candlebatcher = await findCandlebatcher({
+        slug: createCandlebatcherSlug({
+          exchange,
+          asset,
+          currency
+        })
+      });
 
       if (candlebatcher) {
         ({ taskId } = candlebatcher);
@@ -125,7 +118,7 @@ class CandlebatcherRunner extends BaseRunner {
   static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
-      const { taskId, exWatcherId } = props;
+      const { taskId } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
       if (!candlebatcher)
         return {
@@ -137,12 +130,6 @@ class CandlebatcherRunner extends BaseRunner {
           taskId,
           status: STATUS_STOPPED
         };
-
-      const exWatcher = getExWatcherById(exWatcherId);
-
-      if (exWatcher) {
-        return { taskId, status: candlebatcher.status };
-      }
 
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,

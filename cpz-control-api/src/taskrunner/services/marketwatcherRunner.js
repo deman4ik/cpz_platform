@@ -16,12 +16,8 @@ import {
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE, MARKETWATCHER_SERVICE } from "cpzServices";
-import {
-  findMarketwatcher,
-  getMarketwatcherById,
-  getExWatcherById
-} from "cpzStorage";
+import { CONTROL_SERVICE } from "cpzServices";
+import { findMarketwatcher, getMarketwatcherById } from "cpzStorage";
 import BaseRunner from "../baseRunner";
 
 const validateStart = createValidator(
@@ -98,7 +94,7 @@ class MarketwatcherRunner extends BaseRunner {
   static async stop(context, props) {
     try {
       genErrorIfExist(validateStop(props));
-      const { taskId, exWatcherId } = props;
+      const { taskId } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
         return {
@@ -110,11 +106,6 @@ class MarketwatcherRunner extends BaseRunner {
           taskId,
           status: STATUS_STOPPED
         };
-      const exWatcher = getExWatcherById(exWatcherId);
-
-      if (exWatcher) {
-        return { taskId, status: marketwatcher.status };
-      }
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: marketwatcher.exchange,

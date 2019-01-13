@@ -5,18 +5,13 @@ import {
   STATUS_STARTED,
   STATUS_STOPPING,
   STATUS_STOPPED,
-  STATUS_FINISHED,
-  createExWatcherTaskSubject
+  STATUS_FINISHED
 } from "cpzState";
 import { getExWatcherById } from "cpzStorage";
-import { CONTROL_SERVICE } from "cpzServices";
-import publishEvents from "cpzEvents";
 import {
-  TASKS_TOPIC,
   EXWATCHER_START_PARAMS,
   EXWATCHER_STOP_PARAMS,
-  EXWATCHER_UPDATE_PARAMS,
-  TASKS_EXWATCHER_STARTED_EVENT
+  EXWATCHER_UPDATE_PARAMS
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
@@ -173,20 +168,6 @@ class ExWatcherRunner extends BaseRunner {
         await exWatcher.save();
       }
 
-      if (exWatcher.status === STATUS_STARTED) {
-        await publishEvents(TASKS_TOPIC, {
-          service: CONTROL_SERVICE,
-          subject: createExWatcherTaskSubject({
-            exchange: exWatcherState.exchange,
-            asset: exWatcherState.asset,
-            currency: exWatcherState.currency
-          }),
-          eventType: TASKS_EXWATCHER_STARTED_EVENT,
-          data: {
-            taskId: exWatcherState.taskId
-          }
-        });
-      }
       return {
         taskId: exWatcher.taskId,
         status: exWatcher.status
@@ -208,7 +189,7 @@ class ExWatcherRunner extends BaseRunner {
   static async stop(context, params) {
     try {
       genErrorIfExist(validateStop(params));
-      const exWatcherState = getExWatcherById(params.taskId);
+      const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(exWatcherState);
       context.log.info(`ExWatcher ${params.taskId} stop`);
@@ -245,8 +226,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.candlebatcherStatus !== STATUS_STOPPING
       ) {
         const result = await CandlebatcherRunner.stop(context, {
-          taskId: exWatcherState.candlebatcherId,
-          exWatcherId: exWatcher.taskId
+          taskId: exWatcherState.candlebatcherId
         });
         exWatcher.candlebatcherId = result.taskId;
         exWatcher.candlebatcherStatus = result.status;
@@ -257,8 +237,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.marketwatcherStatus !== STATUS_STOPPING
       ) {
         const result = await MarketwatcherRunner.stop(context, {
-          taskId: exWatcherState.marketwatcherId,
-          exWatcherId: exWatcher.taskId
+          taskId: exWatcherState.marketwatcherId
         });
         exWatcher.marketwatcherId = result.taskId;
         exWatcher.marketwatcherStatus = result.status;
@@ -283,7 +262,7 @@ class ExWatcherRunner extends BaseRunner {
   static async update(params) {
     try {
       genErrorIfExist(validateUpdate(params));
-      const exWatcherState = getExWatcherById(params.taskId);
+      const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(exWatcherState);
       context.log.info(`ExWatcher ${params.taskId} update`);

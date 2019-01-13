@@ -1,7 +1,6 @@
 import VError from "verror";
 import {
   STATUS_STARTED,
-  STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING,
@@ -28,47 +27,58 @@ class UserRobot {
     this._strategyName = state.strategyName;
     this._candlebatcherSettings = {
       debug:
-        state.candlebatcherSettings.debug ||
+        (state.candlebatcherSettings && state.candlebatcherSettings.debug) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
       proxy:
-        state.candlebatcherSettings.proxy ||
+        (state.candlebatcherSettings && state.candlebatcherSettings.proxy) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
       requiredHistoryMaxBars:
-        state.candlebatcherSettings.requiredHistoryMaxBars ||
+        (state.candlebatcherSettings &&
+          state.candlebatcherSettings.requiredHistoryMaxBars) ||
         CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
     };
     this._adviserSettings = {
-      debug: state.adviserSettings.debug || ADVISER_SETTINGS_DEFAULTS.debug,
+      debug:
+        (state.adviserSettings && state.adviserSettings.debug) ||
+        ADVISER_SETTINGS_DEFAULTS.debug,
       strategyParameters:
-        state.adviserSettings.strategyParameters ||
+        (state.adviserSettings && state.adviserSettings.strategyParameters) ||
         ADVISER_SETTINGS_DEFAULTS.strategyParameters,
       requiredHistoryCache:
-        state.adviserSettings.requiredHistoryCache ||
+        (state.adviserSettings && state.adviserSettings.requiredHistoryCache) ||
         ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache,
       requiredHistoryMaxBars:
-        state.adviserSettings.requiredHistoryMaxBars ||
+        (state.adviserSettings &&
+          state.adviserSettings.requiredHistoryMaxBars) ||
         ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
     };
     this._traderSettings = {
-      debug: state.traderSettings.debug || TRADER_SETTINGS_DEFAULTS.debug,
-      mode: state.traderSettings.mode || TRADER_SETTINGS_DEFAULTS.mode,
+      debug:
+        (state.traderSettings && state.traderSettings.debug) ||
+        TRADER_SETTINGS_DEFAULTS.debug,
+      mode:
+        (state.traderSettings && state.traderSettings.mode) ||
+        TRADER_SETTINGS_DEFAULTS.mode,
       slippageStep:
-        state.traderSettings.slippageStep ||
+        (state.traderSettings && state.traderSettings.slippageStep) ||
         TRADER_SETTINGS_DEFAULTS.slippageStep,
       deviation:
-        state.traderSettings.deviation || TRADER_SETTINGS_DEFAULTS.deviation,
-      volume: state.traderSettings.volume || TRADER_SETTINGS_DEFAULTS.volume,
+        (state.traderSettings && state.traderSettings.deviation) ||
+        TRADER_SETTINGS_DEFAULTS.deviation,
+      volume:
+        (state.traderSettings && state.traderSettings.volume) ||
+        TRADER_SETTINGS_DEFAULTS.volume,
       openOrderTimeout:
-        state.traderSettings.openOrderTimeout ||
+        (state.traderSettings && state.traderSettings.openOrderTimeout) ||
         TRADER_SETTINGS_DEFAULTS.openOrderTimeout
     };
     this._exwatcherId = state.exwatcherId;
-    this._exwatcherStatus = state.exwatcherStatus;
+    this._exwatcherStatus = state.exwatcherStatus || STATUS_PENDING;
     this._adviserId = state.adviserId;
-    this._adviserStatus = state.adviserStatus;
+    this._adviserStatus = state.adviserStatus || STATUS_PENDING;
     this._traderId = state.traderId;
-    this._traderStatus = state.traderStatus;
-    this._status = state.status || STATUS_STOPPED;
+    this._traderStatus = state.traderStatus || STATUS_PENDING;
+    this._status = state.status || STATUS_PENDING;
     this._error = state.error;
     this._metadata = state.metadata;
   }
@@ -85,16 +95,6 @@ class UserRobot {
     }
 
     if (
-      this._traderStatus === STATUS_STARTING ||
-      this._adviserStatus === STATUS_STARTING ||
-      this._exwatcherStatus === STATUS_STARTING
-    ) {
-      this._status = STATUS_STARTING;
-      this._error = null;
-      return;
-    }
-
-    if (
       this._traderStatus === STATUS_STOPPED ||
       this._adviserStatus === STATUS_STOPPED ||
       this._exwatcherStatus === STATUS_STOPPED
@@ -106,8 +106,7 @@ class UserRobot {
     if (
       this._traderStatus === STATUS_STOPPING ||
       this._adviserStatus === STATUS_STOPPING ||
-      this._candlebatcherStatus === STATUS_STOPPING ||
-      this._marketwatcherStatus === STATUS_STOPPING
+      this._exwatcherStatus === STATUS_STOPPING
     ) {
       this._status = STATUS_STOPPING;
       return;
@@ -194,6 +193,10 @@ class UserRobot {
     };
   }
 
+  get strategyName() {
+    return this._strategyName;
+  }
+
   get adviserSettings() {
     return this._adviserSettings;
   }
@@ -224,6 +227,7 @@ class UserRobot {
         robotId: this._robotId
       }),
       RowKey: this._id,
+      id: this._id,
       robotId: this._robotId,
       userId: this._userId,
       exchange: this._exchange,

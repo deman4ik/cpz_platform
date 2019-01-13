@@ -30,21 +30,22 @@ const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
 class AdviserRunner extends BaseRunner {
   static async start(context, props) {
     try {
-      // TODO: resume в отдельный метод
-      let resume;
-      if (props.taskId) {
-        resume = true;
-      }
-      const taskId = props.taskId || uuid();
+      const taskId = uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
-      const { robotId, exchange, asset, currency, timeframe, settings } = props;
+      const {
+        robotId,
+        exchange,
+        asset,
+        currency,
+        timeframe,
+        strategyName,
+        settings
+      } = props;
 
-      const adviser = resume
-        ? await getAdviserById(taskId)
-        : await findAdviser({
-            robotId
-          });
+      const adviser = await findAdviser({
+        robotId
+      });
 
       if (adviser) {
         if (adviser.status === STATUS_STARTED || adviser.status === STATUS_BUSY)
@@ -71,6 +72,7 @@ class AdviserRunner extends BaseRunner {
           asset,
           currency,
           timeframe,
+          strategyName,
           settings
         }
       });

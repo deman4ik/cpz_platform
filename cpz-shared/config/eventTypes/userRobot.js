@@ -20,11 +20,6 @@ const USER_ROBOT_START_PARAMS = {
     type: "string",
     empty: false
   },
-  mode: {
-    description: "Service run mode.",
-    type: "string",
-    values: ["emulator", "realtime"]
-  },
   exchange: { description: "Exchange code.", type: "string", empty: false },
   asset: { description: "Base currency.", type: "string", empty: false },
   currency: { description: "Quote currency.", type: "string", empty: false },

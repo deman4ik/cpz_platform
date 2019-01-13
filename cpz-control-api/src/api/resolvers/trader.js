@@ -1,3 +1,4 @@
+import { createErrorOutput } from "cpzUtils/error";
 import TraderRunner from "../../taskrunner/services/traderRunner";
 
 async function startTrader(_, { params }, { context }) {
@@ -9,9 +10,14 @@ async function startTrader(_, { params }, { context }) {
       status
     };
   } catch (error) {
+    const errorOutput = createErrorOutput(error);
     return {
       success: false,
-      error: error.message
+      error: {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      }
     };
   }
 }
@@ -25,9 +31,14 @@ async function stopTrader(_, { taskId }, { context }) {
       status
     };
   } catch (error) {
+    const errorOutput = createErrorOutput(error);
     return {
       success: false,
-      error: error.message
+      error: {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      }
     };
   }
 }
@@ -39,9 +50,14 @@ async function updateTrader(_, { params }, { context }) {
       success: true
     };
   } catch (error) {
+    const errorOutput = createErrorOutput(error);
     return {
       success: false,
-      error: error.message
+      error: {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      }
     };
   }
 }

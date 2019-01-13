@@ -1,7 +1,6 @@
 input TraderParams {
     robotId: ID!
     userId: ID!
-    adviserId: ID!
     exchange: String!
     asset: String!
     currency: String!

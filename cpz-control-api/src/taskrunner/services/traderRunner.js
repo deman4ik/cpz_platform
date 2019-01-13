@@ -27,18 +27,12 @@ const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
 class TraderRunner extends BaseRunner {
   static async start(context, props) {
     try {
-      // TODO: resume в отдельный метод
-      let resume;
-      if (props.taskId) {
-        resume = true;
-      }
-      const taskId = props.taskId || uuid();
+      const taskId = uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));
       const {
         robotId,
         userId,
-        adviserId,
         exchange,
         asset,
         currency,
@@ -46,12 +40,10 @@ class TraderRunner extends BaseRunner {
         settings
       } = props;
 
-      const trader = resume
-        ? await getTraderById(taskId)
-        : await findTrader({
-            userId,
-            robotId
-          });
+      const trader = await findTrader({
+        userId,
+        robotId
+      });
       if (trader) {
         if (trader.status === STATUS_STARTED || trader.status === STATUS_BUSY)
           return { taskId, status: STATUS_STARTED };
@@ -72,7 +64,6 @@ class TraderRunner extends BaseRunner {
           taskId,
           robotId,
           userId,
-          adviserId,
           exchange,
           asset,
           currency,

@@ -1,7 +1,7 @@
 import VError from "verror";
 import db from "./db";
 
-async function getUserRobotDB({ id }) {
+async function getUserRobotDB(userRobotId) {
   try {
     const query = `query user_robot_by_pk($userRobotId: uuid!){
   cpz_user_robot_by_pk(id: $userRobotId){
@@ -26,14 +26,13 @@ async function getUserRobotDB({ id }) {
   }
 }`;
     const variables = {
-      userRobotId: id
+      userRobotId
     };
     const response = await db.request(query, variables);
     if (response.cpz_user_robot_by_pk) {
       const { robotByrobotId } = response.cpz_user_robot_by_pk;
       return {
         id: response.cpz_user_robot_by_pk.id,
-        mode: response.cpz_user_robot_by_pk.run_mode,
         userId: response.cpz_user_robot_by_pk.user_id,
         robotId: robotByrobotId.id,
         exchange: robotByrobotId.exchange,
@@ -44,7 +43,10 @@ async function getUserRobotDB({ id }) {
         candlebatcherSettings:
           response.cpz_user_robot_by_pk.candlebatchersettings,
         adviserSettings: response.cpz_user_robot_by_pk.advisersettings,
-        traderSettings: response.cpz_user_robot_by_pk.tradersettings
+        traderSettings: {
+          ...response.cpz_user_robot_by_pk.tradersettings,
+          mode: response.cpz_user_robot_by_pk.run_mode
+        }
       };
     }
     return null;
@@ -54,7 +56,7 @@ async function getUserRobotDB({ id }) {
         name: "DBError",
         cause: error,
         info: {
-          userRobotId: id
+          userRobotId
         }
       },
       "Failed to query user robot from DB;"

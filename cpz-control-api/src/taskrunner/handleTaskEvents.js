@@ -25,7 +25,8 @@ import {
   MARKETWATCHER_SERVICE,
   CANDLEBATCHER_SERVICE,
   ADVISER_SERVICE,
-  TRADER_SERVICE
+  TRADER_SERVICE,
+  EXWATCHER_SERVICE
 } from "cpzServices";
 import {
   STATUS_STARTED,
@@ -129,7 +130,7 @@ async function handleStarted(context, eventData) {
     ) {
       switch (eventType) {
         case TASKS_EXWATCHER_STARTED_EVENT.eventType:
-          serviceName = CANDLEBATCHER_SERVICE;
+          serviceName = EXWATCHER_SERVICE;
           break;
         case TASKS_ADVISER_STARTED_EVENT.eventType:
           serviceName = ADVISER_SERVICE;
@@ -140,6 +141,7 @@ async function handleStarted(context, eventData) {
         default:
           return;
       }
+      context.log("handleStarted", taskId, serviceName);
       const userRobots = await findUserRobotsByServiceId({
         taskId,
         serviceName
@@ -147,6 +149,7 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         userRobots.map(async userRobotState => {
+          context.log(userRobotState);
           const userRobot = new UserRobot(userRobotState);
           if (error) {
             userRobot.error = error;
@@ -160,6 +163,7 @@ async function handleStarted(context, eventData) {
               await RobotRunner.start(context, newState);
             }
           }
+          context.log(userRobot.getCurrentState());
         })
       );
     }
@@ -327,7 +331,7 @@ async function handleStopped(context, eventData) {
     ) {
       switch (eventType) {
         case TASKS_EXWATCHER_STOPPED_EVENT.eventType:
-          serviceName = CANDLEBATCHER_SERVICE;
+          serviceName = EXWATCHER_SERVICE;
           break;
         case TASKS_ADVISER_STOPPED_EVENT.eventType:
           serviceName = ADVISER_SERVICE;

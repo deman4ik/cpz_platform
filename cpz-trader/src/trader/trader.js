@@ -51,8 +51,6 @@ class Trader {
     this._robotId = state.robotId;
     /* Идентификатор пользователя */
     this._userId = state.userId;
-    /* Идентификатор советника */
-    this._adviserId = state.adviserId;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -498,7 +496,6 @@ class Trader {
       taskId: this._taskId,
       robotId: this._robotId,
       userId: this._userId,
-      adviserId: this._adviserId,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

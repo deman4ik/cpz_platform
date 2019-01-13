@@ -1,3 +1,4 @@
+import { createErrorOutput } from "cpzUtils/error";
 import BacktesterRunner from "../../taskrunner/services/backtesterRunner";
 
 async function startBacktester(_, { params }, { context }) {
@@ -9,9 +10,14 @@ async function startBacktester(_, { params }, { context }) {
       status
     };
   } catch (error) {
+    const errorOutput = createErrorOutput(error);
     return {
       success: false,
-      error: error.message
+      error: {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      }
     };
   }
 }
@@ -25,9 +31,14 @@ async function stopBacktester(_, { taskId }, { context }) {
       status
     };
   } catch (error) {
+    const errorOutput = createErrorOutput(error);
     return {
       success: false,
-      error: error.message
+      error: {
+        name: errorOutput.name,
+        message: errorOutput.message,
+        info: errorOutput.info
+      }
     };
   }
 }

@@ -21,11 +21,6 @@ const TASKS_TRADER_START_EVENT = {
       type: "string",
       empty: false
     },
-    adviserId: {
-      description: "Adviser task Id.",
-      type: "string",
-      empty: false
-    },
     exchange: { description: "Exchange code.", type: "string", empty: false },
     asset: { description: "Base currency.", type: "string", empty: false },
     currency: { description: "Quote currency.", type: "string", empty: false },

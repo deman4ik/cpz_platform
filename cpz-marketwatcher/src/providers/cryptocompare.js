@@ -280,9 +280,9 @@ class CryptocompareProvider extends BaseProvider {
   }
 
   async stop() {
-    this._socket.close();
     this._status = STATUS_STOPPED;
     await this._save();
+    this._socket.close();
     process.exit(0);
   }
 

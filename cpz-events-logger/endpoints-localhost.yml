@@ -76,6 +76,8 @@ endpoints:
   - CPZ.Tasks.Importer.Started
   - CPZ.Tasks.Importer.Stopped
   - CPZ.Tasks.Importer.Finished
+  - CPZ.Tasks.Exwatcher.Started
+  - CPZ.Tasks.Exwatcher.Stopped
 # Backtester
 - host: "cpz-backtester"
   port: 8108

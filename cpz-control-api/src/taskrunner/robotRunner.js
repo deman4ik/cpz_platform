@@ -38,6 +38,7 @@ class RobotRunner extends BaseRunner {
       userRobotState = userRobot.getCurrentState();
 
       if (userRobotState.exwatcherStatus !== STATUS_STARTED) {
+        context.log.info("ExWatcher!");
         const exwatcherParams = {
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
@@ -54,36 +55,13 @@ class RobotRunner extends BaseRunner {
 
       if (
         userRobotState.exwatcherStatus === STATUS_STARTED &&
-        userRobotState.adviserStatus !== STATUS_STARTED &&
-        userRobotState.adviserStatus !== STATUS_STARTING
-      ) {
-        const adviserParams = {
-          robotId: userRobotState.robotId,
-          exchange: userRobotState.exchange,
-          asset: userRobotState.asset,
-          currency: userRobotState.currency,
-          timeframe: userRobotState.timeframe,
-          strategyName: userRobotState.strategyName,
-          settings: userRobotState.adviserSettings
-        };
-
-        const result = AdviserRunner.start(context, adviserParams);
-        userRobot.adviserId = result.taskId;
-        userRobot.adviserStatus = result.status;
-        await userRobot.save();
-        userRobotState = userRobot.getCurrentState();
-      }
-
-      if (
-        userRobotState.exwatcherStatus === STATUS_STARTED &&
-        userRobotState.adviserStatus === STATUS_STARTED &&
         userRobotState.traderStatus !== STATUS_STARTED &&
         userRobotState.traderStatus !== STATUS_STARTING
       ) {
+        context.log.info("Trader!");
         const traderParams = {
           robotId: userRobotState.robotId,
           userId: userRobotState.userId,
-          adviserId: userRobotState.adviserId,
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
           currency: userRobotState.currency,
@@ -96,6 +74,31 @@ class RobotRunner extends BaseRunner {
         userRobot.traderStatus = result.status;
         await userRobot.save();
         userRobotState = userRobot.getCurrentState();
+      }
+
+      if (
+        userRobotState.traderStatus === STATUS_STARTED &&
+        userRobotState.adviserStatus !== STATUS_STARTED &&
+        userRobotState.adviserStatus !== STATUS_STARTING
+      ) {
+        context.log.info("Adviser!");
+        const adviserParams = {
+          robotId: userRobotState.robotId,
+          exchange: userRobotState.exchange,
+          asset: userRobotState.asset,
+          currency: userRobotState.currency,
+          timeframe: userRobotState.timeframe,
+          strategyName: userRobotState.strategyName,
+          settings: userRobotState.adviserSettings
+        };
+
+        const result = await AdviserRunner.start(context, adviserParams);
+        context.log(result);
+        userRobot.adviserId = result.taskId;
+        userRobot.adviserStatus = result.status;
+        await userRobot.save();
+        userRobotState = userRobot.getCurrentState();
+        context.log(userRobotState);
       }
 
       return {
@@ -116,10 +119,10 @@ class RobotRunner extends BaseRunner {
     }
   }
 
-  static async stop(robotParams) {
+  static async stop(context, robotParams) {
     try {
       genErrorIfExist(validateStop(robotParams));
-      const userRobotState = getUserRobotById(robotParams.id);
+      const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(userRobotState);
       context.log.info(`UserRobot ${userRobot.id} stop`);
@@ -169,10 +172,10 @@ class RobotRunner extends BaseRunner {
     }
   }
 
-  static async update(robotParams) {
+  static async update(context, robotParams) {
     try {
       genErrorIfExist(validateUpdate(robotParams));
-      const userRobotState = getUserRobotById(robotParams.id);
+      const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(userRobotState);
       context.log.info(`UserRobot ${userRobot.id} update`);
