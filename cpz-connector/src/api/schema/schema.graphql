@@ -28,7 +28,7 @@ input PrivateConnectorInput {
 }
 
 type Error {
-    code: String!
+    name: String!
     message: String!
     info: JSON
 }

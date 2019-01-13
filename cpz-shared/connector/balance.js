@@ -7,7 +7,7 @@ async function getBalanceEX({ exchange, proxy, userId }) {
         balance(connectorInput: $connectorInput){
           success
           error {
-            code
+            name
             message
             info
           }
@@ -22,8 +22,12 @@ async function getBalanceEX({ exchange, proxy, userId }) {
       }
     };
 
-    const response = await client.request(query, variables);
-    return response.balance;
+    const { balance } = await client.request(query, variables);
+    if (!balance.success) {
+      const { name, info, message } = balance.error;
+      throw new VError({ name, info }, message);
+    }
+    return balance.balance;
   } catch (error) {
     throw new VError(
       {

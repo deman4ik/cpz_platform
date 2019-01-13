@@ -60,7 +60,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }
@@ -134,7 +134,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }
@@ -190,7 +190,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }
@@ -210,7 +210,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       try {
         await pretry(call, this._retryOptions);
       } catch (error) {
-        err = { code: error.constructor.name, message: error.message };
+        err = { name: error.constructor.name, message: error.message };
       }
 
       const checkOrder = await this.checkOrder({ exId, asset, currency });
@@ -222,7 +222,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }

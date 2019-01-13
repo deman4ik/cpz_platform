@@ -17,7 +17,7 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
         ) {
           success
           error {
-            code
+            name
             message
             info
           }
@@ -36,8 +36,8 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
 
     const { lastMinuteCandle } = await client.request(query, variables);
     if (!lastMinuteCandle.success) {
-      const { code, info, message } = lastMinuteCandle.error;
-      throw new VError({ name: code, info }, message);
+      const { name, info, message } = lastMinuteCandle.error;
+      throw new VError({ name, info }, message);
     }
     return lastMinuteCandle.candle;
   } catch (error) {
@@ -76,7 +76,7 @@ async function minuteCandlesEX({
         ) {
           success
           error {
-            code
+            name
             message
             info
           }
@@ -97,8 +97,8 @@ async function minuteCandlesEX({
 
     const { minuteCandles } = await client.request(query, variables);
     if (!minuteCandles.success) {
-      const { code, info, message } = minuteCandles.error;
-      throw new VError({ name: code, info }, message);
+      const { name, info, message } = minuteCandles.error;
+      throw new VError({ name, info }, message);
     }
     return minuteCandles.candles;
   } catch (error) {

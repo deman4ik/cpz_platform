@@ -14,7 +14,7 @@ async function createOrderEX({
     createOrder(connectorInput: $connectorInput, order: $order){
       success
       error {
-        code
+        name
         message
         info
       }
@@ -38,8 +38,8 @@ async function createOrderEX({
 
     const { createOrder } = await client.request(query, variables);
     if (!createOrder.success) {
-      const { code, info, message } = createOrder.error;
-      throw new VError({ name: code, info }, message);
+      const { name, info, message } = createOrder.error;
+      throw new VError({ name, info }, message);
     }
     return createOrder.order;
   } catch (error) {
@@ -69,7 +69,7 @@ async function cancelOrderEX({
         cancelOrder(connectorInput: $connectorInput, order: $order) {
           success
           error {
-            code
+            name
             message
             info
           }
@@ -92,8 +92,8 @@ async function cancelOrderEX({
 
     const { cancelOrder } = await client.request(query, variables);
     if (!cancelOrder.success) {
-      const { code, info, message } = cancelOrder.error;
-      throw new VError({ name: code, info }, message);
+      const { name, info, message } = cancelOrder.error;
+      throw new VError({ name, info }, message);
     }
     return cancelOrder.order;
   } catch (error) {
@@ -120,7 +120,7 @@ async function checkOrderEX({
         order(connectorInput: $connectorInput, order: $order) {
           success
           error {
-            code
+            name
             message
             info
           }
@@ -144,8 +144,8 @@ async function checkOrderEX({
 
     const { order } = await client.request(query, variables);
     if (!order.success) {
-      const { code, info, message } = order.error;
-      throw new VError({ name: code, info }, message);
+      const { name, info, message } = order.error;
+      throw new VError({ name, info }, message);
     }
     return order.order;
   } catch (error) {

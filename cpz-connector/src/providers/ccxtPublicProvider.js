@@ -62,7 +62,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }
@@ -116,7 +116,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     } catch (error) {
       return {
         success: false,
-        error: { code: error.constructor.name, message: error.message }
+        error: { name: error.constructor.name, message: error.message }
       };
     }
   }
