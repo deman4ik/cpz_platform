@@ -9,12 +9,23 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_BUSY,
+  createPositionSlug,
+  createCurrentPriceSlug
+} from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { getTraderById, updateTraderState } from "cpzStorage";
+import {
+  getTraderById,
+  updateTraderState,
+  getActivePositionsBySlug,
+  getCurrentPrice
+} from "cpzStorage";
 import Trader from "./trader";
 
 const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
@@ -96,22 +107,25 @@ async function handleStop(context, eventData) {
     if (traderState.status === STATUS_BUSY) {
       // Создаем запрос на завершение при следующей итерации
       newState.stopRequested = true;
+      await updateTraderState(newState);
     } else {
+      const trader = new Trader(traderState);
       // Помечаем как остановленный
-      newState.status = STATUS_STOPPED;
-      newState.endedAt = dayjs().toJSON();
+      trader.status = STATUS_STOPPED;
+      await trader.save();
+      await trader.closeActivePositions();
+
+      // Публикуем событие - успех
+      await publishEvents(TASKS_TOPIC, {
+        service: TRADER_SERVICE,
+        subject: eventData.eventSubject,
+        eventType: TASKS_TRADER_STOPPED_EVENT,
+        data: {
+          taskId: eventData.taskId
+        }
+      });
     }
     // Обновляем состояние проторговщика
-    await updateTraderState(newState);
-    // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
-      eventType: TASKS_TRADER_STOPPED_EVENT,
-      data: {
-        taskId: eventData.taskId
-      }
-    });
   } catch (error) {
     const errorOutput = createErrorOutput(
       new VError(

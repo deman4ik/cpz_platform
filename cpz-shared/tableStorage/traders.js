@@ -111,6 +111,38 @@ const getActiveTradersBySlug = async slug => {
   }
 };
 
+const getActiveTradersWithStopRequested = async () => {
+  try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+    const stopRequestedFilter = TableQuery.booleanFilter(
+      "stopRequested",
+      TableUtilities.QueryComparisons.EQUAL,
+      true
+    );
+
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        startedStatusFilter,
+        TableUtilities.TableOperators.AND,
+        stopRequestedFilter
+      )
+    );
+    return await tableStorage.queryEntities(STORAGE_TRADERS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TraderStorageError",
+        cause: error
+      },
+      "Failed to read active traders with Stop requested"
+    );
+  }
+};
+
 /**
  * Save Trader state
  *
@@ -162,6 +194,7 @@ export {
   getTraderById,
   findTrader,
   getActiveTradersBySlug,
+  getActiveTradersWithStopRequested,
   saveTraderState,
   updateTraderState,
   deleteTraderState

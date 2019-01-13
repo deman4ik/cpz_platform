@@ -1,6 +1,6 @@
 import dayjs from "cpzDayjs";
 import VError from "verror";
-
+import { v4 as uuid } from "uuid";
 import { TRADER_SERVICE } from "cpzServices";
 import {
   REALTIME_MODE,
@@ -10,25 +10,35 @@ import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_SHORT,
+  TRADE_ACTION_CLOSE_LONG,
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
+  ORDER_POS_DIR_ENTRY,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
   ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
   createTraderSlug,
-  createPositionSlug
+  createPositionSlug,
+  createCurrentPriceSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import { saveTraderState, getPosition } from "cpzStorage";
+import {
+  saveTraderState,
+  getPosition,
+  getActivePositionsBySlug,
+  getCurrentPrice
+} from "cpzStorage";
 import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
+
 /**
  * Класс проторговщика
  *
@@ -197,6 +207,66 @@ class Trader {
     );
   }
 
+  async closePosition(price, positionState) {
+    try {
+      const closeSignal = {
+        price,
+        orderType: ORDER_TYPE_MARKET,
+        signalId: uuid(),
+        positionId: positionState.positionId
+      };
+      if (positionState.direction === ORDER_DIRECTION_BUY) {
+        closeSignal.action = TRADE_ACTION_CLOSE_LONG;
+      } else {
+        closeSignal.action = TRADE_ACTION_CLOSE_SHORT;
+      }
+      await this.handleSignal(closeSignal);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "ClosePosition",
+          cause: error
+        },
+        "Failed to close active position"
+      );
+    }
+  }
+
+  async closeActivePositions() {
+    try {
+      const positionsState = await getActivePositionsBySlug(
+        createPositionSlug({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency
+        })
+      );
+      if (positionsState.length > 0) {
+        const price = await getCurrentPrice(
+          createCurrentPriceSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          })
+        );
+
+        /* eslint-disable no-restricted-syntax, no-await-in-loop */
+        for (const positionState of positionsState) {
+          await this.closePosition(price, positionState);
+        }
+        /* no-restricted-syntax, no-await-in-loop */
+      }
+    } catch (error) {
+      throw new VError(
+        {
+          name: "CloseActivePositions",
+          cause: error
+        },
+        "Failed to close active positions"
+      );
+    }
+  }
+
   /**
    *Создание новой позиции
    *
@@ -216,7 +286,6 @@ class Trader {
       currency: this._currency,
       timeframe: this._timeframe,
       direction:
-        this._signal.action === TRADE_ACTION_CLOSE_SHORT ||
         this._signal.action === TRADE_ACTION_LONG
           ? ORDER_DIRECTION_BUY
           : ORDER_DIRECTION_SELL,

@@ -13,6 +13,8 @@ const STORAGE_CANDLEBATCHERS_TABLE = "Candlebatchers"; // Candlebatcher
 const STORAGE_CANDLESCACHED_TABLE = "CandlesCached"; // Candlebatcher / Adviser
 const STORAGE_CANDLESTEMP_TABLE = "CandlesTemp"; // Importer
 const STORAGE_CANDLESPENDING_TABLE = "CandlesPending"; // Candlebatcher
+const STORAGE_CURRENTPRICES_TABLE = "CurrentPrices"; // Current market prices
+const STORAGE_EXWATCHERS_TABLE = "Exwatchers"; // Exchange data watcher
 const STORAGE_IMPORTERS_TABLE = "Importers"; // Importer
 const STORAGE_MARKETWATCHERS_TABLE = "Marketwatchers"; // Marketwatcher
 const STORAGE_POSITIONS_TABLE = "Positions"; // Trader
@@ -20,7 +22,6 @@ const STORAGE_SIGNALSPENDING_TABLE = "SignalsPending"; // Trader
 const STORAGE_TICKSCACHED_TABLE = "TicksCashed"; // Marketwatcher / Adviser
 const STORAGE_TRADERS_TABLE = "Traders"; // Trader
 const STORAGE_USERROBOTS_TABLE = "UserRobots";
-const STORAGE_EXWATCHERS_TABLE = "Exwatchers"; // Exchange data watcher
 
 const STORAGE_TASKS_EVENTS_TABLE = "TasksEvents";
 const STORAGE_SIGNALS_EVENTS_TABLE = "SignalsEvents";
@@ -41,6 +42,7 @@ export {
   STORAGE_CANDLESCACHED_TABLE,
   STORAGE_CANDLESTEMP_TABLE,
   STORAGE_CANDLESPENDING_TABLE,
+  STORAGE_CURRENTPRICES_TABLE,
   STORAGE_IMPORTERS_TABLE,
   STORAGE_MARKETWATCHERS_TABLE,
   STORAGE_POSITIONS_TABLE,

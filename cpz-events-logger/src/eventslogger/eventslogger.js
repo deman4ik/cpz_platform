@@ -1,10 +1,12 @@
+import { createCurrentPriceSlug } from "cpzState";
 import {
   saveTasksEvent,
   saveSignalsEvent,
   saveOrdersEvent,
   savePositionsEvent,
   saveLogsEvent,
-  saveErrorsEvent
+  saveErrorsEvent,
+  saveCurrentPrice
 } from "cpzStorage";
 import {
   CANDLES_NEWCANDLE_EVENT,
@@ -30,6 +32,18 @@ class EventsLogger {
     try {
       const type = event.eventType;
       if (type === CANDLES_NEWCANDLE_EVENT.eventType) {
+        if (this.logToStorage) {
+          const { price, exchange, asset, currency, timeframe } = event.data;
+          if (timeframe === 1) {
+            const slug = createCurrentPriceSlug({ exchange, asset, currency });
+            await saveCurrentPrice({
+              PartitionKey: slug,
+              RowKey: slug,
+              price,
+              source: "candle"
+            });
+          }
+        }
         if (this.logToPostgre)
           await saveCandlesDB({
             timeframe: event.data.timeframe,

@@ -13,11 +13,14 @@ async function handleTimer(context) {
   try {
     const positionsState = await getIdledOpenPositions();
 
+    if (positionsState.length === 0) return;
+
     const handlePositionIdleOrdersResult = await Promise.all(
       positionsState.map(async state => {
         try {
           const position = new Position(state);
           const openOrders = position.getOpenOrders();
+          // TODO: Проверка и закрытие уже открытых ордеров, которые висят слишком долго
           if (openOrders.length > 0) {
             const traderState = await getTraderById(position.traderId);
             if (traderState && traderState.status === STATUS_STARTED) {
@@ -84,7 +87,7 @@ async function handleTimer(context) {
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
-      subject: "Trader.Timer",
+      subject: "Trader.Positions.Timer",
       eventType: ERROR_TRADER_EVENT,
       data: {
         error: {

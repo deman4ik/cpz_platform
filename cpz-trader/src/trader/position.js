@@ -179,7 +179,9 @@ class Position {
       positionId: this._positionId, // Идентификатор позиции
       orderType: signal.orderType, // Тип ордера
       price: signal.price, // Цена ордера
-      volume: this._settings.volume,
+      volume:
+        (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
+        this._settings.volume,
       exchange: this._exchange, // Код биржи
       asset: this._asset, // Базовая валюта
       currency: this._currency, // Котировка валюты
@@ -187,8 +189,8 @@ class Position {
       createdAt: dayjs().toJSON(), // Дата и время создания
       status: ORDER_STATUS_NEW, // Статус ордера
       direction:
-        signal.action === TRADE_ACTION_CLOSE_SHORT ||
-        signal.action === TRADE_ACTION_LONG
+        signal.action === TRADE_ACTION_LONG ||
+        signal.action === TRADE_ACTION_CLOSE_SHORT
           ? ORDER_DIRECTION_BUY
           : ORDER_DIRECTION_SELL, // Направление торговли ордера
       positionDirection, // Место ордера в позиции

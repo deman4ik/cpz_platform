@@ -1,5 +1,5 @@
 import VError from "verror";
-import { STATUS_PENDING } from "cpzState";
+import { STATUS_PENDING, createCurrentPriceSlug } from "cpzState";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import {
   TICKS_NEWTICK_EVENT,
@@ -11,7 +11,11 @@ import {
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
-import { saveMarketwatcherState, saveCachedTick } from "cpzStorage";
+import {
+  saveMarketwatcherState,
+  saveCachedTick,
+  saveCurrentPrice
+} from "cpzStorage";
 
 class BaseProvider {
   constructor(state) {
@@ -132,6 +136,19 @@ class BaseProvider {
   async _saveTrade(tick) {
     try {
       await saveCachedTick(tick);
+      if (tick.type === "tick") {
+        const slug = createCurrentPriceSlug({
+          exchange: tick.exchange,
+          asset: tick.asset,
+          currency: tick.currency
+        });
+        await saveCurrentPrice({
+          PartitionKey: slug,
+          RowKey: slug,
+          price: tick.price,
+          source: "tick"
+        });
+      }
     } catch (error) {
       const errorOutput = createErrorOutput(
         new VError(

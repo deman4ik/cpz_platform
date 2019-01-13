@@ -25,8 +25,6 @@ const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
  */
 async function handlePrice(context, eventData) {
   try {
-    // Валидация входных параметров
-    // genErrorIfExist(validateNewPrice(eventData.currentPrice)); //пока не актуально
     const { currentPrice } = eventData;
     context.log.info("handlesPrice()", currentPrice.price);
     const positionsState = await getActivePositionsBySlug(

@@ -10,4 +10,5 @@ export * from "./ticks";
 export * from "./traders";
 export * from "./events";
 export * from "./userRobots";
-export * from "./exwatcher";
+export * from "./exwatchers";
+export * from "./currentPrices";
