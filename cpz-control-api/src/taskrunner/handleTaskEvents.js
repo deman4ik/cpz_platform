@@ -17,6 +17,7 @@ import {
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOPPED_EVENT,
   TASKS_TRADER_UPDATED_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT,
   ERROR_CONTROL_EVENT,
   ERROR_TOPIC
 } from "cpzEventTypes";
@@ -40,7 +41,21 @@ import { createErrorOutput } from "cpzUtils/error";
 import {
   findExWatchersByServiceId,
   findExWatchersByImporterId,
-  findUserRobotsByServiceId
+  findUserRobotsByServiceId,
+  getMarketwatcherById,
+  deleteMarketwatcherState,
+  getCandlebatcherById,
+  deleteCandlebatcherState,
+  getExWatcherById,
+  deleteExWatcherState,
+  getAdviserById,
+  deleteAdviserState,
+  getTraderById,
+  deleteTraderState,
+  getImporterById,
+  deleteImporterState,
+  getBacktesterById,
+  deleteBacktesterState
 } from "cpzStorage";
 import UserRobot from "./userrobot";
 import RobotRunner from "./robotRunner";
@@ -264,6 +279,7 @@ async function handleStopped(context, eventData) {
     const { eventType, taskId, error } = eventData;
     let serviceName;
 
+    if (!error) await deleteState(taskId, eventType);
     if (
       eventType === TASKS_MARKETWATCHER_STOPPED_EVENT.eventType ||
       eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType
@@ -317,6 +333,7 @@ async function handleStopped(context, eventData) {
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
             await exWatcher.save();
           } else {
+            exWatcher[`${serviceName}Id`] = null;
             exWatcher[`${serviceName}Status`] = STATUS_STOPPED;
             await exWatcher.save();
           }
@@ -355,6 +372,7 @@ async function handleStopped(context, eventData) {
             userRobot[`${serviceName}Status`] = STATUS_ERROR;
             await userRobot.save();
           } else {
+            userRobot[`${serviceName}Id`] = null;
             userRobot[`${serviceName}Status`] = STATUS_STOPPED;
             await userRobot.save();
           }
@@ -487,4 +505,43 @@ async function handleUpdated(context, eventData) {
   }
 }
 
+async function deleteState(taskId, eventType) {
+  try {
+    if (eventType === TASKS_MARKETWATCHER_STOPPED_EVENT.eventType) {
+      const marketwatcher = await getMarketwatcherById(taskId);
+      if (marketwatcher) await deleteMarketwatcherState(marketwatcher);
+    } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType) {
+      const candlebatcher = await getCandlebatcherById(taskId);
+      if (candlebatcher) await deleteCandlebatcherState(candlebatcher);
+    } else if (eventType === TASKS_EXWATCHER_STOPPED_EVENT.eventType) {
+      const exWatcher = await getExWatcherById(taskId);
+      if (exWatcher) await deleteExWatcherState(exWatcher);
+    } else if (eventType === TASKS_ADVISER_STOPPED_EVENT.eventType) {
+      const adviser = await getAdviserById(taskId);
+      if (adviser) await deleteAdviserState(adviser);
+    } else if (eventType === TASKS_TRADER_STOPPED_EVENT.eventType) {
+      const trader = await getTraderById(taskId);
+      if (trader) await deleteTraderState(trader);
+    } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT.eventType) {
+      const importer = await getImporterById(taskId);
+      if (importer) await deleteImporterState(importer);
+    } else if (eventType === TASKS_BACKTESTER_STOPPED_EVENT.eventType) {
+      const backtester = await getBacktesterById(taskId);
+      if (backtester) await deleteBacktesterState(backtester);
+    }
+  } catch (error) {
+    throw new VError(
+      {
+        name: "DeleteStateError",
+        cause: error,
+        info: {
+          taskId,
+          eventType
+        }
+      },
+      "Failed to delete state after '%s' event",
+      eventType
+    );
+  }
+}
 export { handleStarted, handleFinished, handleStopped, handleUpdated };

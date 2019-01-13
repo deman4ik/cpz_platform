@@ -87,9 +87,24 @@ const findExWatchersByImporterId = async ({ taskId }) => {
 const saveExWatcherState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_EXWATCHERS_TABLE, state);
 
+/**
+ * Delete Exchange Data Watcher state
+ *
+ * @param {Object} input
+ * @param {string} input.RowKey
+ * @param {string} input.PartitionKey
+ */
+const deleteExWatcherState = async ({ RowKey, PartitionKey, metadata }) =>
+  tableStorage.deleteEntity(STORAGE_EXWATCHERS_TABLE, {
+    RowKey,
+    PartitionKey,
+    metadata
+  });
+
 export {
   getExWatcherById,
   findExWatchersByServiceId,
   findExWatchersByImporterId,
-  saveExWatcherState
+  saveExWatcherState,
+  deleteExWatcherState
 };

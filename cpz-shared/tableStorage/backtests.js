@@ -77,7 +77,7 @@ const saveBacktesterPositions = async items =>
  * @param {string} input.RowKey
  * @param {string} input.PartitionKey
  */
-const deleteBacktesterState = async ({ RowKey, PartitionKey }) => {
+const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
   const items = await tableStorage.getEntitiesByPartitionKey(
     STORAGE_BACKTESTITEMS_TABLE,
     RowKey
@@ -110,7 +110,8 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey }) => {
 
   await tableStorage.deleteEntity(STORAGE_BACKTESTS_TABLE, {
     RowKey,
-    PartitionKey
+    PartitionKey,
+    metadata
   });
 };
 export {
