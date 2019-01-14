@@ -25,24 +25,20 @@ class BacktesterRunner extends BaseRunner {
     try {
       const taskId = uuid();
 
-      genErrorIfExist(validateStart({ ...props, taskId, adviserId: taskId }));
+      genErrorIfExist(validateStart({ ...props, taskId }));
       const {
-        debug,
-        strategyName,
-        userId,
         robotId,
+        userId,
+        strategyName,
         exchange,
         asset,
         currency,
         timeframe,
-        settings,
-        slippageStep,
-        deviation,
-        volume,
-        requiredHistoryCache,
-        requiredHistoryMaxBars,
         dateFrom,
-        dateTo
+        dateTo,
+        settings,
+        adviserSettings,
+        traderSettings
       } = props;
 
       await publishEvents(TASKS_TOPIC, {
@@ -58,23 +54,18 @@ class BacktesterRunner extends BaseRunner {
         eventType: TASKS_BACKTESTER_START_EVENT,
         data: {
           taskId,
-          adviserId: taskId,
-          debug,
-          strategyName,
-          userId,
           robotId,
+          userId,
+          strategyName,
           exchange,
           asset,
           currency,
           timeframe,
           settings,
-          slippageStep,
-          deviation,
-          volume,
-          requiredHistoryCache,
-          requiredHistoryMaxBars,
           dateFrom,
-          dateTo
+          dateTo,
+          adviserSettings,
+          traderSettings
         }
       });
       return { taskId, status: STATUS_STARTING };
