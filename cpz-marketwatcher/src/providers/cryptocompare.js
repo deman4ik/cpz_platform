@@ -25,6 +25,10 @@ class CryptocompareProvider extends BaseProvider {
     this._subscribeToSocketEvents();
   }
 
+  get connected() {
+    return this._socket.connected;
+  }
+
   _getDirection(dir) {
     switch (dir) {
       case "1":
