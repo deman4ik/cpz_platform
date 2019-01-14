@@ -1,5 +1,6 @@
 {
   "disabled": false,
+  "scriptFile": "../dist/funcCandleEvents.js",
   "bindings": [
     {
       "authLevel": "anonymous",

@@ -1,8 +1,9 @@
 {
   "disabled": false,
+  "scriptFile": "../dist/funcTimer.js",
   "bindings": [
     {
-      "name": "myTimer",
+      "name": "TraderTimer",
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "1 * * * * *"

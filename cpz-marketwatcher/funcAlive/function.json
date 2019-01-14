@@ -1,5 +1,6 @@
 {
   "disabled": false,
+  "scriptFile": "../dist/funcAlive.js",
   "bindings": [
     {
       "authLevel": "function",

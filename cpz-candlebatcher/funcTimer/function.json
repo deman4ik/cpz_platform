@@ -1,5 +1,6 @@
 {
   "disabled": false,
+  "scriptFile": "../dist/funcTimer.js",
   "bindings": [
     {
       "name": "myTimer",
