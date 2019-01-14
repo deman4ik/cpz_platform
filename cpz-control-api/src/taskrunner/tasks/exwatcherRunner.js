@@ -15,11 +15,11 @@ import {
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
-import BaseRunner from "./baseRunner";
+import BaseRunner from "../baseRunner";
 import ExWatcher from "./exwatcher";
-import CandlebatcherRunner from "./services/candlebatcherRunner";
-import MarketwatcherRunner from "./services/marketwatcherRunner";
-import ImporterRunner from "./services/importerRunner";
+import CandlebatcherRunner from "../services/candlebatcherRunner";
+import MarketwatcherRunner from "../services/marketwatcherRunner";
+import ImporterRunner from "../services/importerRunner";
 
 const validateStart = createValidator(EXWATCHER_START_PARAMS);
 const validateStop = createValidator(EXWATCHER_STOP_PARAMS);

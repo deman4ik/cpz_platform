@@ -11,7 +11,7 @@ import {
   subscribeMarketwatcher,
   unsubscribeMarketwatcher
 } from "./marketwatcher";
-import { startRobot, stopRobot, updateRobot } from "./robot";
+import { startUserRobot, stopUserRobot, updateUserRobot } from "./userRobot";
 import { startExWatcher, stopExWatcher, updateExWatcher } from "./exwatcher";
 import { startTrader, stopTrader, updateTrader } from "./trader";
 
@@ -31,9 +31,9 @@ const mutations = {
   startExWatcher,
   stopExWatcher,
   updateExWatcher,
-  startRobot,
-  stopRobot,
-  updateRobot,
+  startUserRobot,
+  stopUserRobot,
+  updateUserRobot,
   startTrader,
   stopTrader,
   updateTrader

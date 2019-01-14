@@ -57,10 +57,10 @@ import {
   getBacktesterById,
   deleteBacktesterState
 } from "cpzStorage";
-import UserRobot from "./userrobot";
-import RobotRunner from "./robotRunner";
-import ExWatcher from "./exwatcher";
-import ExWatcherRunner from "./exwatcherRunner";
+import UserRobot from "./tasks/userRobot";
+import UserRobotRunner from "./tasks/userRobotRunner";
+import ExWatcher from "./tasks/exwatcher";
+import ExWatcherRunner from "./tasks/exwatcherRunner";
 
 async function handleStarted(context, eventData) {
   try {
@@ -175,7 +175,7 @@ async function handleStarted(context, eventData) {
             await userRobot.save();
             if (userRobot.status === STATUS_PENDING) {
               const newState = userRobot.getCurrentState();
-              await RobotRunner.start(context, newState);
+              await UserRobotRunner.start(context, newState);
             }
           }
           context.log(userRobot.getCurrentState());

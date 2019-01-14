@@ -4,7 +4,6 @@
 # import { AdviserParams, AdviserUpdateParams } from "src/api/schema/adviser.graphql"
 # import { TraderParams, TraderUpdateParams } from "src/api/schema/trader.graphql"
 # import { BacktesterParams } from "src/api/schema/backtester.graphql"
-# import { UserRobotParams } from "src/api/schema/robot.graphql"
 # import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
 # import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
 
@@ -44,9 +43,9 @@ type Mutation {
     stopExWatcher(taskId: String!): ServiceRunnerResponse!
     updateExWatcher(taskId: String!, params: CandlebatcherUpdateParams!): Response!
     # UserRobot
-    startRobot(userRobotId: String!): ServiceRunnerResponse!
-    stopRobot(userRobotId: String!): ServiceRunnerResponse!
-    updateRobot(userRobotId: String!, params: TraderUpdateParams!): Response!
+    startUserRobot(userRobotId: String!): ServiceRunnerResponse!
+    stopUserRobot(userRobotId: String!): ServiceRunnerResponse!
+    updateUserRobot(userRobotId: String!, params: TraderUpdateParams!): Response!
 }
 
 type Error {

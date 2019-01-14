@@ -1,12 +1,12 @@
 import { getUserRobotDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
-import RobotRunner from "../../taskrunner/robotRunner";
+import UserRobotRunner from "../../taskrunner/tasks/userRobotRunner";
 
-async function startRobot(_, { userRobotId }, { context }) {
+async function startUserRobot(_, { userRobotId }, { context }) {
   try {
     const userRobot = await getUserRobotDB(userRobotId);
     context.log(userRobot);
-    const { status } = await RobotRunner.start(context, userRobot);
+    const { status } = await UserRobotRunner.start(context, userRobot);
     return {
       success: true,
       taskId: userRobotId,
@@ -25,9 +25,9 @@ async function startRobot(_, { userRobotId }, { context }) {
   }
 }
 
-async function stopRobot(_, { userRobotId }, { context }) {
+async function stopUserRobot(_, { userRobotId }, { context }) {
   try {
-    const { status } = await RobotRunner.stop(context, { id: userRobotId });
+    const { status } = await UserRobotRunner.stop(context, { id: userRobotId });
     return {
       success: true,
       taskId: userRobotId,
@@ -46,9 +46,9 @@ async function stopRobot(_, { userRobotId }, { context }) {
   }
 }
 
-async function updateRobot(_, { userRobotId, params }, { context }) {
+async function updateUserRobot(_, { userRobotId, params }, { context }) {
   try {
-    await RobotRunner.update(context, { id: userRobotId, ...params });
+    await UserRobotRunner.update(context, { id: userRobotId, ...params });
     return {
       success: true
     };
@@ -65,4 +65,4 @@ async function updateRobot(_, { userRobotId, params }, { context }) {
   }
 }
 
-export { startRobot, stopRobot, updateRobot };
+export { startUserRobot, stopUserRobot, updateUserRobot };

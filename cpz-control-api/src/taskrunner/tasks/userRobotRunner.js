@@ -12,17 +12,17 @@ import {
   USER_ROBOT_UPDATE_PARAMS
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import BaseRunner from "./baseRunner";
-import UserRobot from "./userrobot";
-import TraderRunner from "./services/traderRunner";
-import AdviserRunner from "./services/adviserRunner";
+import BaseRunner from "../baseRunner";
+import UserRobot from "./userRobot";
+import TraderRunner from "../services/traderRunner";
+import AdviserRunner from "../services/adviserRunner";
 import ExWatcherRunner from "./exwatcherRunner";
 
 const validateStart = createValidator(USER_ROBOT_START_PARAMS);
 const validateStop = createValidator(USER_ROBOT_STOP_PARAMS);
 const validateUpdate = createValidator(USER_ROBOT_UPDATE_PARAMS);
 
-class RobotRunner extends BaseRunner {
+class UserRobotRunner extends BaseRunner {
   static async start(context, robotParams) {
     try {
       genErrorIfExist(validateStart(robotParams));
@@ -93,12 +93,10 @@ class RobotRunner extends BaseRunner {
         };
 
         const result = await AdviserRunner.start(context, adviserParams);
-        context.log(result);
         userRobot.adviserId = result.taskId;
         userRobot.adviserStatus = result.status;
         await userRobot.save();
         userRobotState = userRobot.getCurrentState();
-        context.log(userRobotState);
       }
 
       return {
@@ -203,4 +201,4 @@ class RobotRunner extends BaseRunner {
   }
 }
 
-export default RobotRunner;
+export default UserRobotRunner;
