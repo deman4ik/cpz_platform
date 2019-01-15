@@ -5,8 +5,7 @@ import {
   arraysDiff,
   getInvertedTimestamp,
   sortDesc,
-  sortAsc,
-  filterOutNonUnique
+  sortAsc
 } from "./helpers";
 import { CANDLE_PREVIOUS, createCachedCandleSlug } from "../config/state";
 
