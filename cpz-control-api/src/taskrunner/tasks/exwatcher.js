@@ -10,7 +10,11 @@ import {
   createWatcherSlug,
   createExWatcherTaskSubject
 } from "cpzState";
-import { TASKS_TOPIC, TASKS_EXWATCHER_STARTED_EVENT } from "cpzEventTypes";
+import {
+  TASKS_TOPIC,
+  TASKS_EXWATCHER_STARTED_EVENT,
+  TASKS_EXWATCHER_STOPPED_EVENT
+} from "cpzEventTypes";
 import publishEvents from "cpzEvents";
 import { saveExWatcherState } from "cpzStorage";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
@@ -52,7 +56,7 @@ class ExWatcher {
     this._status = state.status || STATUS_PENDING;
     this._error = state.error;
     this._metadata = state.metadata;
-    this._events = [];
+    this._event = null;
   }
 
   _setStatus() {
@@ -64,7 +68,7 @@ class ExWatcher {
     ) {
       this._status = STATUS_STARTED;
       this._error = null;
-      this._events.push({
+      this._event = {
         id: uuid(),
         dataVersion: "1.0",
         eventTime: new Date(),
@@ -77,7 +81,7 @@ class ExWatcher {
         data: {
           taskId: this._taskId
         }
-      });
+      };
       return;
     }
 
@@ -86,6 +90,20 @@ class ExWatcher {
       this._marketwatcherStatus === STATUS_STOPPED
     ) {
       this._status = STATUS_STOPPED;
+      this._event = {
+        id: uuid(),
+        dataVersion: "1.0",
+        eventTime: new Date(),
+        subject: createExWatcherTaskSubject({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency
+        }),
+        eventType: TASKS_EXWATCHER_STOPPED_EVENT.eventType,
+        data: {
+          taskId: this._taskId
+        }
+      };
       return;
     }
 
@@ -230,9 +248,9 @@ class ExWatcher {
   async save() {
     try {
       await saveExWatcherState(this.getCurrentState());
-      if (this._events.length > 0) {
-        await publishEvents(TASKS_TOPIC, this._events);
-        this._events = [];
+      if (this._events) {
+        await publishEvents(TASKS_TOPIC, [this._event]);
+        this._event = null;
       }
     } catch (error) {
       throw new VError(

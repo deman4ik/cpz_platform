@@ -12,3 +12,4 @@ export * from "./topics";
 export * from "./trades";
 export * from "./userRobot";
 export * from "./exwatcher";
+export * from "./backtestTasks";

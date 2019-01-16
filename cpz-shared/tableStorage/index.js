@@ -1,4 +1,5 @@
 export * from "./advisers";
+export * from "./backtesters";
 export * from "./backtests";
 export * from "./candlebatchers";
 export * from "./candles";

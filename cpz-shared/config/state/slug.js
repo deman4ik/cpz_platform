@@ -36,6 +36,10 @@ function createBacktesterSlug({
   return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
 
+function createBacktestSlug({ exchange, asset, currency, timeframe, robotId }) {
+  return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
+}
+
 function createRobotSlug({ exchange, asset, currency, robotId }) {
   return `${exchange}.${asset}.${currency}.${robotId}`;
 }
@@ -51,6 +55,7 @@ function createCurrentPriceSlug({ exchange, asset, currency }) {
 export {
   createAdviserSlug,
   createBacktesterSlug,
+  createBacktestSlug,
   createCachedCandleSlug,
   createCachedTickSlug,
   createCandlebatcherSlug,

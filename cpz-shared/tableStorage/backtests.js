@@ -1,113 +1,63 @@
-import {
-  STORAGE_BACKTESTS_TABLE,
-  STORAGE_BACKTESTITEMS_TABLE,
-  STORAGE_BACKTESTSTRATLOG_TABLE,
-  STORAGE_BACKTESTSIGNALS_TABLE,
-  STORAGE_BACKTESTORDERS_TABLE,
-  STORAGE_BACKTESTPOSITIONS_TABLE
-} from "./tables";
+import azure from "azure-storage";
+import VError from "verror";
+import { STORAGE_BACKTESTS_TABLE } from "./tables";
 import tableStorage from "./tableStorage";
 
+const { TableQuery, TableUtilities } = azure;
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTITEMS_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTSTRATLOG_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTSIGNALS_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTORDERS_TABLE);
-tableStorage.createTableIfNotExists(STORAGE_BACKTESTPOSITIONS_TABLE);
 /**
- * Query Backtester State by uniq Task ID
+ * Query Backtest State by uniq Task ID
  *
  * @param {string} taskId
- * @returns {BacktesterState}
+ * @returns {BacktestState}
  */
-const getBacktesterById = async taskId =>
+const getBacktestById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_BACKTESTS_TABLE, taskId);
 
 /**
- * Creates new or update current Backtester State
+ * Find Backtest by any service Id
  *
- * @param {BacktesterState} state
+ * @param {object} input
+ * @param {string} input.taskId Service taskId
+ * @param {string} input.serviceName Service Name
  */
-const saveBacktesterState = async state =>
+const findBacktestsByServiceId = async ({ taskId, serviceName }) => {
+  try {
+    const query = new TableQuery().where(
+      TableQuery.stringFilter(
+        `${serviceName}Id`,
+        TableUtilities.QueryComparisons.EQUAL,
+        taskId
+      )
+    );
+    return await tableStorage.queryEntities(STORAGE_BACKTESTS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { taskId, serviceName }
+      },
+      "Failed to read backtests state"
+    );
+  }
+};
+/**
+ * Creates new or update current Backtest State
+ *
+ * @param {BacktestState} state
+ */
+const saveBacktestState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_BACKTESTS_TABLE, state);
 
 /**
- * Saves backtestitem
- *
- * @param {object} state
- */
-const saveBacktesterItems = async items =>
-  tableStorage.insertOrMergeArray(STORAGE_BACKTESTITEMS_TABLE, items);
-
-/**
- * Saves backtest strategy logs
- *
- * @param {object} state
- */
-const saveBacktesterStratLogs = async items =>
-  tableStorage.insertOrMergeArray(STORAGE_BACKTESTSTRATLOG_TABLE, items);
-
-/**
- * Saves backtest signals
- *
- * @param {SignalState} state
- */
-const saveBacktesterSignals = async items =>
-  tableStorage.insertOrMergeArray(STORAGE_BACKTESTSIGNALS_TABLE, items);
-
-/**
- * Saves backtest orders
- *
- * @param {OderState} state
- */
-const saveBacktesterOrders = async items =>
-  tableStorage.insertOrMergeArray(STORAGE_BACKTESTORDERS_TABLE, items);
-
-/**
- * Saves backtest positions
- *
- * @param {PositionState} state
- */
-const saveBacktesterPositions = async items =>
-  tableStorage.insertOrMergeArray(STORAGE_BACKTESTPOSITIONS_TABLE, items);
-/**
- * Delete Backtester state and all Backtester Items
+ * Delete Backtest state and all Backtester Items
  *
  * @param {Object} input
  * @param {string} input.RowKey
  * @param {string} input.PartitionKey
  */
-const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
-  const items = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTITEMS_TABLE,
-    RowKey
-  );
-  await tableStorage.deleteArray(STORAGE_BACKTESTITEMS_TABLE, items);
-
-  const strLogs = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTSTRATLOG_TABLE,
-    RowKey
-  );
-  await tableStorage.deleteArray(STORAGE_BACKTESTSTRATLOG_TABLE, strLogs);
-
-  const signals = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTSIGNALS_TABLE,
-    RowKey
-  );
-  await tableStorage.deleteArray(STORAGE_BACKTESTSIGNALS_TABLE, signals);
-
-  const orders = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTORDERS_TABLE,
-    RowKey
-  );
-  await tableStorage.deleteArray(STORAGE_BACKTESTORDERS_TABLE, orders);
-
-  const positions = await tableStorage.getEntitiesByPartitionKey(
-    STORAGE_BACKTESTPOSITIONS_TABLE,
-    RowKey
-  );
-  await tableStorage.deleteArray(STORAGE_BACKTESTPOSITIONS_TABLE, positions);
-
+const deleteBacktestState = async ({ RowKey, PartitionKey, metadata }) => {
   await tableStorage.deleteEntity(STORAGE_BACKTESTS_TABLE, {
     RowKey,
     PartitionKey,
@@ -115,12 +65,8 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
   });
 };
 export {
-  getBacktesterById,
-  saveBacktesterState,
-  saveBacktesterItems,
-  saveBacktesterStratLogs,
-  saveBacktesterSignals,
-  saveBacktesterOrders,
-  saveBacktesterPositions,
-  deleteBacktesterState
+  getBacktestById,
+  findBacktestsByServiceId,
+  saveBacktestState,
+  deleteBacktestState
 };

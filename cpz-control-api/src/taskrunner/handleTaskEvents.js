@@ -17,7 +17,9 @@ import {
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOPPED_EVENT,
   TASKS_TRADER_UPDATED_EVENT,
+  TASKS_BACKTESTER_STARTED_EVENT,
   TASKS_BACKTESTER_STOPPED_EVENT,
+  TASKS_BACKTESTER_FINISHED_EVENT,
   ERROR_CONTROL_EVENT,
   ERROR_TOPIC
 } from "cpzEventTypes";
@@ -27,7 +29,9 @@ import {
   CANDLEBATCHER_SERVICE,
   ADVISER_SERVICE,
   TRADER_SERVICE,
-  EXWATCHER_SERVICE
+  EXWATCHER_SERVICE,
+  IMPORTER_SERVICE,
+  BACKTESTER_SERVICE
 } from "cpzServices";
 import {
   STATUS_STARTED,
@@ -42,6 +46,7 @@ import {
   findExWatchersByServiceId,
   findExWatchersByImporterId,
   findUserRobotsByServiceId,
+  findBacktestsByServiceId,
   getMarketwatcherById,
   deleteMarketwatcherState,
   getCandlebatcherById,
@@ -57,6 +62,8 @@ import {
   getBacktesterById,
   deleteBacktesterState
 } from "cpzStorage";
+import Backtest from "./tasks/backtest";
+import BacktestRunner from "./tasks/backtestRunner";
 import UserRobot from "./tasks/userRobot";
 import UserRobotRunner from "./tasks/userRobotRunner";
 import ExWatcher from "./tasks/exwatcher";
@@ -136,6 +143,29 @@ async function handleStarted(context, eventData) {
           }
         })
       );
+
+      serviceName = IMPORTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Status`] = STATUS_STARTED;
+            await backtest.save();
+
+            const newState = backtest.getCurrentState();
+            await ExWatcherRunner.start(context, newState);
+          }
+        })
+      );
     }
 
     if (
@@ -179,6 +209,28 @@ async function handleStarted(context, eventData) {
             }
           }
           context.log(userRobot.getCurrentState());
+        })
+      );
+    }
+
+    if (eventType === TASKS_BACKTESTER_STARTED_EVENT.eventType) {
+      serviceName = BACKTESTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Status`] = STATUS_STARTED;
+            await backtest.save();
+          }
         })
       );
     }
@@ -240,6 +292,51 @@ async function handleFinished(context, eventData) {
 
             const newState = exWatcher.getCurrentState();
             await ExWatcherRunner.start(context, newState);
+          }
+        })
+      );
+
+      serviceName = IMPORTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Status`] = STATUS_FINISHED;
+            await backtest.save();
+
+            const newState = backtest.getCurrentState();
+            await BacktestRunner.start(context, newState);
+          }
+        })
+      );
+    }
+
+    if (eventType === TASKS_BACKTESTER_FINISHED_EVENT.eventType) {
+      serviceName = BACKTESTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Status`] = STATUS_FINISHED;
+            await backtest.save();
           }
         })
       );
@@ -339,6 +436,27 @@ async function handleStopped(context, eventData) {
           }
         })
       );
+
+      serviceName = IMPORTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Id`] = null;
+            backtest[`${serviceName}Status`] = STATUS_STOPPED;
+            await backtest.save();
+          }
+        })
+      );
     }
 
     if (
@@ -375,6 +493,29 @@ async function handleStopped(context, eventData) {
             userRobot[`${serviceName}Id`] = null;
             userRobot[`${serviceName}Status`] = STATUS_STOPPED;
             await userRobot.save();
+          }
+        })
+      );
+    }
+
+    if (eventType === TASKS_BACKTESTER_STOPPED_EVENT.eventType) {
+      serviceName = BACKTESTER_SERVICE;
+      const backtests = await findBacktestsByServiceId({
+        taskId,
+        serviceName
+      });
+
+      await Promise.all(
+        backtests.map(async backtestState => {
+          const backtest = new Backtest(backtestState);
+          if (error) {
+            backtest.error = error;
+            backtest[`${serviceName}Status`] = STATUS_ERROR;
+            await backtest.save();
+          } else {
+            backtest[`${serviceName}Id`] = null;
+            backtest[`${serviceName}Status`] = STATUS_STOPPED;
+            await backtest.save();
           }
         })
       );

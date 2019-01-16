@@ -27,6 +27,17 @@ function createTraderTaskSubject({
   return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
 }
 
+function createBacktestTaskSubject({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  userId
+}) {
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
+}
+
 function createBacktesterTaskSubject({
   exchange,
   asset,
@@ -68,6 +79,7 @@ export {
   createCandlebatcherTaskSubject,
   createAdviserTaskSubject,
   createTraderTaskSubject,
+  createBacktestTaskSubject,
   createBacktesterTaskSubject,
   createNewCandleSubject,
   createNewSignalSubject,
