@@ -122,6 +122,10 @@ const TRADES_ORDER_EVENT = {
       description: "Order created in exchange timestamp UTC.",
       type: "datetime"
     },
+    exLastTrade: {
+      description: "Order last trade in exchange timestamp UTC.",
+      type: "datetime"
+    },
     average: {
       description: "Average executed price.",
       type: "number"
