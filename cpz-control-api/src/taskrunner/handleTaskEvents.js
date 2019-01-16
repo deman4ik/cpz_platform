@@ -160,9 +160,6 @@ async function handleStarted(context, eventData) {
           } else {
             backtest[`${serviceName}Status`] = STATUS_STARTED;
             await backtest.save();
-
-            const newState = backtest.getCurrentState();
-            await ExWatcherRunner.start(context, newState);
           }
         })
       );

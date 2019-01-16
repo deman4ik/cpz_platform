@@ -26,6 +26,12 @@ const resolvers = {
   Mutation: mutations
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ctx => ({
+    context: ctx.context
+  })
+});
 
 export default server.createHandler();

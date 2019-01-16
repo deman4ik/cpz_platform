@@ -1,9 +1,18 @@
+import { getRobotDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
-import BacktesterRunner from "../../taskrunner/services/backtesterRunner";
+import BacktestRunner from "../../taskrunner/tasks/backtestRunner";
 
-async function startBacktester(_, { params }, { context }) {
+async function startBacktest(_, { params }, { context }) {
   try {
-    const { taskId, status } = await BacktesterRunner.start(context, params);
+    const robot = await getRobotDB(params.robotId);
+    const backtestParams = {
+      ...robot,
+      ...params
+    };
+    const { taskId, status } = await BacktestRunner.start(
+      context,
+      backtestParams
+    );
     return {
       success: true,
       taskId,
@@ -22,9 +31,9 @@ async function startBacktester(_, { params }, { context }) {
   }
 }
 
-async function stopBacktester(_, { taskId }, { context }) {
+async function stopBacktest(_, { taskId }, { context }) {
   try {
-    const { status } = await BacktesterRunner.stop(context, { taskId });
+    const { status } = await BacktestRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -43,4 +52,4 @@ async function stopBacktester(_, { taskId }, { context }) {
   }
 }
 
-export { startBacktester, stopBacktester };
+export { startBacktest, stopBacktest };

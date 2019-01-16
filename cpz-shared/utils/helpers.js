@@ -79,6 +79,18 @@ function durationMinutes(dateFrom, dateTo, positive = false) {
 }
 
 /**
+ * Количество минут между двумя датами в заданном таймфрейме
+ *
+ * @param {*} dateFrom
+ * @param {*} dateTo
+ * @param {int} timeframe
+ */
+function durationInTimeframe(dateFrom, dateTo, timeframe) {
+  const minutes = durationMinutes(dateFrom, dateTo);
+  return Math.floor(minutes / timeframe);
+}
+
+/**
  * Процент выполнения
  *
  * @param {*} completedDuration
@@ -183,6 +195,7 @@ export {
   getInvertedTimestamp,
   generateKey,
   durationMinutes,
+  durationInTimeframe,
   completedPercent,
   getPreviousMinuteRange,
   divideDateByDays,

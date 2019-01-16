@@ -3,25 +3,21 @@ import dayjs from "cpzDayjs";
 import {
   STATUS_STARTING,
   STATUS_STARTED,
-  STATUS_STOPPING,
   STATUS_STOPPED,
   STATUS_FINISHED
 } from "cpzState";
 import { getBacktestById } from "cpzStorage";
-import {
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT
-} from "cpzEventTypes";
+import { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
+import { durationInTimeframe } from "cpzUtils/helpers";
 import { countCandlesDB } from "cpzDB";
 import BaseRunner from "../baseRunner";
 import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
 import Backtest from "./backtest";
 
-const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
+const validateStart = createValidator(BACKTEST_START_PARAMS);
+const validateStop = createValidator(BACKTEST_STOP_PARAMS);
 
 class BacktestRunner extends BaseRunner {
   static async start(context, params) {
@@ -32,17 +28,18 @@ class BacktestRunner extends BaseRunner {
       context.log.info(`Backtest ${backtest.taskId}: start`);
 
       backtestState = backtest.getCurrentState();
-
+      context.log(backtestState);
       if (
         backtestState.importerStatus !== STATUS_STARTED &&
         backtestState.importerStatus !== STATUS_FINISHED
       ) {
         context.log.info("Importer!");
-        let dateFrom = backtestState.dateFrom;
-        if (backtestState.candlebatcherSettings.requiredHistoryMaxBars > 0) {
+        let dateFrom;
+        ({ dateFrom } = backtestState);
+        if (backtestState.adviserSettings.requiredHistoryMaxBars > 0) {
           dateFrom = dayjs(backtestState.dateFrom)
             .add(
-              -backtestState.candlebatcherSettings.requiredHistoryMaxBars /
+              -backtestState.adviserSettings.requiredHistoryMaxBars *
                 backtestState.timeframe,
               "minute"
             )
@@ -58,19 +55,21 @@ class BacktestRunner extends BaseRunner {
           dateTo: backtestState.dateTo
         });
 
-        const expectedBars = 0; // TODO
-
+        const expectedBars = durationInTimeframe(
+          dateFrom,
+          backtestState.dateTo,
+          backtestState.timeframe
+        );
+        context.log(totalBarsInDb, expectedBars);
         if (totalBarsInDb < expectedBars) {
           const importerParams = {
-            providerType: backtestState.candlebatcherProviderType,
             exchange: backtestState.exchange,
             asset: backtestState.asset,
             currency: backtestState.currency,
             timeframes: backtestState.timeframes,
             dateFrom,
             dateTo: backtestState.dateTo,
-            saveToCache: false,
-            proxy: backtestState.candlebatcherSettings.proxy
+            saveToCache: false
           };
 
           const result = await ImporterRunner.start(context, importerParams);
@@ -93,6 +92,7 @@ class BacktestRunner extends BaseRunner {
       ) {
         context.log.info("Backtester!");
         const backtesterParams = {
+          taskId: backtestState.backtesterId,
           robotId: backtestState.robotId,
           userId: backtestState.userId,
           strategyName: backtestState.strategyName,
@@ -108,7 +108,6 @@ class BacktestRunner extends BaseRunner {
         };
 
         const result = await BacktesterRunner.start(context, backtesterParams);
-        backtest.backtesterId = result.taskId;
         backtest.backtesterStatus = result.status;
         await backtest.save();
       }

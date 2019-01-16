@@ -1,9 +1,9 @@
 import { createErrorOutput } from "cpzUtils/error";
-import ImporterRunner from "../../taskrunner/services/importerRunner";
+import BacktesterRunner from "../../taskrunner/services/backtesterRunner";
 
-async function startImporter(_, { params }, { context }) {
+async function startBacktesterService(_, { params }, { context }) {
   try {
-    const { taskId, status } = await ImporterRunner.start(context, params);
+    const { taskId, status } = await BacktesterRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -22,9 +22,9 @@ async function startImporter(_, { params }, { context }) {
   }
 }
 
-async function stopImporter(_, { taskId }, { context }) {
+async function stopBacktesterService(_, { taskId }, { context }) {
   try {
-    const { status } = await ImporterRunner.stop(context, { taskId });
+    const { status } = await BacktesterRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -43,4 +43,4 @@ async function stopImporter(_, { taskId }, { context }) {
   }
 }
 
-export { startImporter, stopImporter };
+export { startBacktesterService, stopBacktesterService };

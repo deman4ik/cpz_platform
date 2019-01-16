@@ -1,7 +1,7 @@
 import { createErrorOutput } from "cpzUtils/error";
 import TraderRunner from "../../taskrunner/services/traderRunner";
 
-async function startTrader(_, { params }, { context }) {
+async function startTraderService(_, { params }, { context }) {
   try {
     const { taskId, status } = await TraderRunner.start(context, params);
     return {
@@ -22,7 +22,7 @@ async function startTrader(_, { params }, { context }) {
   }
 }
 
-async function stopTrader(_, { taskId }, { context }) {
+async function stopTraderService(_, { taskId }, { context }) {
   try {
     const { status } = await TraderRunner.stop(context, { taskId });
     return {
@@ -43,7 +43,7 @@ async function stopTrader(_, { taskId }, { context }) {
   }
 }
 
-async function updateTrader(_, { params }, { context }) {
+async function updateTraderService(_, { params }, { context }) {
   try {
     await TraderRunner.update(context, params);
     return {
@@ -62,4 +62,4 @@ async function updateTrader(_, { params }, { context }) {
   }
 }
 
-export { startTrader, stopTrader, updateTrader };
+export { startTraderService, stopTraderService, updateTraderService };

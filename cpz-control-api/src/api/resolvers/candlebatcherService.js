@@ -1,9 +1,9 @@
 import { createErrorOutput } from "cpzUtils/error";
-import AdviserRunner from "../../taskrunner/services/adviserRunner";
+import CandlebatcherRunner from "../../taskrunner/services/candlebatcherRunner";
 
-async function startAdviser(_, { params }, { context }) {
+async function startCandlebatcherService(_, { params }, { context }) {
   try {
-    const { taskId, status } = await AdviserRunner.start(context, params);
+    const { taskId, status } = await CandlebatcherRunner.start(context, params);
     return {
       success: true,
       taskId,
@@ -22,9 +22,9 @@ async function startAdviser(_, { params }, { context }) {
   }
 }
 
-async function stopAdviser(_, { taskId }, { context }) {
+async function stopCandlebatcherService(_, { taskId }, { context }) {
   try {
-    const { status } = await AdviserRunner.stop(context, { taskId });
+    const { status } = await CandlebatcherRunner.stop(context, { taskId });
     return {
       success: true,
       taskId,
@@ -43,9 +43,9 @@ async function stopAdviser(_, { taskId }, { context }) {
   }
 }
 
-async function updateAdviser(_, { params }, { context }) {
+async function updateCandlebatcherService(_, { params }, { context }) {
   try {
-    await AdviserRunner.update(context, params);
+    await CandlebatcherRunner.update(context, params);
     return {
       success: true
     };
@@ -62,4 +62,8 @@ async function updateAdviser(_, { params }, { context }) {
   }
 }
 
-export { startAdviser, stopAdviser, updateAdviser };
+export {
+  startCandlebatcherService,
+  stopCandlebatcherService,
+  updateCandlebatcherService
+};

@@ -97,6 +97,9 @@ class Importer {
       this.dateTo,
       this.limit
     );
+    this.log("dateFrom", state.dateFrom, this.dateFrom);
+    this.log("dateTo", state.dateTo, this.dateTo);
+    this.log("loadDurationChunks", this.loadDurationChunks);
     /* Всего свечей для загрузки */
     this.loadTotalDuration = this.loadDurationChunks.total;
     /* Загружено свечей */
@@ -177,24 +180,48 @@ class Importer {
 
   async loadAndSaveCandles({ dateFrom, dateTo, duration }) {
     try {
+      this.log(
+        "loadAndSaveCandles",
+        dayjs(dateFrom)
+          .utc()
+          .toISOString(),
+        dayjs(dateTo)
+          .utc()
+          .toISOString(),
+        duration
+      );
       const response = await minuteCandlesEX({
         proxy: this.proxy,
         exchange: this.exchange,
         asset: this.asset,
         currency: this.currency,
-        date: dateFrom.toISOString(),
+        date: dayjs(dateFrom)
+          .utc()
+          .toISOString(),
         limit: duration
       });
+      this.log("response", response.length);
+      this.log("response", response[0]);
+      this.log("response", response[response.length - 1]);
       if (response && response.length > 0) {
         const filteredData = [
           ...new Set(
             response.filter(
               candle =>
-                candle.time >= dateFrom.valueOf() &&
-                candle.time <= dateTo.valueOf()
+                candle.time >=
+                  dayjs(dateFrom)
+                    .utc()
+                    .valueOf() &&
+                candle.time <=
+                  dayjs(dateTo)
+                    .utc()
+                    .valueOf()
             )
           )
         ].sort((a, b) => sortAsc(a.time, b.time));
+        this.log("filteredData", filteredData.length);
+        this.log("filteredData", filteredData[0]);
+        this.log("filteredData", filteredData[filteredData.length - 1]);
         if (filteredData && filteredData.length > 0) {
           const data = filteredData.map(candle => ({
             ...candle,
@@ -209,25 +236,29 @@ class Importer {
             taskId: this.taskId,
             type: CANDLE_IMPORTED
           }));
-
+          this.log("data", data.length);
           if (data)
             return {
               success: true,
-              date: dateFrom,
+              dateFrom,
+              dateTo,
               duration,
               count: data.length,
               data
             };
         }
       }
+      this.log("Empty response");
       return {
         success: false,
-        date: dateFrom,
+        dateFrom,
+        dateTo,
         duration,
         count: 0,
         error: "Empty response"
       };
     } catch (error) {
+      this.log("Error", error.message);
       return {
         success: false,
         date: dateFrom,
@@ -451,7 +482,7 @@ class Importer {
           taskId: this.taskId
         }
       });
-      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 10);
+      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 1);
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       this.log("Starting loading candles...");
       for (const loadChunk of loadChunks) {
@@ -464,10 +495,10 @@ class Importer {
         const errorLoads = loadIterationResult.filter(
           result => result.success === false
         );
-
+        this.log("erroLoads", errorLoads);
         const retryLoadIterationResult = await Promise.all(
-          errorLoads.map(async ({ date, duration }) =>
-            this.loadAndSaveCandles({ date, duration })
+          errorLoads.map(async ({ dateFrom, dateTo, duration }) =>
+            this.loadAndSaveCandles({ dateFrom, dateTo, duration })
           )
         );
 
@@ -481,8 +512,9 @@ class Importer {
               name: "ImportCandles",
               info: {
                 errorIterations: retryErrorLoads.map(errorLoad => ({
-                  date: errorLoad.date,
-                  limit: errorLoad.limit
+                  dateFrom: errorLoad.dateFrom,
+                  dateTo: errorLoad.dateTo,
+                  duration: errorLoad.duration
                 }))
               }
             },

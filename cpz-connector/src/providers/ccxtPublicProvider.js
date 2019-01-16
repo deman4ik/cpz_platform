@@ -25,8 +25,9 @@ class CCXTPublicProvider extends BasePublicProvider {
     return `${asset}/${currency}`;
   }
 
-  async loadLastMinuteCandle({ date = dayjs(), asset, currency }) {
+  async loadLastMinuteCandle(context, { date = dayjs(), asset, currency }) {
     try {
+      context.log("loadLastMinuteCandle()");
       const dateStart = dayjs(date).add(-2, "minute");
       const call = async () => {
         try {
@@ -60,6 +61,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         }
       };
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -67,19 +69,23 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadMinuteCandles({
-    date = dayjs().add(-1, "hour"),
-    limit = 60,
-    asset,
-    currency
-  }) {
+  async loadMinuteCandles(
+    context,
+    { date = dayjs().add(-1, "hour"), limit = 60, asset, currency }
+  ) {
     try {
+      context.log("loadMinuteCandles()", dayjs(date).toISOString());
+      const dateToLoad =
+        dayjs(date).valueOf() < dayjs().add(-1, "minute")
+          ? date
+          : dayjs().add(-1, "minute");
+
       const call = async () => {
         try {
           return await this.ccxt.fetchOHLCV(
             this.getSymbol(asset, currency),
             "1m",
-            dayjs(date).valueOf(),
+            dayjs(dateToLoad).valueOf(),
             limit
           );
         } catch (e) {
@@ -92,7 +98,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         return {
           success: false,
           error: {
-            code: "NetworkError",
+            name: "NetworkError",
             message: "Failed to get response from exchange"
           }
         };
@@ -109,11 +115,13 @@ class CCXTPublicProvider extends BasePublicProvider {
         close: candle[4],
         volume: candle[5]
       }));
+      context.log(candles.length);
       return {
         success: true,
         candles
       };
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }

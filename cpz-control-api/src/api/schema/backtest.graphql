@@ -1,11 +1,7 @@
-input BacktesterParams {
+input BacktestParams {
+    backtesterId: ID
     robotId: Int!
     userId: ID!
-    strategyName: String!
-    exchange: String!
-    asset: String!
-    currency: String!
-    timeframe: Int!
     dateFrom: Datetime!
     dateTo: Datetime!
     settings: BacktesterSettings

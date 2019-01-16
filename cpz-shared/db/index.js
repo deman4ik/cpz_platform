@@ -7,3 +7,4 @@ export * from "./positions";
 export * from "./signals";
 export * from "./tasksEvents";
 export * from "./userRobots";
+export * from "./robots";

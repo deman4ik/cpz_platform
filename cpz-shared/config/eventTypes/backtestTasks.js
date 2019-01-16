@@ -1,4 +1,57 @@
 import { BASE_ERROR } from "./events";
+import {
+  BACKTESTER_SETTINGS,
+  ADVISER_SETTINGS,
+  TRADER_SETTINGS
+} from "./settings";
+
+const BACKTEST_START_PARAMS = {
+  robotId: {
+    description: "Robot uniq Id.",
+    type: "number",
+    empty: false
+  },
+  userId: {
+    description: "User uniq Id.",
+    type: "string",
+    empty: false
+  },
+  // TODO: datefrom/dateto custom validation
+  dateFrom: {
+    description: "Backtest start date.",
+    type: "datetime"
+  },
+  dateTo: {
+    description: "Backtest end date.",
+    type: "datetime"
+  },
+  settings: {
+    description: "Backtester settings.",
+    type: "object",
+    props: BACKTESTER_SETTINGS,
+    optional: true
+  },
+  adviserSettings: {
+    description: "Adviser settings.",
+    type: "object",
+    props: ADVISER_SETTINGS,
+    optional: true
+  },
+  traderSettings: {
+    description: "Trader settings.",
+    type: "object",
+    props: TRADER_SETTINGS,
+    optional: true
+  }
+};
+
+const BACKTEST_STOP_PARAMS = {
+  taskId: {
+    description: "Uniq task id.",
+    type: "string",
+    empty: false
+  }
+};
 
 const TASKS_BACKTEST_STARTED_EVENT = {
   eventType: "CPZ.Tasks.Backtest.Started",
@@ -38,6 +91,8 @@ const TASKS_BACKTEST_FINISHED_EVENT = {
 };
 
 export {
+  BACKTEST_START_PARAMS,
+  BACKTEST_STOP_PARAMS,
   TASKS_BACKTEST_STARTED_EVENT,
   TASKS_BACKTEST_STOPPED_EVENT,
   TASKS_BACKTEST_FINISHED_EVENT

@@ -37,9 +37,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return `${asset}/${currency}`;
   }
 
-  async getBalance() {
+  async getBalance(context) {
     try {
-      console.log("getBalance()");
+      context.log("getBalance()");
       const call = async () => {
         try {
           return await this.ccxt.fetchBalance();
@@ -59,6 +59,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -80,13 +81,13 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return {};
   }
 
-  async createOrder(order) {
+  async createOrder(context, order) {
     try {
       /* 
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
       // TODO: Params
-      console.log("createOrder()");
+      context.log("createOrder()");
       const { direction, volume, price, asset, currency, params } = order;
       const orderParams = { ...this.getOrderParams(), ...params };
       this.clearOrderCache();
@@ -138,6 +139,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 } */
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -145,7 +147,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async checkOrder({ exId, asset, currency }) {
+  async checkOrder(context, { exId, asset, currency }) {
     try {
       console.log("checkOrder()");
       const call = async () => {
@@ -199,6 +201,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 }
 */
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -206,9 +209,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async cancelOrder({ exId, asset, currency }) {
+  async cancelOrder(context, { exId, asset, currency }) {
     try {
-      console.log("cancelOrder()");
+      context.log("cancelOrder()");
       const call = async () => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
@@ -224,13 +227,18 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         err = { name: error.constructor.name, message: error.message };
       }
 
-      const checkOrder = await this.checkOrder({ exId, asset, currency });
+      const checkOrder = await this.checkOrder(context, {
+        exId,
+        asset,
+        currency
+      });
       return {
         success: true,
         error: err,
         ...checkOrder
       };
     } catch (error) {
+      context.log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }

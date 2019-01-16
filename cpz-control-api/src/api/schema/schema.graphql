@@ -6,6 +6,7 @@
 # import { BacktesterParams } from "src/api/schema/backtester.graphql"
 # import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
 # import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
+# import { BacktestParams } from "src/api/schema/backtest.graphql"
 
 scalar Datetime
 scalar JSON
@@ -16,28 +17,28 @@ type Query {
 
 type Mutation {
     # Marketwatcher
-    startMarketwatcher(params: MarketwatcherParams!): ServiceRunnerResponse!
-    stopMarketwatcher(taskId: String!): ServiceRunnerResponse!
-    subscribeMarketwatcher(params: MarketwatcherSubParams!): Response!
-    unsubscribeMarketwatcher(params: MarketwatcherSubParams!): Response!
+    startMarketwatcherService(params: MarketwatcherParams!): ServiceRunnerResponse!
+    stopMarketwatcherService(taskId: String!): ServiceRunnerResponse!
+    subscribeMarketwatcherService(params: MarketwatcherSubParams!): Response!
+    unsubscribeMarketwatcherService(params: MarketwatcherSubParams!): Response!
     # Candlebatcher
-    startCandlebatcher(params: CandlebatcherParams!): ServiceRunnerResponse!
-    stopCandlebatcher(taskId: String!): ServiceRunnerResponse!
-    updateCandlebatcher(params: CandlebatcherUpdateParams!): Response!
+    startCandlebatcherService(params: CandlebatcherParams!): ServiceRunnerResponse!
+    stopCandlebatcherService(taskId: String!): ServiceRunnerResponse!
+    updateCandlebatcherService(params: CandlebatcherUpdateParams!): Response!
     # Importer 
-    startImporter(params: ImporterParams!): ServiceRunnerResponse!
-    stopImporter(taskId: String!): ServiceRunnerResponse!
+    startImporterService(params: ImporterParams!): ServiceRunnerResponse!
+    stopImporterService(taskId: String!): ServiceRunnerResponse!
     # Adviser
-    startAdviser(params: AdviserParams!): ServiceRunnerResponse!
-    stopAdviser(taskId: String!): ServiceRunnerResponse!
-    updateAdviser(params: AdviserUpdateParams!): Response!
+    startAdviserService(params: AdviserParams!): ServiceRunnerResponse!
+    stopAdviserService(taskId: String!): ServiceRunnerResponse!
+    updateAdviserService(params: AdviserUpdateParams!): Response!
     # Trader
-    startTrader(params: TraderParams!): ServiceRunnerResponse!
-    stopTrader(taskId: String!): ServiceRunnerResponse!
-    updateTrader(params: TraderUpdateParams!): Response!
+    startTraderService(params: TraderParams!): ServiceRunnerResponse!
+    stopTraderService(taskId: String!): ServiceRunnerResponse!
+    updateTraderService(params: TraderUpdateParams!): Response!
     # Backtester 
-    startBacktester(params: BacktesterParams!): ServiceRunnerResponse!
-    stopBacktester(taskId: String!): ServiceRunnerResponse!
+    startBacktesterService(params: BacktesterParams!): ServiceRunnerResponse!
+    stopBacktesterService(taskId: String!): ServiceRunnerResponse!
     # Exchange Data Watcher
     startExWatcher(params: ExWatcherParams!): ServiceRunnerResponse!
     stopExWatcher(taskId: String!): ServiceRunnerResponse!
@@ -46,6 +47,9 @@ type Mutation {
     startUserRobot(userRobotId: String!): ServiceRunnerResponse!
     stopUserRobot(userRobotId: String!): ServiceRunnerResponse!
     updateUserRobot(userRobotId: String!, params: TraderUpdateParams!): Response!
+    # Backtest
+    startBacktest(params: BacktestParams!): ServiceRunnerResponse!
+    stopBacktest(taskId: String!): ServiceRunnerResponse!
 }
 
 type Error {

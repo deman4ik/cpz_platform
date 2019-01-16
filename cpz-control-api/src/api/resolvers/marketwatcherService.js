@@ -1,7 +1,7 @@
 import { createErrorOutput } from "cpzUtils/error";
 import MarketwatcherRunner from "../../taskrunner/services/marketwatcherRunner";
 
-async function startMarketwatcher(_, { params }, { context }) {
+async function startMarketwatcherService(_, { params }, { context }) {
   try {
     const { taskId, status } = await MarketwatcherRunner.start(context, params);
     return {
@@ -22,7 +22,7 @@ async function startMarketwatcher(_, { params }, { context }) {
   }
 }
 
-async function stopMarketwatcher(_, { taskId }, { context }) {
+async function stopMarketwatcherService(_, { taskId }, { context }) {
   try {
     const { status } = await MarketwatcherRunner.stop(context, { taskId });
     return {
@@ -43,7 +43,7 @@ async function stopMarketwatcher(_, { taskId }, { context }) {
   }
 }
 
-async function subscribeMarketwatcher(_, { params }, { context }) {
+async function subscribeMarketwatcherService(_, { params }, { context }) {
   try {
     await MarketwatcherRunner.subscribe(context, params);
     return {
@@ -62,7 +62,7 @@ async function subscribeMarketwatcher(_, { params }, { context }) {
   }
 }
 
-async function unsubscribeMarketwatcher(_, { params }, { context }) {
+async function unsubscribeMarketwatcherService(_, { params }, { context }) {
   try {
     await MarketwatcherRunner.unsubscribe(context, params);
     return {
@@ -77,8 +77,8 @@ async function unsubscribeMarketwatcher(_, { params }, { context }) {
 }
 
 export {
-  startMarketwatcher,
-  stopMarketwatcher,
-  subscribeMarketwatcher,
-  unsubscribeMarketwatcher
+  startMarketwatcherService,
+  stopMarketwatcherService,
+  subscribeMarketwatcherService,
+  unsubscribeMarketwatcherService
 };

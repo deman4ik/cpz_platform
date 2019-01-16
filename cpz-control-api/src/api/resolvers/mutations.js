@@ -1,42 +1,56 @@
-import { startAdviser, stopAdviser, updateAdviser } from "./adviser";
-import { startBacktester, stopBacktester } from "./backtester";
 import {
-  startCandlebatcher,
-  stopCandlebatcher,
-  updateCandlebatcher
-} from "./candlebatcher";
+  startAdviserService,
+  stopAdviserService,
+  updateAdviserService
+} from "./adviserService";
 import {
-  startMarketwatcher,
-  stopMarketwatcher,
-  subscribeMarketwatcher,
-  unsubscribeMarketwatcher
-} from "./marketwatcher";
+  startBacktesterService,
+  stopBacktesterService
+} from "./backtesterService";
+import {
+  startCandlebatcherService,
+  stopCandlebatcherService,
+  updateCandlebatcherService
+} from "./candlebatcherService";
+import {
+  startMarketwatcherService,
+  stopMarketwatcherService,
+  subscribeMarketwatcherService,
+  unsubscribeMarketwatcherService
+} from "./marketwatcherService";
 import { startUserRobot, stopUserRobot, updateUserRobot } from "./userRobot";
 import { startExWatcher, stopExWatcher, updateExWatcher } from "./exwatcher";
-import { startTrader, stopTrader, updateTrader } from "./trader";
+import {
+  startTraderService,
+  stopTraderService,
+  updateTraderService
+} from "./traderService";
+import { startBacktest, stopBacktest } from "./backtest";
 
 const mutations = {
-  startAdviser,
-  stopAdviser,
-  updateAdviser,
-  startBacktester,
-  stopBacktester,
-  startCandlebatcher,
-  stopCandlebatcher,
-  updateCandlebatcher,
-  startMarketwatcher,
-  stopMarketwatcher,
-  subscribeMarketwatcher,
-  unsubscribeMarketwatcher,
+  startAdviserService,
+  stopAdviserService,
+  updateAdviserService,
+  startBacktest,
+  stopBacktest,
+  startBacktesterService,
+  stopBacktesterService,
+  startCandlebatcherService,
+  stopCandlebatcherService,
+  updateCandlebatcherService,
+  startMarketwatcherService,
+  stopMarketwatcherService,
+  subscribeMarketwatcherService,
+  unsubscribeMarketwatcherService,
   startExWatcher,
   stopExWatcher,
   updateExWatcher,
   startUserRobot,
   stopUserRobot,
   updateUserRobot,
-  startTrader,
-  stopTrader,
-  updateTrader
+  startTraderService,
+  stopTraderService,
+  updateTraderService
 };
 
 export default mutations;

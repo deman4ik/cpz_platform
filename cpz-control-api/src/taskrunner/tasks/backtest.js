@@ -33,7 +33,6 @@ class Backtest {
     this._asset = state.asset;
     this._currency = state.currency;
     this._timeframe = state.timeframe;
-    this._taskId = state.taskId || uuid();
     this._dateFrom = state.dateFrom;
     this._dateTo = state.dateTo;
     this._settings = {
@@ -76,7 +75,8 @@ class Backtest {
         (state.traderSettings && state.traderSettings.openOrderTimeout) ||
         TRADER_SETTINGS_DEFAULTS.openOrderTimeout
     };
-    this._backtesterId = state.backtesterId;
+    this._backtesterId = state.backtesterId || uuid();
+    this._taskId = this._backtesterId;
     this._backtesterStatus = state.backtesterStatus || STATUS_PENDING;
     this._importerId = state.importerId;
     this._importerStatus = state.importerStatus || STATUS_PENDING;
