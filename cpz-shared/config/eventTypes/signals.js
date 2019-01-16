@@ -1,5 +1,4 @@
 import { BASE_ERROR } from "./events";
-import { CANDLES_NEWCANDLE_EVENT } from "./candles";
 import { TRADER_SETTINGS } from "./settings";
 
 const SIGNALS_NEWSIGNAL_EVENT = {
@@ -49,10 +48,14 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       values: ["open", "close", "high", "low", "stop"],
       optional: true
     },
-    candle: {
-      description: "Signal from Candle.",
-      type: "object",
-      props: CANDLES_NEWCANDLE_EVENT.dataSchema,
+    candleId: {
+      description: "Candle uniq Id.",
+      type: "string",
+      optional: true
+    },
+    candleTimestamp: {
+      description: "Candle timestamp.",
+      type: "string",
       optional: true
     },
     positionId: {

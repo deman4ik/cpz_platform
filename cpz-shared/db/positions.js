@@ -32,7 +32,7 @@ async function savePositionsDB(data) {
         objects: $objects
         on_conflict: {
           constraint: c_positions_pk
-          update_columns: [status, exit_date, exit_price]
+          update_columns: [status, entry_date, entry_price, exit_date, exit_price]
         }
       ) {
         affected_rows

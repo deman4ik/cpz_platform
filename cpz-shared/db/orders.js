@@ -30,7 +30,7 @@ async function saveOrdersDB(data) {
       insert_cpz_trades(objects:$objects
         on_conflict: {
           constraint: c_trades_pk
-          update_columns: [status, price, exec_quantity]
+          update_columns: [status, price, exec_quantity, order_time, order_num]
         }
         ){
         affected_rows

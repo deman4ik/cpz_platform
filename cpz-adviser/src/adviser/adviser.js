@@ -679,8 +679,12 @@ class Adviser {
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
+        candleId: this._candle.id,
+        candleTimestamp: this._candle.timestamp,
         service: ADVISER_SERVICE,
-        timestamp: dayjs().toISOString()
+        timestamp: dayjs()
+          .utc()
+          .toISOString()
       }
     };
     this._signals.push(newSignal);

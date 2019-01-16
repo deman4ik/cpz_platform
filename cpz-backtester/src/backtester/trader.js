@@ -14,7 +14,7 @@ class TraderBacktester extends Trader {
     }
   }
 
-  async handlePrice({ price }) {
+  async handlePrice({ price, timestamp }) {
     try {
       this.log("handlePrice()");
       /* eslint-disable no-restricted-syntax */
@@ -27,7 +27,7 @@ class TraderBacktester extends Trader {
         ) {
           const requiredOrders = position.getRequiredOrders(price);
           if (requiredOrders.length > 0) {
-            await this.executeOrders(requiredOrders);
+            await this.executeOrders(requiredOrders, { price, timestamp });
           }
         }
         /* no-await-in-loop */

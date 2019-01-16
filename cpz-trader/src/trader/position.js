@@ -64,7 +64,7 @@ class Position {
     this._direction = state.direction;
     this._entry = state.entry || {
       /* Текущий статус открытия ["new","open","closed","canceled","error"] */
-      status: ORDER_STATUS_NEW,
+      status: null,
       price: null,
       date: null,
       executed: null
@@ -72,7 +72,7 @@ class Position {
 
     this._exit = state.exit || {
       /* Текущий статус закрытия ["new","open","closed","canceled","error"] */
-      status: ORDER_STATUS_NEW,
+      status: null,
       price: null,
       date: null,
       executed: null
@@ -186,7 +186,7 @@ class Position {
       asset: this._asset, // Базовая валюта
       currency: this._currency, // Котировка валюты
       timeframe: this._timeframe, // Таймфрейм
-      createdAt: dayjs().toJSON(), // Дата и время создания
+      createdAt: dayjs().toISOString(), // Дата и время создания
       status: ORDER_STATUS_NEW, // Статус ордера
       direction:
         signal.action === TRADE_ACTION_LONG ||
@@ -251,7 +251,18 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price) {
-    this.log("Checking order", order.orderId);
+    /* this.log(
+      "Checking order",
+      order.orderId,
+      "status",
+      order.status,
+      "direction",
+      order.direction,
+      "order price",
+      order.price,
+      "price",
+      price
+    ); */
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
       // Тип ордера - лимитный
@@ -323,7 +334,7 @@ class Position {
       // Если продаем и текущая цена выше цены сигнала
       if (
         (order.direction === ORDER_DIRECTION_BUY && price <= order.price) ||
-        (order.durection === ORDER_DIRECTION_SELL && price >= order.price)
+        (order.direction === ORDER_DIRECTION_SELL && price >= order.price)
       ) {
         // Нужно проверить ордер на бирже
         return { ...order, task: ORDER_TASK_CHECKLIMIT };
@@ -341,7 +352,12 @@ class Position {
    * @memberof Position
    */
   getRequiredOrders(price) {
-    this.log("Checking required orders for price", price);
+    /* this.log(
+      "Checking required orders for position",
+      this._settings.positionCode,
+      "and price",
+      price
+    ); */
     const requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
     if (
@@ -359,7 +375,7 @@ class Position {
     if (
       this._entry.status !== ORDER_STATUS_NEW &&
       (this._exit.status === ORDER_STATUS_NEW ||
-        this._entry.status === ORDER_STATUS_OPEN)
+        this._exit.status === ORDER_STATUS_OPEN)
     ) {
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       Object.keys(this._exitOrders).forEach(key => {
@@ -369,6 +385,16 @@ class Position {
           requiredOrders.push(checkedOrder);
         }
       });
+    }
+    if (requiredOrders.length > 0) {
+      this.log(
+        requiredOrders.length,
+        "required",
+        "for position",
+        this._settings.positionCode,
+        "and price",
+        price
+      );
     }
     // Возвращаем массив ордеров для дальнейшей обработки
     return requiredOrders;
@@ -391,7 +417,7 @@ class Position {
    * @memberof Position
    */
   getOpenOrders() {
-    this.log("Checking open orders...");
+    /* this.log("Checking open orders..."); */
     const openOrders = [];
     // Если ордера на открытие позиции ожидают обработки
     if (this._entry.status === ORDER_STATUS_OPEN) {
@@ -429,8 +455,8 @@ class Position {
       this._entryOrders[order.orderId] = order;
       // Изменяем статус открытия позиции
       this._entry.status = order.status;
-      this._entry.price = order.price;
-      this._entry.date = order.createdAt;
+      this._entry.price = order.average;
+      this._entry.date = order.exLastTrade;
       this._entry.executed = order.executed;
     } else {
       // Если ордер на закрытие позиции
@@ -439,8 +465,8 @@ class Position {
       this._exitOrders[order.orderId] = order;
       // Изменяем статус закрытия позиции
       this._exit.status = order.status;
-      this._exit.price = order.price;
-      this._exit.date = order.createdAt;
+      this._exit.price = order.average;
+      this._exit.date = order.exLastTrade;
       this._exit.executed = order.executed;
     }
     // Устанавливаем статус позиции

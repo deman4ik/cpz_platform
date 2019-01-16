@@ -106,7 +106,7 @@ class Backtester {
    * @memberof Adviser
    */
   log(...args) {
-    if (this.debug) {
+    if (this.settings.debug) {
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Backtester ${this.eventSubject}:`, ...logData]);
     }
@@ -283,7 +283,8 @@ class Backtester {
         for (const candle of historyCandles) {
           await this.adviserBacktester.handleCandle(candle);
           await this.traderBacktester.handlePrice({
-            price: candle.close
+            price: candle.close,
+            timestamp: candle.timestamp
           });
 
           for (const signal of this.adviserBacktester.signals) {
@@ -302,9 +303,9 @@ class Backtester {
             this.adviserBacktester.signals.forEach(async signalEvent => {
               signalsToSaveDB.push({
                 ...signalEvent.data,
-                backtesterId: this.taskId,
-                candleId: candle.id,
-                candleTimestamp: candle.timestamp
+                backtesterId: this.taskId
+                /* candleId: candle.id,
+                candleTimestamp: candle.timestamp */
               });
               /* Disabled save to storage
               signalsToSave.push({
@@ -364,15 +365,13 @@ class Backtester {
                   }
                 });
               } else {
-                positionsToSaveDB[positionsToSaveDBIndex].status =
-                  positionEvent.data.status;
-                positionsToSaveDB[positionsToSaveDBIndex].exit = {
-                  ...positionEvent.data.exit,
-                  date: candle.timestamp
+                positionsToSaveDB[positionsToSaveDBIndex] = {
+                  ...positionsToSaveDB[positionsToSaveDBIndex],
+                  ...positionEvent.data
                 };
               }
 
-              /* Disabled save to storage
+              /* Disabled save to storage 
               const positionStorageData = {
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
@@ -400,17 +399,26 @@ class Backtester {
               } else {
                 positionsToSave[positionsToSaveIndex] = positionStorageData;
               }
-              */
+              /* */
             });
 
             orders.forEach(orderEvent => {
-              ordersToSaveDB.push({
-                ...orderEvent.data,
-                backtesterId: this.taskId,
-                candleTimestamp: candle.timestamp
-              });
-
-              /* Disabled save to storage
+              const ordersToSaveDBIndex = ordersToSaveDB.findIndex(
+                order => order.orderId === orderEvent.data.orderId
+              );
+              if (ordersToSaveDBIndex === -1) {
+                ordersToSaveDB.push({
+                  ...orderEvent.data,
+                  backtesterId: this.taskId,
+                  candleTimestamp: candle.timestamp
+                });
+              } else {
+                ordersToSaveDB[ordersToSaveDBIndex] = {
+                  ...ordersToSaveDB[ordersToSaveDBIndex],
+                  ...orderEvent.data
+                };
+              }
+              /* Disabled save to storage 
               ordersToSave.push({
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
@@ -426,7 +434,7 @@ class Backtester {
                 RowKey: generateKey(),
                 PartitionKey: this.taskId
               });
-              */
+              /* */
             });
           }
 
@@ -452,12 +460,11 @@ class Backtester {
         if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
         /* Disabled save to storage
         if (signalsToSave.length > 0)
-          await saveBacktesterSignals(signalsToSave);
+          await saveBacktesterSignals(signalsToSave); 
         if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
         if (positionsToSave.length > 0)
           await saveBacktesterPositions(positionsToSave);
-        */
-
+*/
         if (signalsToSaveDB.length > 0) await saveSignalsDB(signalsToSaveDB);
         if (positionsToSaveDB.length > 0)
           await savePositionsDB(positionsToSaveDB);

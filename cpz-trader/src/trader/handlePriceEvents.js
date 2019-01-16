@@ -53,7 +53,10 @@ async function handlePrice(context, eventData) {
                 trader.setUpdate();
               }
               await trader.save();
-              await trader.executeOrders(requiredOrders);
+              await trader.executeOrders(requiredOrders, {
+                price: currentPrice.price,
+                timestamp: currentPrice.timestamp
+              });
 
               // Если есть хотя бы одно событие для отправка
               if (trader.events.length > 0) {

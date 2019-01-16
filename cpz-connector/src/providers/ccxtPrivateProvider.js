@@ -1,5 +1,6 @@
 import ccxt from "ccxt";
 import pretry from "p-retry";
+import dayjs from "cpzDayjs";
 import BasePrivateProvider from "./basePrivateProvider";
 
 class CCXTPrivateProvider extends BasePrivateProvider {
@@ -110,6 +111,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         order: {
           exId: response.id,
           exTimestamp: response.datetime,
+          exLastTrade:
+            response.lastTradeTimestamp &&
+            dayjs(response.lastTradeTimestamp)
+              .utc()
+              .toISOString(),
           status: response.status,
           price: response.price,
           average: response.average,
@@ -159,6 +165,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         order: {
           exId: response.id,
           exTimestamp: response.datetime,
+          exLastTrade:
+            response.lastTradeTimestamp &&
+            dayjs(response.lastTradeTimestamp)
+              .utc()
+              .toISOString(),
           status: response.status,
           price: response.price,
           average: response.average,

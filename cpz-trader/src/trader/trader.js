@@ -395,7 +395,7 @@ class Trader {
         // Если есть залача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер
-          await this.executeOrders([createdOrder]);
+          await this.executeOrders([createdOrder], createdOrder.price);
         } else {
           // Если любой другой тип ордера
           // Сохраняем позицию в сторедж
@@ -428,7 +428,10 @@ class Trader {
    *
    * @param {*} orders
    */
-  async executeOrders(orders) {
+  async executeOrders(
+    orders,
+    emulationParams = { price: null, timestamp: null }
+  ) {
     this.log("Executiong orders...");
     // Для каждого ордера
     /* eslint-disable no-restricted-syntax */
@@ -506,6 +509,9 @@ class Trader {
             // Если тип ордера - лимитный
             // Считаем, что ордер успешно выставлен на биржу
             orderResult.status = ORDER_STATUS_OPEN;
+            orderResult.exLastTrade =
+              emulationParams.timestamp || orderResult.createdAt;
+            orderResult.average = emulationParams.price;
           } else {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - по рынку
@@ -513,6 +519,9 @@ class Trader {
             orderResult.status = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
             orderResult.executed = orderToExecute.volume;
+            orderResult.exLastTrade =
+              emulationParams.timestamp || orderResult.createdAt;
+            orderResult.average = emulationParams.price;
           }
         }
         // Загружаем позицию
