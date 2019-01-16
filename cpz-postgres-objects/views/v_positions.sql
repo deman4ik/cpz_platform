@@ -1,10 +1,8 @@
 drop view v_positions;
 
 create view v_positions as
-SELECT b.started_at,
-       b.ended_at,
-       b.note,
-       p.backtest_id,
+SELECT p.id,
+       p.robot_id,
        p.asset,
        p.currency,
        p.exchange,
@@ -19,10 +17,15 @@ SELECT b.started_at,
        p.entry_balance,
        p.exit_balance,
        p.direction,
-       p.action
-FROM positions p,
-     backtest b
-WHERE (p.backtest_id = b.id);
+       p.action,
+       (select candle_timestamp from signal where position_id = p.id and action in ('short','long')) as candle_time_open,
+       (select candle_timestamp from signal where position_id = p.id and action in ('closeShort','closeLong')) as candle_time_close,
+       p.backtest_id,
+       b.started_at,
+       b.ended_at,
+       b.note
+FROM positions p
+left join backtest b on (p.backtest_id = b.id);
 
 alter table v_positions
   owner to cpz;
