@@ -8,6 +8,7 @@ services:
     ports:
       - "8101:80"
     environment:
+      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
       - AZ_STORAGE_CS
@@ -17,6 +18,7 @@ services:
       - EG_EMULATOR_MODE
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
+      - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
   cpz-marketwatcher:
     container_name: cpz-marketwatcher
@@ -26,13 +28,20 @@ services:
     ports:
       - "8102:80"
     environment:
+      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
       - AZ_STORAGE_CS  
       - API_KEY
       - EG_TEST_ENDPOINT
       - EG_TEST_KEY 
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
+      - CONNECTOR_API_ENDPOINT
+      - CONNECTOR_API_KEY
       - PROXY_ENDPOINT
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
   cpz-candlebatcher:
     container_name: cpz-candlebatcher
@@ -42,6 +51,7 @@ services:
     ports:
       - "8103:80"
     environment:
+      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME 
       - AzureWebJobsStorage  
       - AZ_STORAGE_CS  
@@ -53,104 +63,117 @@ services:
       - CONNECTOR_API_ENDPOINT
       - CONNECTOR_API_KEY
       - PROXY_ENDPOINT
+      - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
-  # cpz-adviser:
-  #   container_name: cpz-adviser
-  #   build:
-  #     context: .
-  #     dockerfile: CPZAdviser.Dockerfile
-  #   ports:
-  #     - "8104:80"
-  #   environment:
-  #     - FUNCTIONS_WORKER_RUNTIME
-  #     - AzureWebJobsStorage 
-  #     - AZ_STORAGE_CS
-  #     - API_KEY
-  #     - EG_TEST_ENDPOINT
-  #     - EG_TEST_KEY  
-  #     - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always  
-  # graphql-engine:
-  #   image: hasura/graphql-engine:v1.0.0-alpha31
-  #   ports:
-  #   - "8105:8080"
-  #   restart: always
-  #   environment:
-  #     - HASURA_GRAPHQL_DATABASE_URL
-  #     - HASURA_GRAPHQL_ACCESS_KEY
-  #   command: graphql-engine serve --enable-console --connections 25
-  # cpz-trader:
-  #   container_name: cpz-trader
-  #   build:
-  #     context: .
-  #     dockerfile: CPZTrader.Dockerfile
-  #   ports:
-  #     - "8106:80"
-  #   environment:   
-  #   - FUNCTIONS_WORKER_RUNTIME
-  #   - AzureWebJobsStorage   
-  #   - AZ_STORAGE_CS
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY  
-  #   - CONNECTOR_API_ENDPOINT
-  #   - CONNECTOR_API_KEY
-  #   - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always
-  # cpz-control-api:
-  #   container_name: cpz-control-api
-  #   build:
-  #     context: .
-  #     dockerfile: CPZControlAPI.Dockerfile
-  #   ports:
-  #     - "8107:80"
-  #   environment:   
-  #   - FUNCTIONS_WORKER_RUNTIME
-  #   - AzureWebJobsStorage   
-  #   - AZ_STORAGE_CS
-  #   - API_KEY
-  #   - EG_TEST_ENDPOINT
-  #   - EG_TEST_KEY  
-  #   - DB_API_ENDPOINT
-  #   - DB_API_ACCESS_KEY
-  #   - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always
-  # cpz-backtester:
-  #   container_name: cpz-backtester
-  #   build:
-  #     context: .
-  #     dockerfile: CPZBacktester.Dockerfile
-  #   ports:
-  #     - "8108:80"
-  #   environment:   
-  #     - FUNCTIONS_WORKER_RUNTIME
-  #     - AzureWebJobsStorage   
-  #     - AZ_STORAGE_CS
-  #     - API_KEY
-  #     - EG_TEST_ENDPOINT
-  #     - EG_TEST_KEY  
-  #     - DB_API_ENDPOINT
-  #     - DB_API_ACCESS_KEY
-  #     - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always  
-  # cpz-connector:
-  #   container_name: cpz-connector
-  #   build:
-  #     context: .
-  #     dockerfile: CPZConnector.Dockerfile
-  #   ports:
-  #     - "8108:80"
-  #   environment:
-  #     - FUNCTIONS_WORKER_RUNTIME 
-  #     - AzureWebJobsStorage  
-  #     - AZ_STORAGE_CS  
-  #     - API_KEY
-  #     - EG_TEST_ENDPOINT
-  #     - EG_TEST_KEY 
-  #     - PROXY_ENDPOINT
-  #     - NODE_TLS_REJECT_UNAUTHORIZED
-  #   restart: always
+  cpz-adviser:
+    container_name: cpz-adviser
+    build:
+      context: .
+      dockerfile: CPZAdviser.Dockerfile
+    ports:
+      - "8104:80"
+    environment:
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage 
+      - AZ_STORAGE_CS
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY  
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always  
+  graphql-engine:
+    image: hasura/graphql-engine:v1.0.0-alpha31
+    ports:
+    - "8105:8080"
+    restart: always
+    environment:
+      - HASURA_GRAPHQL_DATABASE_URL
+      - HASURA_GRAPHQL_ACCESS_KEY
+    command: graphql-engine serve --enable-console --connections 25
+  cpz-trader:
+    container_name: cpz-trader
+    build:
+      context: .
+      dockerfile: CPZTrader.Dockerfile
+    ports:
+      - "8106:80"
+    environment:   
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage   
+      - AZ_STORAGE_CS
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY  
+      - CONNECTOR_API_ENDPOINT
+      - CONNECTOR_API_KEY
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
+  cpz-control-api:
+    container_name: cpz-control-api
+    build:
+      context: .
+      dockerfile: CPZControlAPI.Dockerfile
+    ports:
+      - "8107:80"
+    environment:   
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage   
+      - AZ_STORAGE_CS
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY  
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
+  cpz-backtester:
+    container_name: cpz-backtester
+    build:
+      context: .
+      dockerfile: CPZBacktester.Dockerfile
+    ports:
+      - "8108:80"
+    environment:   
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage   
+      - AZ_STORAGE_CS
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY  
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always  
+  cpz-connector:
+    container_name: cpz-connector
+    build:
+      context: .
+      dockerfile: CPZConnector.Dockerfile
+    ports:
+      - "8109:80"
+    environment:
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME 
+      - AzureWebJobsStorage  
+      - AZ_STORAGE_CS  
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY 
+      - PROXY_ENDPOINT
+      - EXCHANGE_API_KEY
+      - EXCHANGE_SECRET_KEY
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
   nginx:
     container_name: nginx
     build: ./docker-nginx/
