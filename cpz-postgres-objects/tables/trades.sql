@@ -31,7 +31,9 @@ create table trades
     status        varchar(10)     not null default 'none',
     action        varchar(10)     not null,
     price         numeric         not null,
-    exec_quantity numeric,
+    exec_quantity   numeric       default 0,
+    remain_quantity numeric       default 0,
+    trade_quantity  numeric       default 0,
     signal_id     uuid,
     candle_timestamp timestamp
 )
@@ -64,9 +66,11 @@ create index i_trades_sel_user_date
   on trades (user_id, created_at);
 
 comment on column trades.created_at is 'time of issuing order inside the system';
-comment on column trades.order_time is 'order time from Exchange';
+comment on column trades.order_time is 'order time from Exchange (time of last trade on exchange)';
 comment on column trades.order_num is 'external order number from Exchange';
-comment on column trades.price is 'order price from Exchange, not the signal price';
-comment on column trades.exec_quantity is 'volume of asset in the order posted to Exchange';
+comment on column trades.price is 'order price from Exchange = "average price", not the signal price';
+comment on column trades.exec_quantity is 'quantity (volume) of asset in the order has been posted to Exchange';
+comment on column trades.trade_quantity is 'quantity (volume) of asset to trade, comes from robot settings';
+comment on column trades.remain_quantity is 'quantity (volume) of asset remaining to post to exchange, = 0 if all of trade_quantity is posted';
 
 comment on table trades is 'Orders for position';
