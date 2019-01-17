@@ -13,13 +13,15 @@ function mapForDB(order) {
     currency: order.currency,
     timeframe: order.timeframe,
     created_at: order.createdAt,
-    order_type: order.orderType,
     order_time: order.exTimestamp,
     order_num: order.exId,
+    order_type: order.orderType,
     status: order.status,
     action: order.action,
-    price: order.price,
+    price: order.average,
     exec_quantity: order.executed,
+    remain_quantity: order.remaining,
+    trade_quantity: order.volume,
     signal_id: order.signalId,
     candle_timestamp: order.candleTimestamp
   };
