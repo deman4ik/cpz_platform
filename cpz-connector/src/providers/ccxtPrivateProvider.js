@@ -1,6 +1,7 @@
 import ccxt from "ccxt";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
+import { correctWithLimit, precision } from "cpzUtils/helpers";
 import BasePrivateProvider from "./basePrivateProvider";
 
 class CCXTPrivateProvider extends BasePrivateProvider {
@@ -93,6 +94,17 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       // TODO: Params
       context.log("createOrder()");
       const { direction, volume, price, asset, currency, params } = order;
+      const market = this.ccxt.market(this.getSymbol(asset, currency));
+      const correctedPrice = correctWithLimit(
+        precision(price, market.precision.price),
+        market.limits.price.min,
+        market.limits.price.max
+      );
+      const correctedVolume = correctWithLimit(
+        precision(volume, market.precision.amount),
+        market.limits.amount.min,
+        market.limits.amount.max
+      );
       const orderParams = { ...this.getOrderParams(), ...params };
       this.clearOrderCache();
       const call = async () => {
@@ -101,8 +113,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             this.getSymbol(asset, currency),
             "limit",
             direction,
-            volume,
-            price,
+            correctedVolume,
+            correctedPrice,
             orderParams
           );
         } catch (e) {

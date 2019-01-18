@@ -188,6 +188,19 @@ function filterOutNonUnique(arr) {
     i => arrToFilter.indexOf(i) !== arrToFilter.lastIndexOf(i)
   );
 }
+
+function precision(x, n) {
+  if (!x || !n) return x;
+  const m = 10 ** n;
+  return Math.round(x * m) / m;
+}
+
+function correctWithLimit(x, min, max) {
+  if (min && x < min) return min;
+  if (max && x > max) return max;
+  return x;
+}
+
 export {
   sortAsc,
   sortDesc,
@@ -203,5 +216,7 @@ export {
   chunkArray,
   chunkNumberToArray,
   capitalize,
-  filterOutNonUnique
+  filterOutNonUnique,
+  precision,
+  correctWithLimit
 };
