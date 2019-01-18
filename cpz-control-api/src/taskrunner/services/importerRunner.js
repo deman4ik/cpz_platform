@@ -26,6 +26,7 @@ const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 class ImporterRunner extends BaseRunner {
   static async start(context, props) {
     try {
+      context.log("ImporterRunner", "start");
       const taskId = props.taskId || uuid();
 
       genErrorIfExist(validateStart({ ...props, taskId }));

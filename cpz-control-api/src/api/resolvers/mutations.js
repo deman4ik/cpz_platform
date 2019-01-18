@@ -26,6 +26,7 @@ import {
   updateTraderService
 } from "./traderService";
 import { startBacktest, stopBacktest } from "./backtest";
+import { startImporterService, stopImporterService } from "./importerService";
 
 const mutations = {
   startAdviserService,
@@ -42,6 +43,8 @@ const mutations = {
   stopMarketwatcherService,
   subscribeMarketwatcherService,
   unsubscribeMarketwatcherService,
+  startImporterService,
+  stopImporterService,
   startExWatcher,
   stopExWatcher,
   updateExWatcher,
