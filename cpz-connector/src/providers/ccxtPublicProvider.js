@@ -40,15 +40,7 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async getMarket(context, { asset, currency }) {
     try {
-      const call = async () => {
-        try {
-          return await this.ccxt.market(this.getSymbol(asset, currency));
-        } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
-          throw e;
-        }
-      };
-      const response = await pretry(call, this._retryOptions);
+      const response = this.ccxt.market(this.getSymbol(asset, currency));
       return {
         success: true,
         market: {
@@ -56,12 +48,12 @@ class CCXTPublicProvider extends BasePublicProvider {
           asset,
           currency,
           amountLimits: {
-            min: response.limits.price.min,
-            max: response.limits.price.max
-          },
-          priceLimits: {
             min: response.limits.amount.min,
             max: response.limits.amount.max
+          },
+          priceLimits: {
+            min: response.limits.price.min,
+            max: response.limits.price.max
           },
           costLimits: {
             min: response.limits.cost.min,
