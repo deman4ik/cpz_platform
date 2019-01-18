@@ -38,12 +38,13 @@ import {
 } from "cpzStorage";
 import { saveCandlesDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
-import { minuteCandlesEX } from "cpzConnector";
+import { minuteCandlesEX, tradesEX } from "cpzConnector";
 import {
   handleCandleGaps,
   getCurrentTimeframes,
   generateCandleRowKey,
   createMinutesList,
+  createMinutesListWithRange,
   chunkDates
 } from "cpzUtils/candlesUtils";
 
@@ -178,7 +179,131 @@ class Importer {
     }
   }
 
-  async loadAndSaveCandles({ dateFrom, dateTo, duration }) {
+  createCandles(trades, dateFrom, dateTo) {
+    this.log("createCandles()");
+    const candles = [];
+    const minutes = createMinutesListWithRange(dateFrom, dateTo);
+    minutes.forEach(minute => {
+      const minuteTrades = [
+        ...new Set(
+          trades.filter(
+            trade =>
+              trade.time >=
+                dayjs(minute.dateFrom)
+                  .utc()
+                  .valueOf() &&
+              trade.time <=
+                dayjs(minute.dateTo)
+                  .utc()
+                  .valueOf()
+          )
+        )
+      ].sort((a, b) => sortAsc(a.time, b.time));
+
+      if (minuteTrades && minuteTrades.length > 0) {
+        candles.push({
+          PartitionKey: createCachedCandleSlug({
+            exchange: this.exchange,
+            asset: this.asset,
+            currency: this.currency,
+            timeframe: 1
+          }),
+          RowKey: generateCandleRowKey(minute.dateFrom),
+          id: uuid(),
+          taskId: this.taskId,
+          exchange: this.exchange,
+          asset: this.asset,
+          currency: this.currency,
+          timeframe: 1,
+          time: minute.dateFrom, // время в милисекундах
+          timestamp: dayjs(minute.dateFrom).toISOString(), // время в ISO UTC
+          open: minuteTrades[0].price, // цена открытия - цена первого тика
+          high: Math.max(...minuteTrades.map(t => t.price)), // максимальная цена тиков
+          low: Math.min(...minuteTrades.map(t => t.price)), // минимальная цена тиков
+          close: minuteTrades[minuteTrades.length - 1].price, // цена закрытия - цена последнего тика
+          volume: minuteTrades.map(t => t.amount).reduce((a, b) => a + b), // объем - сумма объема всех тиков
+          type: CANDLE_CREATED // признак - свеча сформирована
+        });
+      }
+    });
+
+    return candles;
+  }
+
+  async loadTradesAndMakeCandles({ dateFrom, dateTo, duration }) {
+    try {
+      this.log(
+        "loadTradesAndMakeCandles()",
+        dayjs(dateFrom).toISOString(),
+        dayjs(dateTo).toISOString()
+      );
+      let trades = [];
+      let dateNext = dateFrom;
+      while (
+        dayjs(dateNext)
+          .utc()
+          .valueOf() <
+        dayjs(dateTo)
+          .utc()
+          .valueOf()
+      ) {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await tradesEX({
+          proxy: this.proxy,
+          exchange: this.exchange,
+          asset: this.asset,
+          currency: this.currency,
+          date: dayjs(dateNext)
+            .utc()
+            .toISOString()
+        });
+        dateNext =
+          (response.length > 0 && response[response.length - 1].timestamp) ||
+          dateTo;
+        const filteredData = [
+          ...new Set(
+            response.filter(
+              trade =>
+                trade.time >=
+                  dayjs(dateFrom)
+                    .utc()
+                    .valueOf() &&
+                trade.time <=
+                  dayjs(dateTo)
+                    .utc()
+                    .valueOf()
+            )
+          )
+        ].sort((a, b) => sortAsc(a.time, b.time));
+
+        trades = [...new Set(trades.concat(filteredData))].sort((a, b) =>
+          sortAsc(a.time, b.time)
+        );
+      }
+
+      const candles = this.createCandles(trades, dateFrom, dateTo);
+
+      return {
+        success: true,
+        dateFrom,
+        dateTo,
+        duration,
+        count: candles.length,
+        data: candles
+      };
+    } catch (error) {
+      this.log("Error", error.message);
+      return {
+        success: false,
+        date: dateFrom,
+        duration,
+        count: 0,
+        error
+      };
+    }
+  }
+
+  async loadCandles({ dateFrom, dateTo, duration }) {
     try {
       this.log(
         "loadAndSaveCandles",
@@ -190,6 +315,20 @@ class Importer {
           .toISOString(),
         duration
       );
+      /* Если биржа "kraken" и грузим больше чем за последние 10 часов  */
+      if (
+        this.exchange === "kraken" &&
+        dayjs()
+          .utc()
+          .diff(dayjs(dateFrom).utc(), "hours") > 10
+      ) {
+        /* Собираем минутные свечи по трейдам */
+        return await this.loadTradesAndMakeCandles({
+          dateFrom,
+          dateTo,
+          duration
+        });
+      }
       const response = await minuteCandlesEX({
         proxy: this.proxy,
         exchange: this.exchange,
@@ -200,9 +339,6 @@ class Importer {
           .toISOString(),
         limit: duration
       });
-      this.log("response", response.length);
-      this.log("response", response[0]);
-      this.log("response", response[response.length - 1]);
       if (response && response.length > 0) {
         const filteredData = [
           ...new Set(
@@ -219,9 +355,6 @@ class Importer {
             )
           )
         ].sort((a, b) => sortAsc(a.time, b.time));
-        this.log("filteredData", filteredData.length);
-        this.log("filteredData", filteredData[0]);
-        this.log("filteredData", filteredData[filteredData.length - 1]);
         if (filteredData && filteredData.length > 0) {
           const data = filteredData.map(candle => ({
             ...candle,
@@ -236,7 +369,6 @@ class Importer {
             taskId: this.taskId,
             type: CANDLE_IMPORTED
           }));
-          this.log("data", data.length);
           if (data)
             return {
               success: true,
@@ -482,13 +614,13 @@ class Importer {
           taskId: this.taskId
         }
       });
-      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 1);
+      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 10);
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       this.log("Starting loading candles...");
       for (const loadChunk of loadChunks) {
         const loadIterationResult = await Promise.all(
           loadChunk.map(async ({ dateFrom, dateTo, duration }) =>
-            this.loadAndSaveCandles({ dateFrom, dateTo, duration })
+            this.loadCandles({ dateFrom, dateTo, duration })
           )
         );
 
@@ -498,7 +630,7 @@ class Importer {
         this.log("erroLoads", errorLoads);
         const retryLoadIterationResult = await Promise.all(
           errorLoads.map(async ({ dateFrom, dateTo, duration }) =>
-            this.loadAndSaveCandles({ dateFrom, dateTo, duration })
+            this.loadCandles({ dateFrom, dateTo, duration })
           )
         );
 

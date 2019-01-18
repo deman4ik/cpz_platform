@@ -60,6 +60,19 @@ function createMinutesList(dateFrom, dateTo, dur) {
   return list;
 }
 
+function createMinutesListWithRange(dateFrom, dateTo, dur) {
+  const duration = dur || durationMinutes(dateFrom, dateTo);
+  const list = [];
+  for (let i = 0; i < duration; i += 1) {
+    const date = dayjs(dateFrom).add(i, "minute");
+    list.push({
+      dateFrom: date.valueOf(),
+      dateTo: date.endOf("minute").valueOf()
+    });
+  }
+  return list;
+}
+
 /* Возвращает объект с массивом пачек дат исключая последнюю дату dateTo */
 function chunkDates(dateFrom, dateTo, chunkSize) {
   const list = createMinutesList(dateFrom, dateTo);
@@ -174,6 +187,7 @@ function getMaxTimeframeDateFrom(timeframes, maxBars) {
 export {
   getCurrentTimeframes,
   createMinutesList,
+  createMinutesListWithRange,
   chunkDates,
   handleCandleGaps,
   generateCandleRowKey,
