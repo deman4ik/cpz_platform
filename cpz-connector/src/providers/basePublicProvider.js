@@ -8,6 +8,13 @@ class BasePublicProvider {
     if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
   }
 
+  async getMarket() {
+    throw new VError(
+      { name: "NotImlementedError" },
+      "Method 'getMarket' not impemented in this Provider"
+    );
+  }
+
   async loadPreviousCandle() {
     throw new VError(
       { name: "NotImlementedError" },
@@ -19,6 +26,13 @@ class BasePublicProvider {
     throw new VError(
       { name: "NotImlementedError" },
       "Method 'loadCandles' not impemented in this Provider"
+    );
+  }
+
+  async loadTrades() {
+    throw new VError(
+      { name: "NotImlementedError" },
+      "Method 'loadTrades' not impemented in this Provider"
     );
   }
 }

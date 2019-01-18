@@ -1,19 +1,40 @@
-# import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/order.graphql"
-# import { CandleResponse, CandlesResponse} from "src/api/schema/candle.graphql"
+# import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/orders.graphql"
+# import { MarketResponse } from "src/api/schema/market.graphql"
+# import { CandleResponse, CandlesResponse} from "src/api/schema/candles.graphql"
+# import { TradesResponse } from "src/api/schema/trades.graphql"
 
 scalar DateTime
 scalar JSON
 
 type Query {
-    balance(connectorInput: PrivateConnectorInput!): BalanceResponse
-    order(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse
-    lastMinuteCandle(connectorInput: PublicConnectorInput!, date: DateTime, asset: String!, currency: String!): CandleResponse
-    minuteCandles(connectorInput: PublicConnectorInput!, date: DateTime, limit: Int, asset: String!, currency: String!) : CandlesResponse
+    balance(connectorInput: PrivateConnectorInput!): BalanceResponse!
+    order(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse!
+    market(connectorInput: PublicConnectorInput!, asset: String!, currency: String!): MarketResponse!
+    lastMinuteCandle(
+        connectorInput: PublicConnectorInput!
+        date: DateTime
+        asset: String!
+        currency: String!
+    ): CandleResponse!
+    minuteCandles(
+        connectorInput: PublicConnectorInput!
+        date: DateTime
+        limit: Int
+        asset: String!
+        currency: String!
+    ): CandlesResponse!
+    trades(
+        connectorInput: PublicConnectorInput!
+        date: DateTime
+        limit: Int
+        asset: String!
+        currency: String!
+    ): TradesResponse!
 }
 
 type Mutation {
-    createOrder(connectorInput: PrivateConnectorInput!, order: OrderInput!): OrderResponse
-    cancelOrder(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse
+    createOrder(connectorInput: PrivateConnectorInput!, order: OrderInput!): OrderResponse!
+    cancelOrder(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse!
 }
 
 input PublicConnectorInput {
@@ -38,4 +59,3 @@ type BalanceResponse {
     error: Error
     balance: JSON
 }
-

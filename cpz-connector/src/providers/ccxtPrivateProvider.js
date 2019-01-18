@@ -23,6 +23,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       apiKey: process.env.EXCHANGE_API_KEY,
       secret: process.env.EXCHANGE_SECRET_KEY
     });
+    const call = async () => {
+      await this.ccxt.loadMarkets();
+    };
+    await pretry(call, this._retryOptions);
   }
 
   clearOrderCache() {

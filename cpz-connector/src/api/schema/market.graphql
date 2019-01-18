@@ -1,0 +1,5 @@
+type MarketResponse {
+    success: Boolean!
+    error: Error
+    market: JSON
+}

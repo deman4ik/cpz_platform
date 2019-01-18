@@ -1,4 +1,4 @@
-import { createOrder, cancelOrder } from "./order";
+import { createOrder, cancelOrder } from "./orders";
 
 const mutations = {
   createOrder,

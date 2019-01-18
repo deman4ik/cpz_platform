@@ -19,10 +19,65 @@ class CCXTPublicProvider extends BasePublicProvider {
     this.ccxt = new ccxt[this._exchangeName]({
       agent: this._proxyAgent
     });
+    const call = async () => {
+      await this.ccxt.loadMarkets();
+    };
+    await pretry(call, this._retryOptions);
   }
 
   getSymbol(asset, currency) {
     return `${asset}/${currency}`;
+  }
+
+  getTradesParams(date) {
+    if (this._exchangeName === "kraken")
+      return {
+        since: dayjs(date).valueOf() * 1000000
+      };
+
+    return null;
+  }
+
+  async getMarket(context, { asset, currency }) {
+    try {
+      const call = async () => {
+        try {
+          return await this.ccxt.market(this.getSymbol(asset, currency));
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
+        }
+      };
+      const response = await pretry(call, this._retryOptions);
+      return {
+        success: true,
+        market: {
+          exchange: this._exchangeName,
+          asset,
+          currency,
+          amountLimits: {
+            min: response.limits.price.min,
+            max: response.limits.price.max
+          },
+          priceLimits: {
+            min: response.limits.amount.min,
+            max: response.limits.amount.max
+          },
+          costLimits: {
+            min: response.limits.cost.min,
+            max: response.limits.cost.max
+          },
+          pricePrecision: response.precision.price,
+          amountPrecision: response.precision.amount
+        }
+      };
+    } catch (error) {
+      context.log.error(error);
+      return {
+        success: false,
+        error: { name: error.constructor.name, message: error.message }
+      };
+    }
   }
 
   async loadLastMinuteCandle(context, { date = dayjs(), asset, currency }) {
@@ -119,6 +174,62 @@ class CCXTPublicProvider extends BasePublicProvider {
       return {
         success: true,
         candles
+      };
+    } catch (error) {
+      context.log.error(error);
+      return {
+        success: false,
+        error: { name: error.constructor.name, message: error.message }
+      };
+    }
+  }
+
+  async loadTrades(
+    context,
+    { date = dayjs().add(-1, "hour"), limit = 2000, asset, currency }
+  ) {
+    try {
+      context.log("loadTrades()", dayjs(date).toISOString());
+      const dateToLoad =
+        dayjs(date).valueOf() < dayjs().add(-1, "minute")
+          ? date
+          : dayjs().add(-1, "minute");
+      const call = async () => {
+        try {
+          return await this.ccxt.fetchTrades(
+            this.getSymbol(asset, currency),
+            null,
+            limit,
+            this.getTradesParams(dateToLoad)
+          );
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          throw e;
+        }
+      };
+      const response = await pretry(call, this._retryOptions);
+      if (!response)
+        return {
+          success: false,
+          error: {
+            name: "NetworkError",
+            message: "Failed to get response from exchange"
+          }
+        };
+      const trades = response.map(trade => ({
+        exchange: this._exchangeName,
+        asset,
+        currency,
+        timeframe: 1,
+        time: trade.timestamp,
+        timestamp: trade.datetime,
+        price: trade.price,
+        amount: trade.amount
+      }));
+      context.log(trades.length);
+      return {
+        success: true,
+        trades
       };
     } catch (error) {
       context.log.error(error);
