@@ -9,7 +9,6 @@ async function getUserRobotDB(userRobotId) {
     run_mode
     user_id
     user_params
-    quantity
     robotByrobotId {
       id
       exchange
@@ -44,7 +43,8 @@ async function getUserRobotDB(userRobotId) {
           response.cpz_user_robot_by_pk.candlebatchersettings,
         adviserSettings: response.cpz_user_robot_by_pk.advisersettings,
         traderSettings: {
-          ...response.cpz_user_robot_by_pk.tradersettings,
+          ...robotByrobotId.tradersettings,
+          ...response.cpz_user_robot_by_pk.user_params,
           mode: response.cpz_user_robot_by_pk.run_mode
         }
       };

@@ -10,7 +10,6 @@ create table user_robot
 			constraint c_user_robot_userlist_fk
 			references userlist,	
 	robot_status    integer default 0 not null,
-	quantity        numeric default 0 not null,		
 	balance_init    numeric default 0 not null,
 	balance_current numeric default 0 not null,
 	last_started    timestamp default CURRENT_DATE not null,
@@ -39,7 +38,6 @@ comment on column user_robot.robot_status is '
 10 - running
 20 - paused';
 
-comment on column user_robot.quantity is 'Trade volume for a robot specified by end-user';
 comment on column user_robot.dt_to is 'Date and time robot will be stopped according to user subsribtion';
 
 comment on table user_robot is 'User subscription for a robot';
