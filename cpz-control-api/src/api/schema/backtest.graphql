@@ -1,6 +1,5 @@
 input BacktestParams {
     backtesterId: ID
-    robotId: Int!
     userId: ID!
     dateFrom: Datetime!
     dateTo: Datetime!

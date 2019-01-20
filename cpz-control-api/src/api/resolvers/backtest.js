@@ -2,12 +2,17 @@ import { getRobotDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
 import BacktestRunner from "../../taskrunner/tasks/backtestRunner";
 
-async function startBacktest(_, { params }, { context }) {
+async function startBacktest(
+  _,
+  { robotId, backtesterId, overrideParams },
+  { context }
+) {
   try {
-    const robot = await getRobotDB(params.robotId);
+    const robot = await getRobotDB(robotId);
     const backtestParams = {
       ...robot,
-      ...params
+      backtesterId,
+      ...overrideParams
     };
     const { taskId, status } = await BacktestRunner.start(
       context,

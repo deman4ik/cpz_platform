@@ -1,0 +1,5 @@
+input UserRobotParams {
+    settings: CandlebatcherSettings
+    adviserSettings: AdviserSettings
+    traderSettings: TraderSettings
+}

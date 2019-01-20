@@ -7,6 +7,7 @@
 # import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
 # import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
 # import { BacktestParams } from "src/api/schema/backtest.graphql"
+# import { UserRobotParams } from "src/api/schema/userRobot.graphql"
 
 scalar Datetime
 scalar JSON
@@ -27,29 +28,29 @@ type Mutation {
     updateCandlebatcherService(params: CandlebatcherUpdateParams!): Response!
     # Importer 
     startImporterService(params: ImporterParams!): ServiceRunnerResponse!
-    stopImporterService(taskId: String!): ServiceRunnerResponse!
+    stopImporterService(taskId: ID!): ServiceRunnerResponse!
     # Adviser
     startAdviserService(params: AdviserParams!): ServiceRunnerResponse!
-    stopAdviserService(taskId: String!): ServiceRunnerResponse!
+    stopAdviserService(taskId: ID!): ServiceRunnerResponse!
     updateAdviserService(params: AdviserUpdateParams!): Response!
     # Trader
     startTraderService(params: TraderParams!): ServiceRunnerResponse!
-    stopTraderService(taskId: String!): ServiceRunnerResponse!
+    stopTraderService(taskId: ID!): ServiceRunnerResponse!
     updateTraderService(params: TraderUpdateParams!): Response!
     # Backtester 
     startBacktesterService(params: BacktesterParams!): ServiceRunnerResponse!
-    stopBacktesterService(taskId: String!): ServiceRunnerResponse!
+    stopBacktesterService(taskId: ID!): ServiceRunnerResponse!
     # Exchange Data Watcher
     startExWatcher(params: ExWatcherParams!): ServiceRunnerResponse!
     stopExWatcher(taskId: String!): ServiceRunnerResponse!
     updateExWatcher(taskId: String!, params: CandlebatcherUpdateParams!): Response!
     # UserRobot
-    startUserRobot(userRobotId: String!): ServiceRunnerResponse!
-    stopUserRobot(userRobotId: String!): ServiceRunnerResponse!
-    updateUserRobot(userRobotId: String!, params: TraderUpdateParams!): Response!
+    startUserRobot(userRobotId: ID!, overrideParams: UserRobotParams): ServiceRunnerResponse!
+    stopUserRobot(userRobotId: ID!): ServiceRunnerResponse!
+    updateUserRobot(userRobotId: ID!, params: TraderUpdateParams!): Response!
     # Backtest
-    startBacktest(params: BacktestParams!): ServiceRunnerResponse!
-    stopBacktest(taskId: String!): ServiceRunnerResponse!
+    startBacktest(robotId: Int!, backtesterId: ID, overrideParams: BacktestParams): ServiceRunnerResponse!
+    stopBacktest(taskId: ID!): ServiceRunnerResponse!
 }
 
 type Error {
@@ -66,6 +67,6 @@ type Response {
 type ServiceRunnerResponse {
     success: Boolean!
     error: Error
-    taskId: ID
+    taskId: String
     status: String
 }

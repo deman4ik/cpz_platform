@@ -2,11 +2,15 @@ import { getUserRobotDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
 import UserRobotRunner from "../../taskrunner/tasks/userRobotRunner";
 
-async function startUserRobot(_, { userRobotId }, { context }) {
+async function startUserRobot(_, { userRobotId, overrideParams }, { context }) {
   try {
     const userRobot = await getUserRobotDB(userRobotId);
     context.log(userRobot);
-    const { status } = await UserRobotRunner.start(context, userRobot);
+    const userRobotParams = {
+      ...userRobot,
+      ...overrideParams
+    };
+    const { status } = await UserRobotRunner.start(context, userRobotParams);
     return {
       success: true,
       taskId: userRobotId,
