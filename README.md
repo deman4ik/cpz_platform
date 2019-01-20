@@ -21,7 +21,7 @@ NODE_TLS_REJECT_UNAUTHORIZED=0
 2. Собрать все контейнеры командой:
 
 ```
-docker-compose build
+docker-compose build --parallel
 ```
 
 3. Запустить все контейнеры командой:
