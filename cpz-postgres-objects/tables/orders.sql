@@ -78,8 +78,8 @@ comment on column orders.order_quantity is 'quantity (volume) of asset to trade,
 
 comment on column orders.exec_time is 'time of execution order inside an exchange';
 comment on column orders.exec_price is 'order price from Exchange = "average price"';
-comment on column orders.exec_quantity is 'quantity (volume) of asset in the order has been posted to Exchange';
+comment on column orders.exec_quantity is 'quantity (volume) of asset in the order has been executed on Exchange';
 
-comment on column orders.remain_quantity is 'quantity (volume) of asset remaining to post to exchange, = 0 if all of order_quantity is posted';
+comment on column orders.remain_quantity is 'quantity (volume) of asset remaining to execute to exchange, = 0 if all of order_quantity is executed';
 
 comment on table orders is 'Orders for position';

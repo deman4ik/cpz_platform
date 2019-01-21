@@ -4,37 +4,35 @@ import db from "./db";
 
 function mapForDB(order) {
   return {
-    id: order.orderId,
-    position_id: order.positionId,
+    id: order.orderId, // internal order id
+    position_id: order.positionId, // internal position id
     user_id: order.userId,
     robot_id: order.robotId,
     exchange: order.exchange,
     asset: order.asset,
     currency: order.currency,
     timeframe: order.timeframe,
-    created_at: order.createdAt,
-    order_time: order.exTimestamp,
-    order_num: order.exId,
-    order_type: order.orderType,
+    created_at: order.createdAt, // time of issuing order inside the system
     status: order.status,
     action: order.action,
-    price: order.average,
-    exec_quantity: order.executed,
-    remain_quantity: order.remaining,
-    trade_quantity: order.volume,
+    order_type: order.orderType,
+    order_time: order.exTimestamp, // time of posting order to exchange
+    order_ex_num: order.exId, // external order number from Exchange
+    order_price: order.price, // price of asset to send to exchange including slippage, comes from robot settings
+    order_quantity: order.volume, // quantity (volume) of asset to trade, comes from robot settings
+    exec_time: order.exLastTrade, // time of execution order inside an exchange
+    exec_price: order.average, // order price from Exchange = "average price"
+    exec_quantity: order.executed, // quantity (volume) of asset in the order has been executed on Exchange
+    remain_quantity: order.remaining, // quantity (volume) of asset remaining to execute to exchange, = 0 if all of order_quantity is executed
     signal_id: order.signalId,
+    backtest_id: order.backtesterId,
     candle_timestamp: order.candleTimestamp
   };
 }
 async function saveOrdersDB(data) {
   try {
-    const query = `mutation insert_orders($objects: [cpz_trades_insert_input!]!){
-      insert_cpz_trades(objects:$objects
-        on_conflict: {
-          constraint: c_trades_pk
-          update_columns: [status, price, exec_quantity, order_time, order_num]
-        }
-        ){
+    const query = `mutation insert_orders($objects: [cpz_orders_insert_input!]!){
+      insert_cpz_orders(objects:$objects){
         affected_rows
       }
     }`;
