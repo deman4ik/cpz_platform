@@ -13,7 +13,7 @@ import {
   TRADE_ACTION_CLOSE_LONG,
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
-  ORDER_POS_DIR_ENTRY,
+  POS_STATUS_CLOSED,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
@@ -387,12 +387,14 @@ class Trader {
       }
       if (
         this._currentPositions[this._signal.positionId].status !==
-        POS_STATUS_CANCELED
+          POS_STATUS_CANCELED &&
+        this._currentPositions[this._signal.positionId].status !==
+          POS_STATUS_CLOSED
       ) {
         // Созданный ордер
         const createdOrder = this._currentPositions[this._signal.positionId]
           .currentOrder;
-        // Если есть залача для ордера
+        // Если есть задача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер
           await this.executeOrders([createdOrder], createdOrder.price);
