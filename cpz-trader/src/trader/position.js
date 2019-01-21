@@ -269,8 +269,7 @@ class Position {
       if (order.orderType === ORDER_TYPE_LIMIT) {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
-          // Если проскальзывание текущей цены меньше или равно заданного
-          if (price - order.price <= this._settings.slippageStep) {
+          if (price <= order.price) {
             // Нужно выставить лимитный ордер
             return {
               ...order,
@@ -281,49 +280,12 @@ class Position {
         }
         // Если продаем
         if (order.direction === ORDER_DIRECTION_SELL) {
-          // Если проскальзывание текущей цены меньше или равно заданного
-          if (order.price - price <= this._settings.slippageStep) {
+          if (price >= order.price) {
             // Нужно выставить лимитный ордер
             return {
               ...order,
               price: order.price - this._settings.slippageStep,
               task: ORDER_TASK_SETLIMIT
-            };
-          }
-        }
-        // Тип ордера - стоп
-      } else if (order.orderType === ORDER_TYPE_STOP) {
-        // Если покупаем
-        if (order.direction === ORDER_DIRECTION_BUY) {
-          // Цена сигнала с учетом отклонения
-          const signalPrice = order.price - this._settings.deviation;
-          // Цена ордера с учетом проскальзывания
-          const entryPrice = signalPrice + this._settings.slippageStep;
-          // Если текущая цена больше или равна цене с учетом отклонения
-          if (price >= signalPrice) {
-            // Нужно выставить ордер по рынку, по цене с учетом проскальзывания
-            return {
-              ...order,
-              price: entryPrice,
-              orderType: ORDER_TYPE_MARKET,
-              task: ORDER_TASK_OPENBYMARKET
-            };
-          }
-        }
-        // Если продаем
-        if (order.direction === ORDER_DIRECTION_SELL) {
-          // Цена сигнала с учетом отклонения
-          const signalPrice = order.price + this._settings.deviation;
-          // Цена ордера с учетом проскальзывания
-          const entryPrice = signalPrice - this._settings.slippageStep;
-          // Если текущая цена меньше или равна цене с учетом отклонения
-          if (price <= signalPrice) {
-            // Нужно выставить ордер по рынку, по цене с учетом проскальзывания
-            return {
-              ...order,
-              price: entryPrice,
-              orderType: ORDER_TYPE_MARKET,
-              task: ORDER_TASK_OPENBYMARKET
             };
           }
         }
