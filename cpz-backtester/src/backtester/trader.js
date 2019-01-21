@@ -14,9 +14,18 @@ class TraderBacktester extends Trader {
     }
   }
 
-  async handlePrice({ price, timestamp }) {
+  // Обработка новой свечи
+  async handleCandle(candle) {
     try {
-      this.log("handlePrice()");
+      this.log("handleCandle()");
+      // По умолчанию берем цену закрытия свечи
+      let price = candle.close;
+      // Если в последнем сигнале указан источник цены
+      const { priceSource } = this._lastSignal;
+      if (priceSource) {
+        // берем нужное поле
+        price = candle[priceSource];
+      }
       /* eslint-disable no-restricted-syntax */
       for (const key of Object.keys(this._currentPositions)) {
         /* eslint-disable no-await-in-loop */
@@ -27,7 +36,10 @@ class TraderBacktester extends Trader {
         ) {
           const requiredOrders = position.getRequiredOrders(price);
           if (requiredOrders.length > 0) {
-            await this.executeOrders(requiredOrders, { price, timestamp });
+            await this.executeOrders(requiredOrders, {
+              price,
+              timestamp: candle.timestamp
+            });
           }
         }
         /* no-await-in-loop */
@@ -46,7 +58,7 @@ class TraderBacktester extends Trader {
             eventSubject: this._eventSubject
           }
         },
-        'Error while handling price trader "%s"',
+        'Error while handling candle trader "%s"',
         this._taskId
       );
     }

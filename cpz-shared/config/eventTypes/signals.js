@@ -45,7 +45,7 @@ const SIGNALS_NEWSIGNAL_EVENT = {
     priceSource: {
       description: "Candle field.",
       type: "string",
-      values: ["open", "close", "high", "low", "stop"],
+      values: ["open", "close", "high", "low"],
       optional: true
     },
     candleId: {

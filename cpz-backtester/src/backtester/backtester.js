@@ -282,10 +282,7 @@ class Backtester {
 
         for (const candle of historyCandles) {
           await this.adviserBacktester.handleCandle(candle);
-          await this.traderBacktester.handlePrice({
-            price: candle.close,
-            timestamp: candle.timestamp
-          });
+          await this.traderBacktester.handleCandle(candle);
 
           for (const signal of this.adviserBacktester.signals) {
             await this.traderBacktester.handleSignal(signal.data);
