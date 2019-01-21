@@ -17,6 +17,7 @@ import {
   ORDER_STATUS_ERROR,
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
+  ORDER_TYPE_STOP,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
@@ -80,8 +81,6 @@ class Position {
     this._entryOrders = state.entryOrders || {};
     /* Ордера закрытия */
     this._exitOrders = state.exitOrders || {};
-    /* Последнтй сигнал */
-    this._lastSignal = state.lastSignal || {};
     /* Метаданные стореджа */
     this._metadata = state.metadata;
     this.log = state.log || console.log;
@@ -209,7 +208,6 @@ class Position {
    * @memberof Position
    */
   createEntryOrder(signal) {
-    this._lastSignal = signal;
     // Создаем ордер на открытие позиции
     this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
@@ -231,7 +229,6 @@ class Position {
    * @memberof Position
    */
   createExitOrder(signal) {
-    this._lastSignal = signal;
     // Создаем ордер на закрытие позиции
     this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
@@ -535,8 +532,7 @@ class Position {
       entry: this._entry,
       exit: this._exit,
       entryOrders: this._entryOrders,
-      exitOrders: this._exitOrders,
-      lastSignal: this._lastSignal
+      exitOrders: this._exitOrders
     };
   }
 
