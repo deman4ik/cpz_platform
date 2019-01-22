@@ -663,7 +663,11 @@ class Adviser {
    * @memberof Adviser
    */
   advice(signal) {
-    this.log("New Signal!", signal.action, signal.price);
+    this.log(
+      `Signal! position ${signal.settings.positionCode}, ${signal.action}, ${
+        signal.price
+      } from ${signal.priceSource}`
+    );
     const newSignal = {
       id: uuid(),
       dataVersion: "1.0",

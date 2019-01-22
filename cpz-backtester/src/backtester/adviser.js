@@ -37,7 +37,12 @@ class AdviserBacktester extends Adviser {
    */
   async handleCandle(candle) {
     try {
-      this.log("handleCandle()");
+      this.log(
+        "handleCandle()",
+        `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
+          candle.low
+        }, c:${candle.close}`
+      );
 
       // Обновить текущую свечу
       this._candle = candle;

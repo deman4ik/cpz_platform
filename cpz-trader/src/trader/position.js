@@ -251,18 +251,15 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price) {
-    /* this.log(
-      "Checking order",
-      order.orderId,
-      "status",
-      order.status,
-      "direction",
-      order.direction,
-      "order price",
-      order.price,
-      "price",
-      price
-    ); */
+    this.log(
+      `checkOrder() ${order.orderId}, position: ${
+        this._settings.positionCode
+      }, status: ${order.status}, posDir: ${order.positionDirection}, dir: ${
+        order.direction
+      }, task: ${order.task}, order price: ${
+        order.price
+      }, current price: ${price}`
+    );
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
       // Тип ордера - лимитный
@@ -314,12 +311,11 @@ class Position {
    * @memberof Position
    */
   getRequiredOrders(price) {
-    /* this.log(
-      "Checking required orders for position",
-      this._settings.positionCode,
-      "and price",
-      price
-    ); */
+    this.log(
+      `getRequiredOrders() position: ${this._settings.positionCode}, entry: ${
+        this._entry.status
+      }, exit: ${this._exit.status}, price: ${price}`
+    );
     const requiredOrders = [];
     // Если ордера на открытие позиции ожидают обработки
     if (
@@ -350,12 +346,9 @@ class Position {
     }
     if (requiredOrders.length > 0) {
       this.log(
-        requiredOrders.length,
-        "required",
-        "for position",
-        this._settings.positionCode,
-        "and price",
-        price
+        `${requiredOrders.length} order required position ${
+          this._settings.positionCode
+        }, price: ${price}`
       );
     }
     // Возвращаем массив ордеров для дальнейшей обработки
@@ -411,6 +404,15 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
+    this.log(
+      `Executed ${order.orderId}, position: ${
+        this._settings.positionCode
+      }, status: ${order.status}, posDir: ${order.positionDirection}, dir: ${
+        order.direction
+      }, task: ${order.task}, order price: ${order.price}, average: ${
+        order.average
+      }, date: ${order.exLastTrade}`
+    );
     // Если ордер на открытие позиции
     if (order.positionDirection === ORDER_POS_DIR_ENTRY) {
       // Сохраянем ордер в списке ордеров на открытие позиции

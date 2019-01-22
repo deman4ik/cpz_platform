@@ -17,7 +17,6 @@ class TraderBacktester extends Trader {
   // Обработка новой свечи
   async handleCandle(candle) {
     try {
-      this.log("handleCandle()");
       // По умолчанию берем цену закрытия свечи
       let price = candle.close;
       // Если в последнем сигнале указан источник цены
@@ -29,6 +28,13 @@ class TraderBacktester extends Trader {
         // берем нужное поле
         price = candle[priceSource];
       }
+      this.log(
+        "handleCandle()",
+        `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
+          candle.low
+        }, c:${candle.close}`,
+        `price: ${price}`
+      );
       /* eslint-disable no-restricted-syntax */
       for (const key of Object.keys(this._currentPositions)) {
         /* eslint-disable no-await-in-loop */

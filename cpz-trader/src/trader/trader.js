@@ -350,6 +350,11 @@ class Trader {
    */
   async handleSignal(signal) {
     try {
+      this.log(
+        `handleSignal() position: ${signal.settings.positionCode}, ${
+          signal.action
+        }, ${signal.price}, from ${signal.priceSource}`
+      );
       // Обновить текущий сигнал
       this._signal = signal;
       // Если сигнал уже обрабатывалась - выходим
