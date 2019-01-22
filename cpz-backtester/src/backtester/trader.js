@@ -22,7 +22,10 @@ class TraderBacktester extends Trader {
       let price = candle.close;
       // Если в последнем сигнале указан источник цены
       const { priceSource } = this._lastSignal;
-      if (priceSource) {
+      if (
+        priceSource &&
+        ["open", "close", "high", "low"].includes(priceSource)
+      ) {
         // берем нужное поле
         price = candle[priceSource];
       }
