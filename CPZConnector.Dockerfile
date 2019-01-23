@@ -7,6 +7,7 @@ RUN apt-get update &&  \
 COPY /cpz-connector /src/cpz-connector
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-connector
+ENV NODE_ENV=production
 RUN npm install && \
     npm run webpack && \
     npm uninstall -D && \
@@ -14,6 +15,7 @@ RUN npm install && \
    
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
+ENV NODE_ENV=production
 COPY --from=buildNode ["/src/cpz-connector","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
   

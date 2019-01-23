@@ -7,6 +7,7 @@ RUN apt-get update &&  \
 COPY /cpz-adviser /src/cpz-adviser
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-adviser
+ENV NODE_ENV=production
 RUN npm install tulind --build-from-source && \
     npm install && \
     npm run webpack && \
@@ -15,6 +16,7 @@ RUN npm install tulind --build-from-source && \
 
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
+ENV NODE_ENV=production
 COPY --from=build ["/src/cpz-adviser","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
   
