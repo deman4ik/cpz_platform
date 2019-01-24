@@ -6,7 +6,9 @@
   "scripts": {
     "test": "mocha",
     "dev": "func start --port 8102",
-    "webpack": "webpack"
+    "extensions": "func extensions install",
+    "webpack": "webpack",
+    "build": "func extensions install && webpack"
   },
   "keywords": [
     "cryptuoso",

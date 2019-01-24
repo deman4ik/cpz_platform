@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "func start --port 8101",
-    "webpack": "webpack"
+    "extensions": "func extensions install",
+    "webpack": "webpack",
+    "build": "func extensions install && webpack"
   },
   "keywords": [
     "cryptuoso",
