@@ -11,7 +11,7 @@ const { entityGenerator } = TableUtilities;
 class TableStorage {
   constructor(connectionString) {
     this.tableService = azure
-      .createTableService(connectionString)
+      .createTableService(connectionString || process.env.AZ_STORAGE_CS)
       .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
   }
 
