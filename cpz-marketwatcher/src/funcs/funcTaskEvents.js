@@ -1,4 +1,5 @@
 import "babel-polyfill";
+import VError from "verror";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
@@ -25,6 +26,9 @@ const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    if (req.query["api-key"] !== process.env.API_KEY) {
+      throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
+    }
     const parsedReq = JSON.parse(req.rawBody);
     context.log.info(
       `CPZ Marketwatcher processed a request.${JSON.stringify(parsedReq)}`
@@ -119,8 +123,8 @@ function eventHandler(context, req) {
   } catch (error) {
     context.log.error(error);
     context.res = {
-      status: 500,
-      body: error,
+      status: error.name === "UNAUTHENTICATED" ? 401 : 500,
+      body: error.message,
       headers: {
         "Content-Type": "application/json"
       }

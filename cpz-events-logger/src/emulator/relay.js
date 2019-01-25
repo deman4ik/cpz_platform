@@ -22,7 +22,9 @@ async function relay(context, event) {
         EG_EMULATOR_MODE === "docker"
           ? `${endpoint.endpoint}:${endpoint.port}`
           : `localhost:${endpoint.port}`;
-      const url = `http://${host}${endpoint.url}`;
+      const url = `http://${host}${endpoint.url}?api-key=${
+        process.env.API_KEY
+      }`;
       context.log.info(url);
       context.log.info(event);
       retry(async () => {

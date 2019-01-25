@@ -12,7 +12,7 @@ npm run dev
 ```
 
 ### Start
-POST - http://localhost:8108/api/taskEvents
+POST - http://localhost:8108/api/taskEvents/?api-key=test
 ```javascript
 [{
   "id": "968a8f13-bd77-40d8-ba83-5cf4364ec2a9",
