@@ -1,0 +1,13 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "AzureWebJobsStorage": "",
+      "API_KEY":"test",
+      "PROXY_ENDPOINT":"",
+      "EXCHANGE_API_KEY": "",
+      "EXCHANGE_SECRET_KEY": ""
+    }
+  }
+  

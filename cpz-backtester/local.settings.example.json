@@ -1,0 +1,18 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+        "FUNCTIONS_WORKER_RUNTIME": "node",
+        "AzureWebJobsStorage": "",
+        "AZ_STORAGE_BACKTESTER_CS": "",
+        "API_KEY": "",
+        "EG_TEST_ENDPOINT": "https://localhost:443",
+        "EG_TEST_KEY": "",
+        "DB_API_ENDPOINT": "https://",
+        "DB_API_ACCESS_KEY": "",
+        "EG_TASKS_ENDPOINT": "",
+        "EG_TASKS_KEY": "",
+        "EG_LOG_ENDPOINT": "",
+        "EG_LOG_KEY": ""
+    }
+}

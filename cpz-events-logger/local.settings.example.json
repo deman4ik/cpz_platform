@@ -1,0 +1,16 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "AzureWebJobsStorage": "",
+      "AZ_STORAGE_EVENT_CS": "",
+      "EG_EMULATOR_MODE": "localhost",
+      "LOG_TABLE_STORAGE": true,
+      "LOG_POSTGRE": true,
+      "DB_API_ENDPOINT": "",
+      "DB_API_ACCESS_KEY" :"",
+      "API_KEY": "test"
+    }
+  }
+  
