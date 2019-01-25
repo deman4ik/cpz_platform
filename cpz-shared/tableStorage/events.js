@@ -6,7 +6,9 @@ import {
   STORAGE_LOGS_EVENTS_TABLE,
   STORAGE_ERRORS_EVENTS_TABLE
 } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_EVENT_CS);
 
 tableStorage.createTableIfNotExists(STORAGE_TASKS_EVENTS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_SIGNALS_EVENTS_TABLE);

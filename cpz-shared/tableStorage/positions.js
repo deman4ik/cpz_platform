@@ -3,9 +3,12 @@ import VError from "verror";
 import dayjs from "../utils/lib/dayjs";
 import { POS_STATUS_OPEN, POS_STATUS_NEW } from "../config/state";
 import { STORAGE_POSITIONS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
 const { TableQuery, TableUtilities } = azure;
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_TRADE_CS);
+
 tableStorage.createTableIfNotExists(STORAGE_POSITIONS_TABLE);
 
 /**

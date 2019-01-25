@@ -1,5 +1,7 @@
 import { STORAGE_SIGNALSPENDING_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_TRADE_CS);
 
 tableStorage.createTableIfNotExists(STORAGE_SIGNALSPENDING_TABLE);
 

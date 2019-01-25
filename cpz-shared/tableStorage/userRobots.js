@@ -2,9 +2,12 @@ import azure from "azure-storage";
 import VError from "verror";
 import { STATUS_STARTED, STATUS_STARTING } from "../config/state";
 import { STORAGE_USERROBOTS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
 const { TableQuery, TableUtilities } = azure;
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_CONTROL_CS);
+
 tableStorage.createTableIfNotExists(STORAGE_USERROBOTS_TABLE);
 
 /**

@@ -1,6 +1,7 @@
 import { STORAGE_CURRENTPRICES_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_MARKET_CS);
 tableStorage.createTableIfNotExists(STORAGE_CURRENTPRICES_TABLE);
 
 const getCurrentPrice = async slug =>

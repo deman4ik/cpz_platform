@@ -5,20 +5,23 @@ import { tryParseJSON, chunkArray } from "../utils/helpers";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
-const tableService = azure
-  .createTableService(process.env.AZ_STORAGE_CS)
-  .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
 /**
  * Azure Table Storage API and helpers
  */
 class TableStorage {
+  constructor(connectionString) {
+    this.tableService = azure
+      .createTableService(connectionString)
+      .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
+  }
+
   /**
    * Convert object type Azure Table Storage Entity to common JS Object
    *
    * @param {entity} entity
    * @returns {Object}
    */
-  static entityToObject(entity) {
+  entityToObject(entity) {
     const object = {};
     Object.keys(entity).forEach(key => {
       if (key === ".metadata") {
@@ -40,7 +43,7 @@ class TableStorage {
    * @param {Object} object
    * @returns {entity}
    */
-  static objectToEntity(object) {
+  objectToEntity(object) {
     const entity = {};
     Object.keys(object).forEach(key => {
       const element = object[key];
@@ -72,9 +75,9 @@ class TableStorage {
    * @param {string} tableName
    * @returns
    */
-  static createTableIfNotExists(tableName) {
+  createTableIfNotExists(tableName) {
     return new Promise((resolve, reject) => {
-      tableService.createTableIfNotExists(tableName, (error, result) => {
+      this.tableService.createTableIfNotExists(tableName, (error, result) => {
         if (error) {
           reject(
             new VError(
@@ -100,10 +103,10 @@ class TableStorage {
    * @param {Object} data
    * @returns
    */
-  static insertOrMergeEntity(tableName, data) {
+  insertOrMergeEntity(tableName, data) {
     return new Promise((resolve, reject) => {
       const entity = this.objectToEntity(data);
-      tableService.insertOrMergeEntity(tableName, entity, error => {
+      this.tableService.insertOrMergeEntity(tableName, entity, error => {
         if (error) {
           let err;
           if (error.code === "UpdateConditionNotSatisfied") {
@@ -138,7 +141,7 @@ class TableStorage {
    * @param {string} table
    * @param {object[]} array
    */
-  static async insertOrMergeArray(table, array) {
+  async insertOrMergeArray(table, array) {
     try {
       const chunks = chunkArray(array, 100);
       await Promise.all(
@@ -169,10 +172,10 @@ class TableStorage {
    * @param {Object} data
    * @returns
    */
-  static mergeEntity(tableName, data) {
+  mergeEntity(tableName, data) {
     return new Promise((resolve, reject) => {
       const entity = this.objectToEntity(data);
-      tableService.mergeEntity(tableName, entity, error => {
+      this.tableService.mergeEntity(tableName, entity, error => {
         if (error) {
           let err;
           if (error.code === "UpdateConditionNotSatisfied") {
@@ -213,10 +216,10 @@ class TableStorage {
    * @returns
    *
    */
-  static deleteEntity(tableName, data) {
+  deleteEntity(tableName, data) {
     return new Promise((resolve, reject) => {
       const entity = this.objectToEntity(data);
-      tableService.deleteEntity(tableName, entity, error => {
+      this.tableService.deleteEntity(tableName, entity, error => {
         if (error)
           reject(
             new VError(
@@ -233,7 +236,7 @@ class TableStorage {
     });
   }
 
-  static async _executeDeleteChunk(table, chunk) {
+  async _executeDeleteChunk(table, chunk) {
     const batch = new azure.TableBatch();
     chunk.forEach(entity => {
       batch.deleteEntity(
@@ -253,7 +256,7 @@ class TableStorage {
    * @param {string} table
    * @param {Object[]} array
    */
-  static async deleteArray(table, array) {
+  async deleteArray(table, array) {
     try {
       const chunks = chunkArray(array, 100);
       if (chunks.length > 10) {
@@ -292,9 +295,9 @@ class TableStorage {
    * @param {string} tableName
    * @param {Batch} batch
    */
-  static executeBatch(tableName, batch) {
+  executeBatch(tableName, batch) {
     return new Promise((resolve, reject) => {
-      tableService.executeBatch(tableName, batch, error => {
+      this.tableService.executeBatch(tableName, batch, error => {
         if (error)
           reject(
             new VError(
@@ -319,9 +322,9 @@ class TableStorage {
    * @param {TableContinuationToken} continuationToken
    * @returns {entity[]}
    */
-  static _query(tableName, tableQuery, continuationToken) {
+  _query(tableName, tableQuery, continuationToken) {
     return new Promise((resolve, reject) => {
-      tableService.queryEntities(
+      this.tableService.queryEntities(
         tableName,
         tableQuery,
         continuationToken,
@@ -361,7 +364,7 @@ class TableStorage {
    * @param {TableQuery} tableQuery
    * @returns {entity[]}
    */
-  static async queryEntities(tableName, tableQuery) {
+  async queryEntities(tableName, tableQuery) {
     try {
       let entities = [];
       let nextContinuationToken = null;
@@ -396,7 +399,7 @@ class TableStorage {
    * @param {TableQuery} tableQuery
    * @returns {int} - entities count
    */
-  static async countEntities(tableName, tableQuery) {
+  async countEntities(tableName, tableQuery) {
     try {
       let entitiesCount = 0;
       let nextContinuationToken = null;
@@ -431,7 +434,7 @@ class TableStorage {
    * @param {string} RowKey
    * @returns {entity}
    */
-  static async getEntityByRowKey(table, RowKey) {
+  async getEntityByRowKey(table, RowKey) {
     try {
       const rowKeyFilter = TableQuery.stringFilter(
         "RowKey",
@@ -466,7 +469,7 @@ class TableStorage {
    * @param {string} PartitionKey
    * @returns {entity[]}
    */
-  static async getEntitiesByPartitionKey(table, PartitionKey) {
+  async getEntitiesByPartitionKey(table, PartitionKey) {
     try {
       const partitionKeyFilter = TableQuery.stringFilter(
         "PartitionKey",
@@ -499,7 +502,7 @@ class TableStorage {
    * @param {string} PartitionKey
    * @returns {entity}
    */
-  static async getEntityByPartitionKey(table, PartitionKey) {
+  async getEntityByPartitionKey(table, PartitionKey) {
     try {
       const entities = await this.getEntitiesByPartitionKey(
         table,
@@ -534,7 +537,7 @@ class TableStorage {
    * @param {string} input.PartitionKey
    * @returns {entity}
    */
-  static async getEntityByKeys(table, { RowKey, PartitionKey }) {
+  async getEntityByKeys(table, { RowKey, PartitionKey }) {
     try {
       const rowKeyFilter = TableQuery.stringFilter(
         "RowKey",

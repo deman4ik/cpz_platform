@@ -2,7 +2,27 @@
  * Azure Table Storage - Tables List
  */
 
+/* Control Group */
+const STORAGE_EXWATCHERS_TABLE = "Exwatchers"; // Exchange data watcher
+const STORAGE_USERROBOTS_TABLE = "UserRobots"; // User Robot
+
+/* Market Group */
+const STORAGE_IMPORTERS_TABLE = "Importers"; // Importer
+const STORAGE_CANDLESTEMP_TABLE = "CandlesTemp"; // Importer
+const STORAGE_MARKETWATCHERS_TABLE = "Marketwatchers"; // Marketwatcher
+const STORAGE_TICKSCACHED_TABLE = "TicksCashed"; // Marketwatcher / Candlebatcher
+const STORAGE_CANDLEBATCHERS_TABLE = "Candlebatchers"; // Candlebatcher
+const STORAGE_CANDLESCACHED_TABLE = "CandlesCached"; // Candlebatcher / Adviser
+const STORAGE_CANDLESPENDING_TABLE = "CandlesPending"; // Candlebatcher
+const STORAGE_CURRENTPRICES_TABLE = "CurrentPrices"; // Marketwatcher / Candlebatcher / Trader
+
+/* Trade Group */
 const STORAGE_ADVISERS_TABLE = "Advisers"; // Adviser
+const STORAGE_TRADERS_TABLE = "Traders"; // Trader
+const STORAGE_POSITIONS_TABLE = "Positions"; // Trader
+const STORAGE_SIGNALSPENDING_TABLE = "SignalsPending"; // Trader
+
+/* Backtest Group */
 const STORAGE_BACKTESTS_TABLE = "Backtests"; // Backtester
 const STORAGE_BACKTESTERS_TABLE = "Backtesters"; // Backtester
 const STORAGE_BACKTESTERITEMS_TABLE = "BacktesterItems"; // Backtester
@@ -10,20 +30,8 @@ const STORAGE_BACKTESTERSTRATLOG_TABLE = "BacktesterStratLogs"; // Backtester
 const STORAGE_BACKTESTERSIGNALS_TABLE = "BacktesterSignals"; // Backtester
 const STORAGE_BACKTESTERORDERS_TABLE = "BacktesterOrders"; // Backtester
 const STORAGE_BACKTESTERPOSITIONS_TABLE = "BacktesterPositions"; // Backtester
-const STORAGE_CANDLEBATCHERS_TABLE = "Candlebatchers"; // Candlebatcher
-const STORAGE_CANDLESCACHED_TABLE = "CandlesCached"; // Candlebatcher / Adviser
-const STORAGE_CANDLESTEMP_TABLE = "CandlesTemp"; // Importer
-const STORAGE_CANDLESPENDING_TABLE = "CandlesPending"; // Candlebatcher
-const STORAGE_CURRENTPRICES_TABLE = "CurrentPrices"; // Current market prices
-const STORAGE_EXWATCHERS_TABLE = "Exwatchers"; // Exchange data watcher
-const STORAGE_IMPORTERS_TABLE = "Importers"; // Importer
-const STORAGE_MARKETWATCHERS_TABLE = "Marketwatchers"; // Marketwatcher
-const STORAGE_POSITIONS_TABLE = "Positions"; // Trader
-const STORAGE_SIGNALSPENDING_TABLE = "SignalsPending"; // Trader
-const STORAGE_TICKSCACHED_TABLE = "TicksCashed"; // Marketwatcher / Adviser
-const STORAGE_TRADERS_TABLE = "Traders"; // Trader
-const STORAGE_USERROBOTS_TABLE = "UserRobots";
 
+/* Event Group */
 const STORAGE_TASKS_EVENTS_TABLE = "TasksEvents";
 const STORAGE_SIGNALS_EVENTS_TABLE = "SignalsEvents";
 const STORAGE_ORDERS_EVENTS_TABLE = "OrdersEvents";

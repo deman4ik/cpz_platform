@@ -6,10 +6,11 @@ import {
   STORAGE_CANDLESCACHED_TABLE,
   STORAGE_CANDLESTEMP_TABLE
 } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
 const { TableQuery, TableUtilities } = azure;
 
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_MARKET_CS);
 tableStorage.createTableIfNotExists(STORAGE_CANDLESPENDING_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_CANDLESCACHED_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_CANDLESTEMP_TABLE);

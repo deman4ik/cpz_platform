@@ -23,10 +23,8 @@ const topicsConfig = {
     host: getHost(process.env.EG_TASKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
   },
   ticks: {
-    client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
-    host: getHost(
-      process.env.EG_CANDLES_ENDPOINT || process.env.EG_TEST_ENDPOINT
-    )
+    client: createClient(process.env.EG_TICKS_KEY || process.env.EG_TEST_KEY),
+    host: getHost(process.env.EG_TICKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
   },
   candles: {
     client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
@@ -64,7 +62,6 @@ async function publishEvents(topic, eventData) {
     } else {
       const { eventType } = eventData;
       const data = { service: eventData.service, ...eventData.data };
-      // TODO: validate event data
       const newEvent = {
         id: uuid(),
         metadataVersion: "1",

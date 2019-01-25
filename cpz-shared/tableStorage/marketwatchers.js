@@ -1,9 +1,8 @@
-import azure from "azure-storage";
-import VError from "verror";
 import { STORAGE_MARKETWATCHERS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
-const { TableQuery, TableUtilities } = azure;
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_MARKET_CS);
+
 tableStorage.createTableIfNotExists(STORAGE_MARKETWATCHERS_TABLE);
 
 /**

@@ -3,9 +3,11 @@ import VError from "verror";
 import dayjs from "../utils/lib/dayjs";
 import { STATUS_STARTED } from "../config/state";
 import { STORAGE_IMPORTERS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
 const { TableQuery, TableUtilities } = azure;
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_MARKET_CS);
 
 tableStorage.createTableIfNotExists(STORAGE_IMPORTERS_TABLE);
 

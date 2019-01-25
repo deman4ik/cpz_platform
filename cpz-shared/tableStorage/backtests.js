@@ -1,9 +1,11 @@
 import azure from "azure-storage";
 import VError from "verror";
 import { STORAGE_BACKTESTS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
 const { TableQuery, TableUtilities } = azure;
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_CONTROL_CS);
+
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTS_TABLE);
 /**
  * Query Backtest State by uniq Task ID

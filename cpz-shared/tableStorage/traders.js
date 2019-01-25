@@ -2,10 +2,13 @@ import azure from "azure-storage";
 import VError from "verror";
 import { STATUS_STARTED, STATUS_BUSY } from "../config/state";
 import { STORAGE_TRADERS_TABLE } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 import { deletePositionsState } from "./positions";
 
 const { TableQuery, TableUtilities } = azure;
+
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_TRADE_CS);
+
 tableStorage.createTableIfNotExists(STORAGE_TRADERS_TABLE);
 
 /**

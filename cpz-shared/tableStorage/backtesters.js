@@ -6,8 +6,9 @@ import {
   STORAGE_BACKTESTERORDERS_TABLE,
   STORAGE_BACKTESTERPOSITIONS_TABLE
 } from "./tables";
-import tableStorage from "./tableStorage";
+import TableStorage from "./tableStorage";
 
+const tableStorage = new TableStorage(process.env.AZ_STORAGE_BACKTESTER_CS);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTERS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTERITEMS_TABLE);
 tableStorage.createTableIfNotExists(STORAGE_BACKTESTERSTRATLOG_TABLE);
