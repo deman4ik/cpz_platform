@@ -402,7 +402,9 @@ class Trader {
         // Если есть задача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер
-          await this.executeOrders([createdOrder], createdOrder.price);
+          await this.executeOrders([createdOrder], {
+            price: createdOrder.price
+          });
         } else {
           // Если любой другой тип ордера
           // Сохраняем позицию в сторедж
