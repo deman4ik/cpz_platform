@@ -14,7 +14,7 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { getAdviserById, updateAdviserState } from "cpzStorage";
+import { getAdviserById, updateAdviserState } from "cpzStorage/advisers";
 import Adviser from "./adviser";
 
 const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);

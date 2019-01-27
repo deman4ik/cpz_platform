@@ -5,9 +5,9 @@ import {
   saveOrdersEvent,
   savePositionsEvent,
   saveLogsEvent,
-  saveErrorsEvent,
-  saveCurrentPrice
-} from "cpzStorage";
+  saveErrorsEvent
+} from "cpzStorage/events";
+import { saveCurrentPrice } from "cpzStorage/currentPrices";
 import {
   CANDLES_NEWCANDLE_EVENT,
   SIGNALS_NEWSIGNAL_EVENT,

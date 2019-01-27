@@ -10,9 +10,18 @@ const { entityGenerator } = TableUtilities;
  */
 class TableStorage {
   constructor(connectionString) {
-    this.tableService = azure
-      .createTableService(connectionString || process.env.AZ_STORAGE_CS)
-      .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
+    try {
+      this.tableService = azure
+        .createTableService(connectionString || process.env.AZ_STORAGE_CS)
+        .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
+    } catch (error) {
+      console.log(connectionString);
+      console.log(error);
+      throw new VError(
+        { name: "TableStorage", cause: error },
+        "Failed to create table storage client."
+      );
+    }
   }
 
   /**

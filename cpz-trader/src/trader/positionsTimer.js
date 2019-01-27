@@ -1,10 +1,11 @@
-import { getIdledOpenPositions, getTraderById } from "cpzStorage";
 import VError from "verror";
 import { createErrorOutput } from "cpzUtils/error";
 
 import { ERROR_TRADER_EVENT, ERROR_TOPIC, TRADES_TOPIC } from "cpzEventTypes";
 import { STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
+import { getTraderById } from "cpzStorage/traders";
+import { getIdledOpenPositions } from "cpzStorage/positions";
 import { TRADER_SERVICE } from "cpzServices";
 import Position from "./position";
 import Trader from "./trader";

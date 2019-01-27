@@ -17,7 +17,10 @@ import {
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
-import { findMarketwatcher, getMarketwatcherById } from "cpzStorage";
+import {
+  findMarketwatcher,
+  getMarketwatcherById
+} from "cpzStorage/marketwatchers";
 import BaseRunner from "../baseRunner";
 
 const validateStart = createValidator(

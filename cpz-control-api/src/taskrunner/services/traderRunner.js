@@ -17,7 +17,7 @@ import {
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
-import { findTrader, getTraderById } from "cpzStorage";
+import { findTrader, getTraderById } from "cpzStorage/traders";
 import BaseRunner from "../baseRunner";
 
 const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);

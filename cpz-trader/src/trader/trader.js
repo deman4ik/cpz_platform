@@ -30,12 +30,9 @@ import {
 import publishEvents from "cpzEvents";
 import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
-import {
-  saveTraderState,
-  getPosition,
-  getActivePositionsBySlug,
-  getCurrentPrice
-} from "cpzStorage";
+import { saveTraderState } from "cpzStorage/traders";
+import { getCurrentPrice } from "cpzStorage/currentPrices";
+import { getPosition, getActivePositionsBySlug } from "cpzStorage/positions";
 import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
 
@@ -342,6 +339,11 @@ class Trader {
     }
   }
 
+  handlePrice({ price, timestamp }) {
+    this._lastPrice = price;
+    this._lastPriceTimestamp = timestamp;
+  }
+
   /**
    * Обработка нового сигнала
    *
@@ -402,9 +404,7 @@ class Trader {
         // Если есть задача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер
-          await this.executeOrders([createdOrder], {
-            price: createdOrder.price
-          });
+          await this.executeOrders([createdOrder]);
         } else {
           // Если любой другой тип ордера
           // Сохраняем позицию в сторедж
@@ -437,10 +437,7 @@ class Trader {
    *
    * @param {*} orders
    */
-  async executeOrders(
-    orders,
-    emulationParams = { price: null, timestamp: null }
-  ) {
+  async executeOrders(orders) {
     this.log("Executiong orders...");
     // Для каждого ордера
     /* eslint-disable no-restricted-syntax */
@@ -519,9 +516,9 @@ class Trader {
             // Считаем, что ордер успешно выставлен на биржу
             orderResult.status = ORDER_STATUS_OPEN;
             orderResult.exLastTrade =
-              emulationParams.timestamp || orderResult.createdAt;
-            orderResult.average = emulationParams.price;
-          } else {
+              this._lastPriceTimestamp || orderResult.createdAt;
+            orderResult.average = this._lastPrice;
+          } else if (order.orderType === ORDER_TYPE_MARKET) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - по рынку
             // Считаем, что ордер исполнен
@@ -529,8 +526,8 @@ class Trader {
             // Полностью - т.е. по заданному объему
             orderResult.executed = orderToExecute.volume;
             orderResult.exLastTrade =
-              emulationParams.timestamp || orderResult.createdAt;
-            orderResult.average = emulationParams.price;
+              this._lastPriceTimestamp || orderResult.createdAt;
+            orderResult.average = orderResult.price;
           }
         }
         // Загружаем позицию

@@ -11,11 +11,9 @@ import {
 } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
-import {
-  saveMarketwatcherState,
-  saveCachedTick,
-  saveCurrentPrice
-} from "cpzStorage";
+import { saveMarketwatcherState } from "cpzStorage/marketwatchers";
+import { saveCurrentPrice } from "cpzStorage/currentPrices";
+import { saveCachedTick } from "cpzStorage/ticks";
 
 class BaseProvider {
   constructor(state) {

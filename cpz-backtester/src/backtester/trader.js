@@ -35,6 +35,7 @@ class TraderBacktester extends Trader {
         }, c:${candle.close}`,
         `price: ${price}`
       );
+      this.handlePrice(price, candle.timestamp);
       /* eslint-disable no-restricted-syntax */
       for (const key of Object.keys(this._currentPositions)) {
         /* eslint-disable no-await-in-loop */
@@ -45,10 +46,7 @@ class TraderBacktester extends Trader {
         ) {
           const requiredOrders = position.getRequiredOrders(price);
           if (requiredOrders.length > 0) {
-            await this.executeOrders(requiredOrders, {
-              price,
-              timestamp: candle.timestamp
-            });
+            await this.executeOrders(requiredOrders);
           }
         }
         /* no-await-in-loop */

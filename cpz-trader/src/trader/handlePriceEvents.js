@@ -11,7 +11,8 @@ import {
 import { createPositionSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
-import { getActivePositionsBySlug, getTraderById } from "cpzStorage";
+import { getTraderById } from "cpzStorage/traders";
+import { getActivePositionsBySlug } from "cpzStorage/positions";
 import Position from "./position";
 import Trader from "./trader";
 
@@ -52,11 +53,12 @@ async function handlePrice(context, eventData) {
                 // Обновляем параметры
                 trader.setUpdate();
               }
-              await trader.save();
-              await trader.executeOrders(requiredOrders, {
+              trader.handlePrice({
                 price: currentPrice.price,
                 timestamp: currentPrice.timestamp
               });
+              await trader.save();
+              await trader.executeOrders(requiredOrders);
 
               // Если есть хотя бы одно событие для отправка
               if (trader.events.length > 0) {

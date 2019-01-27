@@ -13,7 +13,8 @@ import {
 } from "cpzState";
 import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
 import { ADVISER_SETTINGS_DEFAULTS } from "cpzDefaults";
-import { getCachedCandlesByKey, saveAdviserState } from "cpzStorage";
+import { getCachedCandlesByKey } from "cpzStorage/candles";
+import { saveAdviserState } from "cpzStorage/advisers";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";

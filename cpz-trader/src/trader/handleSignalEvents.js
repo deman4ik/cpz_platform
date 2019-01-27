@@ -19,12 +19,11 @@ import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {
-  getActiveTradersBySlug,
-  getTraderById,
   savePendingSignal,
   getPendingSignalsByTraderId,
   deletePendingSignal
-} from "cpzStorage";
+} from "cpzStorage/signals";
+import { getActiveTradersBySlug, getTraderById } from "cpzStorage/traders";
 import Trader from "./trader";
 
 const validateNewCandle = createValidator(SIGNALS_NEWSIGNAL_EVENT.dataSchema);

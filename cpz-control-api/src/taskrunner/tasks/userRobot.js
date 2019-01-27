@@ -7,7 +7,7 @@ import {
   STATUS_ERROR,
   createRobotSlug
 } from "cpzState";
-import { saveUserRobotState } from "cpzStorage";
+import { saveUserRobotState } from "cpzStorage/userRobots";
 import {
   CANDLEBATCHER_SETTINGS_DEFAULTS,
   ADVISER_SETTINGS_DEFAULTS,

@@ -16,9 +16,9 @@ import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {
   getPendingCandlesByAdviserId,
-  getAdviserById,
   deletePendingCandle
-} from "cpzStorage";
+} from "cpzStorage/candles";
+import { getAdviserById } from "cpzStorage/advisers";
 import Adviser from "./adviser";
 
 /**

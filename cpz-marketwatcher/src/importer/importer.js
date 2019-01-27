@@ -23,19 +23,17 @@ import {
 import publishEvents from "cpzEvents";
 import {
   chunkArray,
-  chunkNumberToArray,
   durationMinutes,
   completedPercent,
   sortAsc,
   divideDateByDays
 } from "cpzUtils/helpers";
 import {
-  saveImporterState,
   saveCandlesArrayToCache,
   saveCandlesArrayToTemp,
-  getTempCandles,
   clearTempCandles
-} from "cpzStorage";
+} from "cpzStorage/candles";
+import { saveImporterState } from "cpzStorage/importers";
 import { saveCandlesDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
 import { minuteCandlesEX, tradesEX } from "cpzConnector";

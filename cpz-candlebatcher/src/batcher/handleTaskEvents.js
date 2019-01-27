@@ -14,7 +14,10 @@ import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { getCandlebatcherById, updateCandlebatcherState } from "cpzStorage";
+import {
+  getCandlebatcherById,
+  updateCandlebatcherState
+} from "cpzStorage/candlebatchers";
 import Candlebatcher from "./candlebatcher";
 
 const validateStart = createValidator(

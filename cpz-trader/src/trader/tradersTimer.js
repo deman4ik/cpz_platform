@@ -1,4 +1,3 @@
-import { getActiveTradersWithStopRequested } from "cpzStorage";
 import VError from "verror";
 import { createErrorOutput } from "cpzUtils/error";
 
@@ -9,6 +8,7 @@ import {
   TASKS_TOPIC
 } from "cpzEventTypes";
 import { createTraderTaskSubject } from "cpzState";
+import { getActiveTradersWithStopRequested } from "cpzStorage/traders";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import Trader from "./trader";

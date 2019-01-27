@@ -7,7 +7,7 @@ import {
   STATUS_STOPPED,
   STATUS_FINISHED
 } from "cpzState";
-import { getExWatcherById } from "cpzStorage";
+import { getExWatcherById } from "cpzStorage/exwatchers";
 import {
   EXWATCHER_START_PARAMS,
   EXWATCHER_STOP_PARAMS,

@@ -30,7 +30,7 @@ import {
   createNewTradeSubject
 } from "cpzState";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "cpzEventTypes";
-import { savePositionState } from "cpzStorage";
+import { savePositionState } from "cpzStorage/positions";
 
 /**
  * Класс позиции
@@ -214,9 +214,9 @@ class Position {
     this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
     this._entry.status = this._currentOrder.status;
-    this._entry.price = this._currentOrder.price;
-    this._entry.date = this._currentOrder.createdAt;
-    this._entry.executed = this._currentOrder.executed;
+    // this._entry.price = this._currentOrder.price;
+    // this._entry.date = this._currentOrder.createdAt;
+    // this._entry.executed = this._currentOrder.executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -235,9 +235,9 @@ class Position {
     this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
     this._exit.status = this._currentOrder.status;
-    this._exit.price = this._currentOrder.price;
-    this._exit.date = this._currentOrder.createdAt;
-    this._exit.executed = this._currentOrder.executed;
+    // this._exit.price = this._currentOrder.price;
+    //  this._exit.date = this._currentOrder.createdAt;
+    //  this._exit.executed = this._currentOrder.executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }

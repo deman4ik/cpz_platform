@@ -12,7 +12,7 @@ import {
   STATUS_FINISHED,
   createBacktesterTaskSubject
 } from "cpzState";
-import { getBacktesterById } from "cpzStorage";
+import { getBacktesterById } from "cpzStorage/backtesters";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";

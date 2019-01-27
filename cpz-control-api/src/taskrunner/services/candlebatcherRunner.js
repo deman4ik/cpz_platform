@@ -17,12 +17,11 @@ import {
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE, CANDLEBATCHER_SERVICE } from "cpzServices";
+import { CONTROL_SERVICE } from "cpzServices";
 import {
   findCandlebatcher,
-  getCandlebatcherById,
-  getExWatcherById
-} from "cpzStorage";
+  getCandlebatcherById
+} from "cpzStorage/candlebatchers";
 import { arraysDiff } from "cpzUtils/helpers";
 import BaseRunner from "../baseRunner";
 

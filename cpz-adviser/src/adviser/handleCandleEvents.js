@@ -11,7 +11,8 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import { getActiveAdvisersBySlug, savePendingCandle } from "cpzStorage";
+import { savePendingCandle } from "cpzStorage/candles";
+import { getActiveAdvisersBySlug } from "cpzStorage/advisers";
 import execute from "./execute";
 
 const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);

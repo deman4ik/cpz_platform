@@ -5,7 +5,7 @@ import {
   STATUS_STOPPING,
   STATUS_STOPPED
 } from "cpzState";
-import { getUserRobotById } from "cpzStorage";
+import { getUserRobotById } from "cpzStorage/userRobots";
 import {
   USER_ROBOT_START_PARAMS,
   USER_ROBOT_STOP_PARAMS,

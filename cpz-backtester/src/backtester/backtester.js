@@ -31,7 +31,7 @@ import {
   saveBacktesterState,
   saveBacktesterStratLogs,
   deleteBacktesterState
-} from "cpzStorage";
+} from "cpzStorage/backtesters";
 import {
   saveBacktestsDB,
   isBacktestExistsDB,

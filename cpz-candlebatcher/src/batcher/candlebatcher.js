@@ -19,15 +19,17 @@ import {
   CANDLES_TOPIC
 } from "cpzEventTypes";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
+import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
 import {
   saveCandleToCache,
   saveCandlesArrayToCache,
-  saveCandlebatcherState,
   getCachedCandles,
-  getPrevCachedTicks,
-  deletePrevCachedTicksArray,
   cleanCachedCandles
-} from "cpzStorage";
+} from "cpzStorage/candles";
+import {
+  deletePrevCachedTicksArray,
+  getPrevCachedTicks
+} from "cpzStorage/ticks";
 import { getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
 import {

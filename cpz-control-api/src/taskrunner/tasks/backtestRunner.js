@@ -6,7 +6,7 @@ import {
   STATUS_STOPPED,
   STATUS_FINISHED
 } from "cpzState";
-import { getBacktestById } from "cpzStorage";
+import { getBacktestById } from "cpzStorage/backtests";
 import { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { durationInTimeframe } from "cpzUtils/helpers";

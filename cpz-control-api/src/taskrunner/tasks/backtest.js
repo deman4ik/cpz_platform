@@ -17,7 +17,7 @@ import {
   TASKS_BACKTEST_FINISHED_EVENT
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
-import { saveBacktestState } from "cpzStorage";
+import { saveBacktestState } from "cpzStorage/backtests";
 import {
   BACKTESTER_SETTINGS_DEFAULTS,
   ADVISER_SETTINGS_DEFAULTS,

@@ -45,23 +45,26 @@ import { createErrorOutput } from "cpzUtils/error";
 import {
   findExWatchersByServiceId,
   findExWatchersByImporterId,
-  findUserRobotsByServiceId,
-  findBacktestsByServiceId,
-  getMarketwatcherById,
-  deleteMarketwatcherState,
-  getCandlebatcherById,
-  deleteCandlebatcherState,
   getExWatcherById,
-  deleteExWatcherState,
-  getAdviserById,
-  deleteAdviserState,
-  getTraderById,
-  deleteTraderState,
-  getImporterById,
-  deleteImporterState,
+  deleteExWatcherState
+} from "cpzStorage/exwatchers";
+import { findUserRobotsByServiceId } from "cpzStorage/userRobots";
+import { findBacktestsByServiceId } from "cpzStorage/backtests";
+import { getImporterById, deleteImporterState } from "cpzStorage/importers";
+import {
   getBacktesterById,
   deleteBacktesterState
-} from "cpzStorage";
+} from "cpzStorage/backtesters";
+import {
+  getMarketwatcherById,
+  deleteMarketwatcherState
+} from "cpzStorage/marketwatchers";
+import {
+  getCandlebatcherById,
+  deleteCandlebatcherState
+} from "cpzStorage/candlebatchers";
+import { getAdviserById, deleteAdviserState } from "cpzStorage/advisers";
+import { getTraderById, deleteTraderState } from "cpzStorage/traders";
 import Backtest from "./tasks/backtest";
 import BacktestRunner from "./tasks/backtestRunner";
 import UserRobot from "./tasks/userRobot";

@@ -1,6 +1,6 @@
 import { fork } from "child_process";
 import { tryParseJSON } from "cpzUtils/helpers";
-import { getMarketwatcherById } from "cpzStorage";
+import { getMarketwatcherById } from "cpzStorage/marketwatchers";
 import { STATUS_STOPPED } from "cpzState";
 
 const marketwatcherProcesses = {};

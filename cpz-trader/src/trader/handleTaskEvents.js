@@ -1,4 +1,3 @@
-import dayjs from "cpzDayjs";
 import VError from "verror";
 import {
   TASKS_TRADER_START_EVENT,
@@ -12,9 +11,7 @@ import {
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
-  STATUS_BUSY,
-  createPositionSlug,
-  createCurrentPriceSlug
+  STATUS_BUSY
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
@@ -23,9 +20,7 @@ import { createErrorOutput } from "cpzUtils/error";
 import {
   getTraderById,
   updateTraderState,
-  getActivePositionsBySlug,
-  getCurrentPrice
-} from "cpzStorage";
+} from "cpzStorage/traders";
 import Trader from "./trader";
 
 const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);

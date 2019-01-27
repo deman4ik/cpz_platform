@@ -17,11 +17,8 @@ import {
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE, ADVISER_SERVICE } from "cpzServices";
-import {
-  findAdviser,
-  getAdviserById,
-  findOtherActiveUserRobotsByServiceId
-} from "cpzStorage";
+import { findAdviser, getAdviserById } from "cpzStorage/advisers";
+import { findOtherActiveUserRobotsByServiceId } from "cpzStorage/userRobots";
 import BaseRunner from "../baseRunner";
 
 const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
