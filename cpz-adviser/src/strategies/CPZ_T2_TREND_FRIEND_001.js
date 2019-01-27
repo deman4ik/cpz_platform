@@ -21,6 +21,11 @@ const robot4 = {
  
     if (nPrice) price_ = nPrice;
     else price_ = this.candle.close;
+    if (sPriceSource === "open") price_ = this.candle.open;
+    if (sPriceSource === "close") price_ = this.candle.close;
+    if (sPriceSource === "high") price_ = this.candle.high;
+    if (sPriceSource === "low") price_ = this.candle.low;
+    
 
     if (!price_) { this.log("Wrong parameters: cannot define price"); return; }
       
@@ -84,11 +89,11 @@ const robot4 = {
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
         
     if (this.adviceNext === "buy") {
-      this.adviceEx(this.CONSTS.TRADE_ACTION_LONG, "limit", "open"); 
+      this.adviceEx(this.CONSTS.TRADE_ACTION_LONG, "market", "open"); 
       this.adviceNext = null;       
     }
     else if (this.adviceNext === "sell") {
-      this.adviceEx(this.CONSTS.TRADE_ACTION_SHORT, "limit", "open");  
+      this.adviceEx(this.CONSTS.TRADE_ACTION_SHORT, "market", "open");  
       this.adviceNext = null;     
     }
 
