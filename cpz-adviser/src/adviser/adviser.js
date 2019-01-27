@@ -666,8 +666,8 @@ class Adviser {
   advice(signal) {
     this.log(
       `Signal! position ${signal.settings.positionCode}, ${signal.action}, ${
-        signal.price
-      } from ${signal.priceSource}`
+        signal.orderType
+      }, ${signal.price} from ${signal.priceSource}`
     );
     const newSignal = {
       id: uuid(),

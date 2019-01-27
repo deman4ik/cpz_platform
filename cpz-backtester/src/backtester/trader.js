@@ -35,7 +35,7 @@ class TraderBacktester extends Trader {
         }, c:${candle.close}`,
         `price: ${price}`
       );
-      this.handlePrice(price, candle.timestamp);
+      this.handlePrice({ price, timestamp: candle.timestamp });
       /* eslint-disable no-restricted-syntax */
       for (const key of Object.keys(this._currentPositions)) {
         /* eslint-disable no-await-in-loop */

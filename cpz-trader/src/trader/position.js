@@ -143,20 +143,24 @@ class Position {
   setStatus() {
     if (
       this._entry.status === ORDER_STATUS_OPEN ||
+      this._entry.status === ORDER_STATUS_CLOSED ||
       this._exit.status === ORDER_STATUS_OPEN
     ) {
       this._status = POS_STATUS_OPEN;
-    } else if (
+    }
+    if (
       this._entry.status === ORDER_STATUS_CLOSED &&
       this._exit.status === ORDER_STATUS_CLOSED
     ) {
       this._status = POS_STATUS_CLOSED;
-    } else if (
+    }
+    if (
       this._entry.status === ORDER_STATUS_CANCELED ||
       this._exit.status === ORDER_STATUS_CANCELED
     ) {
       this._status = POS_STATUS_CANCELED;
-    } else if (
+    }
+    if (
       this._entry.status === ORDER_STATUS_ERROR ||
       this._exit.status === ORDER_STATUS_ERROR
     ) {
@@ -211,12 +215,13 @@ class Position {
     // Создаем ордер на открытие позиции
     this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
+    this.log("ENTRY", this._currentOrder);
     this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
     this._entry.status = this._currentOrder.status;
-    // this._entry.price = this._currentOrder.price;
-    // this._entry.date = this._currentOrder.createdAt;
-    // this._entry.executed = this._currentOrder.executed;
+    this._entry.price = this._currentOrder.price;
+    this._entry.date = this._currentOrder.createdAt;
+    this._entry.executed = this._currentOrder.executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -232,12 +237,13 @@ class Position {
     // Создаем ордер на закрытие позиции
     this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
+    this.log("EXIT", this._currentOrder);
     this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
     this._exit.status = this._currentOrder.status;
-    // this._exit.price = this._currentOrder.price;
-    //  this._exit.date = this._currentOrder.createdAt;
-    //  this._exit.executed = this._currentOrder.executed;
+    this._exit.price = this._currentOrder.price;
+    this._exit.date = this._currentOrder.createdAt;
+    this._exit.executed = this._currentOrder.executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }

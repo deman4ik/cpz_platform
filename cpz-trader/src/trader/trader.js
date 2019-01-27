@@ -392,6 +392,7 @@ class Trader {
           ].status = POS_STATUS_CANCELED;
         }
       }
+      this.log(this._currentPositions[this._signal.positionId].status);
       if (
         this._currentPositions[this._signal.positionId].status !==
           POS_STATUS_CANCELED &&
@@ -401,6 +402,7 @@ class Trader {
         // Созданный ордер
         const createdOrder = this._currentPositions[this._signal.positionId]
           .currentOrder;
+        this.log("createdOrder", createdOrder);
         // Если есть задача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер
@@ -515,8 +517,7 @@ class Trader {
             // Если тип ордера - лимитный
             // Считаем, что ордер успешно выставлен на биржу
             orderResult.status = ORDER_STATUS_OPEN;
-            orderResult.exLastTrade =
-              this._lastPriceTimestamp || orderResult.createdAt;
+            orderResult.exLastTrade = this._lastPriceTimestamp;
             orderResult.average = this._lastPrice;
           } else if (order.orderType === ORDER_TYPE_MARKET) {
             // Если режим - эмуляция или бэктест
@@ -525,8 +526,7 @@ class Trader {
             orderResult.status = ORDER_STATUS_CLOSED;
             // Полностью - т.е. по заданному объему
             orderResult.executed = orderToExecute.volume;
-            orderResult.exLastTrade =
-              this._lastPriceTimestamp || orderResult.createdAt;
+            orderResult.exLastTrade = this._lastPriceTimestamp;
             orderResult.average = orderResult.price;
           }
         }
