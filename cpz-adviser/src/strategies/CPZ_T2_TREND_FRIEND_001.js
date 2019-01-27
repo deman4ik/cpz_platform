@@ -1,48 +1,33 @@
 const robot4 = {
   adviceEx(sAction, sOrderType, sPriceSource, nPrice) {
     // check params
-/*    if (!sAction || !sOrderType) return;
+    if (!sAction || !sOrderType) { this.log("Wrong parameters: sAction and sOrderType must be set"); return; }
 
     if (
       sAction !== this.CONSTS.TRADE_ACTION_SHORT &&
       sAction !== this.CONSTS.TRADE_ACTION_LONG
     )
-      return;
+      { this.log("Wrong parameters: sAction has wrong value " + sAction); return; }
 
     if (
       sOrderType !== this.CONSTS.ORDER_TYPE_STOP &&
       sOrderType !== this.CONSTS.ORDER_TYPE_MARKET &&
       sOrderType !== this.CONSTS.ORDER_TYPE_LIMIT 
     )
-      return;
-*/
+      { this.log("Wrong parameters: sOrderType has wrong value " + sOrderType); return; }
+
     let price_;
-    let source_;
     let action_;
+ 
+    if (nPrice) price_ = nPrice;
+    else price_ = this.candle.close;
 
-    // define price source if we got price
-    if (sPriceSource && nPrice) {
-      price_ = nPrice;
-      source_ = "stop";
-    } else {
-      if (sPriceSource === "open") price_ = this.candle.open;
-      if (sPriceSource === "close") price_ = this.candle.close;
-      if (sPriceSource === "high") price_ = this.candle.high;
-      if (sPriceSource === "low") price_ = this.candle.low;
-      source_ = sPriceSource;
-
-      if (!sPriceSource && !nPrice) {
-        price_ = this.candle.close;
-        source_ = "close";
-      }
-
-      if (!price_) { this.log("Wrong parameters, cannot define price"); return; }
-    }
-
+    if (!price_) { this.log("Wrong parameters: cannot define price"); return; }
+      
     // do we need to close previously opened position or create new one
-    if (this.prevAction === this.CONSTS.TRADE_ACTION_LONG) {
+    if (this.lastSignal && this.lastSignal.action === this.CONSTS.TRADE_ACTION_LONG) {
       action_ = this.CONSTS.TRADE_ACTION_CLOSE_LONG;
-    } else if (this.prevAction === this.CONSTS.TRADE_ACTION_SHORT) {
+    } else if (this.lastSignal && this.lastSignal.action === this.CONSTS.TRADE_ACTION_SHORT) {
       action_ = this.CONSTS.TRADE_ACTION_CLOSE_SHORT;
     } else {
       this.positionNum += 1;
@@ -50,14 +35,12 @@ const robot4 = {
       action_ = sAction;
     }
 
-    this.prevAction = action_;
-
     // preparing signal
-    const newSignal = {
+    this.lastSignal = {
       action: action_,
       orderType: sOrderType,
       price: price_,
-      priceSource: source_,
+      priceSource: sPriceSource,
       positionId: this.positions[`p${this.positionNum}`].positionId,
       settings: {
         positionCode: this.positions[`p${this.positionNum}`].code
@@ -65,15 +48,16 @@ const robot4 = {
     };
 
     // issue signal
-    this.advice(newSignal);
+    this.advice(this.lastSignal);
+
   },
   init() {
     this.log("init");
     this.positionNum = 0;
-    this.myPropSignal = 0;
-    this.prevAction = "#";
     this.minBarsToHold = 3; // param
     this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least
+    this.lastSignal = null;
+    this.adviceNext = null;   
     this.addIndicator("sma1", "SMA", { windowLength: 10 });
     this.addIndicator("sma2", "SMA", { windowLength: 20 });
     this.addIndicator("sma3", "SMA", { windowLength: 30 });
@@ -84,7 +68,7 @@ const robot4 = {
     // this.log("check");
     // this.log(this.candle);
 
-    const price = this.candle.close;
+    //const price = this.candle.close;
     const sma1 = this.indicators.sma1.result;
     const sma2 = this.indicators.sma2.result;
     const sma3 = this.indicators.sma3.result;
@@ -97,38 +81,36 @@ const robot4 = {
       price
     });*/
 
-    if (this.heldEnoughBars > 0) this.heldEnoughBars += 1;
-
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
+        
+    if (this.adviceNext === "buy") {
+      this.adviceEx(this.CONSTS.TRADE_ACTION_LONG, "limit", "open"); 
+      this.adviceNext = null;       
+    }
+    else if (this.adviceNext === "sell") {
+      this.adviceEx(this.CONSTS.TRADE_ACTION_SHORT, "limit", "open");  
+      this.adviceNext = null;     
+    }
 
     // if last position opened
-    if (this.prevAction === this.CONSTS.TRADE_ACTION_LONG) {
+    if (this.lastSignal && this.lastSignal.action === "long") {
+      this.heldEnoughBars += 1;
       // exit condition
       if (
         this.candle.close < sma1 &&
         this.heldEnoughBars > this.minBarsToHold // > - do not count entry bar
       ) {
           this.heldEnoughBars = 0; // clear bars counter
-          this.adviceEx(
-            this.CONSTS.TRADE_ACTION_SHORT,
-            this.CONSTS.ORDER_TYPE_LIMIT,
-            "open"
-          );
-        
+          this.adviceNext = "sell";
       }
     }
     // enter condition
     else if (
       this.candle.close > sma1 &&
-      (sma1 > sma2 && sma1 > sma3) &&
-      sma2 > sma3
+      (sma1 > sma2 && sma1 > sma3 && sma2 > sma3)
     ) {
       this.heldEnoughBars = 1; // open bar counter
-      this.adviceEx(
-        this.CONSTS.TRADE_ACTION_LONG,
-        this.CONSTS.ORDER_TYPE_LIMIT,
-        "open"
-      );      
+      this.adviceNext = "buy"    
     }
   }
 };
