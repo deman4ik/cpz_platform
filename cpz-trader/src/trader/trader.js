@@ -271,7 +271,11 @@ class Trader {
    * @memberof Trader
    */
   _createPosition(positionId) {
-    this.log("Creating new Position...");
+    this.log(
+      "Creating new Position",
+      this._signal.settings.positionCode,
+      positionId
+    );
     this._currentPositions[positionId] = new Position({
       positionId,
       traderId: this._taskId,
@@ -392,7 +396,6 @@ class Trader {
           ].status = POS_STATUS_CANCELED;
         }
       }
-      this.log(this._currentPositions[this._signal.positionId].status);
       if (
         this._currentPositions[this._signal.positionId].status !==
           POS_STATUS_CANCELED &&
@@ -402,7 +405,6 @@ class Trader {
         // Созданный ордер
         const createdOrder = this._currentPositions[this._signal.positionId]
           .currentOrder;
-        this.log("createdOrder", createdOrder);
         // Если есть задача для ордера
         if (createdOrder.task) {
           // Немедленно исполянем ордер

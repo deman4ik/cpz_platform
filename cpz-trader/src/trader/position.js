@@ -215,7 +215,6 @@ class Position {
     // Создаем ордер на открытие позиции
     this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
-    this.log("ENTRY", this._currentOrder);
     this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
     this._entry.status = this._currentOrder.status;
@@ -237,7 +236,6 @@ class Position {
     // Создаем ордер на закрытие позиции
     this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
-    this.log("EXIT", this._currentOrder);
     this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
     this._exit.status = this._currentOrder.status;
