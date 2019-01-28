@@ -52,14 +52,20 @@ class Adviser {
     /* Настройки */
     this._settings = {
       /* Режима дебага [true,false] */
-      debug: state.settings.debug || ADVISER_SETTINGS_DEFAULTS.debug,
+      debug:
+        state.settings.debug === undefined || state.settings.debug === null
+          ? ADVISER_SETTINGS_DEFAULTS.debug
+          : state.settings.debug,
       strategyParameters:
         state.settings.strategyParameters ||
         ADVISER_SETTINGS_DEFAULTS.strategyParameters,
       /* Загружать историю из кэша */
       requiredHistoryCache:
-        state.settings.requiredHistoryCache ||
-        ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache,
+        state.settings.requiredHistoryCache === undefined ||
+        state.settings.requiredHistoryCache === null
+          ? ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache
+          : state.settings.requiredHistoryCache,
+
       /* Максимально количество свечей в кэше */
       requiredHistoryMaxBars:
         state.settings.requiredHistoryMaxBars ||

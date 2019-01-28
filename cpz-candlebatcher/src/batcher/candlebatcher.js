@@ -65,7 +65,10 @@ class Candlebatcher {
     this._timeframes = state.timeframes || [];
     this._settings = {
       /* Режима дебага [true,false] */
-      debug: state.settings.debug || CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
+      debug:
+        state.settings.debug === undefined || state.settings.debug === null
+          ? CANDLEBATCHER_SETTINGS_DEFAULTS.debug
+          : state.settings.debug,
       /* Адрес прокси сервера */
       proxy: state.settings.proxy || CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
       requiredHistoryMaxBars:

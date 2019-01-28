@@ -58,13 +58,18 @@ class Backtester {
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
     this.settings = {
-      debug: state.settings.debug || BACKTESTER_SETTINGS_DEFAULTS.debug
+      debug:
+        state.settings.debug === undefined || state.settings.debug === null
+          ? BACKTESTER_SETTINGS_DEFAULTS.debug
+          : state.settings.debug
     };
     this.adviserSettings = state.adviserSettings;
     this.traderSettings = state.traderSettings;
     this.requiredHistoryCache =
-      state.adviserSettings.requiredHistoryCache ||
-      ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache;
+      state.adviserSettings.requiredHistoryCache === undefined ||
+      state.adviserSettings.requiredHistoryCache === null
+        ? ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache
+        : state.adviserSettings.requiredHistoryCache;
     this.requiredHistoryMaxBars =
       state.adviserSettings.requiredHistoryMaxBars ||
       ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars;
@@ -196,6 +201,7 @@ class Backtester {
 
       // Если необходим прогрев
       if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
+        this.log("Warming cache...");
         // Формируем параметры запроса
         const requiredHistoryRequest = {
           exchange: this.exchange,

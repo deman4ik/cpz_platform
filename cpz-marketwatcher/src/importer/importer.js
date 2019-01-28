@@ -53,7 +53,10 @@ class Importer {
     /* Уникальный идентификатор задачи */
     this.taskId = state.taskId;
     /* Режима дебага [true,false] */
-    this.debug = state.debug || process.env.DEBUG;
+    this.debug =
+      state.debug === undefined || state.debug === null
+        ? process.env.DEBUG
+        : state.debug;
     /* Тип провайдера ['ccxt'] */
     this.providerType = state.providerType || "ccxt";
     /* Код биржи */

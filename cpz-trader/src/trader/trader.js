@@ -68,7 +68,10 @@ class Trader {
     this._timeframe = state.timeframe;
     this._settings = {
       /* Режима дебага [true,false] */
-      debug: state.settings.debug || TRADER_SETTINGS_DEFAULTS.debug,
+      debug:
+        state.settings.debug === undefined || state.settings.debug === null
+          ? TRADER_SETTINGS_DEFAULTS.debug
+          : state.settings.debug,
       mode: state.settings.mode || TRADER_SETTINGS_DEFAULTS.mode,
       /* Шаг проскальзывания */
       slippageStep:
