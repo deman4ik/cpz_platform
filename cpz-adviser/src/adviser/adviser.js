@@ -75,6 +75,8 @@ class Adviser {
     this._indicators = state.indicators || {};
     /* Текущая свеча */
     this._candle = {};
+    /* Текущие свечи */
+    this._candles = [];
     /* Последняя свеча */
     this._lastCandle = state.lastCandle || { id: null };
     /* Массив сигналов к отправке */

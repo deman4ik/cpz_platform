@@ -48,8 +48,7 @@ class AdviserBacktester extends Adviser {
       this._candle = candle;
       // Если  свеча уже обрабатывалась - выходим
       if (this._candle.id === this._lastCandle.id) return;
-      // Удаляем первую свечу
-      this._candles.shift();
+
       // Добавляем новую  свечу
       this._candles.push(this._candle);
       this._candles = this._candles.slice(
