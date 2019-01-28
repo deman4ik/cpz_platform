@@ -3,19 +3,11 @@
   "scriptFile": "../dist/funcAlive.js",
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "name": "myTimer",
+      "type": "timerTrigger",
       "direction": "in",
-      "name": "req",
-      "route": "alive",
-      "methods": [
-        "post"
-      ]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "res"
+      "schedule": "1 * * * * *"
     }
   ]
 }
+

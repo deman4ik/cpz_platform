@@ -18,7 +18,7 @@ import { saveCachedTick } from "cpzStorage/ticks";
 class BaseProvider {
   constructor(state) {
     /* Тема события */
-    this._eventSubject = state.eventSubject;
+    this._eventSubject = state.eventSubject || state.exchange;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
     /* Режима дебага [true,false] */

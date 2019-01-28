@@ -1,23 +1,33 @@
-import { isProcessExists } from "../globalMarketwatchers";
+import "babel-polyfill";
+import { getStartedMarketwatchers } from "cpzStorage/marketwatchers";
+import {
+  isProcessExists,
+  createNewProcess,
+  sendEventToProcess
+} from "../globalMarketwatchers";
 
-function checkMarketwatcher(context, req) {
-  try {
-    const { taskId } = JSON.parse(req.rawBody);
+async function timerTrigger(context, timer) {
+  const timeStamp = new Date().toISOString();
 
-    context.res = {
-      status: 200,
-      alive: isProcessExists(taskId)
-    };
-  } catch (error) {
-    context.log.error(error);
-    context.res = {
-      status: 500,
-      body: error,
-      headers: {
-        "Content-Type": "application/json"
-      }
-    };
+  if (timer.isPastDue) {
+    context.log.info("Timer trigger is running late!");
   }
-  context.done();
+  context.log.info("Timer trigger function ran!", timeStamp);
+  const marketwatchers = await getStartedMarketwatchers();
+  marketwatchers.forEach(marketwatcherState => {
+    const isAlive = isProcessExists(marketwatcherState.taskId);
+    if (!isAlive) {
+      createNewProcess(
+        context,
+        marketwatcherState.taskId,
+        marketwatcherState.providerType
+      );
+      sendEventToProcess(marketwatcherState.taskId, {
+        type: "start",
+        state: marketwatcherState
+      });
+    }
+  });
 }
-export default checkMarketwatcher;
+
+export default timerTrigger;

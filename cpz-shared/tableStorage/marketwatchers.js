@@ -1,5 +1,10 @@
+import azure from "azure-storage";
+import VError from "verror";
+import { STATUS_STOPPED } from "../config/state";
 import { STORAGE_MARKETWATCHERS_TABLE } from "./tables";
 import TableStorage from "./tableStorage";
+
+const { TableQuery, TableUtilities } = azure;
 
 const tableStorage = new TableStorage(process.env.AZ_STORAGE_MARKET_CS);
 
@@ -14,6 +19,34 @@ tableStorage.createTableIfNotExists(STORAGE_MARKETWATCHERS_TABLE);
 const getMarketwatcherById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_MARKETWATCHERS_TABLE, taskId);
 
+/**
+ * Query Started Marketwatchers
+ *
+ * @returns {MarketwatcherState[]}
+ */
+const getStartedMarketwatchers = async () => {
+  try {
+    const query = new TableQuery().where(
+      TableQuery.stringFilter(
+        "status",
+        TableUtilities.QueryComparisons.NOT_EQUAL,
+        STATUS_STOPPED
+      )
+    );
+    return await tableStorage.queryEntities(
+      STORAGE_MARKETWATCHERS_TABLE,
+      query
+    );
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error
+      },
+      "Failed to load started marketwatchers"
+    );
+  }
+};
 /**
  * Find Marketwatcher
  *
@@ -48,6 +81,7 @@ const deleteMarketwatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getMarketwatcherById,
+  getStartedMarketwatchers,
   findMarketwatcher,
   saveMarketwatcherState,
   deleteMarketwatcherState
