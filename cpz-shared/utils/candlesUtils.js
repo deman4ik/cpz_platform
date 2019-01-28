@@ -10,10 +10,11 @@ import {
 import { CANDLE_PREVIOUS, createCachedCandleSlug } from "../config/state";
 
 /**
- * Отбор подходящих по времени таймфреймов для формирования
+ * Отбор подходящих по времени таймфреймов
  *
- * @param {Array} timeframes
- * @param {dayjs} date
+ * @param {[Int]} timeframes
+ * @param {Date} inputDate
+ * @returns {[Int]}
  */
 function getCurrentTimeframes(timeframes, inputDate) {
   const date = dayjs(inputDate).utc();
@@ -47,8 +48,20 @@ function getCurrentTimeframes(timeframes, inputDate) {
   return currentTimeframes;
 }
 
-function createMinutesList(dateFrom, dateTo, dur) {
-  const duration = dur || durationMinutes(dateFrom, dateTo);
+/**
+ * Создание массива минут между указаннами датами
+ * с указанной продолжительностью
+ *
+ * @param {Date} dateFrom
+ * @param {Date} dateTo
+ * @param {Int} duration
+ * @returns {[Int]}
+ */
+function createMinutesList(
+  dateFrom,
+  dateTo,
+  duration = durationMinutes(dateFrom, dateTo)
+) {
   const list = [];
   for (let i = 0; i < duration; i += 1) {
     list.push(
@@ -60,8 +73,19 @@ function createMinutesList(dateFrom, dateTo, dur) {
   return list;
 }
 
-function createMinutesListWithRange(dateFrom, dateTo, dur) {
-  const duration = dur || durationMinutes(dateFrom, dateTo);
+/**
+ * Создание массива минут (с указанием времени начала и конца минуты) между указаннами датами
+ *
+ * @param {Date} dateFrom
+ * @param {Date} dateTo
+ * @param {Int} duration
+ * @returns {Array}
+ */
+function createMinutesListWithRange(
+  dateFrom,
+  dateTo,
+  duration = durationMinutes(dateFrom, dateTo)
+) {
   const list = [];
   for (let i = 0; i < duration; i += 1) {
     const date = dayjs(dateFrom).add(i, "minute");
@@ -73,7 +97,14 @@ function createMinutesListWithRange(dateFrom, dateTo, dur) {
   return list;
 }
 
-/* Возвращает объект с массивом пачек дат исключая последнюю дату dateTo */
+/**
+ * Возвращает объект с массивом пачек дат между указаннами датами
+ * (dateTo не включается)
+ *
+ * @param {Date} dateFrom
+ * @param {Date} dateTo
+ * @param {Int} chunkSize
+ */
 function chunkDates(dateFrom, dateTo, chunkSize) {
   const list = createMinutesList(dateFrom, dateTo);
 
@@ -91,10 +122,31 @@ function chunkDates(dateFrom, dateTo, chunkSize) {
   return { chunks, total: list.length };
 }
 
+/**
+ * Генерация ID свечи по времени
+ *
+ * @param {Int} time - время в милисекундах
+ */
 function generateCandleRowKey(time) {
   return getInvertedTimestamp(time);
 }
 
+/**
+ * Заполнение пропусков свечей в исходном массиве,
+ * путем создания новых свечей по данным предыдущей свечи
+ *
+ * @param {Object} info
+ * @param {string} info.exchange код биржи
+ * @param {string} info.asset базовая валюта
+ * @param {string} info.currency котировка валюты
+ * @param {Int} info.timeframe таймфрейм в минутах
+ * @param {ID} info.taskId UUID сервиса
+ * @param {Date} dateFrom дата с
+ * @param {Date} dateTo дата по
+ * @param {Int} maxDuration количество минут
+ * @param {[Object]} inputCandles массив свечей
+ * @returns {[Object]} массив свечей с заполненными пропусками
+ */
 function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
   let candles = [...inputCandles];
   const { exchange, asset, currency, timeframe, taskId } = info;
@@ -130,14 +182,14 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
             asset,
             currency,
             timeframe
-          }),
-          RowKey: generateCandleRowKey(diffTime),
-          id: uuid(),
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          taskId,
+          }), // Ключ раздела Azure Table Storage
+          RowKey: generateCandleRowKey(diffTime), // Ключ строки Azure Table Storage
+          id: uuid(), // Уникальный идентификтор свечи
+          exchange, // код биржи
+          asset, // базовая валюта
+          currency, // котировка валюты
+          timeframe, // таймфрейм в минутах
+          taskId, // UUID сервиса
           time: diffTime, // время в милисекундах
           timestamp: dayjs(diffTime)
             .utc()
@@ -161,6 +213,13 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
   return [];
 }
 
+/**
+ * Вычисление количества едениц времени в зависимости от таймфрейма
+ *
+ * @param {Int} number количество единиц
+ * @param {Int} timeframe таймфрейм в минутах
+ * @returns {Object}
+ */
 function timeframeToTimeUnit(number, timeframe) {
   if (timeframe < 60) {
     return { number: number * timeframe, unit: "minute" };
@@ -171,10 +230,23 @@ function timeframeToTimeUnit(number, timeframe) {
   return { number: number * (timeframe / 1440), unit: "day" };
 }
 
+/**
+ * Получение максимального таймфрейма из массива
+ *
+ * @param {[Int]} timeframes массив таймфреймов в минутах
+ */
 function getMaxTimeframe(timeframes) {
   return Math.max(...Object.keys(timeframes).map(key => parseInt(key, 10)));
 }
 
+/**
+ * Получение даты отсчета максимального таймфрейма
+ * в зависимости от количества баров
+ *
+ * @param {[Int]} timeframes массив таймфреймов в минутах
+ * @param {Int} maxBars количество баров
+ * @returns {Date}
+ */
 function getMaxTimeframeDateFrom(timeframes, maxBars) {
   const maxTimeframe = getMaxTimeframe(timeframes);
   const { number, unit } = timeframeToTimeUnit(maxBars, maxTimeframe);

@@ -1,5 +1,11 @@
 import fetch from "node-fetch";
 
+/**
+ * HTTP запрос возвращающий JSON
+ *
+ * @param {string} url
+ * @param {*} agent агент proxy
+ */
 function fetchJSON(url, agent) {
   return fetch(url, { agent })
     .then(res => {

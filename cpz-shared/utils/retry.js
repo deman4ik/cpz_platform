@@ -1,6 +1,12 @@
 import pretry from "p-retry";
 import VError from "verror";
 
+/**
+ * Повторение попыток выполнения функции
+ *
+ * @param {*} func
+ * @param {*} options
+ */
 async function retry(
   func,
   options = {

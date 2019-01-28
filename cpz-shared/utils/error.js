@@ -1,5 +1,10 @@
 import VError from "verror";
 
+/**
+ * Генерация объекта с ошибкой
+ *
+ * @param {*} error стандартный экземпляр Error или экземпляр VError
+ */
 function createErrorOutput(error) {
   let err;
   if (error instanceof VError) {

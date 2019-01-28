@@ -1,6 +1,13 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "./lib/dayjs";
 
+/**
+ * Сортировка по возрастанию
+ *
+ * @param {Number} a
+ * @param {Number} b
+ * @returns {Int}
+ */
 function sortAsc(a, b) {
   if (a > b) {
     return 1;
@@ -11,6 +18,13 @@ function sortAsc(a, b) {
   return 0;
 }
 
+/**
+ * Сортировка по убыванию
+ *
+ * @param {Number} a
+ * @param {Number} b
+ * @returns {Int}
+ */
 function sortDesc(a, b) {
   if (a > b) {
     return -1;
@@ -20,10 +34,11 @@ function sortDesc(a, b) {
   }
   return 0;
 }
+
 /**
  * Парсинг JSON, если ошибка возвращает false
  *
- * @param {*} jsonString
+ * @param {string} jsonString
  */
 function tryParseJSON(jsonString) {
   try {
@@ -39,6 +54,9 @@ function tryParseJSON(jsonString) {
 
 /**
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
+ *
+ * @param {Date} time
+ * @return {string}
  */
 function getInvertedTimestamp(time) {
   const inverted =
@@ -56,6 +74,8 @@ function getInvertedTimestamp(time) {
  * Генерация ключа строки
  * Каждое новое значение всегда меньше предыдущего
  * Применяется в Azure Table Storage для DESC сортировки строк в таблице по RowKey
+ *
+ * @returns {string}
  */
 function generateKey() {
   const inverted = getInvertedTimestamp(dayjs().utc());
@@ -66,9 +86,9 @@ function generateKey() {
 /**
  * Количество минут между двумя датами
  *
- * @param {*} dateFrom
- * @param {*} dateTo
- * @param {boolean} positive
+ * @param {Date} dateFrom дата с
+ * @param {Date} dateTo дата по
+ * @param {boolean} positive возвращать только положительное число
  */
 function durationMinutes(dateFrom, dateTo, positive = false) {
   const duration = dayjs(dateTo)
@@ -81,9 +101,9 @@ function durationMinutes(dateFrom, dateTo, positive = false) {
 /**
  * Количество минут между двумя датами в заданном таймфрейме
  *
- * @param {*} dateFrom
- * @param {*} dateTo
- * @param {int} timeframe
+ * @param {Date} dateFrom дата с
+ * @param {Date} dateTo дата по
+ * @param {Int} timeframe таймфрейм в минутах
  */
 function durationInTimeframe(dateFrom, dateTo, timeframe) {
   const minutes = durationMinutes(dateFrom, dateTo);
@@ -106,7 +126,7 @@ function completedPercent(completedDuration, totalDuration) {
 /**
  * Возвращает начало и конец предыдущей минуты
  *
- * @param {dayjs} date
+ * @param {Date} inputDate
  */
 function getPreviousMinuteRange(inputDate) {
   const date = dayjs(inputDate).utc();
@@ -117,6 +137,13 @@ function getPreviousMinuteRange(inputDate) {
   };
 }
 
+/**
+ * Разделение указанного периода по дням
+ * в том числе учитывая не законченные дни
+ *
+ * @param {Date} inputDateFrom
+ * @param {Date} inputDateTo
+ */
 function divideDateByDays(inputDateFrom, inputDateTo) {
   const dateFrom = dayjs(inputDateFrom).utc();
   const dateTo = dayjs(inputDateTo).utc();
@@ -136,20 +163,37 @@ function divideDateByDays(inputDateFrom, inputDateTo) {
   return dates;
 }
 
+/**
+ * Сравнение двух массивов
+ *
+ * @param {Array} full
+ * @param {Array} part
+ */
 function arraysDiff(full, part) {
   return full.filter(v => !part.includes(v));
 }
 
+/**
+ * Разделение массива по пачкам
+ *
+ * @param {Array} array
+ * @param {Int} chunkSize размер пачкм
+ */
 function chunkArray(array, chunkSize) {
   const arrayToChunk = [...array];
   const results = [];
   while (arrayToChunk.length) {
     results.push(arrayToChunk.splice(0, chunkSize));
   }
-
   return results;
 }
 
+/**
+ * Создание числового ряда
+ *
+ * @param {Number} to
+ * @param {Number} from
+ */
 function createRange(to, from = 1) {
   const range = {
     from,
@@ -171,6 +215,13 @@ function createRange(to, from = 1) {
   return range;
 }
 
+/**
+ * Разбивка числа по пачкам
+ *
+ * @param {Numver} number исзодное число
+ * @param {Int} chunkSize размер пачки
+ * @return {[Number]}
+ */
 function chunkNumberToArray(number, chunkSize) {
   const range = createRange(number);
   const array = Array.from(range);
@@ -178,10 +229,20 @@ function chunkNumberToArray(number, chunkSize) {
   return chunked;
 }
 
+/**
+ * Возвращает исходную строку с прописным первым символом
+ *
+ * @param {string} string исходная строка
+ */
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+/**
+ * Отфильтровать не уникальные элементы массива
+ *
+ * @param {Array} arr
+ */
 function filterOutNonUnique(arr) {
   const arrToFilter = [...arr];
   return arrToFilter.filter(
@@ -189,12 +250,25 @@ function filterOutNonUnique(arr) {
   );
 }
 
+/**
+ * Корректировка точности числа
+ *
+ * @param {Number} x исходное число
+ * @param {Int} n количество знаков после запятой
+ */
 function precision(x, n) {
   if (!x || !n) return x;
   const m = 10 ** n;
   return Math.round(x * m) / m;
 }
 
+/**
+ * Корректировка числа согласно допустимым значениям
+ *
+ * @param {Number} x исходное число
+ * @param {Number} min минимальное допустимое значение
+ * @param {Number} max максимальное доапустимое значение
+ */
 function correctWithLimit(x, min, max) {
   if (min && x < min) return min;
   if (max && x > max) return max;
