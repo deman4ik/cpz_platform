@@ -10,7 +10,7 @@ const ADVISER_SETTINGS_DEFAULTS = {
   debug: true,
   strategyParameters: {},
   requiredHistoryCache: true,
-  requiredHistoryMaxBars: 1
+  requiredHistoryMaxBars: 30
 };
 
 const TRADER_SETTINGS_DEFAULTS = {

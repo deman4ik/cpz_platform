@@ -606,8 +606,13 @@ class Adviser {
       if (this._settings.requiredHistoryCache) {
         // Загрузить свечи из кеша
         await this._loadCandles();
-      } else {
-        // Обрабатываем только текущую свечу
+      }
+      if (
+        this._candles.length === 0 ||
+        this._candles[this._candles.length - 1].id !== this._candle.id
+      ) {
+        // Добавляем текущую свечу
+
         this._candles.push(this._candle);
       }
       // Подготовить свечи для индикаторов

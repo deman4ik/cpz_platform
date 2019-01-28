@@ -52,7 +52,12 @@ class AdviserBacktester extends Adviser {
       this._candles.shift();
       // Добавляем новую  свечу
       this._candles.push(this._candle);
-
+      this._candles = this._candles.slice(
+        Math.max(
+          this._candles.length - this._settings.requiredHistoryMaxBars,
+          0
+        )
+      );
       // Подготовить свечи для индикаторов
       this._prepareCandles();
       // Рассчитать значения индикаторов
