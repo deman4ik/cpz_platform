@@ -22,7 +22,6 @@ const getCandlebatcherById = async taskId =>
 /**
  * Query Started Candlebatchers
  *
- * @param {string} taskId
  * @returns {CandlebatcherState[]}
  */
 const getStartedCandlebatchers = async () => {
