@@ -9,7 +9,9 @@
   "author": "CPZ Team",
   "license": "ISC",
   "dependencies": {
+    "adal-node": "^0.1.28",
     "azure-eventgrid": "^1.5.0",
+    "azure-keyvault": "^3.0.4",
     "azure-storage": "^2.10.2",
     "clean-webpack-plugin": "^1.0.1",
     "dayjs": "^1.8.0",
