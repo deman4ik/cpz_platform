@@ -28,7 +28,8 @@ const robot4 = {
     
 
     if (!price_) { this.log("Wrong parameters: cannot define price"); return; }
-      
+    
+    // redefining action
     // do we need to close previously opened position or create new one
     if (this.lastSignal && this.lastSignal.action === this.CONSTS.TRADE_ACTION_LONG) {
       action_ = this.CONSTS.TRADE_ACTION_CLOSE_LONG;
@@ -52,7 +53,7 @@ const robot4 = {
       }
     };
 
-    // issue signal
+    // issuing signal
     this.advice(this.lastSignal);
 
   },
@@ -62,38 +63,31 @@ const robot4 = {
     this.minBarsToHold = 3; // param
     this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least
     this.lastSignal = null;
-    this.adviceNext = null;   
-    this.addIndicator("sma1", "SMA", { windowLength: 10 });
-    this.addIndicator("sma2", "SMA", { windowLength: 20 });
-    this.addIndicator("sma3", "SMA", { windowLength: 30 });
-    //this.addIndicator("activePosition", "activePosition", {debug:1, highestSeriesSize:20, lowestSeriesSize:20});
-    //this.activePosition = null;
+    this.adviceNext = null;  // shift signal to bar+1 
+    
+    //using SMA_CACHE to skip warm up, needs to run adviser with "requiredHistoryCache":true, "requiredHistoryMaxBars":30
+    this.addIndicator("sma1", "SMA_CACHE", { windowLength: 10 });
+    this.addIndicator("sma2", "SMA_CACHE", { windowLength: 20 });
+    this.addIndicator("sma3", "SMA_CACHE", { windowLength: 30 });
   },
   check() {
-    // this.log("check");
-    // this.log(this.candle);
-
     //const price = this.candle.close;
     const sma1 = this.indicators.sma1.result;
     const sma2 = this.indicators.sma2.result;
     const sma3 = this.indicators.sma3.result;
-    //this.activePosition = this.indicators.activePosition;
-    /*
-    this.logEvent({
-      sma1,
-      sma2,
-      sma3,
-      price
-    });*/
 
+    //this.log("sma3:" + sma3); // log to console
+    //this.logEvent({sma1, sma2, sma3}); // log to storage with auto adding candle props
+    
+    // if we run without "requiredHistoryCache":true then skipping
     if (sma1 === 0 || sma2 === 0 || sma3 === 0) return;
         
     if (this.adviceNext === "buy") {
-      this.adviceEx(this.CONSTS.TRADE_ACTION_LONG, "market", "open"); 
+      this.adviceEx("long", "market", "open"); 
       this.adviceNext = null;       
     }
     else if (this.adviceNext === "sell") {
-      this.adviceEx(this.CONSTS.TRADE_ACTION_SHORT, "market", "open");  
+      this.adviceEx("short", "market", "open");  
       this.adviceNext = null;     
     }
 
