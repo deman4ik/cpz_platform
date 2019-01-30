@@ -45,6 +45,7 @@ input PublicConnectorInput {
 input PrivateConnectorInput {
     userId: ID!
     exchange: String!
+    encryptionKeyName: String!
     proxy: String
 }
 

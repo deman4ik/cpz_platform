@@ -22,9 +22,11 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.3.1",
+    "adal-node": "^0.1.28",
     "apollo-datasource": "^0.2.2",
     "apollo-server-azure-functions": "^2.3.2",
     "azure-eventgrid": "^1.3.1",
+    "azure-keyvault": "^3.0.4",
     "azure-storage": "^2.10.1",
     "babel-polyfill": "^6.26.0",
     "base-64": "^0.1.0",

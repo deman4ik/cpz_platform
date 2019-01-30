@@ -18,11 +18,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 
   async init() {
-    // TODO: Load keys from Azure Key Vault
+    await this.loadKeys();
     this.ccxt = new ccxt[this._exchangeName]({
       agent: this._proxyAgent,
-      apiKey: process.env.EXCHANGE_API_KEY,
-      secret: process.env.EXCHANGE_SECRET_KEY
+      apiKey: this.API_KEY_MAIN,
+      secret: this.API_SECRET_KEY
     });
     const call = async () => {
       await this.ccxt.loadMarkets();
