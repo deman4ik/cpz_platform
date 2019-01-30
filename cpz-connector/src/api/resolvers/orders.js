@@ -1,7 +1,7 @@
 import { getPrivateConnector } from "../../global";
 
 async function checkOrder(_, { connectorInput, order }, { context }) {
-  const connector = await getPrivateConnector(connectorInput);
+  const connector = await getPrivateConnector(context, connectorInput);
   const result = await connector.checkOrder(
     context,
     connectorInput.keys,
@@ -11,7 +11,7 @@ async function checkOrder(_, { connectorInput, order }, { context }) {
 }
 
 async function createOrder(_, { connectorInput, order }, { context }) {
-  const connector = await getPrivateConnector(connectorInput);
+  const connector = await getPrivateConnector(context, connectorInput);
   const result = await connector.createOrder(
     context,
     connectorInput.keys,
@@ -21,7 +21,7 @@ async function createOrder(_, { connectorInput, order }, { context }) {
 }
 
 async function cancelOrder(_, { connectorInput, order }, { context }) {
-  const connector = await getPrivateConnector(connectorInput);
+  const connector = await getPrivateConnector(context, connectorInput);
   const result = await connector.cancelOrder(
     context,
     connectorInput.keys,

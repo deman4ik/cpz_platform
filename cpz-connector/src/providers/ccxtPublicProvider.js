@@ -1,4 +1,5 @@
 import ccxt from "ccxt";
+import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
 import BasePublicProvider from "./basePublicProvider";
@@ -16,13 +17,26 @@ class CCXTPublicProvider extends BasePublicProvider {
   }
 
   async init() {
-    this.ccxt = new ccxt[this._exchangeName]({
-      agent: this._proxyAgent
-    });
-    const call = async () => {
-      await this.ccxt.loadMarkets();
-    };
-    await pretry(call, this._retryOptions);
+    try {
+      this.ccxt = new ccxt[this._exchangeName]({
+        agent: this._proxyAgent
+      });
+      const call = async () => {
+        await this.ccxt.loadMarkets();
+      };
+      await pretry(call, this._retryOptions);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "InitPublicProviderError",
+          cause: error,
+          info: {
+            exchange: this._exchangeName
+          }
+        },
+        "Failed to init public provider."
+      );
+    }
   }
 
   getSymbol(asset, currency) {

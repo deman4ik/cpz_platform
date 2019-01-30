@@ -41,14 +41,14 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     } catch (error) {
       throw new VError(
         {
-          name: "InitProviderError",
+          name: "InitPrivateProviderError",
           cause: error,
           info: {
             exchange: this._exchangeName,
             userId: this._userId
           }
         },
-        "Failed to init provider."
+        "Failed to init private provider."
       );
     }
   }
