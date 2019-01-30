@@ -7,7 +7,7 @@ scalar DateTime
 scalar JSON
 
 type Query {
-    balance(connectorInput: PrivateConnectorInput!): BalanceResponse!
+    balance(connectorInput: PrivateConnectorInput, checkConnectorInput: CheckConnectorInput): BalanceResponse!
     order(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse!
     market(connectorInput: PublicConnectorInput!, asset: String!, currency: String!): MarketResponse!
     lastMinuteCandle(
@@ -45,9 +45,27 @@ input PublicConnectorInput {
 input PrivateConnectorInput {
     userId: ID!
     exchange: String!
-    encryptionKeyName: String!
+    keys: APIKeysInput!
     proxy: String
 }
+
+input CheckConnectorInput {
+    userId: ID!
+    exchange: String!
+    key: String!
+    secret: String!
+}
+input APIKeysInput {
+    main: APIKeyInput!
+    spare: APIKeyInput
+}
+
+input APIKeyInput {
+    encryptionKeyName: String!
+    secretVersion: String!
+}
+
+
 
 type Error {
     name: String!

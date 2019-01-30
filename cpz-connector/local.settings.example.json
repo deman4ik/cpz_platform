@@ -6,8 +6,11 @@
       "AzureWebJobsStorage": "",
       "API_KEY":"test",
       "PROXY_ENDPOINT":"",
-      "EXCHANGE_API_KEY": "",
-      "EXCHANGE_SECRET_KEY": ""
+      "KEY_VAULT_URL": "",
+      "KEY_VAULT_READ_CLIENT_ID": "",
+      "KEY_VAULT_READ_APP_SECRET": "",
+      "KEY_VAULT_DECR_CLIENT_ID": "",
+      "KEY_VAULT_DECR_APP_SECRET": ""
     }
   }
   

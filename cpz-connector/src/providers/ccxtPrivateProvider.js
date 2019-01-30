@@ -1,4 +1,5 @@
 import ccxt from "ccxt";
+import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
 import { correctWithLimit, precision } from "cpzUtils/helpers";
@@ -7,7 +8,6 @@ import BasePrivateProvider from "./basePrivateProvider";
 class CCXTPrivateProvider extends BasePrivateProvider {
   constructor(input) {
     super(input);
-    this._exchangeName = this._exchange.toLowerCase();
 
     this.ccxt = {};
     this._retryOptions = {
@@ -17,17 +17,63 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     };
   }
 
-  async init() {
-    await this.loadKeys();
-    this.ccxt = new ccxt[this._exchangeName]({
-      agent: this._proxyAgent,
-      apiKey: this.API_KEY_MAIN,
-      secret: this.API_SECRET_KEY
-    });
-    const call = async () => {
-      await this.ccxt.loadMarkets();
-    };
-    await pretry(call, this._retryOptions);
+  async init(keyType = "main") {
+    try {
+      if (
+        this._keys[keyType].encryptionKeyName &&
+        this._keys[keyType].secretVersion
+      )
+        await this._loadKeys(keyType);
+      this.ccxt = new ccxt[this._exchangeName]({
+        agent: this._proxyAgent,
+        apiKey: this._keys[keyType].key,
+        secret: this._keys[keyType].secret
+      });
+      this._currentKeyType = keyType;
+      this._currentKeyVersion = this._keys[keyType].secretVersion;
+      const call = async () => {
+        await this.ccxt.loadMarkets();
+      };
+      await pretry(call, this._retryOptions);
+    } catch (error) {
+      throw new VError(
+        {
+          name: "InitProviderError",
+          cause: error,
+          info: {
+            exchange: this._exchangeName,
+            userId: this._userId
+          }
+        },
+        "Failed to init provider."
+      );
+    }
+  }
+
+  async _checkKeysVersion(keys) {
+    if (keys) {
+      if (this._currentKeyVersion !== keys.main.secretVersion) {
+        this._keys.main = keys.main;
+        await this.init("main");
+      }
+      if (
+        keys.spare &&
+        keys.spare.secretVersion &&
+        this._currentKeyVersion !== keys.spare.secretVersion
+      )
+        this._keys.spare = keys.spare;
+    }
+  }
+
+  async _handleExchangeError(e) {
+    if (e instanceof ccxt.ExchangeError) {
+      if (this._currentKeyType === "main" && this._keys.spare.secretVersion) {
+        await this.init("spare");
+        throw e;
+      }
+      throw new pretry.AbortError(e);
+    }
+    throw e;
   }
 
   clearOrderCache() {
@@ -42,15 +88,15 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return `${asset}/${currency}`;
   }
 
-  async getBalance(context) {
+  async getBalance(context, keys) {
     try {
       context.log("getBalance()");
+      await this._checkKeysVersion(keys);
       const call = async () => {
         try {
           return await this.ccxt.fetchBalance();
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
-          throw e;
+          await this._handleExchangeError(e);
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -86,13 +132,14 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return {};
   }
 
-  async createOrder(context, order) {
+  async createOrder(context, keys, order) {
     try {
       /* 
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
       // TODO: Params
       context.log("createOrder()");
+      await this._checkKeysVersion(keys);
       const { direction, volume, price, asset, currency, params } = order;
       const market = this.ccxt.market(this.getSymbol(asset, currency));
       const correctedPrice = correctWithLimit(
@@ -118,8 +165,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             orderParams
           );
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
-          throw e;
+          await this._handleExchangeError(e);
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -163,9 +209,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async checkOrder(context, { exId, asset, currency }) {
+  async checkOrder(context, keys, { exId, asset, currency }) {
     try {
       console.log("checkOrder()");
+      await this._checkKeysVersion(keys);
       const call = async () => {
         try {
           return await this.ccxt.fetchOrder(
@@ -173,8 +220,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             this.getSymbol(asset, currency)
           );
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
-          throw e;
+          await this._handleExchangeError(e);
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -225,15 +271,15 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async cancelOrder(context, { exId, asset, currency }) {
+  async cancelOrder(context, keys, { exId, asset, currency }) {
     try {
       context.log("cancelOrder()");
+      await this._checkKeysVersion(keys);
       const call = async () => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
-          throw e;
+          await this._handleExchangeError(e);
         }
       };
       let err;
