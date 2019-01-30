@@ -19,7 +19,7 @@ async function getSecret({
   secretVersion = ""
 }) {
   try {
-    const keyVaultClient = await getClient(clientId, appSecret);
+    const keyVaultClient = getClient(clientId, appSecret);
     const result = await keyVaultClient.getSecret(
       uri,
       secretName,

@@ -20,7 +20,7 @@ async function setSecret({
   secretName
 }) {
   try {
-    const keyVaultClient = await getClient(clientId, appSecret);
+    const keyVaultClient = getClient(clientId, appSecret);
     const result = await keyVaultClient.setSecret(uri, secretName, secretValue);
     const secretId = KeyVault.parseSecretIdentifier(result.id);
     return secretId;

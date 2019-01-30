@@ -17,20 +17,23 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     };
   }
 
-  async init(keyType = "main") {
+  async init(context, keyType = "main") {
     try {
       if (
         this._keys[keyType].encryptionKeyName &&
-        this._keys[keyType].secretVersion
+        this._keys[keyType].APIKeyVersion &&
+        this._keys[keyType].APISecretVersion
       )
-        await this._loadKeys(keyType);
+        await this._loadKeys(context, keyType);
       this.ccxt = new ccxt[this._exchangeName]({
         agent: this._proxyAgent,
-        apiKey: this._keys[keyType].key,
-        secret: this._keys[keyType].secret
+        apiKey: this._keys[keyType].APIKey,
+        secret: this._keys[keyType].APISecret
       });
       this._currentKeyType = keyType;
-      this._currentKeyVersion = this._keys[keyType].secretVersion;
+      this._currentKeyVersion = `${this._keys[keyType].APIKeyVersion}${
+        this._keys[keyType].APISecretVersion
+      }`;
       const call = async () => {
         await this.ccxt.loadMarkets();
       };
@@ -50,16 +53,21 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async _checkKeysVersion(keys) {
+  async _checkKeysVersion(context, keys) {
     if (keys) {
-      if (this._currentKeyVersion !== keys.main.secretVersion) {
+      if (
+        this._currentKeyVersion !==
+        `${keys.main.APIKeyVersion}${keys.main.APISecretVersion}`
+      ) {
         this._keys.main = keys.main;
-        await this.init("main");
+        await this.init(context, "main");
       }
       if (
         keys.spare &&
-        keys.spare.secretVersion &&
-        this._currentKeyVersion !== keys.spare.secretVersion
+        keys.spare.APIKeyVersion &&
+        keys.spare.APISecretVersion &&
+        this._currentKeyVersion !==
+          `${keys.spare.APIKeyVersion}${keys.spare.APISecretVersion}`
       )
         this._keys.spare = keys.spare;
     }
@@ -67,7 +75,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async _handleExchangeError(e) {
     if (e instanceof ccxt.ExchangeError) {
-      if (this._currentKeyType === "main" && this._keys.spare.secretVersion) {
+      if (
+        this._currentKeyType === "main" &&
+        this._keys.spare.APIKeyVersion &&
+        this._keys.spare.APISecretVersion
+      ) {
         await this.init("spare");
         throw e;
       }
@@ -91,7 +103,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async getBalance(context, keys) {
     try {
       context.log("getBalance()");
-      await this._checkKeysVersion(keys);
+      await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
           return await this.ccxt.fetchBalance();
@@ -139,7 +151,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       BITFINEX: type: "limit" */
       // TODO: Params
       context.log("createOrder()");
-      await this._checkKeysVersion(keys);
+      await this._checkKeysVersion(context, keys);
       const { direction, volume, price, asset, currency, params } = order;
       const market = this.ccxt.market(this.getSymbol(asset, currency));
       const correctedPrice = correctWithLimit(
@@ -212,7 +224,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async checkOrder(context, keys, { exId, asset, currency }) {
     try {
       console.log("checkOrder()");
-      await this._checkKeysVersion(keys);
+      await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
           return await this.ccxt.fetchOrder(
@@ -274,7 +286,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async cancelOrder(context, keys, { exId, asset, currency }) {
     try {
       context.log("cancelOrder()");
-      await this._checkKeysVersion(keys);
+      await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));

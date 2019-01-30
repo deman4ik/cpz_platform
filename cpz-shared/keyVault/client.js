@@ -9,7 +9,7 @@ import { AuthenticationContext } from "adal-node";
  * @param {string} secret пароль приложения
  * @returns {object} KeyVaultClient
  */
-async function getClient(clientId, secret) {
+function getClient(clientId, secret) {
   try {
     // Callback for ADAL authentication.
     const adalCallback = (challenge, callback) => {

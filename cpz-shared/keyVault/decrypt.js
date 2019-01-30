@@ -21,7 +21,7 @@ async function decrypt({
   keyVersion = ""
 }) {
   try {
-    const keyVaultClient = await getClient(clientId, appSecret);
+    const keyVaultClient = getClient(clientId, appSecret);
 
     const result = await keyVaultClient.decrypt(
       uri,
@@ -31,7 +31,7 @@ async function decrypt({
       Buffer.from(JSON.parse(value).data)
     );
 
-    return result.result;
+    return result.result.toString("utf8");
   } catch (error) {
     throw new VError(
       { name: "KeyVaultError", cause: error },

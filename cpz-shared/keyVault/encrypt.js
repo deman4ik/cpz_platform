@@ -21,7 +21,7 @@ async function encrypt({
   keyVersion = ""
 }) {
   try {
-    const keyVaultClient = await getClient(clientId, appSecret);
+    const keyVaultClient = getClient(clientId, appSecret);
 
     const result = await keyVaultClient.encrypt(
       uri,

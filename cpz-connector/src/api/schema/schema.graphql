@@ -45,24 +45,25 @@ input PublicConnectorInput {
 input PrivateConnectorInput {
     userId: ID!
     exchange: String!
-    keys: APIKeysInput!
+    keys: PairKeysInput!
     proxy: String
 }
 
 input CheckConnectorInput {
     userId: ID!
     exchange: String!
-    key: String!
-    secret: String!
+    APIKey: String!
+    APISecret: String!
 }
-input APIKeysInput {
-    main: APIKeyInput!
-    spare: APIKeyInput
+input PairKeysInput {
+    main: KeyInput!
+    spare: KeyInput
 }
 
-input APIKeyInput {
+input KeyInput {
     encryptionKeyName: String!
-    secretVersion: String!
+    APIKeyVersion: String!
+    APISecretVersion: String!
 }
 
 

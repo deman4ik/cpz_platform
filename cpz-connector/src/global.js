@@ -21,7 +21,7 @@ async function removePublicConnector(connectorName) {
   delete publicConnectors[connectorName];
 }
 
-async function getPrivateConnector(props) {
+async function getPrivateConnector(context, props) {
   const { userId, exchange } = props;
   const connectorName = `${exchange}_${userId}`;
   // Check if user uniq class exists
@@ -29,7 +29,7 @@ async function getPrivateConnector(props) {
     // if not - initializing new instance
 
     privateConnectors[connectorName] = new CCXTPrivateProvider(props);
-    await privateConnectors[connectorName].init();
+    await privateConnectors[connectorName].init(context);
   }
   return privateConnectors[connectorName];
 }

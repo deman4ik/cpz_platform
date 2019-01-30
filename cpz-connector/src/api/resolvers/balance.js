@@ -7,7 +7,7 @@ async function getBalance(
   { context }
 ) {
   if (connectorInput) {
-    const connector = await getPrivateConnector(connectorInput);
+    const connector = await getPrivateConnector(context, connectorInput);
     const result = await connector.getBalance(context, connectorInput.keys);
     return result;
   }
@@ -17,8 +17,8 @@ async function getBalance(
       userId: checkConnectorInput.userId,
       keys: {
         main: {
-          key: checkConnectorInput.key,
-          secret: checkConnectorInput.secret
+          APIKey: checkConnectorInput.APIKey,
+          APISecret: checkConnectorInput.APISecret
         }
       }
     });

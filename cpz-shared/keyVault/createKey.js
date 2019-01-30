@@ -13,7 +13,7 @@ import getClient from "./client";
  */
 async function createKey({ uri, clientId, appSecret, keyName }) {
   try {
-    const keyVaultClient = await getClient(clientId, appSecret);
+    const keyVaultClient = getClient(clientId, appSecret);
 
     const keyOperations = ["encrypt", "decrypt"];
     const keyOptions = {

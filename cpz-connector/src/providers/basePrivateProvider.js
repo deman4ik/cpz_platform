@@ -11,16 +11,19 @@ const {
 } = process.env;
 class BasePrivateProvider {
   constructor(input) {
+    this._exchange = input.exchange;
     this._exchangeName = this._exchange.toLowerCase();
     this._userId = input.userId;
     this._keys = {
       main: {
         encryptionKeyName: null,
-        secretVersion: null
+        APIKeyVersion: null,
+        APISecretVersion: null
       },
       spare: {
         encryptionKeyName: null,
-        secretVersion: null
+        APIKeyVersion: null,
+        APISecretVersion: null
       }
     };
     this._keys = { ...this._keys, ...input.keys };
@@ -30,34 +33,36 @@ class BasePrivateProvider {
     if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
   }
 
-  async _loadKeys(keyType) {
+  async _loadKeys(context, keyType) {
     try {
-      const encryptedApiKey = await getSecret({
+      const encryptedAPIKey = await getSecret({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_READ_CLIENT_ID,
         appSecret: KEY_VAULT_READ_APP_SECRET,
-        secretName: `${this._exchangeName}_${this._userId}_key_${keyType}`,
-        secretVerstion: this._keys[keyType].secretVersion
+        secretName: `${this._exchangeName}-${this._userId}-${keyType}-key`,
+        secretVersion: this._keys[keyType].APIKeyVersion
       });
-      const encryptedApiSecret = await getSecret({
+
+      const encryptedAPISecret = await getSecret({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_READ_CLIENT_ID,
         appSecret: KEY_VAULT_READ_APP_SECRET,
-        secretName: `${this._exchangeName}_${this._userId}_secret_${keyType}`,
-        secretVerstion: this._keys[keyType].secretVersion
+        secretName: `${this._exchangeName}-${this._userId}-${keyType}-secret`,
+        secretVersion: this._keys[keyType].APISecretVersion
       });
-      this._keys[keyType].key = await decrypt({
+
+      this._keys[keyType].APIKey = await decrypt({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_DECR_CLIENT_ID,
         appSecret: KEY_VAULT_DECR_APP_SECRET,
-        value: encryptedApiKey,
+        value: encryptedAPIKey,
         keyName: this._keys[keyType].encryptionKeyName
       });
-      this._keys[keyType].secret = await decrypt({
+      this._keys[keyType].APISecret = await decrypt({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_DECR_CLIENT_ID,
         appSecret: KEY_VAULT_DECR_APP_SECRET,
-        value: encryptedApiSecret,
+        value: encryptedAPISecret,
         keyName: this._keys[keyType].encryptionKeyName
       });
     } catch (error) {
@@ -68,7 +73,8 @@ class BasePrivateProvider {
           info: {
             keyType,
             encryptionKeyName: this._keys[keyType].encryptionKeyName,
-            secretVersion: this._keys[keyType].secretVersion
+            APIKeyVersion: this._keys[keyType].APIKeyVersion,
+            APISecretVersion: this._keys[keyType].APISecretVersion
           }
         },
         "Failed to load API Keys."
