@@ -1,3 +1,4 @@
+# import { APIPairKeysInput } from "src/api/schema/apikeys.graphql"
 # import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/orders.graphql"
 # import { MarketResponse } from "src/api/schema/market.graphql"
 # import { CandleResponse, CandlesResponse} from "src/api/schema/candles.graphql"
@@ -45,28 +46,17 @@ input PublicConnectorInput {
 input PrivateConnectorInput {
     userId: ID!
     exchange: String!
-    keys: PairKeysInput!
+    keys: APIPairKeysInput!
     proxy: String
 }
 
 input CheckConnectorInput {
     userId: ID!
     exchange: String!
-    APIKey: String!
-    APISecret: String!
+    APIKeyValue: String!
+    APISecretValue: String!
+    proxy: String
 }
-input PairKeysInput {
-    main: KeyInput!
-    spare: KeyInput
-}
-
-input KeyInput {
-    encryptionKeyName: String!
-    APIKeyVersion: String!
-    APISecretVersion: String!
-}
-
-
 
 type Error {
     name: String!

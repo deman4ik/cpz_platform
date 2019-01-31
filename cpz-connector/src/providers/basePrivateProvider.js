@@ -1,6 +1,7 @@
 import VError from "verror";
 import HttpsProxyAgent from "https-proxy-agent";
 import { getSecret, decrypt } from "cpzKeyVault";
+import { resolve } from "url";
 
 const {
   KEY_VAULT_URL,
@@ -16,65 +17,117 @@ class BasePrivateProvider {
     this._userId = input.userId;
     this._keys = {
       main: {
-        encryptionKeyName: null,
-        APIKeyVersion: null,
-        APISecretVersion: null
+        specified: false,
+        loaded: false,
+        active: true,
+        APIKey: {
+          encryptionKeyName: null,
+          name: null,
+          version: null,
+          value: null
+        },
+        APISecret: {
+          encryptionKeyName: null,
+          name: null,
+          version: null,
+          value: null
+        }
       },
       spare: {
-        encryptionKeyName: null,
-        APIKeyVersion: null,
-        APISecretVersion: null
+        specified: false,
+        loaded: false,
+        active: false,
+        APIKey: {
+          encryptionKeyName: null,
+          name: null,
+          version: null,
+          value: null
+        },
+        APISecret: {
+          encryptionKeyName: null,
+          name: null,
+          version: null,
+          value: null
+        }
       }
     };
-    this._keys = { ...this._keys, ...input.keys };
+    this._setKeys(input.keys);
     this._exchange = input.exchange;
     this._currentKeyType = "main";
     this._proxy = input.proxy || process.env.PROXY_ENDPOINT;
     if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
   }
 
+  _setKeys(keys) {
+    if (keys.main) {
+      this._keys.main.APIKey = keys.main.APIKey;
+      this._keys.main.APISecret = keys.main.APISecret;
+      this._keys.main.specified = true;
+      this._keys.main.loaded = !!(
+        keys.main.APIKey.value && keys.main.APISecret.value
+      );
+    }
+
+    if (keys.spare) {
+      this._keys.spare.APIKey = keys.spare.APIKey;
+      this._keys.spare.APISecret = keys.spare.APISecret;
+      this._keys.spare.specified = true;
+      this._keys.spare.loaded = !!(
+        keys.spare.APIKey.value && keys.spare.APISecret.value
+      );
+    }
+  }
+
+  async _loadAndDecrypt(context, keyType, keyName) {
+    try {
+      context.log("loadAndDecrypt()");
+      const encryptedData = await getSecret({
+        uri: KEY_VAULT_URL,
+        clientId: KEY_VAULT_READ_CLIENT_ID,
+        appSecret: KEY_VAULT_READ_APP_SECRET,
+        secretName: this._keys[keyType][keyName].name,
+        secretVersion: this._keys[keyType][keyName].version
+      });
+      this._keys[keyType][keyName].value = await decrypt({
+        uri: KEY_VAULT_URL,
+        clientId: KEY_VAULT_DECR_CLIENT_ID,
+        appSecret: KEY_VAULT_DECR_APP_SECRET,
+        value: encryptedData,
+        keyName: this._keys[keyType][keyName].encryptionKeyName
+      });
+      this._keys[keyType][keyName].loaded = true;
+    } catch (error) {
+      throw new VError(
+        {
+          name: "LoadAndDecryptSecretError",
+          cause: error,
+          info: {
+            keyType,
+            keyName
+          }
+        },
+        "Failed to load and decrypt secret from key vault."
+      );
+    }
+  }
+
   async _loadKeys(context, keyType) {
     try {
-      const encryptedAPIKey = await getSecret({
-        uri: KEY_VAULT_URL,
-        clientId: KEY_VAULT_READ_CLIENT_ID,
-        appSecret: KEY_VAULT_READ_APP_SECRET,
-        secretName: `${this._exchangeName}-${this._userId}-${keyType}-key`,
-        secretVersion: this._keys[keyType].APIKeyVersion
-      });
+      context.log("loadKeys()");
 
-      const encryptedAPISecret = await getSecret({
-        uri: KEY_VAULT_URL,
-        clientId: KEY_VAULT_READ_CLIENT_ID,
-        appSecret: KEY_VAULT_READ_APP_SECRET,
-        secretName: `${this._exchangeName}-${this._userId}-${keyType}-secret`,
-        secretVersion: this._keys[keyType].APISecretVersion
-      });
+      const loaders = [
+        this._loadAndDecrypt(context, keyType, "APIKey"),
+        this._loadAndDecrypt(context, keyType, "APISecret")
+      ];
 
-      this._keys[keyType].APIKey = await decrypt({
-        uri: KEY_VAULT_URL,
-        clientId: KEY_VAULT_DECR_CLIENT_ID,
-        appSecret: KEY_VAULT_DECR_APP_SECRET,
-        value: encryptedAPIKey,
-        keyName: this._keys[keyType].encryptionKeyName
-      });
-      this._keys[keyType].APISecret = await decrypt({
-        uri: KEY_VAULT_URL,
-        clientId: KEY_VAULT_DECR_CLIENT_ID,
-        appSecret: KEY_VAULT_DECR_APP_SECRET,
-        value: encryptedAPISecret,
-        keyName: this._keys[keyType].encryptionKeyName
-      });
+      await Promise.all(loaders);
     } catch (error) {
       throw new VError(
         {
           name: "LoadAPIKeysError",
           cause: error,
           info: {
-            keyType,
-            encryptionKeyName: this._keys[keyType].encryptionKeyName,
-            APIKeyVersion: this._keys[keyType].APIKeyVersion,
-            APISecretVersion: this._keys[keyType].APISecretVersion
+            keyType
           }
         },
         "Failed to load API Keys."

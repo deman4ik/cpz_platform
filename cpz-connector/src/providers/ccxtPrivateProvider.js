@@ -19,21 +19,24 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async init(context, keyType = "main") {
     try {
-      if (
-        this._keys[keyType].encryptionKeyName &&
-        this._keys[keyType].APIKeyVersion &&
-        this._keys[keyType].APISecretVersion
-      )
+      context.log(JSON.stringify(this._keys));
+      if (this._keys[keyType].specified && !this._keys[keyType].loaded)
         await this._loadKeys(context, keyType);
+
+      context.log(JSON.stringify(this._keys));
       this.ccxt = new ccxt[this._exchangeName]({
         agent: this._proxyAgent,
-        apiKey: this._keys[keyType].APIKey,
-        secret: this._keys[keyType].APISecret
+        apiKey: this._keys[keyType].APIKey.value,
+        secret: this._keys[keyType].APISecret.value
       });
-      this._currentKeyType = keyType;
-      this._currentKeyVersion = `${this._keys[keyType].APIKeyVersion}${
-        this._keys[keyType].APISecretVersion
-      }`;
+
+      this._keys[keyType].active = true;
+      if (keyType === "main") {
+        this._keys.spare.active = false;
+      } else {
+        this._keys.main.active = false;
+      }
+
       const call = async () => {
         await this.ccxt.loadMarkets();
       };
@@ -56,30 +59,30 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   async _checkKeysVersion(context, keys) {
     if (keys) {
       if (
-        this._currentKeyVersion !==
-        `${keys.main.APIKeyVersion}${keys.main.APISecretVersion}`
+        keys.main &&
+        (keys.main.APIKey.name !== this._keys.main.APIKey.name ||
+          keys.main.APIKey.version !== this._keys.main.APIKey.version ||
+          keys.main.APISecret.name !== this._keys.main.APISecret.name ||
+          keys.main.APISecret.version !== this._keys.main.APISecret.version)
       ) {
-        this._keys.main = keys.main;
+        this._setKeys({ main: keys.main });
         await this.init(context, "main");
       }
+
       if (
         keys.spare &&
-        keys.spare.APIKeyVersion &&
-        keys.spare.APISecretVersion &&
-        this._currentKeyVersion !==
-          `${keys.spare.APIKeyVersion}${keys.spare.APISecretVersion}`
+        (keys.spare.APIKey.name !== this._keys.spare.APIKey.name ||
+          keys.spare.APIKey.version !== this._keys.spare.APIKey.version ||
+          keys.spare.APISecret.name !== this._keys.spare.APISecret.name ||
+          keys.spare.APISecret.version !== this._keys.spare.APISecret.version)
       )
-        this._keys.spare = keys.spare;
+        this._setKeys({ spare: keys.spare });
     }
   }
 
   async _handleExchangeError(e) {
     if (e instanceof ccxt.ExchangeError) {
-      if (
-        this._currentKeyType === "main" &&
-        this._keys.spare.APIKeyVersion &&
-        this._keys.spare.APISecretVersion
-      ) {
+      if (this._keys.main.active && this._keys.spare.specified) {
         await this.init("spare");
         throw e;
       }

@@ -17,12 +17,23 @@ async function getBalance(
       userId: checkConnectorInput.userId,
       keys: {
         main: {
-          APIKey: checkConnectorInput.APIKey,
-          APISecret: checkConnectorInput.APISecret
+          APIKey: {
+            encryptionKeyName: null,
+            name: null,
+            version: null,
+            value: checkConnectorInput.APIKeyValue
+          },
+          APISecret: {
+            encryptionKeyName: null,
+            name: null,
+            version: null,
+            value: checkConnectorInput.APISecretValue
+          }
         }
-      }
+      },
+      proxy: checkConnectorInput.proxy
     });
-    await provider.init();
+    await provider.init(context);
     const result = await provider.getBalance(context);
     return result;
   }
