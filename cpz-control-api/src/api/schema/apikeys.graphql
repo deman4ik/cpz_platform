@@ -1,0 +1,15 @@
+input APIPairKeysInput {
+    main: APIKeyInput!
+    spare: APIKeyInput
+}
+
+input APIKeyInput {
+    APIKey: KVSecretInput!
+    APISecret: KVSecretInput!
+}
+
+input KVSecretInput {
+    encryptionKeyName: String!
+    name: String!
+    version: String!
+}

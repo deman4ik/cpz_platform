@@ -1,7 +1,7 @@
 import VError from "verror";
 import client from "./connector";
 
-async function getBalanceEX({ exchange, proxy, userId }) {
+async function getBalanceEX({ exchange, proxy, userId, keys }) {
   try {
     const query = `query balance($connectorInput: PrivateConnectorInput!){
         balance(connectorInput: $connectorInput){
@@ -18,6 +18,7 @@ async function getBalanceEX({ exchange, proxy, userId }) {
       connectorInput: {
         userId,
         exchange,
+        keys,
         proxy
       }
     };

@@ -7,6 +7,7 @@ async function createOrderEX({
   asset,
   currency,
   userId,
+  keys,
   order
 }) {
   try {
@@ -25,6 +26,7 @@ async function createOrderEX({
       connectorInput: {
         userId,
         exchange,
+        keys,
         proxy
       },
       order: {
@@ -59,6 +61,7 @@ async function cancelOrderEX({
   asset,
   currency,
   userId,
+  keys,
   exId
 }) {
   try {
@@ -81,6 +84,7 @@ async function cancelOrderEX({
       connectorInput: {
         userId,
         exchange,
+        keys,
         proxy
       },
       order: {
@@ -113,6 +117,7 @@ async function checkOrderEX({
   asset,
   currency,
   userId,
+  keys,
   exId
 }) {
   try {
@@ -133,6 +138,7 @@ async function checkOrderEX({
       connectorInput: {
         userId,
         exchange,
+        keys,
         proxy
       },
       order: {

@@ -8,6 +8,7 @@
 # import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
 # import { BacktestParams } from "src/api/schema/backtest.graphql"
 # import { UserRobotParams } from "src/api/schema/userRobot.graphql"
+# import { APIPairKeysInput } from "src/api/schema/apikeys.graphql"
 
 scalar Datetime
 scalar JSON

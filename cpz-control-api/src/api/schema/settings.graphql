@@ -17,6 +17,7 @@ input TraderSettings {
     slippageStep: Float
     deviation: Float
     volume: Float
+    keys: APIPairKeysInput
 }
 
 input BacktesterSettings {

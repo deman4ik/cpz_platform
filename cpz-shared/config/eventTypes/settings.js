@@ -43,6 +43,21 @@ const ADVISER_SETTINGS = {
   }
 };
 
+const KEY_VAULT_SECRET = {
+  encryptionKeyName: {
+    description: "Name of encryption key",
+    type: "string"
+  },
+  name: {
+    description: "Secret name",
+    type: "string"
+  },
+  version: {
+    description: "Secret version",
+    type: "string"
+  }
+};
+// TODO: Custom validation if mode = 'realtime' keys.main required
 const TRADER_SETTINGS = {
   mode: {
     description: "Service run mode.",
@@ -68,6 +83,46 @@ const TRADER_SETTINGS = {
   volume: {
     description: "User trade volume",
     type: "number",
+    optional: true
+  },
+  keys: {
+    description: "Exchange API Keys Info",
+    type: "object",
+    props: {
+      main: {
+        description: "Main Exchange API Keys Info",
+        type: "object",
+        props: {
+          APIKey: {
+            description: "Main Exchange API Key",
+            type: "object",
+            props: KEY_VAULT_SECRET
+          },
+          APISecret: {
+            description: "Main Exchange API Secret",
+            type: "object",
+            props: KEY_VAULT_SECRET
+          }
+        }
+      },
+      spare: {
+        description: "Spare Exchange API Keys Info",
+        type: "object",
+        props: {
+          APIKey: {
+            description: "Spare Exchange API Key",
+            type: "object",
+            props: KEY_VAULT_SECRET
+          },
+          APISecret: {
+            description: "Spare Exchange API Secret",
+            type: "object",
+            props: KEY_VAULT_SECRET
+          }
+        },
+        optional: true
+      }
+    },
     optional: true
   }
 };

@@ -83,7 +83,8 @@ class Trader {
       /* Order execution timeout */
       openOrderTimeout:
         state.settings.openOrderTimeout ||
-        TRADER_SETTINGS_DEFAULTS.openOrderTimeout
+        TRADER_SETTINGS_DEFAULTS.openOrderTimeout,
+      keys: state.settings.keys
     };
     /* Текущий сигнал */
     this._signal = {};
@@ -462,6 +463,7 @@ class Trader {
               asset: this._asset,
               currency: this._currency,
               userId: this._userId,
+              keys: this._settings.keys,
               exId: order.exId
             });
             this.log("checkOrderEX", currentOrder);
@@ -476,6 +478,7 @@ class Trader {
                 asset: this._asset,
                 currency: this._currency,
                 userId: this._userId,
+                keys: this._settings.keys,
                 exId: order.exId
               });
               this.log("cancelOrderEX", currentOrder);
@@ -503,6 +506,7 @@ class Trader {
               asset: this._asset,
               currency: this._currency,
               userId: this._userId,
+              keys: this._settings.keys,
               order: {
                 direction: orderToExecute.direction,
                 volume: orderToExecute.volume,
