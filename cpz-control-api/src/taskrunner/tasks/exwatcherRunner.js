@@ -5,7 +5,8 @@ import {
   STATUS_STARTED,
   STATUS_STOPPING,
   STATUS_STOPPED,
-  STATUS_FINISHED
+  STATUS_FINISHED,
+  createWatcherSlug
 } from "cpzState";
 import { getExWatcherById } from "cpzStorage/exwatchers";
 import {
@@ -30,8 +31,27 @@ class ExWatcherRunner extends BaseRunner {
     try {
       genErrorIfExist(validateStart(params));
       let exWatcherState = params;
-      const exWatcher = new ExWatcher(exWatcherState);
-      context.log.info(`ExWatcher ${exWatcher.taskId}: start`);
+
+      if (!exWatcherState.taskId) {
+        const currentExWatcherState = await getExWatcherById(
+          createWatcherSlug({
+            exchange: params.exchange,
+            asset: params.asset,
+            currency: params.currency
+          })
+        );
+        if (currentExWatcherState) {
+          if (currentExWatcherState.status === STATUS_STARTED) {
+            return {
+              taskId: currentExWatcherState.taskId,
+              status: currentExWatcherState.status
+            };
+          }
+          exWatcherState = currentExWatcherState;
+        }
+      }
+      const exWatcher = new ExWatcher(context, exWatcherState);
+      exWatcher.log(`start`);
 
       exWatcherState = exWatcher.getCurrentState();
 
@@ -39,7 +59,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.importerHistoryStatus !== STATUS_STARTED &&
         exWatcherState.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        context.log.info("Importer History!");
+        exWatcher.log("Importer History!");
         if (exWatcherState.candlebatcherSettings.requiredHistoryMaxBars > 0) {
           const dateFrom = getMaxTimeframeDateFrom(
             exWatcherState.timeframes,
@@ -89,7 +109,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.marketwatcherStatus !== STATUS_STARTED &&
         exWatcherState.marketwatcherStatus !== STATUS_STARTING
       ) {
-        context.log.info("Marketwatcher!");
+        exWatcher.log("Marketwatcher!");
         const marketwatcherParams = {
           exchange: exWatcherState.exchange,
           providerType: exWatcherState.marketwatcherProviderType,
@@ -116,7 +136,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.candlebatcherStatus !== STATUS_STARTED &&
         exWatcherState.candlebatcherStatus !== STATUS_STARTING
       ) {
-        context.log.info("Candlebatcher!");
+        exWatcher.log("Candlebatcher!");
         const candlebatcherParams = {
           providerType: exWatcherState.candlebatcherProviderType,
           exchange: exWatcherState.exchange,
@@ -140,7 +160,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcherState.importerCurrentStatus !== STATUS_STARTED &&
         exWatcherState.importerCurrentStatus !== STATUS_FINISHED
       ) {
-        context.log.info("Importer Current!");
+        exWatcher.log("Importer Current!");
         const importerCurrentParams = {
           providerType: exWatcherState.candlebatcherProviderType,
           exchange: exWatcherState.exchange,
@@ -191,8 +211,8 @@ class ExWatcherRunner extends BaseRunner {
       genErrorIfExist(validateStop(params));
       const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
-      const exWatcher = new ExWatcher(exWatcherState);
-      context.log.info(`ExWatcher ${params.taskId} stop`);
+      const exWatcher = new ExWatcher(context, exWatcherState);
+      exWatcher.log("stop");
       if (exWatcher.status === STATUS_STOPPED)
         return {
           taskId: exWatcher.taskId,
@@ -264,8 +284,8 @@ class ExWatcherRunner extends BaseRunner {
       genErrorIfExist(validateUpdate(params));
       const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
-      const exWatcher = new ExWatcher(exWatcherState);
-      context.log.info(`ExWatcher ${params.taskId} update`);
+      const exWatcher = new ExWatcher(context, exWatcherState);
+      exWatcher.log("update");
       if (params.candlebatcherSettings) {
         exWatcher.candlebatcherSettings = params.candlebatcherSettings;
         await CandlebatcherRunner.update(context, {

@@ -131,8 +131,9 @@ class UserRobotRunner extends BaseRunner {
         };
 
       if (
-        userRobotState.traderStatus !== STATUS_STOPPED ||
-        userRobotState.traderStatus !== STATUS_STOPPING
+        userRobotState.traderId &&
+        (userRobotState.traderStatus !== STATUS_STOPPED ||
+          userRobotState.traderStatus !== STATUS_STOPPING)
       ) {
         const result = await TraderRunner.stop(context, {
           taskId: userRobotState.traderId
@@ -142,8 +143,9 @@ class UserRobotRunner extends BaseRunner {
       }
 
       if (
-        userRobotState.adviserStatus !== STATUS_STOPPED ||
-        userRobotState.adviserStatus !== STATUS_STOPPING
+        userRobotState.adviserId &&
+        (userRobotState.adviserStatus !== STATUS_STOPPED ||
+          userRobotState.adviserStatus !== STATUS_STOPPING)
       ) {
         const result = await AdviserRunner.stop(context, {
           taskId: userRobotState.adviserId,

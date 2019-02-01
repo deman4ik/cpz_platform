@@ -20,7 +20,8 @@ import { saveExWatcherState } from "cpzStorage/exwatchers";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
 
 class ExWatcher {
-  constructor(state) {
+  constructor(context, state) {
+    this._context = context;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -57,6 +58,10 @@ class ExWatcher {
     this._error = state.error;
     this._metadata = state.metadata;
     this._event = null;
+  }
+
+  log(...args) {
+    this._context.log.info(`ExWatcher ${this._taskId}:`, ...args);
   }
 
   _setStatus() {
@@ -248,7 +253,7 @@ class ExWatcher {
   async save() {
     try {
       await saveExWatcherState(this.getCurrentState());
-      if (this._events) {
+      if (this._event) {
         await publishEvents(TASKS_TOPIC, [this._event]);
         this._event = null;
       }

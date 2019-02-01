@@ -24,7 +24,7 @@ class BacktestRunner extends BaseRunner {
     try {
       genErrorIfExist(validateStart(params));
       let backtestState = params;
-      const backtest = new Backtest(backtestState);
+      const backtest = new Backtest(context, backtestState);
       context.log.info(`Backtest ${backtest.taskId}: start`);
 
       backtestState = backtest.getCurrentState();
@@ -135,7 +135,7 @@ class BacktestRunner extends BaseRunner {
       genErrorIfExist(validateStop(params));
       const backtestState = await getBacktestById(params.taskId);
       if (!backtestState) throw new Error("BacktestNotFound");
-      const backtest = new Backtest(backtestState);
+      const backtest = new Backtest(context, backtestState);
       context.log.info(`Backtest ${params.taskId} stop`);
       if (
         backtest.status === STATUS_STOPPED ||

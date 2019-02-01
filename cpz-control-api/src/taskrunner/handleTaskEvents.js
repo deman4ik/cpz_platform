@@ -100,7 +100,7 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
-          const exWatcher = new ExWatcher(exWatcherState);
+          const exWatcher = new ExWatcher(context, exWatcherState);
           if (error) {
             exWatcher.error = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
@@ -124,7 +124,7 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
-          const exWatcher = new ExWatcher(exWatcherState);
+          const exWatcher = new ExWatcher(context, exWatcherState);
           if (exWatcher.importerHistoryId === taskId) {
             serviceName = "importerHistory";
           } else if (exWatcher.importerCurrentId === taskId) {
@@ -155,7 +155,7 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -222,7 +222,7 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -276,7 +276,7 @@ async function handleFinished(context, eventData) {
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
-          const exWatcher = new ExWatcher(exWatcherState);
+          const exWatcher = new ExWatcher(context, exWatcherState);
           if (exWatcher.importerHistoryId === taskId) {
             serviceName = "importerHistory";
           } else {
@@ -304,7 +304,7 @@ async function handleFinished(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -329,7 +329,7 @@ async function handleFinished(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -399,7 +399,7 @@ async function handleStopped(context, eventData) {
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
-          const exWatcher = new ExWatcher(exWatcherState);
+          const exWatcher = new ExWatcher(context, exWatcherState);
           if (error) {
             exWatcher.error = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
@@ -419,7 +419,7 @@ async function handleStopped(context, eventData) {
 
       await Promise.all(
         exWatchers.map(async exWatcherState => {
-          const exWatcher = new ExWatcher(exWatcherState);
+          const exWatcher = new ExWatcher(context, exWatcherState);
           if (exWatcher.importerHistoryId === taskId) {
             serviceName = "importerHistory";
           } else {
@@ -445,7 +445,7 @@ async function handleStopped(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -507,7 +507,7 @@ async function handleStopped(context, eventData) {
 
       await Promise.all(
         backtests.map(async backtestState => {
-          const backtest = new Backtest(backtestState);
+          const backtest = new Backtest(context, backtestState);
           if (error) {
             backtest.error = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
@@ -577,7 +577,7 @@ async function handleUpdated(context, eventData) {
 
         await Promise.all(
           exWatchers.map(async exWatcherState => {
-            const exWatcher = new ExWatcher(exWatcherState);
+            const exWatcher = new ExWatcher(context, exWatcherState);
 
             exWatcher.error = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;

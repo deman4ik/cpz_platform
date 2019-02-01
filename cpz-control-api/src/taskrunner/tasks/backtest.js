@@ -25,7 +25,8 @@ import {
 } from "cpzDefaults";
 
 class Backtest {
-  constructor(state) {
+  constructor(context, state) {
+    this._context = context;
     this._robotId = state.robotId;
     this._userId = state.userId;
     this._strategyName = state.strategyName;
@@ -84,6 +85,10 @@ class Backtest {
     this._error = state.error;
     this._metadata = state.metadata;
     this._event = null;
+  }
+
+  log(...args) {
+    this._context.log.info(`Backtest ${this._robotId}:`, ...args);
   }
 
   _setStatus() {
