@@ -9,10 +9,10 @@ import {
 } from "cpzState";
 import { saveUserRobotState } from "cpzStorage/userRobots";
 import {
-  CANDLEBATCHER_SETTINGS_DEFAULTS,
-  ADVISER_SETTINGS_DEFAULTS,
-  TRADER_SETTINGS_DEFAULTS
-} from "cpzDefaults";
+  combineCandlebatcherSettings,
+  combineAdvserSettings,
+  combineTraderSettings
+} from "cpzUtils/settings";
 
 class UserRobot {
   constructor(state) {
@@ -25,53 +25,12 @@ class UserRobot {
     this._currency = state.currency;
     this._timeframe = state.timeframe;
     this._strategyName = state.strategyName;
-    this._candlebatcherSettings = {
-      debug:
-        (state.candlebatcherSettings && state.candlebatcherSettings.debug) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
-      proxy:
-        (state.candlebatcherSettings && state.candlebatcherSettings.proxy) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
-      requiredHistoryMaxBars:
-        (state.candlebatcherSettings &&
-          state.candlebatcherSettings.requiredHistoryMaxBars) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
-    };
-    this._adviserSettings = {
-      debug:
-        (state.adviserSettings && state.adviserSettings.debug) ||
-        ADVISER_SETTINGS_DEFAULTS.debug,
-      strategyParameters:
-        (state.adviserSettings && state.adviserSettings.strategyParameters) ||
-        ADVISER_SETTINGS_DEFAULTS.strategyParameters,
-      requiredHistoryCache:
-        (state.adviserSettings && state.adviserSettings.requiredHistoryCache) ||
-        ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache,
-      requiredHistoryMaxBars:
-        (state.adviserSettings &&
-          state.adviserSettings.requiredHistoryMaxBars) ||
-        ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
-    };
-    this._traderSettings = {
-      debug:
-        (state.traderSettings && state.traderSettings.debug) ||
-        TRADER_SETTINGS_DEFAULTS.debug,
-      mode:
-        (state.traderSettings && state.traderSettings.mode) ||
-        TRADER_SETTINGS_DEFAULTS.mode,
-      slippageStep:
-        (state.traderSettings && state.traderSettings.slippageStep) ||
-        TRADER_SETTINGS_DEFAULTS.slippageStep,
-      deviation:
-        (state.traderSettings && state.traderSettings.deviation) ||
-        TRADER_SETTINGS_DEFAULTS.deviation,
-      volume:
-        (state.traderSettings && state.traderSettings.volume) ||
-        TRADER_SETTINGS_DEFAULTS.volume,
-      openOrderTimeout:
-        (state.traderSettings && state.traderSettings.openOrderTimeout) ||
-        TRADER_SETTINGS_DEFAULTS.openOrderTimeout
-    };
+    this._candlebatcherSettings = combineCandlebatcherSettings(
+      state.candlebatcherSettings
+    );
+    this._adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this._traderSettings = combineTraderSettings(state.traderSettings);
+
     this._exwatcherId = state.exwatcherId;
     this._exwatcherStatus = state.exwatcherStatus || STATUS_PENDING;
     this._adviserId = state.adviserId;

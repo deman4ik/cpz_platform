@@ -92,7 +92,9 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние проторговщика по уникальному ключу
+
     const traderState = await getTraderById(eventData.taskId);
+
     // Генерируем новое состояние
     const newState = {
       RowKey: traderState.RowKey,
@@ -104,7 +106,7 @@ async function handleStop(context, eventData) {
       newState.stopRequested = true;
       await updateTraderState(newState);
     } else {
-      const trader = new Trader(traderState);
+      const trader = new Trader(context, traderState);
       // Помечаем как остановленный
       trader.status = STATUS_STOPPED;
       await trader.save();

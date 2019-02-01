@@ -18,7 +18,7 @@ import {
   ERROR_CANDLEBATCHER_EVENT,
   CANDLES_TOPIC
 } from "cpzEventTypes";
-import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
+import { combineCandlebatcherSettings } from "cpzUtils/settings";
 import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
 import {
   saveCandleToCache,
@@ -63,18 +63,7 @@ class Candlebatcher {
     this._currency = state.currency;
     /* Массив таймфреймов [1, 5, 15, 30, 60, 120, 240, 1440] */
     this._timeframes = state.timeframes || [];
-    this._settings = {
-      /* Режима дебага [true,false] */
-      debug:
-        state.settings.debug === undefined || state.settings.debug === null
-          ? CANDLEBATCHER_SETTINGS_DEFAULTS.debug
-          : state.settings.debug,
-      /* Адрес прокси сервера */
-      proxy: state.settings.proxy || CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
-      requiredHistoryMaxBars:
-        state.settings.requiredHistoryMaxBars ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
-    };
+    this._settings = combineCandlebatcherSettings(state.settings);
     /* Текущие тики */
     this._ticks = [];
     /* Текущие минутные свечи */
@@ -340,7 +329,7 @@ class Candlebatcher {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           const { number, unit } = timeframeToTimeUnit(
-            this._settings.requiredHistoryMaxBars,
+            this._settings.requiredHistoryMaxBars * 2,
             timeframe
           );
 

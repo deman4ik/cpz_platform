@@ -22,7 +22,7 @@ async function handleTimer(context) {
     const handleTradersToStopResult = await Promise.all(
       tradersState.map(async state => {
         try {
-          const trader = new Trader(state);
+          const trader = new Trader(context, state);
           await trader.save();
           await trader.closeActivePositions();
           // Публикуем событие - успех

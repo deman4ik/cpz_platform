@@ -30,7 +30,7 @@ import {
   createCurrentPriceSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
-import { TRADER_SETTINGS_DEFAULTS } from "cpzDefaults";
+import { combineTraderSettings } from "cpzUtils/settings";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState } from "cpzStorage/traders";
 import { getCurrentPrice } from "cpzStorage/currentPrices";
@@ -68,33 +68,7 @@ class Trader {
     this._currency = state.currency;
     /* Таймфрейм */
     this._timeframe = state.timeframe;
-    this._settings = {
-      /* Режима дебага [true,false] */
-      debug:
-        state.settings.debug == undefined || state.settings.debug == null
-          ? TRADER_SETTINGS_DEFAULTS.debug
-          : state.settings.debug,
-      mode: state.settings.mode || TRADER_SETTINGS_DEFAULTS.mode,
-      /* Шаг проскальзывания */
-      slippageStep:
-        state.settings.slippageStep || TRADER_SETTINGS_DEFAULTS.slippageStep,
-      /* Отклонение цены */
-      deviation: state.settings.deviation || TRADER_SETTINGS_DEFAULTS.deviation,
-      /* Объем */
-      volume: state.settings.volume || TRADER_SETTINGS_DEFAULTS.volume,
-      /* Order execution timeout */
-      openOrderTimeout:
-        state.settings.openOrderTimeout ||
-        TRADER_SETTINGS_DEFAULTS.openOrderTimeout,
-      /* Режима работы с несколькими активными позициями */
-      multiPosition:
-        state.settings.multiPosition === undefined ||
-        state.settings.multiPosition === null
-          ? TRADER_SETTINGS_DEFAULTS.multiPosition
-          : state.settings.multiPosition,
-      /* Информация о API ключах */
-      keys: state.settings.keys
-    };
+    this._settings = combineTraderSettings(state.settings);
     /* Текущий сигнал */
     this._signal = {};
     /* Последнтй сигнал */

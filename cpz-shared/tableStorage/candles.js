@@ -1,6 +1,7 @@
 import azure from "azure-storage";
 import VError from "verror";
 import dayjs from "../utils/lib/dayjs";
+import { CANDLE_PREVIOUS } from "../config/state";
 import {
   STORAGE_CANDLESPENDING_TABLE,
   STORAGE_CANDLESCACHED_TABLE,
@@ -107,10 +108,18 @@ const getCachedCandlesByKey = async (key, limit) => {
   try {
     const query = new TableQuery()
       .where(
-        TableQuery.stringFilter(
-          "PartitionKey",
-          TableUtilities.QueryComparisons.EQUAL,
-          key
+        TableQuery.combineFilters(
+          TableQuery.stringFilter(
+            "PartitionKey",
+            TableUtilities.QueryComparisons.EQUAL,
+            key
+          ),
+          TableUtilities.TableOperators.AND,
+          TableQuery.stringFilter(
+            "type",
+            TableUtilities.QueryComparisons.NOT_EQUAL,
+            CANDLE_PREVIOUS
+          )
         )
       )
       .top(limit);

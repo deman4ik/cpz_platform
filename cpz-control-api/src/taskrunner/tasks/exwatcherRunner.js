@@ -63,7 +63,7 @@ class ExWatcherRunner extends BaseRunner {
         if (exWatcherState.candlebatcherSettings.requiredHistoryMaxBars > 0) {
           const dateFrom = getMaxTimeframeDateFrom(
             exWatcherState.timeframes,
-            exWatcherState.candlebatcherSettings.requiredHistoryMaxBars
+            exWatcherState.candlebatcherSettings.requiredHistoryMaxBars * 2
           );
           const dateTo = dayjs(
             `${dayjs()

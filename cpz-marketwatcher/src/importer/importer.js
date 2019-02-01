@@ -70,7 +70,10 @@ class Importer {
     this.timeframes = state.timeframes || [1, 5, 15, 30, 60, 120, 240, 1440];
     /* Признак необходимости свертывания свечей */
     this.requireBatching = state.requireBatching || true;
-    this.saveToCache = state.saveToCache || false;
+    this.saveToCache =
+      state.saveToCache === undefined || state.saveToCache === null
+        ? false
+        : state.saveToCache;
     this.dateFrom = dayjs(
       `${dayjs(state.dateFrom)
         .utc()
@@ -841,6 +844,7 @@ class Importer {
       currency: this.currency,
       timeframes: this.timeframes,
       requireBatching: this.requireBatching,
+      saveToCache: this.saveToCache,
       limit: this.limit,
       loadTotalDuration: this.loadTotalDuration,
       loadCompletedDuration: this.loadCompletedDuration,

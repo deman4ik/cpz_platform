@@ -103,7 +103,8 @@ async function handleStop(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      throw new VError('Marketwatcher task "%s" not started', eventData.taskId);
+      context.log.warn(`Marketwatcher task "${eventData.taskId}" not started`);
+      return;
     }
 
     sendEventToProcess(eventData.taskId, {
