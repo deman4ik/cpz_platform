@@ -145,7 +145,7 @@ async function handlePendingSignals(context, { traderId }) {
  */
 async function handleSignal(context, eventData) {
   try {
-    const { eventSubject, signal } = eventData;
+    const { signal } = eventData;
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(signal));
     // Ищем подходящих проторговщиков
@@ -170,7 +170,7 @@ async function handleSignal(context, eventData) {
     const traderExecutionResults = await Promise.all(
       startedTraders.map(async state => {
         try {
-          await execute(context, eventSubject, state, signal);
+          await execute(context, state, signal);
         } catch (error) {
           const errorOutput = createErrorOutput(error);
           return {

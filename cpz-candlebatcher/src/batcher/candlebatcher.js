@@ -510,7 +510,11 @@ class Candlebatcher {
                 volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
                 count: candles.length,
                 gap: candles.length !== timeframe,
-                type: CANDLE_CREATED // признак - свеча сформирована
+                type:
+                  candles.filter(candle => candle.type === CANDLE_PREVIOUS)
+                    .length === timeframe
+                    ? CANDLE_PREVIOUS
+                    : CANDLE_CREATED
               };
             }
           });

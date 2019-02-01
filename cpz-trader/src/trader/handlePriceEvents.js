@@ -8,7 +8,12 @@ import {
   TRADES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { createPositionSlug, STATUS_STARTED, STATUS_BUSY } from "cpzState";
+import {
+  createPositionSlug,
+  STATUS_STARTED,
+  STATUS_BUSY,
+  CANDLE_PREVIOUS
+} from "cpzState";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { getTraderById } from "cpzStorage/traders";
@@ -193,6 +198,8 @@ async function handleCandle(context, eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateNewCandle(eventData.candle));
     const { eventSubject, candle } = eventData;
+    /* Если свеча сгенерирована по предыдущим данным - пропускаем */
+    if (candle.type === CANDLE_PREVIOUS) return;
     const currentPrice = {
       exchange: candle.exchange,
       asset: candle.asset,

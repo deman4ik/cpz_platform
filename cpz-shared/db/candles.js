@@ -1,4 +1,5 @@
 import VError from "verror";
+import { CANDLE_PREVIOUS } from "../config/state";
 import { chunkArray } from "../utils/helpers";
 import db from "./db";
 
@@ -89,6 +90,7 @@ async function getCandlesDB({
             asset: { _eq: $asset }
             currency: { _eq: $currency }
             timestamp: { _gte: $dateFrom, _lte: $dateTo }
+            type: { _neq: ${CANDLE_PREVIOUS}}
           }
         ) {
           id

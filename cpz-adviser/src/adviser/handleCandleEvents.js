@@ -6,7 +6,12 @@ import {
   CANDLES_TOPIC,
   ERROR_TOPIC
 } from "cpzEventTypes";
-import { STATUS_STARTED, STATUS_BUSY, createAdviserSlug } from "cpzState";
+import {
+  STATUS_STARTED,
+  STATUS_BUSY,
+  CANDLE_PREVIOUS,
+  createAdviserSlug
+} from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
@@ -28,6 +33,8 @@ async function handleCandle(context, eventData) {
     genErrorIfExist(validateNewCandle(eventData.candle));
     const { candle } = eventData;
 
+    /* Если свеча сгенерирована по предыдущим данным - пропускаем */
+    if (candle.type === CANDLE_PREVIOUS) return;
     // Ищем подходящих советников
     const advisers = await getActiveAdvisersBySlug(
       createAdviserSlug({
