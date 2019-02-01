@@ -19,7 +19,8 @@ const TRADER_SETTINGS_DEFAULTS = {
   openOrderTimeout: 10, // minutes
   slippageStep: 0,
   deviation: 0,
-  volume: 1
+  volume: 0.002,
+  multiPosition: false
 };
 
 const BACKTESTER_SETTINGS_DEFAULTS = {

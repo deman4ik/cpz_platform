@@ -4,6 +4,7 @@ import { v4 as uuid } from "uuid";
 import { TRADER_SERVICE } from "cpzServices";
 import {
   REALTIME_MODE,
+  BACKTEST_MODE,
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED,
@@ -14,6 +15,7 @@ import {
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
   POS_STATUS_CLOSED,
+  POS_STATUS_OPEN,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
@@ -69,7 +71,7 @@ class Trader {
     this._settings = {
       /* Режима дебага [true,false] */
       debug:
-        state.settings.debug === undefined || state.settings.debug === null
+        state.settings.debug == undefined || state.settings.debug == null
           ? TRADER_SETTINGS_DEFAULTS.debug
           : state.settings.debug,
       mode: state.settings.mode || TRADER_SETTINGS_DEFAULTS.mode,
@@ -84,6 +86,13 @@ class Trader {
       openOrderTimeout:
         state.settings.openOrderTimeout ||
         TRADER_SETTINGS_DEFAULTS.openOrderTimeout,
+      /* Режима работы с несколькими активными позициями */
+      multiPosition:
+        state.settings.multiPosition === undefined ||
+        state.settings.multiPosition === null
+          ? TRADER_SETTINGS_DEFAULTS.multiPosition
+          : state.settings.multiPosition,
+      /* Информация о API ключах */
       keys: state.settings.keys
     };
     /* Текущий сигнал */
@@ -242,6 +251,7 @@ class Trader {
           currency: this._currency
         })
       );
+
       if (positionsState.length > 0) {
         const price = await getCurrentPrice(
           createCurrentPriceSlug({
@@ -374,6 +384,35 @@ class Trader {
         this._signal.action === TRADE_ACTION_LONG ||
         this._signal.action === TRADE_ACTION_SHORT
       ) {
+        if (!this._settings.multiPosition) {
+          if (this._settings.mode === BACKTEST_MODE) {
+            const activePositions = Object.keys(this._currentPositions)
+              .map(key => ({
+                positionId: this._currentPositions[key].positionId,
+                positionCode: this._currentPositions[key].settings.positionCode,
+                status: this._currentPositions[key].status
+              }))
+              .filter(
+                position =>
+                  position.status === POS_STATUS_NEW ||
+                  position.status === POS_STATUS_OPEN
+              );
+            if (activePositions.length > 0) {
+              throw new VError(
+                {
+                  name: "CreatePositionError",
+                  info: {
+                    activePositions
+                  }
+                },
+                "Failed to create new position, active positions found"
+              );
+            }
+          }
+          // In realtime and emulation - closing all active positions
+          await this.closeActivePositions();
+        }
+
         // Создаем новую позицию
         this._createPosition(this._signal.positionId);
         // Создаем ордер на открытие позиции

@@ -85,6 +85,11 @@ const TRADER_SETTINGS = {
     type: "number",
     optional: true
   },
+  multiPosition: {
+    description: "Multiple active positions available.",
+    type: "boolean",
+    optional: true
+  },
   keys: {
     description: "Exchange API Keys Info",
     type: "object",
