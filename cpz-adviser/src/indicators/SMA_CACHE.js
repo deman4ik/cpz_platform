@@ -5,8 +5,11 @@ const SMA = {
     this.prices = [];
   },
   calc() {
-    // Если в кэше меньше свечей чем windowLength (работаем без кэша)
-    if (this.candlesProps.close.length < this.windowLength) {
+    // Если в кэше меньше свечей чем windowLength (работаем без кэша) и уже начали заполнять внутренний стейт
+    if (
+      this.candlesProps.close.length < this.windowLength &&
+      this.prices.length > 0
+    ) {
       // Накапливаем цены по одной
       this.prices.push(this.candle.close);
       // Оставляем только последние windowLength цен
