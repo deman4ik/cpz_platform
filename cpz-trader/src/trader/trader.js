@@ -31,6 +31,7 @@ import {
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { combineTraderSettings } from "cpzUtils/settings";
+import { timeframeToTimeUnit } from "cpzUtils/candlesUtils";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState } from "cpzStorage/traders";
 import { getCurrentPrice } from "cpzStorage/currentPrices";
@@ -528,11 +529,16 @@ class Trader {
               }
             });
             this.log("createOrderEX", currentOrder);
-
+            const { number, unit } = timeframeToTimeUnit(1, this._timeframe);
             orderResult = {
               ...orderResult,
               ...currentOrder,
-              status: ORDER_STATUS_OPEN
+              status: ORDER_STATUS_OPEN,
+              candleTimestamp: dayjs()
+                .utc()
+                .add(-number, unit)
+                .startOf("minute")
+                .toISOString()
             };
           } else if (order.orderType === ORDER_TYPE_LIMIT) {
             // Если режим - эмуляция или бэктест
