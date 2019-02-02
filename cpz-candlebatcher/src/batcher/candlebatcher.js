@@ -8,6 +8,7 @@ import {
   CANDLE_CREATED,
   CANDLE_LOADED,
   CANDLE_PREVIOUS,
+  VALID_TIMEFRAMES,
   createCandlebatcherSlug,
   createCachedCandleSlug,
   createNewCandleSubject
@@ -62,7 +63,7 @@ class Candlebatcher {
     /* Котировка валюты */
     this._currency = state.currency;
     /* Массив таймфреймов [1, 5, 15, 30, 60, 120, 240, 1440] */
-    this._timeframes = state.timeframes || [];
+    this._timeframes = state.timeframes || VALID_TIMEFRAMES;
     this._settings = combineCandlebatcherSettings(state.settings);
     /* Текущие тики */
     this._ticks = [];

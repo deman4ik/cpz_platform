@@ -18,6 +18,7 @@ import {
   CANDLE_CREATED,
   CANDLE_IMPORTED,
   CANDLE_PREVIOUS,
+  VALID_TIMEFRAMES,
   createImporterSlug,
   createCachedCandleSlug
 } from "cpzState";
@@ -67,7 +68,7 @@ class Importer {
     /* Котировка валюты */
     this.currency = state.currency;
     /* Генерируемые таймфреймы [1, 5, 15, 30, 60, 120, 240, 1440] */
-    this.timeframes = state.timeframes || [1, 5, 15, 30, 60, 120, 240, 1440];
+    this.timeframes = state.timeframes || VALID_TIMEFRAMES;
     /* Признак необходимости свертывания свечей */
     this.requireBatching = state.requireBatching || true;
     this.saveToCache =

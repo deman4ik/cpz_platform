@@ -7,6 +7,7 @@ import {
   STATUS_PENDING,
   STATUS_ERROR,
   STATUS_FINISHED,
+  VALID_TIMEFRAMES,
   createWatcherSlug,
   createExWatcherTaskSubject
 } from "cpzState";
@@ -30,7 +31,7 @@ class ExWatcher {
       asset: this._asset,
       currency: this._currency
     });
-    this._timeframes = state.timeframs || [1, 5, 15, 30, 60, 120, 240, 1440];
+    this._timeframes = state.timeframs || VALID_TIMEFRAMES;
     this._marketwatcherProviderType =
       state.marketwatcherProviderType || "cryptocompare";
     this._candlebatcherProviderType = state.candlebatcherProviderType || "ccxt";

@@ -1,3 +1,4 @@
+import { VALID_TIMEFRAMES } from "../state/timeframes";
 import { BASE_ERROR } from "./events";
 
 const TASKS_IMPORTER_START_EVENT = {
@@ -26,7 +27,7 @@ const TASKS_IMPORTER_START_EVENT = {
     timeframes: {
       description: "Timeframe in minutes.",
       type: "array",
-      enum: [1, 5, 15, 30, 60, 120, 240, 1440],
+      enum: VALID_TIMEFRAMES,
       optional: true
     },
     requireBatching: {

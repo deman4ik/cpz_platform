@@ -1,3 +1,4 @@
+import { VALID_TIMEFRAMES } from "../state/timeframes";
 import { BASE_ERROR } from "./events";
 import { CANDLEBATCHER_SETTINGS } from "./settings";
 
@@ -9,7 +10,7 @@ const EXWATCHER_START_PARAMS = {
     description: "List of timeframes in minutes.",
     type: "array",
     items: "number",
-    enum: [1, 5, 15, 30, 60, 120, 240, 1440],
+    enum: VALID_TIMEFRAMES,
     optional: true
   },
   marketwatcherProviderType: {
