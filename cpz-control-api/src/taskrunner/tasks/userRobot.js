@@ -1,4 +1,5 @@
 import VError from "verror";
+import dayjs from "cpzDayjs";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -38,6 +39,8 @@ class UserRobot {
     this._traderId = state.traderId;
     this._traderStatus = state.traderStatus || STATUS_PENDING;
     this._status = state.status || STATUS_PENDING;
+    this._startedAt = state.startedAt;
+    this._stoppedAt = state.stoppedAt;
     this._error = state.error;
     this._metadata = state.metadata;
   }
@@ -48,6 +51,10 @@ class UserRobot {
       this._adviserStatus === STATUS_STARTED &&
       this._exwatcherStatus === STATUS_STARTED
     ) {
+      this._startedAt = dayjs()
+        .utc()
+        .toISOString();
+      this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
       return;
@@ -58,6 +65,9 @@ class UserRobot {
       this._adviserStatus === STATUS_STOPPED ||
       this._exwatcherStatus === STATUS_STOPPED
     ) {
+      this._stoppedAt = dayjs()
+        .utc()
+        .toISOString();
       this._status = STATUS_STOPPED;
       return;
     }
@@ -76,6 +86,9 @@ class UserRobot {
       this._adviserStatus === STATUS_ERROR ||
       this._exwatcherStatus === STATUS_ERROR
     ) {
+      this._stoppedAt = dayjs()
+        .utc()
+        .toISOString();
       this._status = STATUS_ERROR;
       return;
     }
@@ -203,6 +216,8 @@ class UserRobot {
       adviserStatus: this._adviserStatus,
       traderId: this._traderId,
       traderStatus: this._traderStatus,
+      startedAt: this._startedAt,
+      stoppedAt: this._stoppedAt,
       status: this._status,
       error: this._error,
       metadata: this._metadata

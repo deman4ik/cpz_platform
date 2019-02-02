@@ -1,5 +1,6 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
+import dayjs from "cpzDayjs";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -56,6 +57,8 @@ class ExWatcher {
     this._importerCurrentId = state.importerCurrentId;
     this._importerCurrentStatus = state.importerCurrentStatus || STATUS_PENDING;
     this._status = state.status || STATUS_PENDING;
+    this._startedAt = state.startedAt;
+    this._stoppedAt = state.stoppedAt;
     this._error = state.error;
     this._metadata = state.metadata;
     this._event = null;
@@ -72,6 +75,10 @@ class ExWatcher {
       this._marketwatcherStatus === STATUS_STARTED &&
       this._importerCurrentStatus === STATUS_FINISHED
     ) {
+      this._startedAt = dayjs()
+        .utc()
+        .toISOString();
+      this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
       this._event = {
@@ -96,6 +103,9 @@ class ExWatcher {
       this._marketwatcherStatus === STATUS_STOPPED
     ) {
       this._status = STATUS_STOPPED;
+      this._stoppedAt = dayjs()
+        .utc()
+        .toISOString();
       this._event = {
         id: uuid(),
         dataVersion: "1.0",
@@ -125,6 +135,9 @@ class ExWatcher {
       this._candlebatcherStatus === STATUS_ERROR ||
       this._marketwatcherStatus === STATUS_ERROR
     ) {
+      this._stoppedAt = dayjs()
+        .utc()
+        .toISOString();
       this._status = STATUS_ERROR;
       return;
     }
@@ -246,6 +259,8 @@ class ExWatcher {
       importerCurrentId: this._importerCurrentId,
       importerCurrentStatus: this._importerCurrentStatus,
       status: this._status,
+      startedAt: this._startedAt,
+      stoppedAt: this._stoppedAt,
       error: this._error,
       metadata: this._metadata
     };
