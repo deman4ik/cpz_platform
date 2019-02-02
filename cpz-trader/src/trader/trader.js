@@ -360,31 +360,35 @@ class Trader {
       ) {
         if (!this._settings.multiPosition) {
           if (this._settings.mode === BACKTEST_MODE) {
-            const activePositions = Object.keys(this._currentPositions)
-              .map(key => ({
-                positionId: this._currentPositions[key].positionId,
-                positionCode: this._currentPositions[key].settings.positionCode,
-                status: this._currentPositions[key].status
-              }))
-              .filter(
-                position =>
-                  position.status === POS_STATUS_NEW ||
-                  position.status === POS_STATUS_OPEN
-              );
-            if (activePositions.length > 0) {
-              throw new VError(
-                {
-                  name: "CreatePositionError",
-                  info: {
-                    activePositions
-                  }
-                },
-                "Failed to create new position, active positions found"
-              );
+            if (Object.keys(this._currentPositions).length > 0) {
+              const activePositions = Object.keys(this._currentPositions)
+                .map(key => ({
+                  positionId: this._currentPositions[key]._positionId,
+                  positionCode: this._currentPositions[key]._settings
+                    .positionCode,
+                  status: this._currentPositions[key]._status
+                }))
+                .filter(
+                  position =>
+                    position.status === POS_STATUS_NEW ||
+                    position.status === POS_STATUS_OPEN
+                );
+              if (activePositions.length > 0) {
+                throw new VError(
+                  {
+                    name: "CreatePositionError",
+                    info: {
+                      activePositions
+                    }
+                  },
+                  "Failed to create new position, active positions found"
+                );
+              }
             }
+          } else {
+            // In realtime and emulation - closing all active positions
+            await this.closeActivePositions();
           }
-          // In realtime and emulation - closing all active positions
-          await this.closeActivePositions();
         }
 
         // Создаем новую позицию
