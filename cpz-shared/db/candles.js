@@ -80,6 +80,7 @@ async function getCandlesDB({
         $dateTo: timestamp
         $limit: Int
         $offset: Int
+        $excludeCandleType: String
       ) {
         ${table}(
           order_by: ${orderBy}
@@ -90,7 +91,7 @@ async function getCandlesDB({
             asset: { _eq: $asset }
             currency: { _eq: $currency }
             timestamp: { _gte: $dateFrom, _lte: $dateTo }
-            type: { _neq: ${CANDLE_PREVIOUS}}
+            type: { _neq: $excludeCandleType}
           }
         ) {
           id
@@ -114,7 +115,8 @@ async function getCandlesDB({
       dateFrom,
       dateTo,
       offset,
-      limit
+      limit,
+      excludeCandleType: CANDLE_PREVIOUS
     };
     const response = await db.request(query, variables);
     const candles = response[table];
