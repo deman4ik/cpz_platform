@@ -24,7 +24,7 @@ import {
   BACKTESTER_SETTINGS_DEFAULTS,
   ADVISER_SETTINGS_DEFAULTS
 } from "cpzDefaults";
-import { generateKey, chunkNumberToArray } from "cpzUtils/helpers";
+import { sortAsc, generateKey, chunkNumberToArray } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
 import {
   getBacktesterById,
@@ -209,37 +209,45 @@ class Backtester {
           currency: this.currency,
           timeframe: this.timeframe,
           dateFrom: dayjs(this.dateFrom)
-            .add(-this.requiredHistoryMaxBars / this.timeframe, "minute")
+            .add((-this.requiredHistoryMaxBars * 2) / this.timeframe, "minute")
             .toISOString(),
           dateTo: dayjs(this.dateFrom)
             .add(-1, "minute")
-            .toISOString(),
-          limit: this.requiredHistoryMaxBars
+            .toISOString()
         };
+
         // Запрашиваем свечи из БД
         const getRequiredHistoryResult = await getCandlesDB(
           requiredHistoryRequest
         );
 
+        // Сортируем загруженные свечи в порядке возрастания и отсекаем лишнее
+        const requiredHistoryCandles = getRequiredHistoryResult
+          .sort((a, b) => sortAsc(a.time, b.time))
+          .slice(
+            Math.max(
+              getRequiredHistoryResult.length - this.requiredHistoryMaxBars,
+              0
+            )
+          );
         // Если загрузили меньше свечей чем запросили
-        if (getRequiredHistoryResult.length < this.requiredHistoryMaxBars) {
+        if (requiredHistoryCandles.length < this.requiredHistoryMaxBars) {
           // Генерируем ошибку
           throw new VError(
             {
               name: "HistoryRangeError",
               info: {
                 requiredHistoryMaxBars: this.requiredHistoryMaxBars,
-                actualHistoryMaxBars: getRequiredHistoryResult.length
+                actualHistoryMaxBars: requiredHistoryCandles.length
               }
             },
             "Can't load history required: %s bars but loaded: %s bars",
             this.requiredHistoryMaxBars,
-            getRequiredHistoryResult.length
+            requiredHistoryCandles.length
           );
         }
-        // Сортируем загруженные свечи в порядке возрастания
-        const requiredHistory = getRequiredHistoryResult.reverse();
-        this.adviserBacktester.setCachedCandles(requiredHistory);
+
+        this.adviserBacktester.setCachedCandles(requiredHistoryCandles);
       }
       // Сохраняем начальное состояние
       await this.save();
