@@ -304,7 +304,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         err = { name: error.constructor.name, message: error.message };
       }
 
-      const checkOrder = await this.checkOrder(context, {
+      const checkOrder = await this.checkOrder(context, keys, {
         exId,
         asset,
         currency
