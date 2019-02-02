@@ -147,6 +147,24 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return {};
   }
 
+  getCloseOrderDate(orderResponse) {
+    if (this._exchange === "kraken") {
+      return (
+        orderResponse.info.closetm &&
+        dayjs(parseInt(orderResponse.info.closetm, 10) * 1000)
+          .utc()
+          .toISOString()
+      );
+    }
+
+    return (
+      orderResponse.lastTradeTimestamp &&
+      dayjs(orderResponse.lastTradeTimestamp)
+        .utc()
+        .toISOString()
+    );
+  }
+
   async createOrder(context, keys, order) {
     try {
       /* 
@@ -189,11 +207,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         order: {
           exId: response.id,
           exTimestamp: response.datetime,
-          exLastTrade:
-            response.lastTradeTimestamp &&
-            dayjs(response.lastTradeTimestamp)
-              .utc()
-              .toISOString(),
+          exLastTrade: this.getCloseOrderDate(response),
           status: response.status,
           price: response.price,
           average: response.average,
@@ -239,16 +253,13 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
       const response = await pretry(call, this._retryOptions);
+      // TODO: kraken parse response.info.closetm
       return {
         success: true,
         order: {
           exId: response.id,
           exTimestamp: response.datetime,
-          exLastTrade:
-            response.lastTradeTimestamp &&
-            dayjs(response.lastTradeTimestamp)
-              .utc()
-              .toISOString(),
+          exLastTrade: this.getCloseOrderDate(response),
           status: response.status,
           price: response.price,
           average: response.average,
