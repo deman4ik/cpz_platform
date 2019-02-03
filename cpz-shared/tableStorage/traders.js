@@ -106,7 +106,7 @@ const getActiveTradersBySlug = async slug => {
       {
         name: "TraderStorageError",
         cause: error,
-        info: slug
+        info: { slug }
       },
       'Failed to read traders by slug "%s"',
       slug

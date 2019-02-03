@@ -84,6 +84,7 @@ async function getActivePositionsBySlug(slug) {
       TableUtilities.QueryComparisons.EQUAL,
       slug
     );
+
     const newStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
@@ -113,10 +114,73 @@ async function getActivePositionsBySlug(slug) {
       {
         name: "TableStorageError",
         cause: error,
-        info: slug
+        info: { slug }
       },
       'Failed to read active positions by slug "%s"',
       slug
+    );
+  }
+}
+
+/**
+ * Query active positions by trader id
+ *
+ * @param {object} input
+ * @param {string} input.slug - partition key
+ * @param {string} input.traderId - trader task id
+ * @returns {PositionState[]}
+ */
+async function getActivePositionsBySlugAndTraderId({ slug, traderId }) {
+  try {
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
+    const traderIdFilter = TableQuery.stringFilter(
+      "traderId",
+      TableUtilities.QueryComparisons.EQUAL,
+      traderId
+    );
+    const positionFilter = TableQuery.combineFilters(
+      partitionKeyFilter,
+      TableUtilities.TableOperators.AND,
+      traderIdFilter
+    );
+    const newStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      POS_STATUS_NEW
+    );
+    const openStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      POS_STATUS_OPEN
+    );
+    const statusFilter = TableQuery.combineFilters(
+      newStatusFilter,
+      TableUtilities.TableOperators.OR,
+      openStatusFilter
+    );
+
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        positionFilter,
+        TableUtilities.TableOperators.AND,
+        statusFilter
+      )
+    );
+    return await tableStorage.queryEntities(STORAGE_POSITIONS_TABLE, query);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { slug, traderId }
+      },
+      'Failed to read active positions by slug "%s" and traderId "%s"',
+      slug,
+      traderId
     );
   }
 }
@@ -212,6 +276,7 @@ const deletePositionsState = async traderId => {
 export {
   getPosition,
   getActivePositionsBySlug,
+  getActivePositionsBySlugAndTraderId,
   getIdledOpenPositions,
   savePositionState,
   deletePositionState,

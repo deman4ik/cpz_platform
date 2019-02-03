@@ -16,7 +16,12 @@ async function timerTrigger(context, timer) {
   const marketwatchers = await getStartedMarketwatchers();
   marketwatchers.forEach(marketwatcherState => {
     const isAlive = isProcessExists(marketwatcherState.taskId);
-    if (!isAlive) {
+    if (isAlive) {
+      sendEventToProcess(marketwatcherState.taskId, {
+        type: "check",
+        state: marketwatcherState
+      });
+    } else {
       createNewProcess(
         context,
         marketwatcherState.taskId,

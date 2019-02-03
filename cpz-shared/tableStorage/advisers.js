@@ -91,7 +91,7 @@ const getActiveAdvisersBySlug = async slug => {
       {
         name: "TableStorageError",
         cause: error,
-        info: slug
+        info: { slug }
       },
       'Failed to read active advisers by slug "%s"',
       slug

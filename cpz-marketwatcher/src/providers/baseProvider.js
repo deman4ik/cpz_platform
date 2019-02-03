@@ -77,6 +77,14 @@ class BaseProvider {
     });
   }
 
+  get status() {
+    return this._status;
+  }
+
+  get socketStatus() {
+    return this._socketStatus;
+  }
+
   /* eslint-disable */
     async start() {}
 

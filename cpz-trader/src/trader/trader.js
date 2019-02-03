@@ -34,7 +34,10 @@ import { combineTraderSettings } from "cpzUtils/settings";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState } from "cpzStorage/traders";
 import { getCurrentPrice } from "cpzStorage/currentPrices";
-import { getPosition, getActivePositionsBySlug } from "cpzStorage/positions";
+import {
+  getPosition,
+  getActivePositionsBySlugAndTraderId
+} from "cpzStorage/positions";
 import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
 
@@ -218,13 +221,14 @@ class Trader {
 
   async closeActivePositions() {
     try {
-      const positionsState = await getActivePositionsBySlug(
-        createPositionSlug({
+      const positionsState = await getActivePositionsBySlugAndTraderId({
+        slug: createPositionSlug({
           exchange: this._exchange,
           asset: this._asset,
           currency: this._currency
-        })
-      );
+        }),
+        traderId: this._taskId
+      });
 
       if (positionsState.length > 0) {
         const price = await getCurrentPrice(

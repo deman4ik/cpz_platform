@@ -176,6 +176,7 @@ async function handleSignal(context, eventData) {
           return {
             success: false,
             taskId: state.taskId,
+            cause: error,
             error: {
               name: errorOutput.name,
               message: errorOutput.message,
@@ -221,10 +222,14 @@ async function handleSignal(context, eventData) {
     // Отбираем из результата выполнения только не успешные
     const errorTraders = traderExecutionResults
       .filter(result => result.success === false)
-      .map(result => ({ taskId: result.taskId, error: result.error }));
+      .map(result => ({
+        taskId: result.taskId,
+        error: result.error,
+        cause: result.cause
+      }));
     // Отбираем из не успешных только с ошибкой мутации стореджа
     const concurrentTraders = errorTraders.filter(trader =>
-      VError.hasCauseWithName(trader.error, "StorageEntityMutation")
+      VError.hasCauseWithName(trader.cause, "StorageEntityMutation")
     );
     // Для занятых проторговщиков параллельно наполняем свечами очередь на дальнейшую обработку
     const traderConcurrentQueueResults = await Promise.all(
@@ -271,7 +276,10 @@ async function handleSignal(context, eventData) {
       data: {
         signalId: signal.signalId,
         success: successTaders,
-        error: errorTraders,
+        error: errorTraders.map(result => ({
+          taskId: result.taskId,
+          error: result.error
+        })),
         successPending: successPendingTraders,
         errorPending: errorPendingTraders
       }

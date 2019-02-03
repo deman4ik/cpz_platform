@@ -422,20 +422,20 @@ class Position {
       // Сохраянем ордер в списке ордеров на открытие позиции
       this._entryOrders[order.orderId] = order;
       // Изменяем статус открытия позиции
-      this._entry.status = order.status;
-      this._entry.price = order.average;
-      this._entry.date = order.exLastTrade;
-      this._entry.executed = order.executed;
+      this._entry.status = order.status || this._entry.status;
+      this._entry.price = order.average || this._entry.price;
+      this._entry.date = order.exLastTrade || this._entry.date;
+      this._entry.executed = order.executed || this._entry.executed;
     } else {
       // Если ордер на закрытие позиции
 
       // Сохраянем ордер в списке ордеров на закрытие позиции
       this._exitOrders[order.orderId] = order;
       // Изменяем статус закрытия позиции
-      this._exit.status = order.status;
-      this._exit.price = order.average;
-      this._exit.date = order.exLastTrade;
-      this._exit.executed = order.executed;
+      this._exit.status = order.status || this._exit.status;
+      this._exit.price = order.average || this._exit.price;
+      this._exit.date = order.exLastTrade || this._exit.date;
+      this._exit.executed = order.executed || this._exit.executed;
     }
     // Устанавливаем статус позиции
     this.setStatus();

@@ -92,8 +92,12 @@ class EventsLogger {
         return;
       }
       if (type === TRADES_POSITION_EVENT.eventType) {
+        this.context.log.info("POSITION EVENT!");
         if (this.logToStorage) await savePositionsEvent(fullEventData);
-        if (this.logToPostgre) await savePositionsDB([fullEventData]);
+        if (this.logToPostgre) {
+          this.context.log.info("POSITION EVENT DB!");
+          await savePositionsDB([fullEventData]);
+        }
         return;
       }
       if (type.includes(".Log")) {

@@ -103,6 +103,44 @@ class CryptocompareProvider extends BaseProvider {
     return null;
   }
 
+  async _handleError(error = "unknown connection error") {
+    this.log("error", error);
+    this._socketStatus = "error";
+    this._status = STATUS_ERROR;
+    const errorOutput = createErrorOutput(
+      new VError(
+        {
+          name: "CryptocompareStreamingError",
+          cause: new Error(error),
+          info: this._getCurrentState()
+        },
+        'Cryptocompare streaming error - task "%s"',
+        this._taskId
+      )
+    );
+    this.logError(errorOutput);
+    this._error = {
+      name: errorOutput.name,
+      message: errorOutput.message,
+      info: errorOutput.info
+    };
+    await publishEvents(ERROR_TOPIC, {
+      service: MARKETWATCHER_SERVICE,
+      subject: this._eventSubject,
+      eventType: ERROR_MARKETWATCHER_EVENT,
+      data: {
+        taskId: this._taskId,
+        error: {
+          name: errorOutput.name,
+          message: errorOutput.message,
+          info: errorOutput.info
+        }
+      }
+    });
+    await this._save();
+    process.exit(0);
+  }
+
   _subscribeToSocketEvents() {
     this._socket.on("connect", async () => {
       this.log("connect");
@@ -124,93 +162,13 @@ class CryptocompareProvider extends BaseProvider {
     });
 
     // При disconnectе
-    this._socket.on("disconnect", async reason => {
-      this.log("disconnect", reason);
-      this._socketStatus = reason;
-      //  if (reason === "io server disconnect") {
-      // the disconnection was initiated by the server, you need to reconnect manually
-      this._socket.connect();
-      // }
-      await this._save();
-      // else the socket will automatically try to reconnect
-    });
+    this._socket.on("disconnect", this._handleError);
 
     // Если произошла ошибка
-    this._socket.on("error", async error => {
-      this.log("error", error);
-      this._socketStatus = "error";
-      this._status = STATUS_ERROR;
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "CryptocompareStreamingError",
-            cause: new Error(error),
-            info: this._getCurrentState()
-          },
-          'Cryptocompare streaming error - task "%s"',
-          this._taskId
-        )
-      );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
-        data: {
-          taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
-      });
-      await this._save();
-      process.exit(0);
-    });
+    this._socket.on("error", this._handleError);
 
     // Если все попытки переподключения исчерпаны
-    this._socket.on("reconnect_failed", async () => {
-      this.log("reconnect_failed");
-      this._socketStatus = "reconnect_failed";
-      this._status = STATUS_ERROR;
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "CryptocompareStreamingError",
-            info: this._getCurrentState()
-          },
-          'Cryptocompare streaming error - Reconnect failed - task "%s"',
-          this._taskId
-        )
-      );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
-        data: {
-          taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
-      });
-      await this._save();
-      process.exit(0);
-    });
+    this._socket.on("reconnect_failed", this._handleError);
   }
 
   async start() {
@@ -396,6 +354,20 @@ class CryptocompareProvider extends BaseProvider {
 process.on("message", async m => {
   const eventData = JSON.parse(m);
   switch (eventData.type) {
+    case "check":
+      if (providerInstance && providerInstance.socketStatus === "connect") {
+        providerInstance.log("Checked!");
+      } else {
+        if (!providerInstance) {
+          providerInstance = new CryptocompareProvider(eventData.state);
+        } else {
+          providerInstance = new CryptocompareProvider(
+            providerInstance._getCurrentState()
+          );
+        }
+        await providerInstance.start(eventData.state.subscriptions);
+      }
+      break;
     case "start":
       providerInstance = new CryptocompareProvider(eventData.state);
       await providerInstance.start(eventData.state.subscriptions);
