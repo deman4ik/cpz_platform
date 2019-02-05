@@ -39,7 +39,11 @@ create table orders
     remain_quantity numeric       default 0,
 
     signal_id     uuid,
-    backtest_id   uuid,
+    backtest_id   uuid
+      constraint c_orders_backtest_fk
+        references backtest
+          ON DELETE CASCADE,
+    trader_id     uuid,
     candle_timestamp timestamp
 )
 with OIDS;
