@@ -35,10 +35,6 @@ services:
       - API_KEY
       - EG_TEST_ENDPOINT
       - EG_TEST_KEY 
-      - DB_API_ENDPOINT
-      - DB_API_ACCESS_KEY
-      - CONNECTOR_API_ENDPOINT
-      - CONNECTOR_API_KEY
       - PROXY_ENDPOINT
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
@@ -57,9 +53,7 @@ services:
       - AZ_STORAGE_CS  
       - API_KEY
       - EG_TEST_ENDPOINT
-      - EG_TEST_KEY 
-      - DB_API_ENDPOINT
-      - DB_API_ACCESS_KEY
+      - EG_TEST_KEY
       - CONNECTOR_API_ENDPOINT
       - CONNECTOR_API_KEY
       - PROXY_ENDPOINT
@@ -84,15 +78,27 @@ services:
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always  
-  # graphql-engine:
-  #   image: hasura/graphql-engine:v1.0.0-alpha31
-  #   ports:
-  #   - "8105:8080"
-  #   restart: always
-  #   environment:
-  #     - HASURA_GRAPHQL_DATABASE_URL
-  #     - HASURA_GRAPHQL_ACCESS_KEY
-  #   command: graphql-engine serve --enable-console --connections 25
+  cpz-importer:
+    container_name: cpz-importer
+    build:
+      context: .
+      dockerfile: CPZImporter.Dockerfile
+    ports:
+      - "8105:80"
+    environment:
+      - NODE_ENV
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage
+      - AZ_STORAGE_CS  
+      - API_KEY
+      - EG_TEST_ENDPOINT
+      - EG_TEST_KEY 
+      - CONNECTOR_API_ENDPOINT
+      - CONNECTOR_API_KEY
+      - PROXY_ENDPOINT
+      - DEBUG
+      - NODE_TLS_REJECT_UNAUTHORIZED
+    restart: always
   cpz-trader:
     container_name: cpz-trader
     build:
@@ -169,8 +175,11 @@ services:
       - EG_TEST_ENDPOINT
       - EG_TEST_KEY 
       - PROXY_ENDPOINT
-      - EXCHANGE_API_KEY
-      - EXCHANGE_SECRET_KEY
+      - KEY_VAULT_URL
+      - KEY_VAULT_READ_CLIENT_ID
+      - KEY_VAULT_READ_APP_SECRET
+      - KEY_VAULT_DECR_CLIENT_ID
+      - KEY_VAULT_DECR_APP_SECRET
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
     restart: always
