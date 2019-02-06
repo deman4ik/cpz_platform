@@ -106,6 +106,12 @@ class ExWatcher {
       this._stoppedAt = dayjs()
         .utc()
         .toISOString();
+    }
+
+    if (
+      this._candlebatcherStatus === STATUS_STOPPED &&
+      this._marketwatcherStatus === STATUS_STOPPED
+    ) {
       this._event = {
         id: uuid(),
         dataVersion: "1.0",
