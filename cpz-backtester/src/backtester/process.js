@@ -1,5 +1,5 @@
 import "babel-polyfill";
-import Backtester from "./backtester/backtester";
+import Backtester from "./backtester";
 
 process.on("message", async m => {
   const eventData = JSON.parse(m);

@@ -11,7 +11,7 @@ const config = {
   watch: false,
   entry: {
     server: path.resolve(__dirname, `src/server.js`),
-    cryptocompare: path.resolve(__dirname, "src/providers/cryptocompare.js")
+    importerProcess: path.resolve(__dirname, "src/importer/process.js")
   },
   resolve: {
     alias: {

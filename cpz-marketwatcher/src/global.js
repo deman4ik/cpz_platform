@@ -2,6 +2,7 @@ import { fork } from "child_process";
 import { tryParseJSON } from "cpzUtils/helpers";
 import { getMarketwatcherById } from "cpzStorage/marketwatchers";
 import { STATUS_STOPPED } from "cpzState";
+import dayjs from "cpzDayjs";
 
 const marketwatcherProcesses = {};
 
@@ -12,8 +13,9 @@ function isProcessExists(taskId) {
   return false;
 }
 
-function log(context, m) {
-  context.log.info(
+function log(m) {
+  console.info(
+    `[${dayjs().format("MM/DD/YYYY HH:mm:ss")}]`,
     ...m.map(msg => {
       const json = tryParseJSON(msg);
       if (json) {
@@ -23,18 +25,18 @@ function log(context, m) {
     })
   );
 }
-function createNewProcess(context, taskId, provider) {
+function createNewProcess(taskId, provider) {
   const providerName = provider || "cryptocompare";
-  context.log("Creating new process ", taskId, providerName);
+  console.log("Creating new process ", taskId, providerName);
   marketwatcherProcesses[taskId] = fork(`./dist/${providerName}.js`);
   marketwatcherProcesses[taskId].on("message", m => {
-    log(context, m);
+    log(m);
   });
   marketwatcherProcesses[taskId].on("exit", async () => {
     delete marketwatcherProcesses[taskId];
     const marketwatcherState = await getMarketwatcherById(taskId);
     if (marketwatcherState.status !== STATUS_STOPPED) {
-      createNewProcess(context, taskId, providerName);
+      createNewProcess(taskId, providerName);
       sendEventToProcess(taskId, {
         type: "start",
         state: marketwatcherState

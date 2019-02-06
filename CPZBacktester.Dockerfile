@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/node:2.0 AS build
+FROM node:10 as build
 RUN apt-get update &&  \
     apt-get install -y git &&  \
     apt-get install -y python2.7 && \ 
@@ -16,9 +16,10 @@ RUN npm install tulind --build-from-source && \
     npm uninstall -D && \
     npm cache clean --force  
 
-FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
+FROM node:10 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
 ENV NODE_ENV=production
 COPY --from=build ["/src/cpz-backtester","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
+CMD [ "npm", "start" ]
   

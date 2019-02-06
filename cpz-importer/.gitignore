@@ -1,4 +1,3 @@
-**/node_modules
 bin
 obj
 csx
@@ -6,6 +5,7 @@ csx
 edge
 Publish
 dist
+.env
 
 *.user
 *.suo

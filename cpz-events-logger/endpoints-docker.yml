@@ -31,6 +31,13 @@ endpoints:
   url: "/api/candleEvents"
   types:
   - CPZ.Candles.NewCandle
+# Importer
+- host: "cpz-importer"
+  port: 80
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Importer.Start
+  - CPZ.Tasks.Importer.Stop  
 # Trader  
 - host: "cpz-trader"
   port: 80

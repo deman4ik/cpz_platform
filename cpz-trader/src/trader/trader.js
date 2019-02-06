@@ -197,10 +197,16 @@ class Trader {
   async closePosition(price, positionState) {
     try {
       const closeSignal = {
-        price,
-        orderType: ORDER_TYPE_MARKET,
         signalId: uuid(),
-        positionId: positionState.positionId
+        price,
+        timestamp: dayjs()
+          .utc()
+          .toISOString(),
+        orderType: ORDER_TYPE_MARKET,
+        positionId: positionState.positionId,
+        settings: {
+          positionCode: positionState.settings.positionCode
+        }
       };
       if (positionState.direction === ORDER_DIRECTION_BUY) {
         closeSignal.action = TRADE_ACTION_CLOSE_LONG;

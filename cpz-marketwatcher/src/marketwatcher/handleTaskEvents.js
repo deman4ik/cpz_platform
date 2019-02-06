@@ -17,7 +17,7 @@ import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
-} from "../globalMarketwatchers";
+} from "../global";
 
 const validateStart = createValidator(
   TASKS_MARKETWATCHER_START_EVENT.dataSchema
@@ -34,20 +34,17 @@ const validateUnsubscribe = createValidator(
 /**
  * Запуск нового наблюдателя за рынком
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleStart(context, eventData) {
+async function handleStart(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
     if (isProcessExists(eventData.taskId)) {
-      throw new VError(
-        'Marketwatcher task "%s" already started',
-        eventData.taskId
-      );
+      console.warn('Marketwatcher task "%s" already started', eventData.taskId);
+      return;
     }
-    createNewProcess(context, eventData.taskId, eventData.providerType);
+    createNewProcess(eventData.taskId, eventData.providerType);
     sendEventToProcess(eventData.taskId, {
       type: "start",
       state: eventData
@@ -74,7 +71,7 @@ async function handleStart(context, eventData) {
         "Failed to start marketwatcher"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -95,15 +92,14 @@ async function handleStart(context, eventData) {
 /**
  * Остановка наблюдателя за рынков
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleStop(context, eventData) {
+async function handleStop(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      context.log.warn(`Marketwatcher task "${eventData.taskId}" not started`);
+      console.warn(`Marketwatcher task "${eventData.taskId}" not started`);
       return;
     }
 
@@ -132,7 +128,7 @@ async function handleStop(context, eventData) {
         "Failed to stop marketwatcher"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -153,10 +149,9 @@ async function handleStop(context, eventData) {
 /**
  * Подписаться на новые данные
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleSubscribe(context, eventData) {
+async function handleSubscribe(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateSubscribe(eventData));
@@ -193,7 +188,7 @@ async function handleSubscribe(context, eventData) {
         "Failed to subscribe"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -214,10 +209,9 @@ async function handleSubscribe(context, eventData) {
 /**
  * Отписаться от данных
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleUnsubscribe(context, eventData) {
+async function handleUnsubscribe(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateUnsubscribe(eventData));
@@ -254,7 +248,7 @@ async function handleUnsubscribe(context, eventData) {
         "Failed to unsubscribe"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,

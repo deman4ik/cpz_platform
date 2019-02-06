@@ -21,14 +21,13 @@ const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
 /**
  * Запуск бэктеста
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleStart(context, eventData) {
+async function handleStart(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
-    createNewProcess(context, eventData.taskId);
+    createNewProcess( eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
       state: eventData
@@ -46,7 +45,7 @@ async function handleStart(context, eventData) {
         "Failed to start backtester"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
@@ -67,15 +66,15 @@ async function handleStart(context, eventData) {
 /**
  * Остановка бэктеста
  *
- * @param {*} context
+
  * @param {*} eventData
  */
-async function handleStop(context, eventData) {
+async function handleStop(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      context.log.warn('Backtester task "%s" not started', eventData.taskId);
+      console.warn('Backtester task "%s" not started', eventData.taskId);
       return;
     }
 
@@ -106,7 +105,7 @@ async function handleStop(context, eventData) {
         "Failed to stop backtester"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,

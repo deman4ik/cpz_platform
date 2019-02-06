@@ -2,32 +2,17 @@ require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-const fs = require("fs");
 const path = require("path");
 
-// the path(s) that should be cleaned
 const pathsToClean = [path.resolve(__dirname, "dist")];
 
-/**
- * Finds all functions entry points from /src/funcs
- *
- * @returns {object} entry
- */
-function findEntryPoints() {
-  const entry = {
-    process: path.resolve(__dirname, "src/process.js")
-  };
-  fs.readdirSync(path.resolve(__dirname, "src/funcs")).forEach(file => {
-    const key = file.replace(".js", "");
-    entry[key] = path.resolve(__dirname, `src/funcs/${file}`);
-  });
-  return entry;
-}
-
 const config = {
-  mode: process.env.NODE_ENV || "development",
+  mode: "production",
   watch: false,
-  entry: findEntryPoints(),
+  entry: {
+    server: path.resolve(__dirname, `src/server.js`),
+    process: path.resolve(__dirname, "src/backtester/process.js")
+  },
   resolve: {
     alias: {
       cpzDefaults: path.resolve(__dirname, "../cpz-shared/config/defaults"),
@@ -73,7 +58,6 @@ const config = {
   plugins: [
     new CleanWebpackPlugin(pathsToClean),
     new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({
       banner: 'require("source-map-support").install();',

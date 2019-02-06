@@ -8,8 +8,6 @@ endpoints:
   - CPZ.Tasks.Marketwatcher.Stop
   - CPZ.Tasks.Marketwatcher.Subscribe
   - CPZ.Tasks.Marketwatcher.Unsubscribe
-  - CPZ.Tasks.Importer.Start
-  - CPZ.Tasks.Importer.Stop
 # Candlebatcher  
 - host: "cpz-candlebatcher"
   port: 8103
@@ -31,6 +29,13 @@ endpoints:
   url: "/api/candleEvents"
   types:
   - CPZ.Candles.NewCandle
+# Importer
+- host: "cpz-importer"
+  port: 8105
+  url: "/api/taskEvents"
+  types:
+  - CPZ.Tasks.Importer.Start
+  - CPZ.Tasks.Importer.Stop
 # Trader  
 - host: "cpz-trader"
   port: 8106

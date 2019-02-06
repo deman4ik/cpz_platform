@@ -14,21 +14,20 @@ import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
-} from "../globalImporters";
+} from "../global";
 
 const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
 const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 /**
  * Запуск нового импортера свечей
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleImportStart(context, eventData) {
+async function handleImportStart(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
-    createNewProcess(context, eventData.taskId);
+    createNewProcess(eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
       state: eventData
@@ -46,7 +45,7 @@ async function handleImportStart(context, eventData) {
         "Failed to start importer"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,
@@ -66,15 +65,14 @@ async function handleImportStart(context, eventData) {
 /**
  * Остановка импорта
  *
- * @param {*} context
  * @param {*} eventData
  */
-async function handleImportStop(context, eventData) {
+async function handleImportStop( eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      context.log.warn('Importer task "%s" not started', eventData.taskId);
+      console.warn('Importer task "%s" not started', eventData.taskId);
       return;
     }
 
@@ -105,7 +103,7 @@ async function handleImportStop(context, eventData) {
         "Failed to stop importer"
       )
     );
-    context.log.error(errorOutput);
+    console.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,

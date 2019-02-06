@@ -6,9 +6,7 @@ import {
   TASKS_MARKETWATCHER_START_EVENT,
   TASKS_MARKETWATCHER_STOP_EVENT,
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-  TASKS_IMPORTER_START_EVENT,
-  TASKS_IMPORTER_STOP_EVENT
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
@@ -17,20 +15,17 @@ import {
   handleSubscribe,
   handleUnsubscribe
 } from "../marketwatcher/handleTaskEvents";
-import {
-  handleImportStart,
-  handleImportStop
-} from "../importer/handleTaskEvents";
 
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
-function eventHandler(context, req) {
+function eventHandler(req, res) {
   try {
+
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
-    const parsedReq = JSON.parse(req.rawBody);
-    context.log.info(
+    const parsedReq = req.body;
+    console.info(
       `CPZ Marketwatcher processed a request.${JSON.stringify(parsedReq)}`
     );
     // TODO: SENDER ENDPOINT VALIDATION
@@ -42,95 +37,65 @@ function eventHandler(context, req) {
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
         case SUB_VALIDATION_EVENT.eventType: {
-          context.log.warn(
+          console.warn(
             `Got SubscriptionValidation event data, validationCode: ${
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
           );
-          context.res = {
-            status: 200,
-            body: {
-              validationResponse: eventData.validationCode
-            },
-            headers: {
-              "Content-Type": "application/json"
-            }
-          };
+          res.send({
+            validationResponse: eventData.validationCode
+          });
           break;
         }
         case TASKS_MARKETWATCHER_START_EVENT.eventType: {
-          context.log.info(
+          console.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleStart(context, { eventSubject, ...eventData });
+          handleStart({ eventSubject, ...eventData });
           break;
         }
         case TASKS_MARKETWATCHER_STOP_EVENT.eventType: {
-          context.log.info(
+          console.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleStop(context, { eventSubject, ...eventData });
+          handleStop({ eventSubject, ...eventData });
           break;
         }
         case TASKS_MARKETWATCHER_SUBSCRIBE_EVENT.eventType: {
-          context.log.info(
+          console.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleSubscribe(context, { eventSubject, ...eventData });
+          handleSubscribe({ eventSubject, ...eventData });
           break;
         }
         case TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.eventType: {
-          context.log.info(
+          console.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleUnsubscribe(context, { eventSubject, ...eventData });
-          break;
-        }
-        case TASKS_IMPORTER_START_EVENT.eventType: {
-          context.log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
-          );
-          handleImportStart(context, { eventSubject, ...eventData });
-          break;
-        }
-        case TASKS_IMPORTER_STOP_EVENT.eventType: {
-          context.log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
-          );
-          handleImportStop(context, { eventSubject, ...eventData });
+          handleUnsubscribe({ eventSubject, ...eventData });
           break;
         }
         default: {
-          context.log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
+          console.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
         }
       }
     });
-    context.res = {
-      status: 200
-    };
+
+    res.status(200);
   } catch (error) {
-    context.log.error(error);
-    context.res = {
-      status: error.name === "UNAUTHENTICATED" ? 401 : 500,
-      body: error.message,
-      headers: {
-        "Content-Type": "application/json"
-      }
-    };
+    console.error(error);
+    res
+      .status(error.name === "UNAUTHENTICATED" ? 401 : 500)
+      .send(error.message);
   }
-  context.done();
 }
 
 export default eventHandler;

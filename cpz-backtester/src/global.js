@@ -1,16 +1,18 @@
 import { fork } from "child_process";
 import { tryParseJSON } from "cpzUtils/helpers";
+import dayjs from "cpzDayjs";
 
 const processes = {};
 
 function isProcessExists(taskId) {
   return Object.prototype.hasOwnProperty.call(processes, taskId);
 }
-function createNewProcess(context, taskId) {
-  context.log("Creating new process ", taskId);
+function createNewProcess(taskId) {
+  console.log("Creating new process ", taskId);
   processes[taskId] = fork(`./dist/process.js`);
   processes[taskId].on("message", m => {
-    context.log.info(
+    console.info(
+      `[${dayjs().format("MM/DD/YYYY HH:mm:ss")}]`,
       ...m.map(msg => {
         const json = tryParseJSON(msg);
         if (json) {

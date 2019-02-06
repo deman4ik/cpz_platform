@@ -39,9 +39,8 @@ async function getUserRobotDB(userRobotId) {
         currency: robotByrobotId.currency,
         timeframe: robotByrobotId.timeframe,
         strategyName: robotByrobotId.stratBystrat.filename,
-        candlebatcherSettings:
-          response.cpz_user_robot_by_pk.candlebatchersettings,
-        adviserSettings: response.cpz_user_robot_by_pk.advisersettings,
+        candlebatcherSettings: robotByrobotId.candlebatchersettings,
+        adviserSettings: robotByrobotId.advisersettings,
         traderSettings: {
           ...robotByrobotId.tradersettings,
           ...response.cpz_user_robot_by_pk.user_params,

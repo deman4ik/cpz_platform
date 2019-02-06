@@ -1,7 +1,7 @@
 {
-  "name": "cpz-backtester",
+  "name": "cpz-importer",
   "version": "1.0.0",
-  "description": "Cryptuoso - backtesting service",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "jest",
@@ -35,7 +35,6 @@
     "helmet": "^3.15.0",
     "nodemon": "^1.18.9",
     "p-retry": "^2.0.0",
-    "tulind": "^0.8.14",
     "uuid": "^3.3.2",
     "verror": "^1.10.0"
   },

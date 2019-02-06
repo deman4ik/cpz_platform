@@ -4,15 +4,9 @@ import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
-} from "../globalMarketwatchers";
+} from "./global";
 
-async function timerTrigger(context, timer) {
-  const timeStamp = new Date().toISOString();
-
-  if (timer.isPastDue) {
-    context.log.info("Timer trigger is running late!");
-  }
-  context.log.info("Timer trigger function ran!", timeStamp);
+async function timerTrigger() {
   const marketwatchers = await getStartedMarketwatchers();
   marketwatchers.forEach(marketwatcherState => {
     const isAlive = isProcessExists(marketwatcherState.taskId);
@@ -23,7 +17,6 @@ async function timerTrigger(context, timer) {
       });
     } else {
       createNewProcess(
-        context,
         marketwatcherState.taskId,
         marketwatcherState.providerType
       );
