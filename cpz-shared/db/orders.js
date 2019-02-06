@@ -26,6 +26,7 @@ function mapForDB(order) {
     remain_quantity: order.remaining, // quantity (volume) of asset remaining to execute to exchange, = 0 if all of order_quantity is executed
     signal_id: order.signalId,
     backtest_id: order.backtesterId,
+    trader_id: order.traderId,
     candle_timestamp: order.candleTimestamp
   };
 }
