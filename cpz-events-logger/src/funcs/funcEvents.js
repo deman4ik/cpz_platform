@@ -1,8 +1,12 @@
 import "babel-polyfill";
 import VError from "verror";
 import { SUB_VALIDATION_EVENT } from "cpzEventTypes";
+import { checkEnvVars } from "cpzUtils/environment";
+import eventsloggerEnv from "cpzEnv/eventslogger";
 import EventsLogger from "../eventslogger/eventslogger";
 import relay from "../emulator/relay";
+
+checkEnvVars(eventsloggerEnv.variables);
 
 const { EG_EMULATOR_MODE } = process.env;
 

@@ -13,6 +13,7 @@ const config = {
   entry: { index: path.resolve(__dirname, "src/index.js") },
   resolve: {
     alias: {
+      cpzEnv: path.resolve(__dirname, "../cpz-shared/config/environment"),
       cpzDefaults: path.resolve(__dirname, "../cpz-shared/config/defaults"),
       cpzEventTypes: path.resolve(__dirname, "../cpz-shared/config/eventTypes"),
       cpzServices: path.resolve(__dirname, "../cpz-shared/config/services"),

@@ -8,12 +8,15 @@ import {
   TASKS_TRADER_UPDATE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import { checkEnvVars } from "cpzUtils/environment";
+import traderEnv from "cpzEnv/trader";
 import {
   handleStart,
   handleStop,
   handleUpdate
 } from "../trader/handleTaskEvents";
 
+checkEnvVars(traderEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {

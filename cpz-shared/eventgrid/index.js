@@ -16,41 +16,45 @@ function createClient(key) {
 function getHost(endpoint) {
   return url.parse(endpoint, true).host;
 }
-
+// TODO: Refactoring
 const topicsConfig = {
   tasks: {
-    client: createClient(process.env.EG_TASKS_KEY || process.env.EG_TEST_KEY),
-    host: getHost(process.env.EG_TASKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+    client: process.env.EG_TASKS_KEY && createClient(process.env.EG_TASKS_KEY),
+    host:
+      process.env.EG_TASKS_ENDPOINT && getHost(process.env.EG_TASKS_ENDPOINT)
   },
   ticks: {
-    client: createClient(process.env.EG_TICKS_KEY || process.env.EG_TEST_KEY),
-    host: getHost(process.env.EG_TICKS_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+    client: process.env.EG_TICKS_KEY && createClient(process.env.EG_TICKS_KEY),
+    host:
+      process.env.EG_TICKS_ENDPOINT && getHost(process.env.EG_TICKS_ENDPOINT)
   },
   candles: {
-    client: createClient(process.env.EG_CANDLES_KEY || process.env.EG_TEST_KEY),
-    host: getHost(
-      process.env.EG_CANDLES_ENDPOINT || process.env.EG_TEST_ENDPOINT
-    )
+    client:
+      process.env.EG_CANDLES_KEY && createClient(process.env.EG_CANDLES_KEY),
+    host:
+      process.env.EG_CANDLES_ENDPOINT &&
+      getHost(process.env.EG_CANDLES_ENDPOINT)
   },
   signals: {
-    client: createClient(process.env.EG_SIGNALS_KEY || process.env.EG_TEST_KEY),
-    host: getHost(
-      process.env.EG_SIGNALS_ENDPOINT || process.env.EG_TEST_ENDPOINT
-    )
+    client:
+      process.env.EG_SIGNALS_KEY && createClient(process.env.EG_SIGNALS_KEY),
+    host:
+      process.env.EG_SIGNALS_ENDPOINT &&
+      getHost(process.env.EG_SIGNALS_ENDPOINT)
   },
   trades: {
-    client: createClient(process.env.EG_TRADES_KEY || process.env.EG_TEST_KEY),
-    host: getHost(
-      process.env.EG_TRADES_ENDPOINT || process.env.EG_TEST_ENDPOINT
-    )
+    client:
+      process.env.EG_TRADES_KEY && createClient(process.env.EG_TRADES_KEY),
+    host:
+      process.env.EG_TRADES_ENDPOINT && getHost(process.env.EG_TRADES_ENDPOINT)
   },
   log: {
-    client: createClient(process.env.EG_LOG_KEY || process.env.EG_TEST_KEY),
-    host: getHost(process.env.EG_LOG_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+    client: process.env.EG_LOG_KEY && createClient(process.env.EG_LOG_KEY),
+    host: process.env.EG_LOG_ENDPOINT && getHost(process.env.EG_LOG_ENDPOINT)
   },
   error: {
-    client: createClient(process.env.EG_LOG_KEY || process.env.EG_TEST_KEY),
-    host: getHost(process.env.EG_LOG_ENDPOINT || process.env.EG_TEST_ENDPOINT)
+    client: process.env.EG_LOG_KEY && createClient(process.env.EG_LOG_KEY),
+    host: process.env.EG_LOG_ENDPOINT && getHost(process.env.EG_LOG_ENDPOINT)
   }
 };
 
@@ -73,10 +77,10 @@ async function publishEvents(topic, eventData) {
       };
       events.push(newEvent);
     }
-    const { client, host } = topicsConfig[topic];
-    await client.publishEvents(host, events);
-    /* await retry(
+
+    await retry(
       async () => {
+        const { client, host } = topicsConfig[topic];
         await client.publishEvents(host, events);
       },
       {
@@ -84,7 +88,7 @@ async function publishEvents(topic, eventData) {
         minTimeout: 200,
         maxTimeout: 1000
       }
-    ); */
+    );
   } catch (error) {
     const err = new VError(
       {

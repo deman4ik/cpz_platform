@@ -4,8 +4,12 @@ import {
 } from "apollo-server-azure-functions";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
+import { checkEnvVars } from "cpzUtils/environment";
+import controlEnv from "cpzEnv/control";
 import typeDefs from "../api/schema/schema.graphql";
 import mutations from "../api/resolvers/mutations";
+
+checkEnvVars(controlEnv.variables);
 
 const resolvers = {
   JSON: GraphQLJSON,

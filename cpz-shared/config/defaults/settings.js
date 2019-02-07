@@ -1,20 +1,20 @@
 import { EMULATOR_MODE } from "../state";
 
 const CANDLEBATCHER_SETTINGS_DEFAULTS = {
-  debug: true,
+  debug: process.env.DEBUG || false,
   proxy: process.env.PROXY_ENDPOINT,
-  requiredHistoryMaxBars: 1
+  requiredHistoryMaxBars: 30
 };
 
 const ADVISER_SETTINGS_DEFAULTS = {
-  debug: true,
+  debug: process.env.DEBUG || false,
   strategyParameters: {},
   requiredHistoryCache: true,
   requiredHistoryMaxBars: 30
 };
 
 const TRADER_SETTINGS_DEFAULTS = {
-  debug: true,
+  debug: process.env.DEBUG || false,
   mode: EMULATOR_MODE,
   openOrderTimeout: 10, // minutes
   slippageStep: 0,
@@ -24,7 +24,7 @@ const TRADER_SETTINGS_DEFAULTS = {
 };
 
 const BACKTESTER_SETTINGS_DEFAULTS = {
-  debug: true
+  debug: process.env.DEBUG || false
 };
 export {
   CANDLEBATCHER_SETTINGS_DEFAULTS,

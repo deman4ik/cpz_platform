@@ -1,0 +1,14 @@
+export default {
+  variables: [
+    "KEY_VAULT_URL",
+    "KEY_VAULT_READ_CLIENT_ID",
+    "KEY_VAULT_READ_APP_SECRET",
+    "KEY_VAULT_WRITE_CLIENT_ID",
+    "KEY_VAULT_WRITE_APP_SECRET",
+    "RESOURSE_GROUP",
+    "MANAGE_APP_ID",
+    "MANAGE_APP_KEY",
+    "SUBSRIPTION_ID",
+    "AD_DIRECTORY_ID"
+  ]
+};
