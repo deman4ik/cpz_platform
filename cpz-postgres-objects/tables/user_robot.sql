@@ -25,7 +25,7 @@ alter table user_robot
     
 alter table user_robot
   add constraint c_user_robot_run_mode_chk
-    check (run_mode in ('backtest','emulator','realtime'));
+    check (run_mode in ('emulator','realtime'));
         	
 create index i_user_robot_userlist_fk on user_robot (user_id);
 
@@ -36,7 +36,7 @@ comment on column user_robot.robot_status is '
 0 - added to favorites (default)
 1 - subscribed to signals
 10 - running
-20 - paused';
+20 - stopped';
 
 comment on column user_robot.dt_to is 'Date and time robot will be stopped according to user subsribtion';
 

@@ -44,7 +44,8 @@ create table orders
         references backtest
           ON DELETE CASCADE,
     trader_id     uuid,
-    candle_timestamp timestamp
+    candle_timestamp timestamp,
+    run_mode  varchar(10)
 )
 with OIDS;
 
@@ -55,7 +56,11 @@ alter table orders
 alter table orders
   add constraint c_orders_order_type_chk
     check (order_type in ('limit','market','stop'));
-        
+
+alter table orders
+  add constraint c_orders_run_mode_chk
+    check (run_mode in ('emulator','realtime'));
+            
 create index i_orders_userlist_fk
   on orders (user_id);
 create index i_orders_robot_fk
