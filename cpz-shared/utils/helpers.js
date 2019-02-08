@@ -226,6 +226,7 @@ function chunkNumberToArray(number, chunkSize) {
   const range = createRange(number);
   const array = Array.from(range);
   return chunkArray(array, chunkSize).map(val => val.length);
+}
 
 /**
  * Возвращает исходную строку с прописным первым символом
