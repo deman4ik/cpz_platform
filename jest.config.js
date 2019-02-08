@@ -1,5 +1,6 @@
 module.exports = {
   verbose: true,
   reporters: ["default", "jest-junit"],
-  projects: ["<rootDir>"]
+  projects: ["<rootDir>/cpz-adviser", "<rootDir>/cpz-shared"],
+  testEnvironment: "node"
 };

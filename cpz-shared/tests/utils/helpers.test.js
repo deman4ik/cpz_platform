@@ -1,6 +1,7 @@
 import dayjs from "../../utils/lib/dayjs";
 import * as helpers from "../../utils/helpers";
 
+
 describe("Array sorting methods", () => {
   test("Array should be sorted by asc", () => {
     const arr = [4, 5, 3, 3, 2, 1];
@@ -17,7 +18,7 @@ describe("Array sorting methods", () => {
 
 test("Should be correct JSON", () => {
   const correctJson =
-    '{ "o": 3500, "h": 3900, "l": 3350, "c": 3453, "v": null}';
+    "{ \"o\": 3500, \"h\": 3900, \"l\": 3350, \"c\": 3453, \"v\": null}";
   const incorrectJson = "{o: 234}";
   expect(helpers.tryParseJSON(correctJson)).toEqual({
     o: 3500,
@@ -67,7 +68,7 @@ test("Should be number - duration in timeframes", () => {
   ).toBe(24);
 });
 
-test('Should be calculated correct "percentage of progress"', () => {
+test("Should be calculated correct \"percentage of progress\"", () => {
   const currentValue = 23;
   const totalValue = 130;
   expect(helpers.completedPercent(currentValue, totalValue)).toBe(18);

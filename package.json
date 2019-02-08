@@ -4,7 +4,7 @@
   "description": "1. Описать переменные окружения в файле .env в корне проекта",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --no-cache"
   },
   "repository": {
     "type": "git",
@@ -12,8 +12,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
