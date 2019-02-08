@@ -1,4 +1,5 @@
 module.exports = {
   verbose: true,
-  reporters: ["default", "jest-junit"]
+  reporters: ["default", "jest-junit"],
+  collectCoverage: true
 };
