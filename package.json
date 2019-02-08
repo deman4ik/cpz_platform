@@ -1,0 +1,23 @@
+{
+  "name": "cpz_platform",
+  "version": "1.0.0",
+  "description": "1. Описать переменные окружения в файле .env в корне проекта",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://cryptuoso.visualstudio.com/CPZ/_git/cpz_platform"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "jest": "^24.1.0",
+    "jest-junit": "^6.2.1"
+  }
+}
