@@ -46,7 +46,7 @@ class CCXTPublicProvider extends BasePublicProvider {
   getTradesParams(date) {
     if (this._exchangeName === "kraken")
       return {
-        since: dayjs(date).valueOf() * 1000000
+        since: dayjs.utc(date).valueOf() * 1000000
       };
 
     return null;
@@ -86,10 +86,10 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadLastMinuteCandle(context, { date = dayjs(), asset, currency }) {
+  async loadLastMinuteCandle(context, { date = dayjs.utc(), asset, currency }) {
     try {
       context.log("loadLastMinuteCandle()");
-      const dateStart = dayjs(date).add(-2, "minute");
+      const dateStart = dayjs.utc(date).add(-2, "minute");
       const call = async () => {
         try {
           return await this.ccxt.fetchOHLCV(
@@ -113,7 +113,7 @@ class CCXTPublicProvider extends BasePublicProvider {
           currency,
           timeframe: 1,
           time: latestCandle[0],
-          timestamp: dayjs(latestCandle[0]).toISOString(),
+          timestamp: dayjs.utc(latestCandle[0]).toISOString(),
           open: latestCandle[1],
           high: latestCandle[2],
           low: latestCandle[3],
@@ -132,21 +132,21 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async loadMinuteCandles(
     context,
-    { date = dayjs().add(-1, "hour"), limit = 60, asset, currency }
+    { date = dayjs.utc().add(-1, "hour"), limit = 60, asset, currency }
   ) {
     try {
-      context.log("loadMinuteCandles()", dayjs(date).toISOString());
+      context.log("loadMinuteCandles()", dayjs.utc(date).toISOString());
       const dateToLoad =
-        dayjs(date).valueOf() < dayjs().add(-1, "minute")
+        dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
-          : dayjs().add(-1, "minute");
+          : dayjs.utc().add(-1, "minute");
 
       const call = async () => {
         try {
           return await this.ccxt.fetchOHLCV(
             this.getSymbol(asset, currency),
             "1m",
-            dayjs(dateToLoad).valueOf(),
+            dayjs.utc(dateToLoad).valueOf(),
             limit
           );
         } catch (e) {
@@ -192,14 +192,14 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async loadTrades(
     context,
-    { date = dayjs().add(-1, "hour"), limit = 2000, asset, currency }
+    { date = dayjs.utc().add(-1, "hour"), limit = 2000, asset, currency }
   ) {
     try {
-      context.log("loadTrades()", dayjs(date).toISOString());
+      context.log("loadTrades()", dayjs.utc(date).toISOString());
       const dateToLoad =
-        dayjs(date).valueOf() < dayjs().add(-1, "minute")
+        dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
-          : dayjs().add(-1, "minute");
+          : dayjs.utc().add(-1, "minute");
       const call = async () => {
         try {
           return await this.ccxt.fetchTrades(

@@ -5,13 +5,13 @@ import * as helpers from "../../utils/helpers";
 describe("Correct choose from timeframes", () => {
   const timeframes = [1, 15, 60, 1440];
   test("Should be [15]", () => {
-    const inputDate = dayjs("2019-02-01T10:15:44.118Z").utc();
+    const inputDate = dayjs.utc("2019-02-01T10:15:44.118Z");
     expect(candlesUtils.getCurrentTimeframes(timeframes, inputDate)).toEqual([
       15
     ]);
   });
   test("Should be [] ", () => {
-    const inputDate = dayjs("2019-02-01T10:14:44.118Z").utc();
+    const inputDate = dayjs.utc("2019-02-01T10:14:44.118Z");
     expect(candlesUtils.getCurrentTimeframes(timeframes, inputDate)).toEqual(
       []
     );
@@ -19,8 +19,8 @@ describe("Correct choose from timeframes", () => {
 });
 
 describe("Create array of minutes between input dates", () => {
-  const dateFrom = dayjs("2019-01-31T10:08:44.118Z").utc();
-  const dateTo = dayjs("2019-01-31T10:13:44.118Z").utc();
+  const dateFrom = dayjs.utc("2019-01-31T10:08:44.118Z");
+  const dateTo = dayjs.utc("2019-01-31T10:13:44.118Z");
   let duration = 0;
   beforeAll(() => {
     duration = helpers.durationMinutes(dateFrom, dateTo, true);
@@ -46,8 +46,8 @@ describe("Create array of minutes between input dates", () => {
 });
 
 describe("Create array of minutes between input dates with range", () => {
-  const dateFrom = dayjs("2019-01-31T10:08:44.118Z").utc();
-  const dateTo = dayjs("2019-01-31T10:11:44.118Z").utc();
+  const dateFrom = dayjs.utc("2019-01-31T10:08:44.118Z");
+  const dateTo = dayjs.utc("2019-01-31T10:11:44.118Z");
   let duration = 0;
   beforeAll(() => {
     duration = helpers.durationMinutes(dateFrom, dateTo, true);
@@ -91,8 +91,8 @@ describe("Create array of minutes between input dates with range", () => {
 });
 
 describe("Returns an object with an array of date batches between the specified dates (the dateTo is not included)", () => {
-  const dateFrom = dayjs("2019-01-30T10:08:44.118Z").utc();
-  const dateTo = dayjs("2019-01-30T11:10:44.118Z").utc();
+  const dateFrom = dayjs.utc("2019-01-30T10:08:44.118Z");
+  const dateTo = dayjs.utc("2019-01-30T11:10:44.118Z");
   const chunkSize = 30;
   test("Should be correct chunks", () => {
     const chunkDates = candlesUtils.chunkDates(dateFrom, dateTo, chunkSize);
@@ -110,21 +110,11 @@ describe("Returns an object with an array of date batches between the specified 
 
 describe("Candle ID generation over time", () => {
   test("Should be true", () => {
-    const date = dayjs("2019-01-30T10:10:44.118Z").utc();
+    const date = dayjs.utc("2019-01-30T10:10:44.118Z");
     expect(candlesUtils.generateCandleRowKey(date)).toBe("030954836955882");
   });
 });
 
-// TODO need method parsenumber
-/* describe("Getting the starting date of the maximum timeframe depending on the number of bars", () =>{
-  test("Should be correct", () => {
-    const timeframes = [1, 60, 5, 15];
-    const maxBars = 2;
-    expect(candlesUtils.getMaxTimeframeDateFrom(timeframes, maxBars)).toBe(0);
-  });
-}); */
-
-// TODO need function createCachedCandleSlug
 describe("Filling Candle Gaps in the Source Array", () => {
   const info = {
     exchange: "Binance",
@@ -135,8 +125,8 @@ describe("Filling Candle Gaps in the Source Array", () => {
   };
 
   test("Should be 4 missing candles", () => {
-    const dateFrom = dayjs(1548853200000).utc();
-    const dateTo = dayjs(1548853800000).utc();
+    const dateFrom = dayjs.utc(1548853200000);
+    const dateTo = dayjs.utc(1548853800000);
     const maxDuration = 5;
     const candles = [
       {
@@ -174,8 +164,8 @@ describe("Filling Candle Gaps in the Source Array", () => {
   });
 
   test("Should be 4 missing candles with equal price (1 candle was get)", () => {
-    const dateFrom = dayjs(1548853200000).utc();
-    const dateTo = dayjs(1548853500000).utc();
+    const dateFrom = dayjs.utc(1548853200000);
+    const dateTo = dayjs.utc(1548853500000);
     const maxDuration = 5;
     const candles = [
       {
@@ -205,8 +195,8 @@ describe("Filling Candle Gaps in the Source Array", () => {
   });
 
   test("Should be empty array (no gaps)", () => {
-    const dateFrom = dayjs(1548853200000).utc();
-    const dateTo = dayjs(1548853260000).utc();
+    const dateFrom = dayjs.utc(1548853200000);
+    const dateTo = dayjs.utc(1548853260000);
     const maxDuration = 2;
     const candles = [
       {
@@ -238,8 +228,8 @@ describe("Filling Candle Gaps in the Source Array", () => {
   });
 
   test("Should be empty array (no gaps, because no candles was get)", () => {
-    const dateFrom = dayjs(1548853200000).utc();
-    const dateTo = dayjs(1548853260000).utc();
+    const dateFrom = dayjs.utc(1548853200000);
+    const dateTo = dayjs.utc(1548853260000);
     const maxDuration = 2;
     const candles = [];
     const gaps = candlesUtils.handleCandleGaps(

@@ -37,7 +37,8 @@ class BacktestRunner extends BaseRunner {
         let dateFrom;
         ({ dateFrom } = backtestState);
         if (backtestState.adviserSettings.requiredHistoryMaxBars > 0) {
-          dateFrom = dayjs(backtestState.dateFrom)
+          dateFrom = dayjs
+            .utc(backtestState.dateFrom)
             .add(
               -backtestState.adviserSettings.requiredHistoryMaxBars *
                 backtestState.timeframe,

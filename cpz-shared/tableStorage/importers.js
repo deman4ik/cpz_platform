@@ -49,12 +49,12 @@ const findActiveImporter = async ({ slug, dateFrom, dateTo }) => {
     const dateFromFilter = TableQuery.dateFilter(
       "dateFrom",
       TableUtilities.QueryComparisons.EQUAL,
-      dayjs(dateFrom).toDate()
+      dayjs.utc(dateFrom).toDate()
     );
     const dateToFilter = TableQuery.dateFilter(
       "dateTo",
       TableUtilities.QueryComparisons.EQUAL,
-      dayjs(dateTo).toDate()
+      dayjs.utc(dateTo).toDate()
     );
     const dateFilter = TableQuery.combineFilters(
       dateFromFilter,

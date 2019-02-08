@@ -31,12 +31,12 @@ const _getCandles = async (tableName, { dateFrom, dateTo, slug }) => {
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
-      dayjs(dateFrom).toDate()
+      dayjs.utc(dateFrom).toDate()
     );
     const dateToFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
-      dayjs(dateTo).toDate()
+      dayjs.utc(dateTo).toDate()
     );
     const dateFilter = TableQuery.combineFilters(
       dateFromFilter,
@@ -170,12 +170,12 @@ const countCachedCandles = async ({ slug, dateFrom, dateTo }) => {
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
-      dayjs(dateFrom).toDate()
+      dayjs.utc(dateFrom).toDate()
     );
     const dateToFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
-      dayjs(dateTo).toDate()
+      dayjs.utc(dateTo).toDate()
     );
     const dateFilter = TableQuery.combineFilters(
       dateFromFilter,
@@ -246,7 +246,7 @@ const cleanCachedCandles = async ({ slug, dateTo }) => {
     const dateToFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.LESS_THAN,
-      dayjs(dateTo).toDate()
+      dayjs.utc(dateTo).toDate()
     );
 
     const query = new TableQuery()

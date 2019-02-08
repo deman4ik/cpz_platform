@@ -174,7 +174,7 @@ class Backtester {
 
   async execute() {
     try {
-      this.startedAt = dayjs().toISOString();
+      this.startedAt = dayjs.utc().toISOString();
       const backtester = await getBacktesterById(this.taskId);
       if (backtester) {
         this.log(
@@ -208,10 +208,12 @@ class Backtester {
           asset: this.asset,
           currency: this.currency,
           timeframe: this.timeframe,
-          dateFrom: dayjs(this.dateFrom)
+          dateFrom: dayjs
+            .utc(this.dateFrom)
             .add((-this.requiredHistoryMaxBars * 2) / this.timeframe, "minute")
             .toISOString(),
-          dateTo: dayjs(this.dateFrom)
+          dateTo: dayjs
+            .utc(this.dateFrom)
             .add(-1, "minute")
             .toISOString()
         };
@@ -488,14 +490,13 @@ class Backtester {
       /* no-restricted-syntax, no-await-in-loop  */
       // Закончили обработку
       this.status = STATUS_FINISHED;
-      this.endedAt = dayjs().toISOString();
+      this.endedAt = dayjs.utc().toISOString();
       // Сохраняем состояние пачки
       await this.save();
 
-      const duration = dayjs(this.endedAt).diff(
-        dayjs(this.startedAt),
-        "minute"
-      );
+      const duration = dayjs
+        .utc(this.endedAt)
+        .diff(dayjs.utc(this.startedAt), "minute");
       await publishEvents(TASKS_TOPIC, {
         service: BACKTESTER_SERVICE,
         subject: this.eventSubject,
@@ -507,9 +508,9 @@ class Backtester {
       });
       this.log(
         `Backtest finished! From`,
-        dayjs(this.dateFrom).toISOString(),
+        dayjs.utc(this.dateFrom).toISOString(),
         "to",
-        dayjs(this.dateTo).toISOString(),
+        dayjs.utc(this.dateTo).toISOString(),
         "in",
         duration,
         "minutes"

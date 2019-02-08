@@ -75,9 +75,7 @@ class ExWatcher {
       this._marketwatcherStatus === STATUS_STARTED &&
       this._importerCurrentStatus === STATUS_FINISHED
     ) {
-      this._startedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._startedAt = dayjs.utc().toISOString();
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
@@ -103,9 +101,7 @@ class ExWatcher {
       this._marketwatcherStatus === STATUS_STOPPED
     ) {
       this._status = STATUS_STOPPED;
-      this._stoppedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._stoppedAt = dayjs.utc().toISOString();
     }
 
     if (
@@ -141,9 +137,7 @@ class ExWatcher {
       this._candlebatcherStatus === STATUS_ERROR ||
       this._marketwatcherStatus === STATUS_ERROR
     ) {
-      this._stoppedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_ERROR;
       return;
     }

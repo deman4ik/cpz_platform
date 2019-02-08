@@ -195,7 +195,8 @@ async function getIdledOpenPositions() {
     const idleFilter = TableQuery.dateFilter(
       "Timestamp",
       TableUtilities.QueryComparisons.LESS_THAN,
-      dayjs()
+      dayjs
+        .utc()
         .add(-1, "minute")
         .toDate()
     );

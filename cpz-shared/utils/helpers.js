@@ -59,11 +59,7 @@ function tryParseJSON(jsonString) {
  * @return {string}
  */
 function getInvertedTimestamp(time) {
-  const inverted =
-    new Date("3000-01-01").valueOf() -
-    dayjs(time)
-      .utc()
-      .valueOf();
+  const inverted = new Date("3000-01-01").valueOf() - dayjs.utc(time).valueOf();
   const invertedString = inverted.toString();
   const pad = "000000000000000";
 
@@ -78,7 +74,7 @@ function getInvertedTimestamp(time) {
  * @returns {string}
  */
 function generateKey() {
-  const inverted = getInvertedTimestamp(dayjs().utc());
+  const inverted = getInvertedTimestamp(dayjs.utc());
   const uid = uuid();
   return `${inverted}_${uid}`;
 }
@@ -91,9 +87,7 @@ function generateKey() {
  * @param {boolean} positive возвращать только положительное число
  */
 function durationMinutes(dateFrom, dateTo, positive = false) {
-  const duration = dayjs(dateTo)
-    .utc()
-    .diff(dayjs(dateFrom).utc(), "minutes");
+  const duration = dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), "minutes");
   if (positive) return duration > 0 ? duration : 0;
   return duration;
 }
@@ -129,7 +123,7 @@ function completedPercent(completedDuration, totalDuration) {
  * @param {Date} inputDate
  */
 function getPreviousMinuteRange(inputDate) {
-  const date = dayjs(inputDate).utc();
+  const date = dayjs.utc(inputDate);
   const prev = date.add(-1, "minute");
   return {
     dateFrom: prev.startOf("minute"),
@@ -145,8 +139,8 @@ function getPreviousMinuteRange(inputDate) {
  * @param {Date} inputDateTo
  */
 function divideDateByDays(inputDateFrom, inputDateTo) {
-  const dateFrom = dayjs(inputDateFrom).utc();
-  const dateTo = dayjs(inputDateTo).utc();
+  const dateFrom = dayjs.utc(inputDateFrom);
+  const dateTo = dayjs.utc(inputDateTo);
   const dates = [];
   const duration = dateTo.diff(dateFrom, "day", true);
   for (let i = 0; i < duration; i += 1) {

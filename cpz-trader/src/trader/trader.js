@@ -86,10 +86,10 @@ class Trader {
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt || dayjs().toJSON();
+    this._startedAt = state.startedAt || dayjs.utc().toISOString();
     /* Дата и время остановки */
     this._endedAt = this._stopRequested
-      ? dayjs().toJSON()
+      ? dayjs.utc().toISOString()
       : state.endedAt || "";
     /* События для отправки */
     this._events = [];
@@ -138,7 +138,7 @@ class Trader {
   set status(status) {
     if (status) this._status = status;
     if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
-      this._endedAt = dayjs().toJSON();
+      this._endedAt = dayjs.utc().toISOString();
   }
 
   /**
@@ -199,9 +199,7 @@ class Trader {
       const closeSignal = {
         signalId: uuid(),
         price,
-        timestamp: dayjs()
-          .utc()
-          .toISOString(),
+        timestamp: dayjs.utc().toISOString(),
         orderType: ORDER_TYPE_MARKET,
         positionId: positionState.positionId,
         settings: {
@@ -497,7 +495,7 @@ class Trader {
 
             if (
               currentOrder.status === ORDER_STATUS_OPEN &&
-              dayjs().diff(dayjs(currentOrder.exTimestamp), "minute") >
+              dayjs.utc().diff(dayjs.utc(currentOrder.exTimestamp), "minute") >
                 this._settings.openOrderTimeout
             ) {
               currentOrder = await cancelOrderEX({
@@ -546,7 +544,7 @@ class Trader {
               ...orderResult,
               ...currentOrder,
               status: ORDER_STATUS_OPEN,
-              candleTimestamp: dayjs()
+              candleTimestamp: dayjs
                 .utc()
                 .add(-this._timeframe, "minute")
                 .startOf("minute")

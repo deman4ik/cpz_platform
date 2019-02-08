@@ -15,7 +15,7 @@ const validator = new FValidator({
 
 // расширение валидатора новым типом данных datetime
 validator.add("datetime", value => {
-  if (!dayjs(value).isValid())
+  if (!dayjs.utc(value).isValid())
     return validator.makeError("datetime", null, value);
 
   return true;

@@ -84,10 +84,10 @@ class Candlebatcher {
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt || dayjs().toISOString();
+    this._startedAt = state.startedAt || dayjs.utc().toISOString();
     /* Дата и время остановки */
     this._endedAt = this._stopRequested
-      ? dayjs().toISOString()
+      ? dayjs.utc().toISOString()
       : state.endedAt || ""; // Дата и время остановки
     /* Метаданные стореджа */
     this._metadata = state.metadata;
@@ -167,7 +167,8 @@ class Candlebatcher {
   set status(status) {
     if (status) this._status = status;
 
-    if (this._status === STATUS_STOPPED) this._endedAt = dayjs().toJSON();
+    if (this._status === STATUS_STOPPED)
+      this._endedAt = dayjs.utc().toISOString();
   }
 
   /**
@@ -341,7 +342,7 @@ class Candlebatcher {
               currency: this._currency,
               timeframe
             }),
-            dateTo: dayjs().add(-number, unit)
+            dateTo: dayjs.utc().add(-number, unit)
           });
         })
       );
@@ -371,7 +372,7 @@ class Candlebatcher {
       const { dateFrom, dateTo } = getPreviousMinuteRange();
       this._prevDateFrom = dateFrom;
       this._prevDateTo = dateTo;
-      this._currentDate = dayjs().startOf("minute");
+      this._currentDate = dayjs.utc().startOf("minute");
       /* Пробуем сформировать минутную свечу */
       await this._createCandle();
       this._currentCandle = this._createdCandle;
@@ -492,7 +493,7 @@ class Candlebatcher {
                 currency: this._currency,
                 timeframe,
                 time: timeFrom, // время в милисекундах
-                timestamp: dayjs(timeFrom).toISOString(), // время в ISO UTC
+                timestamp: dayjs.utc(timeFrom).toISOString(), // время в ISO UTC
                 open: candles[0].open, // цена открытия - цена открытия первой свечи
                 high: Math.max(...candles.map(t => t.high)), // максимальная цена
                 low: Math.min(...candles.map(t => t.low)), // минимальная цена

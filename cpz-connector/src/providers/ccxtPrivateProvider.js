@@ -151,17 +151,13 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     if (this._exchange === "kraken") {
       return (
         orderResponse.info.closetm &&
-        dayjs(parseInt(orderResponse.info.closetm, 10) * 1000)
-          .utc()
-          .toISOString()
+        dayjs.utc(parseInt(orderResponse.info.closetm, 10) * 1000).toISOString()
       );
     }
 
     return (
       orderResponse.lastTradeTimestamp &&
-      dayjs(orderResponse.lastTradeTimestamp)
-        .utc()
-        .toISOString()
+      dayjs.utc(orderResponse.lastTradeTimestamp).toISOString()
     );
   }
 

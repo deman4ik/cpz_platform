@@ -30,7 +30,7 @@ test("Should be correct JSON", () => {
 });
 
 test("Timestamp should be correct inverted", () => {
-  const date = dayjs("2019-01-30T13:02:00.000Z").utc();
+  const date = dayjs.utc("2019-01-30T13:02:00.000Z");
   const transformedTimestamp = helpers.getInvertedTimestamp(date);
   expect(transformedTimestamp).toBe("030954826680000");
 });
@@ -43,15 +43,15 @@ test("Should be successful Key ", () => {
 
 describe("Should be return correct duration", () => {
   test("Duration should be return only positive value greater or equal than 0", () => {
-    const dateFrom = dayjs("2019-01-10T00:00:00.000Z").utc();
-    const dateTo = dayjs("2019-01-09T00:00:00.000Z").utc();
+    const dateFrom = dayjs.utc("2019-01-10T00:00:00.000Z");
+    const dateTo = dayjs.utc("2019-01-09T00:00:00.000Z");
     expect(
       helpers.durationMinutes(dateFrom, dateTo, true)
     ).toBeGreaterThanOrEqual(0);
   });
   test("Duration should be any positive or negative number value", () => {
-    const dateFrom = dayjs("2019-01-10T00:00:00.000Z").utc();
-    const dateTo = dayjs("2019-01-09T00:00:00.000Z").utc();
+    const dateFrom = dayjs.utc("2019-01-10T00:00:00.000Z");
+    const dateTo = dayjs.utc("2019-01-09T00:00:00.000Z");
     expect(typeof helpers.durationMinutes(dateFrom, dateTo, false)).toBe(
       "number"
     );
@@ -59,8 +59,8 @@ describe("Should be return correct duration", () => {
 });
 
 test("Should be number - duration in timeframes", () => {
-  const dateFrom = dayjs("2019-01-09T00:00:00.000Z").utc();
-  const dateTo = dayjs("2019-01-10T00:00:00.000Z").utc();
+  const dateFrom = dayjs.utc("2019-01-09T00:00:00.000Z");
+  const dateTo = dayjs.utc("2019-01-10T00:00:00.000Z");
   const timeframeInMinutes = 60;
   expect(
     helpers.durationInTimeframe(dateFrom, dateTo, timeframeInMinutes)
@@ -74,7 +74,7 @@ test('Should be calculated correct "percentage of progress"', () => {
 });
 
 test("Previous minute range should be return", () => {
-  const time = dayjs("2019-01-12T00:00:00.000Z").utc();
+  const time = dayjs.utc("2019-01-12T00:00:00.000Z");
   const range = helpers.getPreviousMinuteRange(time);
   expect(typeof range).toBe("object");
   expect(range.dateFrom.valueOf()).toBe(1547251140000);
@@ -85,8 +85,8 @@ test("Previous minute range should be return", () => {
 
 describe("Devide date by days", () => {
   test("Should be correct array of date object (full days)", () => {
-    const dateFrom = dayjs("2019-01-12T01:00:00.000Z").utc();
-    const dateTo = dayjs("2019-01-14T01:00:00.000Z").utc();
+    const dateFrom = dayjs.utc("2019-01-12T01:00:00.000Z");
+    const dateTo = dayjs.utc("2019-01-14T01:00:00.000Z");
     const arrayOfDate = helpers.divideDateByDays(dateFrom, dateTo);
     expect(Array.isArray(arrayOfDate)).toBeTruthy();
     expect(arrayOfDate).toHaveLength(2);
@@ -98,8 +98,8 @@ describe("Devide date by days", () => {
   });
 
   test("Should be correct array of date object (not full days)", () => {
-    const dateFrom = dayjs("2019-01-12T21:34:54.000Z").utc();
-    const dateTo = dayjs("2019-01-16T14:43:12.000Z").utc();
+    const dateFrom = dayjs.utc("2019-01-12T21:34:54.000Z");
+    const dateTo = dayjs.utc("2019-01-16T14:43:12.000Z");
     const arrayOfDate = helpers.divideDateByDays(dateFrom, dateTo);
     expect(Array.isArray(arrayOfDate)).toBeTruthy();
     expect(arrayOfDate).toHaveLength(4);

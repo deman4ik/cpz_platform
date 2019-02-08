@@ -15,7 +15,7 @@ function isProcessExists(taskId) {
 
 function log(m) {
   console.info(
-    `[${dayjs().format("MM/DD/YYYY HH:mm:ss")}]`,
+    `[${dayjs.utc().format("MM/DD/YYYY HH:mm:ss")}]`,
     ...m.map(msg => {
       const json = tryParseJSON(msg);
       if (json) {

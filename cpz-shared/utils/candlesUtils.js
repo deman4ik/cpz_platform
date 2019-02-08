@@ -17,7 +17,7 @@ import { CANDLE_PREVIOUS, createCachedCandleSlug } from "../config/state";
  * @returns {number[]}
  */
 function getCurrentTimeframes(timeframes, inputDate) {
-  const date = dayjs(inputDate).utc();
+  const date = dayjs.utc(inputDate);
   /* Количество часов 0-23 */
   const hour = date.hour();
   /* Количество минут 0-59 */
@@ -65,7 +65,8 @@ function createMinutesList(
   const list = [];
   for (let i = 0; i < duration; i += 1) {
     list.push(
-      dayjs(dateFrom)
+      dayjs
+        .utc(dateFrom)
         .add(i, "minute")
         .valueOf()
     );
@@ -113,8 +114,8 @@ function chunkDates(dateFrom, dateTo, chunkSize) {
   while (arrayToChunk.length) {
     const chunk = arrayToChunk.splice(0, chunkSize);
     chunks.push({
-      dateFrom: dayjs(chunk[0]).utc(),
-      dateTo: dayjs(chunk[chunk.length - 1]).utc(),
+      dateFrom: dayjs.utc(chunk[0]),
+      dateTo: dayjs.utc(chunk[chunk.length - 1]),
       duration: chunk.length
     });
   }
@@ -164,8 +165,8 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
     // Для каждой пропущенный свечи
     diffs.forEach(diffTime => {
       // Время предыдущей свечи
-      const previousTime = dayjs(diffTime)
-        .utc()
+      const previousTime = dayjs
+        .utc(diffTime)
         .add(-1, "minute")
         .valueOf();
       // Индекс предыдущей свечи
@@ -191,9 +192,7 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
           timeframe, // таймфрейм в минутах
           taskId, // UUID сервиса
           time: diffTime, // время в милисекундах
-          timestamp: dayjs(diffTime)
-            .utc()
-            .toISOString(), // время в ISO UTC
+          timestamp: dayjs.utc(diffTime).toISOString(), // время в ISO UTC
           open: previousCandle.close, // цена открытия = цене закрытия предыдущей
           high: previousCandle.close, // максимальная цена = цене закрытия предыдущей
           low: previousCandle.close, // минимальная цена = цене закрытия предыдущей
@@ -250,7 +249,7 @@ function getMaxTimeframe(timeframes) {
 function getMaxTimeframeDateFrom(timeframes, maxBars) {
   const maxTimeframe = getMaxTimeframe(timeframes);
   const { number, unit } = timeframeToTimeUnit(maxBars, maxTimeframe);
-  return dayjs()
+  return dayjs
     .utc()
     .add(-number, unit)
     .toISOString();

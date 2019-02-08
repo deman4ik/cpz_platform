@@ -99,7 +99,7 @@ async function handleStop(context, eventData) {
     } else {
       // Помечаем как остановленный
       newState.status = STATUS_STOPPED;
-      newState.endedAt = dayjs().toJSON();
+      newState.endedAt = dayjs.utc().toISOString();
     }
     // Обновляем состояние советника
     await updateAdviserState(newState);

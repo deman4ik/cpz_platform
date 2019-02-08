@@ -51,9 +51,7 @@ class UserRobot {
       this._adviserStatus === STATUS_STARTED &&
       this._exwatcherStatus === STATUS_STARTED
     ) {
-      this._startedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._startedAt = dayjs.utc().toISOString();
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
@@ -65,9 +63,7 @@ class UserRobot {
       this._adviserStatus === STATUS_STOPPED ||
       this._exwatcherStatus === STATUS_STOPPED
     ) {
-      this._stoppedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_STOPPED;
       return;
     }
@@ -86,9 +82,7 @@ class UserRobot {
       this._adviserStatus === STATUS_ERROR ||
       this._exwatcherStatus === STATUS_ERROR
     ) {
-      this._stoppedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_ERROR;
       return;
     }

@@ -79,10 +79,10 @@ class Adviser {
       ? STATUS_STOPPED
       : state.status || STATUS_STARTED;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt || dayjs().toISOString();
+    this._startedAt = state.startedAt || dayjs.utc().toISOString();
     /* Дата и время остановки */
     this._endedAt = this._stopRequested
-      ? dayjs().toISOString()
+      ? dayjs.utc().toISOString()
       : state.endedAt || "";
     /* Признак выполнения инициализации */
     this._initialized = state.initialized || false;
@@ -143,7 +143,7 @@ class Adviser {
   set status(status) {
     if (status) this._status = status;
     if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
-      this._endedAt = dayjs().toJSON();
+      this._endedAt = dayjs.utc().toISOString();
   }
 
   /**
@@ -680,9 +680,7 @@ class Adviser {
         candleId: this._candle.id,
         candleTimestamp: this._candle.timestamp,
         service: ADVISER_SERVICE,
-        timestamp: dayjs()
-          .utc()
-          .toISOString()
+        timestamp: dayjs.utc().toISOString()
       }
     };
     this._signals.push(newSignal);

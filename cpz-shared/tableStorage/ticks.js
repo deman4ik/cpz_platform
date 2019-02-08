@@ -31,12 +31,12 @@ const getPrevCachedTicks = async ({ dateFrom, dateTo, slug }) => {
     const dateFromFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.GREATER_THAN_OR_EQUAL,
-      dayjs(dateFrom).toDate()
+      dayjs.utc(dateFrom).toDate()
     );
     const dateToFilter = TableQuery.dateFilter(
       "timestamp",
       TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
-      dayjs(dateTo).toDate()
+      dayjs.utc(dateTo).toDate()
     );
     const dateFilter = TableQuery.combineFilters(
       dateFromFilter,

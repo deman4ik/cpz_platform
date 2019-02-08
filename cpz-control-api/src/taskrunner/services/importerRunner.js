@@ -1,5 +1,4 @@
 import VError from "verror";
-import dayjs from "cpzDayjs";
 import { v4 as uuid } from "uuid";
 import {
   TASKS_IMPORTER_START_EVENT,

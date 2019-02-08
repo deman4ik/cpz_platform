@@ -190,7 +190,7 @@ class Position {
       asset: this._asset, // Базовая валюта
       currency: this._currency, // Котировка валюты
       timeframe: this._timeframe, // Таймфрейм
-      createdAt: dayjs().toISOString(), // Дата и время создания
+      createdAt: dayjs.utc().toISOString(), // Дата и время создания
       status: ORDER_STATUS_NEW, // Статус ордера
       direction:
         signal.action === TRADE_ACTION_LONG ||

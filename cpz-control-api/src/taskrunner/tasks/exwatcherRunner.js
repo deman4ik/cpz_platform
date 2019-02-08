@@ -65,13 +65,12 @@ class ExWatcherRunner extends BaseRunner {
             exWatcherState.timeframes,
             exWatcherState.candlebatcherSettings.requiredHistoryMaxBars * 2
           );
-          const dateTo = dayjs(
-            `${dayjs()
-              .utc()
-              .format("YYYY-MM-DD")}T00:00:00.000Z`
-          ).toISOString();
+          // TODO: test startOf("day")
+          const dateTo = dayjs
+            .utc(`${dayjs.utc().format("YYYY-MM-DD")}T00:00:00.000Z`)
+            .toISOString();
 
-          if (dayjs(dateFrom).valueOf() <= dayjs(dateTo).valueOf()) {
+          if (dayjs.utc(dateFrom).valueOf() <= dayjs.utc(dateTo).valueOf()) {
             const importerHistoryParams = {
               providerType: exWatcherState.candlebatcherProviderType,
               exchange: exWatcherState.exchange,
@@ -167,14 +166,11 @@ class ExWatcherRunner extends BaseRunner {
           asset: exWatcherState.asset,
           currency: exWatcherState.currency,
           timeframes: exWatcherState.timeframes,
-          dateFrom: dayjs(
-            `${dayjs()
-              .utc()
-              .format("YYYY-MM-DD")}T00:00:00.000Z`
-          ).toISOString(),
-          dateTo: dayjs()
-            .utc()
+          // TODO: test startOf("day")
+          dateFrom: dayjs
+            .utc(`${dayjs.utc().format("YYYY-MM-DD")}T00:00:00.000Z`)
             .toISOString(),
+          dateTo: dayjs.utc().toISOString(),
           saveToCache: true,
           proxy: exWatcherState.candlebatcherSettings.proxy
         };
