@@ -1,22 +1,31 @@
 {
   "name": "cpz_platform",
   "version": "1.0.0",
-  "description": "1. Описать переменные окружения в файле .env в корне проекта",
+  "description": "",
   "main": "index.js",
   "scripts": {
+    "pretest": "eslint .",
     "test": "jest --no-cache --ci"
   },
   "repository": {
     "type": "git",
     "url": "https://cryptuoso.visualstudio.com/CPZ/_git/cpz_platform"
   },
-  "author": "",
+  "author": "CPZ Team",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.3.1",
-    "jest": "^24.1.0",
-    "jest-junit": "^6.2.1"
+    "@babel/core": "7.2.2",
+    "@babel/preset-env": "7.3.1",
+    "eslint": "5.13.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-config-prettier": "4.0.0",
+    "eslint-import-resolver-webpack": "0.11.0",
+    "eslint-plugin-import": "2.15.0",
+    "eslint-plugin-jest": "^22.2.2",
+    "eslint-plugin-prettier": "3.0.1",
+    "jest": "24.1.0",
+    "jest-junit": "6.2.1",
+    "prettier": "^1.16.4"
   }
 }

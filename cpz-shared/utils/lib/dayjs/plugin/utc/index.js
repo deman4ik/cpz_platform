@@ -3,7 +3,7 @@
  * https://github.com/iamkun/dayjs/pull/168
  * FIXME: Remove this when pull request will be merged with master
  */
-
+/* eslint-disable */
 import UTCDate from "./UTCDate";
 import { parseTimezoneOffset, LOCAL_TIMEZONE_OFFSET } from "./util";
 

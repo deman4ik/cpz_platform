@@ -1,15 +1,17 @@
 {
-    "extends": ["airbnb-base", "plugin:prettier/recommended"],
+    "extends": ["airbnb-base", "plugin:prettier/recommended", "plugin:jest/recommended"],
     "env": {
         "node": true,
-        "mocha": true
+        "jest": true
     },
-    "plugins": ["prettier"],
+    "plugins": ["prettier", "jest"],
     "rules": {
         "prettier/prettier": "error",
+        "no-use-before-define": ["error", { "functions": false }],
         "no-unused-vars": "warn",
+        "consistent-return": "warn",
+        "import/prefer-default-export": "warn",
         "class-methods-use-this": "off",
-        "import/prefer-default-export": "error",
         "no-console": "off",
         "no-param-reassign": "off",
         "no-underscore-dangle": "off"

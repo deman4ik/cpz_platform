@@ -2,7 +2,7 @@
  * Plugin for dayjs
  * https://github.com/iamkun/dayjs/pull/168
  */
-
+/* eslint-disable */
 import { LOCAL_TIMEZONE_OFFSET } from "./util";
 
 const padStart = (string, length, pad) => {

@@ -2,7 +2,7 @@
  * Plugin for dayjs
  * https://github.com/iamkun/dayjs/pull/168
  */
-
+/* eslint-disable */
 function parseTimezoneOffset(tz) {
   let execRet;
   switch (typeof tz) {

@@ -78,8 +78,7 @@ const findMarketwatcherByExchange = async exchange => {
       "Failed to load started marketwatchers"
     );
   }
-}
-
+};
 
 /**
  * Save Marketwatcher state
