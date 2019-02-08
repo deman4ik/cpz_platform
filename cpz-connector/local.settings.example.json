@@ -1,16 +1,14 @@
 {
     "IsEncrypted": false,
     "Values": {
-      "NODE_TLS_REJECT_UNAUTHORIZED": 0,
-      "FUNCTIONS_WORKER_RUNTIME": "node",
-      "AzureWebJobsStorage": "",
-      "API_KEY":"test",
-      "PROXY_ENDPOINT":"",
-      "KEY_VAULT_URL": "",
-      "KEY_VAULT_READ_CLIENT_ID": "",
-      "KEY_VAULT_READ_APP_SECRET": "",
-      "KEY_VAULT_DECR_CLIENT_ID": "",
-      "KEY_VAULT_DECR_APP_SECRET": ""
+        "FUNCTIONS_WORKER_RUNTIME": "node",
+        "AzureWebJobsStorage": "",
+        "API_KEY": "test",
+        "PROXY_ENDPOINT": "",
+        "KEY_VAULT_URL": "",
+        "KEY_VAULT_READ_CLIENT_ID": "",
+        "KEY_VAULT_READ_APP_SECRET": "",
+        "KEY_VAULT_DECR_CLIENT_ID": "",
+        "KEY_VAULT_DECR_APP_SECRET": ""
     }
-  }
-  
+}

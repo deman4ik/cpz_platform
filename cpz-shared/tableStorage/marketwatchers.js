@@ -54,8 +54,32 @@ const getStartedMarketwatchers = async () => {
  * @param {string} input.exchange - Marketwatcher exchange
  * @returns {MarketwatcherState}
  */
-const findMarketwatcher = async exchange =>
-  tableStorage.getEntityByPartitionKey(STORAGE_MARKETWATCHERS_TABLE, exchange);
+const findMarketwatcherByExchange = async exchange => {
+  try {
+    const query = new TableQuery().where(
+      TableQuery.stringFilter(
+        "exchange",
+        TableUtilities.QueryComparisons.EQUAL,
+        exchange
+      )
+    );
+    const marketwatchers = await tableStorage.queryEntities(
+      STORAGE_MARKETWATCHERS_TABLE,
+      query
+    );
+    if (marketwatchers.length > 0) return marketwatchers[0];
+    return null;
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error
+      },
+      "Failed to load started marketwatchers"
+    );
+  }
+}
+
 
 /**
  * Save Marketwatcher state
@@ -82,7 +106,7 @@ const deleteMarketwatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 export {
   getMarketwatcherById,
   getStartedMarketwatchers,
-  findMarketwatcher,
+  findMarketwatcherByExchange,
   saveMarketwatcherState,
   deleteMarketwatcherState
 };

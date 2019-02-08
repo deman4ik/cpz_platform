@@ -2,7 +2,11 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
+import { checkEnvVars } from "cpzUtils/environment";
+import backtesterEnv from "cpzEnv/backtester";
 import handleTaskEvents from "./routes/taskEvents";
+
+checkEnvVars(backtesterEnv.variables);
 
 const run = () => {
   const server = express();

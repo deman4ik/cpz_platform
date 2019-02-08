@@ -5,9 +5,13 @@ import {
 } from "apollo-server-azure-functions";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
+import { checkEnvVars } from "cpzUtils/environment";
+import connectorEnv from "cpzEnv/connector";
 import typeDefs from "../api/schema/schema.graphql";
 import queries from "../api/resolvers/queries";
 import mutations from "../api/resolvers/mutations";
+
+checkEnvVars(connectorEnv.variables);
 
 const resolvers = {
   JSON: GraphQLJSON,

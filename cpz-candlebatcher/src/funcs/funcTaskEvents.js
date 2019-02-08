@@ -8,12 +8,15 @@ import {
   TASKS_CANDLEBATCHER_UPDATE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import { checkEnvVars } from "cpzUtils/environment";
+import candlebatcherEnv from "cpzEnv/candlebatcher";
 import {
   handleStart,
   handleStop,
   handleUpdate
 } from "../batcher/handleTaskEvents";
 
+checkEnvVars(candlebatcherEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {

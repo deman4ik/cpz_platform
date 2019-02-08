@@ -2,8 +2,12 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
+import { checkEnvVars } from "cpzUtils/environment";
+import marketwatcherEnv from "cpzEnv/marketwatcher";
 import handleTaskEvents from "./routes/taskEvents";
 import checkAlive from "./checkAlive";
+
+checkEnvVars(marketwatcherEnv.variables);
 
 const run = () => {
   const server = express();

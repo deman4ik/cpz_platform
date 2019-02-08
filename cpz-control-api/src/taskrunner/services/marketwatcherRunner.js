@@ -18,7 +18,7 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { CONTROL_SERVICE } from "cpzServices";
 import {
-  findMarketwatcher,
+  findMarketwatcherByExchange,
   getMarketwatcherById
 } from "cpzStorage/marketwatchers";
 import BaseRunner from "../baseRunner";
@@ -37,15 +37,12 @@ class MarketwatcherRunner extends BaseRunner {
   static async start(context, props) {
     try {
       let taskId = uuid();
-      context.log(taskId);
       genErrorIfExist(validateStart({ ...props, taskId }));
       const { debug, exchange, providerType, subscriptions } = props;
 
-      const marketwatcher = await findMarketwatcher(exchange);
-      context.log(marketwatcher);
+      const marketwatcher = await findMarketwatcherByExchange(exchange);
       if (marketwatcher) {
         ({ taskId } = marketwatcher);
-        context.log(taskId);
         if (
           marketwatcher.status === STATUS_STARTED ||
           marketwatcher.status === STATUS_PENDING
@@ -68,7 +65,6 @@ class MarketwatcherRunner extends BaseRunner {
           };
         }
       }
-      context.log(taskId);
       await publishEvents(TASKS_TOPIC, {
         service: CONTROL_SERVICE,
         subject: exchange,

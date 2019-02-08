@@ -8,12 +8,15 @@ import {
   TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import { checkEnvVars } from "cpzUtils/environment";
+import adviserEnv from "cpzEnv/adviser";
 import {
   handleStart,
   handleStop,
   handleUpdate
 } from "../adviser/handleTaskEvents";
 
+checkEnvVars(adviserEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {

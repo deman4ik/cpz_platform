@@ -12,7 +12,7 @@ class TableStorage {
   constructor(connectionString) {
     try {
       this.tableService = azure
-        .createTableService(connectionString || process.env.AZ_STORAGE_CS)
+        .createTableService(connectionString)
         .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
     } catch (error) {
       console.log(connectionString);
