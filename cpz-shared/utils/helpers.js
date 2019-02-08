@@ -177,7 +177,7 @@ function arraysDiff(full, part) {
  * Разделение массива по пачкам
  *
  * @param {Array} array
- * @param {Int} chunkSize размер пачкм
+ * @param {number} chunkSize размер пачкм
  */
 function chunkArray(array, chunkSize) {
   const arrayToChunk = [...array];
@@ -218,16 +218,14 @@ function createRange(to, from = 1) {
 /**
  * Разбивка числа по пачкам
  *
- * @param {Numver} number исзодное число
- * @param {Int} chunkSize размер пачки
+ * @param {Number} number исзодное число
+ * @param {Number} chunkSize размер пачки
  * @return {[Number]}
  */
 function chunkNumberToArray(number, chunkSize) {
   const range = createRange(number);
   const array = Array.from(range);
-  const chunked = chunkArray(array, chunkSize).map(val => val.length);
-  return chunked;
-}
+  return chunkArray(array, chunkSize).map(val => val.length);
 
 /**
  * Возвращает исходную строку с прописным первым символом
@@ -254,7 +252,7 @@ function filterOutNonUnique(arr) {
  * Корректировка точности числа
  *
  * @param {Number} x исходное число
- * @param {Int} n количество знаков после запятой
+ * @param {Number} n количество знаков после запятой
  */
 function precision(x, n) {
   if (!x || !n) return x;

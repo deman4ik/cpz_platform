@@ -1,7 +1,6 @@
 import dayjs from "../../utils/lib/dayjs";
 import * as helpers from "../../utils/helpers";
 
-
 describe("Array sorting methods", () => {
   test("Array should be sorted by asc", () => {
     const arr = [4, 5, 3, 3, 2, 1];
@@ -18,7 +17,7 @@ describe("Array sorting methods", () => {
 
 test("Should be correct JSON", () => {
   const correctJson =
-    "{ \"o\": 3500, \"h\": 3900, \"l\": 3350, \"c\": 3453, \"v\": null}";
+    '{ "o": 3500, "h": 3900, "l": 3350, "c": 3453, "v": null}';
   const incorrectJson = "{o: 234}";
   expect(helpers.tryParseJSON(correctJson)).toEqual({
     o: 3500,
@@ -68,7 +67,7 @@ test("Should be number - duration in timeframes", () => {
   ).toBe(24);
 });
 
-test("Should be calculated correct \"percentage of progress\"", () => {
+test('Should be calculated correct "percentage of progress"', () => {
   const currentValue = 23;
   const totalValue = 130;
   expect(helpers.completedPercent(currentValue, totalValue)).toBe(18);
@@ -86,21 +85,21 @@ test("Previous minute range should be return", () => {
 
 describe("Devide date by days", () => {
   test("Should be correct array of date object (full days)", () => {
-    const dateFrom = dayjs("2019-1-12");
-    const dateTo = dayjs("2019-1-14");
+    const dateFrom = dayjs("2019-01-12T01:00:00.000Z").utc();
+    const dateTo = dayjs("2019-01-14T01:00:00.000Z").utc();
     const arrayOfDate = helpers.divideDateByDays(dateFrom, dateTo);
     expect(Array.isArray(arrayOfDate)).toBeTruthy();
     expect(arrayOfDate).toHaveLength(2);
     expect(arrayOfDate).toContainEqual({
-      dateFrom: "2019-01-12T21:00:00.000Z",
-      dateTo: "2019-01-13T21:00:00.000Z",
+      dateFrom: "2019-01-12T01:00:00.000Z",
+      dateTo: "2019-01-13T01:00:00.000Z",
       duration: 1440
     });
   });
 
   test("Should be correct array of date object (not full days)", () => {
-    const dateFrom = dayjs("2019-01-12T21:34:54.000Z");
-    const dateTo = dayjs("2019-01-16T14:43:12.000Z");
+    const dateFrom = dayjs("2019-01-12T21:34:54.000Z").utc();
+    const dateTo = dayjs("2019-01-16T14:43:12.000Z").utc();
     const arrayOfDate = helpers.divideDateByDays(dateFrom, dateTo);
     expect(Array.isArray(arrayOfDate)).toBeTruthy();
     expect(arrayOfDate).toHaveLength(4);

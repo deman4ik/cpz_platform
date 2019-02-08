@@ -12,9 +12,9 @@ import { CANDLE_PREVIOUS, createCachedCandleSlug } from "../config/state";
 /**
  * Отбор подходящих по времени таймфреймов
  *
- * @param {[Int]} timeframes
+ * @param {number[]} timeframes
  * @param {Date} inputDate
- * @returns {[Int]}
+ * @returns {number[]}
  */
 function getCurrentTimeframes(timeframes, inputDate) {
   const date = dayjs(inputDate).utc();
@@ -54,8 +54,8 @@ function getCurrentTimeframes(timeframes, inputDate) {
  *
  * @param {Date} dateFrom
  * @param {Date} dateTo
- * @param {Int} duration
- * @returns {[Int]}
+ * @param {number} duration
+ * @returns {number[]}
  */
 function createMinutesList(
   dateFrom,
@@ -78,7 +78,7 @@ function createMinutesList(
  *
  * @param {Date} dateFrom
  * @param {Date} dateTo
- * @param {Int} duration
+ * @param {number} duration
  * @returns {Array}
  */
 function createMinutesListWithRange(
@@ -103,7 +103,7 @@ function createMinutesListWithRange(
  *
  * @param {Date} dateFrom
  * @param {Date} dateTo
- * @param {Int} chunkSize
+ * @param {number} chunkSize
  */
 function chunkDates(dateFrom, dateTo, chunkSize) {
   const list = createMinutesList(dateFrom, dateTo);
@@ -125,7 +125,7 @@ function chunkDates(dateFrom, dateTo, chunkSize) {
 /**
  * Генерация ID свечи по времени
  *
- * @param {Int} time - время в милисекундах
+ * @param {number} time - время в милисекундах
  */
 function generateCandleRowKey(time) {
   return getInvertedTimestamp(time);
@@ -139,11 +139,11 @@ function generateCandleRowKey(time) {
  * @param {string} info.exchange код биржи
  * @param {string} info.asset базовая валюта
  * @param {string} info.currency котировка валюты
- * @param {Int} info.timeframe таймфрейм в минутах
- * @param {ID} info.taskId UUID сервиса
+ * @param {number} info.timeframe таймфрейм в минутах
+ * @param {string} info.taskId UUID сервиса
  * @param {Date} dateFrom дата с
  * @param {Date} dateTo дата по
- * @param {Int} maxDuration количество минут
+ * @param {number} maxDuration количество минут
  * @param {[Object]} inputCandles массив свечей
  * @returns {[Object]} массив свечей с заполненными пропусками
  */
@@ -216,8 +216,8 @@ function handleCandleGaps(info, dateFrom, dateTo, maxDuration, inputCandles) {
 /**
  * Вычисление количества едениц времени в зависимости от таймфрейма
  *
- * @param {Int} number количество единиц
- * @param {Int} timeframe таймфрейм в минутах
+ * @param {number} number количество единиц
+ * @param {number} timeframe таймфрейм в минутах
  * @returns {Object}
  */
 function timeframeToTimeUnit(number, timeframe) {
@@ -233,7 +233,7 @@ function timeframeToTimeUnit(number, timeframe) {
 /**
  * Получение максимального таймфрейма из массива
  *
- * @param {[Int]} timeframes массив таймфреймов в минутах
+ * @param {Object} timeframes массив таймфреймов в минутах
  */
 function getMaxTimeframe(timeframes) {
   return Math.max(...Object.keys(timeframes).map(key => parseInt(key, 10)));
@@ -243,8 +243,8 @@ function getMaxTimeframe(timeframes) {
  * Получение даты отсчета максимального таймфрейма
  * в зависимости от количества баров
  *
- * @param {[Int]} timeframes массив таймфреймов в минутах
- * @param {Int} maxBars количество баров
+ * @param {Object} timeframes массив таймфреймов в минутах
+ * @param {number} maxBars количество баров
  * @returns {Date}
  */
 function getMaxTimeframeDateFrom(timeframes, maxBars) {

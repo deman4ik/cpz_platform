@@ -4,7 +4,7 @@
   "description": "1. Описать переменные окружения в файле .env в корне проекта",
   "main": "index.js",
   "scripts": {
-    "test": "jest --no-cache"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
