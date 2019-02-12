@@ -1,7 +1,8 @@
 import {
   ADVISER_SETTINGS_DEFAULTS,
   CANDLEBATCHER_SETTINGS_DEFAULTS,
-  TRADER_SETTINGS_DEFAULTS
+  TRADER_SETTINGS_DEFAULTS,
+  BACKTESTER_SETTINGS_DEFAULTS
 } from "../config/defaults";
 
 const combineAdvserSettings = settings => ({
@@ -62,8 +63,17 @@ const combineTraderSettings = settings => ({
   /* Информация о API ключах */
   keys: settings.keys
 });
+
+const combineBacktesterSettings = settings => ({
+  debug:
+    settings.debug === undefined || settings.debug === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.debug
+      : settings.debug
+});
+
 export {
   combineAdvserSettings,
   combineCandlebatcherSettings,
-  combineTraderSettings
+  combineTraderSettings,
+  combineBacktesterSettings
 };

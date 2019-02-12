@@ -21,9 +21,10 @@ import {
   LOG_TOPIC
 } from "cpzEventTypes";
 import {
-  BACKTESTER_SETTINGS_DEFAULTS,
-  ADVISER_SETTINGS_DEFAULTS
-} from "cpzDefaults";
+  combineBacktesterSettings,
+  combineAdvserSettings,
+  combineTraderSettings
+} from "cpzUtils/settings";
 import { sortAsc, generateKey, chunkNumberToArray } from "cpzUtils/helpers";
 import { createErrorOutput } from "cpzUtils/error";
 import {
@@ -57,22 +58,11 @@ class Backtester {
     this.robotId = state.robotId;
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
-    this.settings = {
-      debug:
-        state.settings.debug === undefined || state.settings.debug === null
-          ? BACKTESTER_SETTINGS_DEFAULTS.debug
-          : state.settings.debug
-    };
-    this.adviserSettings = state.adviserSettings;
-    this.traderSettings = state.traderSettings;
-    this.requiredHistoryCache =
-      state.adviserSettings.requiredHistoryCache === undefined ||
-      state.adviserSettings.requiredHistoryCache === null
-        ? ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache
-        : state.adviserSettings.requiredHistoryCache;
-    this.requiredHistoryMaxBars =
-      state.adviserSettings.requiredHistoryMaxBars ||
-      ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars;
+    this.settings = combineBacktesterSettings(state.settings);
+    this.adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this.traderSettings = combineTraderSettings(state.traderSettings);
+    this.requiredHistoryCache = this.adviserSettings.requiredHistoryCache;
+    this.requiredHistoryMaxBars = this.adviserSettings.requiredHistoryMaxBars;
     this.totalBars = 0;
     this.processedBars = 0;
     this.leftBars = 0;

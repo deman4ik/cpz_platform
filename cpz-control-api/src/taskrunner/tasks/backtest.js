@@ -19,10 +19,10 @@ import {
 import publishEvents from "cpzEvents";
 import { saveBacktestState } from "cpzStorage/backtests";
 import {
-  BACKTESTER_SETTINGS_DEFAULTS,
-  ADVISER_SETTINGS_DEFAULTS,
-  TRADER_SETTINGS_DEFAULTS
-} from "cpzDefaults";
+  combineBacktesterSettings,
+  combineAdvserSettings,
+  combineTraderSettings
+} from "cpzUtils/settings";
 
 class Backtest {
   constructor(context, state) {
@@ -36,46 +36,9 @@ class Backtest {
     this._timeframe = state.timeframe;
     this._dateFrom = state.dateFrom;
     this._dateTo = state.dateTo;
-    this._settings = {
-      debug:
-        (state.settings && state.settings.debug) ||
-        BACKTESTER_SETTINGS_DEFAULTS.debug
-    };
-    this._adviserSettings = {
-      debug:
-        (state.adviserSettings && state.adviserSettings.debug) ||
-        ADVISER_SETTINGS_DEFAULTS.debug,
-      strategyParameters:
-        (state.adviserSettings && state.adviserSettings.strategyParameters) ||
-        ADVISER_SETTINGS_DEFAULTS.strategyParameters,
-      requiredHistoryCache:
-        (state.adviserSettings && state.adviserSettings.requiredHistoryCache) ||
-        ADVISER_SETTINGS_DEFAULTS.requiredHistoryCache,
-      requiredHistoryMaxBars:
-        (state.adviserSettings &&
-          state.adviserSettings.requiredHistoryMaxBars) ||
-        ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
-    };
-    this._traderSettings = {
-      debug:
-        (state.traderSettings && state.traderSettings.debug) ||
-        TRADER_SETTINGS_DEFAULTS.debug,
-      mode:
-        (state.traderSettings && state.traderSettings.mode) ||
-        TRADER_SETTINGS_DEFAULTS.mode,
-      slippageStep:
-        (state.traderSettings && state.traderSettings.slippageStep) ||
-        TRADER_SETTINGS_DEFAULTS.slippageStep,
-      deviation:
-        (state.traderSettings && state.traderSettings.deviation) ||
-        TRADER_SETTINGS_DEFAULTS.deviation,
-      volume:
-        (state.traderSettings && state.traderSettings.volume) ||
-        TRADER_SETTINGS_DEFAULTS.volume,
-      openOrderTimeout:
-        (state.traderSettings && state.traderSettings.openOrderTimeout) ||
-        TRADER_SETTINGS_DEFAULTS.openOrderTimeout
-    };
+    this._settings = combineBacktesterSettings(state.settings);
+    this._adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this._traderSettings = combineTraderSettings(state.traderSettings);
     this._backtesterId = state.backtesterId || uuid();
     this._taskId = this._backtesterId;
     this._backtesterStatus = state.backtesterStatus || STATUS_PENDING;
