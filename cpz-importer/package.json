@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "start": "node dist/server.js",
     "dev": "nodemon dev.js",

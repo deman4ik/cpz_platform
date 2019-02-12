@@ -20,7 +20,6 @@ const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(req, res) {
   try {
-
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

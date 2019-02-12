@@ -37,6 +37,10 @@ async function getBalance(
     const result = await provider.getBalance(context);
     return result;
   }
+  return {
+    success: false,
+    error: { name: "ConnectorError", message: "Wrong input." }
+  };
 }
 
-export { getBalance };
+export default getBalance;

@@ -1,7 +1,6 @@
 import VError from "verror";
 import HttpsProxyAgent from "https-proxy-agent";
 import { getSecret, decrypt } from "cpzKeyVault";
-import { resolve } from "url";
 
 const {
   KEY_VAULT_URL,

@@ -27,7 +27,7 @@ async function handleStart(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
-    createNewProcess( eventData.taskId);
+    createNewProcess(eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
       state: eventData

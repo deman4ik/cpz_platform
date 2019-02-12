@@ -4,7 +4,7 @@
   "description": "CPZ Platform shared code",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "build": "echo Nothing to build"
   },

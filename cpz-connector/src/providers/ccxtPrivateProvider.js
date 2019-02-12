@@ -112,6 +112,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           return await this.ccxt.fetchBalance();
         } catch (e) {
           await this._handleExchangeError(e);
+          return null;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -195,6 +196,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           );
         } catch (e) {
           await this._handleExchangeError(e);
+          return null;
         }
       };
       const response = await pretry(call, this._retryOptions);
@@ -246,6 +248,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           );
         } catch (e) {
           await this._handleExchangeError(e);
+          return null;
         }
       };
       const response = await pretry(call, this._retryOptions);

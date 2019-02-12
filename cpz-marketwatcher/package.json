@@ -1,10 +1,10 @@
 {
-  "name": "cpz-marketstream",
+  "name": "cpz-marketwatcher",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "start": "node dist/server.js",
     "dev": "nodemon dev.js",
@@ -59,7 +59,7 @@
     "prettier": "1.16.1",
     "source-map-support": "0.5.10",
     "webpack": "4.29.3",
-    "webpack-cli": "3.2.3",
+    "webpack-cli": "^3.2.3",
     "webpack-dev-server": "3.1.14",
     "webpack-node-externals": "1.7.2"
   }

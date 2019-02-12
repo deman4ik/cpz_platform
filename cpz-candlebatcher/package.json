@@ -4,7 +4,7 @@
   "description": "Cryptuoso - Importer and Candle creater service",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "dev": "func start --port 8103",
     "extensions": "func extensions install",

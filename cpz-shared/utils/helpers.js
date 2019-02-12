@@ -268,6 +268,8 @@ function correctWithLimit(x, min, max) {
   return x;
 }
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export {
   sortAsc,
   sortDesc,
@@ -285,5 +287,6 @@ export {
   capitalize,
   filterOutNonUnique,
   precision,
-  correctWithLimit
+  correctWithLimit,
+  sleep
 };

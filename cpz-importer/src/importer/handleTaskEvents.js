@@ -67,7 +67,7 @@ async function handleImportStart(eventData) {
  *
  * @param {*} eventData
  */
-async function handleImportStop( eventData) {
+async function handleImportStop(eventData) {
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));

@@ -8,19 +8,12 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY
-} from "cpzState";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import {
-  getTraderById,
-  updateTraderState,
-} from "cpzStorage/traders";
+import { getTraderById, updateTraderState } from "cpzStorage/traders";
 import Trader from "./trader";
 
 const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);

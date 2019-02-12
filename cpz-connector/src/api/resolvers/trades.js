@@ -15,4 +15,4 @@ async function loadTrades(
   return result;
 }
 
-export { loadTrades };
+export default loadTrades;

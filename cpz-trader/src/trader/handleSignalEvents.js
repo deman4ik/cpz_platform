@@ -11,7 +11,6 @@ import {
   STATUS_STARTED,
   STATUS_BUSY,
   STATUS_ERROR,
-  STATUS_STOPPED,
   createTraderSlug
 } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";

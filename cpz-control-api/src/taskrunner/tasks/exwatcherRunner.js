@@ -275,7 +275,7 @@ class ExWatcherRunner extends BaseRunner {
     }
   }
 
-  static async update(params) {
+  static async update(context, params) {
     try {
       genErrorIfExist(validateUpdate(params));
       const exWatcherState = await getExWatcherById(params.taskId);

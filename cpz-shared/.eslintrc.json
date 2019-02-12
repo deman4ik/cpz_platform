@@ -10,7 +10,7 @@
       "no-use-before-define": ["error", { "functions": false }],
       "no-unused-vars": "warn",
       "consistent-return": "warn",
-      "import/prefer-default-export": "warn",
+      "import/prefer-default-export": "off",
       "class-methods-use-this": "off",
       "no-console": "off",
       "no-param-reassign": "off",

@@ -4,7 +4,7 @@
   "description": "Cryptuoso - Exchange Connector API",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "dev": "func start --port 8109",
     "extensions": "func extensions install",

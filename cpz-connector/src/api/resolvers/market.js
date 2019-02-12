@@ -9,4 +9,4 @@ async function getMarket(_, { connectorInput, asset, currency }, { context }) {
   return result;
 }
 
-export { getMarket };
+export default getMarket;

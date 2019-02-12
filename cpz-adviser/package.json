@@ -4,7 +4,7 @@
   "description": "Cryptuoso - Strategy runner service",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint .",
+    "lint": "eslint .",
     "test": "jest --ci",
     "dev": "func start --port 8104",
     "extensions": "func extensions install",
