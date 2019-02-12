@@ -1,9 +1,9 @@
-import { BASE_ERROR } from "./events";
+import { BASE_ERROR } from "../base";
 import {
   ADVISER_SETTINGS,
   TRADER_SETTINGS,
   BACKTESTER_SETTINGS
-} from "./settings";
+} from "../settings";
 
 const TASKS_BACKTESTER_START_EVENT = {
   eventType: "CPZ.Tasks.Backtester.Start",

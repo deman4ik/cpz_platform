@@ -1,0 +1,60 @@
+import { CONTROL_SERVICE } from "../../services";
+import { TASKS_TOPIC } from "./topics";
+import {
+  TASKS_MARKETWATCHER_STARTED_EVENT,
+  TASKS_MARKETWATCHER_START_EVENT,
+  TASKS_MARKETWATCHER_UPDATED_EVENT
+} from "../types/tasks/marketwatcher";
+import {
+  TASKS_CANDLEBATCHER_STARTED_EVENT,
+  TASKS_CANDLEBATCHER_STOPPED_EVENT,
+  TASKS_CANDLEBATCHER_UPDATED_EVENT
+} from "../types/tasks/candlebatcher";
+import {
+  TASKS_IMPORTER_STARTED_EVENT,
+  TASKS_IMPORTER_STOPPED_EVENT,
+  TASKS_IMPORTER_FINISHED_EVENT
+} from "../types/tasks/importer";
+import {
+  TASKS_ADVISER_STARTED_EVENT,
+  TASKS_ADVISER_STOPPED_EVENT,
+  TASKS_ADVISER_UPDATED_EVENT
+} from "../types/tasks/adviser";
+import {
+  TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT,
+  TASKS_BACKTESTER_FINISHED_EVENT
+} from "../types/tasks/backtester";
+import {
+  TASKS_EXWATCHER_STARTED_EVENT,
+  TASKS_EXWATCHER_STOPPED_EVENT
+} from "../types/tasks/exwatcher";
+
+export default {
+  endpoints: [
+    {
+      name: `${CONTROL_SERVICE}-${TASKS_TOPIC}`,
+      topic: TASKS_TOPIC,
+      url: "/api/taskEvents",
+      types: [
+        TASKS_MARKETWATCHER_STARTED_EVENT.eventType,
+        TASKS_MARKETWATCHER_START_EVENT.eventType,
+        TASKS_MARKETWATCHER_UPDATED_EVENT.eventType,
+        TASKS_CANDLEBATCHER_STARTED_EVENT.eventType,
+        TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType,
+        TASKS_CANDLEBATCHER_UPDATED_EVENT.eventType,
+        TASKS_IMPORTER_STARTED_EVENT.eventType,
+        TASKS_IMPORTER_STOPPED_EVENT.eventType,
+        TASKS_IMPORTER_FINISHED_EVENT.eventType,
+        TASKS_ADVISER_STARTED_EVENT.eventType,
+        TASKS_ADVISER_STOPPED_EVENT.eventType,
+        TASKS_ADVISER_UPDATED_EVENT.eventType,
+        TASKS_BACKTESTER_STARTED_EVENT.eventType,
+        TASKS_BACKTESTER_STOPPED_EVENT.eventType,
+        TASKS_BACKTESTER_FINISHED_EVENT.eventType,
+        TASKS_EXWATCHER_STARTED_EVENT.eventType,
+        TASKS_EXWATCHER_STOPPED_EVENT.eventType
+      ]
+    }
+  ]
+};

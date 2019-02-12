@@ -1,9 +1,9 @@
-import { BASE_ERROR } from "./events";
+import { BASE_ERROR } from "../base";
 import {
   BACKTESTER_SETTINGS,
   ADVISER_SETTINGS,
   TRADER_SETTINGS
-} from "./settings";
+} from "../settings";
 
 const BACKTEST_START_PARAMS = {
   robotId: {

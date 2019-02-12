@@ -1,4 +1,4 @@
-import { TRADER_SETTINGS } from "./settings";
+import { TRADER_SETTINGS } from "../settings";
 import {
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
@@ -11,8 +11,7 @@ import {
   TRADE_ACTION_CLOSE_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_SHORT
-} from "../state/types";
-
+} from "../../../state/types";
 import {
   POS_STATUS_NEW,
   POS_STATUS_OPEN,
@@ -24,7 +23,7 @@ import {
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR
-} from "../state/status";
+} from "../../../state/status";
 
 const TRADES_ORDER_EVENT = {
   eventType: "CPZ.Trades.Order",

@@ -1,5 +1,5 @@
-import { BASE_ERROR } from "./events";
-import { ADVISER_SETTINGS } from "./settings";
+import { BASE_ERROR } from "../base";
+import { ADVISER_SETTINGS } from "../settings";
 /**
  * Событие - Запуск нового советника
  */

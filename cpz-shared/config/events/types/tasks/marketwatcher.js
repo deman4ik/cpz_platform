@@ -1,4 +1,4 @@
-import { BASE_ERROR } from "./events";
+import { BASE_ERROR } from "../base";
 
 const TASKS_MARKETWATCHER_START_EVENT = {
   eventType: "CPZ.Tasks.Marketwatcher.Start",

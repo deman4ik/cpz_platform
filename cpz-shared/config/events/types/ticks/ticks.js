@@ -1,4 +1,4 @@
-import { BASE_ERROR } from "./events";
+import { BASE_ERROR } from "../base";
 
 const TICKS_NEWTICK_EVENT = {
   eventType: "CPZ.Ticks.NewTick",

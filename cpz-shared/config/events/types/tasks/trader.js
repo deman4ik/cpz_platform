@@ -1,5 +1,5 @@
-import { BASE_ERROR } from "./events";
-import { TRADER_SETTINGS } from "./settings";
+import { BASE_ERROR } from "../base";
+import { TRADER_SETTINGS } from "../settings";
 /**
  * Событие - запуск нового проторговщика
  */

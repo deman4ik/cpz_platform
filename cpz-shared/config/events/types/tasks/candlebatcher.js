@@ -1,6 +1,6 @@
-import { VALID_TIMEFRAMES } from "../state/timeframes";
-import { BASE_ERROR } from "./events";
-import { CANDLEBATCHER_SETTINGS } from "./settings";
+import { VALID_TIMEFRAMES } from "../../../state/timeframes";
+import { BASE_ERROR } from "../base";
+import { CANDLEBATCHER_SETTINGS } from "../settings";
 
 const TASKS_CANDLEBATCHER_START_EVENT = {
   eventType: "CPZ.Tasks.Candlebatcher.Start",

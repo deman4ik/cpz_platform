@@ -1,4 +1,4 @@
-import { BASE_ERROR } from "./events";
+import { BASE_ERROR } from "../base";
 
 const CANDLES_NEWCANDLE_EVENT = {
   eventType: "CPZ.Candles.NewCandle",
