@@ -29,9 +29,9 @@
     "build:trader": "npm run build --prefix cpz-trader",
     "lint:trader": "npm run lint --prefix cpz-trader",
     "lint:shared": "npm run lint --prefix cpz-shared",
-    "install": "npm-run-all -p install:**",
-    "build": "npm-run-all -p build:**",
-    "lint": "npm-run-all -p lint:**",
+    "install-all": "npm-run-all -p install:**",
+    "build-all": "npm-run-all -p build:**",
+    "lint-all": "npm-run-all -p lint:**",
     "test": "jest --no-cache --ci"
   },
   "repository": {
