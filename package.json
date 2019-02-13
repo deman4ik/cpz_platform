@@ -28,6 +28,7 @@
     "install:trader": "npm install --prefix cpz-trader",
     "build:trader": "npm run build --prefix cpz-trader",
     "lint:trader": "npm run lint --prefix cpz-trader",
+    "install:shared": "npm install --prefix cpz-shared",
     "lint:shared": "npm run lint --prefix cpz-shared",
     "install-all": "npm-run-all -p install:**",
     "build-all": "npm-run-all -p build:**",
