@@ -6,7 +6,7 @@ import {
 } from "../types/tasks/importer";
 
 export default {
-  endpoints: [
+  [IMPORTER_SERVICE]: [
     {
       name: `${IMPORTER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

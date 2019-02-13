@@ -8,7 +8,7 @@ import {
 import { CANDLES_NEWCANDLE_EVENT } from "../types/candles/candles";
 
 export default {
-  endpoints: [
+  [ADVISER_SERVICE]: [
     {
       name: `${ADVISER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

@@ -6,7 +6,7 @@ import {
 } from "../types/tasks/backtester";
 
 export default {
-  endpoints: [
+  [BACKTESTER_SERVICE]: [
     {
       name: `${BACKTESTER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

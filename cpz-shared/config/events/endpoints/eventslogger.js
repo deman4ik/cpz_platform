@@ -108,7 +108,7 @@ import {
 } from "../types/error/error";
 
 export default {
-  endpoint: [
+  [EVENTS_LOGGER_SERVICE]: [
     {
       name: `${EVENTS_LOGGER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
