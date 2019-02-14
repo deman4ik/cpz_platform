@@ -11,7 +11,7 @@ import {
   ORDER_TYPE_STOP,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL
-} from "cpzState";
+} from "../../../cpz-shared/config/state";
 
 class BaseStrategy {
   constructor(state) {
