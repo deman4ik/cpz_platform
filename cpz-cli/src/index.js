@@ -2,6 +2,7 @@ import Vorpal from "vorpal";
 
 import { saveAPIKeys } from "./keyVault";
 import { createSubs } from "./eventGrid";
+import { createEnvList, updateEnvVars } from "./envvars";
 
 const vorpal = new Vorpal();
 vorpal
@@ -30,4 +31,6 @@ vorpal
   .action(saveAPIKeys);
 
 vorpal.command("eg create subs <Env>").action(createSubs);
+vorpal.command("env create list").action(createEnvList);
+vorpal.command("env update <Env>").action(updateEnvVars);
 vorpal.delimiter("cpz$").show();
