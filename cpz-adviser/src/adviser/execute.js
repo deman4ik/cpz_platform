@@ -27,7 +27,7 @@ import Adviser from "./adviser";
  * @param {*} context
  * @param {*} state
  * @param {*} candle
- * @param {boolean} child признак вызовая функции повторно
+ * @param {boolean} child признак вызова функции повторно
  */
 async function execute(context, state, candle, child = false) {
   let adviser;

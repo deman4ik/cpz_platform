@@ -3,15 +3,15 @@ import dayjs from "cpzDayjs";
 import VError from "verror";
 import { ADVISER_SERVICE } from "cpzServices";
 import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_FINISHED,
+  createAdviserSlug,
+  createNewSignalSubject,
   INDICATORS_BASE,
   INDICATORS_TULIP,
-  createAdviserSlug,
-  createNewSignalSubject
+  STATUS_FINISHED,
+  STATUS_STARTED,
+  STATUS_STOPPED
 } from "cpzState";
-import { SIGNALS_NEWSIGNAL_EVENT, LOG_ADVISER_EVENT } from "cpzEventTypes";
+import { LOG_ADVISER_EVENT, SIGNALS_NEWSIGNAL_EVENT } from "cpzEventTypes";
 import { combineAdvserSettings } from "cpzUtils/settings";
 import { getCachedCandlesByKey } from "cpzStorage/candles";
 import { saveAdviserState } from "cpzStorage/advisers";
@@ -112,6 +112,18 @@ class Adviser {
   }
 
   /**
+   * Установка статуса сервиса
+   *
+   * @param {*} status
+   * @memberof Adviser
+   */
+  set status(status) {
+    if (status) this._status = status;
+    if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
+      this._endedAt = dayjs.utc().toISOString();
+  }
+
+  /**
    * Запрос текущего признака обновления параметров
    *
    * @returns updateRequested
@@ -132,18 +144,6 @@ class Adviser {
 
   get logEvents() {
     return this._logEvents;
-  }
-
-  /**
-   * Установка статуса сервиса
-   *
-   * @param {*} status
-   * @memberof Adviser
-   */
-  set status(status) {
-    if (status) this._status = status;
-    if (this._status === STATUS_STOPPED || this._status === STATUS_FINISHED)
-      this._endedAt = dayjs.utc().toISOString();
   }
 
   /**

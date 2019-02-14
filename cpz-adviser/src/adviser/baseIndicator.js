@@ -8,8 +8,8 @@ class BaseIndicator {
     this._currency = state.currency;
     this._timeframe = state.timeframe;
     this._options = state.options;
-    this._candle = null;
-    this._candles = [];
+    this._candle = null; // {}
+    this._candles = []; // [{}]
     this._candlesProps = {
       open: [],
       high: [],
@@ -17,7 +17,7 @@ class BaseIndicator {
       close: [],
       volume: []
     };
-    this._tulipIndicators = state.tulipIndicators || {};
+    this._tulipIndicators = state.tulipIndicators || {}; // отдельный
     this._log = state.log; // Функция логирования в консоль
     this._logEvent = state.logEvent; // Функция логирования в EventGrid в топик CPZ-LOGS
     if (state.variables) {
@@ -71,7 +71,7 @@ class BaseIndicator {
   }
 
   get currency() {
-    return this._сurrency;
+    return this._currency;
   }
 
   get timeframe() {

@@ -3,49 +3,49 @@ import dayjs from "cpzDayjs";
 import { v4 as uuid } from "uuid";
 import { IMPORTER_SERVICE } from "cpzServices";
 import {
-  ERROR_TOPIC,
-  TASKS_TOPIC,
-  LOG_TOPIC,
   ERROR_IMPORTER_EVENT,
-  TASKS_IMPORTER_STARTED_EVENT,
+  ERROR_TOPIC,
+  LOG_IMPORTER_EVENT,
+  LOG_TOPIC,
   TASKS_IMPORTER_FINISHED_EVENT,
-  LOG_IMPORTER_EVENT
+  TASKS_IMPORTER_STARTED_EVENT,
+  TASKS_TOPIC
 } from "cpzEventTypes";
 import {
-  STATUS_STARTED,
-  STATUS_FINISHED,
-  STATUS_ERROR,
   CANDLE_CREATED,
   CANDLE_IMPORTED,
   CANDLE_PREVIOUS,
-  VALID_TIMEFRAMES,
+  createCachedCandleSlug,
   createImporterSlug,
-  createCachedCandleSlug
+  STATUS_ERROR,
+  STATUS_FINISHED,
+  STATUS_STARTED,
+  VALID_TIMEFRAMES
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import {
   chunkArray,
-  durationMinutes,
   completedPercent,
-  sortAsc,
-  divideDateByDays
+  divideDateByDays,
+  durationMinutes,
+  sortAsc
 } from "cpzUtils/helpers";
 import {
+  clearTempCandles,
   saveCandlesArrayToCache,
-  saveCandlesArrayToTemp,
-  clearTempCandles
+  saveCandlesArrayToTemp
 } from "cpzStorage/candles";
 import { saveImporterState } from "cpzStorage/importers";
 import { saveCandlesDB } from "cpzDB";
 import { createErrorOutput } from "cpzUtils/error";
 import { minuteCandlesEX, tradesEX } from "cpzConnector";
 import {
-  handleCandleGaps,
-  getCurrentTimeframes,
-  generateCandleRowKey,
+  chunkDates,
   createMinutesList,
   createMinutesListWithRange,
-  chunkDates
+  generateCandleRowKey,
+  getCurrentTimeframes,
+  handleCandleGaps
 } from "cpzUtils/candlesUtils";
 
 class Importer {
