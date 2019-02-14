@@ -1,11 +1,6 @@
-require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
 const path = require("path");
-
-// the path(s) that should be cleaned
-// const pathsToClean = [path.resolve(__dirname, "dist")];
 
 const config = {
   mode: "production",
@@ -41,32 +36,11 @@ const config = {
     path: `${__dirname}`,
     libraryTarget: "commonjs2"
   },
-  module: {
-    rules: [
-      {
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"]
-          }
-        },
-        test: /\.js$/,
-        exclude: /node_modules/
-      },
-      {
-        exclude: /node_modules/,
-        test: /\.graphql$/,
-        use: [{ loader: "graphql-import-loader" }]
-      }
-    ]
-  },
   devtool: "inline-source-map",
   target: "node",
   externals: [nodeExternals()],
   plugins: [
-    // new CleanWebpackPlugin(pathsToClean),
     new webpack.NamedModulesPlugin(),
-    // new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({
       banner: 'require("source-map-support").install();',

@@ -1,7 +1,7 @@
-import "babel-polyfill";
 import Vorpal from "vorpal";
 
 import { saveAPIKeys } from "./keyVault";
+import { createSubs } from "./eventGrid";
 
 const vorpal = new Vorpal();
 vorpal
@@ -29,4 +29,5 @@ vorpal
   )
   .action(saveAPIKeys);
 
+vorpal.command("eg create subs <Env>").action(createSubs);
 vorpal.delimiter("cpz$").show();

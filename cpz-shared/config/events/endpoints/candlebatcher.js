@@ -7,7 +7,7 @@ import {
 } from "../types/tasks/candlebatcher";
 
 export default {
-  endpoints: [
+  [CANDLEBATCHER_SERVICE]: [
     {
       name: `${CANDLEBATCHER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

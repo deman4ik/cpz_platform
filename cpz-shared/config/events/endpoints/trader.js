@@ -15,7 +15,7 @@ import { TICKS_NEWTICK_EVENT } from "../types/ticks/ticks";
 import { SIGNALS_NEWSIGNAL_EVENT } from "../types/signals/signals";
 
 export default {
-  endpoints: [
+  [TRADER_SERVICE]: [
     {
       name: `${TRADER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

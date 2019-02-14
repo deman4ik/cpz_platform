@@ -31,7 +31,7 @@ import {
 } from "../types/tasks/exwatcher";
 
 export default {
-  endpoints: [
+  [CONTROL_SERVICE]: [
     {
       name: `${CONTROL_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,

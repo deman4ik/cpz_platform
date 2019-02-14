@@ -8,7 +8,7 @@ import {
 } from "../types/tasks/marketwatcher";
 
 export default {
-  endpoints: [
+  [MARKETWATCHER_SERVICE]: [
     {
       name: `${MARKETWATCHER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
