@@ -30,7 +30,7 @@ vorpal
   )
   .action(saveAPIKeys);
 
-vorpal.command("eg create subs <Env>").action(createSubs);
+vorpal.command("eg create subs <Env> <APIKey>").action(createSubs);
 vorpal.command("env create list").action(createEnvList);
 vorpal.command("env update <Env>").action(updateEnvVars);
 vorpal.delimiter("cpz$").show();

@@ -96,10 +96,11 @@ async function listSubs(EGMClient, topicName) {
  * @param {string} serviceName
  * @param {string} environment
  * @param {string} postfix
+ * @param {string} apikey
  * @returns {string}
  */
-const createEndpointUrl = (serviceName, environment, postfix) =>
-  `https://cpz-${serviceName}-${environment}.azurewebsites.net${postfix}`;
+const createEndpointUrl = (serviceName, environment, postfix, apikey) =>
+  `https://cpz-${serviceName}-${environment}.azurewebsites.net${postfix}?api-key=${apikey}`;
 
 /**
  * Create Event Grid Topic Name
@@ -124,7 +125,7 @@ const createTopicName = (topicName, environment) =>
  *             types: ["CPZ.Adviser.Error","CPZ.Backtester.Error"],
  *             topicName: 'cpz-error-prod' }]}
  */
-function createSubscriptionsList(environment) {
+function createSubscriptionsList(environment, apikey) {
   let allEndpoints = [];
   Object.keys(eventEndpoints).forEach(key => {
     allEndpoints = [
@@ -132,7 +133,7 @@ function createSubscriptionsList(environment) {
         ...eventEndpoints[key].map(endpoint => ({
           ...endpoint,
           topicName: createTopicName(endpoint.topic, environment),
-          url: createEndpointUrl(key, environment, endpoint.url)
+          url: createEndpointUrl(key, environment, endpoint.url, apikey)
         })),
         ...allEndpoints
       ])

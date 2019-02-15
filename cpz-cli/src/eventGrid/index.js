@@ -6,11 +6,10 @@ import {
 
 async function createSubs(args) {
   this.log("createSubs", args);
-  const ENVIRONMENT = args.environment;
-  this.log("Creating Event Grid subscriptions for environment", ENVIRONMENT);
+  this.log("Creating Event Grid subscriptions for environment", args.Env);
   const EGMClient = await getClient();
   this.log("Connected to Azure!");
-  const subscriptions = createSubscriptionsList(ENVIRONMENT);
+  const subscriptions = createSubscriptionsList(args.Env, args.APIKey);
   this.log(
     "Subscriptions list",
     Object.keys(subscriptions).map(
