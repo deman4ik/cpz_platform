@@ -5,9 +5,14 @@ import retry from "cpzUtils/retry";
 
 const { EG_EMULATOR_MODE } = process.env;
 
-const endpointsConfig = yaml.safeLoad(
-  fs.readFileSync(`${process.cwd()}/endpoints-${EG_EMULATOR_MODE}.yml`, "utf8")
-);
+let endpointsConfig = {};
+if (EG_EMULATOR_MODE)
+  endpointsConfig = yaml.safeLoad(
+    fs.readFileSync(
+      `${process.cwd()}/endpoints-${EG_EMULATOR_MODE}.yml`,
+      "utf8"
+    )
+  );
 
 const findEndpoint = eventType =>
   endpointsConfig.endpoints.find(endpoint =>
