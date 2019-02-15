@@ -34,7 +34,7 @@ function eventHandler(req, res) {
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
           );
-          res.send({
+          res.status(200).send({
             validationResponse: eventData.validationCode
           });
           break;
@@ -49,6 +49,7 @@ function eventHandler(req, res) {
             ...eventData,
             eventSubject
           });
+          res.status(200);
           break;
         }
         case TASKS_BACKTESTER_STOP_EVENT.eventType: {
@@ -61,14 +62,15 @@ function eventHandler(req, res) {
             ...eventData,
             eventSubject
           });
+          res.status(200);
           break;
         }
         default: {
           console.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
+          res.status(200);
         }
       }
     });
-    res.status(200);
   } catch (error) {
     console.error(error);
     res

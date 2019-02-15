@@ -85,9 +85,6 @@ function eventHandler(context, req) {
         }
       }
     });
-    context.res = {
-      status: 200
-    };
   } catch (error) {
     context.log.error(error);
     context.res = {
