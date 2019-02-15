@@ -23,7 +23,7 @@ function findEntryPoints() {
 }
 
 const config = {
-  mode: "production",
+  mode: process.env.NODE_ENV || "production",
   watch: false,
   entry: findEntryPoints(),
   resolve: {
