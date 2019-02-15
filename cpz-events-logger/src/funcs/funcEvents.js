@@ -4,7 +4,6 @@ import { SUB_VALIDATION_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
 import EventsLogger from "../eventslogger/eventslogger";
-import relay from "../emulator/relay";
 
 checkEnvVars(eventsloggerEnv.variables);
 
@@ -48,6 +47,9 @@ function handleEvent(context, req) {
           eventslogger.save(eventGridEvent);
 
           if (EG_EMULATOR_MODE) {
+            /* eslint-disable global-require */
+            const relay = require("../emulator/relay");
+            /* global-require */
             relay(context, eventGridEvent);
           }
         }
