@@ -151,17 +151,22 @@ function createSubscriptionsList(environment, apikey) {
 
 async function createSubscriptions(client, subscriptions) {
   try {
-    const results = await Promise.all(
-      subscriptions.map(async subscription =>
-        createOrUpdateSub(
-          client,
-          subscription.topicName,
-          subscription.name,
+    /* eslint-disable no-restricted-syntax, no-await-in-loop */
+    for (const subscription of subscriptions) {
+      console.log(
+        `Creating ${subscription.topicName} - ${subscription.name} sub to ${
           subscription.url
-        )
-      )
-    );
-    return results;
+        }`
+      );
+      const result = await createOrUpdateSub(
+        client,
+        subscription.topicName,
+        subscription.name,
+        subscription.url
+      );
+      console.log(result);
+    }
+    /* no-restricted-syntax, no-await-in-loop  */
   } catch (error) {
     throw error;
   }

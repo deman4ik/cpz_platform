@@ -20,8 +20,7 @@ async function createSubs(args) {
   for (const key of Object.keys(subscriptions)) {
     const topicSubscriptions = subscriptions[key];
     this.log(`Creating "${key}" subscriptions...`);
-    const result = await createSubscriptions(EGMClient, topicSubscriptions);
-    this.log(result);
+    await createSubscriptions(EGMClient, topicSubscriptions);
   }
   /* no-restricted-syntax, no-await-in-loop */
 }
