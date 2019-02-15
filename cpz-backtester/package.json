@@ -4,7 +4,7 @@
     "description": "Cryptuoso - backtesting service",
     "main": "dist/server.js",
     "engines": {
-        "node": "10.15.0"
+        "node": "10.14.1"
     },
     "scripts": {
         "lint": "eslint .",
