@@ -7,7 +7,7 @@ import EventsLogger from "../eventslogger/eventslogger";
 
 checkEnvVars(eventsloggerEnv.variables);
 
-const { EG_EMULATOR_MODE } = process.env;
+// const { EG_EMULATOR_MODE } = process.env;
 
 function handleEvent(context, req) {
   try {
@@ -46,12 +46,14 @@ function handleEvent(context, req) {
           const eventslogger = new EventsLogger(context);
           eventslogger.save(eventGridEvent);
 
+          /*
           if (EG_EMULATOR_MODE) {
-            /* eslint-disable global-require */
+            
             const relay = require("../emulator/relay");
-            /* global-require */
+        
             relay(context, eventGridEvent);
           }
+          */
         }
       }
     });

@@ -6,6 +6,7 @@ import retry from "cpzUtils/retry";
 const { EG_EMULATOR_MODE } = process.env;
 
 let endpointsConfig = {};
+// TODO: Build from config
 if (EG_EMULATOR_MODE)
   endpointsConfig = yaml.safeLoad(
     fs.readFileSync(
