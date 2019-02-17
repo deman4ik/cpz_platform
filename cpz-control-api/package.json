@@ -9,6 +9,7 @@
     "dev": "func start --port 8107",
     "extensions": "func extensions install",
     "webpack": "webpack",
+    "webpack:watch": "webpack --watch",
     "build": "func extensions install && webpack"
   },
   "keywords": [

@@ -9,7 +9,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "build": "webpack",
-    "webpack": "webpack --watch"
+    "webpack": "webpack",
+    "webpack:watch": "webpack --watch"
   },
   "keywords": [],
   "author": "",

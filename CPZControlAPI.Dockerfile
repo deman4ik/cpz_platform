@@ -7,11 +7,10 @@ RUN apt-get update &&  \
 COPY /cpz-control-api /src/cpz-control-api
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-control-api
+RUN npm install
 ENV NODE_ENV=production
-RUN npm install && \
-    npm run webpack && \
-    npm uninstall -D && \
-    npm cache clean --force
+RUN npm run webpack
+RUN npm uninstall
    
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
