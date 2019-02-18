@@ -43,11 +43,11 @@ const TASKS_IMPORTER_START_EVENT = {
     // TODO: datefrom/dateto custom validation
     dateFrom: {
       description: "Import start date.",
-      type: "datetime"
+      type: "datefrom"
     },
     dateTo: {
       description: "Import end date.",
-      type: "datetime"
+      type: "dateto"
     },
     proxy: {
       description: "Proxy endpoint.",
