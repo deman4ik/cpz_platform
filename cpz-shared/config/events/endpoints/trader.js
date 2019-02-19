@@ -35,13 +35,13 @@ export default {
     {
       name: `${TRADER_SERVICE}-${TICKS_TOPIC}`,
       topic: TICKS_TOPIC,
-      url: "/api/candleEvents",
+      url: "/api/tickEvents",
       types: [TICKS_NEWTICK_EVENT.eventType]
     },
     {
       name: `${TRADER_SERVICE}-${SIGNALS_TOPIC}`,
       topic: SIGNALS_TOPIC,
-      url: "/api/candleEvents",
+      url: "/api/signalEvents",
       types: [SIGNALS_NEWSIGNAL_EVENT.eventType]
     }
   ]
