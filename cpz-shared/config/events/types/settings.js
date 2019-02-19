@@ -12,7 +12,7 @@ const CANDLEBATCHER_SETTINGS = {
   },
   requiredHistoryMaxBars: {
     description: "Load history data from cache.",
-    type: "number",
+    type: "int",
     integer: true,
     optional: true
   }
@@ -37,7 +37,7 @@ const ADVISER_SETTINGS = {
   },
   requiredHistoryMaxBars: {
     description: "Load history data from cache.",
-    type: "number",
+    type: "int",
     integer: true,
     optional: true
   }

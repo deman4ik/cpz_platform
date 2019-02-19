@@ -1,6 +1,10 @@
 import "babel-polyfill";
 import VError from "verror";
-import { BASE_EVENT, SUB_VALIDATION_EVENT } from "cpzEventTypes";
+import {
+  BASE_EVENT,
+  SUB_VALIDATION_EVENT,
+  SUB_DELETED_EVENT
+} from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleStarted,
@@ -20,28 +24,14 @@ function eventHandler(context, req) {
     context.log.info(
       `CPZ Control processed a request.${JSON.stringify(parsedReq)}`
     );
+    // TODO: event schema validation by type
     parsedReq.forEach(eventGridEvent => {
       // Валидация структуры события
       genErrorIfExist(validateEvent(eventGridEvent));
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       const { eventType } = eventGridEvent;
-      if (eventType === SUB_VALIDATION_EVENT) {
-        context.log.warn(
-          `Got SubscriptionValidation event data, validationCode: ${
-            eventData.validationCode
-          }, topic: ${eventGridEvent.topic}`
-        );
-        context.res = {
-          status: 200,
-          body: {
-            validationResponse: eventData.validationCode
-          },
-          headers: {
-            "Content-Type": "application/json"
-          }
-        };
-      } else if (eventType.includes(".Started")) {
+      if (eventType.includes(".Started")) {
         context.log.info(
           `Got ${eventType} event data ${JSON.stringify(eventData)}`
         );
@@ -61,6 +51,27 @@ function eventHandler(context, req) {
           `Got ${eventType} event data ${JSON.stringify(eventData)}`
         );
         handleFinished(context, { eventSubject, eventType, ...eventData });
+      } else if (eventType === SUB_VALIDATION_EVENT.eventType) {
+        context.log.warn(
+          `Got SubscriptionValidation event data, validationCode: ${
+            eventData.validationCode
+          }, topic: ${eventGridEvent.topic}`
+        );
+        context.res = {
+          status: 200,
+          body: {
+            validationResponse: eventData.validationCode
+          },
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+      } else if (eventType === SUB_DELETED_EVENT.eventType) {
+        context.log.warn(
+          `Got SubscriptionDeletedEvent event data, topic: ${
+            eventGridEvent.topic
+          }`
+        );
       } else {
         context.log.error(`Unknown Event Type: ${eventType}`);
       }

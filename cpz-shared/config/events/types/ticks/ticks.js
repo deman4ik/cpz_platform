@@ -4,9 +4,9 @@ const TICKS_NEWTICK_EVENT = {
   eventType: "CPZ.Ticks.NewTick",
 
   dataSchema: {
-    exchange: { description: "Exchange code.", type: "string", empty: false },
-    asset: { description: "Base currency.", type: "string", empty: false },
-    currency: { description: "Quote currency.", type: "string", empty: false },
+    exchange: { description: "Exchange code.", type: "exchange" },
+    asset: { description: "Base currency.", type: "currency" },
+    currency: { description: "Quote currency.", type: "currency" },
     direction: {
       description: "Price direction.",
       type: "string",

@@ -1,6 +1,8 @@
 import assert from "assert";
 import { createValidator, genErrorIfExist } from "../../utils/validation";
 
+const { stringify: str } = JSON;
+
 /**
  * @param {*} value
  * @param {*} schema
@@ -75,5 +77,98 @@ describe("Validate dateFrom & dateTo", () => {
       "Throws error",
       "doesNotThrow"
     );
+  });
+});
+
+describe("Validate datetime", () => {
+  test("Should throw error on incorrect date input", () => {
+    toValidateAndCheck({ date: "Tester" }, { date: "datetime" });
+  });
+
+  test("Shouldn't throw error on correct date input", () => {
+    toValidateAndCheck(
+      { date: new Date().toISOString() },
+      { date: "datetime" },
+      "Throws error",
+      "doesNotThrow"
+    );
+  });
+});
+
+describe("Validate currency", () => {
+  // inc - incorret
+  ["BtC", "eu", "2eu", 2, {}, [], ""].forEach(inc => {
+    test(`Should throw error on incorrect currency input: ${str(inc)}`, () => {
+      toValidateAndCheck({ val: inc }, { val: "currency" });
+    });
+  });
+
+  // cor - correct
+  ["BTC", "EU", "F", "COZ"].forEach(cor => {
+    test(`Shouldn't throw error on correct currency input: ${str(cor)}`, () => {
+      toValidateAndCheck(
+        { val: cor },
+        { val: "currency" },
+        "Throws error",
+        "doesNotThrow"
+      );
+    });
+  });
+});
+
+describe("Validate int", () => {
+  [23.23, 0.3, -2.3, 0.0000000000000001, NaN, "Tester", {}, []].forEach(inc => {
+    test(`Should throw error on incorrect int input: ${str(inc)}`, () => {
+      toValidateAndCheck({ val: inc }, { val: "int" });
+    });
+  });
+
+  [1, 0, -1].forEach(cor => {
+    test(`Shouldn't throw error on correct int input: ${str(cor)}`, () => {
+      toValidateAndCheck(
+        { val: cor },
+        { val: "int" },
+        "Throws error",
+        "doesNotThrow"
+      );
+    });
+  });
+});
+
+describe("Validate exchange", () => {
+  [1, {}, [], "Uppercase", "Incorrect( )symbols", "/|\\", ""].forEach(inc => {
+    test(`Should throw error on incorrect exchange input: ${str(inc)}`, () => {
+      toValidateAndCheck({ val: inc }, { val: "exchange" });
+    });
+  });
+
+  ["test_", "_test_", "23____", "_", "f1"].forEach(cor => {
+    test(`Shouldn't throw error on correct exchange input: ${str(cor)}`, () => {
+      toValidateAndCheck(
+        { val: cor },
+        { val: "exchange" },
+        "Throws error",
+        "doesNotThrow"
+      );
+    });
+  });
+});
+
+describe("Validate posInt", () => {
+  [23.23, 0.3, -2.3, 0.00000000001, NaN, "Tester", {}, [], -1].forEach(inc => {
+    test(`Should throw error on incorrect posInt input: ${str(inc)}`, () => {
+      toValidateAndCheck({ val: inc }, { val: "posInt" });
+    });
+  });
+
+  [1, 0].forEach(cor => {
+    test(`Shouldn't throw error on correct posInt input: ${str(cor)}`, () => {
+      toValidateAndCheck(
+        { val: cor },
+        { val: "posInt" },
+        "Throws error",
+        "doesNotThrow"
+      );
+    });
   });
 });

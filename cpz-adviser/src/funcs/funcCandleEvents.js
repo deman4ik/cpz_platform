@@ -3,6 +3,7 @@ import VError from "verror";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
+  SUB_DELETED_EVENT,
   CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
@@ -25,6 +26,15 @@ function eventHandler(context, req) {
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
+        case CANDLES_NEWCANDLE_EVENT.eventType: {
+          context.log.info(
+            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
+              eventData
+            )}`
+          );
+          handleCandle(context, { eventSubject, candle: eventData });
+          break;
+        }
         case SUB_VALIDATION_EVENT.eventType: {
           context.log.warn(
             `Got SubscriptionValidation event data, validationCode: ${
@@ -42,13 +52,12 @@ function eventHandler(context, req) {
           };
           break;
         }
-        case CANDLES_NEWCANDLE_EVENT.eventType: {
-          context.log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
+        case SUB_DELETED_EVENT.eventType: {
+          context.log.warn(
+            `Got SubscriptionDeletedEvent event data, topic: ${
+              eventGridEvent.topic
+            }`
           );
-          handleCandle(context, { eventSubject, candle: eventData });
           break;
         }
         default: {

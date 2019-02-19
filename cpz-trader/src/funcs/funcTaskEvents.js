@@ -3,6 +3,7 @@ import VError from "verror";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
+  SUB_DELETED_EVENT,
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATE_EVENT
@@ -36,23 +37,6 @@ function eventHandler(context, req) {
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
-        case SUB_VALIDATION_EVENT.eventType: {
-          context.log.warn(
-            `Got SubscriptionValidation event data, validationCode: ${
-              eventData.validationCode
-            }, topic: ${eventGridEvent.topic}`
-          );
-          context.res = {
-            status: 200,
-            body: {
-              validationResponse: eventData.validationCode
-            },
-            headers: {
-              "Content-Type": "application/json"
-            }
-          };
-          break;
-        }
         case TASKS_TRADER_START_EVENT.eventType: {
           context.log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
@@ -78,6 +62,31 @@ function eventHandler(context, req) {
             )}`
           );
           handleUpdate(context, { eventSubject, ...eventData });
+          break;
+        }
+        case SUB_VALIDATION_EVENT.eventType: {
+          context.log.warn(
+            `Got SubscriptionValidation event data, validationCode: ${
+              eventData.validationCode
+            }, topic: ${eventGridEvent.topic}`
+          );
+          context.res = {
+            status: 200,
+            body: {
+              validationResponse: eventData.validationCode
+            },
+            headers: {
+              "Content-Type": "application/json"
+            }
+          };
+          break;
+        }
+        case SUB_DELETED_EVENT.eventType: {
+          context.log.warn(
+            `Got SubscriptionDeletedEvent event data, topic: ${
+              eventGridEvent.topic
+            }`
+          );
           break;
         }
         default: {

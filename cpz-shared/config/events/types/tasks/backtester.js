@@ -16,12 +16,12 @@ const TASKS_BACKTESTER_START_EVENT = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "number",
+      type: "int",
       empty: false
     },
     userId: {
       description: "User uniq Id.",
-      type: "string",
+      type: "uuid",
       empty: false
     },
     strategyName: {
@@ -29,12 +29,12 @@ const TASKS_BACKTESTER_START_EVENT = {
       type: "string",
       empty: false
     },
-    exchange: { description: "Exchange code.", type: "string", empty: false },
-    asset: { description: "Base currency.", type: "string", empty: false },
-    currency: { description: "Quote currency.", type: "string", empty: false },
+    exchange: { description: "Exchange code.", type: "exchange" },
+    asset: { description: "Base currency.", type: "currency" },
+    currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "number"
+      type: "int"
     },
     dateFrom: {
       description: "Backtest start date.",
