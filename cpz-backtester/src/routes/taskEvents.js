@@ -3,6 +3,7 @@ import VError from "verror";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
+  SUB_DELETED_EVENT,
   TASKS_BACKTESTER_START_EVENT,
   TASKS_BACKTESTER_STOP_EVENT
 } from "cpzEventTypes";
@@ -28,17 +29,6 @@ function eventHandler(req, res) {
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
-        case SUB_VALIDATION_EVENT.eventType: {
-          console.warn(
-            `Got SubscriptionValidation event data, validationCode: ${
-              eventData.validationCode
-            }, topic: ${eventGridEvent.topic}`
-          );
-          res.status(200).send({
-            validationResponse: eventData.validationCode
-          });
-          break;
-        }
         case TASKS_BACKTESTER_START_EVENT.eventType: {
           console.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
@@ -62,6 +52,26 @@ function eventHandler(req, res) {
             ...eventData,
             eventSubject
           });
+          res.status(200);
+          break;
+        }
+        case SUB_VALIDATION_EVENT.eventType: {
+          console.warn(
+            `Got SubscriptionValidation event data, validationCode: ${
+              eventData.validationCode
+            }, topic: ${eventGridEvent.topic}`
+          );
+          res.status(200).send({
+            validationResponse: eventData.validationCode
+          });
+          break;
+        }
+        case SUB_DELETED_EVENT.eventType: {
+          console.warn(
+            `Got SubscriptionDeletedEvent event data, topic: ${
+              eventGridEvent.topic
+            }`
+          );
           res.status(200);
           break;
         }

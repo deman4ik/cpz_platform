@@ -1,6 +1,6 @@
 import "babel-polyfill";
 import VError from "verror";
-import { SUB_VALIDATION_EVENT } from "cpzEventTypes";
+import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
 import EventsLogger from "../eventslogger/eventslogger";
@@ -23,7 +23,7 @@ function handleEvent(context, req) {
     );
     parsedReq.forEach(eventGridEvent => {
       switch (eventGridEvent.eventType) {
-        case SUB_VALIDATION_EVENT: {
+        case SUB_VALIDATION_EVENT.eventType: {
           context.log.warn(
             `Got SubscriptionValidation event data, validationCode: ${
               eventGridEvent.data.validationCode
@@ -38,6 +38,14 @@ function handleEvent(context, req) {
               "Content-Type": "application/json"
             }
           };
+          break;
+        }
+        case SUB_DELETED_EVENT.eventType: {
+          context.log.warn(
+            `Got SubscriptionDeletedEvent event data, topic: ${
+              eventGridEvent.topic
+            }`
+          );
           break;
         }
         default: {

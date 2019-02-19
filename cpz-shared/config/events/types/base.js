@@ -69,4 +69,8 @@ const SUB_VALIDATION_EVENT = {
   eventType: "Microsoft.EventGrid.SubscriptionValidationEvent"
 };
 
-export { BASE_EVENT, BASE_ERROR, SUB_VALIDATION_EVENT };
+const SUB_DELETED_EVENT = {
+  eventType: "Microsoft.EventGrid.SubscriptionDeletedEvent"
+};
+
+export { BASE_EVENT, BASE_ERROR, SUB_VALIDATION_EVENT, SUB_DELETED_EVENT };
