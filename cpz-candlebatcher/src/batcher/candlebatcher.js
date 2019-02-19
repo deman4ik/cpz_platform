@@ -3,29 +3,29 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
   CANDLE_CREATED,
   CANDLE_LOADED,
   CANDLE_PREVIOUS,
-  VALID_TIMEFRAMES,
-  createCandlebatcherSlug,
   createCachedCandleSlug,
-  createNewCandleSubject
+  createCandlebatcherSlug,
+  createNewCandleSubject,
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  VALID_TIMEFRAMES
 } from "cpzState";
 import {
-  LOG_CANDLEBATCHER_EVENT,
   CANDLES_NEWCANDLE_EVENT,
+  CANDLES_TOPIC,
   ERROR_CANDLEBATCHER_EVENT,
-  CANDLES_TOPIC
+  LOG_CANDLEBATCHER_EVENT
 } from "cpzEventTypes";
 import { combineCandlebatcherSettings } from "cpzUtils/settings";
 import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
 import {
-  saveCandleToCache,
-  saveCandlesArrayToCache,
+  cleanCachedCandles,
   getCachedCandles,
-  cleanCachedCandles
+  saveCandlesArrayToCache,
+  saveCandleToCache
 } from "cpzStorage/candles";
 import {
   deletePrevCachedTicksArray,
@@ -34,9 +34,9 @@ import {
 import { getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
 import {
-  handleCandleGaps,
-  getCurrentTimeframes,
   generateCandleRowKey,
+  getCurrentTimeframes,
+  handleCandleGaps,
   timeframeToTimeUnit
 } from "cpzUtils/candlesUtils";
 import { lastMinuteCandleEX } from "cpzConnector";
@@ -95,6 +95,47 @@ class Candlebatcher {
     this.log(`Candlebatcher ${this._eventSubject} initialized`);
   }
 
+  get slug() {
+    return createCandlebatcherSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency
+    });
+  }
+
+  /**
+   * Запрос текущего статуса сервиса
+   *
+   * @returns status
+   * @memberof  Trader
+   */
+  get status() {
+    return this._status;
+  }
+
+  /**
+   * Установка статуса сервиса
+   *
+   * @param {*} status
+   * @memberof Trader
+   */
+  set status(status) {
+    if (status) this._status = status;
+
+    if (this._status === STATUS_STOPPED)
+      this._endedAt = dayjs.utc().toISOString();
+  }
+
+  /**
+   * Запрос текущего признака обновления параметров
+   *
+   * @returns updateRequested
+   * @memberof Trader
+   */
+  get updateRequested() {
+    return this._updateRequested;
+  }
+
   /**
    * Логирование в консоль
    *
@@ -128,47 +169,6 @@ class Candlebatcher {
         data
       }
     });
-  }
-
-  get slug() {
-    return createCandlebatcherSlug({
-      exchange: this._exchange,
-      asset: this._asset,
-      currency: this._currency
-    });
-  }
-
-  /**
-   * Запрос текущего статуса сервиса
-   *
-   * @returns status
-   * @memberof  Trader
-   */
-  get status() {
-    return this._status;
-  }
-
-  /**
-   * Запрос текущего признака обновления параметров
-   *
-   * @returns updateRequested
-   * @memberof Trader
-   */
-  get updateRequested() {
-    return this._updateRequested;
-  }
-
-  /**
-   * Установка статуса сервиса
-   *
-   * @param {*} status
-   * @memberof Trader
-   */
-  set status(status) {
-    if (status) this._status = status;
-
-    if (this._status === STATUS_STOPPED)
-      this._endedAt = dayjs.utc().toISOString();
   }
 
   /**

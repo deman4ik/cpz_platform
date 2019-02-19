@@ -25,6 +25,28 @@ const deletePrevCachedTicksArray = ticks =>
  * @param {Date} input.dateFrom
  * @param {Date} input.dateTo
  * @param {string} input.slug
+ * @return {Object} -
+ * @example  Example of return Object
+ * getPrevCachedTicks({
+ *   dateFrom: ,
+ *   dateTo,
+ *   slug
+ * })
+ * // returns {
+        type: “tick”,
+        tickId,
+        PartitionKey: “bitfinex.BTC.USD”,
+        RowKey: tickId,
+        exchange: “bitfinex”,
+        asset: “BTC”,
+        currency: “USD”,
+        direction: “BUY”,
+        tradeId,
+        time,
+        timestamp ISO string,
+        volume,
+        price: Number, example 1231
+      }
  */
 const getPrevCachedTicks = async ({ dateFrom, dateTo, slug }) => {
   try {

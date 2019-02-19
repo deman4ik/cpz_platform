@@ -10,10 +10,8 @@ const state = {
   timeframe: 15,
   options: {},
   tulipIndicators: {},
-  log: () => {
-  },
-  logEvent: () => {
-  },
+  log: () => {},
+  logEvent: () => {},
   variables: {},
   indicatorFunctions: {}
 };
