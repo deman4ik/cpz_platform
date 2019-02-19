@@ -31,7 +31,7 @@
     "babel-polyfill": "6.26.0",
     "ccxt": "1.18.210",
     "dayjs": "1.8.5",
-    "fastest-validator": "0.6.14",
+    "fastest-validator": "^0.6.15",
     "graphql": "14.1.1",
     "graphql-import-loader": "0.2.1",
     "graphql-iso-date": "3.6.1",
