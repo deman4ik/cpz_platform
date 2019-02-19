@@ -10,7 +10,7 @@ WORKDIR /src/cpz-importer
 RUN npm install
 ENV NODE_ENV=production
 RUN npm run webpack
-RUN npm uninstall 
+RUN npm uninstall -D
 
 FROM node:10 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
