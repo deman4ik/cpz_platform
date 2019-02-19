@@ -1,11 +1,12 @@
-import msRestAzure from "ms-rest-azure";
-import EventGridManagementClient from "azure-arm-eventgrid";
+import * as msRestAzure from "@azure/ms-rest-nodeauth";
+import { EventGridManagementClient } from "@azure/arm-eventgrid";
 import { checkEnvVars } from "cpzUtils/environment";
 import dotenv from "dotenv-safe";
 import {
   endpoints as eventEndpoints,
   topics
 } from "cpzConfig/events/endpoints";
+import { EVENTS_LOGGER_SERVICE } from "cpzServices";
 
 dotenv.config();
 checkEnvVars([
@@ -13,14 +14,16 @@ checkEnvVars([
   "MANAGE_APP_KEY",
   "AD_DIRECTORY_ID",
   "SUBSRIPTION_ID",
-  "RESOURSE_GROUP"
+  "RESOURSE_GROUP",
+  "STORAGE"
 ]);
 const {
   MANAGE_APP_ID,
   MANAGE_APP_KEY,
   AD_DIRECTORY_ID,
   SUBSRIPTION_ID,
-  RESOURSE_GROUP
+  RESOURSE_GROUP,
+  STORAGE
 } = process.env;
 
 async function getClient() {
@@ -36,19 +39,26 @@ async function getClient() {
 
 async function createOrUpdateSub(
   EGMClient,
-  topicName,
-  subName,
-  endpointUrl,
-  eventTypes
+  { topic, topicName, serviceName, subName, endpointUrl, eventTypes }
 ) {
   const scope = `/subscriptions/${SUBSRIPTION_ID}/resourceGroups/${RESOURSE_GROUP}/providers/Microsoft.EventGrid/topics/${topicName}`;
   const properties = {
+    deadLetterDestination: {
+      endpointType: "StorageBlob",
+      blobContainerName: `eg-${topic}-dead`,
+      resourceId: `/subscriptions/${SUBSRIPTION_ID}/resourceGroups/${RESOURSE_GROUP}/providers/microsoft.Storage/storageAccounts/${STORAGE}`
+    },
     destination: {
       endpointType: "WebHook",
       endpointUrl
     },
     filter: {
-      includedEventTypes: eventTypes
+      includedEventTypes:
+        serviceName === EVENTS_LOGGER_SERVICE ? null : eventTypes
+    },
+    retryPolicy: {
+      eventTimeToLiveInMinutes: 60,
+      maxDeliveryAttempts: 10
     },
     eventDeliverySchema: "EventGridSchema"
   };
@@ -133,7 +143,8 @@ function createSubscriptionsList(environment, apikey) {
         ...eventEndpoints[key].map(endpoint => ({
           ...endpoint,
           topicName: createTopicName(endpoint.topic, environment),
-          url: createEndpointUrl(key, environment, endpoint.url, apikey)
+          url: createEndpointUrl(key, environment, endpoint.url, apikey),
+          serviceName: key
         })),
         ...allEndpoints
       ])
@@ -158,17 +169,24 @@ async function createSubscriptions(client, subscriptions) {
           subscription.url
         }`
       );
-      const result = await createOrUpdateSub(
-        client,
-        subscription.topicName,
-        subscription.name,
-        subscription.url
-      );
-      console.log(result);
+
+      try {
+        await createOrUpdateSub(client, {
+          topic: subscription.topic,
+          topicName: subscription.topicName,
+          serviceName: subscription.serviceName,
+          subName: subscription.name,
+          endpointUrl: subscription.url,
+          eventTypes: subscription.types
+        });
+        console.log(subscription.name, "ok");
+      } catch (err) {
+        console.log(err);
+      }
     }
     /* no-restricted-syntax, no-await-in-loop  */
   } catch (error) {
-    throw error;
+    console.error(error);
   }
 }
 

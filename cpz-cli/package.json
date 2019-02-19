@@ -16,11 +16,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/arm-eventgrid": "^3.0.1",
+    "@azure/ms-rest-nodeauth": "^0.9.1",
     "adal-node": "0.1.28",
-    "azure-arm-eventgrid": "3.0.0",
     "azure-keyvault": "3.0.4",
     "dotenv-safe": "6.1.0",
-    "ms-rest-azure": "2.6.0",
     "uuid": "3.3.2",
     "verror": "1.10.0",
     "vorpal": "^1.12.0"
