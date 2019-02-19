@@ -8,18 +8,18 @@ services:
     ports:
       - "8101:80"
     environment:
-      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
-      - AZ_STORAGE_CS
-      - API_KEY 
-      - DB_API_ENDPOINT
-      - DB_API_ACCESS_KEY
+      - AZ_STORAGE_EVENT_CS
+      - AZ_STORAGE_MARKET_CS
       - EG_EMULATOR_MODE
       - LOG_TABLE_STORAGE
       - LOG_POSTGRE
-      - DEBUG
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
+      - API_KEY
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
   cpz-marketwatcher:
     container_name: cpz-marketwatcher
     build:
@@ -28,16 +28,19 @@ services:
     ports:
       - "8102:80"
     environment:
-      - NODE_ENV
-      - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
-      - AZ_STORAGE_CS  
+      - AZ_STORAGE_MARKET_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY 
       - PROXY_ENDPOINT
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
+      - EG_TICKS_ENDPOINT
+      - EG_TICKS_KEY
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   cpz-candlebatcher:
     container_name: cpz-candlebatcher
@@ -47,18 +50,22 @@ services:
     ports:
       - "8103:80"
     environment:
-      - NODE_ENV
-      - FUNCTIONS_WORKER_RUNTIME 
-      - AzureWebJobsStorage  
-      - AZ_STORAGE_CS  
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage
+      - AZ_STORAGE_MARKET_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
+      - EG_CANDLES_ENDPOINT
+      - EG_CANDLES_KEY
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
       - CONNECTOR_API_ENDPOINT
       - CONNECTOR_API_KEY
-      - PROXY_ENDPOINT
-      - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   cpz-adviser:
     container_name: cpz-adviser
@@ -68,15 +75,20 @@ services:
     ports:
       - "8104:80"
     environment:
-      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
-      - AzureWebJobsStorage 
-      - AZ_STORAGE_CS
+      - AzureWebJobsStorage
+      - AZ_STORAGE_TRADE_CS
+      - AZ_STORAGE_MARKET_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY  
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
+      - EG_SIGNALS_ENDPOINT
+      - EG_SIGNALS_KEY
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always  
   cpz-importer:
     container_name: cpz-importer
@@ -86,18 +98,20 @@ services:
     ports:
       - "8105:80"
     environment:
-      - NODE_ENV
-      - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
-      - AZ_STORAGE_CS  
+      - AZ_STORAGE_MARKET_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY 
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
+      - DB_API_ENDPOINT
+      - DB_API_ACCESS_KEY
       - CONNECTOR_API_ENDPOINT
       - CONNECTOR_API_KEY
-      - PROXY_ENDPOINT
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   cpz-trader:
     container_name: cpz-trader
@@ -107,17 +121,22 @@ services:
     ports:
       - "8106:80"
     environment:   
-      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
-      - AzureWebJobsStorage   
-      - AZ_STORAGE_CS
+      - AzureWebJobsStorage
+      - AZ_STORAGE_MARKET_CS
+      - AZ_STORAGE_TRADE_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY  
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
+      - EG_TRADES_ENDPOINT
+      - EG_TRADES_KEY
       - CONNECTOR_API_ENDPOINT
       - CONNECTOR_API_KEY
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   cpz-control-api:
     container_name: cpz-control-api
@@ -127,17 +146,22 @@ services:
     ports:
       - "8107:80"
     environment:   
-      - NODE_ENV
       - FUNCTIONS_WORKER_RUNTIME
-      - AzureWebJobsStorage   
-      - AZ_STORAGE_CS
+      - AzureWebJobsStorage
+      - AZ_STORAGE_CONTROL_CS
+      - AZ_STORAGE_MARKET_CS
+      - AZ_STORAGE_TRADE_CS
+      - AZ_STORAGE_BACKTESTER_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY  
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
       - DB_API_ENDPOINT
       - DB_API_ACCESS_KEY
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   cpz-backtester:
     container_name: cpz-backtester
@@ -147,17 +171,20 @@ services:
     ports:
       - "8108:80"
     environment:   
-      - NODE_ENV
-      - FUNCTIONS_WORKER_RUNTIME
-      - AzureWebJobsStorage   
-      - AZ_STORAGE_CS
+      - AzureWebJobsStorage
+      - AZ_STORAGE_MARKET_CS
+      - AZ_STORAGE_TRADE_CS
+      - AZ_STORAGE_BACKTESTER_CS
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY  
+      - EG_TASKS_ENDPOINT
+      - EG_TASKS_KEY
+      - EG_LOG_ENDPOINT
+      - EG_LOG_KEY
       - DB_API_ENDPOINT
       - DB_API_ACCESS_KEY
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always  
   cpz-connector:
     container_name: cpz-connector
@@ -167,13 +194,9 @@ services:
     ports:
       - "8109:80"
     environment:
-      - NODE_ENV
-      - FUNCTIONS_WORKER_RUNTIME 
-      - AzureWebJobsStorage  
-      - AZ_STORAGE_CS  
+      - FUNCTIONS_WORKER_RUNTIME
+      - AzureWebJobsStorage
       - API_KEY
-      - EG_TEST_ENDPOINT
-      - EG_TEST_KEY 
       - PROXY_ENDPOINT
       - KEY_VAULT_URL
       - KEY_VAULT_READ_CLIENT_ID
@@ -182,6 +205,7 @@ services:
       - KEY_VAULT_DECR_APP_SECRET
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
+      - NODE_ENV
     restart: always
   nginx:
     container_name: nginx
