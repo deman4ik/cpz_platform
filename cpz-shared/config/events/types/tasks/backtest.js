@@ -13,7 +13,7 @@ const BACKTEST_START_PARAMS = {
   },
   userId: {
     description: "User uniq Id.",
-    type: "string",
+    type: "uuid",
     empty: false
   },
   dateFrom: {

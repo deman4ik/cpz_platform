@@ -8,7 +8,7 @@ const TASKS_MARKETWATCHER_START_EVENT = {
       type: "string",
       empty: false
     },
-    exchange: { description: "Exchange code.", type: "string", empty: false },
+    exchange: { description: "Exchange code.", type: "exchange", empty: false },
     debug: {
       description: "Debug mode.",
       type: "boolean",
@@ -28,12 +28,12 @@ const TASKS_MARKETWATCHER_START_EVENT = {
         props: {
           asset: {
             description: "Base currency.",
-            type: "string",
+            type: "currency",
             empty: false
           },
           currency: {
             description: "Quote currency.",
-            type: "string",
+            type: "currency",
             empty: false
           }
         }
@@ -61,7 +61,7 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
       type: "string",
       empty: false
     },
-    exchange: { description: "Exchange code.", type: "string", empty: false },
+    exchange: { description: "Exchange code.", type: "exchange", empty: false },
     subscriptions: {
       description: "Data subscriptions list",
       type: "array",
@@ -70,12 +70,12 @@ const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT = {
         props: {
           asset: {
             description: "Base currency.",
-            type: "string",
+            type: "currency",
             empty: false
           },
           currency: {
             description: "Quote currency.",
-            type: "string",
+            type: "currency",
             empty: false
           }
         }
@@ -100,12 +100,12 @@ const TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT = {
         props: {
           asset: {
             description: "Base currency.",
-            type: "string",
+            type: "currency",
             empty: false
           },
           currency: {
             description: "Quote currency.",
-            type: "string",
+            type: "currency",
             empty: false
           }
         }
