@@ -16,14 +16,13 @@ const BACKTEST_START_PARAMS = {
     type: "string",
     empty: false
   },
-  // TODO: datefrom/dateto custom validation
   dateFrom: {
     description: "Backtest start date.",
-    type: "datetime"
+    type: "datefrom"
   },
   dateTo: {
     description: "Backtest end date.",
-    type: "datetime"
+    type: "dateto"
   },
   settings: {
     description: "Backtester settings.",

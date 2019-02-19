@@ -41,7 +41,7 @@ function eventHandler(req, res) {
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
           );
-          res.send({
+          res.status(200).send({
             validationResponse: eventData.validationCode
           });
           break;
@@ -53,6 +53,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleStart({ eventSubject, ...eventData });
+          res.status(200);
           break;
         }
         case TASKS_MARKETWATCHER_STOP_EVENT.eventType: {
@@ -71,6 +72,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleSubscribe({ eventSubject, ...eventData });
+          res.status(200);
           break;
         }
         case TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.eventType: {
@@ -80,6 +82,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleUnsubscribe({ eventSubject, ...eventData });
+          res.status(200);
           break;
         }
         default: {
@@ -87,8 +90,6 @@ function eventHandler(req, res) {
         }
       }
     });
-
-    res.status(200);
   } catch (error) {
     console.error(error);
     res

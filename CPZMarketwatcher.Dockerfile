@@ -7,11 +7,10 @@ RUN apt-get update &&  \
 COPY /cpz-marketwatcher /src/cpz-marketwatcher
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-marketwatcher
+RUN npm install
 ENV NODE_ENV=production
-RUN npm install && \
-    npm run webpack && \
-    npm uninstall -D && \
-    npm cache clean --force     
+RUN npm run webpack
+RUN npm uninstall  
 
 FROM node:10 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot

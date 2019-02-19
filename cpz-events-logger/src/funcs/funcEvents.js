@@ -4,11 +4,10 @@ import { SUB_VALIDATION_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
 import EventsLogger from "../eventslogger/eventslogger";
-import relay from "../emulator/relay";
 
 checkEnvVars(eventsloggerEnv.variables);
 
-const { EG_EMULATOR_MODE } = process.env;
+// const { EG_EMULATOR_MODE } = process.env;
 
 function handleEvent(context, req) {
   try {
@@ -47,9 +46,14 @@ function handleEvent(context, req) {
           const eventslogger = new EventsLogger(context);
           eventslogger.save(eventGridEvent);
 
+          /*
           if (EG_EMULATOR_MODE) {
+            
+            const relay = require("../emulator/relay");
+        
             relay(context, eventGridEvent);
           }
+          */
         }
       }
     });

@@ -13,7 +13,7 @@ const BASE_EVENT = {
     subject: {
       description: "A resource path relative to the topic path.",
       type: "string",
-      empty: false
+      empty: true
     },
     data: {
       description: "Event data specific to the event type.",

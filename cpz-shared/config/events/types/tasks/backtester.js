@@ -36,14 +36,13 @@ const TASKS_BACKTESTER_START_EVENT = {
       description: "Timeframe in minutes.",
       type: "number"
     },
-    // TODO: datefrom/dateto custom validation
     dateFrom: {
       description: "Backtest start date.",
-      type: "datetime"
+      type: "datefrom"
     },
     dateTo: {
       description: "Backtest end date.",
-      type: "datetime"
+      type: "dateto"
     },
     settings: {
       description: "Backtester settings.",
