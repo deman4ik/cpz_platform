@@ -23,7 +23,6 @@
   "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC",
   "dependencies": {
-    "dayjs": "file:../cpz-shared/utils/lib/dayjs.js",
     "@babel/runtime": "7.3.1",
     "azure-eventgrid": "1.5.0",
     "azure-storage": "2.10.1",
