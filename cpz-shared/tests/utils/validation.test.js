@@ -172,3 +172,83 @@ describe("Validate posInt", () => {
     });
   });
 });
+
+describe("Validate tradeMode", () => {
+  const testSchema = {
+    type: "any",
+    optional: true
+  };
+
+  const testObj = {
+    test1: "test1",
+    test2: {
+      test1: 1
+    },
+    test3: [{ test1: [0, 1, 2] }, [{ test1: [0] }]]
+  };
+
+  test("Shouldn't throw error on correct type", () => {
+    toValidateAndCheck(
+      { mode: "test", test: testObj },
+      {
+        mode: {
+          type: "tradeMode",
+          values: ["test"],
+          requiredProps: {
+            test: ["test", "test.test1", "test.test2"]
+          }
+        },
+        test: testSchema
+      },
+      "Threw error",
+      "doesNotThrow"
+    );
+  });
+
+  test("Shouldn't throw error on correct type with depeer check", () => {
+    toValidateAndCheck(
+      { mode: "test", test: testObj },
+      {
+        mode: {
+          type: "tradeMode",
+          values: ["test", "brook"],
+          requiredProps: {
+            test: ["test.test1", "test.test2.test1", "test.test3[0].test1[2]"]
+          }
+        },
+        test: testSchema
+      },
+      "Threw error",
+      "doesNotThrow"
+    );
+  });
+
+  test("Should throw error on incorrect type", () => {
+    toValidateAndCheck(
+      { mode: "test", test: testObj },
+      {
+        mode: {
+          type: "tradeMode",
+          values: ["test"],
+          requiredProps: {
+            test: ["notExistsUrl", "test.notExistsUrl"]
+          }
+        },
+        test: testSchema
+      }
+    );
+  });
+
+  test("Should throw error on incorrect requiredProps type", () => {
+    toValidateAndCheck(
+      { mode: "test", test: testObj },
+      {
+        mode: {
+          type: "tradeMode",
+          values: ["test"],
+          requiredProps: []
+        }
+      }
+    );
+  });
+});

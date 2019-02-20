@@ -167,3 +167,41 @@ describe("Correct with limit", () => {
     expect(helpers.correctWithLimit(initValue, min, max)).toBe(5);
   });
 });
+
+describe("Should return query by path", () => {
+  test("Should return query by objects", () => {
+    expect(helpers.getQueryByPath({ a: { c: "d" } }, "a.c")).toEqual("d");
+  });
+
+  test("Should return undefined if query not reachable", () => {
+    expect(helpers.getQueryByPath({ a: "a" }, "a.b.c")).toEqual(undefined);
+  });
+
+  test("Should return query by array", () => {
+    expect(helpers.getQueryByPath({ a: [{ c: "d" }] }, "a[0]c")).toEqual("d");
+  });
+
+  test("Should delete empty keys", () => {
+    expect(helpers.getQueryByPath([[0, { "2": 3 }]], "[0][1][2]")).toEqual(3);
+  });
+});
+
+describe("Should return bool - does query have", () => {
+  test("Should return true by objects", () => {
+    expect(helpers.hasQueryByPath({ a: { c: "d" } }, "a.c")).toEqual(true);
+  });
+
+  test("Should return false if query not reachable", () => {
+    expect(helpers.hasQueryByPath({ a: "a" }, "a.b.c")).toEqual(false);
+  });
+
+  test("Should return true by arrays", () => {
+    expect(helpers.hasQueryByPath({ a: [{ c: "d" }] }, "a[0]c")).toEqual(true);
+  });
+
+  test("Should delete empty keys", () => {
+    expect(helpers.hasQueryByPath([[0, { "2": 3 }]], "[0][1][2]")).toEqual(
+      true
+    );
+  });
+});

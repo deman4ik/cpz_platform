@@ -2,6 +2,8 @@ import FValidator from "fastest-validator";
 import VError from "verror";
 import dayjs from "./lib/dayjs";
 
+import { hasQueryByPath } from "./helpers";
+
 /**
  * Валидатор структуры объекта
  */
@@ -11,6 +13,7 @@ const validator = new FValidator({
     datetime:
       "The '{field}' field must be an ISO 8601 date format! Actual: {actual}",
     datediff: "The '{field}' field must be more or equal than field 'dateto'",
+    requiredQuery: "The '{expected}' queries is required. Actual: {actual}",
     requiredByField: "If have '{field}' the {expected} is required",
     keyNameError:
       "The '{field}' field must have another key. Actual: {actual}, expected: {expected}",
@@ -21,7 +24,8 @@ const validator = new FValidator({
     NaN: "The '{field}' field must be a number",
     // Not an Integer
     NaI: "The '{field}' field must be an integer",
-    posInt: "The '{field}' field must be positive"
+    posInt: "The '{field}' field must be positive",
+    incorrectValue: "The '{field}' can be only {expected}. Actual {actual}"
   }
 });
 
@@ -47,6 +51,40 @@ validator.add("int", value => {
   if (typeof value !== "number" || isNaN(value))
     return validator.makeError("NaN");
   if (value !== Math.floor(value)) return validator.makeError("NaI");
+
+  return true;
+});
+
+// расширение валидатора новым типом данных tradeMode
+validator.add("tradeMode", (value, { values, requiredProps }, _, parent) => {
+  const { isArray: iA } = Array;
+
+  if (iA(values) && !values.includes(value))
+    return validator.makeError("incorrectValue", values.join(", "), value);
+
+  const { stringify: str } = JSON;
+
+  if (!requiredProps || typeof requiredProps !== "object" || iA(requiredProps))
+    return validator.makeError(
+      "requiredQuery",
+      `requiredProps: ${str(
+        values.reduce((prev, cur) => {
+          prev[cur] = "string[]";
+          return prev;
+        }, {})
+      )}`,
+      requiredProps
+    );
+
+  requiredProps = requiredProps[value];
+  if (!requiredProps) return true;
+
+  for (let i = 0; i < requiredProps.length; i += 1) {
+    const path = requiredProps[i];
+
+    if (!hasQueryByPath(parent, path))
+      return validator.makeError("requiredByField", path);
+  }
 
   return true;
 });

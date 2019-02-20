@@ -57,12 +57,14 @@ const KEY_VAULT_SECRET = {
     type: "string"
   }
 };
-// TODO: Custom validation if mode = 'realtime' keys.main required
 const TRADER_SETTINGS = {
   mode: {
     description: "Service run mode.",
-    type: "string",
+    type: "tradeMode",
     values: ["emulator", "realtime"],
+    requiredProps: {
+      realtime: ["keys.main.APIKey", "keys.main.APISecret"]
+    },
     optional: true
   },
   debug: {
