@@ -162,13 +162,13 @@ class CryptocompareProvider extends BaseProvider {
     });
 
     // При disconnectе
-    this._socket.on("disconnect", this._handleError);
+    this._socket.on("disconnect", this._handleError.bind(this));
 
     // Если произошла ошибка
-    this._socket.on("error", this._handleError);
+    this._socket.on("error", this._handleError.bind(this));
 
     // Если все попытки переподключения исчерпаны
-    this._socket.on("reconnect_failed", this._handleError);
+    this._socket.on("reconnect_failed", this._handleError.bind(this));
   }
 
   async start() {
