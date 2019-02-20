@@ -16,6 +16,7 @@ const STATUS_FINISHED = "finished"; // Обработка завершена
 const POS_STATUS_NEW = "new"; // Не определен (создана в системе)
 const POS_STATUS_OPEN = "open"; // Позиция открыта (активна) ордер на открытие выставлен
 const POS_STATUS_CLOSED = "closed"; // Позиция закрыта (завершена)
+const POS_STATUS_CLOSED_AUTO = "closedAuto"; // Позиция закрыта (завершена) автоматически
 const POS_STATUS_CANCELED = "canceled"; // Позиция отменена
 const POS_STATUS_ERROR = "error"; // Произошла ошибка во время обработки позиции
 
@@ -34,6 +35,7 @@ const ORDER_STATUS_ERROR = "error"; // Произошла ошибка во вр
 const ORDER_TASK_OPENBYMARKET = "openByMarket"; // Выставить ордер по рынку
 const ORDER_TASK_SETLIMIT = "setLimit"; // Выставить лимитный ордер
 const ORDER_TASK_CHECKLIMIT = "checkLimit"; // Проверить выполненный объем ордера на бирже
+const ORDER_TASK_CANCEL = "cancel"; // Отменить ордер
 
 export {
   STATUS_BUSY,
@@ -47,6 +49,7 @@ export {
   POS_STATUS_NEW,
   POS_STATUS_OPEN,
   POS_STATUS_CLOSED,
+  POS_STATUS_CLOSED_AUTO,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
   ORDER_STATUS_NEW,
@@ -56,5 +59,6 @@ export {
   ORDER_STATUS_ERROR,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT
+  ORDER_TASK_CHECKLIMIT,
+  ORDER_TASK_CANCEL
 };

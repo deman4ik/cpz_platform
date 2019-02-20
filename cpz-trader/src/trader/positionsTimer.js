@@ -21,7 +21,6 @@ async function handleTimer(context) {
         try {
           const position = new Position(state);
           const openOrders = position.getOpenOrders();
-          // TODO: Проверка и закрытие уже открытых ордеров, которые висят слишком долго
           if (openOrders.length > 0) {
             const traderState = await getTraderById(position.traderId);
             if (traderState && traderState.status === STATUS_STARTED) {

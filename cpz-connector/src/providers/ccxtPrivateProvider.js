@@ -2,6 +2,7 @@ import ccxt from "ccxt";
 import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
+import { ORDER_TYPE_MARKET_FORCE } from "cpzState";
 import { correctWithLimit, precision } from "cpzUtils/helpers";
 import BasePrivateProvider from "./basePrivateProvider";
 
@@ -170,7 +171,21 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       // TODO: Params
       context.log("createOrder()");
       await this._checkKeysVersion(context, keys);
-      const { direction, volume, price, asset, currency, params } = order;
+      const {
+        direction,
+        volume,
+        price,
+        asset,
+        currency,
+        orderType,
+        params
+      } = order;
+      /* Если тип ордера строго "маркет" и биржа поддерживает маркет ордера, 
+        то выставляем маркет ордер во всех остальных случаях limit */
+      const type =
+        orderType === ORDER_TYPE_MARKET_FORCE && this.ccxt.has.createMarketOrder
+          ? "market"
+          : "limit";
       const market = this.ccxt.market(this.getSymbol(asset, currency));
       const correctedPrice = correctWithLimit(
         precision(price, market.precision.price),
@@ -188,7 +203,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         try {
           return await this.ccxt.createOrder(
             this.getSymbol(asset, currency),
-            "limit",
+            type,
             direction,
             correctedVolume,
             correctedPrice,

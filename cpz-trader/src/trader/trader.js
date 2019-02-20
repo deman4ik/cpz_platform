@@ -15,16 +15,21 @@ import {
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
   POS_STATUS_CLOSED,
+  POS_STATUS_CLOSED_AUTO,
   POS_STATUS_OPEN,
+  ORDER_POS_DIR_EXIT,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
+  ORDER_STATUS_CANCELED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
+  ORDER_TYPE_MARKET_FORCE,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
+  ORDER_TASK_CANCEL,
   createTraderSlug,
   createPositionSlug,
   createCurrentPriceSlug
@@ -40,6 +45,7 @@ import {
 } from "cpzStorage/positions";
 import { checkOrderEX, cancelOrderEX, createOrderEX } from "cpzConnector";
 import Position from "./position";
+import { EMULATOR_MODE } from "../../../cpz-shared/config/state/types";
 
 /**
  * Класс проторговщика
@@ -194,16 +200,20 @@ class Trader {
     );
   }
 
-  async closePosition(price, positionState) {
+  async closePosition(positionState) {
     try {
       const closeSignal = {
         signalId: uuid(),
-        price,
+        price:
+          positionState.direction === ORDER_DIRECTION_BUY
+            ? 1000000000
+            : 0.00000001, // Цена ордера, для бирж не поддерживающих маркет ордера
         timestamp: dayjs.utc().toISOString(),
-        orderType: ORDER_TYPE_MARKET,
+        orderType: ORDER_TYPE_MARKET_FORCE,
         positionId: positionState.positionId,
         settings: {
-          positionCode: positionState.settings.positionCode
+          positionCode: positionState.settings.positionCode,
+          volume: positionState.exit.remaining
         }
       };
       if (positionState.direction === ORDER_DIRECTION_BUY) {
@@ -235,17 +245,9 @@ class Trader {
       });
 
       if (positionsState.length > 0) {
-        const price = await getCurrentPrice(
-          createCurrentPriceSlug({
-            exchange: this._exchange,
-            asset: this._asset,
-            currency: this._currency
-          })
-        );
-
         /* eslint-disable no-restricted-syntax, no-await-in-loop */
         for (const positionState of positionsState) {
-          await this.closePosition(price, positionState);
+          await this.closePosition(positionState);
         }
         /* no-restricted-syntax, no-await-in-loop */
       }
@@ -344,6 +346,58 @@ class Trader {
     this._lastPriceTimestamp = timestamp;
   }
 
+  async _checkSinglePosition() {
+    try {
+      if (!this._settings.multiPosition) {
+        if (
+          this._settings.mode === REALTIME_MODE ||
+          this._settings.mode === EMULATOR_MODE
+        ) {
+          // In realtime and emulation - closing all active positions
+          await this.closeActivePositions();
+        } else if (this._settings.mode === BACKTEST_MODE) {
+          if (Object.keys(this._currentPositions).length > 0) {
+            const activePositions = Object.keys(this._currentPositions)
+              .map(key => ({
+                positionId: this._currentPositions[key]._positionId,
+                positionCode: this._currentPositions[key]._settings
+                  .positionCode,
+                status: this._currentPositions[key]._status
+              }))
+              .filter(
+                position =>
+                  position.status === POS_STATUS_NEW ||
+                  position.status === POS_STATUS_OPEN
+              );
+            if (activePositions.length > 0) {
+              throw new VError(
+                {
+                  name: "CreatePositionError",
+                  info: {
+                    activePositions
+                  }
+                },
+                "Failed to create new position, active positions found"
+              );
+            }
+          }
+        }
+      }
+    } catch (error) {
+      throw new VError(
+        {
+          name: "TraderError",
+          cause: error,
+          info: {
+            taskId: this._taskId
+          }
+        },
+        'Failed to check multi positions trader "%s"',
+        this._taskId
+      );
+    }
+  }
+
   /**
    * Обработка нового сигнала
    *
@@ -366,38 +420,8 @@ class Trader {
         this._signal.action === TRADE_ACTION_LONG ||
         this._signal.action === TRADE_ACTION_SHORT
       ) {
-        if (!this._settings.multiPosition) {
-          if (this._settings.mode === BACKTEST_MODE) {
-            if (Object.keys(this._currentPositions).length > 0) {
-              const activePositions = Object.keys(this._currentPositions)
-                .map(key => ({
-                  positionId: this._currentPositions[key]._positionId,
-                  positionCode: this._currentPositions[key]._settings
-                    .positionCode,
-                  status: this._currentPositions[key]._status
-                }))
-                .filter(
-                  position =>
-                    position.status === POS_STATUS_NEW ||
-                    position.status === POS_STATUS_OPEN
-                );
-              if (activePositions.length > 0) {
-                throw new VError(
-                  {
-                    name: "CreatePositionError",
-                    info: {
-                      activePositions
-                    }
-                  },
-                  "Failed to create new position, active positions found"
-                );
-              }
-            }
-          } else {
-            // In realtime and emulation - closing all active positions
-            await this.closeActivePositions();
-          }
-        }
+        // Проверка единичной позиции
+        await this._checkSinglePosition();
 
         // Создаем новую позицию
         this._createPosition(this._signal.positionId);
@@ -429,7 +453,9 @@ class Trader {
         this._currentPositions[this._signal.positionId].status !==
           POS_STATUS_CANCELED &&
         this._currentPositions[this._signal.positionId].status !==
-          POS_STATUS_CLOSED
+          POS_STATUS_CLOSED &&
+        this._currentPositions[this._signal.positionId].status !==
+          POS_STATUS_CLOSED_AUTO
       ) {
         // Созданный ордер
         const createdOrder = this._currentPositions[this._signal.positionId]
@@ -465,6 +491,53 @@ class Trader {
     }
   }
 
+  async handleOrder(order) {
+    try {
+      // Загружаем позицию
+      await this._loadPosition(order.positionId);
+
+      // Сохраняем ордер в позиции и генерируем события
+      this._events.push(
+        this._currentPositions[order.positionId].handleOrder(order)
+      );
+      this._events.push(
+        this._currentPositions[order.positionId].createPositionEvent()
+      );
+      // Сохраняем состояние позиции в сторедж
+      await this._currentPositions[order.positionId].save();
+
+      const currentOrder = { ...order };
+      if (
+        order.exTimestamp &&
+        order.status === ORDER_STATUS_OPEN &&
+        dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
+          this._settings.openOrderTimeout
+      ) {
+        currentOrder.task = ORDER_TASK_CANCEL;
+        await this.executeOrders([currentOrder]);
+      } else if (
+        order.status === ORDER_STATUS_CANCELED &&
+        order.positionCode === ORDER_POS_DIR_EXIT
+      ) {
+        await this.closePosition(
+          this._currentPositions[order.positionId].getCurrentState()
+        );
+      }
+    } catch (error) {
+      throw new VError(
+        {
+          name: "HandlingOrder",
+          cause: error,
+          info: {
+            order
+          }
+        },
+        'Error while handling order "%s"',
+        order.orderId
+      );
+    }
+  }
+
   /**
    * Исполнение ордеров
    *
@@ -483,7 +556,7 @@ class Trader {
           // Если режим - в реальном времени
           if (this._settings.mode === REALTIME_MODE) {
             // Запрашиваем статус ордера с биржи
-            let currentOrder = await checkOrderEX({
+            const currentOrder = await checkOrderEX({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
@@ -493,21 +566,6 @@ class Trader {
             });
             this.log("checkOrderEX", currentOrder);
 
-            if (
-              currentOrder.status === ORDER_STATUS_OPEN &&
-              dayjs.utc().diff(dayjs.utc(currentOrder.exTimestamp), "minute") >
-                this._settings.openOrderTimeout
-            ) {
-              currentOrder = await cancelOrderEX({
-                exchange: this._exchange,
-                asset: this._asset,
-                currency: this._currency,
-                userId: this._userId,
-                keys: this._settings.keys,
-                exId: order.exId
-              });
-              this.log("cancelOrderEX", currentOrder);
-            }
             orderResult = { ...orderResult, ...currentOrder };
           } else {
             // Если режим - эмуляция или бэктест
@@ -567,19 +625,19 @@ class Trader {
             orderResult.exLastTrade = this._lastPriceTimestamp;
             orderResult.average = orderResult.price;
           }
+        } else if (order.task === ORDER_TASK_CANCEL) {
+          const currentOrder = await cancelOrderEX({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            userId: this._userId,
+            keys: this._settings.keys,
+            exId: order.exId
+          });
+          this.log("cancelOrderEX", currentOrder);
+          orderResult = { ...orderResult, ...currentOrder };
         }
-        // Загружаем позицию
-        await this._loadPosition(order.positionId);
-
-        // Сохраняем ордер в позиции и генерируем события
-        this._events.push(
-          this._currentPositions[order.positionId].handleOrder(orderResult)
-        );
-        this._events.push(
-          this._currentPositions[order.positionId].createPositionEvent()
-        );
-        // Сохраняем состояние позиции в сторедж
-        await this._currentPositions[order.positionId].save();
+        await this.handleOrder(orderResult);
       } catch (error) {
         throw new VError(
           {

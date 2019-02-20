@@ -8,6 +8,7 @@ import {
   POS_STATUS_NEW,
   POS_STATUS_OPEN,
   POS_STATUS_CLOSED,
+  POS_STATUS_CLOSED_AUTO,
   POS_STATUS_CANCELED,
   POS_STATUS_ERROR,
   ORDER_STATUS_NEW,
@@ -17,6 +18,7 @@ import {
   ORDER_STATUS_ERROR,
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
+  ORDER_TYPE_MARKET_FORCE,
   ORDER_TASK_OPENBYMARKET,
   ORDER_TASK_SETLIMIT,
   ORDER_TASK_CHECKLIMIT,
@@ -58,7 +60,7 @@ class Position {
     this._timeframe = state.timeframe;
     /* Настройки */
     this._settings = state.settings;
-    /* Текущий статус ["new","open","closed","canceled","error"] */
+    /* Текущий статус ["new","open","closed","closedAuto","canceled","error"] */
     this._status = state.status || POS_STATUS_NEW;
     this._direction = state.direction;
     this._entry = state.entry || {
@@ -66,7 +68,8 @@ class Position {
       status: null,
       price: null,
       date: null,
-      executed: null
+      executed: null,
+      remaining: null
     };
 
     this._exit = state.exit || {
@@ -74,7 +77,8 @@ class Position {
       status: null,
       price: null,
       date: null,
-      executed: null
+      executed: null,
+      remaining: null
     };
     /* Ордера открытия */
     this._entryOrders = state.entryOrders || {};
@@ -152,6 +156,11 @@ class Position {
       this._exit.status === ORDER_STATUS_CLOSED
     ) {
       this._status = POS_STATUS_CLOSED;
+    } else if (
+      this._entry.status === POS_STATUS_CLOSED &&
+      this._exit.status === POS_STATUS_CLOSED_AUTO
+    ) {
+      this._status = POS_STATUS_CLOSED_AUTO;
     }
     if (
       this._entry.status === ORDER_STATUS_CANCELED ||
@@ -159,6 +168,7 @@ class Position {
     ) {
       this._status = POS_STATUS_CANCELED;
     }
+
     if (
       this._entry.status === ORDER_STATUS_ERROR ||
       this._exit.status === ORDER_STATUS_ERROR
@@ -176,13 +186,15 @@ class Position {
    */
   _createOrder(signal, positionDirection) {
     this.log("Creating new order...");
+    const { signalId, orderType, price, action, settings } = signal;
     this._currentOrder = {
       orderId: uuid(), // Уникальный идентификатор ордера
-      signalId: signal.signalId, // Идентификатор сигнала
+      signalId, // Идентификатор сигнала
       positionId: this._positionId, // Идентификатор позиции
-      orderType: signal.orderType, // Тип ордера
-      price: signal.price, // Цена ордера
+      orderType, // Тип ордера
+      price, // Цена ордера
       volume:
+        settings.volume ||
         (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
         this._settings.volume,
       exchange: this._exchange, // Код биржи
@@ -192,14 +204,15 @@ class Position {
       createdAt: dayjs.utc().toISOString(), // Дата и время создания
       status: ORDER_STATUS_NEW, // Статус ордера
       direction:
-        signal.action === TRADE_ACTION_LONG ||
-        signal.action === TRADE_ACTION_CLOSE_SHORT
+        action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT
           ? ORDER_DIRECTION_BUY
           : ORDER_DIRECTION_SELL, // Направление торговли ордера
       positionDirection, // Место ордера в позиции
-      action: signal.action, // Торговое действие
+      action, // Торговое действие
       task:
-        signal.orderType === ORDER_TYPE_MARKET ? ORDER_TASK_OPENBYMARKET : null // Задача ордера
+        orderType === ORDER_TYPE_MARKET || orderType === ORDER_TYPE_MARKET_FORCE
+          ? ORDER_TASK_OPENBYMARKET
+          : null // Задача ордера
     };
   }
 
@@ -220,6 +233,7 @@ class Position {
     this._entry.price = this._currentOrder.price;
     this._entry.date = this._currentOrder.createdAt;
     this._entry.executed = this._currentOrder.executed;
+    this._entry.remaining = this._currentOrder.remaining;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -241,6 +255,7 @@ class Position {
     this._exit.price = this._currentOrder.price;
     this._exit.date = this._currentOrder.createdAt;
     this._exit.executed = this._currentOrder.executed;
+    this._exit.remaining = this._currentOrder.remaining;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -425,6 +440,7 @@ class Position {
       this._entry.price = order.average || this._entry.price;
       this._entry.date = order.exLastTrade || this._entry.date;
       this._entry.executed = order.executed || this._entry.executed;
+      this._entry.remaining = order.remaining || this._entry.remaining;
     } else {
       // Если ордер на закрытие позиции
 
@@ -432,9 +448,16 @@ class Position {
       this._exitOrders[order.orderId] = order;
       // Изменяем статус закрытия позиции
       this._exit.status = order.status || this._exit.status;
+      if (
+        this._exit.status === ORDER_STATUS_CLOSED &&
+        order.orderType === ORDER_TYPE_MARKET_FORCE
+      )
+        this._exit.status = POS_STATUS_CLOSED_AUTO;
+
       this._exit.price = order.average || this._exit.price;
       this._exit.date = order.exLastTrade || this._exit.date;
       this._exit.executed = order.executed || this._exit.executed;
+      this._exit.remaining = order.remaining || this._exit.remaining;
     }
     // Устанавливаем статус позиции
     this.setStatus();
