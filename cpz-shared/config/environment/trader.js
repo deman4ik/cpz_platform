@@ -11,6 +11,8 @@ export default {
     "EG_LOG_KEY",
     "EG_TRADES_ENDPOINT",
     "EG_TRADES_KEY",
+    "EG_SIGNALS_ENDPOINT",
+    "EG_SIGNALS_KEY",
     "CONNECTOR_API_ENDPOINT",
     "CONNECTOR_API_KEY"
   ]

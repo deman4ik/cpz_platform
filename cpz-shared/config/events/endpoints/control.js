@@ -22,7 +22,7 @@ import {
 } from "../types/tasks/importer";
 import {
   TASKS_MARKETWATCHER_STARTED_EVENT,
-  TASKS_MARKETWATCHER_START_EVENT,
+  TASKS_MARKETWATCHER_STOPPED_EVENT,
   TASKS_MARKETWATCHER_UPDATED_EVENT
 } from "../types/tasks/marketwatcher";
 import {
@@ -43,7 +43,7 @@ export default {
       url: "/api/taskEvents",
       types: [
         TASKS_MARKETWATCHER_STARTED_EVENT.eventType,
-        TASKS_MARKETWATCHER_START_EVENT.eventType,
+        TASKS_MARKETWATCHER_STOPPED_EVENT.eventType,
         TASKS_MARKETWATCHER_UPDATED_EVENT.eventType,
         TASKS_CANDLEBATCHER_STARTED_EVENT.eventType,
         TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType,
