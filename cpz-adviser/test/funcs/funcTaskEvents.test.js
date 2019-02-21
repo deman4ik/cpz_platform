@@ -1,14 +1,17 @@
 import {
   SUB_DELETED_EVENT,
   SUB_VALIDATION_EVENT,
-  CANDLES_NEWCANDLE_EVENT
+  TASKS_ADVISER_START_EVENT,
+  TASKS_ADVISER_STOP_EVENT,
+  TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
-import eventHandler from "../../src/funcs/funcCandleEvents";
+import eventHandler from "../../src/funcs/funcTaskEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
 jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
-jest.mock("../../src/adviser/handleCandleEvents");
+jest.mock("../../src/adviser/handleTaskEvents");
+jest.mock("cpzEnv/advister");
 
 const { stringify: str } = JSON;
 
@@ -48,7 +51,27 @@ describe("eventHandler should show correct messages and return correct objects",
       topic,
       subject,
       data,
-      eventType: CANDLES_NEWCANDLE_EVENT.eventType,
+      eventType: TASKS_ADVISER_START_EVENT.eventType,
+      eventTime,
+      metadataVersion: "0.0.0",
+      dataVersion: "0.0.0"
+    },
+    {
+      id,
+      topic,
+      subject,
+      data,
+      eventType: TASKS_ADVISER_STOP_EVENT.eventType,
+      eventTime,
+      metadataVersion: "0.0.0",
+      dataVersion: "0.0.0"
+    },
+    {
+      id,
+      topic,
+      subject,
+      data,
+      eventType: TASKS_ADVISER_UPDATE_EVENT.eventType,
       eventTime,
       metadataVersion: "0.0.0",
       dataVersion: "0.0.0"
@@ -67,7 +90,9 @@ describe("eventHandler should show correct messages and return correct objects",
     test("Infos should be computable", () => {
       expect(context.log.info.cache).toStrictEqual([
         `CPZ Adviser processed a request.${str(body)}`,
-        `Got CPZ.Candles.NewCandle event data ${str(data)}`
+        `Got ${TASKS_ADVISER_START_EVENT.eventType} event data ${str(data)}`,
+        `Got ${TASKS_ADVISER_STOP_EVENT.eventType} event data ${str(data)}`,
+        `Got ${TASKS_ADVISER_UPDATE_EVENT.eventType} event data ${str(data)}`
       ]);
     });
   });
@@ -94,6 +119,9 @@ describe("eventHandler should show correct messages and return correct objects",
     ]);
 
     eventHandler(errorCtx, errorReq);
+    test("Should be 1 error with doesn't exist type", () => {
+      expect(errorCtx.log.error.cache.length).toEqual(1);
+    });
 
     test("Error should be computable", () => {
       expect(errorCtx.log.error.cache).toStrictEqual([
@@ -113,6 +141,10 @@ describe("eventHandler should show correct messages and return correct objects",
   });
 
   describe("warn", () => {
+    test("Should includes 2 warns", () => {
+      expect(context.log.warn.cache.length).toEqual(2);
+    });
+
     test("Warns should be computable", () => {
       expect(context.log.warn.cache).toStrictEqual([
         `Got SubscriptionDeletedEvent event data, topic: ${topic}`,

@@ -13,6 +13,7 @@ module.exports = {
     cpzState: "<rootDir>../cpz-shared/config/state",
     cpzStorageTables: "<rootDir>../cpz-shared/config/storageTables",
     "^cpzStorage.(.*)$": "<rootDir>../cpz-shared/tableStorage/$1",
+    cpzEnv: "<rootDir>../cpz-shared/config/environment",
     cpzQueuesList: "<rootDir>../cpz-shared/config/queues",
     cpzQueue: "<rootDir>../cpz-shared/queueStorage",
     cpzEvents: "<rootDir>../cpz-shared/eventgrid",
