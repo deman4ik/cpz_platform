@@ -55,12 +55,16 @@ alter table orders
 
 alter table orders
   add constraint c_orders_order_type_chk
-    check (order_type in ('limit','market','stop'));
+    check (order_type in ('limit','market','marketForce','stop'));
 
 alter table orders
   add constraint c_orders_run_mode_chk
     check (run_mode in ('emulator','realtime'));
             
+alter table orders
+  add constraint c_orders_status_chk
+    check (status in ('none','open','closed','canceled'));
+                
 create index i_orders_userlist_fk
   on orders (user_id);
 create index i_orders_robot_fk
