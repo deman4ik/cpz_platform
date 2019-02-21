@@ -113,12 +113,8 @@ describe("eventHandler should show correct messages and return correct objects",
     test("Result should be computable", () => {
       expect(context.res).toStrictEqual({
         status: 200,
-        body: {
-          validationResponse: validationCode
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
+        body: { validationResponse: validationCode },
+        headers: { "Content-Type": "application/json" }
       });
     });
   });
