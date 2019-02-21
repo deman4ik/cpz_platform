@@ -3,7 +3,7 @@ import {
   SUB_VALIDATION_EVENT,
   CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
-import eventHandler from "../../src/funcs/funcCandleEvents";
+import funcCandleEvents from "../../src/funcs/funcCandleEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
@@ -12,7 +12,7 @@ jest.mock("../../src/adviser/handleCandleEvents");
 
 const { stringify: str } = JSON;
 
-describe("eventHandler should show correct messages and return correct objects", () => {
+describe("funcCandleEvents should show correct messages and return correct objects", () => {
   const context = contextMock();
 
   const topic = "TOPIC";
@@ -57,7 +57,7 @@ describe("eventHandler should show correct messages and return correct objects",
 
   const req = reqMock(body);
 
-  eventHandler(context, req);
+  funcCandleEvents(context, req);
 
   test("Should be done", () => {
     expect(context.done.called).toEqual(true);
@@ -93,7 +93,7 @@ describe("eventHandler should show correct messages and return correct objects",
       }
     ]);
 
-    eventHandler(errorCtx, errorReq);
+    funcCandleEvents(errorCtx, errorReq);
 
     test("Error should be computable", () => {
       expect(errorCtx.log.error.cache).toStrictEqual([

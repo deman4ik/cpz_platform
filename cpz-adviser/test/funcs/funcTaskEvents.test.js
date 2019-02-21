@@ -5,7 +5,7 @@ import {
   TASKS_ADVISER_STOP_EVENT,
   TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
-import eventHandler from "../../src/funcs/funcTaskEvents";
+import funcTaskEvents from "../../src/funcs/funcTaskEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
@@ -15,7 +15,7 @@ jest.mock("cpzEnv/advister");
 
 const { stringify: str } = JSON;
 
-describe("eventHandler should show correct messages and return correct objects", () => {
+describe("funcTaskEvents should show correct messages and return correct objects", () => {
   const context = contextMock();
 
   const topic = "TOPIC";
@@ -80,7 +80,7 @@ describe("eventHandler should show correct messages and return correct objects",
 
   const req = reqMock(body);
 
-  eventHandler(context, req);
+  funcTaskEvents(context, req);
 
   test("Should be done", () => {
     expect(context.done.called).toEqual(true);
@@ -118,7 +118,7 @@ describe("eventHandler should show correct messages and return correct objects",
       }
     ]);
 
-    eventHandler(errorCtx, errorReq);
+    funcTaskEvents(errorCtx, errorReq);
     test("Should be 1 error with doesn't exist type", () => {
       expect(errorCtx.log.error.cache.length).toEqual(1);
     });
