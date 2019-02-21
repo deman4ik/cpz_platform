@@ -3,6 +3,7 @@ import VError from "verror";
 import { STATUS_STARTED, STATUS_STARTING } from "../config/state";
 import { STORAGE_USERROBOTS_TABLE } from "./tables";
 import TableStorage from "./tableStorage";
+import { deleteTraderState } from "./traders";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -119,9 +120,47 @@ const findOtherActiveUserRobotsByServiceId = async ({
 const saveUserRobotState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_USERROBOTS_TABLE, state);
 
+/**
+ * Delete User Robot state with trader
+ *
+ * @param {Object} input
+ * @param {string} input.RowKey
+ * @param {string} input.PartitionKey
+ * @param {string} input.traderId
+ */
+const deleteUserRobotState = async ({
+  RowKey,
+  PartitionKey,
+  metadata,
+  traderId
+}) => {
+  try {
+    if (traderId) await deleteTraderState(traderId);
+    await tableStorage.deleteEntity(STORAGE_USERROBOTS_TABLE, {
+      RowKey,
+      PartitionKey,
+      metadata
+    });
+  } catch (error) {
+    if (error instanceof VError) throw error;
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: {
+          RowKey,
+          PartitionKey
+        }
+      },
+      "Failed to delete User Robot state"
+    );
+  }
+};
+
 export {
   getUserRobotById,
   findUserRobotsByServiceId,
   findOtherActiveUserRobotsByServiceId,
-  saveUserRobotState
+  saveUserRobotState,
+  deleteUserRobotState
 };

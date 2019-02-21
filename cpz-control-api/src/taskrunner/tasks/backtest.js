@@ -42,8 +42,10 @@ class Backtest {
     this._backtesterId = state.backtesterId || uuid();
     this._taskId = this._backtesterId;
     this._backtesterStatus = state.backtesterStatus || STATUS_PENDING;
+    this._backtesterError = state.backtesterError;
     this._importerId = state.importerId;
     this._importerStatus = state.importerStatus || STATUS_PENDING;
+    this._importerError = state.importerError;
     this._status = state.status || STATUS_PENDING;
     this._error = state.error;
     this._metadata = state.metadata;
@@ -246,8 +248,10 @@ class Backtest {
       traderSettings: this._traderSettings,
       backtesterId: this._backtesterId,
       backtesterStatus: this._backtesterStatus,
+      backtesterError: this._backtesterError,
       importerId: this._importerId,
       importerStatus: this._importerStatus,
+      importerError: this._importerError,
       status: this._status,
       error: this._error,
       metadata: this._metadata

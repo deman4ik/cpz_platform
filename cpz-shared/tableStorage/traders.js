@@ -171,12 +171,16 @@ const updateTraderState = async state =>
  */
 const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) => {
   try {
-    await deletePositionsState(RowKey);
-    await tableStorage.deleteEntity(STORAGE_TRADERS_TABLE, {
-      RowKey,
-      PartitionKey,
-      metadata
-    });
+    const traderState = await getTraderById(RowKey);
+    if (traderState) {
+      await deletePositionsState(RowKey);
+
+      await tableStorage.deleteEntity(STORAGE_TRADERS_TABLE, {
+        RowKey,
+        PartitionKey,
+        metadata
+      });
+    }
   } catch (error) {
     if (error instanceof VError) throw error;
     throw new VError(

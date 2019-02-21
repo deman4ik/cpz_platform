@@ -5,7 +5,7 @@ import {
   STATUS_STOPPING,
   STATUS_STOPPED
 } from "cpzState";
-import { getUserRobotById } from "cpzStorage/userRobots";
+import { getUserRobotById, deleteUserRobotState } from "cpzStorage/userRobots";
 import {
   USER_ROBOT_START_PARAMS,
   USER_ROBOT_STOP_PARAMS,
@@ -23,12 +23,44 @@ const validateStop = createValidator(USER_ROBOT_STOP_PARAMS);
 const validateUpdate = createValidator(USER_ROBOT_UPDATE_PARAMS);
 
 class UserRobotRunner extends BaseRunner {
-  static async start(context, robotParams) {
+  static async create(context, robotParams) {
     try {
       genErrorIfExist(validateStart(robotParams));
+      const userRobotState = await getUserRobotById(robotParams.id);
+      if (userRobotState) {
+        if (
+          userRobotState.status === STATUS_STARTED ||
+          userRobotState.status === STATUS_STARTING
+        ) {
+          return {
+            id: userRobotState.id,
+            status: userRobotState.status
+          };
+        }
+
+        await deleteUserRobotState(userRobotState);
+      }
+
+      return await UserRobotRunner.start(context, robotParams);
+    } catch (error) {
+      const err = new VError(
+        {
+          name: "RobotRunnerError",
+          cause: error,
+          info: robotParams
+        },
+        "Failed to create robot"
+      );
+      context.log.error(err);
+      throw err;
+    }
+  }
+
+  static async start(context, robotParams) {
+    try {
       let userRobotState = robotParams;
-      const userRobot = new UserRobot(userRobotState);
-      context.log.info(`UserRobot ${userRobot.id} start`);
+      const userRobot = new UserRobot(context, userRobotState);
+      userRobot.log("start");
       if (userRobot.status === STATUS_STARTED) {
         return {
           id: userRobot.id,
@@ -38,7 +70,7 @@ class UserRobotRunner extends BaseRunner {
       userRobotState = userRobot.getCurrentState();
 
       if (userRobotState.exwatcherStatus !== STATUS_STARTED) {
-        context.log.info("ExWatcher!");
+        userRobot.log("ExWatcher!");
         const exwatcherParams = {
           exchange: userRobotState.exchange,
           asset: userRobotState.asset,
@@ -58,7 +90,7 @@ class UserRobotRunner extends BaseRunner {
         userRobotState.traderStatus !== STATUS_STARTED &&
         userRobotState.traderStatus !== STATUS_STARTING
       ) {
-        context.log.info("Trader!");
+        userRobot.log("Trader!");
         const traderParams = {
           robotId: userRobotState.robotId,
           userId: userRobotState.userId,
@@ -81,7 +113,7 @@ class UserRobotRunner extends BaseRunner {
         userRobotState.adviserStatus !== STATUS_STARTED &&
         userRobotState.adviserStatus !== STATUS_STARTING
       ) {
-        context.log.info("Adviser!");
+        userRobot.log("Adviser!");
         const adviserParams = {
           robotId: userRobotState.robotId,
           exchange: userRobotState.exchange,
@@ -122,8 +154,8 @@ class UserRobotRunner extends BaseRunner {
       genErrorIfExist(validateStop(robotParams));
       const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
-      const userRobot = new UserRobot(userRobotState);
-      context.log.info(`UserRobot ${userRobot.id} stop`);
+      const userRobot = new UserRobot(context, userRobotState);
+      userRobot.log("stop");
       if (userRobot.status === STATUS_STOPPED)
         return {
           id: userRobot.id,
@@ -177,8 +209,8 @@ class UserRobotRunner extends BaseRunner {
       genErrorIfExist(validateUpdate(robotParams));
       const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
-      const userRobot = new UserRobot(userRobotState);
-      context.log.info(`UserRobot ${userRobot.id} update`);
+      const userRobot = new UserRobot(context, userRobotState);
+      userRobot.log("update");
       if (robotParams.traderSettings) {
         userRobot.traderSettings = robotParams.traderSettings;
         await TraderRunner.update(context, {

@@ -50,12 +50,16 @@ class ExWatcher {
     };
     this._marketwatcherId = state.marketwatcherId;
     this._marketwatcherStatus = state.marketwatcherStatus || STATUS_PENDING;
+    this._marketwatcherError = state.marketwatcherError;
     this._candlebatcherId = state.candlebatcherId;
     this._candlebatcherStatus = state.candlebatcherStatus || STATUS_PENDING;
+    this._candlebatcherError = state.candlebatcherError;
     this._importerHistoryId = state.importerHistoryId;
     this._importerHistoryStatus = state.importerHistoryStatus || STATUS_PENDING;
+    this._importerHistoryError = state.importerHistoryError;
     this._importerCurrentId = state.importerCurrentId;
     this._importerCurrentStatus = state.importerCurrentStatus || STATUS_PENDING;
+    this._importerCurrentError = state.importerCurrentError;
     this._status = state.status || STATUS_PENDING;
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
@@ -252,12 +256,16 @@ class ExWatcher {
       candlebatcherSettings: this._candlebatcherSettings,
       marketwatcherId: this._marketwatcherId,
       marketwatcherStatus: this._marketwatcherStatus,
+      marketwatcherError: this._marketwatcherError,
       candlebatcherId: this._candlebatcherId,
       candlebatcherStatus: this._candlebatcherStatus,
+      candlebatcherError: this._candlebatcherError,
       importerHistoryId: this._importerHistoryId,
       importerHistoryStatus: this._importerHistoryStatus,
+      importerHistoryError: this._importerHistoryError,
       importerCurrentId: this._importerCurrentId,
       importerCurrentStatus: this._importerCurrentStatus,
+      importerCurrentError: this._importerCurrentError,
       status: this._status,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,

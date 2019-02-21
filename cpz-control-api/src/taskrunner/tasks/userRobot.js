@@ -1,4 +1,5 @@
 import VError from "verror";
+import { v4 as uuid } from "uuid";
 import dayjs from "cpzDayjs";
 import {
   STATUS_STARTED,
@@ -6,8 +7,15 @@ import {
   STATUS_STOPPING,
   STATUS_PENDING,
   STATUS_ERROR,
-  createRobotSlug
+  createRobotSlug,
+  createUserRobotTaskSubject
 } from "cpzState";
+import {
+  TASKS_TOPIC,
+  TASKS_USERROBOT_STARTED_EVENT,
+  TASKS_USERROBOT_STOPPED_EVENT
+} from "cpzEventTypes";
+import publishEvents from "cpzEvents";
 import { saveUserRobotState } from "cpzStorage/userRobots";
 import {
   combineCandlebatcherSettings,
@@ -16,7 +24,8 @@ import {
 } from "cpzUtils/settings";
 
 class UserRobot {
-  constructor(state) {
+  constructor(context, state) {
+    this._context = context;
     this._id = state.id;
     this._robotId = state.robotId;
     this._userId = state.userId;
@@ -31,18 +40,25 @@ class UserRobot {
     );
     this._adviserSettings = combineAdvserSettings(state.adviserSettings);
     this._traderSettings = combineTraderSettings(state.traderSettings);
-
     this._exwatcherId = state.exwatcherId;
     this._exwatcherStatus = state.exwatcherStatus || STATUS_PENDING;
+    this._exwatcherError = state.exwatcherError;
     this._adviserId = state.adviserId;
     this._adviserStatus = state.adviserStatus || STATUS_PENDING;
+    this._adviserError = state.adviserError;
     this._traderId = state.traderId;
     this._traderStatus = state.traderStatus || STATUS_PENDING;
+    this._traderError = state.traderError;
     this._status = state.status || STATUS_PENDING;
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._error = state.error;
     this._metadata = state.metadata;
+    this._event = null;
+  }
+
+  log(...args) {
+    this._context.log.info(`UserRobot ${this._id}:`, ...args);
   }
 
   _setStatus() {
@@ -55,6 +71,35 @@ class UserRobot {
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
+      this._event = {
+        id: uuid(),
+        dataVersion: "1.0",
+        eventTime: new Date(),
+        subject: createUserRobotTaskSubject({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          robotId: this._robotId,
+          userId: this._userId
+        }),
+        eventType: TASKS_USERROBOT_STARTED_EVENT.eventType,
+        data: {
+          id: this._id,
+          robotId: this._robotId,
+          userId: this._userId,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          strategyName: this._strategyName,
+          candlebatcherSettings: this._candlebatcherSettings,
+          adviserSettings: this._adviserSettings,
+          traderSettings: this._traderSettings,
+          status: STATUS_STARTED,
+          startedAt: this._startedAt
+        }
+      };
       return;
     }
 
@@ -65,6 +110,35 @@ class UserRobot {
     ) {
       this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_STOPPED;
+      this._event = {
+        id: uuid(),
+        dataVersion: "1.0",
+        eventTime: new Date(),
+        subject: createUserRobotTaskSubject({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          robotId: this._robotId,
+          userId: this._userId
+        }),
+        eventType: TASKS_USERROBOT_STOPPED_EVENT.eventType,
+        data: {
+          id: this._id,
+          robotId: this._robotId,
+          userId: this._userId,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          strategyName: this._strategyName,
+          candlebatcherSettings: this._candlebatcherSettings,
+          adviserSettings: this._adviserSettings,
+          traderSettings: this._traderSettings,
+          status: STATUS_STOPPED,
+          stoppedAt: this._stoppedAt
+        }
+      };
       return;
     }
 
@@ -206,10 +280,13 @@ class UserRobot {
       traderSettings: this._traderSettings,
       exwatcherId: this._exwatcherId,
       exwatcherStatus: this._exwatcherStatus,
+      exwatcherError: this._exwatcherError,
       adviserId: this._adviserId,
       adviserStatus: this._adviserStatus,
+      adviserError: this._adviserError,
       traderId: this._traderId,
       traderStatus: this._traderStatus,
+      traderError: this._traderError,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,
       status: this._status,
@@ -221,6 +298,10 @@ class UserRobot {
   async save() {
     try {
       await saveUserRobotState(this.getCurrentState());
+      if (this._event) {
+        await publishEvents(TASKS_TOPIC, [this._event]);
+        this._event = null;
+      }
     } catch (error) {
       throw new VError(
         {

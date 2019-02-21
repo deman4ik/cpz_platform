@@ -25,15 +25,15 @@ class BacktestRunner extends BaseRunner {
       genErrorIfExist(validateStart(params));
       let backtestState = params;
       const backtest = new Backtest(context, backtestState);
-      context.log.info(`Backtest ${backtest.taskId}: start`);
+      backtest.log("start");
 
       backtestState = backtest.getCurrentState();
-      context.log(backtestState);
+
       if (
         backtestState.importerStatus !== STATUS_STARTED &&
         backtestState.importerStatus !== STATUS_FINISHED
       ) {
-        context.log.info("Importer!");
+        backtest.log("Importer!");
         let dateFrom;
         ({ dateFrom } = backtestState);
         if (backtestState.adviserSettings.requiredHistoryMaxBars > 0) {
@@ -61,7 +61,7 @@ class BacktestRunner extends BaseRunner {
           backtestState.dateTo,
           backtestState.timeframe
         );
-        context.log(totalBarsInDb, expectedBars);
+
         if (totalBarsInDb < expectedBars) {
           const importerParams = {
             exchange: backtestState.exchange,
@@ -91,7 +91,7 @@ class BacktestRunner extends BaseRunner {
         backtestState.backtesterStatus !== STATUS_STARTED &&
         backtestState.backtesterStatus !== STATUS_FINISHED
       ) {
-        context.log.info("Backtester!");
+        backtest.log("Backtester!");
         const backtesterParams = {
           taskId: backtestState.backtesterId,
           robotId: backtestState.robotId,
@@ -137,7 +137,7 @@ class BacktestRunner extends BaseRunner {
       const backtestState = await getBacktestById(params.taskId);
       if (!backtestState) throw new Error("BacktestNotFound");
       const backtest = new Backtest(context, backtestState);
-      context.log.info(`Backtest ${params.taskId} stop`);
+      backtest.log("stop");
       if (
         backtest.status === STATUS_STOPPED ||
         backtest.status === STATUS_FINISHED

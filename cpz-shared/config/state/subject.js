@@ -1,3 +1,14 @@
+function createUserRobotTaskSubject({
+  exchange,
+  asset,
+  currency,
+  timeframe,
+  robotId,
+  userId
+}) {
+  return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
+}
+
 function createExWatcherTaskSubject({ exchange, asset, currency }) {
   return `${exchange}/${asset}/${currency}`;
 }
@@ -75,6 +86,7 @@ function createNewTradeSubject({
 }
 
 export {
+  createUserRobotTaskSubject,
   createExWatcherTaskSubject,
   createCandlebatcherTaskSubject,
   createAdviserTaskSubject,

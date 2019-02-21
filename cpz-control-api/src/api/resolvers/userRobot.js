@@ -5,12 +5,22 @@ import UserRobotRunner from "../../taskrunner/tasks/userRobotRunner";
 async function startUserRobot(_, { userRobotId, overrideParams }, { context }) {
   try {
     const userRobot = await getUserRobotDB(userRobotId);
-    // TODO: throw error if userRobot is null
+    if (!userRobot)
+      return {
+        success: false,
+        error: {
+          name: "RobotRunnerError",
+          message: `User Robot ${userRobotId} not found`,
+          info: {
+            userRobotId
+          }
+        }
+      };
     const userRobotParams = {
       ...userRobot,
       ...overrideParams
     };
-    const { status } = await UserRobotRunner.start(context, userRobotParams);
+    const { status } = await UserRobotRunner.create(context, userRobotParams);
     return {
       success: true,
       taskId: userRobotId,

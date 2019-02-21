@@ -195,7 +195,7 @@ async function handleStarted(context, eventData) {
       await Promise.all(
         userRobots.map(async userRobotState => {
           context.log(userRobotState);
-          const userRobot = new UserRobot(userRobotState);
+          const userRobot = new UserRobot(context, userRobotState);
           if (error) {
             userRobot.error = error;
             userRobot[`${serviceName}Status`] = STATUS_ERROR;
@@ -376,7 +376,7 @@ async function handleStopped(context, eventData) {
     const { eventType, taskId, error } = eventData;
     let serviceName;
 
-    if (!error) await deleteState(taskId, eventType);
+    await deleteState(taskId, eventType);
     if (
       eventType === TASKS_MARKETWATCHER_STOPPED_EVENT.eventType ||
       eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType
@@ -401,7 +401,7 @@ async function handleStopped(context, eventData) {
         exWatchers.map(async exWatcherState => {
           const exWatcher = new ExWatcher(context, exWatcherState);
           if (error) {
-            exWatcher.error = error;
+            exWatcher[`${serviceName}Error`] = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
             await exWatcher.save();
           } else {
@@ -426,7 +426,7 @@ async function handleStopped(context, eventData) {
             serviceName = "importerCurrent";
           }
           if (error) {
-            exWatcher.error = error;
+            exWatcher[`${serviceName}Error`] = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
             await exWatcher.save();
           } else {
@@ -447,7 +447,7 @@ async function handleStopped(context, eventData) {
         backtests.map(async backtestState => {
           const backtest = new Backtest(context, backtestState);
           if (error) {
-            backtest.error = error;
+            backtest[`${serviceName}Error`] = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
             await backtest.save();
           } else {
@@ -484,9 +484,9 @@ async function handleStopped(context, eventData) {
 
       await Promise.all(
         userRobots.map(async userRobotState => {
-          const userRobot = new UserRobot(userRobotState);
+          const userRobot = new UserRobot(context, userRobotState);
           if (error) {
-            userRobot.error = error;
+            userRobot[`${serviceName}Error`] = error;
             userRobot[`${serviceName}Status`] = STATUS_ERROR;
             await userRobot.save();
           } else {
@@ -509,7 +509,7 @@ async function handleStopped(context, eventData) {
         backtests.map(async backtestState => {
           const backtest = new Backtest(context, backtestState);
           if (error) {
-            backtest.error = error;
+            backtest[`${serviceName}Error`] = error;
             backtest[`${serviceName}Status`] = STATUS_ERROR;
             await backtest.save();
           } else {
@@ -579,7 +579,7 @@ async function handleUpdated(context, eventData) {
           exWatchers.map(async exWatcherState => {
             const exWatcher = new ExWatcher(context, exWatcherState);
 
-            exWatcher.error = error;
+            exWatcher[`${serviceName}Error`] = error;
             exWatcher[`${serviceName}Status`] = STATUS_ERROR;
             await exWatcher.save();
           })
@@ -607,9 +607,9 @@ async function handleUpdated(context, eventData) {
 
         await Promise.all(
           userRobots.map(async userRobotState => {
-            const userRobot = new UserRobot(userRobotState);
+            const userRobot = new UserRobot(context, userRobotState);
 
-            userRobot.error = error;
+            userRobot[`${serviceName}Error`] = error;
             userRobot[`${serviceName}Status`] = STATUS_ERROR;
             await userRobot.save();
           })

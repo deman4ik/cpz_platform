@@ -8,7 +8,7 @@ import {
   STATUS_FINISHED,
   createWatcherSlug
 } from "cpzState";
-import { getExWatcherById } from "cpzStorage/exwatchers";
+import { getExWatcherById, deleteExWatcherState } from "cpzStorage/exwatchers";
 import {
   EXWATCHER_START_PARAMS,
   EXWATCHER_STOP_PARAMS,
@@ -27,32 +27,55 @@ const validateStop = createValidator(EXWATCHER_STOP_PARAMS);
 const validateUpdate = createValidator(EXWATCHER_UPDATE_PARAMS);
 
 class ExWatcherRunner extends BaseRunner {
-  static async start(context, params) {
+  static async create(context, params) {
     try {
       genErrorIfExist(validateStart(params));
-      let exWatcherState = params;
-
-      if (!exWatcherState.taskId) {
-        const currentExWatcherState = await getExWatcherById(
-          createWatcherSlug({
-            exchange: params.exchange,
-            asset: params.asset,
-            currency: params.currency
-          })
-        );
-        if (currentExWatcherState) {
-          if (currentExWatcherState.status === STATUS_STARTED) {
-            return {
-              taskId: currentExWatcherState.taskId,
-              status: currentExWatcherState.status
-            };
-          }
-          exWatcherState = currentExWatcherState;
+      const exWatcherState = await getExWatcherById(
+        createWatcherSlug({
+          exchange: params.exchange,
+          asset: params.asset,
+          currency: params.currency
+        })
+      );
+      if (exWatcherState) {
+        if (
+          exWatcherState.status === STATUS_STARTED ||
+          exWatcherState.status === STATUS_STARTING
+        ) {
+          return {
+            taskId: exWatcherState.taskId,
+            status: exWatcherState.status
+          };
         }
+        await deleteExWatcherState(exWatcherState);
+      }
+
+      return await ExWatcherRunner.start(context, params);
+    } catch (error) {
+      const err = new VError(
+        {
+          name: "ExWatcherRunnerError",
+          cause: error,
+          info: params
+        },
+        "Failed to create Exchange Data Watcher"
+      );
+      context.log.error(err);
+      throw err;
+    }
+  }
+
+  static async start(context, params) {
+    try {
+      let exWatcherState = params;
+      if (exWatcherState.status === STATUS_STARTED) {
+        return {
+          taskId: exWatcherState.taskId,
+          status: exWatcherState.status
+        };
       }
       const exWatcher = new ExWatcher(context, exWatcherState);
       exWatcher.log(`start`);
-
       exWatcherState = exWatcher.getCurrentState();
 
       if (
