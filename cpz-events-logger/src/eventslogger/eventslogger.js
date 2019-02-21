@@ -12,13 +12,16 @@ import {
   CANDLES_NEWCANDLE_EVENT,
   SIGNALS_NEWSIGNAL_EVENT,
   TRADES_ORDER_EVENT,
-  TRADES_POSITION_EVENT
+  TRADES_POSITION_EVENT,
+  TASKS_USERROBOT_STARTED_EVENT,
+  TASKS_USERROBOT_STOPPED_EVENT
 } from "cpzEventTypes";
 import {
   saveCandlesDB,
   saveSignalsDB,
   saveOrdersDB,
-  savePositionsDB
+  savePositionsDB,
+  saveUserRobotHistDB
 } from "cpzDB";
 
 class EventsLogger {
@@ -76,7 +79,12 @@ class EventsLogger {
             ...baseEventData,
             data: event.data
           });
-        //  if (this.logToPostgre) await saveTasksEventDB(eventData);
+        if (
+          type === TASKS_USERROBOT_STARTED_EVENT.eventType ||
+          type === TASKS_USERROBOT_STOPPED_EVENT.eventType
+        ) {
+          if (this.logToPostgre) await saveUserRobotHistDB([fullEventData]);
+        }
         return;
       }
       if (type.includes("CPZ.Signals")) {
