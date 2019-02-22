@@ -5,7 +5,9 @@ as $$
 begin
 
   if (old.backtest_id is null) then
+    -- there are no physical constrains because records from backend are posted async.
     delete from orders where position_id = old.id;
+    delete from signal where position_id = old.id;
   end if;
 
 
