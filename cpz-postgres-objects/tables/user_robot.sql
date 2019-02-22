@@ -15,8 +15,12 @@ create table user_robot
 	last_started    timestamp default CURRENT_DATE not null,
 	dt_from					timestamp not null,
 	dt_to						timestamp not null,
-	run_mode      	varchar(10) not null,
-	user_params			jsonb	
+	run_mode      	varchar(10) not null, -- goes to tradersettings
+	volume		      numeric,              -- goes to tradersettings
+	user_params			jsonb,	 -- goes to tradersettings, additional params for a particular exchange or user_robot
+	linked_user_robot_id     uuid
+			constraint c_user_robothist_linked_user_robot_fk
+			references user_robot -- for subscribed user robots
 );
 
 alter table user_robot
@@ -29,13 +33,15 @@ alter table user_robot
         	
 create index i_user_robot_userlist_fk on user_robot (user_id);
 
-alter table user_robot add constraint c_user_robot_status_chk check (robot_status in (-1, 0, 1, 10, 20));
+alter table user_robot add constraint c_user_robot_status_chk check (robot_status in (-1, 0, 1, 5, 10, 15, 20));
 
 comment on column user_robot.robot_status is '
 -1 - deleted
-0 - added to favorites (default)
+0 - default
 1 - subscribed to signals
-10 - running
+5 - starting
+10 - started (running)
+15 - stopping
 20 - stopped';
 
 comment on column user_robot.dt_to is 'Date and time robot will be stopped according to user subsribtion';
