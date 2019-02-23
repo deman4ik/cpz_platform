@@ -14,7 +14,7 @@ jest.mock("cpzUtils/validation", () => ({
   genErrorIfExist: () => true
 }));
 jest.mock("cpzEnv/advister");
-jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
+jest.mock("../../../cpz-shared/tableStorage/tableStorage");
 
 describe("Should show correct messages and return correct objects", () => {
   const validationCode = "*some_code*";

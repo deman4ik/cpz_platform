@@ -9,7 +9,7 @@ import funcTaskEvents from "../../src/routes/taskEvents";
 import { reqMock, resMock, logMock } from "../../../tests/helpers";
 
 jest.mock("cpzEnv");
-jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
+jest.mock("../../../cpz-shared/tableStorage/tableStorage");
 jest.mock("../../src/backtester/handleTaskEvents", () => ({
   handleStart: ({ eventSubject }) => {
     Object.assign(eventSubject, { handleStart: true });

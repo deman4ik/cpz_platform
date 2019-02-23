@@ -13,7 +13,7 @@ jest.mock("cpzUtils/validation", () => ({
 }));
 jest.mock("cpzEnv");
 
-jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
+jest.mock("../../../cpz-shared/tableStorage/tableStorage");
 
 jest.mock("../../src/trader/handlePriceEvents", () => ({
   handleCandle: context => {
