@@ -7,6 +7,18 @@ function logQuery(key) {
   return function out(content) {
     if (!this[key].cache) this[key].cache = [];
     this[key].cache.push(content);
+
+    // For chain requests
+    // Exmaple - res.status(200).send("Hello")
+    return this;
+  };
+}
+
+function logMock() {
+  return {
+    info: logQuery("info"),
+    error: logQuery("error"),
+    warn: logQuery("warn")
   };
 }
 
@@ -15,14 +27,19 @@ function logQuery(key) {
  */
 function contextMock() {
   return {
-    log: {
-      info: logQuery("info"),
-      error: logQuery("error"),
-      warn: logQuery("warn")
-    },
+    log: logMock(),
     done() {
       this.done.called = true;
     }
+  };
+}
+
+function resMock() {
+  return {
+    send: logQuery("send"),
+    status: logQuery("status"),
+    end: logQuery("end"),
+    error: logQuery("error")
   };
 }
 
@@ -31,13 +48,13 @@ function contextMock() {
  * @param {*} query
  */
 function reqMock(body, query = { "api-key": process.env.API_KEY }) {
-  body = str(body);
+  const rawBody = str(body);
 
   return {
     query,
     body,
-    rawBody: body
+    rawBody
   };
 }
 
-export { logQuery, contextMock, reqMock };
+export { logQuery, contextMock, reqMock, resMock, logMock };

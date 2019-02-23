@@ -22,7 +22,7 @@ jest.mock("../../src/trader/handleSignalEvents", () => ({
   }
 }));
 
-describe("funcTaskEvents should show correct messages and return correct objects", () => {
+describe("Should show correct messages and return correct objects", () => {
   const validationCode = "*some_code*";
 
   const data = { validationCode };

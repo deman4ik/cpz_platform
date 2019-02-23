@@ -22,65 +22,63 @@ jest.mock("../../src/adviser/handleCandleEvents", () => ({
   }
 }));
 
-describe("funcTaskEvents should show correct messages and return correct objects", () => {
-  const validationCode = "*some_code*";
+const validationCode = "*some_code*";
 
-  const data = { validationCode };
+const data = { validationCode };
 
-  const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT.eventType }];
+const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT.eventType }];
 
-  test("Should be done", () => {
-    const req = reqMock(body);
-    const context = contextMock();
+test("Should be done", () => {
+  const req = reqMock(body);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    expect(context.done.called).toEqual(true);
-  });
+  expect(context.done.called).toEqual(true);
+});
 
-  test("Should call all handlers", () => {
-    const req = reqMock(body);
-    const context = contextMock();
+test("Should call all handlers", () => {
+  const req = reqMock(body);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    const { handleCandle } = context;
+  const { handleCandle } = context;
 
-    expect(handleCandle).toEqual(true);
-  });
+  expect(handleCandle).toEqual(true);
+});
 
-  test("Should go to error", () => {
-    const req = reqMock([{ eventType: "DoestNotExistType" }]);
-    const context = contextMock();
+test("Should go to error", () => {
+  const req = reqMock([{ eventType: "DoestNotExistType" }]);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    expect(context.log.error.cache.length).toEqual(1);
-  });
+  expect(context.log.error.cache.length).toEqual(1);
+});
 
-  test("SUB events should work", () => {
-    const req = reqMock([
-      { eventType: SUB_VALIDATION_EVENT.eventType, data },
-      { eventType: SUB_DELETED_EVENT.eventType, data }
-    ]);
-    const context = contextMock();
+test("SUB events should work", () => {
+  const req = reqMock([
+    { eventType: SUB_VALIDATION_EVENT.eventType, data },
+    { eventType: SUB_DELETED_EVENT.eventType, data }
+  ]);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    expect({
-      warnLen: context.log.warn.cache.length,
-      res: context.res
-    }).toStrictEqual({
-      warnLen: 2,
-      res: {
-        status: 200,
-        body: {
-          validationResponse: validationCode
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
+  expect({
+    warnLen: context.log.warn.cache.length,
+    res: context.res
+  }).toStrictEqual({
+    warnLen: 2,
+    res: {
+      status: 200,
+      body: {
+        validationResponse: validationCode
+      },
+      headers: {
+        "Content-Type": "application/json"
       }
-    });
+    }
   });
 });

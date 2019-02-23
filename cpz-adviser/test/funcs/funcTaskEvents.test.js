@@ -29,77 +29,75 @@ jest.mock("../../src/adviser/handleTaskEvents", () => ({
   }
 }));
 
-describe("funcTaskEvents should show correct messages and return correct objects", () => {
-  const validationCode = "*some_code*";
+const validationCode = "*some_code*";
 
-  const data = { validationCode };
+const data = { validationCode };
 
-  const body = [
-    { data, eventType: TASKS_ADVISER_START_EVENT.eventType },
-    { data, eventType: TASKS_ADVISER_STOP_EVENT.eventType },
-    { data, eventType: TASKS_ADVISER_UPDATE_EVENT.eventType }
-  ];
+const body = [
+  { data, eventType: TASKS_ADVISER_START_EVENT.eventType },
+  { data, eventType: TASKS_ADVISER_STOP_EVENT.eventType },
+  { data, eventType: TASKS_ADVISER_UPDATE_EVENT.eventType }
+];
 
-  test("Should be done", () => {
-    const req = reqMock(body);
-    const context = contextMock();
+test("Should be done", () => {
+  const req = reqMock(body);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    expect(context.done.called).toEqual(true);
+  expect(context.done.called).toEqual(true);
+});
+
+test("Should call all handlers", () => {
+  const req = reqMock(body);
+  const context = contextMock();
+
+  funcTaskEvents(context, req);
+
+  const {
+    handleStart: start,
+    handleStop: stop,
+    handleUpdate: update
+  } = context;
+
+  expect({ start, stop, update }).toEqual({
+    start: true,
+    stop: true,
+    update: true
   });
+});
 
-  test("Should call all handlers", () => {
-    const req = reqMock(body);
-    const context = contextMock();
+test("Should go to error", () => {
+  const req = reqMock([{ eventType: "DoestNotExistType" }]);
+  const context = contextMock();
 
-    funcTaskEvents(context, req);
+  funcTaskEvents(context, req);
 
-    const {
-      handleStart: start,
-      handleStop: stop,
-      handleUpdate: update
-    } = context;
+  expect(context.log.error.cache.length).toEqual(1);
+});
 
-    expect({ start, stop, update }).toEqual({
-      start: true,
-      stop: true,
-      update: true
-    });
-  });
+test("SUB events should work", () => {
+  const req = reqMock([
+    { eventType: SUB_VALIDATION_EVENT.eventType, data },
+    { eventType: SUB_DELETED_EVENT.eventType, data }
+  ]);
+  const context = contextMock();
 
-  test("Should go to error", () => {
-    const req = reqMock([{ eventType: "DoestNotExistType" }]);
-    const context = contextMock();
+  funcTaskEvents(context, req);
 
-    funcTaskEvents(context, req);
-
-    expect(context.log.error.cache.length).toEqual(1);
-  });
-
-  test("SUB events should work", () => {
-    const req = reqMock([
-      { eventType: SUB_VALIDATION_EVENT.eventType, data },
-      { eventType: SUB_DELETED_EVENT.eventType, data }
-    ]);
-    const context = contextMock();
-
-    funcTaskEvents(context, req);
-
-    expect({
-      warnLen: context.log.warn.cache.length,
-      res: context.res
-    }).toStrictEqual({
-      warnLen: 2,
-      res: {
-        status: 200,
-        body: {
-          validationResponse: validationCode
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
+  expect({
+    warnLen: context.log.warn.cache.length,
+    res: context.res
+  }).toStrictEqual({
+    warnLen: 2,
+    res: {
+      status: 200,
+      body: {
+        validationResponse: validationCode
+      },
+      headers: {
+        "Content-Type": "application/json"
       }
-    });
+    }
   });
 });

@@ -16,7 +16,7 @@ jest.mock("cpzUtils/validation", () => ({
 jest.mock("cpzEnv/advister");
 jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
 
-describe("funcTaskEvents should show correct messages and return correct objects", () => {
+describe("Should show correct messages and return correct objects", () => {
   const validationCode = "*some_code*";
 
   const data = { validationCode };
