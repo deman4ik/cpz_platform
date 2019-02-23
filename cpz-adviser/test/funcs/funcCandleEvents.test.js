@@ -3,121 +3,84 @@ import {
   SUB_VALIDATION_EVENT,
   CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
-import funcCandleEvents from "../../src/funcs/funcCandleEvents";
+import funcTaskEvents from "../../src/funcs/funcCandleEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
+jest.mock("cpzUtils/validation", () => ({
+  createValidator: () => () => true,
+  genErrorIfExist: () => true
+}));
+jest.mock("cpzEnv/advister");
+
 jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
-jest.mock("../../src/adviser/handleCandleEvents");
 
-const { stringify: str } = JSON;
+jest.mock("../../src/adviser/handleCandleEvents", () => ({
+  __esModule: true,
+  default: context => {
+    context.handleCandle = true;
+  }
+}));
 
-describe("funcCandleEvents should show correct messages and return correct objects", () => {
-  const context = contextMock();
+describe("funcTaskEvents should show correct messages and return correct objects", () => {
+  const validationCode = "*some_code*";
 
-  const topic = "TOPIC";
-  const validationCode = "none";
   const data = { validationCode };
-  const id = "Test";
-  const subject = "subjest";
-  const eventTime = new Date().toISOString();
 
-  const body = [
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: SUB_DELETED_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: SUB_VALIDATION_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: CANDLES_NEWCANDLE_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    }
-  ];
-
-  const req = reqMock(body);
-
-  funcCandleEvents(context, req);
+  const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT.eventType }];
 
   test("Should be done", () => {
+    const req = reqMock(body);
+    const context = contextMock();
+
+    funcTaskEvents(context, req);
+
     expect(context.done.called).toEqual(true);
   });
 
-  describe("info", () => {
-    test("Infos should be computable", () => {
-      expect(context.log.info.cache).toStrictEqual([
-        `CPZ Adviser processed a request.${str(body)}`,
-        `Got CPZ.Candles.NewCandle event data ${str(data)}`
-      ]);
-    });
+  test("Should call all handlers", () => {
+    const req = reqMock(body);
+    const context = contextMock();
+
+    funcTaskEvents(context, req);
+
+    const { handleCandle } = context;
+
+    expect(handleCandle).toEqual(true);
   });
 
-  describe("error", () => {
-    test("Shouldn't have errors", () => {
-      expect(context.log.error.cache).toEqual(undefined);
-    });
+  test("Should go to error", () => {
+    const req = reqMock([{ eventType: "DoestNotExistType" }]);
+    const context = contextMock();
 
-    const doesNotExistsType = "NOT_EXISTS_TYPE_TEST_ERROR";
+    funcTaskEvents(context, req);
 
-    const errorCtx = contextMock();
-    const errorReq = reqMock([
-      {
-        id,
-        topic,
-        subject,
-        data,
-        eventType: doesNotExistsType,
-        eventTime,
-        metadataVersion: "0.0.0",
-        dataVersion: "0.0.0"
-      }
+    expect(context.log.error.cache.length).toEqual(1);
+  });
+
+  test("SUB events should work", () => {
+    const req = reqMock([
+      { eventType: SUB_VALIDATION_EVENT.eventType, data },
+      { eventType: SUB_DELETED_EVENT.eventType, data }
     ]);
+    const context = contextMock();
 
-    funcCandleEvents(errorCtx, errorReq);
+    funcTaskEvents(context, req);
 
-    test("Error should be computable", () => {
-      expect(errorCtx.log.error.cache).toStrictEqual([
-        `Unknown Event Type: ${doesNotExistsType}`
-      ]);
-    });
-  });
-
-  describe("res", () => {
-    test("Result should be computable", () => {
-      expect(context.res).toStrictEqual({
+    expect({
+      warnLen: context.log.warn.cache.length,
+      res: context.res
+    }).toStrictEqual({
+      warnLen: 2,
+      res: {
         status: 200,
-        body: { validationResponse: validationCode },
-        headers: { "Content-Type": "application/json" }
-      });
-    });
-  });
-
-  describe("warn", () => {
-    test("Warns should be computable", () => {
-      expect(context.log.warn.cache).toStrictEqual([
-        `Got SubscriptionDeletedEvent event data, topic: ${topic}`,
-        `Got SubscriptionValidation event data, validationCode: ${validationCode}, topic: ${topic}`
-      ]);
+        body: {
+          validationResponse: validationCode
+        },
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
     });
   });
 });

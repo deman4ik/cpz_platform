@@ -9,147 +9,97 @@ import funcTaskEvents from "../../src/funcs/funcTaskEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
-jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
-jest.mock("../../src/adviser/handleTaskEvents");
+jest.mock("cpzUtils/validation", () => ({
+  createValidator: () => () => true,
+  genErrorIfExist: () => true
+}));
 jest.mock("cpzEnv/advister");
 
-const { stringify: str } = JSON;
+jest.mock("../../../cpz-shared/tableStorage/tableStorage.js");
+
+jest.mock("../../src/adviser/handleTaskEvents", () => ({
+  handleStart: context => {
+    context.handleStart = true;
+  },
+  handleStop: context => {
+    context.handleStop = true;
+  },
+  handleUpdate: context => {
+    context.handleUpdate = true;
+  }
+}));
 
 describe("funcTaskEvents should show correct messages and return correct objects", () => {
-  const context = contextMock();
+  const validationCode = "*some_code*";
 
-  const topic = "TOPIC";
-  const validationCode = "none";
   const data = { validationCode };
-  const id = "Test";
-  const subject = "subjest";
-  const eventTime = new Date().toISOString();
 
   const body = [
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: SUB_DELETED_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: SUB_VALIDATION_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: TASKS_ADVISER_START_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: TASKS_ADVISER_STOP_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    },
-    {
-      id,
-      topic,
-      subject,
-      data,
-      eventType: TASKS_ADVISER_UPDATE_EVENT.eventType,
-      eventTime,
-      metadataVersion: "0.0.0",
-      dataVersion: "0.0.0"
-    }
+    { data, eventType: TASKS_ADVISER_START_EVENT.eventType },
+    { data, eventType: TASKS_ADVISER_STOP_EVENT.eventType },
+    { data, eventType: TASKS_ADVISER_UPDATE_EVENT.eventType }
   ];
 
-  const req = reqMock(body);
-
-  funcTaskEvents(context, req);
-
   test("Should be done", () => {
+    const req = reqMock(body);
+    const context = contextMock();
+
+    funcTaskEvents(context, req);
+
     expect(context.done.called).toEqual(true);
   });
 
-  describe("info", () => {
-    test("Infos should be computable", () => {
-      expect(context.log.info.cache).toStrictEqual([
-        `CPZ Adviser processed a request.${str(body)}`,
-        `Got ${TASKS_ADVISER_START_EVENT.eventType} event data ${str(data)}`,
-        `Got ${TASKS_ADVISER_STOP_EVENT.eventType} event data ${str(data)}`,
-        `Got ${TASKS_ADVISER_UPDATE_EVENT.eventType} event data ${str(data)}`
-      ]);
+  test("Should call all handlers", () => {
+    const req = reqMock(body);
+    const context = contextMock();
+
+    funcTaskEvents(context, req);
+
+    const {
+      handleStart: start,
+      handleStop: stop,
+      handleUpdate: update
+    } = context;
+
+    expect({ start, stop, update }).toEqual({
+      start: true,
+      stop: true,
+      update: true
     });
   });
 
-  describe("error", () => {
-    test("Shouldn't have errors", () => {
-      expect(context.log.error.cache).toEqual(undefined);
-    });
+  test("Should go to error", () => {
+    const req = reqMock([{ eventType: "DoestNotExistType" }]);
+    const context = contextMock();
 
-    const doesNotExistsType = "NOT_EXISTS_TYPE_TEST_ERROR";
+    funcTaskEvents(context, req);
 
-    const errorCtx = contextMock();
-    const errorReq = reqMock([
-      {
-        id,
-        topic,
-        subject,
-        data,
-        eventType: doesNotExistsType,
-        eventTime,
-        metadataVersion: "0.0.0",
-        dataVersion: "0.0.0"
-      }
+    expect(context.log.error.cache.length).toEqual(1);
+  });
+
+  test("SUB events should work", () => {
+    const req = reqMock([
+      { eventType: SUB_VALIDATION_EVENT.eventType, data },
+      { eventType: SUB_DELETED_EVENT.eventType, data }
     ]);
+    const context = contextMock();
 
-    funcTaskEvents(errorCtx, errorReq);
-    test("Should be 1 error with doesn't exist type", () => {
-      expect(errorCtx.log.error.cache.length).toEqual(1);
-    });
+    funcTaskEvents(context, req);
 
-    test("Error should be computable", () => {
-      expect(errorCtx.log.error.cache).toStrictEqual([
-        `Unknown Event Type: ${doesNotExistsType}`
-      ]);
-    });
-  });
-
-  describe("res", () => {
-    test("Result should be computable", () => {
-      expect(context.res).toStrictEqual({
+    expect({
+      warnLen: context.log.warn.cache.length,
+      res: context.res
+    }).toStrictEqual({
+      warnLen: 2,
+      res: {
         status: 200,
-        body: { validationResponse: validationCode },
-        headers: { "Content-Type": "application/json" }
-      });
-    });
-  });
-
-  describe("warn", () => {
-    test("Should includes 2 warns", () => {
-      expect(context.log.warn.cache.length).toEqual(2);
-    });
-
-    test("Warns should be computable", () => {
-      expect(context.log.warn.cache).toStrictEqual([
-        `Got SubscriptionDeletedEvent event data, topic: ${topic}`,
-        `Got SubscriptionValidation event data, validationCode: ${validationCode}, topic: ${topic}`
-      ]);
+        body: {
+          validationResponse: validationCode
+        },
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
     });
   });
 });
