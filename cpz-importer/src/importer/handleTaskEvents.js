@@ -16,17 +16,19 @@ import {
   sendEventToProcess
 } from "../global";
 
-const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
 /**
  * Запуск нового импортера свечей
  *
  * @param {*} eventData
  */
+
+// TODO Add definition to eventData
 async function handleImportStart(eventData) {
+  const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
+    const toValidate = validateStart(eventData);
+    genErrorIfExist(toValidate);
     createNewProcess(eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
@@ -68,6 +70,7 @@ async function handleImportStart(eventData) {
  * @param {*} eventData
  */
 async function handleImportStop(eventData) {
+  const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
   try {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));

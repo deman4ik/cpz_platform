@@ -1,4 +1,23 @@
 module.exports = {
   verbose: true,
-  reporters: ["default", "jest-junit"]
+  reporters: ["default", "jest-junit"],
+  moduleFileExtensions: ["js"],
+  testEnvironment: "node",
+  clearMocks: true,
+  setupFiles: ["<rootDir>/tests/setupEnv.js"],
+  moduleNameMapper: {
+    cpzConfig: "<rootDir>../cpz-shared/config",
+    cpzEnv: "<rootDir>../cpz-shared/config/environment",
+    cpzDefaults: "<rootDir>../cpz-shared/config/defaults",
+    cpzEventTypes: "<rootDir>../cpz-shared/config/events/types",
+    cpzServices: "<rootDir>../cpz-shared/config/services",
+    cpzState: "<rootDir>../cpz-shared/config/state",
+    cpzStorageTables: "<rootDir>../cpz-shared/config/storageTables",
+    "^cpzStorage(.*)$": "<rootDir>../cpz-shared/tableStorage$1",
+    cpzEvents: "<rootDir>../cpz-shared/eventgrid",
+    "^cpzUtils(.*)$": "<rootDir>../cpz-shared/utils$1",
+    cpzDayjs: "<rootDir>../cpz-shared/utils/lib/dayjs",
+    cpzDB: "<rootDir>../cpz-shared/db",
+    cpzConnector: "<rootDir>../cpz-shared/connector"
+  }
 };

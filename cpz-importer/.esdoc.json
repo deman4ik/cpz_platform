@@ -1,0 +1,46 @@
+{
+  "source": "./src",
+  "destination": "./docs",
+  "plugins": [
+    {
+      "name": "esdoc-standard-plugin",
+      "option": {
+        "lint": {
+          "enable": true
+        },
+        "coverage": {
+          "enable": true
+        },
+        "brand": {
+          "title": "CPZ-Importer",
+          "description": "",
+          "repository": "https://cryptuoso.visualstudio.com/CPZ/_git/cpz_platform",
+          "site": "",
+          "author": "Cryptuoso Team"
+        },
+        "test": {
+          "source": "./tests/",
+          "interfaces": [
+            "describe",
+            "it",
+            "context",
+            "suite",
+            "test"
+          ],
+          "includes": [
+            "(spec|Spec|test|Test)\\.js$"
+          ],
+          "excludes": [
+            "\\.config\\.js$"
+          ]
+        }
+      }
+    },
+    {
+      "name": "esdoc-ecmascript-proposal-plugin",
+      "option": {
+        "all": true
+      }
+    }
+  ]
+}

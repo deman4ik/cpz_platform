@@ -132,6 +132,9 @@ function generateCandleRowKey(time) {
   return getInvertedTimestamp(time);
 }
 
+/* TODO Описать детальнее handleCandleGaps
+ * с примером аргументов и return
+ */
 /**
  * Заполнение пропусков свечей в исходном массиве,
  * путем создания новых свечей по данным предыдущей свечи

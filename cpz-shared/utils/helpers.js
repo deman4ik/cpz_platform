@@ -6,7 +6,7 @@ import dayjs from "./lib/dayjs";
  *
  * @param {Number} a
  * @param {Number} b
- * @returns {Int}
+ * @returns {Number}
  */
 function sortAsc(a, b) {
   if (a > b) {
@@ -23,7 +23,7 @@ function sortAsc(a, b) {
  *
  * @param {Number} a
  * @param {Number} b
- * @returns {Int}
+ * @returns {Number}
  */
 function sortDesc(a, b) {
   if (a > b) {
@@ -81,10 +81,15 @@ function generateKey() {
 
 /**
  * Количество минут между двумя датами
- *
- * @param {Date} dateFrom дата с
- * @param {Date} dateTo дата по
+ * @function
+ * @name durationMinutes
+ * @param {Date} dateFrom - дата с, в ISO Date формате
+ * @param {Date} dateTo -  дата по, в ISO Date формате
  * @param {boolean} positive возвращать только положительное число
+ * @returns {number} duration - количество минут между двумя датами, может быть отрицательным
+ * @example
+ * durationMinutes("2019-02-21T11:49:00.000Z", "2019-02-21T11:51:00.000Z", true)
+ * // return 2
  */
 function durationMinutes(dateFrom, dateTo, positive = false) {
   const duration = dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), "minutes");
@@ -97,7 +102,7 @@ function durationMinutes(dateFrom, dateTo, positive = false) {
  *
  * @param {Date} dateFrom дата с
  * @param {Date} dateTo дата по
- * @param {Int} timeframe таймфрейм в минутах
+ * @param {Number} timeframe таймфрейм в минутах
  */
 function durationInTimeframe(dateFrom, dateTo, timeframe) {
   const minutes = durationMinutes(dateFrom, dateTo);
