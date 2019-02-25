@@ -1,11 +1,9 @@
 import {
   SUB_DELETED_EVENT,
   SUB_VALIDATION_EVENT,
-  TASKS_CANDLEBATCHER_START_EVENT,
-  TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT
+  CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
-import funcTaskEvents from "../../src/funcs/funcTaskEvents";
+import funcTaskEvents from "../../src/funcs/funcCandleEvents";
 
 import { contextMock, reqMock } from "../../../tests/helpers";
 
@@ -17,15 +15,10 @@ jest.mock("cpzEnv/advister");
 
 jest.mock("../../../cpz-shared/tableStorage/tableStorage");
 
-jest.mock("../../src/batcher/handleTaskEvents", () => ({
-  handleStart: context => {
-    context.handleStart = true;
-  },
-  handleStop: context => {
-    context.handleStop = true;
-  },
-  handleUpdate: context => {
-    context.handleUpdate = true;
+jest.mock("../../src/adviser/handleCandleEvents", () => ({
+  __esModule: true,
+  default: context => {
+    context.handleCandle = true;
   }
 }));
 
@@ -33,11 +26,7 @@ const validationCode = "*some_code*";
 
 const data = { validationCode };
 
-const body = [
-  { data, eventType: TASKS_CANDLEBATCHER_START_EVENT.eventType },
-  { data, eventType: TASKS_CANDLEBATCHER_STOP_EVENT.eventType },
-  { data, eventType: TASKS_CANDLEBATCHER_UPDATE_EVENT.eventType }
-];
+const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT.eventType }];
 
 test("Should be done", () => {
   const req = reqMock(body);
@@ -54,17 +43,9 @@ test("Should call all handlers", () => {
 
   funcTaskEvents(context, req);
 
-  const {
-    handleStart: start,
-    handleStop: stop,
-    handleUpdate: update
-  } = context;
+  const { handleCandle } = context;
 
-  expect({ start, stop, update }).toEqual({
-    start: true,
-    stop: true,
-    update: true
-  });
+  expect(handleCandle).toEqual(true);
 });
 
 test("Should go to error", () => {

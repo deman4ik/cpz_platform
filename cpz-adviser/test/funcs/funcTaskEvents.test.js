@@ -1,9 +1,9 @@
 import {
   SUB_DELETED_EVENT,
   SUB_VALIDATION_EVENT,
-  TASKS_CANDLEBATCHER_START_EVENT,
-  TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT
+  TASKS_ADVISER_START_EVENT,
+  TASKS_ADVISER_STOP_EVENT,
+  TASKS_ADVISER_UPDATE_EVENT
 } from "cpzEventTypes";
 import funcTaskEvents from "../../src/funcs/funcTaskEvents";
 
@@ -17,7 +17,7 @@ jest.mock("cpzEnv/advister");
 
 jest.mock("../../../cpz-shared/tableStorage/tableStorage");
 
-jest.mock("../../src/batcher/handleTaskEvents", () => ({
+jest.mock("../../src/adviser/handleTaskEvents", () => ({
   handleStart: context => {
     context.handleStart = true;
   },
@@ -34,9 +34,9 @@ const validationCode = "*some_code*";
 const data = { validationCode };
 
 const body = [
-  { data, eventType: TASKS_CANDLEBATCHER_START_EVENT.eventType },
-  { data, eventType: TASKS_CANDLEBATCHER_STOP_EVENT.eventType },
-  { data, eventType: TASKS_CANDLEBATCHER_UPDATE_EVENT.eventType }
+  { data, eventType: TASKS_ADVISER_START_EVENT.eventType },
+  { data, eventType: TASKS_ADVISER_STOP_EVENT.eventType },
+  { data, eventType: TASKS_ADVISER_UPDATE_EVENT.eventType }
 ];
 
 test("Should be done", () => {
