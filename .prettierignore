@@ -1,0 +1,10 @@
+.env
+.vs
+.vscode
+.DS_Store
+*.sh
+node_modules
+coverage
+dist
+*.rar
+junit.xml
