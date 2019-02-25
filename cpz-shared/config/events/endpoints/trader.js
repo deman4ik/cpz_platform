@@ -20,6 +20,7 @@ export default {
       name: `${TRADER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8106,
       types: [
         TASKS_TRADER_START_EVENT.eventType,
         TASKS_TRADER_STOP_EVENT.eventType,
@@ -30,18 +31,21 @@ export default {
       name: `${TRADER_SERVICE}-${CANDLES_TOPIC}`,
       topic: CANDLES_TOPIC,
       url: "/api/candleEvents",
+      localPort: 8106,
       types: [CANDLES_NEWCANDLE_EVENT.eventType]
     },
     {
       name: `${TRADER_SERVICE}-${TICKS_TOPIC}`,
       topic: TICKS_TOPIC,
       url: "/api/tickEvents",
+      localPort: 8106,
       types: [TICKS_NEWTICK_EVENT.eventType]
     },
     {
       name: `${TRADER_SERVICE}-${SIGNALS_TOPIC}`,
       topic: SIGNALS_TOPIC,
       url: "/api/signalEvents",
+      localPort: 8106,
       types: [SIGNALS_NEWSIGNAL_EVENT.eventType]
     }
   ]

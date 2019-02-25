@@ -13,6 +13,7 @@ export default {
       name: `${ADVISER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8104,
       types: [
         TASKS_ADVISER_START_EVENT.eventType,
         TASKS_ADVISER_STOP_EVENT.eventType,
@@ -23,6 +24,7 @@ export default {
       name: `${ADVISER_SERVICE}-${CANDLES_TOPIC}`,
       topic: CANDLES_TOPIC,
       url: "/api/candleEvents",
+      localPort: 8104,
       types: [CANDLES_NEWCANDLE_EVENT.eventType]
     }
   ]

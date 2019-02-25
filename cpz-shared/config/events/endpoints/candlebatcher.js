@@ -12,6 +12,7 @@ export default {
       name: `${CANDLEBATCHER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8103,
       types: [
         TASKS_CANDLEBATCHER_START_EVENT.eventType,
         TASKS_CANDLEBATCHER_STOP_EVENT.eventType,

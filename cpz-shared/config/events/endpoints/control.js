@@ -41,6 +41,7 @@ export default {
       name: `${CONTROL_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8107,
       types: [
         TASKS_MARKETWATCHER_STARTED_EVENT.eventType,
         TASKS_MARKETWATCHER_STOPPED_EVENT.eventType,

@@ -5,7 +5,7 @@ module.exports = {
   testEnvironment: "node",
   clearMocks: true,
   moduleNameMapper: {
-    cpzConfig: "<rootDir>../cpz-shared/config",
+    "^cpzConfig.(.*)$": "<rootDir>../cpz-shared/config/$1",
     cpzEnv: "<rootDir>../cpz-shared/config/environment",
     cpzDefaults: "<rootDir>../cpz-shared/config/defaults",
     cpzEventTypes: "<rootDir>../cpz-shared/config/events/types",

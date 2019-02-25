@@ -13,6 +13,7 @@ export default {
       name: `${MARKETWATCHER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8102,
       types: [
         TASKS_MARKETWATCHER_START_EVENT.eventType,
         TASKS_MARKETWATCHER_STOP_EVENT.eventType,

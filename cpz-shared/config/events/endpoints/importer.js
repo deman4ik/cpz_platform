@@ -11,6 +11,7 @@ export default {
       name: `${IMPORTER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8105,
       types: [
         TASKS_IMPORTER_START_EVENT.eventType,
         TASKS_IMPORTER_STOP_EVENT.eventType

@@ -1,51 +1,72 @@
 import fetch from "node-fetch";
-import yaml from "js-yaml";
-import fs from "fs";
 import retry from "cpzUtils/retry";
+import { endpoints as eventEndpoints } from "cpzConfig/events/endpoints";
+import { EVENTS_LOGGER_SERVICE } from "cpzServices";
 
-const { EG_EMULATOR_MODE } = process.env;
+class Relay {
+  constructor(mode, key) {
+    this._mode = mode;
+    this._key = key;
+    this._endpoints = [];
+    if (this._mode) {
+      this._init();
+    }
+  }
 
-let endpointsConfig = {};
-// TODO: Build from config
-if (EG_EMULATOR_MODE)
-  endpointsConfig = yaml.safeLoad(
-    fs.readFileSync(
-      `${process.cwd()}/endpoints-${EG_EMULATOR_MODE}.yml`,
-      "utf8"
-    )
-  );
-
-const findEndpoint = eventType =>
-  endpointsConfig.endpoints.find(endpoint =>
-    endpoint.types.find(type => type === eventType)
-  );
-
-async function relay(context, event) {
-  try {
-    const endpoint = findEndpoint(event.eventType);
-    if (endpoint) {
-      const host =
-        EG_EMULATOR_MODE === "docker"
-          ? `${endpoint.endpoint}:${endpoint.port}`
-          : `localhost:${endpoint.port}`;
-      const url = `http://${host}${endpoint.url}?api-key=${
-        process.env.API_KEY
-      }`;
-      context.log.info(url);
-      context.log.info(event);
-      retry(async () => {
-        await fetch(url, {
-          method: "POST",
-          body: JSON.stringify([
-            { ...event, topic: "cpz-events-logger", metadataVersion: "1" }
-          ]),
-          headers: { "Content-Type": "application/json" }
+  _init() {
+    Object.keys(eventEndpoints).forEach(service => {
+      if (service === EVENTS_LOGGER_SERVICE) return;
+      const serviceEndpoints = eventEndpoints[service];
+      serviceEndpoints.forEach(endpoint => {
+        this._endpoints.push({
+          service,
+          url: `http://${
+            this._mode === "docker"
+              ? `cpz-${service}:80`
+              : `localhost:${endpoint.localPort}`
+          }${endpoint.url}?api-key=${this._key}`,
+          types: endpoint.types
         });
       });
+    });
+  }
+
+  _findEndpoints(eventType) {
+    return this._endpoints.filter(endpoint =>
+      endpoint.types.find(type => type === eventType)
+    );
+  }
+
+  async send(context, event) {
+    try {
+      if (this._mode) {
+        const endpoints = this._findEndpoints(event.eventType);
+        if (endpoints && endpoints.length > 0) {
+          await Promise.all(
+            endpoints.map(async endpoint => {
+              context.log.info(endpoint);
+              context.log.info(event);
+              await retry(async () => {
+                await fetch(endpoint.url, {
+                  method: "POST",
+                  body: JSON.stringify([
+                    {
+                      ...event,
+                      topic: "cpz-events-logger",
+                      metadataVersion: "1"
+                    }
+                  ]),
+                  headers: { "Content-Type": "application/json" }
+                });
+              });
+            })
+          );
+        }
+      }
+    } catch (error) {
+      context.log.error(error);
     }
-  } catch (error) {
-    context.log.error(error);
   }
 }
 
-export default relay;
+export default Relay;

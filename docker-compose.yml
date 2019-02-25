@@ -1,7 +1,7 @@
-version: '3'
+version: "3"
 services:
-  cpz-events-logger:
-    container_name: cpz-events-logger
+  cpz-eventslogger:
+    container_name: cpz-eventslogger
     build:
       context: .
       dockerfile: CPZEventslogger.Dockerfile
@@ -89,7 +89,7 @@ services:
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
       - NODE_ENV
-    restart: always  
+    restart: always
   cpz-importer:
     container_name: cpz-importer
     build:
@@ -120,7 +120,7 @@ services:
       dockerfile: CPZTrader.Dockerfile
     ports:
       - "8106:80"
-    environment:   
+    environment:
       - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
       - AZ_STORAGE_MARKET_CS
@@ -138,14 +138,14 @@ services:
       - NODE_TLS_REJECT_UNAUTHORIZED
       - NODE_ENV
     restart: always
-  cpz-control-api:
-    container_name: cpz-control-api
+  cpz-control:
+    container_name: cpz-control
     build:
       context: .
       dockerfile: CPZControlAPI.Dockerfile
     ports:
       - "8107:80"
-    environment:   
+    environment:
       - FUNCTIONS_WORKER_RUNTIME
       - AzureWebJobsStorage
       - AZ_STORAGE_CONTROL_CS
@@ -170,7 +170,7 @@ services:
       dockerfile: CPZBacktester.Dockerfile
     ports:
       - "8108:80"
-    environment:   
+    environment:
       - AzureWebJobsStorage
       - AZ_STORAGE_MARKET_CS
       - AZ_STORAGE_TRADE_CS
@@ -185,7 +185,7 @@ services:
       - DEBUG
       - NODE_TLS_REJECT_UNAUTHORIZED
       - NODE_ENV
-    restart: always  
+    restart: always
   cpz-connector:
     container_name: cpz-connector
     build:

@@ -11,6 +11,7 @@ export default {
       name: `${BACKTESTER_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
       url: "/api/taskEvents",
+      localPort: 8108,
       types: [
         TASKS_BACKTESTER_START_EVENT.eventType,
         TASKS_BACKTESTER_STOP_EVENT.eventType

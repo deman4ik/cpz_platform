@@ -4,17 +4,16 @@ import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
 import EventsLogger from "../eventslogger/eventslogger";
+import Relay from "../emulator/relay";
 
 checkEnvVars(eventsloggerEnv.variables);
 
-// const { EG_EMULATOR_MODE } = process.env;
+const { EG_EMULATOR_MODE, API_KEY } = process.env;
+const relay = new Relay(EG_EMULATOR_MODE, API_KEY);
 
 function handleEvent(context, req) {
   try {
-    if (
-      process.env.EG_EMULATOR_MODE === "none" &&
-      req.query["api-key"] !== process.env.API_KEY
-    ) {
+    if (req.query["api-key"] !== API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
     const parsedReq = JSON.parse(req.rawBody);
@@ -54,14 +53,9 @@ function handleEvent(context, req) {
           const eventslogger = new EventsLogger(context);
           eventslogger.save(eventGridEvent);
 
-          /*
           if (EG_EMULATOR_MODE) {
-            
-            const relay = require("../emulator/relay");
-        
-            relay(context, eventGridEvent);
+            relay.send(context, eventGridEvent);
           }
-          */
         }
       }
     });
