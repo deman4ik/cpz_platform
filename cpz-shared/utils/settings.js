@@ -60,6 +60,8 @@ const combineTraderSettings = settings => ({
     settings.multiPosition === undefined || settings.multiPosition === null
       ? TRADER_SETTINGS_DEFAULTS.multiPosition
       : settings.multiPosition,
+  /* Пользовательские дополнительные параметры для биржи */
+  exchangeParams: settings.exchangeParams,
   /* Информация о API ключах */
   keys: settings.keys
 });

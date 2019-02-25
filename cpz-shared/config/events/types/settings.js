@@ -88,8 +88,13 @@ const TRADER_SETTINGS = {
     optional: true
   },
   multiPosition: {
-    description: "Multiple active positions available.",
+    description: "Multiple active positions available",
     type: "boolean",
+    optional: true
+  },
+  exchangeParams: {
+    description: "User specific exchange parameters",
+    type: "object",
     optional: true
   },
   keys: {

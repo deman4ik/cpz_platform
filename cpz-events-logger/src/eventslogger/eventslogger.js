@@ -79,12 +79,13 @@ class EventsLogger {
             ...baseEventData,
             data: event.data
           });
-        if (
+        // TODO: SAVE TO DB USER ROBOT TASK EVENTS
+        /*  if (
           type === TASKS_USERROBOT_STARTED_EVENT.eventType ||
           type === TASKS_USERROBOT_STOPPED_EVENT.eventType
         ) {
           if (this.logToPostgre) await saveUserRobotHistDB([fullEventData]);
-        }
+        } */
         return;
       }
       if (type.includes("CPZ.Signals")) {

@@ -8,6 +8,8 @@ async function getUserRobotDB(userRobotId) {
     id
     run_mode
     user_id
+    run_mode
+    volume
     user_params
     robotByrobotId {
       id
@@ -43,7 +45,8 @@ async function getUserRobotDB(userRobotId) {
         adviserSettings: robotByrobotId.advisersettings,
         traderSettings: {
           ...robotByrobotId.tradersettings,
-          ...response.cpz_user_robot_by_pk.user_params,
+          exchangeParams: response.cpz_user_robot_by_pk.user_params,
+          volume: response.cpz_user_robot_by_pk.volume,
           mode: response.cpz_user_robot_by_pk.run_mode
         }
       };

@@ -1,6 +1,13 @@
 import VError from "verror";
 import db from "./db";
 
+const getEventAction = eventType =>
+  eventType
+    .split(".")
+    .pop()
+    .toString()
+    .toLowerCase();
+
 async function saveUserRobotHistDB(data) {
   try {
     const query = `mutation saveUserRobotHist($objects: [cpz_user_robothist_insert_input!]!) {
@@ -9,19 +16,16 @@ async function saveUserRobotHistDB(data) {
         }
       }`;
 
-    /* eslint-disable no-restricted-syntax, no-await-in-loop */
-
     const variables = {
       objects: data.map(hist => ({
         user_robot_id: hist.id,
         action_date: hist.eventTime,
-        action:
-          hist.eventType.split(".").pop() === "Started" ? "start" : "stop_user", // TODO
+        action: getEventAction(hist.eventType), // TODO stopped user/auto
         run_mode: hist.traderSettings.mode,
-        // user_params: hist.userParams, //TODO
         advisersettings: hist.adviserSettings,
         tradersettings: hist.traderSettings,
-        candlebatchersettings: hist.candlebatcherSettings
+        candlebatchersettings: hist.candlebatcherSettings,
+        error: hist.error
       }))
     };
 
