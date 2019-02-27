@@ -21,7 +21,9 @@ class CryptocompareProvider extends BaseProvider {
   constructor(state) {
     super(state);
     // Создаем новое подключение к провайдеру Cryptocompare
-    this._socket = io("https://streamer.cryptocompare.com/");
+    this._socket = io("https://streamer.cryptocompare.com/", {
+      transports: ["websocket"]
+    });
     this._subscribeToSocketEvents();
   }
 
@@ -166,6 +168,10 @@ class CryptocompareProvider extends BaseProvider {
 
     // Если произошла ошибка
     this._socket.on("error", this._handleError.bind(this));
+
+    this._socket.on("reconnect_attempt", () => {
+      this._socket.io.opts.transports = ["polling", "websocket"];
+    });
 
     // Если все попытки переподключения исчерпаны
     this._socket.on("reconnect_failed", this._handleError.bind(this));
