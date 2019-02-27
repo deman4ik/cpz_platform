@@ -1,5 +1,5 @@
 import VError from "verror";
-import appInsights from "applicationinsights";
+import * as appInsights from "applicationinsights";
 
 /**
  * Логирование и сбор аналитики
@@ -11,7 +11,17 @@ class Log {
     this._logInfo = console.log;
     this._logWarn = console.warn;
     this._logError = console.error;
+    this._serviceName = "platform";
     this._appInstightsEnabled = !!process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
+    this.initAppInsights();
+  }
+
+  /**
+   * Инициализация службы Applicatin Insights
+   *
+   * @memberof Log
+   */
+  initAppInsights() {
     if (this._appInstightsEnabled) {
       appInsights
         .setup()
@@ -22,7 +32,6 @@ class Log {
         .setAutoCollectDependencies(true)
         .setAutoCollectConsole(true, true)
         .setUseDiskRetryCaching(true);
-
       appInsights.start();
     }
   }
@@ -33,7 +42,8 @@ class Log {
    * @param {string} serviceName
    * @memberof Log
    */
-  setAppInsightsService(serviceName) {
+  setService(serviceName) {
+    this._serviceName = serviceName;
     if (this._appInstightsEnabled) {
       appInsights.defaultClient.context.tags[
         appInsights.defaultClient.context.keys.cloudRole
@@ -70,7 +80,7 @@ class Log {
    * @memberof Log
    */
   info(...args) {
-    this._logInfo(...args);
+    this._logInfo(`CPZ-${this._serviceName}`, ...args);
   }
 
   /**
@@ -99,12 +109,15 @@ class Log {
    * @param {Object} eventData
    * @memberof Log
    */
-  event(eventData) {
+  event(eventData, eventGrid = false) {
     if (this._appInstightsEnabled) {
       if (eventData) {
         // TODO: Parse base Event Types from config
         const name = eventData.name || "UnknownEvent"; // TODO: Create constant
         appInsights.defaultClient.trackEvent({ name, properties: eventData });
+        if (eventGrid) {
+          // TODO: Publish to Event Grid LOG Topic
+        }
       }
     }
   }
@@ -115,7 +128,7 @@ class Log {
    * @param {*} errorData
    * @memberof Log
    */
-  exception(errorData) {
+  exception(errorData, eventGrid = false) {
     if (this._appInstightsEnabled) {
       if (errorData) {
         // TODO: Check errorData type - Error or VError
@@ -124,6 +137,9 @@ class Log {
         appInsights.defaultClient.trackException({
           exception: errorData
         });
+        if (eventGrid) {
+          // TODO: Publish to  Event Grid Error Topic
+        }
       }
     }
   }

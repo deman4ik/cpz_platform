@@ -24,11 +24,12 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "7.3.1",
+    "applicationinsights": "1.2.0",
     "azure-eventgrid": "1.5.0",
     "azure-storage": "2.10.2",
     "babel-polyfill": "6.26.0",
     "dayjs": "1.8.5",
-    "fastest-validator": "^0.6.15",
+    "fastest-validator": "0.6.15",
     "ms-rest-azure": "2.6.0",
     "p-retry": "3.0.1",
     "tulind": "0.8.14",

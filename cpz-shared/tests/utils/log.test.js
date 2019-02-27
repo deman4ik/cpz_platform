@@ -1,7 +1,12 @@
 import Log from "../../utils/log";
 import { contextMock } from "../../../tests/helpers";
 
+jest.mock("applicationinsights");
+
 describe("Log helper should log data", () => {
+  test("Should set default mode values", () => {
+    expect(Log._appInstightsEnabled).toBeFalsy();
+  });
   test("Should log info to console", () => {
     const spy = jest.spyOn(Log, "_logInfo");
     Log.info("info");
@@ -17,6 +22,7 @@ describe("Log helper should log data", () => {
     Log.error("error");
     expect(spy).toHaveBeenCalled();
   });
+
   test("Should throw error for invalid context", () => {
     const context = {};
     expect(() => {
