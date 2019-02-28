@@ -1,0 +1,26 @@
+const TRADER_PENDING_CANDLES_ERROR = "TraderPendingCandlesError";
+
+const TRADER_HANDLE_SIGNAL_ERROR = "TraderHandleSignalError";
+
+const TRADER_EXECUTE_ERROR = "TradersExecutionError";
+
+const TRADER_NOT_FOUND_ERROR = "TraderNotFound";
+
+const TRADER_RUNNER_ERROR = "TraderRunnerError";
+
+const TRADER_CRASH_ERROR = "TraderCrashError";
+
+const TRADER_STOP_ERROR = "TradersStopError";
+
+const TRADER_ERROR = "TraderError";
+
+export {
+  TRADER_PENDING_CANDLES_ERROR,
+  TRADER_HANDLE_SIGNAL_ERROR,
+  TRADER_NOT_FOUND_ERROR,
+  TRADER_EXECUTE_ERROR,
+  TRADER_RUNNER_ERROR,
+  TRADER_CRASH_ERROR,
+  TRADER_STOP_ERROR,
+  TRADER_ERROR
+};

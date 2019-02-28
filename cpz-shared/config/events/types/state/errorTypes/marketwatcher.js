@@ -1,0 +1,11 @@
+const MARKETWATCHER_NOT_FOUND_ERROR = "MarketwatcherNotFound";
+
+const MARKETWATCHER_RUNNER_ERROR = "MarketwatcherRunnerError";
+
+const MARKETWATCHER_ERROR = "MarketwatcherError";
+
+export {
+  MARKETWATCHER_NOT_FOUND_ERROR,
+  MARKETWATCHER_RUNNER_ERROR,
+  MARKETWATCHER_ERROR
+};

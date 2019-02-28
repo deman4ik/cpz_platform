@@ -1,0 +1,11 @@
+const CANDLEBATCHER_NOT_FOUND_ERROR = "CandlebatcherNotFound";
+
+const CANDLEBATCHER_RUNNER_ERROR = "CandlebatcherRunnerError";
+
+const CANDLEBATCHER_ERROR = "CandlebatcherError";
+
+export {
+  CANDLEBATCHER_NOT_FOUND_ERROR,
+  CANDLEBATCHER_RUNNER_ERROR,
+  CANDLEBATCHER_ERROR
+};

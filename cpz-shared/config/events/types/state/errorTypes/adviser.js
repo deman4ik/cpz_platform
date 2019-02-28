@@ -1,0 +1,26 @@
+const ADVISER_VALIDATION_ERROR = "AdviserValidationError";
+
+const ADVISER_INDICATOR_ERROR = "AdviserIndicatorError";
+
+const ADVISER_STRATEGY_ERROR = "AdviserStrategyError";
+
+const ADVISER_EXECUTE_ERROR = "AdviserExecutionError";
+
+const ADVISER_RUNNER_ERROR = "AdviserRunnerError";
+
+const ADVISER_CRASH_ERROR = "AdviserCrashError";
+
+const ADVISER_NOT_FOUND_ERROR = "AdviserNotFound";
+
+const ADVISER_ERROR = "AdviserError";
+
+export {
+  ADVISER_VALIDATION_ERROR,
+  ADVISER_NOT_FOUND_ERROR,
+  ADVISER_INDICATOR_ERROR,
+  ADVISER_STRATEGY_ERROR,
+  ADVISER_EXECUTE_ERROR,
+  ADVISER_RUNNER_ERROR,
+  ADVISER_CRASH_ERROR,
+  ADVISER_ERROR
+};

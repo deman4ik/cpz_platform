@@ -1,0 +1,11 @@
+const BACKTESTER_RUNNER_ERROR = "BacktesterRunnerError";
+
+const BACKTESTER_NOT_FOUND_ERROR = "BacktestNotFound";
+
+const BACKTESTER_ERROR = "BacktesterError";
+
+export {
+  BACKTESTER_NOT_FOUND_ERROR,
+  BACKTESTER_RUNNER_ERROR,
+  BACKTESTER_ERROR
+};
