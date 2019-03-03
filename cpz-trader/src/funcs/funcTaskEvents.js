@@ -8,6 +8,8 @@ import {
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATE_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
+import { TRADER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { checkEnvVars } from "cpzUtils/environment";
 import traderEnv from "cpzEnv/trader";
@@ -17,11 +19,13 @@ import {
   handleUpdate
 } from "../trader/handleTaskEvents";
 
+Log.setService(TRADER_SERVICE);
 checkEnvVars(traderEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    Log.addContext(context);
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

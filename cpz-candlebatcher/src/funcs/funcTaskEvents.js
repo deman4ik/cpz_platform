@@ -11,17 +11,21 @@ import {
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { checkEnvVars } from "cpzUtils/environment";
 import candlebatcherEnv from "cpzEnv/candlebatcher";
+import Log from "cpzUtils/log";
+import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import {
   handleStart,
   handleStop,
   handleUpdate
 } from "../batcher/handleTaskEvents";
 
+Log.setService(CANDLEBATCHER_SERVICE);
 checkEnvVars(candlebatcherEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    Log.addContext(context);
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

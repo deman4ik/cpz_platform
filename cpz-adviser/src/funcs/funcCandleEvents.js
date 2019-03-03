@@ -7,12 +7,16 @@ import {
   CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import Log from "cpzUtils/log";
+import { ADVISER_SERVICE } from "cpzServices";
 import handleCandle from "../adviser/handleCandleEvents";
 
+Log.setService(ADVISER_SERVICE);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    Log.addContext(context);
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

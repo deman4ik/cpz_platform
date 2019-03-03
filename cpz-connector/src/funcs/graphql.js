@@ -29,6 +29,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: req => {
+    Log.addContext(req.context);
     if (req.request.headers["api-key"] !== process.env.API_KEY) {
       const authError = new AuthenticationError("Invalid API Key");
       Log.exception(authError);

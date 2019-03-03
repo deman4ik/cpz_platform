@@ -30,7 +30,8 @@ function contextMock() {
     log: logMock(),
     done() {
       this.done.called = true;
-    }
+    },
+    executionContext: { invocationId: "1", functionName: "func" }
   };
 }
 

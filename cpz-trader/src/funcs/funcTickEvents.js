@@ -5,13 +5,17 @@ import {
   SUB_DELETED_EVENT,
   TICKS_NEWTICK_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
+import { TRADER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { handleTick } from "../trader/handlePriceEvents";
 
+Log.setService(TRADER_SERVICE);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    Log.addContext(context);
     const parsedReq = JSON.parse(req.rawBody);
     context.log.info(
       `CPZ Trader processed a request.${JSON.stringify(parsedReq)}`

@@ -4,11 +4,11 @@ import { ServiceError } from "../../utils/error";
 const { stringify: str } = JSON;
 
 describe("ServiceError", () => {
-  test("Should instade of VError", () => {
+  test("Should be instance of VError", () => {
     expect(new ServiceError()).toBeInstanceOf(VError);
   });
 
-  test("Should instede of Error", () => {
+  test("Should be instance of Error", () => {
     expect(new ServiceError()).toBeInstanceOf(Error);
   });
 
@@ -61,58 +61,89 @@ describe("ServiceError", () => {
     });
   });
 
-  describe("stackNames", () => {
-    test("method 'getStackNames'", () => {
-      const stackNames = ["root", "pre-sheet", "sheet"];
+  describe("stack", () => {
+    test("static method 'getStackNames'", () => {
+      const stack =
+        "AdviserExecutionError: Failed to execute adviser\nAdviserSaveError: Failed to save adviser taskId:'12345678' state\nStorageError: Failed to load from 'advisers' table";
 
-      const result = new ServiceError({
-        name: stackNames[2],
-        $$toCheck: false,
-        cause: new ServiceError({
-          name: stackNames[1],
+      const error = new ServiceError(
+        {
+          name: "AdviserExecutionError",
           $$toCheck: false,
-          cause: new ServiceError({
-            name: stackNames[0],
-            $$toCheck: false
-          })
-        })
-      }).getStackNames();
-
-      expect(result).toStrictEqual(stackNames);
+          cause: new ServiceError(
+            {
+              name: "AdviserSaveError",
+              $$toCheck: false,
+              cause: new ServiceError(
+                {
+                  name: "StorageError",
+                  $$toCheck: false
+                },
+                "Failed to load from 'advisers' table"
+              )
+            },
+            "Failed to save adviser taskId:'12345678' state"
+          )
+        },
+        "Failed to execute adviser"
+      );
+      const result = ServiceError.getStackNames(error);
+      expect(result).toStrictEqual(stack);
     });
 
-    test("static method 'getStackNamesError'", () => {
-      const stackNames = ["root", "pre-sheet", "sheet"];
+    test("static method 'getStack'", () => {
+      const stack = [
+        { name: "AdviserExecutionError", message: "Failed to execute adviser" },
 
-      const result = ServiceError.getStackNamesError(
-        new ServiceError({
-          name: stackNames[2],
+        {
+          name: "AdviserSaveError",
+          message: "Failed to save adviser taskId:'12345678' state"
+        },
+
+        {
+          name: "StorageError",
+          message: "Failed to load from 'advisers' table"
+        }
+      ];
+      const error = new ServiceError(
+        {
+          name: "AdviserExecutionError",
           $$toCheck: false,
-          cause: new ServiceError({
-            name: stackNames[1],
-            $$toCheck: false,
-            cause: new ServiceError({
-              name: stackNames[0],
-              $$toCheck: false
-            })
-          })
-        })
+          cause: new ServiceError(
+            {
+              name: "AdviserSaveError",
+              $$toCheck: false,
+              cause: new ServiceError(
+                {
+                  name: "StorageError",
+                  $$toCheck: false
+                },
+                "Failed to load from 'advisers' table"
+              )
+            },
+            "Failed to save adviser taskId:'12345678' state"
+          )
+        },
+        "Failed to execute adviser"
       );
+      const result = ServiceError.getStack(error);
 
-      expect(result).toStrictEqual(stackNames);
+      expect(result).toStrictEqual(stack);
     });
   });
 
   describe("format", () => {
     describe("static method 'formatError'", () => {
       test("Default pattern should be mutable", () => {
-        const error = new ServiceError({
-          message: "some_message",
-          name: "SomeError",
-          info: { info: "some_info" },
-          cause: new Error("some_message"),
-          $$toCheck: false
-        });
+        const error = new ServiceError(
+          {
+            name: "SomeError",
+            info: { info: "some_info" },
+            cause: new Error("some_message"),
+            $$toCheck: false
+          },
+          "some_message"
+        );
 
         ServiceError.$$defaultFormatPattern =
           "n: {name}\nm: {message}\ni: {info}\ns: {stack}";
@@ -120,20 +151,22 @@ describe("ServiceError", () => {
         const result = ServiceError.formatError(error);
 
         expect(result).toEqual(
-          `n: ${error.name}\nm: ${error.message}\ni: ${str(
+          `n: ${error.name}\nm: ${error.jse_shortmsg}\ni: ${str(
             VError.info(error)
-          )}\ns: ${VError.fullStack(error)}`
+          )}\ns: SomeError: some_message\nError: some_message`
         );
       });
 
       test("Should return correct result", () => {
-        const error = new ServiceError({
-          message: "some_message",
-          name: "SomeError",
-          info: { info: "some_info" },
-          cause: new Error("some_message"),
-          $$toCheck: false
-        });
+        const error = new ServiceError(
+          {
+            name: "SomeError",
+            info: { info: "some_info" },
+            cause: new Error("some_message"),
+            $$toCheck: false
+          },
+          "some_message"
+        );
 
         const result = ServiceError.formatError(
           error,
@@ -141,75 +174,130 @@ describe("ServiceError", () => {
         );
 
         expect(result).toEqual(
-          `n: ${error.name}\nm: ${error.message}\ni: ${str(
+          `n: ${error.name}\nm: ${error.jse_shortmsg}\ni: ${str(
             VError.info(error)
-          )}\ns: ${VError.fullStack(error)}`
+          )}\ns: SomeError: some_message\nError: some_message`
         );
       });
     });
 
     describe("method 'format'", () => {
       test("Should return correct result", () => {
-        const error = new ServiceError({
-          message: "some_message",
-          name: "SomeError",
-          info: { info: "some_info" },
-          cause: new Error("some_message"),
-          $$toCheck: false
-        });
+        const error = new ServiceError(
+          {
+            name: "SomeError",
+            info: { info: "some_info" },
+            cause: new Error("some_message"),
+            $$toCheck: false
+          },
+          "some_message"
+        );
 
         const result = error.format(
           "n: {name}\nm: {message}\ni: {info}\ns: {stack}"
         );
 
         expect(result).toEqual(
-          `n: ${error.name}\nm: ${error.message}\ni: ${str(error.info)}\ns: ${
-            error.fullStack
-          }`
+          `n: ${error.name}\nm: ${error.jse_shortmsg}\ni: ${str(
+            error.info
+          )}\ns: SomeError: some_message\nError: some_message`
         );
       });
 
       test("Default pattern should be mutable", () => {
-        const error = new ServiceError({
-          message: "some_message",
-          name: "SomeError",
-          info: { info: "some_info" },
-          cause: new Error("some_message"),
-          $$defaultFormatPattern:
-            "n: {name}\nm: {message}\ni: {info}\ns: {stack}",
-          $$toCheck: false
-        });
+        const error = new ServiceError(
+          {
+            name: "SomeError",
+            info: { info: "some_info" },
+            cause: new Error("some_message"),
+            $$defaultFormatPattern:
+              "n: {name}\nm: {message}\ni: {info}\ns: {stack}",
+            $$toCheck: false
+          },
+          "some_message"
+        );
 
         const result = error.format();
 
         expect(result).toEqual(
-          `n: ${error.name}\nm: ${error.message}\ni: ${str(error.info)}\ns: ${
-            error.fullStack
-          }`
+          `n: ${error.name}\nm: ${error.jse_shortmsg}\ni: ${str(
+            error.info
+          )}\ns: SomeError: some_message\nError: some_message`
         );
       });
     });
 
     describe("method 'toString'", () => {
       test("Work with mutable default pattern", () => {
-        const error = new ServiceError({
-          message: "some_message",
-          name: "SomeError",
-          info: { info: "some_info" },
-          cause: new Error("some_message"),
-          $$defaultFormatPattern:
-            "n: {name}\nm: {message}\ni: {info}\ns: {stack}",
-          $$toCheck: false
-        });
+        const error = new ServiceError(
+          {
+            name: "SomeError",
+            info: { info: "some_info" },
+            cause: new Error("some_message"),
+            $$defaultFormatPattern:
+              "n: {name}\nm: {message}\ni: {info}\ns: {stack}",
+            $$toCheck: false
+          },
+          "some_message"
+        );
 
         const result = error.toString();
 
         expect(result).toEqual(
-          `n: ${error.name}\nm: ${error.message}\ni: ${str(error.info)}\ns: ${
-            error.fullStack
-          }`
+          `n: ${error.name}\nm: ${error.jse_shortmsg}\ni: ${str(
+            error.info
+          )}\ns: SomeError: some_message\nError: some_message`
         );
       });
+    });
+  });
+  describe("json", () => {
+    test("Should return json object", () => {
+      const json = {
+        name: "AdviserExecutionError",
+        message: "Failed to execute adviser",
+        info: { table: "advisers", taskId: "12345678" },
+        stack: [
+          {
+            name: "AdviserExecutionError",
+            message: "Failed to execute adviser"
+          },
+
+          {
+            name: "AdviserSaveError",
+            message: "Failed to save adviser taskId:'12345678' state"
+          },
+
+          {
+            name: "StorageError",
+            message: "Failed to load from 'advisers' table"
+          }
+        ]
+      };
+      const error = new ServiceError(
+        {
+          name: "AdviserExecutionError",
+          $$toCheck: false,
+          cause: new ServiceError(
+            {
+              name: "AdviserSaveError",
+              $$toCheck: false,
+              cause: new ServiceError(
+                {
+                  name: "StorageError",
+                  info: { table: "advisers" },
+                  $$toCheck: false
+                },
+                "Failed to load from 'advisers' table"
+              ),
+              info: { taskId: "12345678" }
+            },
+            "Failed to save adviser taskId:'12345678' state"
+          )
+        },
+        "Failed to execute adviser"
+      );
+      expect(error.json).toStrictEqual(json);
     });
   });
 });

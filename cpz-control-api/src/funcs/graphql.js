@@ -6,9 +6,12 @@ import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
 import { checkEnvVars } from "cpzUtils/environment";
 import controlEnv from "cpzEnv/control";
+import Log from "cpzUtils/log";
+import { CONTROL_SERVICE } from "cpzServices";
 import typeDefs from "../api/schema/schema.graphql";
 import mutations from "../api/resolvers/mutations";
 
+Log.setService(CONTROL_SERVICE);
 checkEnvVars(controlEnv.variables);
 
 const resolvers = {
@@ -26,6 +29,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: req => {
+    Log.addContext(req.context);
     if (req.request.headers["api-key"] !== process.env.API_KEY)
       throw new AuthenticationError("Invalid API Key");
     return {

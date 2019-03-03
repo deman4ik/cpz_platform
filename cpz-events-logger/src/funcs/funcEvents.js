@@ -3,9 +3,12 @@ import VError from "verror";
 import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
+import Log from "cpzUtils/log";
+import { EVENTS_LOGGER_SERVICE } from "cpzServices";
 import EventsLogger from "../eventslogger/eventslogger";
 import Relay from "../emulator/relay";
 
+Log.setService(EVENTS_LOGGER_SERVICE);
 checkEnvVars(eventsloggerEnv.variables);
 
 const { EG_EMULATOR_MODE, API_KEY } = process.env;
@@ -13,6 +16,7 @@ const relay = new Relay(EG_EMULATOR_MODE, API_KEY);
 
 function handleEvent(context, req) {
   try {
+    Log.addContext(context);
     if (req.query["api-key"] !== API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

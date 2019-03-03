@@ -1,4 +1,5 @@
 import "babel-polyfill";
+import { v4 as uuid } from "uuid";
 import VError from "verror";
 import {
   BASE_EVENT,
@@ -9,6 +10,8 @@ import {
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
   TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
+import { MARKETWATCHER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleStart,
@@ -17,10 +20,17 @@ import {
   handleUnsubscribe
 } from "../marketwatcher/handleTaskEvents";
 
+Log.setService(MARKETWATCHER_SERVICE);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(req, res) {
   try {
+    Log.addContext({
+      executionContext: {
+        invocationId: uuid(),
+        functionName: "taskEvents"
+      }
+    });
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }

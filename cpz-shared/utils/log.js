@@ -1,6 +1,8 @@
+import util from "util";
 import VError from "verror";
 import * as appInsights from "applicationinsights";
 
+const SEVERITY_LEVEL = appInsights.Contracts.SeverityLevel;
 /**
  * Логирование и сбор аналитики
  *
@@ -11,7 +13,9 @@ class Log {
     this._logInfo = console.log;
     this._logWarn = console.warn;
     this._logError = console.error;
-    this._serviceName = "platform";
+    this._executionContext = {
+      ServiceName: "platform"
+    };
     this._appInstightsEnabled = !!process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
     this.initAppInsights();
   }
@@ -30,9 +34,21 @@ class Log {
         .setAutoCollectPerformance(true)
         .setAutoCollectExceptions(true)
         .setAutoCollectDependencies(true)
-        .setAutoCollectConsole(true, true)
+        .setAutoCollectConsole(false)
         .setUseDiskRetryCaching(true);
+
       appInsights.start();
+      appInsights.defaultClient.commonProperties = {
+        ...this._executionContext
+      };
+    }
+  }
+
+  _updateAppInsightsCommonProperties() {
+    if (this._appInstightsEnabled) {
+      appInsights.defaultClient.commonProperties = {
+        ...this._executionContext
+      };
     }
   }
 
@@ -43,11 +59,13 @@ class Log {
    * @memberof Log
    */
   setService(serviceName) {
-    this._serviceName = serviceName;
+    this._executionContext.ServiceName = serviceName;
     if (this._appInstightsEnabled) {
       appInsights.defaultClient.context.tags[
         appInsights.defaultClient.context.keys.cloudRole
       ] = serviceName;
+
+      this._updateAppInsightsCommonProperties();
     }
   }
 
@@ -56,51 +74,142 @@ class Log {
    * для рантайма Azure Functions
    *
    * @param {Object} context
-   * @param {function} context.log
-   * @param {function} context.log.info
-   * @param {function} context.log.warn
-   * @param {function} context.log.error
+   *  @property {function} log
+   *   @property {function} log.info
+   *   @property {function} log.warn
+   *   @property {function} log.error
+   * @property {Object} executionContext
+   *  @property {string} invocationId
+   *  @propert {string} functionName
    * @memberof Log
    */
-  addContext({ log }) {
-    if (!log || !log.info || !log.warn || !log.error)
+  addContext(context) {
+    if (!context)
       throw new VError(
         { name: "LogError" },
         "Failed to add context to Log Instance"
       );
-    this._logInfo = log.info;
-    this._logWarn = log.warn;
-    this._logError = log.error;
+    const { log, executionContext } = context;
+    if (log) {
+      this._logInfo = log.info;
+      this._logWarn = log.warn;
+      this._logError = log.error;
+    }
+    this._executionContext.InvocationId = executionContext.invocationId;
+    this._executionContext.FunctionName = executionContext.functionName;
+
+    this._updateAppInsightsCommonProperties();
   }
 
   /**
-   * Логирование в консоль уровня info
+   * Create string message to log
+   * supports print-f format
+   *
+   * @param {*} args
+   * @returns
+   * @memberof Log
+   */
+  _createMessage(args) {
+    return `CPZ-${this._executionContext.ServiceName} ${util.format(...args)}`;
+  }
+
+  /**
+   * Логирование только в консоль
    *
    * @param {*} args
    * @memberof Log
    */
-  info(...args) {
-    this._logInfo(`CPZ-${this._serviceName}`, ...args);
+  console(...args) {
+    this._logInfo(this._createMessage(args));
   }
 
   /**
-   * Логирование в консоль уровня warn
+   * Базовое логирование
    *
+   * @param {SeverityLevel} severity
+   * @param {Object} properties
    * @param {*} args
    * @memberof Log
    */
-  warn(...args) {
-    this._logWarn(...args);
+  _log(severity, properties, args) {
+    const message = this._createMessage(args);
+    switch (severity) {
+      case SEVERITY_LEVEL.Verbose:
+      case SEVERITY_LEVEL.Information:
+        this._logInfo(message);
+        break;
+      case SEVERITY_LEVEL.Warning:
+        this._logWarn(message);
+        break;
+      case SEVERITY_LEVEL.Error:
+      case SEVERITY_LEVEL.Critical:
+        this._logError(message);
+        break;
+      default:
+        this._logInfo(message);
+    }
+    this._logInfo(message);
+    if (this._appInstightsEnabled)
+      appInsights.defaultClient.trackTrace({
+        message,
+        severity,
+        properties
+      });
   }
 
   /**
-   * Логирование в консоль уровня error
+   * Логирование уровня verbose
    *
+   * @param {Object} props
    * @param {*} args
    * @memberof Log
    */
-  error(...args) {
-    this._logError(...args);
+  debug(props, ...args) {
+    this._log(SEVERITY_LEVEL.Verbose, props, args);
+  }
+
+  /**
+   * Логирование уровня info
+   *
+   * @param {Object} props
+   * @param {*} args
+   * @memberof Log
+   */
+  info(props, ...args) {
+    this._log(SEVERITY_LEVEL.Information, props, args);
+  }
+
+  /**
+   * Логирование уровня warn
+   *
+   * @param {Object} props
+   * @param {*} args
+   * @memberof Log
+   */
+  warn(props, ...args) {
+    this._log(SEVERITY_LEVEL.Warning, props, args);
+  }
+
+  /**
+   * Логирование уровня error
+   *
+   * @param {Object} props
+   * @param {*} args
+   * @memberof Log
+   */
+  error(props, ...args) {
+    this._log(SEVERITY_LEVEL.Error, props, args);
+  }
+
+  /**
+   * Логирование уровня critical
+   *
+   * @param {Object} props
+   * @param {*} args
+   * @memberof Log
+   */
+  critical(props, ...args) {
+    this._log(SEVERITY_LEVEL.Critical, props, args);
   }
 
   /**
@@ -109,15 +218,16 @@ class Log {
    * @param {Object} eventData
    * @memberof Log
    */
-  event(eventData, eventGrid = false) {
+  event(eventData) {
+    this._logInfo(JSON.stringify(eventData));
     if (this._appInstightsEnabled) {
       if (eventData) {
         // TODO: Parse base Event Types from config
         const name = eventData.name || "UnknownEvent"; // TODO: Create constant
-        appInsights.defaultClient.trackEvent({ name, properties: eventData });
-        if (eventGrid) {
-          // TODO: Publish to Event Grid LOG Topic
-        }
+        appInsights.defaultClient.trackEvent({
+          name,
+          properties: eventData
+        });
       }
     }
   }
@@ -128,7 +238,7 @@ class Log {
    * @param {*} errorData
    * @memberof Log
    */
-  exception(errorData, eventGrid = false) {
+  exception(errorData) {
     if (this._appInstightsEnabled) {
       if (errorData) {
         // TODO: Check errorData type - Error or VError
@@ -137,9 +247,6 @@ class Log {
         appInsights.defaultClient.trackException({
           exception: errorData
         });
-        if (eventGrid) {
-          // TODO: Publish to  Event Grid Error Topic
-        }
       }
     }
   }
@@ -174,6 +281,8 @@ class Log {
         appInsights.defaultClient.trackDependency(data);
     }
   }
+
+  // TODO: trackRequest
 }
 
 const log = new Log();

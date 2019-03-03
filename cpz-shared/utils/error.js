@@ -37,12 +37,11 @@ class ServiceError extends VError {
    *
    * @param {object} body VError body. Check docs https://github.com/joyent/node-verror
    *  @property {string} name название ошибки. Константы доставать из cpzTypes/state/errorTypes
-   *  @property {string} message информация для разработчика
    *  @property {Error | VError} cause предыдущая ошибка (уровень выше)
    *  @property {object} info информация для пользователя (достать и обработать с помощью VError.info(error))
    *  @property {boolean} $$toCheck флаг - проверять ли error.name
    *  @property {string} $$defaultFormatPattern дефолтный паттерн для метода .format(pattern = this.$$defaultFormatPattern)
-   * @param  {...any} args последующие аргументы для VError
+   * @param  {...any} args сообщение в print-f стиле
    */
   constructor(body = {}, ...args) {
     super(body, ...args);
@@ -50,7 +49,6 @@ class ServiceError extends VError {
       name = UN,
       cause,
       info = {},
-      message,
       $$toCheck = true,
       $$defaultFormatPattern = "{name}: {message}\ninfo: {info}\nstack: {stack}"
     } = body;
@@ -59,13 +57,15 @@ class ServiceError extends VError {
 
     if ($$toCheck && !errorTypesList.includes(name)) {
       this.name = UN;
-      this.jse_cause = new ServiceError({
-        name,
-        cause,
-        info,
-        message,
-        $$toCheck: false
-      });
+      this.jse_cause = new ServiceError(
+        {
+          name,
+          cause,
+          info,
+          $$toCheck: false
+        },
+        ...args
+      );
     }
   }
 
@@ -82,11 +82,24 @@ class ServiceError extends VError {
     return VError.info(this);
   }
 
+  get json() {
+    return {
+      name: this.name,
+      message: this.jse_shortmsg,
+      info: this.info,
+      stack: ServiceError.getStack(this)
+    };
+  }
+
   /**
+   * @param {Boolean} fullStack формировать полный стэк вызова
    * @returns {string} отформатированная в строка ошибки (аналог toString)
    */
-  toString() {
-    return this.format();
+  toString(fullStack) {
+    const formatStr = fullStack
+      ? ServiceError.$$fullStackFormatPattern
+      : ServiceError.$$defaultFormatPattern;
+    return this.format(formatStr);
   }
 
   /**
@@ -100,8 +113,12 @@ class ServiceError extends VError {
 
     return formatStr
       .replace(/{name}/g, error.name || "not enought name")
-      .replace(/{message}/g, error.message || "not enought message")
-      .replace(/{stack}/g, VError.fullStack(error) || "not enought stack")
+      .replace(/{message}/g, error.jse_shortmsg || "not enought message")
+      .replace(
+        /{stack}/g,
+        ServiceError.getStackNames(error) || "not enought stack"
+      )
+      .replace(/{fullStack}/g, VError.fullStack(error) || "not enought stack")
       .replace(/{info}/g, str(VError.info(error)) || "not enought info");
   }
 
@@ -126,30 +143,38 @@ class ServiceError extends VError {
   }
 
   /**
+   * @param {Error | VError | ServiceError} error VError | Error insted
    * @returns {string[]} возвращает стек ошибок по названию (от начала до корня)
    */
-  getStackNames() {
-    return ServiceError.getStackNamesError(this);
+  static getStackNames(error) {
+    return ServiceError.getStack(error)
+      .map(err => `${err.name}: ${err.message}`)
+      .join("\n");
   }
 
   /**
    * @param {Error | VError | ServiceError} error VError | Error insted
-   * @returns {string[]} возвращает стек ошибок по названию (от начала до корня)
+   * @returns {Array} возвращает стек ошибок (от корня до начала) в виде массива объектов
    */
-  static getStackNamesError(error) {
+  static getStack(error) {
     const stack = [];
     let curErr = error;
-
     while (curErr) {
-      stack.push(curErr.name);
+      stack.push({
+        name: curErr.name,
+        message: curErr.jse_shortmsg || curErr.message
+      });
       if (curErr) curErr = curErr.cause ? curErr.cause() : false;
     }
 
-    return stack.reverse();
+    return stack;
   }
 }
 
 ServiceError.$$defaultFormatPattern =
   "{name}: {message}\ninfo: {info}\nstack: {stack}";
+
+ServiceError.$$fullStackFormatPattern =
+  "{name}: {message}\ninfo: {info}\nfullStack: {fullStack}";
 
 export { createErrorOutput, ServiceError };
