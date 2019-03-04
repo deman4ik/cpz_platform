@@ -81,10 +81,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async _handleExchangeError(e) {
+  async _handleExchangeError(context, e) {
     if (e instanceof ccxt.ExchangeError) {
       if (this._keys.main.active && this._keys.spare.specified) {
-        await this.init("spare");
+        await this.init(context, "spare");
         throw e;
       }
       throw new pretry.AbortError(e);
@@ -112,7 +112,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         try {
           return await this.ccxt.fetchBalance();
         } catch (e) {
-          await this._handleExchangeError(e);
+          await this._handleExchangeError(context, e);
           return null;
         }
       };
@@ -186,7 +186,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         orderType === ORDER_TYPE_MARKET_FORCE && this.ccxt.has.createMarketOrder
           ? "market"
           : "limit";
-      const market = this.ccxt.market(this.getSymbol(asset, currency));
+      const symbol = this.getSymbol(asset, currency);
+      const market = this.ccxt.market(symbol);
       const correctedPrice = correctWithLimit(
         precision(price, market.precision.price),
         market.limits.price.min,
