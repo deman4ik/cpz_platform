@@ -18,6 +18,41 @@ tableStorage.createTableIfNotExists(STORAGE_TICKSCACHED_TABLE);
 const deletePrevCachedTicksArray = ticks =>
   tableStorage.deleteArray(STORAGE_TICKSCACHED_TABLE, ticks);
 
+const deletePrevCachedTicks = async ({ dateTo, slug }) => {
+  try {
+    const dateToFilter = TableQuery.dateFilter(
+      "timestamp",
+      TableUtilities.QueryComparisons.LESS_THAN_OR_EQUAL,
+      dayjs.utc(dateTo).toDate()
+    );
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        dateToFilter,
+        TableUtilities.TableOperators.AND,
+        partitionKeyFilter
+      )
+    );
+    const ticks = await tableStorage.queryEntities(
+      STORAGE_TICKSCACHED_TABLE,
+      query
+    );
+    await deletePrevCachedTicksArray(ticks);
+  } catch (error) {
+    throw new VError(
+      {
+        name: "TableStorageError",
+        cause: error,
+        info: { dateTo, slug }
+      },
+      "Failed to delete previous ticks"
+    );
+  }
+};
 /**
  * Query cached ticks for previous minute
  *
@@ -98,4 +133,9 @@ const getPrevCachedTicks = async ({ dateFrom, dateTo, slug }) => {
 const saveCachedTick = async tick =>
   tableStorage.insertOrMergeEntity(STORAGE_TICKSCACHED_TABLE, tick);
 
-export { deletePrevCachedTicksArray, getPrevCachedTicks, saveCachedTick };
+export {
+  deletePrevCachedTicksArray,
+  deletePrevCachedTicks,
+  getPrevCachedTicks,
+  saveCachedTick
+};

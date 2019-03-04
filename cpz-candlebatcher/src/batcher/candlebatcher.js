@@ -6,6 +6,7 @@ import {
   CANDLE_CREATED,
   CANDLE_LOADED,
   CANDLE_PREVIOUS,
+  createCachedTickSlug,
   createCachedCandleSlug,
   createCandlebatcherSlug,
   createNewCandleSubject,
@@ -28,10 +29,7 @@ import {
   saveCandlesArrayToCache,
   saveCandleToCache
 } from "cpzStorage/candles";
-import {
-  deletePrevCachedTicksArray,
-  getPrevCachedTicks
-} from "cpzStorage/ticks";
+import { deletePrevCachedTicks, getPrevCachedTicks } from "cpzStorage/ticks";
 import { getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
 import {
@@ -309,7 +307,14 @@ class Candlebatcher {
   async _clearTicks() {
     try {
       if (this._ticks.length > 0) {
-        await deletePrevCachedTicksArray(this._ticks);
+        await deletePrevCachedTicks({
+          slug: createCachedTickSlug({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          }),
+          dateTo: this._ticks[this._ticks.length - 1].timestamp
+        });
       }
     } catch (error) {
       throw new VError(
