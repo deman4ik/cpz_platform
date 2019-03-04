@@ -127,12 +127,18 @@ class Log {
    * Базовое логирование
    *
    * @param {SeverityLevel} severity
-   * @param {Object} properties
-   * @param {*} args
+   * @param {Object} props
+   * @param {*} msgs
    * @memberof Log
    */
-  _log(severity, properties, args) {
-    const message = this._createMessage(args);
+  _log(severity, props, msgs) {
+    let properties = props;
+    let messages = msgs;
+    if (typeof props !== "object") {
+      properties = null;
+      if (typeof props === "string") messages = [props, ...msgs];
+    }
+    const message = this._createMessage(messages);
     switch (severity) {
       case SEVERITY_LEVEL.Verbose:
       case SEVERITY_LEVEL.Information:
@@ -160,7 +166,7 @@ class Log {
   /**
    * Логирование уровня verbose
    *
-   * @param {Object} props
+   * @param {Object | String} props
    * @param {*} args
    * @memberof Log
    */
@@ -171,7 +177,7 @@ class Log {
   /**
    * Логирование уровня info
    *
-   * @param {Object} props
+   * @param {Object | String} props
    * @param {*} args
    * @memberof Log
    */
@@ -182,7 +188,7 @@ class Log {
   /**
    * Логирование уровня warn
    *
-   * @param {Object} props
+   * @param {Object | String} props
    * @param {*} args
    * @memberof Log
    */
@@ -193,7 +199,7 @@ class Log {
   /**
    * Логирование уровня error
    *
-   * @param {Object} props
+   * @param {Object | String} props
    * @param {*} args
    * @memberof Log
    */
@@ -204,7 +210,7 @@ class Log {
   /**
    * Логирование уровня critical
    *
-   * @param {Object} props
+   * @param {Object | String} props
    * @param {*} args
    * @memberof Log
    */
