@@ -11,6 +11,7 @@ import { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { durationInTimeframe } from "cpzUtils/helpers";
 import { countCandlesDB } from "cpzDB";
+import Log from "cpzUtils/log";
 import BaseRunner from "../baseRunner";
 import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
@@ -126,7 +127,7 @@ class BacktestRunner extends BaseRunner {
         },
         "Failed to start Backtest"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -181,7 +182,7 @@ class BacktestRunner extends BaseRunner {
         },
         "Failed to stop Backtest"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }

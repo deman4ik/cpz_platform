@@ -2,6 +2,7 @@ import ccxt from "ccxt";
 import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
+import Log from "cpzUtils/log";
 import { ORDER_TYPE_MARKET_FORCE } from "cpzState";
 import { correctWithLimit, precision } from "cpzUtils/helpers";
 import BasePrivateProvider from "./basePrivateProvider";
@@ -20,11 +21,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async init(context, keyType = "main") {
     try {
-      context.log(JSON.stringify(this._keys));
       if (this._keys[keyType].specified && !this._keys[keyType].loaded)
         await this._loadKeys(context, keyType);
 
-      context.log(JSON.stringify(this._keys));
       this.ccxt = new ccxt[this._exchangeName]({
         agent: this._proxyAgent,
         apiKey: this._keys[keyType].APIKey.value,
@@ -106,7 +105,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async getBalance(context, keys) {
     try {
-      context.log("getBalance()");
+      Log.debug("getBalance()");
       await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
@@ -127,7 +126,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -169,7 +168,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
       // TODO: Params
-      context.log("createOrder()");
+      Log.debug("createOrder()");
       await this._checkKeysVersion(context, keys);
       const {
         direction,
@@ -243,7 +242,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 } */
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -303,7 +302,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 }
 */
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -313,7 +312,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async cancelOrder(context, keys, { exId, asset, currency }) {
     try {
-      context.log("cancelOrder()");
+      Log.debug("cancelOrder()");
       await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
@@ -340,7 +339,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         ...checkOrder
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }

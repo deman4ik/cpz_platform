@@ -14,6 +14,7 @@ import {
   STATUS_BUSY,
   CANDLE_PREVIOUS
 } from "cpzState";
+import Log from "cpzUtils/log";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { getTraderById } from "cpzStorage/traders";
@@ -32,7 +33,7 @@ const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
 async function handlePrice(context, eventData) {
   try {
     const { currentPrice } = eventData;
-    context.log.info("handlesPrice()", currentPrice.price);
+    Log.debug("handlesPrice()", currentPrice.price);
     const positionsState = await getActivePositionsBySlug(
       createPositionSlug({
         exchange: currentPrice.exchange,
@@ -74,7 +75,7 @@ async function handlePrice(context, eventData) {
             }
           }
         } catch (error) {
-          context.log.error(error);
+          Log.error(error);
           return {
             success: false,
             taskId: state.traderId,
@@ -126,7 +127,7 @@ async function handlePrice(context, eventData) {
         "Failed to handle current price"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -175,7 +176,7 @@ async function handleTick(context, eventData) {
         eventData.tradeId
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
@@ -226,7 +227,7 @@ async function handleCandle(context, eventData) {
         eventData.id
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,

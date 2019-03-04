@@ -30,9 +30,7 @@ function eventHandler(context, req) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
     const parsedReq = JSON.parse(req.rawBody);
-    context.log.info(
-      `CPZ Candlebatcher processed a request.${JSON.stringify(parsedReq)}`
-    );
+    Log.debug("Processed a request", JSON.stringify(parsedReq));
     parsedReq.forEach(eventGridEvent => {
       // Валидация структуры события
       genErrorIfExist(validateEvent(eventGridEvent));
@@ -40,7 +38,7 @@ function eventHandler(context, req) {
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
         case TASKS_CANDLEBATCHER_START_EVENT.eventType: {
-          context.log.info(
+          Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
@@ -49,7 +47,7 @@ function eventHandler(context, req) {
           break;
         }
         case TASKS_CANDLEBATCHER_STOP_EVENT.eventType: {
-          context.log.info(
+          Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
@@ -58,7 +56,7 @@ function eventHandler(context, req) {
           break;
         }
         case TASKS_CANDLEBATCHER_UPDATE_EVENT.eventType: {
-          context.log.info(
+          Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
@@ -67,7 +65,7 @@ function eventHandler(context, req) {
           break;
         }
         case SUB_VALIDATION_EVENT.eventType: {
-          context.log.warn(
+          Log.warn(
             `Got SubscriptionValidation event data, validationCode: ${
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
@@ -84,7 +82,7 @@ function eventHandler(context, req) {
           break;
         }
         case SUB_DELETED_EVENT.eventType: {
-          context.log.warn(
+          Log.warn(
             `Got SubscriptionDeletedEvent event data, topic: ${
               eventGridEvent.topic
             }`
@@ -92,12 +90,12 @@ function eventHandler(context, req) {
           break;
         }
         default: {
-          context.log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
+          Log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
         }
       }
     });
   } catch (error) {
-    context.log.error(error);
+    Log.error(error);
     context.res = {
       status: error.name === "UNAUTHENTICATED" ? 401 : 500,
       body: error.message,
@@ -106,6 +104,7 @@ function eventHandler(context, req) {
       }
     };
   }
+  Log.request(context.req, context.res);
   context.done();
 }
 

@@ -9,6 +9,7 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
@@ -64,7 +65,7 @@ async function handleStart(context, eventData) {
         "Failed to start candlebatcher"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: CANDLEBATCHER_SERVICE,
@@ -133,7 +134,7 @@ async function handleStop(context, eventData) {
         "Failed to stop candlebatcher"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: CANDLEBATCHER_SERVICE,
@@ -199,7 +200,7 @@ async function handleUpdate(context, eventData) {
         "Failed to stop candlebatcher"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: CANDLEBATCHER_SERVICE,

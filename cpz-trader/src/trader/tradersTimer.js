@@ -10,6 +10,7 @@ import {
 import { createTraderTaskSubject } from "cpzState";
 import { getActiveTradersWithStopRequested } from "cpzStorage/traders";
 import publishEvents from "cpzEvents";
+import Log from "cpzUtils/log";
 import { TRADER_SERVICE } from "cpzServices";
 import Trader from "./trader";
 
@@ -85,7 +86,7 @@ async function handleTimer(context) {
         "Failed to handle trader timer"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,

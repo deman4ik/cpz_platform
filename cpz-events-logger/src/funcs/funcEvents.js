@@ -21,13 +21,11 @@ function handleEvent(context, req) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
     const parsedReq = JSON.parse(req.rawBody);
-    context.log.info(
-      `CPZ Events Logger processed a request.${JSON.stringify(parsedReq)}`
-    );
+    Log.debug("Processed a request", JSON.stringify(parsedReq));
     parsedReq.forEach(eventGridEvent => {
       switch (eventGridEvent.eventType) {
         case SUB_VALIDATION_EVENT.eventType: {
-          context.log.warn(
+          Log.warn(
             `Got SubscriptionValidation event data, validationCode: ${
               eventGridEvent.data.validationCode
             }, topic: ${eventGridEvent.topic}`
@@ -44,7 +42,7 @@ function handleEvent(context, req) {
           break;
         }
         case SUB_DELETED_EVENT.eventType: {
-          context.log.warn(
+          Log.warn(
             `Got SubscriptionDeletedEvent event data, topic: ${
               eventGridEvent.topic
             }`
@@ -52,7 +50,7 @@ function handleEvent(context, req) {
           break;
         }
         default: {
-          context.log.info(`Got ${eventGridEvent.eventType} event.`);
+          Log.info(`Got ${eventGridEvent.eventType} event.`);
 
           const eventslogger = new EventsLogger(context);
           eventslogger.save(eventGridEvent);
@@ -64,7 +62,7 @@ function handleEvent(context, req) {
       }
     });
   } catch (error) {
-    context.log.error(error);
+    Log.error(error);
     context.res = {
       status: error.name === "UNAUTHENTICATED" ? 401 : 500,
       body: error.message,
@@ -73,6 +71,7 @@ function handleEvent(context, req) {
       }
     };
   }
+  Log.request(context.req, context.res);
   context.done();
 }
 

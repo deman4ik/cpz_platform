@@ -9,6 +9,7 @@ import {
   ERROR_TOPIC,
   TICKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
 import { saveMarketwatcherState } from "cpzStorage/marketwatchers";
@@ -48,12 +49,20 @@ class BaseProvider {
    */
   log(...args) {
     if (this._debug) {
+      Log.debug(`${this._eventSubject}:`, ...args);
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
     }
   }
 
+  logInfo(...args) {
+    Log.info(`${this._eventSubject}:`, ...args);
+    const logData = args.map(arg => JSON.stringify(arg));
+    process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
+  }
+
   logError(...args) {
+    Log.error(`${this._eventSubject}:`, ...args);
     const logData = args.map(arg => JSON.stringify(arg));
     process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
   }
@@ -86,16 +95,15 @@ class BaseProvider {
   }
 
   /* eslint-disable */
-    async start() {}
+  async start() {}
 
-    async stop() {}
+  async stop() {}
 
-    async subscribe() {}
+  async subscribe() {}
 
-    async unsubscribe() {}
+  async unsubscribe() {}
 
-    /* eslint-enable */
-
+  /* eslint-enable */
 
   async _publishTick(tick) {
     try {

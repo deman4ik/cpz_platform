@@ -19,6 +19,7 @@ import {
   ERROR_CANDLEBATCHER_EVENT,
   LOG_CANDLEBATCHER_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { combineCandlebatcherSettings } from "cpzUtils/settings";
 import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
 import {
@@ -92,7 +93,7 @@ class Candlebatcher {
     /* Метаданные стореджа */
     this._metadata = state.metadata;
     /* Запуск инициализациия провайдера */
-    this.log(`Candlebatcher ${this._eventSubject} initialized`);
+    this.logInfo(`${this._eventSubject} running...`);
   }
 
   get slug() {
@@ -144,12 +145,16 @@ class Candlebatcher {
    */
   log(...args) {
     if (this._settings.debug) {
-      this._context.log.info(`Candlebatcher ${this._eventSubject}:`, ...args);
+      Log.debug(`${this._eventSubject}:`, ...args);
     }
   }
 
+  logInfo(...args) {
+    Log.error(`${this._eventSubject}:`, ...args);
+  }
+
   logError(...args) {
-    this._context.log.error(`Candlebatcher ${this._eventSubject}:`, ...args);
+    Log.error(`${this._eventSubject}:`, ...args);
   }
 
   /**
@@ -615,7 +620,7 @@ class Candlebatcher {
    */
   async end(status, error) {
     try {
-      this.log(`Finished execution! Status: ${status}`);
+      this.logInfo(`Finished execution! Status: ${status}`);
       this._status = status;
       this._error = error
         ? {

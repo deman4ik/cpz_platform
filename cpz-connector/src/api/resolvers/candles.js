@@ -1,4 +1,3 @@
-import Log from "cpzUtils/log";
 import { getPublicConnector } from "../../global";
 
 async function loadLastMinuteCandle(
@@ -6,8 +5,6 @@ async function loadLastMinuteCandle(
   { connectorInput, date, asset, currency },
   { context }
 ) {
-  Log.debug({ userId: "D" }, "loadLastMinuteCandle()");
-  Log.event({ method: "loadLastMinuteCandle" });
   const connector = await getPublicConnector(connectorInput);
   const result = await connector.loadLastMinuteCandle(context, {
     date,

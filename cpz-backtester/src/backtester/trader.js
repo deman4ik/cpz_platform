@@ -1,5 +1,6 @@
 import VError from "verror";
 import Trader from "cpzTrader/trader";
+import Log from "cpzUtils/log";
 import { POS_STATUS_NEW, POS_STATUS_OPEN } from "cpzState";
 
 class TraderBacktester extends Trader {
@@ -9,9 +10,18 @@ class TraderBacktester extends Trader {
 
   log(...args) {
     if (this._settings.debug) {
+      Log.debug(`Trader ${this._eventSubject}:`, ...args);
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Trader ${this._eventSubject}:`, ...logData]);
     }
+  }
+
+  logInfo(...args) {
+    Log.info(`Trader ${this._eventSubject}:`, ...args);
+  }
+
+  logError(...args) {
+    Log.error(`Trader ${this._eventSubject}:`, ...args);
   }
 
   // Обработка новой свечи

@@ -12,6 +12,7 @@ import {
   CANDLE_PREVIOUS,
   createAdviserSlug
 } from "cpzState";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";
@@ -165,7 +166,7 @@ async function handleCandle(context, eventData) {
         "Failed to handle candle"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: ADVISER_SERVICE,

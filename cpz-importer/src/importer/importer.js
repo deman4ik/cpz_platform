@@ -23,6 +23,7 @@ import {
   VALID_TIMEFRAMES
 } from "cpzState";
 import publishEvents from "cpzEvents";
+import Log from "cpzUtils/log";
 import {
   chunkArray,
   completedPercent,
@@ -316,9 +317,18 @@ class Importer {
    */
   log(...args) {
     if (this.debug) {
+      Log.debug(`Importer ${this.eventSubject}:`, ...args);
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Importer ${this.eventSubject}:`, ...logData]);
     }
+  }
+
+  logInfo(...args) {
+    Log.info(`Importer ${this.eventSubject}:`, ...args);
+  }
+
+  logError(...args) {
+    Log.error(`Importer ${this.eventSubject}:`, ...args);
   }
 
   /**
@@ -450,7 +460,7 @@ class Importer {
         data: candles
       };
     } catch (error) {
-      this.log("Error", error.message);
+      this.logError(error.message);
       return {
         success: false,
         date: dateFrom,
@@ -542,7 +552,7 @@ class Importer {
         error: "Empty response"
       };
     } catch (error) {
-      this.log("Error", error.message);
+      this.logError(error.message);
       return {
         success: false,
         date: dateFrom,
@@ -948,7 +958,7 @@ class Importer {
           "Failed to execute importer"
         )
       );
-      this.log(errorOutput);
+      this.logError(errorOutput);
       // Если есть экземпляр класса
       this.status = STATUS_ERROR;
       this.error = {
@@ -1018,6 +1028,7 @@ class Importer {
     try {
       await saveImporterState(this.getCurrentState());
     } catch (error) {
+      this.logError(error.message);
       throw new VError(
         {
           name: "ImporterError",

@@ -11,6 +11,7 @@ import {
   STATUS_STARTED,
   STATUS_STOPPED
 } from "cpzState";
+import Log from "cpzUtils/log";
 import { LOG_ADVISER_EVENT, SIGNALS_NEWSIGNAL_EVENT } from "cpzEventTypes";
 import { combineAdvserSettings } from "cpzUtils/settings";
 import { getCachedCandlesByKey } from "cpzStorage/candles";
@@ -99,6 +100,7 @@ class Adviser {
       this.initStrategy();
       this._initialized = true;
     }
+    this.logInfo(`${this._eventSubject} running...`);
   }
 
   /**
@@ -154,12 +156,16 @@ class Adviser {
    */
   log(...args) {
     if (this._settings.debug) {
-      this._context.log.info(`Adviser ${this._eventSubject}:`, ...args);
+      Log.debug(`${this._eventSubject}:`, ...args);
     }
   }
 
+  logInfo(...args) {
+    Log.info(`${this._eventSubject}:`, ...args);
+  }
+
   logError(...args) {
-    this._context.log.error(`Adviser ${this._eventSubject}:`, ...args);
+    Log.error(`${this._eventSubject}:`, ...args);
   }
 
   /**
@@ -178,7 +184,6 @@ class Adviser {
       eventType: LOG_ADVISER_EVENT.eventType,
       data: {
         taskId: this._taskId,
-        service: ADVISER_SERVICE,
         ...data
       }
     };
@@ -407,7 +412,6 @@ class Adviser {
   initIndicators() {
     try {
       Object.keys(this._indicators).forEach(key => {
-        this.log(key);
         try {
           if (!this[`_ind${key}Instance`].initialized) {
             this[`_ind${key}Instance`].init();
@@ -859,7 +863,7 @@ class Adviser {
    */
   async end(status, error) {
     try {
-      this.log(`Finished execution! Current status: ${status}`);
+      this.logInfo(`Finished execution! Current status: ${status}`);
       this._status = status;
       this._error = error
         ? {

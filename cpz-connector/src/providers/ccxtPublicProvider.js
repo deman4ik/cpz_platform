@@ -2,6 +2,7 @@ import ccxt from "ccxt";
 import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
+import Log from "cpzUtils/log";
 import BasePublicProvider from "./basePublicProvider";
 
 class CCXTPublicProvider extends BasePublicProvider {
@@ -78,7 +79,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         }
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -88,7 +89,7 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async loadLastMinuteCandle(context, { date = dayjs.utc(), asset, currency }) {
     try {
-      context.log("loadLastMinuteCandle()");
+      Log.debug("loadLastMinuteCandle()");
       const dateStart = dayjs.utc(date).add(-2, "minute");
       const call = async () => {
         try {
@@ -122,7 +123,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         }
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -135,7 +136,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     { date = dayjs.utc().add(-1, "hour"), limit = 60, asset, currency }
   ) {
     try {
-      context.log("loadMinuteCandles()", dayjs.utc(date).toISOString());
+      Log.debug("loadMinuteCandles()", dayjs.utc(date).toISOString());
       const dateToLoad =
         dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
@@ -176,13 +177,12 @@ class CCXTPublicProvider extends BasePublicProvider {
         close: candle[4],
         volume: candle[5]
       }));
-      context.log(candles.length);
       return {
         success: true,
         candles
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -195,7 +195,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     { date = dayjs.utc().add(-1, "hour"), limit = 2000, asset, currency }
   ) {
     try {
-      context.log("loadTrades()", dayjs.utc(date).toISOString());
+      Log.debug("loadTrades()", dayjs.utc(date).toISOString());
       const dateToLoad =
         dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
@@ -232,13 +232,12 @@ class CCXTPublicProvider extends BasePublicProvider {
         price: trade.price,
         amount: trade.amount
       }));
-      context.log(trades.length);
       return {
         success: true,
         trades
       };
     } catch (error) {
-      context.log.error(error);
+      Log.error(error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }

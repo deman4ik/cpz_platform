@@ -1,5 +1,5 @@
 import VError from "verror";
-import * as errorTypes from "../config/events/types/state/errorTypes/index";
+import * as errorTypes from "../config/state/errorTypes";
 
 const { stringify: str } = JSON;
 

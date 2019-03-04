@@ -33,6 +33,7 @@ import {
   IMPORTER_SERVICE,
   BACKTESTER_SERVICE
 } from "cpzServices";
+import Log from "cpzUtils/log";
 import {
   STATUS_STARTED,
   STATUS_PENDING,
@@ -74,7 +75,7 @@ import ExWatcherRunner from "./tasks/exwatcherRunner";
 
 async function handleStarted(context, eventData) {
   try {
-    context.log.info("handleStarted", eventData);
+    Log.debug("handleStarted", eventData);
     const { eventType, taskId, error } = eventData;
     let serviceName;
 
@@ -130,7 +131,7 @@ async function handleStarted(context, eventData) {
           } else if (exWatcher.importerCurrentId === taskId) {
             serviceName = "importerCurrent";
           } else {
-            context.log.error(
+            Log.error(
               `Importer ${taskId} not found in ExWatcher ${
                 exWatcherState.taskId
               } state`
@@ -186,7 +187,6 @@ async function handleStarted(context, eventData) {
         default:
           return;
       }
-      context.log("handleStarted", taskId, serviceName);
       const userRobots = await findUserRobotsByServiceId({
         taskId,
         serviceName
@@ -194,7 +194,6 @@ async function handleStarted(context, eventData) {
 
       await Promise.all(
         userRobots.map(async userRobotState => {
-          context.log(userRobotState);
           const userRobot = new UserRobot(context, userRobotState);
           if (error) {
             userRobot.error = error;
@@ -208,7 +207,6 @@ async function handleStarted(context, eventData) {
               await UserRobotRunner.start(context, newState);
             }
           }
-          context.log(userRobot.getCurrentState());
         })
       );
     }
@@ -247,7 +245,7 @@ async function handleStarted(context, eventData) {
         "Failed to handle started events"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
@@ -354,7 +352,7 @@ async function handleFinished(context, eventData) {
         "Failed to handle started events"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
@@ -533,7 +531,7 @@ async function handleStopped(context, eventData) {
         "Failed to handle stopped events"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,
@@ -629,7 +627,7 @@ async function handleUpdated(context, eventData) {
         "Failed to handle updated events"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CONTROL_SERVICE,

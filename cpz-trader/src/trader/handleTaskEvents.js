@@ -8,6 +8,7 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
@@ -56,7 +57,7 @@ async function handleStart(context, eventData) {
         "Failed to start trader"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
@@ -129,7 +130,7 @@ async function handleStop(context, eventData) {
         "Failed to stop trader"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
@@ -191,7 +192,7 @@ async function handleUpdate(context, eventData) {
         "Failed to update trader"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,

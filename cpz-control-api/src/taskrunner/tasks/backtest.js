@@ -16,6 +16,7 @@ import {
   TASKS_BACKTEST_STOPPED_EVENT,
   TASKS_BACKTEST_FINISHED_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import publishEvents from "cpzEvents";
 import { saveBacktestState } from "cpzStorage/backtests";
 import {
@@ -53,7 +54,11 @@ class Backtest {
   }
 
   log(...args) {
-    this._context.log.info(`Backtest ${this._robotId}:`, ...args);
+    Log.debug(`Backtest ${this._robotId}:`, ...args);
+  }
+
+  logInfo(...args) {
+    Log.info(`Backtest ${this._robotId}:`, ...args);
   }
 
   _setStatus() {

@@ -7,6 +7,7 @@ import { ERROR_MARKETWATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import { capitalize } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
+import Log from "cpzUtils/log";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -388,6 +389,7 @@ process.on("message", async m => {
       await providerInstance.unsubscribe(eventData.subscriptions);
       break;
     default:
+      Log.warn("Unknown child process event type");
       process.send(["Unknown child process event type"]);
       break;
   }

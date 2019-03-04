@@ -11,9 +11,9 @@ async function timerTrigger(context, timer) {
   const timeStamp = new Date().toISOString();
 
   if (timer.isPastDue) {
-    context.log.info("Timer trigger is running late!");
+    Log.warn("Timer trigger is running late!");
   }
-  context.log.info("Timer trigger function ran!", timeStamp);
+  Log.debug("Timer trigger function ran!", timeStamp);
   handleTimers(context);
 }
 

@@ -13,6 +13,7 @@ import {
   STATUS_ERROR,
   createTraderSlug
 } from "cpzState";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
@@ -93,7 +94,7 @@ async function execute(context, state, signal, child = false) {
       // Сохраняем ошибку в сторедже
       await trader.end(status, errorOutput);
     } else {
-      context.log.error(errorOutput);
+      Log.error(errorOutput);
     }
     throw err;
   }
@@ -296,7 +297,7 @@ async function handleSignal(context, eventData) {
         "Failed to handle signal"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,

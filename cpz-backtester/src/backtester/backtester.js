@@ -9,6 +9,7 @@ import {
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
+import Log from "cpzUtils/log";
 import {
   TASKS_BACKTESTER_STARTED_EVENT,
   TASKS_BACKTESTER_FINISHED_EVENT,
@@ -102,9 +103,18 @@ class Backtester {
    */
   log(...args) {
     if (this.settings.debug) {
+      Log.debug(`Backtester ${this.eventSubject}:`, ...args);
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Backtester ${this.eventSubject}:`, ...logData]);
     }
+  }
+
+  logInfo(...args) {
+    Log.info(`Backtester ${this.eventSubject}:`, ...args);
+  }
+
+  logError(...args) {
+    Log.error(`Backtester ${this.eventSubject}:`, ...args);
   }
 
   /**

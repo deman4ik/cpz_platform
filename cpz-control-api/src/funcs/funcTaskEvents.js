@@ -5,6 +5,8 @@ import {
   SUB_VALIDATION_EVENT,
   SUB_DELETED_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
+import { CONTROL_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleStarted,
@@ -13,17 +15,17 @@ import {
   handleFinished
 } from "../taskrunner/handleTaskEvents";
 
+Log.setService(CONTROL_SERVICE);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
   try {
+    Log.addContext(context);
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
     const parsedReq = JSON.parse(req.rawBody);
-    context.log.info(
-      `CPZ Control processed a request.${JSON.stringify(parsedReq)}`
-    );
+    Log.debug("Processed a request", JSON.stringify(parsedReq));
     // TODO: event schema validation by type
     parsedReq.forEach(eventGridEvent => {
       // Валидация структуры события
@@ -32,27 +34,19 @@ function eventHandler(context, req) {
       const eventSubject = eventGridEvent.subject;
       const { eventType } = eventGridEvent;
       if (eventType.includes(".Started")) {
-        context.log.info(
-          `Got ${eventType} event data ${JSON.stringify(eventData)}`
-        );
+        Log.info(`Got ${eventType} event data ${JSON.stringify(eventData)}`);
         handleStarted(context, { eventSubject, eventType, ...eventData });
       } else if (eventType.includes(".Stopped")) {
-        context.log.info(
-          `Got ${eventType} event data ${JSON.stringify(eventData)}`
-        );
+        Log.info(`Got ${eventType} event data ${JSON.stringify(eventData)}`);
         handleStopped(context, { eventSubject, eventType, ...eventData });
       } else if (eventType.includes(".Updated")) {
-        context.log.info(
-          `Got ${eventType} event data ${JSON.stringify(eventData)}`
-        );
+        Log.info(`Got ${eventType} event data ${JSON.stringify(eventData)}`);
         handleUpdated(context, { eventSubject, eventType, ...eventData });
       } else if (eventType.includes(".Finished")) {
-        context.log.info(
-          `Got ${eventType} event data ${JSON.stringify(eventData)}`
-        );
+        Log.info(`Got ${eventType} event data ${JSON.stringify(eventData)}`);
         handleFinished(context, { eventSubject, eventType, ...eventData });
       } else if (eventType === SUB_VALIDATION_EVENT.eventType) {
-        context.log.warn(
+        Log.warn(
           `Got SubscriptionValidation event data, validationCode: ${
             eventData.validationCode
           }, topic: ${eventGridEvent.topic}`
@@ -67,17 +61,17 @@ function eventHandler(context, req) {
           }
         };
       } else if (eventType === SUB_DELETED_EVENT.eventType) {
-        context.log.warn(
+        Log.warn(
           `Got SubscriptionDeletedEvent event data, topic: ${
             eventGridEvent.topic
           }`
         );
       } else {
-        context.log.error(`Unknown Event Type: ${eventType}`);
+        Log.error(`Unknown Event Type: ${eventType}`);
       }
     });
   } catch (error) {
-    context.log.error(error);
+    Log.error(error);
     context.res = {
       status: error.name === "UNAUTHENTICATED" ? 401 : 500,
       body: error.message,
@@ -86,6 +80,7 @@ function eventHandler(context, req) {
       }
     };
   }
+  Log.request(context.req, context.res);
   context.done();
 }
 

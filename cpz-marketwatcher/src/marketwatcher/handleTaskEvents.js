@@ -9,6 +9,7 @@ import {
   TASKS_MARKETWATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
@@ -41,7 +42,7 @@ async function handleStart(eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStart(eventData));
     if (isProcessExists(eventData.taskId)) {
-      console.warn('Marketwatcher task "%s" already started', eventData.taskId);
+      Log.warn('Marketwatcher task "%s" already started', eventData.taskId);
       return;
     }
     createNewProcess(eventData.taskId, eventData.providerType);
@@ -71,7 +72,7 @@ async function handleStart(eventData) {
         "Failed to start marketwatcher"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -99,7 +100,7 @@ async function handleStop(eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      console.warn(`Marketwatcher task "${eventData.taskId}" not started`);
+      Log.warn(`Marketwatcher task "${eventData.taskId}" not started`);
       return;
     }
 
@@ -128,7 +129,7 @@ async function handleStop(eventData) {
         "Failed to stop marketwatcher"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -188,7 +189,7 @@ async function handleSubscribe(eventData) {
         "Failed to subscribe"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,
@@ -248,7 +249,7 @@ async function handleUnsubscribe(eventData) {
         "Failed to unsubscribe"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: MARKETWATCHER_SERVICE,

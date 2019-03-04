@@ -16,6 +16,7 @@ import {
   TASKS_USERROBOT_STOPPED_EVENT
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
+import Log from "cpzUtils/log";
 import { saveUserRobotState } from "cpzStorage/userRobots";
 import {
   combineCandlebatcherSettings,
@@ -58,7 +59,11 @@ class UserRobot {
   }
 
   log(...args) {
-    this._context.log.info(`UserRobot ${this._id}:`, ...args);
+    Log.debug(`UserRobot ${this._id}:`, ...args);
+  }
+
+  logInfo(...args) {
+    Log.info(`UserRobot ${this._id}:`, ...args);
   }
 
   _setStatus() {

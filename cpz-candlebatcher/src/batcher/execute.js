@@ -9,6 +9,7 @@ import {
   STATUS_BUSY,
   STATUS_ERROR
 } from "cpzState";
+import Log from "cpzUtils/log";
 import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";
@@ -60,7 +61,7 @@ async function execute(context, state) {
       // Сохраняем ошибку в сторедже и продолжаем работу
       await candlebatcher.end(STATUS_STARTED, errorOutput);
     } else {
-      context.log.error(errorOutput);
+      Log.error(errorOutput);
     }
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {

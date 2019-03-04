@@ -2,10 +2,13 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
+import Log from "cpzUtils/log";
+import { BACKTESTER_SERVICE } from "cpzServices";
 import { checkEnvVars } from "cpzUtils/environment";
 import backtesterEnv from "cpzEnv/backtester";
 import handleTaskEvents from "./routes/taskEvents";
 
+Log.setService(BACKTESTER_SERVICE);
 checkEnvVars(backtesterEnv.variables);
 
 const run = () => {
@@ -18,7 +21,7 @@ const run = () => {
   const PORT = process.env.NODE_PORT || process.env.PORT || 8108;
   server.listen(PORT, err => {
     if (err) throw err;
-    console.info(`> Ready on http://localhost:${PORT}/api/taskEvents`);
+    Log.info(`> Ready on http://localhost:${PORT}/api/taskEvents`);
   });
 };
 

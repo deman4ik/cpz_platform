@@ -9,14 +9,12 @@ import {
   TASKS_IMPORTER_STOP_EVENT
 } from "cpzEventTypes";
 import Log from "cpzUtils/log";
-import { IMPORTER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleImportStart,
   handleImportStop
 } from "../importer/handleTaskEvents";
 
-Log.setService(IMPORTER_SERVICE);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(req, res) {
@@ -31,9 +29,7 @@ function eventHandler(req, res) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
     const parsedReq = req.body;
-    console.info(
-      `CPZ Importer processed a request.${JSON.stringify(parsedReq)}`
-    );
+    Log.debug("Processed a request", JSON.stringify(parsedReq));
     // TODO: SENDER ENDPOINT VALIDATION
     // check req.originalUrl
     parsedReq.forEach(eventGridEvent => {
@@ -43,7 +39,7 @@ function eventHandler(req, res) {
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
         case TASKS_IMPORTER_START_EVENT.eventType: {
-          console.info(
+          Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
@@ -53,7 +49,7 @@ function eventHandler(req, res) {
           break;
         }
         case TASKS_IMPORTER_STOP_EVENT.eventType: {
-          console.info(
+          Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
@@ -63,7 +59,7 @@ function eventHandler(req, res) {
           break;
         }
         case SUB_VALIDATION_EVENT.eventType: {
-          console.warn(
+          Log.warn(
             `Got SubscriptionValidation event data, validationCode: ${
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
@@ -74,7 +70,7 @@ function eventHandler(req, res) {
           break;
         }
         case SUB_DELETED_EVENT.eventType: {
-          console.warn(
+          Log.warn(
             `Got SubscriptionDeletedEvent event data, topic: ${
               eventGridEvent.topic
             }`
@@ -83,17 +79,18 @@ function eventHandler(req, res) {
           break;
         }
         default: {
-          console.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
+          Log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
           res.status(200);
         }
       }
     });
   } catch (error) {
-    console.error(error);
+    Log.error(error);
     res
       .status(error.name === "UNAUTHENTICATED" ? 401 : 500)
       .send(error.message);
   }
+  Log.request(req, res);
 }
 
 export default eventHandler;

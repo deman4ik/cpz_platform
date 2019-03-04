@@ -1,5 +1,6 @@
 import VError from "verror";
 import Adviser from "cpzAdviser/adviser";
+import Log from "cpzUtils/log";
 
 class AdviserBacktester extends Adviser {
   constructor(context, state) {
@@ -9,9 +10,18 @@ class AdviserBacktester extends Adviser {
 
   log(...args) {
     if (this._settings.debug) {
+      Log.debug(`Adviser ${this._eventSubject}:`, ...args);
       const logData = args.map(arg => JSON.stringify(arg));
       process.send([`Adviser ${this._eventSubject}:`, ...logData]);
     }
+  }
+
+  logInfo(...args) {
+    Log.info(`Adviser ${this._eventSubject}:`, ...args);
+  }
+
+  logError(...args) {
+    Log.error(`Adviser ${this._eventSubject}:`, ...args);
   }
 
   get indicators() {

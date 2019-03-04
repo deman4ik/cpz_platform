@@ -14,6 +14,7 @@ import {
   EXWATCHER_STOP_PARAMS,
   EXWATCHER_UPDATE_PARAMS
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
 import BaseRunner from "../baseRunner";
@@ -60,7 +61,7 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to create Exchange Data Watcher"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -220,7 +221,7 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to start Exchange Data Watcher"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -293,7 +294,7 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to stop Exchange Data Watcher"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -323,7 +324,7 @@ class ExWatcherRunner extends BaseRunner {
         },
         "Failed to update Exchange Data Watcher"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }

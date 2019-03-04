@@ -7,6 +7,7 @@ import {
   saveLogsEvent,
   saveErrorsEvent
 } from "cpzStorage/events";
+import Log from "cpzUtils/log";
 import { saveCurrentPrice } from "cpzStorage/currentPrices";
 import {
   CANDLES_NEWCANDLE_EVENT,
@@ -101,12 +102,9 @@ class EventsLogger {
         return;
       }
       if (type === TRADES_POSITION_EVENT.eventType) {
-        this.context.log.info("POSITION EVENT!");
         if (this.logToStorage) await savePositionsEvent(fullEventData);
-        if (this.logToPostgre) {
-          this.context.log.info("POSITION EVENT DB!");
-          await savePositionsDB([fullEventData]);
-        }
+        if (this.logToPostgre) await savePositionsDB([fullEventData]);
+
         return;
       }
       if (type.includes(".Log")) {
@@ -120,7 +118,7 @@ class EventsLogger {
         return;
       }
     } catch (error) {
-      this.context.log.error(error);
+      Log.error(error);
     }
   }
 }

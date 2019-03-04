@@ -11,6 +11,7 @@ import {
   USER_ROBOT_STOP_PARAMS,
   USER_ROBOT_UPDATE_PARAMS
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import BaseRunner from "../baseRunner";
 import UserRobot from "./userRobot";
@@ -51,7 +52,7 @@ class UserRobotRunner extends BaseRunner {
         },
         "Failed to create robot"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -144,7 +145,7 @@ class UserRobotRunner extends BaseRunner {
         },
         "Failed to start robot"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -199,7 +200,7 @@ class UserRobotRunner extends BaseRunner {
         },
         "Failed to stop robot"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }
@@ -229,7 +230,7 @@ class UserRobotRunner extends BaseRunner {
         },
         "Failed to update robot"
       );
-      context.log.error(err);
+      Log.error(err);
       throw err;
     }
   }

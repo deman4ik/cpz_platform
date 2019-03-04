@@ -282,7 +282,19 @@ class Log {
     }
   }
 
-  // TODO: trackRequest
+  /**
+   *  Отправка информации о входящих HTTP запросах
+   *
+   * @param {*} request
+   * @param {*} response
+   * @memberof Log
+   */
+  request(request, response) {
+    appInsights.defaultClient.trackNodeHttpRequest({
+      request,
+      response
+    });
+  }
 }
 
 const log = new Log();

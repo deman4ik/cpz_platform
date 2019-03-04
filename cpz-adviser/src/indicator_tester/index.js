@@ -7,6 +7,7 @@ const path = require("path");
 const VError = require("verror");
 const Adviser = require("../adviser/adviser");
 
+// TODO: Привести имена ошибок в соответсвии с cpz-shared/config/state/errorTypes
 class IndicatorTester {
   constructor(name) {
     this.name = name || "";

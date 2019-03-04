@@ -1,5 +1,9 @@
 import "babel-polyfill";
+import Log from "cpzUtils/log";
+import { BACKTESTER_SERVICE } from "cpzServices";
 import Backtester from "./backtester";
+
+Log.setService(BACKTESTER_SERVICE);
 
 process.on("message", async m => {
   const eventData = JSON.parse(m);
@@ -8,6 +12,10 @@ process.on("message", async m => {
       const backtester = new Backtester(eventData.state);
       await backtester.execute();
     } catch (error) {
+      Log.error(
+        `${eventData.state.taskId} initialization error`,
+        error.message
+      );
       process.send([
         `Backtester ${eventData.state.taskId} initialization error`,
         error.message
@@ -15,9 +23,11 @@ process.on("message", async m => {
     }
     process.exit(0);
   } else if (eventData.type === "stop") {
+    Log.info(`${eventData.state.taskId} stopped!`);
     process.send([`Backtester ${eventData.state.taskId} stopped!`]);
     process.exit(0);
   } else {
+    Log.warn("Unknown child process event type");
     process.send(["Unknown child process event type"]);
   }
 });

@@ -12,6 +12,7 @@ import {
   ERROR_TOPIC,
   ERROR_ADVISER_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {
@@ -95,7 +96,7 @@ async function execute(context, state, candle, child = false) {
       // Сохраняем ошибку в сторедже
       await adviser.end(status, errorOutput);
     } else {
-      context.log.error(errorOutput);
+      Log.error(errorOutput);
     }
 
     // Публикуем событие - ошибка

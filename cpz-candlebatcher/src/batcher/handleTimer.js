@@ -2,6 +2,7 @@ import VError from "verror";
 import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
+import Log from "cpzUtils/log";
 import publishEvents from "cpzEvents";
 import { getStartedCandlebatchers } from "cpzStorage/candlebatchers";
 import executeCandlebatcher from "./execute";
@@ -26,7 +27,7 @@ async function handleTimer(context) {
         "Failed to stop candlebatcher"
       )
     );
-    context.log.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: CANDLEBATCHER_SERVICE,

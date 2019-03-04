@@ -35,6 +35,7 @@ import {
   createCurrentPriceSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
+import Log from "cpzUtils/log";
 import { combineTraderSettings } from "cpzUtils/settings";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState } from "cpzStorage/traders";
@@ -102,7 +103,7 @@ class Trader {
 
     /* Метаданные стореджа */
     this._metadata = state.metadata;
-    this.log("Initialized");
+    this.logInfo(`${this._eventSubject} running...`);
   }
 
   /**
@@ -155,12 +156,16 @@ class Trader {
    */
   log(...args) {
     if (this._settings.debug) {
-      this._context.log.info(`Trader ${this._eventSubject}:`, ...args);
+      Log.debug(`Trader ${this._eventSubject}:`, ...args);
     }
   }
 
+  logInfo(...args) {
+    Log.error(`Trader ${this._eventSubject}:`, ...args);
+  }
+
   logError(...args) {
-    this._context.log.error(`Trader ${this._eventSubject}:`, ...args);
+    Log.error(`Trader ${this._eventSubject}:`, ...args);
   }
 
   /**
@@ -744,7 +749,9 @@ class Trader {
    */
   async end(status, error) {
     try {
-      this.log(`Finished execution! Current status: ${status}`);
+      this.logInfo(
+        `${this._eventSubject} Finished execution! Current status: ${status}`
+      );
       this._status = status;
       this._error = error
         ? {

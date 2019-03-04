@@ -10,6 +10,7 @@ import {
   TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import {
   isProcessExists,
   createNewProcess,
@@ -47,7 +48,7 @@ async function handleImportStart(eventData) {
         "Failed to start importer"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,
@@ -75,7 +76,7 @@ async function handleImportStop(eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      console.warn('Importer task "%s" not started', eventData.taskId);
+      Log.warn('Importer task "%s" not started', eventData.taskId);
       return;
     }
 
@@ -106,7 +107,7 @@ async function handleImportStop(eventData) {
         "Failed to stop importer"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: IMPORTER_SERVICE,

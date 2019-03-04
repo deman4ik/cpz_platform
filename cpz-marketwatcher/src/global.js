@@ -3,6 +3,7 @@ import { tryParseJSON } from "cpzUtils/helpers";
 import { getMarketwatcherById } from "cpzStorage/marketwatchers";
 import { STATUS_STOPPED } from "cpzState";
 import dayjs from "cpzDayjs";
+import Log from "cpzUtils/log";
 
 const marketwatcherProcesses = {};
 
@@ -14,7 +15,7 @@ function isProcessExists(taskId) {
 }
 
 function log(m) {
-  console.info(
+  Log.debug(
     `[${dayjs.utc().format("MM/DD/YYYY HH:mm:ss")}]`,
     ...m.map(msg => {
       const json = tryParseJSON(msg);
@@ -27,7 +28,7 @@ function log(m) {
 }
 function createNewProcess(taskId, provider) {
   const providerName = provider || "cryptocompare";
-  console.log("Creating new process ", taskId, providerName);
+  Log.info("Creating new process ", taskId, providerName);
   marketwatcherProcesses[taskId] = fork(`./dist/${providerName}.js`);
   marketwatcherProcesses[taskId].on("message", m => {
     log(m);

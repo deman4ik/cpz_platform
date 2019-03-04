@@ -17,6 +17,7 @@ import {
   TASKS_EXWATCHER_STARTED_EVENT,
   TASKS_EXWATCHER_STOPPED_EVENT
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import publishEvents from "cpzEvents";
 import { saveExWatcherState } from "cpzStorage/exwatchers";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
@@ -69,7 +70,11 @@ class ExWatcher {
   }
 
   log(...args) {
-    this._context.log.info(`ExWatcher ${this._taskId}:`, ...args);
+    Log.debug(`ExWatcher ${this._taskId}:`, ...args);
+  }
+
+  logInfo(...args) {
+    Log.info(`ExWatcher ${this._taskId}:`, ...args);
   }
 
   _setStatus() {

@@ -6,6 +6,7 @@ import {
   TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
+import Log from "cpzUtils/log";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
@@ -45,7 +46,7 @@ async function handleStart(eventData) {
         "Failed to start backtester"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
@@ -74,7 +75,7 @@ async function handleStop(eventData) {
     // Валидация входных параметров
     genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
-      console.warn('Backtester task "%s" not started', eventData.taskId);
+      Log.warn('Backtester task "%s" not started', eventData.taskId);
       return;
     }
 
@@ -105,7 +106,7 @@ async function handleStop(eventData) {
         "Failed to stop backtester"
       )
     );
-    console.error(errorOutput);
+    Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: BACKTESTER_SERVICE,
