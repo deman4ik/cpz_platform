@@ -64,14 +64,19 @@ async function handlePrice(context, eventData) {
                 timestamp: currentPrice.timestamp
               });
               await trader.save();
-              await trader.executeOrders(requiredOrders);
+              try {
+                await trader.executeOrders(requiredOrders);
 
-              // Если есть хотя бы одно событие для отправка
-              if (trader.events.length > 0) {
-                // Отправляем
-                await publishEvents(TRADES_TOPIC, trader.events);
+                // Если есть хотя бы одно событие для отправка
+                if (trader.events.length > 0) {
+                  // Отправляем
+                  await publishEvents(TRADES_TOPIC, trader.events);
+                }
+                await trader.end(STATUS_STARTED);
+              } catch (error) {
+                Log.error(error);
+                trader.end(STATUS_STARTED, error);
               }
-              await trader.end(STATUS_STARTED);
             }
           }
         } catch (error) {
