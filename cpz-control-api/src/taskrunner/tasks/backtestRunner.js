@@ -11,7 +11,7 @@ import { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { durationInTimeframe } from "cpzUtils/helpers";
 import { countCandlesDB } from "cpzDB";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import BaseRunner from "../baseRunner";
 import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";

@@ -1,10 +1,13 @@
 import "babel-polyfill";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { TRADER_SERVICE } from "cpzServices";
 import positionsTimer from "../trader/positionsTimer";
 import tradersTimer from "../trader/tradersTimer";
 
-Log.setService(TRADER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: TRADER_SERVICE
+});
 
 async function timerTrigger(context, timer) {
   Log.addContext(context);
@@ -15,6 +18,7 @@ async function timerTrigger(context, timer) {
   }
   Log.debug("Timer trigger function ran!", timeStamp);
   handleTimers(context);
+  // TODO: Log.clearContext();
 }
 
 async function handleTimers(context) {

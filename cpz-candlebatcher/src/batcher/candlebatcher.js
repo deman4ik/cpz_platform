@@ -20,7 +20,7 @@ import {
   ERROR_CANDLEBATCHER_EVENT,
   LOG_CANDLEBATCHER_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { combineCandlebatcherSettings } from "cpzUtils/settings";
 import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
 import {

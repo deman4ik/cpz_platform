@@ -12,7 +12,7 @@ import {
   CANDLE_PREVIOUS,
   createAdviserSlug
 } from "cpzState";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { ADVISER_SERVICE } from "cpzServices";

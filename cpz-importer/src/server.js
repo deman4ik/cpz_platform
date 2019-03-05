@@ -2,13 +2,16 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { IMPORTER_SERVICE } from "cpzServices";
 import { checkEnvVars } from "cpzUtils/environment";
 import importerEnv from "cpzEnv/importer";
 import handleTaskEvents from "./routes/taskEvents";
 
-Log.setService(IMPORTER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: IMPORTER_SERVICE
+});
 
 checkEnvVars(importerEnv.variables);
 

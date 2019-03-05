@@ -8,7 +8,7 @@ import {
   TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";

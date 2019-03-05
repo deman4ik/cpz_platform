@@ -2,13 +2,16 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import { checkEnvVars } from "cpzUtils/environment";
 import backtesterEnv from "cpzEnv/backtester";
 import handleTaskEvents from "./routes/taskEvents";
 
-Log.setService(BACKTESTER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: BACKTESTER_SERVICE
+});
 checkEnvVars(backtesterEnv.variables);
 
 const run = () => {

@@ -2,7 +2,7 @@ import VError from "verror";
 import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import publishEvents from "cpzEvents";
 import { getStartedCandlebatchers } from "cpzStorage/candlebatchers";
 import executeCandlebatcher from "./execute";

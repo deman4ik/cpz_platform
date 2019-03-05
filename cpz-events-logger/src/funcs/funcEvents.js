@@ -3,12 +3,15 @@ import VError from "verror";
 import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpzEventTypes";
 import { checkEnvVars } from "cpzUtils/environment";
 import eventsloggerEnv from "cpzEnv/eventslogger";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { EVENTS_LOGGER_SERVICE } from "cpzServices";
 import EventsLogger from "../eventslogger/eventslogger";
 import Relay from "../emulator/relay";
 
-Log.setService(EVENTS_LOGGER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: EVENTS_LOGGER_SERVICE
+});
 checkEnvVars(eventsloggerEnv.variables);
 
 const { EG_EMULATOR_MODE, API_KEY } = process.env;

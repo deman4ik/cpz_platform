@@ -14,7 +14,7 @@ import {
   EXWATCHER_STOP_PARAMS,
   EXWATCHER_UPDATE_PARAMS
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
 import BaseRunner from "../baseRunner";

@@ -14,7 +14,7 @@ import {
   STATUS_BUSY,
   CANDLE_PREVIOUS
 } from "cpzState";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { getTraderById } from "cpzStorage/traders";

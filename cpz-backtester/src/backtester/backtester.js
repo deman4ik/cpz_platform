@@ -9,7 +9,7 @@ import {
 } from "cpzState";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import {
   TASKS_BACKTESTER_STARTED_EVENT,
   TASKS_BACKTESTER_FINISHED_EVENT,

@@ -6,7 +6,7 @@ import {
   TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { BACKTESTER_SERVICE } from "cpzServices";

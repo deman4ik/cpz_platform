@@ -17,7 +17,7 @@ import {
   TASKS_EXWATCHER_STARTED_EVENT,
   TASKS_EXWATCHER_STOPPED_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import publishEvents from "cpzEvents";
 import { saveExWatcherState } from "cpzStorage/exwatchers";
 import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";

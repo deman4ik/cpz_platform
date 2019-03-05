@@ -5,12 +5,15 @@ import helmet from "helmet";
 import { checkEnvVars } from "cpzUtils/environment";
 import { sleep } from "cpzUtils/helpers";
 import marketwatcherEnv from "cpzEnv/marketwatcher";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { MARKETWATCHER_SERVICE } from "cpzServices";
 import handleTaskEvents from "./routes/taskEvents";
 import checkAlive from "./checkAlive";
 
-Log.setService(MARKETWATCHER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: MARKETWATCHER_SERVICE
+});
 checkEnvVars(marketwatcherEnv.variables);
 
 const run = async () => {

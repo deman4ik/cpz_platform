@@ -5,7 +5,7 @@ import {
   SUB_VALIDATION_EVENT,
   SUB_DELETED_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { CONTROL_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
@@ -15,7 +15,10 @@ import {
   handleFinished
 } from "../taskrunner/handleTaskEvents";
 
-Log.setService(CONTROL_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: CONTROL_SERVICE
+});
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
@@ -82,6 +85,7 @@ function eventHandler(context, req) {
   }
   Log.request(context.req, context.res);
   context.done();
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

@@ -1,4 +1,4 @@
-import Log from "../../utils/log";
+import Log from "../../log";
 import { contextMock } from "../../../tests/helpers";
 
 jest.mock("applicationinsights");

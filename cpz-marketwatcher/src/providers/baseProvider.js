@@ -9,7 +9,7 @@ import {
   ERROR_TOPIC,
   TICKS_TOPIC
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createErrorOutput } from "cpzUtils/error";
 import publishEvents from "cpzEvents";
 import { saveMarketwatcherState } from "cpzStorage/marketwatchers";

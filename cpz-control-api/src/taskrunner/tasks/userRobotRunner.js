@@ -11,7 +11,7 @@ import {
   USER_ROBOT_STOP_PARAMS,
   USER_ROBOT_UPDATE_PARAMS
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import BaseRunner from "../baseRunner";
 import UserRobot from "./userRobot";

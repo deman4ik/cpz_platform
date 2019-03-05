@@ -3,7 +3,7 @@ import { tryParseJSON } from "cpzUtils/helpers";
 import { getMarketwatcherById } from "cpzStorage/marketwatchers";
 import { STATUS_STOPPED } from "cpzState";
 import dayjs from "cpzDayjs";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 
 const marketwatcherProcesses = {};
 

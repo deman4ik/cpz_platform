@@ -11,7 +11,7 @@ import {
   STATUS_STARTED,
   STATUS_STOPPED
 } from "cpzState";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { LOG_ADVISER_EVENT, SIGNALS_NEWSIGNAL_EVENT } from "cpzEventTypes";
 import { combineAdvserSettings } from "cpzUtils/settings";
 import { getCachedCandlesByKey } from "cpzStorage/candles";

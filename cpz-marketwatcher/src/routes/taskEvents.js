@@ -10,7 +10,7 @@ import {
   TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
   TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleStart,
@@ -111,7 +111,8 @@ function eventHandler(req, res) {
       .status(error.name === "UNAUTHENTICATED" ? 401 : 500)
       .send(error.message);
   }
-  Log.request(req, res);
+  Log.request(req, res); // TODO: в отдельный middleware
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

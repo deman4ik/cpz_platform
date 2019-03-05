@@ -1,9 +1,12 @@
 import "babel-polyfill";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { IMPORTER_SERVICE } from "cpzServices";
 import Importer from "./importer";
 
-Log.setService(IMPORTER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: IMPORTER_SERVICE
+});
 
 process.on("message", async m => {
   const eventData = JSON.parse(m);

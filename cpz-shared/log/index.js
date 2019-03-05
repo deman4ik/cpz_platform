@@ -16,17 +16,19 @@ class Log {
     this._executionContext = {
       ServiceName: "platform"
     };
-    this._appInstightsEnabled = !!process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
-    this.initAppInsights();
+    this._appInstightsKey = null;
   }
 
   /**
    * Инициализация службы Applicatin Insights
-   *
+   * @param {Object} input
+   *  @property {string} key
+   *  @property {string} serviceName
    * @memberof Log
    */
-  initAppInsights() {
-    if (this._appInstightsEnabled) {
+  config({ key, serviceName }) {
+    this._appInstightsKey = key;
+    if (this._appInstightsKey) {
       appInsights
         .setup()
         .setAutoDependencyCorrelation(true)
@@ -38,6 +40,13 @@ class Log {
         .setUseDiskRetryCaching(true);
 
       appInsights.start();
+      if (serviceName) {
+        appInsights.defaultClient.context.tags[
+          appInsights.defaultClient.context.keys.cloudRole
+        ] = serviceName;
+
+        this._executionContext.ServiceName = serviceName;
+      }
       appInsights.defaultClient.commonProperties = {
         ...this._executionContext
       };
@@ -45,27 +54,10 @@ class Log {
   }
 
   _updateAppInsightsCommonProperties() {
-    if (this._appInstightsEnabled) {
+    if (this._appInstightsKey) {
       appInsights.defaultClient.commonProperties = {
         ...this._executionContext
       };
-    }
-  }
-
-  /**
-   * Установка имени сервиса для службы аналитики
-   *
-   * @param {string} serviceName
-   * @memberof Log
-   */
-  setService(serviceName) {
-    this._executionContext.ServiceName = serviceName;
-    if (this._appInstightsEnabled) {
-      appInsights.defaultClient.context.tags[
-        appInsights.defaultClient.context.keys.cloudRole
-      ] = serviceName;
-
-      this._updateAppInsightsCommonProperties();
     }
   }
 
@@ -78,9 +70,9 @@ class Log {
    *   @property {function} log.info
    *   @property {function} log.warn
    *   @property {function} log.error
-   * @property {Object} executionContext
-   *  @property {string} invocationId
-   *  @propert {string} functionName
+   *  @property {Object} executionContext
+   *   @property {string} invocationId
+   *   @property {string} functionName
    * @memberof Log
    */
   addContext(context) {
@@ -101,6 +93,15 @@ class Log {
     this._updateAppInsightsCommonProperties();
   }
 
+  clearContext() {
+    this._logInfo = console.log;
+    this._logWarn = console.warn;
+    this._logError = console.error;
+    delete this._executionContext.InvocationId;
+    delete this._executionContext.FunctionName;
+    this._updateAppInsightsCommonProperties();
+  }
+
   /**
    * Create string message to log
    * supports print-f format
@@ -110,7 +111,7 @@ class Log {
    * @memberof Log
    */
   _createMessage(args) {
-    return `CPZ-${this._executionContext.ServiceName} ${util.format(...args)}`;
+    return `cpz-${this._executionContext.ServiceName} ${util.format(...args)}`;
   }
 
   /**
@@ -155,7 +156,7 @@ class Log {
         this._logInfo(message);
     }
     this._logInfo(message);
-    if (this._appInstightsEnabled)
+    if (this._appInstightsKey)
       appInsights.defaultClient.trackTrace({
         message,
         severity,
@@ -226,7 +227,7 @@ class Log {
    */
   event(eventData) {
     this._logInfo(JSON.stringify(eventData));
-    if (this._appInstightsEnabled) {
+    if (this._appInstightsKey) {
       if (eventData) {
         // TODO: Parse base Event Types from config
         const name = eventData.name || "UnknownEvent"; // TODO: Create constant
@@ -245,7 +246,7 @@ class Log {
    * @memberof Log
    */
   exception(errorData) {
-    if (this._appInstightsEnabled) {
+    if (this._appInstightsKey) {
       if (errorData) {
         // TODO: Check errorData type - Error or VError
         const errorString = JSON.stringify(errorData); // TODO: Better VError stringify
@@ -266,7 +267,7 @@ class Log {
    * @memberof Log
    */
   metric({ name, value }) {
-    if (this._appInstightsEnabled) {
+    if (this._appInstightsKey) {
       if (name && value) {
         appInsights.defaultClient.trackMetric({ name, value });
       }
@@ -282,7 +283,7 @@ class Log {
    * {target:"http://dbname", name:"select customers proc", data:"SELECT * FROM Customers", duration:231, resultCode:0, success: true, dependencyTypeName: "ZSQL"}
    */
   dependency(data) {
-    if (this._appInstightsEnabled) {
+    if (this._appInstightsKey) {
       if (data && data.target && data.name && data.data)
         appInsights.defaultClient.trackDependency(data);
     }

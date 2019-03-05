@@ -45,7 +45,8 @@ const config = {
       cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
       cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
       cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
-      cpzDB: path.resolve(__dirname, "../cpz-shared/db")
+      cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
+      cpzLog: path.resolve(__dirname, "../cpz-shared/log")
     }
   },
   output: {

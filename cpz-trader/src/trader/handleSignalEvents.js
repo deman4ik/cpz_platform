@@ -13,7 +13,7 @@ import {
   STATUS_ERROR,
   createTraderSlug
 } from "cpzState";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";

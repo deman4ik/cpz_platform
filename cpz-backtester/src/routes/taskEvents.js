@@ -8,12 +8,15 @@ import {
   TASKS_BACKTESTER_START_EVENT,
   TASKS_BACKTESTER_STOP_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { handleStart, handleStop } from "../backtester/handleTaskEvents";
 
-Log.setService(BACKTESTER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: BACKTESTER_SERVICE
+});
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(req, res) {
@@ -96,6 +99,7 @@ function eventHandler(req, res) {
       .send(error.message);
   }
   Log.request(req, res);
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

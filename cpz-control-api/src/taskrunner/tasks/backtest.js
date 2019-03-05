@@ -16,7 +16,7 @@ import {
   TASKS_BACKTEST_STOPPED_EVENT,
   TASKS_BACKTEST_FINISHED_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import publishEvents from "cpzEvents";
 import { saveBacktestState } from "cpzStorage/backtests";
 import {

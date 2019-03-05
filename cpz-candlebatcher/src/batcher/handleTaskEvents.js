@@ -9,7 +9,7 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
 import publishEvents from "cpzEvents";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";

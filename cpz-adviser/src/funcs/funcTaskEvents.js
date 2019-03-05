@@ -11,7 +11,7 @@ import {
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { checkEnvVars } from "cpzUtils/environment";
 import adviserEnv from "cpzEnv/adviser";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { ADVISER_SERVICE } from "cpzServices";
 import {
   handleStart,
@@ -19,7 +19,10 @@ import {
   handleUpdate
 } from "../adviser/handleTaskEvents";
 
-Log.setService(ADVISER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: ADVISER_SERVICE
+});
 checkEnvVars(adviserEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -106,6 +109,7 @@ function eventHandler(context, req) {
   }
   Log.request(context.req, context.res);
   context.done();
+  //TODO: Log.clearContext();
 }
 
 export default eventHandler;

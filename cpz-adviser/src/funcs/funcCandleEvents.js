@@ -7,11 +7,14 @@ import {
   CANDLES_NEWCANDLE_EVENT
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { ADVISER_SERVICE } from "cpzServices";
 import handleCandle from "../adviser/handleCandleEvents";
 
-Log.setService(ADVISER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: ADVISER_SERVICE
+});
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {
@@ -79,6 +82,7 @@ function eventHandler(context, req) {
   }
   Log.request(context.req, context.res);
   context.done();
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

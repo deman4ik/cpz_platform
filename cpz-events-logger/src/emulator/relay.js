@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import retry from "cpzUtils/retry";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { endpoints as eventEndpoints } from "cpzConfig/events/endpoints";
 import { EVENTS_LOGGER_SERVICE } from "cpzServices";
 

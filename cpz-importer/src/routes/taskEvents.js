@@ -8,7 +8,7 @@ import {
   TASKS_IMPORTER_START_EVENT,
   TASKS_IMPORTER_STOP_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import {
   handleImportStart,

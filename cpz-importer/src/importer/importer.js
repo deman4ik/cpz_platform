@@ -23,7 +23,7 @@ import {
   VALID_TIMEFRAMES
 } from "cpzState";
 import publishEvents from "cpzEvents";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import {
   chunkArray,
   completedPercent,

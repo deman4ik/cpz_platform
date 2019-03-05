@@ -7,13 +7,16 @@ import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
 import { checkEnvVars } from "cpzUtils/environment";
 import connectorEnv from "cpzEnv/connector";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { CONNECTOR_SERVICE } from "cpzServices";
 import typeDefs from "../api/schema/schema.graphql";
 import queries from "../api/resolvers/queries";
 import mutations from "../api/resolvers/mutations";
 
-Log.setService(CONNECTOR_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: CONNECTOR_SERVICE
+});
 checkEnvVars(connectorEnv.variables);
 
 const resolvers = {
@@ -42,4 +45,7 @@ const server = new ApolloServer({
   }
 });
 
+// TODO: Разобраться с middleware ПОСЛЕ выполнения ресолверов
+// TODO: Log.clearContext();
+// TODO: Log.request(req,res);
 export default server.createHandler();

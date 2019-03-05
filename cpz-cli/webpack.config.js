@@ -28,7 +28,8 @@ const config = {
       cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
       cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
       cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
-      cpzKeyVault: path.resolve(__dirname, "../cpz-shared/keyVault")
+      cpzKeyVault: path.resolve(__dirname, "../cpz-shared/keyVault"),
+      cpzLog: path.resolve(__dirname, "../cpz-shared/log")
     }
   },
   output: {

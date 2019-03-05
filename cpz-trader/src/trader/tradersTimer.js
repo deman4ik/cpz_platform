@@ -10,7 +10,7 @@ import {
 import { createTraderTaskSubject } from "cpzState";
 import { getActiveTradersWithStopRequested } from "cpzStorage/traders";
 import publishEvents from "cpzEvents";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { TRADER_SERVICE } from "cpzServices";
 import Trader from "./trader";
 

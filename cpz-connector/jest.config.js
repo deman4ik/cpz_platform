@@ -18,6 +18,7 @@ module.exports = {
     "^cpzUtils(.*)$": "<rootDir>../cpz-shared/utils$1",
     cpzDayjs: "<rootDir>../cpz-shared/utils/lib/dayjs",
     cpzDB: "<rootDir>../cpz-shared/db",
-    cpzKeyVault: "<rootDir>../cpz-shared/keyVault/index.js"
+    cpzKeyVault: "<rootDir>../cpz-shared/keyVault/index.js",
+    cpzLog: "<rootDir>../cpz-shared/log"
   }
 };

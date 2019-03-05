@@ -16,7 +16,7 @@ import {
   TASKS_USERROBOT_STOPPED_EVENT
 } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { saveUserRobotState } from "cpzStorage/userRobots";
 import {
   combineCandlebatcherSettings,

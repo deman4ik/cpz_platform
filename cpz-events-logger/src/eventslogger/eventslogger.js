@@ -7,7 +7,7 @@ import {
   saveLogsEvent,
   saveErrorsEvent
 } from "cpzStorage/events";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { saveCurrentPrice } from "cpzStorage/currentPrices";
 import {
   CANDLES_NEWCANDLE_EVENT,

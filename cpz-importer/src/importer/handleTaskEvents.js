@@ -10,7 +10,7 @@ import {
   TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import {
   isProcessExists,
   createNewProcess,

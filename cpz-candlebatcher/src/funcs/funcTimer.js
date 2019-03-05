@@ -1,9 +1,12 @@
 import "babel-polyfill";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import handleCandlesTimer from "../batcher/handleTimer";
 
-Log.setService(CANDLEBATCHER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: CANDLEBATCHER_SERVICE
+});
 
 async function timerTrigger(context, timer) {
   Log.addContext(context);
@@ -14,6 +17,7 @@ async function timerTrigger(context, timer) {
   }
   Log.debug("Timer trigger function ran!", timeStamp);
   handleCandlesTimer(context);
+  // TODO: Log.clearContext();
 }
 
 export default timerTrigger;

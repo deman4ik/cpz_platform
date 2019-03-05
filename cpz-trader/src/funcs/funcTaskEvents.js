@@ -8,7 +8,7 @@ import {
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATE_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { TRADER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import { checkEnvVars } from "cpzUtils/environment";
@@ -19,7 +19,10 @@ import {
   handleUpdate
 } from "../trader/handleTaskEvents";
 
-Log.setService(TRADER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: TRADER_SERVICE
+});
 checkEnvVars(traderEnv.variables);
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
@@ -108,6 +111,7 @@ function eventHandler(context, req) {
   }
   Log.request(context.req, context.res);
   context.done();
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

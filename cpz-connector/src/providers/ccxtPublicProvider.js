@@ -2,7 +2,7 @@ import ccxt from "ccxt";
 import VError from "verror";
 import pretry from "p-retry";
 import dayjs from "cpzDayjs";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import BasePublicProvider from "./basePublicProvider";
 
 class CCXTPublicProvider extends BasePublicProvider {

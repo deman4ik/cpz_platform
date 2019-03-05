@@ -7,7 +7,7 @@ import { ERROR_MARKETWATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import { createErrorOutput } from "cpzUtils/error";
 import { capitalize } from "cpzUtils/helpers";
 import publishEvents from "cpzEvents";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,

@@ -12,7 +12,7 @@ import {
   ERROR_TOPIC,
   ERROR_ADVISER_EVENT
 } from "cpzEventTypes";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { ADVISER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {

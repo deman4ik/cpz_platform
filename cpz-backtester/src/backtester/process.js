@@ -1,9 +1,12 @@
 import "babel-polyfill";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { BACKTESTER_SERVICE } from "cpzServices";
 import Backtester from "./backtester";
 
-Log.setService(BACKTESTER_SERVICE);
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: BACKTESTER_SERVICE
+});
 
 process.on("message", async m => {
   const eventData = JSON.parse(m);

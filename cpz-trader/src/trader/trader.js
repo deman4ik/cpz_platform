@@ -35,7 +35,7 @@ import {
   createCurrentPriceSlug
 } from "cpzState";
 import publishEvents from "cpzEvents";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { combineTraderSettings } from "cpzUtils/settings";
 import { LOG_TRADER_EVENT, LOG_TOPIC } from "cpzEventTypes";
 import { saveTraderState } from "cpzStorage/traders";

@@ -9,7 +9,7 @@ import {
   STATUS_BUSY,
   STATUS_ERROR
 } from "cpzState";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
 import publishEvents from "cpzEvents";
 import { createErrorOutput } from "cpzUtils/error";

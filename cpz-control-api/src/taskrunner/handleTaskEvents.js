@@ -33,7 +33,7 @@ import {
   IMPORTER_SERVICE,
   BACKTESTER_SERVICE
 } from "cpzServices";
-import Log from "cpzUtils/log";
+import Log from "cpzLog";
 import {
   STATUS_STARTED,
   STATUS_PENDING,
