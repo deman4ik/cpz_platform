@@ -205,6 +205,17 @@ class Trader {
     );
   }
 
+  async currentPrice() {
+    const { price } = await getCurrentPrice(
+      createCurrentPriceSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency
+      })
+    );
+    return price;
+  }
+
   async closePosition(positionState) {
     try {
       const closeSignal = {
@@ -586,6 +597,8 @@ class Trader {
         ) {
           // Устанавливаем объем из параметров
           const orderToExecute = { ...order };
+          if (order.task === ORDER_TASK_OPENBYMARKET)
+            orderToExecute.price = await this.currentPrice();
           // Если режим - в реальном времени
           if (this._settings.mode === REALTIME_MODE) {
             // Публикуем ордер на биржу
