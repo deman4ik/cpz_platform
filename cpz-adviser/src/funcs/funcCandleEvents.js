@@ -8,13 +8,8 @@ import {
 } from "cpzEventTypes";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import Log from "cpzLog";
-import { ADVISER_SERVICE } from "cpzServices";
 import handleCandle from "../adviser/handleCandleEvents";
 
-Log.config({
-  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: ADVISER_SERVICE
-});
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
 function eventHandler(context, req) {

@@ -1,6 +1,8 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcCandleEvents.js",
+  "_originalEntryPoint": false,
+  "scriptFile": "../index.js",
+  "entryPoint": "candleEvents",
   "bindings": [
     {
       "authLevel": "anonymous",
@@ -8,9 +10,7 @@
       "direction": "in",
       "name": "req",
       "route": "candleEvents",
-      "methods": [
-        "post"
-      ]
+      "methods": ["post"]
     },
     {
       "type": "http",
