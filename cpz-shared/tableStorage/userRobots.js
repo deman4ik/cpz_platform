@@ -3,7 +3,7 @@ import VError from "verror";
 import { STATUS_STARTED, STATUS_STARTING } from "../config/state";
 import { STORAGE_USERROBOTS_TABLE } from "./tables";
 import TableStorage from "./tableStorage";
-import { deleteTraderState } from "./traders";
+import { getTraderById, deleteTraderState } from "./traders";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -135,7 +135,10 @@ const deleteUserRobotState = async ({
   traderId
 }) => {
   try {
-    if (traderId) await deleteTraderState(traderId);
+    if (traderId) {
+      const trader = getTraderById(traderId);
+      if (trader) await deleteTraderState(trader);
+    }
     await tableStorage.deleteEntity(STORAGE_USERROBOTS_TABLE, {
       RowKey,
       PartitionKey,

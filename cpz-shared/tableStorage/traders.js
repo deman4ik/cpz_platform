@@ -169,7 +169,7 @@ const updateTraderState = async state =>
  * @param {string} input.RowKey
  * @param {string} input.PartitionKey
  */
-const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) => {
+const deleteTraderState = async ({ RowKey, PartitionKey }) => {
   try {
     const traderState = await getTraderById(RowKey);
     if (traderState) {
@@ -177,8 +177,7 @@ const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) => {
 
       await tableStorage.deleteEntity(STORAGE_TRADERS_TABLE, {
         RowKey,
-        PartitionKey,
-        metadata
+        PartitionKey
       });
     }
   } catch (error) {
