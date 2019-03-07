@@ -15,6 +15,7 @@ SELECT p.id,
        p.exit_price,
        p.status,
        p.bars_held,
+       p.quantity,
        (select candle_timestamp from signal where position_id = p.id and action in ('short','long')) as signal_time_open,
        (select candle_timestamp from signal where position_id = p.id and action in ('closeShort','closeLong')) as signal_time_close,
        (select price from signal where position_id = p.id and action in ('short','long')) as signal_price_open,
@@ -31,7 +32,8 @@ SELECT p.id,
        oo.status as o_status_open,  oo.created_at as o_created_at_open,  oo.order_type as o_type_open,  oo.order_price as o_price_open,  oo.candle_timestamp as o_candle_timestamp_open,
        oo.order_ex_num as o_ex_num_open,
        oc.status as o_status_close, oc.created_at as o_created_at_close, oc.order_type as o_type_close, oc.order_price as o_price_close, oc.candle_timestamp as o_candle_timestamp_close,
-       oc.order_ex_num as o_ex_num_close
+       oc.order_ex_num as o_ex_num_close,
+       p.OID
 FROM positions p
 left join backtest b on (p.backtest_id = b.id)
 left join orders oo on (p.id = oo.position_id and oo.action in ('short','long'))

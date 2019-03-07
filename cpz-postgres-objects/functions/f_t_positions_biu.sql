@@ -21,7 +21,7 @@ begin
   end if;
   
   if (new.bars_held is null) then
-      if (new.status = 'closed') then
+      if (new.status in ('closed','closedAuto')) then
         new.bars_held := (EXTRACT(EPOCH FROM (new.exit_date - new.entry_date))::int/60/new.timeframe) + 1; -- all timeframes are in minutes, +1 for count exitBar
       end if;
   end if;
