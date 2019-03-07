@@ -245,7 +245,7 @@ const deletePositionState = async ({ RowKey, PartitionKey, metadata }) =>
  *
  * @param {string} traderId - Trader id
  */
-const deletePositionsState = async traderId => {
+const deletePositionsStateByTraderId = async traderId => {
   try {
     const positions = await tableStorage.queryEntities(
       STORAGE_POSITIONS_TABLE,
@@ -281,5 +281,5 @@ export {
   getIdledOpenPositions,
   savePositionState,
   deletePositionState,
-  deletePositionsState
+  deletePositionsStateByTraderId
 };

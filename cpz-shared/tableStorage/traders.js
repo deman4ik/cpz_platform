@@ -3,7 +3,7 @@ import VError from "verror";
 import { STATUS_STARTED, STATUS_BUSY } from "../config/state";
 import { STORAGE_TRADERS_TABLE } from "./tables";
 import TableStorage from "./tableStorage";
-import { deletePositionsState } from "./positions";
+import { deletePositionsStateByTraderId } from "./positions";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -20,6 +20,8 @@ tableStorage.createTableIfNotExists(STORAGE_TRADERS_TABLE);
 const getTraderById = async taskId =>
   tableStorage.getEntityByRowKey(STORAGE_TRADERS_TABLE, taskId);
 
+const getTraderByKeys = async ({ RowKey, PartitionKey }) =>
+  tableStorage.getEntityByKeys(STORAGE_TRADERS_TABLE, { RowKey, PartitionKey });
 /**
  * Find Trader
  *
@@ -171,13 +173,13 @@ const updateTraderState = async state =>
  */
 const deleteTraderState = async ({ RowKey, PartitionKey }) => {
   try {
-    const traderState = await getTraderById(RowKey);
-    if (traderState) {
-      await deletePositionsState(RowKey);
+    const traderState = await getTraderByKeys({ RowKey, PartitionKey });
+    if (traderState && traderState.RowKey && traderState.PartitionKey) {
+      await deletePositionsStateByTraderId(traderState.RowKey);
 
       await tableStorage.deleteEntity(STORAGE_TRADERS_TABLE, {
-        RowKey,
-        PartitionKey
+        RowKey: traderState.RowKey,
+        PartitionKey: traderState.PartitionKey
       });
     }
   } catch (error) {
@@ -198,6 +200,7 @@ const deleteTraderState = async ({ RowKey, PartitionKey }) => {
 
 export {
   getTraderById,
+  getTraderByKeys,
   findTrader,
   getActiveTradersBySlug,
   getActiveTradersWithStopRequested,
