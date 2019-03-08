@@ -297,10 +297,12 @@ class Log {
    * @memberof Log
    */
   request(request, response) {
-    appInsights.defaultClient.trackNodeHttpRequest({
-      request,
-      response
-    });
+    if (this._appInstightsKey) {
+      appInsights.defaultClient.trackNodeHttpRequest({
+        request,
+        response
+      });
+    }
   }
 }
 
