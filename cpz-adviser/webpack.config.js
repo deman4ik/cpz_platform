@@ -2,11 +2,7 @@ require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
-const fs = require("fs");
 const path = require("path");
-
-// the path(s) that should be cleaned
-const pathsToClean = [path.resolve(__dirname, "dist")];
 
 const config = {
   mode: process.env.NODE_ENV || "production",
@@ -58,7 +54,7 @@ const config = {
   target: "node",
   externals: [nodeExternals()],
   plugins: [
-    new CleanWebpackPlugin(pathsToClean),
+    new CleanWebpackPlugin(),
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),

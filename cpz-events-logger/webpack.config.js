@@ -5,9 +5,6 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const fs = require("fs");
 const path = require("path");
 
-// the path(s) that should be cleaned
-const pathsToClean = [path.resolve(__dirname, "dist")];
-
 /**
  * Finds all functions entry points from /src/funcs
  *
@@ -74,7 +71,7 @@ const config = {
   target: "node",
   externals: [nodeExternals()],
   plugins: [
-    new CleanWebpackPlugin(pathsToClean),
+    new CleanWebpackPlugin(),
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
