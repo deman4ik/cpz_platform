@@ -5,11 +5,6 @@ RUN dotnet restore
 RUN dotnet build -c Release
 
 FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS buildNode
-RUN apt-get update &&  \
-    apt-get install -y git &&  \
-    apt-get install -y python2.7 && \ 
-    apt-get install -y build-essential && \
-    apt-get install -y gcc
 COPY /cpz-candlebatcher /src/cpz-candlebatcher
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-candlebatcher
