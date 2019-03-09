@@ -1,4 +1,4 @@
-FROM node:10 as build
+FROM cpzdev.azurecr.io/cpzbuildnode:latest as build
 RUN apt-get update &&  \
     apt-get install -y git &&  \
     apt-get install -y python2.7 && \ 
@@ -21,4 +21,3 @@ ENV NODE_ENV=production
 COPY --from=build ["/src/cpz-backtester","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
 CMD [ "npm", "start" ]
-  

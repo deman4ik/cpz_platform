@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/node:2.0 AS buildNode
+FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS buildNode
 RUN apt-get update &&  \
     apt-get install -y git &&  \
     apt-get install -y python2.7 && \ 
@@ -11,10 +11,9 @@ RUN npm install
 ENV NODE_ENV=production
 RUN npm run webpack
 RUN npm uninstall -D
-   
+
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
 ENV NODE_ENV=production
 COPY --from=buildNode ["/src/cpz-control-api","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
-  

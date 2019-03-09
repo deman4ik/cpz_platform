@@ -1,4 +1,4 @@
-FROM node:10 AS build
+FROM cpzdev.azurecr.io/cpzbuildnode:latest AS build
 RUN apt-get update &&  \
     apt-get install -y git &&  \
     apt-get install -y python2.7 && \ 

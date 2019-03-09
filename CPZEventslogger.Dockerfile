@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-functions/node:2.0 AS build
+FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS build
 RUN apt-get update &&  \
     apt-get install -y git &&  \
     apt-get install -y python2.7 && \ 
@@ -17,4 +17,3 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot
 ENV NODE_ENV=production
 COPY --from=build ["/src/cpz-events-logger","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
-  
