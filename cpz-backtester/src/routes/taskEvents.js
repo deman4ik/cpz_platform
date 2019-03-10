@@ -50,7 +50,7 @@ function eventHandler(req, res) {
             ...eventData,
             eventSubject
           });
-          res.status(200);
+          res.status(200).end();
           break;
         }
         case TASKS_BACKTESTER_STOP_EVENT.eventType: {
@@ -63,7 +63,7 @@ function eventHandler(req, res) {
             ...eventData,
             eventSubject
           });
-          res.status(200);
+          res.status(200).end();
           break;
         }
         case SUB_VALIDATION_EVENT.eventType: {
@@ -83,12 +83,12 @@ function eventHandler(req, res) {
               eventGridEvent.topic
             }`
           );
-          res.status(200);
+          res.status(200).end();
           break;
         }
         default: {
           Log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
-          res.status(200);
+          res.status(200).end();
         }
       }
     });
