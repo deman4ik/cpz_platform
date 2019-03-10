@@ -59,7 +59,7 @@ alter table orders
 
 alter table orders
   add constraint c_orders_run_mode_chk
-    check (run_mode in ('emulator','realtime'));
+    check (run_mode in ('emulator','realtime','backtest'));
             
 alter table orders
   add constraint c_orders_status_chk

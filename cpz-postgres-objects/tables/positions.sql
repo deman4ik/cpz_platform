@@ -64,7 +64,7 @@ alter table positions
 
 alter table positions
   add constraint c_positions_run_mode_chk
-    check (run_mode in ('emulator','realtime'));
+    check (run_mode in ('emulator','realtime','backtest'));
         
 create index i_positions_dates
   on positions (robot_id, entry_date, exit_date);
