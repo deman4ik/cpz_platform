@@ -104,8 +104,6 @@ class Backtester {
   log(...args) {
     if (this.settings.debug) {
       Log.debug(`Backtester ${this.eventSubject}:`, ...args);
-      const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Backtester ${this.eventSubject}:`, ...logData]);
     }
   }
 

@@ -24,17 +24,17 @@ export default (req, res, next) => {
   /* eslint no-restricted-syntax: ["error"] */
   if (event.eventType === TASKS_BACKTESTER_START_EVENT.eventType) {
     try {
-      genErrorIfExist(validatorStartEvent(event));
+      genErrorIfExist(validatorStartEvent(event.data));
       req.body = event;
     } catch (e) {
-      Log.warn(`Invalid event format: ${event}`);
+      Log.warn(e, "Invalid event format");
     }
   } else if (event.eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
     try {
-      genErrorIfExist(validatorStopEvent(event));
+      genErrorIfExist(validatorStopEvent(event.data));
       req.body = event;
     } catch (e) {
-      Log.warn(`Invalid event format: ${event}`);
+      Log.warn(e, "Invalid event format");
     }
   }
   next();

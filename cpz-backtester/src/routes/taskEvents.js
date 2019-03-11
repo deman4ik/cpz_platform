@@ -29,13 +29,13 @@ function eventHandler(req, res) {
     Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
     handleStart({
       ...data,
-      subject
+      eventSubject: subject
     }).catch(e => Log.warn(e));
   } else if (eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
     Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
     handleStop({
       ...data,
-      subject
+      eventSubject: subject
     }).catch(e => Log.warn(e));
   }
 }

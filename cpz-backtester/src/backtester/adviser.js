@@ -11,8 +11,6 @@ class AdviserBacktester extends Adviser {
   log(...args) {
     if (this._settings.debug) {
       Log.debug(`Adviser ${this._eventSubject}:`, ...args);
-      const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Adviser ${this._eventSubject}:`, ...logData]);
     }
   }
 

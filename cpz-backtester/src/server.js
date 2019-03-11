@@ -29,8 +29,8 @@ Log.addContext({
     functionName: "taskEvents"
   }
 });
-
-server.use(
+server.get("/", (req, res) => res.status(200).end());
+server.post(
   "/api/taskEvents",
   checkAuth,
   handlingEventsByType,
@@ -41,5 +41,5 @@ server.use(
 const PORT = process.env.NODE_PORT || process.env.PORT || 8108;
 server.listen(PORT, err => {
   if (err) throw err;
-  Log.info(`> Ready on http://localhost:${PORT}/api/taskEvents`);
+  Log.info(`Ready on http://localhost:${PORT}/api/taskEvents`);
 });

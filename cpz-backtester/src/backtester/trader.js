@@ -11,8 +11,6 @@ class TraderBacktester extends Trader {
   log(...args) {
     if (this._settings.debug) {
       Log.debug(`Trader ${this._eventSubject}:`, ...args);
-      const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Trader ${this._eventSubject}:`, ...logData]);
     }
   }
 

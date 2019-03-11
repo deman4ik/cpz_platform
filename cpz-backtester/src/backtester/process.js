@@ -19,18 +19,12 @@ process.on("message", async m => {
         `${eventData.state.taskId} initialization error`,
         error.message
       );
-      process.send([
-        `Backtester ${eventData.state.taskId} initialization error`,
-        error.message
-      ]);
     }
     process.exit(0);
   } else if (eventData.type === "stop") {
     Log.info(`${eventData.state.taskId} stopped!`);
-    process.send([`Backtester ${eventData.state.taskId} stopped!`]);
     process.exit(0);
   } else {
     Log.warn("Unknown child process event type");
-    process.send(["Unknown child process event type"]);
   }
 });
