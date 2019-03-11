@@ -27,7 +27,7 @@ create table orders
     status        varchar(10)     not null default 'none',
     action        varchar(10)     not null,
         
-    order_type    varchar(10)     not null,    
+    order_type    varchar(20)     not null,    
     order_time    timestamp,
     order_ex_num    varchar(160),
     order_price     numeric       default 0,
@@ -59,7 +59,7 @@ alter table orders
 
 alter table orders
   add constraint c_orders_run_mode_chk
-    check (run_mode in ('emulator','realtime'));
+    check (run_mode in ('emulator','realtime','backtest'));
             
 alter table orders
   add constraint c_orders_status_chk

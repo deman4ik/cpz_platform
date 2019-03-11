@@ -22,7 +22,8 @@ function mapForDB(position) {
     exit_price: position.exit.price,
     slippage_step: position.settings.slippageStep,
     deviation: position.settings.deviation,
-    quantity: position.settings.volume
+    quantity: position.settings.volume,
+    run_mode: position.settings.mode
   };
 }
 async function savePositionsDB(data) {

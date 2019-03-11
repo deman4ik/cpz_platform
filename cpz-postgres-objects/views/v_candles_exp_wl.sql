@@ -16,8 +16,7 @@ union all
    asset = 'BTC' 
    and currency = 'USD' 
    and exchange = 'kraken'
-   and t.timestamp >= '2019-02-22 00:00:00.000000' 
-   and t.timestamp <= '2019-02-23 00:00:00.000000'
-   and type!='previous'
+   and t.timestamp >= '2019-01-03 22:30:00.000000' 
+   and t.timestamp < '2019-01-04 05:00:00.000000'
   ORDER by t.timestamp asc
 );

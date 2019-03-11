@@ -110,8 +110,10 @@ class Log {
    * @returns
    * @memberof Log
    */
-  _createMessage(args) {
-    return `cpz-${this._executionContext.ServiceName} ${util.format(...args)}`;
+  _createMessage(args, props) {
+    return `cpz-${this._executionContext.ServiceName} ${util.format(...args)}${
+      props ? ` ${JSON.stringify(props)}` : ""
+    } `;
   }
 
   /**
@@ -139,7 +141,7 @@ class Log {
       properties = null;
       if (typeof props === "string") messages = [props, ...msgs];
     }
-    const message = this._createMessage(messages);
+    const message = this._createMessage(messages, properties);
     switch (severity) {
       case SEVERITY_LEVEL.Verbose:
       case SEVERITY_LEVEL.Information:
@@ -155,7 +157,6 @@ class Log {
       default:
         this._logInfo(message);
     }
-    this._logInfo(message);
     if (this._appInstightsKey)
       appInsights.defaultClient.trackTrace({
         message,
@@ -297,10 +298,12 @@ class Log {
    * @memberof Log
    */
   request(request, response) {
-    appInsights.defaultClient.trackNodeHttpRequest({
-      request,
-      response
-    });
+    if (this._appInstightsKey) {
+      appInsights.defaultClient.trackNodeHttpRequest({
+        request,
+        response
+      });
+    }
   }
 }
 

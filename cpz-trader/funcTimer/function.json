@@ -1,7 +1,6 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/service.js",
-  "entryPoint": "timerEvent",
+  "scriptFile": "../dist/funcTimer.js",
   "bindings": [
     {
       "name": "TraderTimer",

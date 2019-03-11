@@ -18,7 +18,7 @@ tableStorage.createTableIfNotExists(STORAGE_POSITIONS_TABLE);
  * @param {string} input.slug
  * @param {string} input.traderId - Trader task id
  * @param {string} input.positionId - Position id
- * @returns {Object} PositionState
+ * @returns {PositionState}
  */
 const getPosition = async ({ slug, traderId, positionId }) => {
   try {
@@ -75,7 +75,7 @@ const getPosition = async ({ slug, traderId, positionId }) => {
  * Query active positions
  *
  * @param {string} slug - partition key
- * @returns {Object []} Array of PositionState
+ * @returns {PositionState[]}
  */
 async function getActivePositionsBySlug(slug) {
   try {
@@ -128,7 +128,7 @@ async function getActivePositionsBySlug(slug) {
  * @param {object} input
  * @param {string} input.slug - partition key
  * @param {string} input.traderId - trader task id
- * @returns {Object[]} Array of PositionState
+ * @returns {PositionState[]}
  */
 async function getActivePositionsBySlugAndTraderId({ slug, traderId }) {
   try {
@@ -222,7 +222,7 @@ async function getIdledOpenPositions() {
 /**
  * Save Position state
  *
- * @param {Object} state
+ * @param {PositionState} state
  */
 const savePositionState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_POSITIONS_TABLE, state);
@@ -230,9 +230,9 @@ const savePositionState = async state =>
 /**
  * Delete Position state
  *
- * @param {Object} taskId
- * @param {string} taskId.RowKey
- * @param {string} taskId.PartitionKey
+ * @param {string} taskId
+ * @param {string} input.RowKey
+ * @param {string} input.PartitionKey
  */
 const deletePositionState = async ({ RowKey, PartitionKey, metadata }) =>
   tableStorage.deleteEntity(STORAGE_POSITIONS_TABLE, {
@@ -245,7 +245,7 @@ const deletePositionState = async ({ RowKey, PartitionKey, metadata }) =>
  *
  * @param {string} traderId - Trader id
  */
-const deletePositionsState = async traderId => {
+const deletePositionsStateByTraderId = async traderId => {
   try {
     const positions = await tableStorage.queryEntities(
       STORAGE_POSITIONS_TABLE,
@@ -281,5 +281,5 @@ export {
   getIdledOpenPositions,
   savePositionState,
   deletePositionState,
-  deletePositionsState
+  deletePositionsStateByTraderId
 };

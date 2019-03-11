@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import UTCPlugin from "./plugin/utc";
-/* dayjs в режиме UTC */
-dayjs.extend(UTCPlugin);
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 export default dayjs;

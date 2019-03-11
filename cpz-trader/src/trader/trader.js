@@ -174,9 +174,9 @@ class Trader {
    * @param {*} data
    * @memberof Trader
    */
-  async logEvent(data) {
+  logEvent(data) {
     // Публикуем событие
-    await publishEvents(LOG_TOPIC, {
+    publishEvents(LOG_TOPIC, {
       service: TRADER_SERVICE,
       subject: this._eventSubject,
       eventType: LOG_TRADER_EVENT,

@@ -181,7 +181,6 @@ class Position {
    * Создать ордер из сигнала
    *
    * @param {*} signal
-   * @param {String} positionDirection
    *
    * @memberof Position
    */

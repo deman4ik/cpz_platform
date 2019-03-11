@@ -126,7 +126,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
     } catch (error) {
-      Log.error(error);
+      Log.error("getBalance", error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -243,7 +243,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 } */
     } catch (error) {
-      Log.error(error);
+      Log.error("createOrder", error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -253,7 +253,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async checkOrder(context, keys, { exId, asset, currency }) {
     try {
-      console.log("checkOrder()");
+      Log.debug("checkOrder()");
       await this._checkKeysVersion(context, keys);
       const call = async () => {
         try {
@@ -303,7 +303,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 }
 */
     } catch (error) {
-      Log.error(error);
+      Log.error("checkOrder", error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }
@@ -340,7 +340,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         ...checkOrder
       };
     } catch (error) {
-      Log.error(error);
+      Log.error("cancelOrder", error);
       return {
         success: false,
         error: { name: error.constructor.name, message: error.message }

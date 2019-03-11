@@ -1,61 +1,44 @@
 import "babel-polyfill";
-import { v4 as uuid } from "uuid";
 import VError from "verror";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
   SUB_DELETED_EVENT,
-  TASKS_IMPORTER_START_EVENT,
-  TASKS_IMPORTER_STOP_EVENT
+  SIGNALS_NEWSIGNAL_EVENT
 } from "cpzEventTypes";
 import Log from "cpzLog";
+import { TRADER_SERVICE } from "cpzServices";
 import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import {
-  handleImportStart,
-  handleImportStop
-} from "../importer/handleTaskEvents";
+import handleSignal from "../trader/handleSignalEvents";
 
+Log.config({
+  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
+  serviceName: TRADER_SERVICE
+});
 const validateEvent = createValidator(BASE_EVENT.dataSchema);
 
-function eventHandler(req, res) {
+function eventHandler(context, req) {
   try {
-    Log.addContext({
-      executionContext: {
-        invocationId: uuid(),
-        functionName: "taskEvents"
-      }
-    });
+    Log.addContext(context);
     if (req.query["api-key"] !== process.env.API_KEY) {
       throw new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key");
     }
-    const parsedReq = req.body;
+    const parsedReq = JSON.parse(req.rawBody);
     Log.debug("Processed a request", JSON.stringify(parsedReq));
     // TODO: SENDER ENDPOINT VALIDATION
-    // check req.originalUrl
     parsedReq.forEach(eventGridEvent => {
       // Валидация структуры события
       genErrorIfExist(validateEvent(eventGridEvent));
       const eventData = eventGridEvent.data;
       const eventSubject = eventGridEvent.subject;
       switch (eventGridEvent.eventType) {
-        case TASKS_IMPORTER_START_EVENT.eventType: {
+        case SIGNALS_NEWSIGNAL_EVENT.eventType: {
           Log.info(
             `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
               eventData
             )}`
           );
-          handleImportStart({ eventSubject, ...eventData });
-          res.status(200).end();
-          break;
-        }
-        case TASKS_IMPORTER_STOP_EVENT.eventType: {
-          Log.info(
-            `Got ${eventGridEvent.eventType} event data ${JSON.stringify(
-              eventData
-            )}`
-          );
-          handleImportStop({ eventSubject, ...eventData });
-          res.status(200).end();
+          handleSignal(context, { eventSubject, signal: eventData });
           break;
         }
         case SUB_VALIDATION_EVENT.eventType: {
@@ -64,9 +47,15 @@ function eventHandler(req, res) {
               eventData.validationCode
             }, topic: ${eventGridEvent.topic}`
           );
-          res.status(200).send({
-            validationResponse: eventData.validationCode
-          });
+          context.res = {
+            status: 200,
+            body: {
+              validationResponse: eventData.validationCode
+            },
+            headers: {
+              "Content-Type": "application/json"
+            }
+          };
           break;
         }
         case SUB_DELETED_EVENT.eventType: {
@@ -75,22 +64,26 @@ function eventHandler(req, res) {
               eventGridEvent.topic
             }`
           );
-          res.status(200).end();
           break;
         }
         default: {
           Log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
-          res.status(200).end();
         }
       }
     });
   } catch (error) {
     Log.error(error);
-    res
-      .status(error.name === "UNAUTHENTICATED" ? 401 : 500)
-      .send(error.message);
+    context.res = {
+      status: error.name === "UNAUTHENTICATED" ? 401 : 500,
+      body: error.message,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
   }
-  Log.request(req, res);
+  Log.request(context.req, context.res);
+  context.done();
+  // TODO: Log.clearContext();
 }
 
 export default eventHandler;

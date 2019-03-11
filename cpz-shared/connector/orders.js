@@ -1,4 +1,5 @@
 import VError from "verror";
+import Log from "../log";
 import client from "./connector";
 
 async function createOrderEX({
@@ -45,6 +46,7 @@ async function createOrderEX({
     }
     return createOrder.order;
   } catch (error) {
+    Log.error("createOrderEX", error);
     throw new VError(
       {
         name: "ConnectorAPIError",
@@ -101,6 +103,7 @@ async function cancelOrderEX({
     }
     return cancelOrder.order;
   } catch (error) {
+    Log.error("cancelOrderEX", error);
     throw new VError(
       {
         name: "ConnectorAPIError",
@@ -131,9 +134,7 @@ async function checkOrderEX({
           }
           order
         }
-      }
-      
-        `;
+      }`;
     const variables = {
       connectorInput: {
         userId,
@@ -155,6 +156,7 @@ async function checkOrderEX({
     }
     return order.order;
   } catch (error) {
+    Log.error("checkOrderEX", error);
     throw new VError(
       {
         name: "ConnectorAPIError",

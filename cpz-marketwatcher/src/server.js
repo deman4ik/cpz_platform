@@ -21,6 +21,7 @@ const run = async () => {
 
   server.use(helmet());
   server.use(bodyParser.json());
+  server.get("/", (req, res) => res.status(200).end());
   server.post("/api/taskEvents", (req, res) => handleTaskEvents(req, res));
 
   const PORT = process.env.NODE_PORT || process.env.PORT || 8102;
