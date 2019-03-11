@@ -4,6 +4,8 @@ const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const path = require("path");
 
+const pathsToClean = [path.resolve(__dirname, "dist")];
+
 const config = {
   mode: process.env.NODE_ENV || "production",
   watch: false,
@@ -58,7 +60,7 @@ const config = {
   target: "node",
   externals: [nodeExternals()],
   plugins: [
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin(pathsToClean),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({

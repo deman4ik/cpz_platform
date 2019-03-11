@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcTickEvents.js",
+  "scriptFile": "../dist/service.js",
+  "entryPoint": "tickEvent",
   "bindings": [
     {
       "authLevel": "anonymous",

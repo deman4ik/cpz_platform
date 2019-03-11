@@ -101,18 +101,21 @@ const robot4 = {
     } 
   },
   init() {
-    this.log("init");
+    // basic
+    this.lastPositionActive = false;
     this.positionNum = 0;
-    this.positionCode = null;
-    this.minBarsToHold = 3; // param
-    this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least
     this.lastSignal = null;
     this.adviceNext = null; // shift signal to bar+1
+    
+    // specific    
+    this.minBarsToHold = 3; // param
+    this.heldEnoughBars = 0; // bar counter, how much bars for holding postions we need at least
 
     // using SMA_CACHE to skip warm up, needs to run adviser with "requiredHistoryCache":true, "requiredHistoryMaxBars":30
     this.addIndicator("sma1", "SMA_CACHE", { windowLength: 10 });
     this.addIndicator("sma2", "SMA_CACHE", { windowLength: 20 });
     this.addIndicator("sma3", "SMA_CACHE", { windowLength: 30 });
+    this.log("init");    
   },
   check() {
     // const price = this.candle.close;

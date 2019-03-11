@@ -137,8 +137,7 @@ const deleteUserRobotState = async ({
   try {
     if (traderId) {
       const trader = getTraderById(traderId);
-      if (trader && trader.RowKey && trader.PartitionKey)
-        await deleteTraderState(trader);
+      if (trader) await deleteTraderState(trader);
     }
     await tableStorage.deleteEntity(STORAGE_USERROBOTS_TABLE, {
       RowKey,

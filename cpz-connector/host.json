@@ -1,12 +1,12 @@
 {
   "version": "2.0",
   "logging": {
-    "fileLoggingMode": "always",
+    "fileLoggingMode": "never",
     "logLevel": {
       "default": "Debug"
     },
     "console": {
-      "isEnabled": "true"
+      "isEnabled": "false"
     }
   },
   "watchDirectories": ["dist"]

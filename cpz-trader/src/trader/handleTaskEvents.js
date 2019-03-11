@@ -1,47 +1,41 @@
 import VError from "verror";
 import {
-  TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOPPED_EVENT,
-  TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATED_EVENT,
-  TASKS_TRADER_UPDATE_EVENT,
   TASKS_TOPIC
 } from "cpzEventTypes";
 import Log from "cpzLog";
 import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import { getTraderById, updateTraderState } from "cpzStorage/traders";
 import Trader from "./trader";
 
-const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
-
 /**
  * Запуск нового проторговщика
  *
  * @param {*} context
- * @param {*} eventData
+ * @param {*} event
  */
-async function handleStart(context, eventData) {
+async function handleStart(context, event) {
+  const {
+    subject,
+    data: { taskId }
+  } = event;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
     // Инициализируем класс проторговщика
-    const trader = new Trader(context, eventData);
+    const trader = new Trader(context, event.data);
     // Сохраняем состояние
-    trader.end(STATUS_STARTED);
+    await trader.end(STATUS_STARTED);
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: TASKS_TRADER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId
+        taskId
       }
     });
   } catch (error) {
@@ -51,7 +45,7 @@ async function handleStart(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            eventData
+            event
           }
         },
         "Failed to start trader"
@@ -61,10 +55,10 @@ async function handleStart(context, eventData) {
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: TASKS_TRADER_STARTED_EVENT,
       data: {
-        taskId: eventData.taskId,
+        taskId,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -79,15 +73,15 @@ async function handleStart(context, eventData) {
  * Остановка проторговщика
  *
  * @param {*} context
- * @param {*} eventData
+ * @param {*} event
  */
-async function handleStop(context, eventData) {
+async function handleStop(context, event) {
+  const {
+    subject,
+    data: { taskId }
+  } = event;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
-    // Запрашиваем текущее состояние проторговщика по уникальному ключу
-
-    const traderState = await getTraderById(eventData.taskId);
+    const traderState = await getTraderById(taskId);
 
     // Генерируем новое состояние
     const newState = {
@@ -109,10 +103,10 @@ async function handleStop(context, eventData) {
       // Публикуем событие - успех
       await publishEvents(TASKS_TOPIC, {
         service: TRADER_SERVICE,
-        subject: eventData.eventSubject,
+        subject,
         eventType: TASKS_TRADER_STOPPED_EVENT,
         data: {
-          taskId: eventData.taskId
+          taskId
         }
       });
     }
@@ -124,7 +118,7 @@ async function handleStop(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            eventData
+            event
           }
         },
         "Failed to stop trader"
@@ -134,10 +128,10 @@ async function handleStop(context, eventData) {
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: TASKS_TRADER_STOPPED_EVENT,
       data: {
-        taskId: eventData.taskId,
+        taskId,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -151,32 +145,34 @@ async function handleStop(context, eventData) {
  * Обновление параметров проторговщика
  *
  * @param {*} context
- * @param {*} eventData
+ * @param {*} event
  */
-async function handleUpdate(context, eventData) {
+async function handleUpdate(context, event) {
+  const {
+    subject,
+    data: { taskId, settings }
+  } = event;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateUpdate(eventData));
-    const traderState = await getTraderById(eventData.taskId);
+    const traderState = await getTraderById(taskId);
     const newState = {
       RowKey: traderState.RowKey,
       PartitionKey: traderState.PartitionKey
     };
     // Если занят
     if (traderState.status === STATUS_BUSY) {
-      newState.updateRequested = eventData.settings;
+      newState.updateRequested = settings;
     } else {
-      newState.settings = { ...traderState.settings, ...eventData.settings };
+      newState.settings = { ...traderState.settings, ...settings };
     }
     await updateTraderState(newState);
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: TASKS_TRADER_UPDATED_EVENT,
       data: {
-        taskId: eventData.taskId
+        taskId
       }
     });
   } catch (error) {
@@ -186,7 +182,7 @@ async function handleUpdate(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            eventData
+            event
           }
         },
         "Failed to update trader"
@@ -196,10 +192,10 @@ async function handleUpdate(context, eventData) {
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: TASKS_TRADER_UPDATED_EVENT,
       data: {
-        taskId: eventData.taskId,
+        taskId,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,

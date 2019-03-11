@@ -79,7 +79,7 @@ class UserRobotRunner extends BaseRunner {
           candlebatcherSettings: userRobotState.candlebatcherSettings
         };
 
-        const result = await ExWatcherRunner.create(context, exwatcherParams);
+        const result = await ExWatcherRunner.start(context, exwatcherParams);
         userRobot.exwatcherId = result.taskId;
         userRobot.exwatcherStatus = result.status;
         await userRobot.save();

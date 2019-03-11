@@ -47,7 +47,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleStart({ eventSubject, ...eventData });
-          res.status(200).end();
+          res.status(200);
           break;
         }
         case TASKS_MARKETWATCHER_STOP_EVENT.eventType: {
@@ -66,7 +66,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleSubscribe({ eventSubject, ...eventData });
-          res.status(200).end();
+          res.status(200);
           break;
         }
         case TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.eventType: {
@@ -76,7 +76,7 @@ function eventHandler(req, res) {
             )}`
           );
           handleUnsubscribe({ eventSubject, ...eventData });
-          res.status(200).end();
+          res.status(200);
           break;
         }
         case SUB_VALIDATION_EVENT.eventType: {
@@ -96,12 +96,12 @@ function eventHandler(req, res) {
               eventGridEvent.topic
             }`
           );
-          res.status(200).end();
+          res.status(200);
           break;
         }
         default: {
           Log.error(`Unknown Event Type: ${eventGridEvent.eventType}`);
-          res.status(200).end();
+          res.status(200);
         }
       }
     });
