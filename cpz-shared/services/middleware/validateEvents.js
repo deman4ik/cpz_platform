@@ -7,7 +7,7 @@ import Log from "../../log";
  * if events is not valid call log.warn
  *
  * @function
- * @param {Object} events - EventGrid Events
+ * @param {Object} event - EventGrid Events
  * @param {Object} schema - event schema
  * @return {Promise} Array of valid events
  * */

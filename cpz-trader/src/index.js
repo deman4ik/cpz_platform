@@ -3,6 +3,7 @@ import Log from "cpzLog";
 import { checkEnvVars } from "cpzUtils/environment";
 import traderEnv from "cpzEnv/trader";
 import {
+  BASE_EVENT,
   CANDLES_NEWCANDLE_EVENT,
   SIGNALS_NEWSIGNAL_EVENT,
   TASKS_TRADER_START_EVENT,
@@ -135,18 +136,33 @@ class TraderService extends BaseService {
         const { eventType } = inValidateEvent;
         super
           // Validate events by target schema
-          .validateEvents(inValidateEvent, eventType.dataSchema)
+          .validateEvents(inValidateEvent, BASE_EVENT.dataSchema)
           .then(async event => {
             // Run handler base on eventType
             switch (eventType) {
               case TASKS_TRADER_START_EVENT.eventType:
-                await handleStart(context, event);
+                super
+                  .validateEvents(
+                    event.data,
+                    TASKS_TRADER_START_EVENT.dataSchema
+                  )
+                  .then(startEvent => handleStart(context, startEvent));
                 break;
               case TASKS_TRADER_UPDATE_EVENT.eventType:
-                await handleUpdate(context, event);
+                super
+                  .validateEvents(
+                    event.data,
+                    TASKS_TRADER_UPDATE_EVENT.dataSchema
+                  )
+                  .then(updateEvent => handleUpdate(context, updateEvent));
                 break;
               case TASKS_TRADER_STOP_EVENT.eventType:
-                await handleStop(context, event);
+                super
+                  .validateEvents(
+                    event.data,
+                    TASKS_TRADER_STOP_EVENT.dataSchema
+                  )
+                  .then(stopEvent => handleStop(context, stopEvent));
                 break;
               default:
                 Log.info("No tasks events");
