@@ -1,7 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/service.js",
-  "entryPoint": "tickEvent",
+  "scriptFile": "../index.js",
+  "entryPoint": "tickEvents",
   "bindings": [
     {
       "authLevel": "anonymous",
@@ -9,9 +9,7 @@
       "direction": "in",
       "name": "req",
       "route": "tickEvents",
-      "methods": [
-        "post"
-      ]
+      "methods": ["post"]
     },
     {
       "type": "http",

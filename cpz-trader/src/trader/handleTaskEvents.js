@@ -19,14 +19,12 @@ import Trader from "./trader";
  * @param {*} context
  * @param {*} event
  */
-async function handleStart(context, event) {
-  const {
-    subject,
-    data: { taskId }
-  } = event;
+async function handleStart(context, eventData) {
+  context.log(eventData);
+  const { subject, taskId } = eventData;
   try {
     // Инициализируем класс проторговщика
-    const trader = new Trader(context, event.data);
+    const trader = new Trader(context, eventData);
     // Сохраняем состояние
     await trader.end(STATUS_STARTED);
     // Публикуем событие - успех
@@ -45,7 +43,7 @@ async function handleStart(context, event) {
           name: "TraderError",
           cause: error,
           info: {
-            event
+            eventData
           }
         },
         "Failed to start trader"
@@ -73,13 +71,10 @@ async function handleStart(context, event) {
  * Остановка проторговщика
  *
  * @param {*} context
- * @param {*} event
+ * @param {*} eventData
  */
-async function handleStop(context, event) {
-  const {
-    subject,
-    data: { taskId }
-  } = event;
+async function handleStop(context, eventData) {
+  const { subject, taskId } = eventData;
   try {
     const traderState = await getTraderById(taskId);
 
@@ -118,7 +113,7 @@ async function handleStop(context, event) {
           name: "TraderError",
           cause: error,
           info: {
-            event
+            eventData
           }
         },
         "Failed to stop trader"
@@ -128,7 +123,7 @@ async function handleStop(context, event) {
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
       service: TRADER_SERVICE,
-      subject,
+      subjcet: subject,
       eventType: TASKS_TRADER_STOPPED_EVENT,
       data: {
         taskId,
@@ -145,13 +140,10 @@ async function handleStop(context, event) {
  * Обновление параметров проторговщика
  *
  * @param {*} context
- * @param {*} event
+ * @param {*} eventData
  */
-async function handleUpdate(context, event) {
-  const {
-    subject,
-    data: { taskId, settings }
-  } = event;
+async function handleUpdate(context, eventData) {
+  const { subject, taskId, settings } = eventData;
   try {
     const traderState = await getTraderById(taskId);
     const newState = {
@@ -182,7 +174,7 @@ async function handleUpdate(context, event) {
           name: "TraderError",
           cause: error,
           info: {
-            event
+            eventData
           }
         },
         "Failed to update trader"

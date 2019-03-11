@@ -63,7 +63,7 @@ class Trader {
     /* Текущий контекст выполнения */
     this._context = context;
     /* Тема события */
-    this._eventSubject = state.eventSubject;
+    this._eventSubject = state.eventSubject || state.subject;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
     /* Идентификатор робота */
@@ -161,7 +161,7 @@ class Trader {
   }
 
   logInfo(...args) {
-    Log.error(`Trader ${this._eventSubject}:`, ...args);
+    Log.info(`Trader ${this._eventSubject}:`, ...args);
   }
 
   logError(...args) {

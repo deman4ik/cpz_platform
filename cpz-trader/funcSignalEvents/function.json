@@ -1,6 +1,6 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/service.js",
+  "scriptFile": "../index.js",
   "entryPoint": "signalEvents",
   "bindings": [
     {
@@ -9,9 +9,7 @@
       "direction": "in",
       "name": "req",
       "route": "signalEvents",
-      "methods": [
-        "post"
-      ]
+      "methods": ["post"]
     },
     {
       "type": "http",

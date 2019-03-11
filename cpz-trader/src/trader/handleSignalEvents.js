@@ -137,13 +137,18 @@ async function handlePendingSignals({ traderId }) {
  * Обработка нового сигнала
  *
  * @param {*} context
- * @param {*} signalEvent
+ * @param {*} eventData
  */
-async function handleSignal(context, signalEvent) {
+async function handleSignal(context, eventData) {
   const {
     subject,
-    data: { exchange, asset, currency, timeframe, robotId, signalId }
-  } = signalEvent;
+    exchange,
+    asset,
+    currency,
+    timeframe,
+    robotId,
+    signalId
+  } = eventData;
   try {
     const traders = await getActiveTradersBySlug(
       createTraderSlug({
@@ -166,7 +171,7 @@ async function handleSignal(context, signalEvent) {
     const traderExecutionResults = await Promise.all(
       startedTraders.map(async state => {
         try {
-          await execute(context, state, signalEvent.data);
+          await execute(context, state, eventData);
         } catch (error) {
           const errorOutput = createErrorOutput(error);
           return {
@@ -188,7 +193,7 @@ async function handleSignal(context, signalEvent) {
     const traderBusyQueueResults = await Promise.all(
       busyTraders.map(async state => {
         const newPendingSignal = {
-          ...signalEvent.data,
+          ...eventData,
           taskId: state.taskId,
           PartitionKey: state.taskId,
           RowKey: state.signalId
@@ -231,7 +236,7 @@ async function handleSignal(context, signalEvent) {
     const traderConcurrentQueueResults = await Promise.all(
       concurrentTraders.map(async state => {
         const newPendingSignal = {
-          ...signalEvent.data,
+          ...eventData,
           taskId: state.taskId,
           PartitionKey: state.taskId,
           RowKey: state.signalId
@@ -285,7 +290,7 @@ async function handleSignal(context, signalEvent) {
           name: "TraderError",
           cause: error,
           info: {
-            signalEvent
+            eventData
           }
         },
         "Failed to handle signal"

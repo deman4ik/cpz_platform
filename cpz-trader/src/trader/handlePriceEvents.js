@@ -19,13 +19,13 @@ import Trader from "./trader";
  * Обработка текущей цены
  *
  * @param {*} context
- * @param {*} event
+ * @param {*} eventData
  */
-async function handlePrice(context, event) {
+async function handlePrice(context, eventData) {
   const {
     subject,
-    data: { exchange, asset, currency, price, timestamp }
-  } = event;
+    currentPrice: { exchange, asset, currency, price, timestamp }
+  } = eventData;
   try {
     Log.debug("handlesPrice()", price);
     const positionsState = await getActivePositionsBySlug(
@@ -120,7 +120,7 @@ async function handlePrice(context, event) {
           name: "TraderError",
           cause: error,
           info: {
-            event
+            eventData
           }
         },
         "Failed to handle current price"
@@ -133,7 +133,7 @@ async function handlePrice(context, event) {
       subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        event,
+        eventData,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -144,11 +144,17 @@ async function handlePrice(context, event) {
   }
 }
 
-async function handleTick(context, tickEvent) {
+async function handleTick(context, eventData) {
   const {
     subject,
-    data: { exchange, asset, currency, time, timestamp, price, tradeId }
-  } = tickEvent;
+    exchange,
+    asset,
+    currency,
+    time,
+    timestamp,
+    price,
+    tradeId
+  } = eventData;
   try {
     const currentPrice = {
       exchange,
@@ -183,7 +189,7 @@ async function handleTick(context, tickEvent) {
       subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        tickEvent,
+        eventData,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -194,11 +200,18 @@ async function handleTick(context, tickEvent) {
   }
 }
 
-async function handleCandle(context, candleEvent) {
+async function handleCandle(context, eventData) {
   const {
     subject,
-    data: { id, type, exchange, asset, currency, time, timestamp, price }
-  } = candleEvent;
+    id,
+    type,
+    exchange,
+    asset,
+    currency,
+    time,
+    timestamp,
+    price
+  } = eventData;
   try {
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
     if (type === CANDLE_PREVIOUS) return;
@@ -210,7 +223,7 @@ async function handleCandle(context, candleEvent) {
       timestamp,
       price
     };
-    await handlePrice({
+    await handlePrice(context, {
       subject,
       currentPrice
     });
@@ -235,7 +248,7 @@ async function handleCandle(context, candleEvent) {
       subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        candleEvent,
+        eventData,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,

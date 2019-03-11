@@ -1,6 +1,6 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/service.js",
+  "scriptFile": "../index.js",
   "entryPoint": "timerEvent",
   "bindings": [
     {

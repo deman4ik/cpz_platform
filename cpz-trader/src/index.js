@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import { TRADER_SERVICE } from "cpzServices";
 import Log from "cpzLog";
 import { checkEnvVars } from "cpzUtils/environment";
@@ -25,19 +26,15 @@ import {
 class TraderService extends BaseService {
   constructor() {
     super();
-    console.log("constructor start");
     this.init();
-    console.log("constructor end");
   }
 
   init() {
-    console.log("init start");
     checkEnvVars(traderEnv.variables);
     Log.config({
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: TRADER_SERVICE
     });
-    console.log("init end");
   }
 
   /**
@@ -47,32 +44,29 @@ class TraderService extends BaseService {
    * @param {Object} context - context of Azure Function
    * @param {Object} req - HTTP trigger with Event Data
    */
-  candleEvents(context, req) {
-    Log.addContext(context);
-    super
+  async candleEvents(context, req) {
+    try {
+      Log.addContext(context);
       // Checking that request is authorized
-      .checkAuth(context, req)
+      await super.checkAuth(context, req);
       // Handling event by target type
-      .then(request =>
-        super.handlingEventsByTypes(context, request, [
-          CANDLES_NEWCANDLE_EVENT.eventType
-        ])
-      )
-      // Validate event by target schema
-      .then(event =>
-        super.validateEvents(event, CANDLES_NEWCANDLE_EVENT.dataSchema)
-      )
-      // Handling candle
-      .then(candleEvent => handleCandle(context, candleEvent))
-      // Calling context.done for finalize function
-      .then(() => {
+      const event = await super.handlingEventsByTypes(context, req, [
+        CANDLES_NEWCANDLE_EVENT.eventType
+      ]);
+      if (event) {
+        const { subject, data } = event;
+        // Validate event by target schema
+        await super.validateEvents(event, CANDLES_NEWCANDLE_EVENT.dataSchema);
+        // Handling candle
+        await handleCandle(context, { subject, ...data });
+        // Calling context.done for finalize function
         Log.request(context.req, context.res);
         context.done();
-      })
-      .catch(error => {
-        Log.error(error);
-        context.done();
-      });
+      }
+    } catch (error) {
+      Log.error(error);
+      context.done();
+    }
   }
 
   /**
@@ -82,32 +76,29 @@ class TraderService extends BaseService {
    * @param {Object} context - context of Azure Function
    * @param {Object} req - HTTP trigger with Event Data
    */
-  signalEvents(context, req) {
-    Log.addContext(context);
-    super
+  async signalEvents(context, req) {
+    try {
+      Log.addContext(context);
       // Checking that request is authorized
-      .checkAuth(context, req)
+      await super.checkAuth(context, req);
       // Handling event by target type
-      .then(request =>
-        super.handlingEventsByTypes(context, request, [
-          SIGNALS_NEWSIGNAL_EVENT.eventType
-        ])
-      )
+      const event = await super.handlingEventsByTypes(context, req, [
+        SIGNALS_NEWSIGNAL_EVENT.eventType
+      ]);
       // Validate event by target schema
-      .then(event =>
-        super.validateEvents(event, SIGNALS_NEWSIGNAL_EVENT.dataSchema)
-      )
-      // Handling signal
-      .then(signalEvent => handleSignal(context, signalEvent))
-      // Calling context.done for finalize function
-      .then(() => {
+      if (event) {
+        const { subject, data } = event;
+        await super.validateEvents(data, SIGNALS_NEWSIGNAL_EVENT.dataSchema);
+        // Handling signal
+        await handleSignal(context, { subject, ...data });
+        // Calling context.done for finalize function
         Log.request(context.req, context.res);
         context.done();
-      })
-      .catch(error => {
-        Log.error(error);
-        context.done();
-      });
+      }
+    } catch (error) {
+      Log.error(error);
+      context.done();
+    }
   }
 
   /**
@@ -118,66 +109,64 @@ class TraderService extends BaseService {
    * @param {Object} context - context of Azure Function
    * @param {Object} req - HTTP trigger with Event Data
    */
-  tasksEvent(context, req) {
-    Log.addContext(context);
-    super
+  async taskEvents(context, req) {
+    try {
+      Log.addContext(context);
       // Checking that request is authorized
-      .checkAuth(context, req)
+      await super.checkAuth(context, req);
       // Handling events by target type
-      .then(request =>
-        super.handlingEventsByTypes(context, request, [
-          TASKS_TRADER_START_EVENT.eventType,
-          TASKS_TRADER_STOP_EVENT.eventType,
-          TASKS_TRADER_UPDATE_EVENT.eventType
-        ])
-      )
-      // TODO Combine Task Event in one Event with prop actions: "start/stop/update"
-      .then(inValidateEvent => {
-        const { eventType } = inValidateEvent;
-        super
-          // Validate events by target schema
-          .validateEvents(inValidateEvent, BASE_EVENT.dataSchema)
-          .then(async event => {
-            // Run handler base on eventType
-            switch (eventType) {
-              case TASKS_TRADER_START_EVENT.eventType:
-                super
-                  .validateEvents(
-                    event.data,
-                    TASKS_TRADER_START_EVENT.dataSchema
-                  )
-                  .then(startEvent => handleStart(context, startEvent));
-                break;
-              case TASKS_TRADER_UPDATE_EVENT.eventType:
-                super
-                  .validateEvents(
-                    event.data,
-                    TASKS_TRADER_UPDATE_EVENT.dataSchema
-                  )
-                  .then(updateEvent => handleUpdate(context, updateEvent));
-                break;
-              case TASKS_TRADER_STOP_EVENT.eventType:
-                super
-                  .validateEvents(
-                    event.data,
-                    TASKS_TRADER_STOP_EVENT.dataSchema
-                  )
-                  .then(stopEvent => handleStop(context, stopEvent));
-                break;
-              default:
-                Log.info("No tasks events");
-            }
-          });
-      })
-      // Calling context.done for finalize function
-      .then(() => {
+      const event = await super.handlingEventsByTypes(context, req, [
+        TASKS_TRADER_START_EVENT.eventType,
+        TASKS_TRADER_STOP_EVENT.eventType,
+        TASKS_TRADER_UPDATE_EVENT.eventType
+      ]);
+
+      if (event) {
+        // TODO Combine Task Event in one Event with prop actions: "start/stop/update"
+        const { eventType, subject, data } = event;
+        // Validate events by target schema
+        await super.validateEvents(event, BASE_EVENT.dataSchema);
+        // Run handler base on eventType
+        switch (eventType) {
+          case TASKS_TRADER_START_EVENT.eventType:
+            await super.validateEvents(
+              data,
+              TASKS_TRADER_START_EVENT.dataSchema
+            );
+            await handleStart(context, {
+              subject,
+              ...data
+            });
+
+            break;
+          case TASKS_TRADER_UPDATE_EVENT.eventType:
+            await super.validateEvents(
+              data,
+              TASKS_TRADER_UPDATE_EVENT.dataSchema
+            );
+            await handleUpdate(context, {
+              subject,
+              ...data
+            });
+            break;
+          case TASKS_TRADER_STOP_EVENT.eventType:
+            await super.validateEvents(
+              data,
+              TASKS_TRADER_STOP_EVENT.dataSchema
+            );
+            await handleStop(context, { subject, ...data });
+            break;
+          default:
+            Log.warn("No tasks events");
+        }
         Log.request(context.req, context.res);
+        // Calling context.done for finalize function
         context.done();
-      })
-      .catch(error => {
-        Log.error(error);
-        context.done();
-      });
+      }
+    } catch (error) {
+      Log.error(error);
+      context.done();
+    }
   }
 
   /**
@@ -187,50 +176,50 @@ class TraderService extends BaseService {
    * @param {Object} context - context of Azure Function
    * @param {Object} req - HTTP trigger with Event Data
    */
-  tickEvent(context, req) {
-    Log.addContext(context);
-    super
+  async tickEvents(context, req) {
+    try {
+      Log.addContext(context);
       // Checking that request is authorized
-      .checkAuth(context, req)
+      await super.checkAuth(context, req);
       // Handling events by target type
-      .then(request =>
-        super.handlingEventsByTypes(context, request, [
-          TICKS_NEWTICK_EVENT.eventType
-        ])
-      )
-      // Validate event by target schema
-      .then(event =>
-        super.validateEvents(event, TICKS_NEWTICK_EVENT.dataSchema)
-      )
-      // Handling ticks
-      .then(tickEvent => handleTick(context, tickEvent))
-      // Calling context.done for finalize function
-      .then(() => {
+      const event = await super.handlingEventsByTypes(context, req, [
+        TICKS_NEWTICK_EVENT.eventType
+      ]);
+
+      if (event) {
+        const { subject, data } = event;
+        // Validate event by target schema
+        await super.validateEvents(data, TICKS_NEWTICK_EVENT.dataSchema);
+        // Handling ticks
+        await handleTick(context, { subject, ...data });
+        // Calling context.done for finalize function
         Log.request(context.req, context.res);
         context.done();
-      })
-      .catch(error => {
-        Log.error(error);
-        context.done();
-      });
+      }
+    } catch (error) {
+      Log.error(error);
+      context.done();
+    }
   }
 
-  timerEvent(context, timer) {
-    Log.addContext(context);
-    const timeStamp = new Date().toISOString();
+  async timerEvent(context, timer) {
+    try {
+      Log.addContext(context);
+      const timeStamp = new Date().toISOString();
 
-    if (timer.isPastDue) {
-      Log.warn("Timer trigger is running late!");
+      if (timer.isPastDue) {
+        Log.warn("Timer trigger is running late!");
+      }
+      Log.debug("Timer trigger function ran!", timeStamp);
+      await positionsTimer(context);
+      await tradersTimer(context);
+      context.done();
+    } catch (error) {
+      Log.error(error);
+      context.done();
     }
-    Log.debug("Timer trigger function ran!", timeStamp);
-    handleTimers(context);
     // TODO: Log.clearContext();
   }
-}
-
-async function handleTimers(context) {
-  await positionsTimer(context);
-  await tradersTimer(context);
 }
 
 const service = new TraderService();
