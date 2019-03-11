@@ -1,32 +1,28 @@
 import VError from "verror";
 import {
+  ERROR_TOPIC,
   ERROR_TRADER_EVENT,
-  SIGNALS_NEWSIGNAL_EVENT,
   SIGNALS_HANDLED_EVENT,
   SIGNALS_TOPIC,
-  TRADES_TOPIC,
-  ERROR_TOPIC
+  TRADES_TOPIC
 } from "cpzEventTypes";
 import {
-  STATUS_STARTED,
+  createTraderSlug,
   STATUS_BUSY,
   STATUS_ERROR,
-  createTraderSlug
+  STATUS_STARTED
 } from "cpzState";
 import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
 import publishEvents from "cpzEvents";
 import { TRADER_SERVICE } from "cpzServices";
 import { createErrorOutput } from "cpzUtils/error";
 import {
-  savePendingSignal,
+  deletePendingSignal,
   getPendingSignalsByTraderId,
-  deletePendingSignal
+  savePendingSignal
 } from "cpzStorage/signals";
 import { getActiveTradersBySlug, getTraderById } from "cpzStorage/traders";
 import Trader from "./trader";
-
-const validateNewCandle = createValidator(SIGNALS_NEWSIGNAL_EVENT.dataSchema);
 
 /**
  * Обработка сигнала проторговщиком
@@ -65,7 +61,7 @@ async function execute(context, state, signal, child = false) {
     // Если это основной вызов
     if (!child) {
       // Проверяем ожидающие обработку свечи
-      await handlePendingSignals(context, {
+      await handlePendingSignals({
         traderId: state.RowKey
       });
     }
@@ -105,7 +101,7 @@ async function execute(context, state, signal, child = false) {
  *
  * @param {*} taskId
  */
-async function handlePendingSignals(context, { traderId }) {
+async function handlePendingSignals({ traderId }) {
   try {
     // Считываем не обработанные сигналы
     const pendingSignals = getPendingSignalsByTraderId(traderId);
@@ -116,7 +112,7 @@ async function handlePendingSignals(context, { traderId }) {
         // Считываем текущее состояние проторговщика
         const traderState = await getTraderById(traderId);
         // Начинаем обработку
-        await execute(context, traderState, pendingSignal, true);
+        await execute(traderState, pendingSignal, true);
         // Удаляем свечу из очереди
         await deletePendingSignal(pendingSignal);
         /*  no-await-in-loop */
@@ -141,21 +137,21 @@ async function handlePendingSignals(context, { traderId }) {
  * Обработка нового сигнала
  *
  * @param {*} context
- * @param {*} signal
+ * @param {*} signalEvent
  */
-async function handleSignal(context, eventData) {
+async function handleSignal(context, signalEvent) {
+  const {
+    subject,
+    data: { exchange, asset, currency, timeframe, robotId, signalId }
+  } = signalEvent;
   try {
-    const { signal } = eventData;
-    // Валидация входных параметров
-    genErrorIfExist(validateNewCandle(signal));
-    // Ищем подходящих проторговщиков
     const traders = await getActiveTradersBySlug(
       createTraderSlug({
-        exchange: signal.exchange,
-        asset: signal.asset,
-        currency: signal.currency,
-        timeframe: signal.timeframe,
-        robotId: signal.robotId
+        exchange,
+        asset,
+        currency,
+        timeframe,
+        robotId
       })
     );
     // Фильтруем только доступные проторговщики
@@ -170,7 +166,7 @@ async function handleSignal(context, eventData) {
     const traderExecutionResults = await Promise.all(
       startedTraders.map(async state => {
         try {
-          await execute(context, state, signal);
+          await execute(context, state, signalEvent.data);
         } catch (error) {
           const errorOutput = createErrorOutput(error);
           return {
@@ -192,7 +188,7 @@ async function handleSignal(context, eventData) {
     const traderBusyQueueResults = await Promise.all(
       busyTraders.map(async state => {
         const newPendingSignal = {
-          ...signal,
+          ...signalEvent.data,
           taskId: state.taskId,
           PartitionKey: state.taskId,
           RowKey: state.signalId
@@ -235,7 +231,7 @@ async function handleSignal(context, eventData) {
     const traderConcurrentQueueResults = await Promise.all(
       concurrentTraders.map(async state => {
         const newPendingSignal = {
-          ...signal,
+          ...signalEvent.data,
           taskId: state.taskId,
           PartitionKey: state.taskId,
           RowKey: state.signalId
@@ -269,12 +265,10 @@ async function handleSignal(context, eventData) {
     // Публикуем событие - успех
     await publishEvents(SIGNALS_TOPIC, {
       service: TRADER_SERVICE,
-      subject: `${signal.exchange}/${signal.asset}/${signal.currency}/${
-        signal.timeframe
-      }`,
+      subject: `${exchange}/${asset}/${currency}/${timeframe}`,
       eventType: SIGNALS_HANDLED_EVENT,
       data: {
-        signalId: signal.signalId,
+        signalId,
         success: successTaders,
         error: errorTraders.map(result => ({
           taskId: result.taskId,
@@ -291,7 +285,7 @@ async function handleSignal(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            eventData
+            signalEvent
           }
         },
         "Failed to handle signal"
@@ -301,10 +295,10 @@ async function handleSignal(context, eventData) {
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        signalId: eventData.signal.signalId,
+        signalId,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,

@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcSignalEvents.js",
+  "scriptFile": "../dist/service.js",
+  "entryPoint": "signalEvents",
   "bindings": [
     {
       "authLevel": "anonymous",

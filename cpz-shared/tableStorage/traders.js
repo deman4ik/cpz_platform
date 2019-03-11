@@ -149,7 +149,7 @@ const getActiveTradersWithStopRequested = async () => {
 /**
  * Save Trader state
  *
- * @param {TraderState} state
+ * @param {Object} state
  */
 const saveTraderState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_TRADERS_TABLE, state);
@@ -157,7 +157,7 @@ const saveTraderState = async state =>
 /**
  * Update Trader state
  *
- * @param {TraderState} state
+ * @param {Object} state
  */
 const updateTraderState = async state =>
   tableStorage.mergeEntity(STORAGE_TRADERS_TABLE, state);
