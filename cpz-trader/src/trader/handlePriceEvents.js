@@ -1,18 +1,11 @@
 import VError from "verror";
 import { createErrorOutput } from "cpzUtils/error";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import { ERROR_TOPIC, ERROR_TRADER_EVENT, TRADES_TOPIC } from "cpzEventTypes";
 import {
-  TICKS_NEWTICK_EVENT,
-  CANDLES_NEWCANDLE_EVENT,
-  ERROR_TRADER_EVENT,
-  TRADES_TOPIC,
-  ERROR_TOPIC
-} from "cpzEventTypes";
-import {
+  CANDLE_PREVIOUS,
   createPositionSlug,
-  STATUS_STARTED,
   STATUS_BUSY,
-  CANDLE_PREVIOUS
+  STATUS_STARTED
 } from "cpzState";
 import Log from "cpzLog";
 import publishEvents from "cpzEvents";
@@ -22,23 +15,24 @@ import { getActivePositionsBySlug } from "cpzStorage/positions";
 import Position from "./position";
 import Trader from "./trader";
 
-const validateNewTick = createValidator(TICKS_NEWTICK_EVENT.dataSchema);
-const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
 /**
  * Обработка текущей цены
  *
  * @param {*} context
- * @param {*} price
+ * @param {*} event
  */
-async function handlePrice(context, eventData) {
+async function handlePrice(context, event) {
+  const {
+    subject,
+    data: { exchange, asset, currency, price, timestamp }
+  } = event;
   try {
-    const { currentPrice } = eventData;
-    Log.debug("handlesPrice()", currentPrice.price);
+    Log.debug("handlesPrice()", price);
     const positionsState = await getActivePositionsBySlug(
       createPositionSlug({
-        exchange: currentPrice.exchange,
-        asset: currentPrice.asset,
-        currency: currentPrice.currency
+        exchange,
+        asset,
+        currency
       })
     );
 
@@ -46,7 +40,7 @@ async function handlePrice(context, eventData) {
       positionsState.map(async state => {
         try {
           const position = new Position(state);
-          const requiredOrders = position.getRequiredOrders(currentPrice.price);
+          const requiredOrders = position.getRequiredOrders(price);
 
           if (requiredOrders.length > 0) {
             const traderState = await getTraderById(position.traderId);
@@ -60,8 +54,8 @@ async function handlePrice(context, eventData) {
                 trader.setUpdate();
               }
               trader.handlePrice({
-                price: currentPrice.price,
-                timestamp: currentPrice.timestamp
+                price,
+                timestamp
               });
               await trader.save();
               try {
@@ -75,7 +69,7 @@ async function handlePrice(context, eventData) {
                 await trader.end(STATUS_STARTED);
               } catch (error) {
                 Log.error(error);
-                trader.end(STATUS_STARTED, error);
+                await trader.end(STATUS_STARTED, error);
               }
             }
           }
@@ -126,7 +120,7 @@ async function handlePrice(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            eventData
+            event
           }
         },
         "Failed to handle current price"
@@ -136,10 +130,10 @@ async function handlePrice(context, eventData) {
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        eventData,
+        event,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -150,21 +144,22 @@ async function handlePrice(context, eventData) {
   }
 }
 
-async function handleTick(context, eventData) {
+async function handleTick(context, tickEvent) {
+  const {
+    subject,
+    data: { exchange, asset, currency, time, timestamp, price, tradeId }
+  } = tickEvent;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateNewTick(eventData.tick));
-    const { eventSubject, tick } = eventData;
     const currentPrice = {
-      exchange: tick.exchange,
-      asset: tick.asset,
-      currency: tick.currency,
-      time: tick.time,
-      timestamp: tick.timestamp,
-      price: tick.price
+      exchange,
+      asset,
+      currency,
+      time,
+      timestamp,
+      price
     };
     await handlePrice(context, {
-      eventSubject,
+      subject,
       currentPrice
     });
   } catch (error) {
@@ -174,21 +169,21 @@ async function handleTick(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            tradeId: eventData.tradeId
+            tradeId
           }
         },
         'Failed to handle new tick "%s"',
-        eventData.tradeId
+        tradeId
       )
     );
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        eventData,
+        tickEvent,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -199,23 +194,24 @@ async function handleTick(context, eventData) {
   }
 }
 
-async function handleCandle(context, eventData) {
+async function handleCandle(context, candleEvent) {
+  const {
+    subject,
+    data: { id, type, exchange, asset, currency, time, timestamp, price }
+  } = candleEvent;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateNewCandle(eventData.candle));
-    const { eventSubject, candle } = eventData;
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
-    if (candle.type === CANDLE_PREVIOUS) return;
+    if (type === CANDLE_PREVIOUS) return;
     const currentPrice = {
-      exchange: candle.exchange,
-      asset: candle.asset,
-      currency: candle.currency,
-      time: candle.time,
-      timestamp: candle.timestamp,
-      price: candle.close
+      exchange,
+      asset,
+      currency,
+      time,
+      timestamp,
+      price
     };
-    await handlePrice(context, {
-      eventSubject,
+    await handlePrice({
+      subject,
       currentPrice
     });
   } catch (error) {
@@ -225,21 +221,21 @@ async function handleCandle(context, eventData) {
           name: "TraderError",
           cause: error,
           info: {
-            candleId: eventData.id
+            candleId: id
           }
         },
         'Failed to handle new candle "%s"',
-        eventData.id
+        id
       )
     );
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
       service: TRADER_SERVICE,
-      subject: eventData.eventSubject,
+      subject,
       eventType: ERROR_TRADER_EVENT,
       data: {
-        eventData,
+        candleEvent,
         error: {
           name: errorOutput.name,
           message: errorOutput.message,
@@ -249,4 +245,5 @@ async function handleCandle(context, eventData) {
     });
   }
 }
+
 export { handleTick, handleCandle };

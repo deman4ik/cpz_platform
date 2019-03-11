@@ -18,7 +18,7 @@ tableStorage.createTableIfNotExists(STORAGE_POSITIONS_TABLE);
  * @param {string} input.slug
  * @param {string} input.traderId - Trader task id
  * @param {string} input.positionId - Position id
- * @returns {PositionState}
+ * @returns {Object} PositionState
  */
 const getPosition = async ({ slug, traderId, positionId }) => {
   try {
@@ -75,7 +75,7 @@ const getPosition = async ({ slug, traderId, positionId }) => {
  * Query active positions
  *
  * @param {string} slug - partition key
- * @returns {PositionState[]}
+ * @returns {Object []} Array of PositionState
  */
 async function getActivePositionsBySlug(slug) {
   try {
@@ -128,7 +128,7 @@ async function getActivePositionsBySlug(slug) {
  * @param {object} input
  * @param {string} input.slug - partition key
  * @param {string} input.traderId - trader task id
- * @returns {PositionState[]}
+ * @returns {Object[]} Array of PositionState
  */
 async function getActivePositionsBySlugAndTraderId({ slug, traderId }) {
   try {
@@ -222,7 +222,7 @@ async function getIdledOpenPositions() {
 /**
  * Save Position state
  *
- * @param {PositionState} state
+ * @param {Object} state
  */
 const savePositionState = async state =>
   tableStorage.insertOrMergeEntity(STORAGE_POSITIONS_TABLE, state);
@@ -230,9 +230,9 @@ const savePositionState = async state =>
 /**
  * Delete Position state
  *
- * @param {string} taskId
- * @param {string} input.RowKey
- * @param {string} input.PartitionKey
+ * @param {Object} taskId
+ * @param {string} taskId.RowKey
+ * @param {string} taskId.PartitionKey
  */
 const deletePositionState = async ({ RowKey, PartitionKey, metadata }) =>
   tableStorage.deleteEntity(STORAGE_POSITIONS_TABLE, {

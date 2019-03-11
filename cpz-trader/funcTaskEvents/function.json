@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcTaskEvents.js",
+  "scriptFile": "../dist/service.js",
+  "entryPoint": "taskEvents",
   "bindings": [
     {
       "authLevel": "anonymous",

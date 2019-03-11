@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcCandleEvents.js",
+  "scriptFile": "../dist/service.js",
+  "entryPoint": "candleEvents",
   "bindings": [
     {
       "authLevel": "anonymous",
