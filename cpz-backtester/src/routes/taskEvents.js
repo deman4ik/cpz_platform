@@ -21,26 +21,23 @@ Log.config({
  */
 
 function eventHandler(req, res) {
-  const events = req.body;
+  const { subject, data, eventType } = req.body;
   // Send 200 to EventGrid and run handler for each event
   res.status(200).end();
 
-  events.forEach(event => {
-    const { subject, data, eventType } = event;
-    if (eventType === TASKS_BACKTESTER_START_EVENT.eventType) {
-      Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
-      handleStart({
-        ...data,
-        subject
-      }).catch(e => Log.warn(e));
-    } else if (eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
-      Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
-      handleStop({
-        ...data,
-        subject
-      }).catch(e => Log.warn(e));
-    }
-  });
+  if (eventType === TASKS_BACKTESTER_START_EVENT.eventType) {
+    Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
+    handleStart({
+      ...data,
+      subject
+    }).catch(e => Log.warn(e));
+  } else if (eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
+    Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
+    handleStop({
+      ...data,
+      subject
+    }).catch(e => Log.warn(e));
+  }
 }
 
 export default eventHandler;
