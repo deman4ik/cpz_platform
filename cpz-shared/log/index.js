@@ -1,6 +1,7 @@
 import util from "util";
 import VError from "verror";
 import * as appInsights from "applicationinsights";
+import dayjs from "../utils/lib/dayjs";
 
 const SEVERITY_LEVEL = appInsights.Contracts.SeverityLevel;
 /**
@@ -28,6 +29,7 @@ class Log {
    */
   config({ key, serviceName }) {
     this._appInstightsKey = key;
+    if (serviceName) this._executionContext.ServiceName = serviceName;
     if (this._appInstightsKey) {
       appInsights
         .setup()
@@ -44,8 +46,6 @@ class Log {
         appInsights.defaultClient.context.tags[
           appInsights.defaultClient.context.keys.cloudRole
         ] = serviceName;
-
-        this._executionContext.ServiceName = serviceName;
       }
       appInsights.defaultClient.commonProperties = {
         ...this._executionContext
@@ -111,9 +111,9 @@ class Log {
    * @memberof Log
    */
   _createMessage(args, props) {
-    return `cpz-${this._executionContext.ServiceName} ${util.format(...args)}${
-      props ? ` ${JSON.stringify(props)}` : ""
-    } `;
+    return `[${dayjs.utc().toISOString()}] cpz-${
+      this._executionContext.ServiceName
+    } > ${util.format(...args)}${props ? ` ${JSON.stringify(props)}` : ""} `;
   }
 
   /**
