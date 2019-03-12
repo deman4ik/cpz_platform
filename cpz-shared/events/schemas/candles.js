@@ -1,9 +1,11 @@
-import { BASE_ERROR } from "../base";
+import { BASE_ERROR } from "./base";
+import {
+  CANDLES_NEWCANDLE_EVENT,
+  CANDLES_HANDLED_EVENT
+} from "../types/candles";
 
-const CANDLES_NEWCANDLE_EVENT = {
-  eventType: "CPZ.Candles.NewCandle",
-
-  dataSchema: {
+const CANDLES_EVENTS = {
+  [CANDLES_NEWCANDLE_EVENT]: {
     id: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "exchange" },
     asset: { description: "Base currency.", type: "currency" },
@@ -22,12 +24,8 @@ const CANDLES_NEWCANDLE_EVENT = {
     high: { description: "Candle Highest Price.", type: "number" },
     low: { description: "Trade Lowest Price.", type: "number" },
     volume: { description: "Candle Volume.", type: "number" }
-  }
-};
-const CANDLES_HANDLED_EVENT = {
-  eventType: "CPZ.Candles.Handled",
-
-  dataSchema: {
+  },
+  [CANDLES_HANDLED_EVENT]: {
     id: { description: "Uniq Candle Id.", type: "string", empty: false },
     service: {
       description: "Sevice name handeling event",
@@ -73,4 +71,4 @@ const CANDLES_HANDLED_EVENT = {
   }
 };
 
-export { CANDLES_HANDLED_EVENT, CANDLES_NEWCANDLE_EVENT };
+export default CANDLES_EVENTS;

@@ -19,8 +19,12 @@ export default (event, schema) => {
       genErrorIfExist(validator(event));
       resolve(event);
     } catch (e) {
-      Log.warn(`Invalid event format: ${event}`);
-      reject(new VError("Invalid event format"));
+      const error = new VError(
+        { name: "ValidationError", cause: e },
+        "Invalid event format"
+      );
+      Log.warn(error, "Invalid event format");
+      reject(error);
     }
   });
 };

@@ -1,0 +1,3 @@
+const TRADES_ORDER_EVENT = "CPZ.Trades.Order";
+const TRADES_POSITION_EVENT = "CPZ.Trades.Position";
+export { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT };

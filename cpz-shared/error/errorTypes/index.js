@@ -32,6 +32,8 @@ const RETRY_ERROR = "RetryError";
 
 const DB_ERROR = "DBError";
 
+const VALIDATION_ERROR = "ValidationError";
+
 export * from "./marketwatcher";
 export * from "./candlebatcher";
 export * from "./backtester";
@@ -63,5 +65,6 @@ export {
   UNKNOWN_ERROR,
   NETWOKR_ERROR,
   RETRY_ERROR,
-  DB_ERROR
+  DB_ERROR,
+  VALIDATION_ERROR
 };

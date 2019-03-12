@@ -35,7 +35,8 @@ const config = {
       cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
       cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
       cpzConnector: path.resolve(__dirname, "../cpz-shared/connector"),
-      cpzLog: path.resolve(__dirname, "../cpz-shared/log")
+      cpzLog: path.resolve(__dirname, "../cpz-shared/log"),
+      cpz: path.resolve(__dirname, "../cpz-shared")
     }
   },
   output: {

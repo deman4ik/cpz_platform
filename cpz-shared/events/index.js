@@ -2,38 +2,15 @@ import msRestAzure from "ms-rest-azure";
 import EventGrid from "azure-eventgrid";
 import url from "url";
 import { v4 as uuid } from "uuid";
-import VError from "verror";
-import { createErrorOutput } from "../utils/error";
+import ServiceError from "../error";
 import retry from "../utils/retry";
-import { createValidator, genErrorIfExist } from "../utils/validation";
+import Log from "../log";
+import ServiceValidator from "../validator";
 
 class EG {
   constructor() {
     this._clients = {};
     this._commonProps = {};
-    this._validateConfig = createValidator(EG.configValidationSchema);
-  }
-
-  static get configValidationSchema() {
-    return {
-      topics: {
-        description: "Event Grid client configuration",
-        type: "array",
-        items: {
-          type: "object",
-          props: {
-            name: { type: "string", empty: false },
-            endpoint: { type: "string", empty: false },
-            key: { type: "string", empty: false }
-          }
-        }
-      },
-      commonProps: {
-        description: "Common properties",
-        type: "object",
-        optional: true
-      }
-    };
   }
 
   static get baseEvent() {
@@ -63,7 +40,6 @@ class EG {
    * @memberof EventGrid
    */
   config(topics, commonProps) {
-    genErrorIfExist(this._validateConfig({ topics, commonProps }));
     topics.forEach(topic => {
       this._clients[topic.name] = {
         client: this._createClient(topic.key),
@@ -83,18 +59,13 @@ class EG {
 
   async publish(topic, eventData) {
     try {
-      // TODO: Validation
-      let events = [];
-      if (Array.isArray(eventData)) {
-        events = eventData.map(this._mergeEventData);
-      } else {
-        const newEvent = this._mergeEventData(eventData);
-        events.push(newEvent);
-      }
+      const newEvent = this._mergeEventData(eventData);
+      ServiceValidator.check(newEvent.eventType, newEvent.data);
+
       await retry(
         async () => {
           const { client, host } = this._clients[topic];
-          await client.publishEvents(host, events);
+          await client.publishEvents(host, [newEvent]);
         },
         {
           retries: 2,
@@ -103,9 +74,9 @@ class EG {
         }
       );
     } catch (error) {
-      const err = new VError(
+      const err = new ServiceError(
         {
-          name: "EventGridPublishError",
+          name: ServiceError.types.EVENTGRID_PUBLISH_ERROR,
           cause: error,
           info: {
             topic,
@@ -115,8 +86,7 @@ class EG {
         'Failed to publish event to topic "%s"',
         topic
       );
-      const errorOutput = createErrorOutput(err);
-      console.error(errorOutput);
+      Log.error(err);
       throw err;
     }
   }

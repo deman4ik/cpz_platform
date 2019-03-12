@@ -14,6 +14,14 @@ class BaseService {
   validateEvents(events, schema) {
     return validateEvents(events, schema);
   }
+
+  EGConfig(topics) {
+    return topics.map(topic => ({
+      name: topic,
+      endpoint: process.env[`EG_${topic.toUpperCase()}_ENDPOINT`],
+      key: process.env[`EG_${topic.toUpperCase()}_KEY`]
+    }));
+  }
 }
 
 export default BaseService;

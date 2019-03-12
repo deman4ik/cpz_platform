@@ -1,5 +1,5 @@
 import VError from "verror";
-import { ServiceError } from "../../utils/error";
+import ServiceError from "../../error";
 
 const { stringify: str } = JSON;
 

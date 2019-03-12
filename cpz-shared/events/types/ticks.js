@@ -1,0 +1,3 @@
+const TICKS_NEWTICK_EVENT = "CPZ.Ticks.NewTick";
+const TICKS_HANDLED_EVENT = "CPZ.Ticks.Handled";
+export { TICKS_NEWTICK_EVENT, TICKS_HANDLED_EVENT };

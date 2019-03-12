@@ -1,10 +1,12 @@
-import { BASE_ERROR } from "../base";
-import { TRADER_SETTINGS } from "../settings";
+import { BASE_ERROR } from "./base";
+import { TRADER_SETTINGS } from "./settings";
+import {
+  SIGNALS_NEWSIGNAL_EVENT,
+  SIGNALS_HANDLED_EVENT
+} from "../types/signals";
 
-const SIGNALS_NEWSIGNAL_EVENT = {
-  eventType: "CPZ.Signals.NewSignal",
-
-  dataSchema: {
+const SIGNALS_EVENTS = {
+  [SIGNALS_NEWSIGNAL_EVENT]: {
     signalId: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "exchange" },
     asset: { description: "Base currency.", type: "currency" },
@@ -78,12 +80,8 @@ const SIGNALS_NEWSIGNAL_EVENT = {
       },
       optional: true
     }
-  }
-};
-const SIGNALS_HANDLED_EVENT = {
-  eventType: "CPZ.Signals.Handled",
-
-  dataSchema: {
+  },
+  [SIGNALS_HANDLED_EVENT]: {
     signalId: { description: "Uniq Signal Id.", type: "string", empty: false },
     service: {
       description: "Sevice name handeling event",
@@ -129,4 +127,4 @@ const SIGNALS_HANDLED_EVENT = {
   }
 };
 
-export { SIGNALS_HANDLED_EVENT, SIGNALS_NEWSIGNAL_EVENT };
+export default SIGNALS_EVENTS;

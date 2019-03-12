@@ -1,8 +1,7 @@
 import "babel-polyfill";
-import { TRADER_SERVICE } from "cpzServices";
-import Log from "cpzLog";
-import { checkEnvVars } from "cpzUtils/environment";
-import traderEnv from "cpzEnv/trader";
+import Log from "cpz/log";
+import { checkEnvVars } from "cpz/utils/environment";
+import traderEnv from "cpz/config/environment/trader";
 import {
   BASE_EVENT,
   CANDLES_NEWCANDLE_EVENT,
@@ -11,8 +10,12 @@ import {
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATE_EVENT,
   TICKS_NEWTICK_EVENT
-} from "cpzConfig/events/types";
-import BaseService from "../../cpz-shared/services/baseService";
+} from "cpz/config/events/types";
+import BaseService from "cpz/services/baseService";
+import ServiceError from "cpz/error";
+import EventGrid from "cpz/events";
+import ServiceValidator from "cpz/validator";
+import ConnectorClient from "cpz/connector-client";
 import handleSignal from "./trader/handleSignalEvents";
 import { handleCandle, handleTick } from "./trader/handlePriceEvents";
 import positionsTimer from "./trader/positionsTimer";
@@ -22,18 +25,32 @@ import {
   handleStop,
   handleUpdate
 } from "./trader/handleTaskEvents";
+import config from "./config";
 
 class TraderService extends BaseService {
   constructor() {
     super();
+    this.config = config;
     this.init();
   }
 
   init() {
+    // Check environment variables
     checkEnvVars(traderEnv.variables);
+    // Configure Logger
     Log.config({
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-      serviceName: TRADER_SERVICE
+      serviceName: this.config.serviceName
+    });
+    // Configure Validator
+    ServiceValidator.add(this.config.events.schemas);
+    // Configure Event Grid Client
+    const EGConfig = super.EGConfig(this.config.events.topics);
+    EventGrid.config(EGConfig);
+    // Configure Connector Client
+    this.connector = new ConnectorClient({
+      endpoint: process.env.CONNECTOR_API_ENDPOINT,
+      key: process.env.CONNECTOR_API_KEY
     });
   }
 
@@ -56,6 +73,10 @@ class TraderService extends BaseService {
       if (event) {
         const { subject, data } = event;
         // Validate event by target schema
+        /* TODO: Use new ServiceValidator
+        const {CANDLES_NEWCANDLE_EVENT } = this.config.events.types;
+        this.validator.check(CANDLES_NEWCANDLE_EVENT, data)
+        */
         await super.validateEvents(event, CANDLES_NEWCANDLE_EVENT.dataSchema);
         // Handling candle
         await handleCandle(context, { subject, ...data });
@@ -65,8 +86,13 @@ class TraderService extends BaseService {
       }
     } catch (error) {
       Log.error(error);
+      /* TODO: error instanceOf ServiceError
+        const { ERROR_TOPIC } = this.config.events.topics;
+        await EventGrid.publish(ERROR_TOPIC,error.json);
+      */
       context.done();
     }
+    Log.clearContext();
   }
 
   /**
@@ -99,6 +125,7 @@ class TraderService extends BaseService {
       Log.error(error);
       context.done();
     }
+    Log.clearContext();
   }
 
   /**
@@ -167,6 +194,7 @@ class TraderService extends BaseService {
       Log.error(error);
       context.done();
     }
+    Log.clearContext();
   }
 
   /**
@@ -200,6 +228,7 @@ class TraderService extends BaseService {
       Log.error(error);
       context.done();
     }
+    Log.clearContext();
   }
 
   async timerEvent(context, timer) {
@@ -218,7 +247,7 @@ class TraderService extends BaseService {
       Log.error(error);
       context.done();
     }
-    // TODO: Log.clearContext();
+    Log.clearContext();
   }
 }
 
