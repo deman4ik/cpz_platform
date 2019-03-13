@@ -1,0 +1,4 @@
+const EVENTGRID_PUBLISH_ERROR = "EventGridPublishError";
+const EVENTGRID_CONFIG_ERROR = "EventGridConfigError";
+
+export { EVENTGRID_CONFIG_ERROR, EVENTGRID_PUBLISH_ERROR };

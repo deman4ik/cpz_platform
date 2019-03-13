@@ -2,8 +2,6 @@ const CRYPTOCOMPARE_STREAMING_ERROR = "CryptocompareStreamingError";
 
 const STORAGE_ENTITY_MUTATION_ERROR = "StorageEntityMutation";
 
-const EVENTGRID_PUBLISH_ERROR = "EventGridPublishError";
-
 const TABLE_STORAGE_ERROR = "TableStorageError";
 
 const CONNECTOR_API_ERROR = "ConnectorAPIError";
@@ -47,11 +45,11 @@ export * from "./trader";
 export * from "./robots";
 export * from "./tulip";
 export * from "./task";
+export * from "./eventgrid";
 
 export {
   STORAGE_ENTITY_MUTATION_ERROR,
   CRYPTOCOMPARE_STREAMING_ERROR,
-  EVENTGRID_PUBLISH_ERROR,
   IMPORT_CANDLES_ERROR,
   HANDLING_ORDER_ERROR,
   CONNECTOR_API_ERROR,
