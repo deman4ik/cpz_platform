@@ -1,0 +1,11 @@
+const TABLE_STORAGE_ENTITY_MUTATION_ERROR = "TableStorageEntityMutation";
+
+const TABLE_STORAGE_ERROR = "TableStorageError";
+
+const TABLE_STORAGE_CONFIG_ERROR = "TableStorageConfigError";
+
+export {
+  TABLE_STORAGE_ENTITY_MUTATION_ERROR,
+  TABLE_STORAGE_CONFIG_ERROR,
+  TABLE_STORAGE_ERROR
+};

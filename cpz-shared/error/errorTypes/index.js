@@ -1,15 +1,3 @@
-const CRYPTOCOMPARE_STREAMING_ERROR = "CryptocompareStreamingError";
-
-const STORAGE_ENTITY_MUTATION_ERROR = "StorageEntityMutation";
-
-const TABLE_STORAGE_ERROR = "TableStorageError";
-
-const CONNECTOR_API_ERROR = "ConnectorAPIError";
-
-const LOAD_API_KEYS_ERROR = "LoadAPIKeysError";
-
-const DELETE_STATE_ERROR = "DeleteStateError";
-
 const EXECUTE_ORDER_ERROR = "ExecutingOrder";
 
 const HANDLING_ORDER_ERROR = "HandlingOrder";
@@ -46,17 +34,12 @@ export * from "./robots";
 export * from "./tulip";
 export * from "./task";
 export * from "./eventgrid";
+export * from "./tableStorage";
 
 export {
-  STORAGE_ENTITY_MUTATION_ERROR,
-  CRYPTOCOMPARE_STREAMING_ERROR,
   IMPORT_CANDLES_ERROR,
   HANDLING_ORDER_ERROR,
-  CONNECTOR_API_ERROR,
-  LOAD_API_KEYS_ERROR,
   EXECUTE_ORDER_ERROR,
-  TABLE_STORAGE_ERROR,
-  DELETE_STATE_ERROR,
   USER_ROBOT_ERROR,
   KEY_VAULT_ERROR,
   NOT_IMPL_ERROR,

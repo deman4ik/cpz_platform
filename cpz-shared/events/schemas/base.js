@@ -1,4 +1,4 @@
-import { BASE_EVENT, EG_CONFIG } from "../types/base";
+import { BASE_EVENT } from "../types/base";
 
 const BASE_EVENTS = {
   [BASE_EVENT]: {

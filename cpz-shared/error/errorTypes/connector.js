@@ -1,3 +1,5 @@
 const CONNECTOR_ERROR = "ConnectorError";
+const CONNECTOR_API_ERROR = "ConnectorAPIError";
+const LOAD_API_KEYS_ERROR = "LoadAPIKeysError";
 
-export { CONNECTOR_ERROR };
+export { CONNECTOR_ERROR, CONNECTOR_API_ERROR, LOAD_API_KEYS_ERROR };
