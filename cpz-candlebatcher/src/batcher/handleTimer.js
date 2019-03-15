@@ -1,11 +1,18 @@
 import VError from "verror";
-import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
-import { CANDLEBATCHER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
-import Log from "cpzLog";
-import publishEvents from "cpzEvents";
-import { getStartedCandlebatchers } from "cpzStorage/candlebatchers";
+import { createErrorOutput } from "cpz/utils/error";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { getStartedCandlebatchers } from "cpz/tableStorage/candlebatchers";
 import executeCandlebatcher from "./execute";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    topics: { ERROR_TOPIC },
+    types: { ERROR_CANDLEBATCHER_EVENT }
+  }
+} = config;
 
 async function handleTimer(context) {
   try {
@@ -30,7 +37,7 @@ async function handleTimer(context) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: "CandlebatcherTimerError",
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {

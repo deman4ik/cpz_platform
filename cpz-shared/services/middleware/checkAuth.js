@@ -8,23 +8,20 @@ import Log from "../../log";
  * @function
  * @param {Object} context - context of Azure Functions
  * @param {Object} req - HTTP request
- * @return {Promise} Authorized request
  * */
 
 export default (context, req) => {
-  return new Promise(resolve => {
-    if (req.query["api-key"] !== process.env.API_KEY) {
-      context.res = {
-        status: 401,
-        body: "Invalid API Key",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      Log.warn(new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key"));
-      context.done();
-    } else {
-      resolve(req);
-    }
-  });
+  if (req.query["api-key"] !== process.env.API_KEY) {
+    context.res = {
+      status: 401,
+      body: "Invalid API Key",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+    Log.warn(new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key"));
+    Log.request(context.req, context.res);
+    Log.clearContext();
+    context.done();
+  }
 };

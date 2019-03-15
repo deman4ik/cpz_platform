@@ -1,11 +1,11 @@
 import "babel-polyfill";
-import Log from "cpzLog";
-import { IMPORTER_SERVICE } from "cpzServices";
+import Log from "cpz/log";
 import Importer from "./importer";
+import config from "../config";
 
 Log.config({
   key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: IMPORTER_SERVICE
+  serviceName: config.serviceName
 });
 
 process.on("message", async m => {

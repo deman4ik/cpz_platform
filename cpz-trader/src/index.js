@@ -1,20 +1,11 @@
 import "babel-polyfill";
 import Log from "cpz/log";
+import ServiceError from "cpz/error";
+import ServiceValidator from "cpz/validator";
 import { checkEnvVars } from "cpz/utils/environment";
 import traderEnv from "cpz/config/environment/trader";
-import {
-  BASE_EVENT,
-  CANDLES_NEWCANDLE_EVENT,
-  SIGNALS_NEWSIGNAL_EVENT,
-  TASKS_TRADER_START_EVENT,
-  TASKS_TRADER_STOP_EVENT,
-  TASKS_TRADER_UPDATE_EVENT,
-  TICKS_NEWTICK_EVENT
-} from "cpz/config/events/types";
 import BaseService from "cpz/services/baseService";
-import ServiceError from "cpz/error";
 import EventGrid from "cpz/events";
-import ServiceValidator from "cpz/validator";
 import ConnectorClient from "cpz/connector-client";
 import handleSignal from "./trader/handleSignalEvents";
 import { handleCandle, handleTick } from "./trader/handlePriceEvents";
@@ -62,37 +53,34 @@ class TraderService extends BaseService {
    * @param {Object} req - HTTP trigger with Event Data
    */
   async candleEvents(context, req) {
-    try {
-      Log.addContext(context);
-      // Checking that request is authorized
-      await super.checkAuth(context, req);
-      // Handling event by target type
-      const event = await super.handlingEventsByTypes(context, req, [
-        CANDLES_NEWCANDLE_EVENT.eventType
-      ]);
-      if (event) {
-        const { subject, data } = event;
+    Log.addContext(context);
+    // Checking that request is authorized
+    super.checkAuth(context, req);
+
+    const { CANDLES_NEWCANDLE_EVENT } = this.config.events.types;
+
+    // Handling event by target type
+    const event = super.handlingEventsByTypes(context, req, [
+      CANDLES_NEWCANDLE_EVENT
+    ]);
+    if (event) {
+      const { subject, data } = event;
+      try {
         // Validate event by target schema
-        /* TODO: Use new ServiceValidator
-        const {CANDLES_NEWCANDLE_EVENT } = this.config.events.types;
-        this.validator.check(CANDLES_NEWCANDLE_EVENT, data)
-        */
-        await super.validateEvents(event, CANDLES_NEWCANDLE_EVENT.dataSchema);
+        ServiceValidator.check(CANDLES_NEWCANDLE_EVENT, data);
         // Handling candle
         await handleCandle(context, { subject, ...data });
-        // Calling context.done for finalize function
-        Log.request(context.req, context.res);
-        context.done();
+      } catch (error) {
+        Log.error(error);
+        // TODO: error instanceOf ServiceError
+        // const { ERROR_TOPIC } = this.config.events.topics;
+        await EventGrid.publish("CPZ.Trader.Error", error.json);
       }
-    } catch (error) {
-      Log.error(error);
-      /* TODO: error instanceOf ServiceError
-        const { ERROR_TOPIC } = this.config.events.topics;
-        await EventGrid.publish(ERROR_TOPIC,error.json);
-      */
-      context.done();
     }
+    // Calling context.done for finalize function
+    Log.request(context.req, context.res);
     Log.clearContext();
+    context.done();
   }
 
   /**
@@ -103,29 +91,30 @@ class TraderService extends BaseService {
    * @param {Object} req - HTTP trigger with Event Data
    */
   async signalEvents(context, req) {
-    try {
-      Log.addContext(context);
-      // Checking that request is authorized
-      await super.checkAuth(context, req);
-      // Handling event by target type
-      const event = await super.handlingEventsByTypes(context, req, [
-        SIGNALS_NEWSIGNAL_EVENT.eventType
-      ]);
-      // Validate event by target schema
-      if (event) {
-        const { subject, data } = event;
-        await super.validateEvents(data, SIGNALS_NEWSIGNAL_EVENT.dataSchema);
+    Log.addContext(context);
+    // Checking that request is authorized
+    super.checkAuth(context, req);
+    // Handling event by target type
+    const { SIGNALS_NEWSIGNAL_EVENT } = this.config.events.types;
+    const event = super.handlingEventsByTypes(context, req, [
+      SIGNALS_NEWSIGNAL_EVENT
+    ]);
+    if (event) {
+      const { subject, data } = event;
+      try {
+        // Validate event by target schema
+        ServiceValidator.check(SIGNALS_NEWSIGNAL_EVENT, data);
         // Handling signal
         await handleSignal(context, { subject, ...data });
         // Calling context.done for finalize function
-        Log.request(context.req, context.res);
-        context.done();
+      } catch (error) {
+        Log.error(error);
+        await EventGrid.publish("CPZ.Trader.Error", error.json);
       }
-    } catch (error) {
-      Log.error(error);
-      context.done();
     }
+    Log.request(context.req, context.res);
     Log.clearContext();
+    context.done();
   }
 
   /**
@@ -137,29 +126,32 @@ class TraderService extends BaseService {
    * @param {Object} req - HTTP trigger with Event Data
    */
   async taskEvents(context, req) {
-    try {
-      Log.addContext(context);
-      // Checking that request is authorized
-      await super.checkAuth(context, req);
-      // Handling events by target type
-      const event = await super.handlingEventsByTypes(context, req, [
-        TASKS_TRADER_START_EVENT.eventType,
-        TASKS_TRADER_STOP_EVENT.eventType,
-        TASKS_TRADER_UPDATE_EVENT.eventType
-      ]);
+    Log.addContext(context);
+    // Checking that request is authorized
+    super.checkAuth(context, req);
+    const {
+      BASE_EVENT,
+      TASKS_TRADER_START_EVENT,
+      TASKS_TRADER_STOP_EVENT,
+      TASKS_TRADER_UPDATE_EVENT
+    } = this.config.events.types;
+    // Handling events by target type
+    const event = super.handlingEventsByTypes(context, req, [
+      TASKS_TRADER_START_EVENT,
+      TASKS_TRADER_STOP_EVENT,
+      TASKS_TRADER_UPDATE_EVENT
+    ]);
 
-      if (event) {
-        // TODO Combine Task Event in one Event with prop actions: "start/stop/update"
-        const { eventType, subject, data } = event;
+    if (event) {
+      // TODO Combine Task Event in one Event with prop actions: "start/stop/update"
+      const { eventType, subject, data } = event;
+      try {
         // Validate events by target schema
-        await super.validateEvents(event, BASE_EVENT.dataSchema);
+        ServiceValidator.check(BASE_EVENT, data);
         // Run handler base on eventType
         switch (eventType) {
           case TASKS_TRADER_START_EVENT.eventType:
-            await super.validateEvents(
-              data,
-              TASKS_TRADER_START_EVENT.dataSchema
-            );
+            ServiceValidator.check(TASKS_TRADER_START_EVENT, data);
             await handleStart(context, {
               subject,
               ...data
@@ -167,34 +159,29 @@ class TraderService extends BaseService {
 
             break;
           case TASKS_TRADER_UPDATE_EVENT.eventType:
-            await super.validateEvents(
-              data,
-              TASKS_TRADER_UPDATE_EVENT.dataSchema
-            );
+            ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, data);
             await handleUpdate(context, {
               subject,
               ...data
             });
             break;
           case TASKS_TRADER_STOP_EVENT.eventType:
-            await super.validateEvents(
-              data,
-              TASKS_TRADER_STOP_EVENT.dataSchema
-            );
+            ServiceValidator.check(TASKS_TRADER_STOP_EVENT, data);
             await handleStop(context, { subject, ...data });
             break;
           default:
             Log.warn("No tasks events");
         }
-        Log.request(context.req, context.res);
         // Calling context.done for finalize function
         context.done();
+      } catch (error) {
+        Log.error(error);
+        await EventGrid.publish("CPZ.Trader.Error", error.json);
       }
-    } catch (error) {
-      Log.error(error);
-      context.done();
     }
+    Log.request(context.req, context.res);
     Log.clearContext();
+    context.done();
   }
 
   /**
@@ -205,37 +192,37 @@ class TraderService extends BaseService {
    * @param {Object} req - HTTP trigger with Event Data
    */
   async tickEvents(context, req) {
-    try {
-      Log.addContext(context);
-      // Checking that request is authorized
-      await super.checkAuth(context, req);
-      // Handling events by target type
-      const event = await super.handlingEventsByTypes(context, req, [
-        TICKS_NEWTICK_EVENT.eventType
-      ]);
+    Log.addContext(context);
+    // Checking that request is authorized
+    await super.checkAuth(context, req);
+    const { TICKS_NEWTICK_EVENT } = this.config.events.types;
+    // Handling events by target type
+    const event = await super.handlingEventsByTypes(context, req, [
+      TICKS_NEWTICK_EVENT
+    ]);
 
-      if (event) {
-        const { subject, data } = event;
-        // Validate event by target schema
-        await super.validateEvents(data, TICKS_NEWTICK_EVENT.dataSchema);
+    if (event) {
+      const { subject, data } = event;
+      // Validate event by target schema
+      try {
+        ServiceValidator.check(TICKS_NEWTICK_EVENT, data);
         // Handling ticks
         await handleTick(context, { subject, ...data });
-        // Calling context.done for finalize function
-        Log.request(context.req, context.res);
-        context.done();
+      } catch (error) {
+        Log.error(error);
+        await EventGrid.publish("CPZ.Trader.Error", error.json);
       }
-    } catch (error) {
-      Log.error(error);
-      context.done();
     }
+    // Calling context.done for finalize function
+    Log.request(context.req, context.res);
     Log.clearContext();
+    context.done();
   }
 
   async timerEvent(context, timer) {
+    Log.addContext(context);
+    const timeStamp = new Date().toISOString();
     try {
-      Log.addContext(context);
-      const timeStamp = new Date().toISOString();
-
       if (timer.isPastDue) {
         Log.warn("Timer trigger is running late!");
       }
@@ -245,6 +232,7 @@ class TraderService extends BaseService {
       context.done();
     } catch (error) {
       Log.error(error);
+      ServiceError(error.json);
       context.done();
     }
     Log.clearContext();

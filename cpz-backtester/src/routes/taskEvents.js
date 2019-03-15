@@ -1,16 +1,17 @@
 import "babel-polyfill";
-import {
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { BACKTESTER_SERVICE } from "cpzServices";
+import Log from "cpz/log";
 import { handleStart, handleStop } from "../backtester/handleTaskEvents";
+import config from "../config";
 
 Log.config({
   key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: BACKTESTER_SERVICE
+  serviceName: config.serviceName
 });
+
+const {
+  TASKS_BACKTESTER_START_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT
+} = config.events.types;
 
 /**
  * Handling BackTester Events
@@ -22,16 +23,18 @@ Log.config({
 
 function eventHandler(req, res) {
   const { subject, data, eventType } = req.body;
+  Log.request(req, res);
+  Log.clearContext();
   // Send 200 to EventGrid and run handler for each event
   res.status(200).end();
 
-  if (eventType === TASKS_BACKTESTER_START_EVENT.eventType) {
+  if (eventType === TASKS_BACKTESTER_START_EVENT) {
     Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
     handleStart({
       ...data,
       eventSubject: subject
     }).catch(e => Log.warn(e));
-  } else if (eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
+  } else if (eventType === TASKS_BACKTESTER_STOP_EVENT) {
     Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
     handleStop({
       ...data,

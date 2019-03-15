@@ -2,11 +2,15 @@ import Log from "cpz/log";
 import config from "../config";
 
 const {
-  SUB_VALIDATION_EVENT,
-  SUB_DELETED_EVENT,
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT
-} = config.events.types;
+  events: {
+    types: {
+      SUB_VALIDATION_EVENT,
+      SUB_DELETED_EVENT,
+      TASKS_IMPORTER_START_EVENT,
+      TASKS_IMPORTER_STOP_EVENT
+    }
+  }
+} = config;
 
 /**
  * Event handling by type
@@ -17,10 +21,7 @@ const {
  * @param {Function} next - function processed req, res to the next middleware
  * */
 export default (req, res, next) => {
-  const neededEvents = [
-    TASKS_BACKTESTER_START_EVENT,
-    TASKS_BACKTESTER_STOP_EVENT
-  ];
+  const neededEvents = [TASKS_IMPORTER_START_EVENT, TASKS_IMPORTER_STOP_EVENT];
   const events = req.body;
   // Hack for https://github.com/MicrosoftDocs/azure-docs/issues/14325
   if (events.length > 1) {

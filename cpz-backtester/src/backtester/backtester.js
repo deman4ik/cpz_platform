@@ -1,51 +1,54 @@
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import VError from "verror";
 import {
-  STATUS_STARTED,
-  STATUS_FINISHED,
-  STATUS_ERROR,
+  BACKTEST_MODE,
   createBacktesterSlug,
-  BACKTEST_MODE
-} from "cpzState";
-import publishEvents from "cpzEvents";
-import { BACKTESTER_SERVICE } from "cpzServices";
-import Log from "cpzLog";
+  STATUS_ERROR,
+  STATUS_FINISHED,
+  STATUS_STARTED
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import Log from "cpz/log";
 import {
-  TASKS_BACKTESTER_STARTED_EVENT,
-  TASKS_BACKTESTER_FINISHED_EVENT,
-  ERROR_BACKTESTER_EVENT,
-  LOG_BACKTESTER_EVENT,
-  TRADES_POSITION_EVENT,
-  TRADES_ORDER_EVENT,
-  ERROR_TOPIC,
-  TASKS_TOPIC,
-  LOG_TOPIC
-} from "cpzEventTypes";
-import {
-  combineBacktesterSettings,
   combineAdvserSettings,
+  combineBacktesterSettings,
   combineTraderSettings
-} from "cpzUtils/settings";
-import { sortAsc, generateKey, chunkNumberToArray } from "cpzUtils/helpers";
-import { createErrorOutput } from "cpzUtils/error";
+} from "cpz/utils/settings";
+import { chunkNumberToArray, generateKey, sortAsc } from "cpz/utils/helpers";
+import { createErrorOutput } from "cpz/utils/error";
 import {
+  deleteBacktesterState,
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterStratLogs,
-  deleteBacktesterState
-} from "cpzStorage/backtesters";
+  saveBacktesterStratLogs
+} from "cpz/tableStorage/backtesters";
 import {
-  saveBacktestsDB,
-  isBacktestExistsDB,
-  deleteBacktestDB,
   countCandlesDB,
+  deleteBacktestDB,
   getCandlesDB,
-  saveSignalsDB,
+  isBacktestExistsDB,
+  saveBacktestsDB,
+  saveOrdersDB,
   savePositionsDB,
-  saveOrdersDB
-} from "cpzDB";
+  saveSignalsDB
+} from "cpz/db";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
+import config from "../config";
+
+const {
+  events: {
+    topics: { LOG_TOPIC, TASKS_TOPIC, ERROR_TOPIC },
+    types: {
+      LOG_BACKTESTER_EVENT,
+      TASKS_BACKTESTER_STARTED_EVENT,
+      TRADES_POSITION_EVENT,
+      TRADES_ORDER_EVENT,
+      TASKS_BACKTESTER_FINISHED_EVENT,
+      ERROR_BACKTESTER_EVENT
+    }
+  }
+} = config;
 
 class Backtester {
   constructor(state) {
@@ -124,7 +127,7 @@ class Backtester {
   logEvent(data) {
     // Публикуем событие
     publishEvents(LOG_TOPIC, {
-      service: BACKTESTER_SERVICE,
+      service: config.serviceName,
       subject: this.eventSubject,
       eventType: LOG_BACKTESTER_EVENT,
       data: {
@@ -252,7 +255,7 @@ class Backtester {
       // Сохраняем начальное состояние
       await this.save();
       await publishEvents(TASKS_TOPIC, {
-        service: BACKTESTER_SERVICE,
+        service: config.serviceName,
         subject: this.eventSubject,
         eventType: TASKS_BACKTESTER_STARTED_EVENT,
         data: {
@@ -356,10 +359,10 @@ class Backtester {
           // Если есть хотя бы одно событие для отправка
           if (this.traderBacktester.events.length > 0) {
             const positions = this.traderBacktester.events.filter(
-              event => event.eventType === TRADES_POSITION_EVENT.eventType
+              event => event.eventType === TRADES_POSITION_EVENT
             );
             const orders = this.traderBacktester.events.filter(
-              event => event.eventType === TRADES_ORDER_EVENT.eventType
+              event => event.eventType === TRADES_ORDER_EVENT
             );
             positions.forEach(positionEvent => {
               const positionsToSaveDBIndex = positionsToSaveDB.findIndex(
@@ -496,7 +499,7 @@ class Backtester {
         .utc(this.endedAt)
         .diff(dayjs.utc(this.startedAt), "minute");
       await publishEvents(TASKS_TOPIC, {
-        service: BACKTESTER_SERVICE,
+        service: config.serviceName,
         subject: this.eventSubject,
         eventType: TASKS_BACKTESTER_FINISHED_EVENT,
         data: {
@@ -534,7 +537,7 @@ class Backtester {
       await this.save();
       // Публикуем событие - ошибка
       await publishEvents(ERROR_TOPIC, {
-        service: BACKTESTER_SERVICE,
+        service: config.serviceName,
         subject: this.eventSubject,
         eventType: ERROR_BACKTESTER_EVENT,
         data: {

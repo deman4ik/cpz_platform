@@ -2,11 +2,17 @@ import Log from "cpz/log";
 import config from "../config";
 
 const {
-  SUB_VALIDATION_EVENT,
-  SUB_DELETED_EVENT,
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT
-} = config.events.types;
+  events: {
+    types: {
+      SUB_VALIDATION_EVENT,
+      SUB_DELETED_EVENT,
+      TASKS_MARKETWATCHER_START_EVENT,
+      TASKS_MARKETWATCHER_STOP_EVENT,
+      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
+    }
+  }
+} = config;
 
 /**
  * Event handling by type
@@ -18,8 +24,10 @@ const {
  * */
 export default (req, res, next) => {
   const neededEvents = [
-    TASKS_BACKTESTER_START_EVENT,
-    TASKS_BACKTESTER_STOP_EVENT
+    TASKS_MARKETWATCHER_START_EVENT,
+    TASKS_MARKETWATCHER_STOP_EVENT,
+    TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+    TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
   ];
   const events = req.body;
   // Hack for https://github.com/MicrosoftDocs/azure-docs/issues/14325

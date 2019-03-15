@@ -1,7 +1,6 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
-import dayjs from "cpzDayjs";
-import { CANDLEBATCHER_SERVICE } from "cpzServices";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   CANDLE_CREATED,
   CANDLE_LOADED,
@@ -13,32 +12,42 @@ import {
   STATUS_STARTED,
   STATUS_STOPPED,
   VALID_TIMEFRAMES
-} from "cpzState";
-import {
-  CANDLES_NEWCANDLE_EVENT,
-  CANDLES_TOPIC,
-  ERROR_CANDLEBATCHER_EVENT,
-  LOG_CANDLEBATCHER_EVENT
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { combineCandlebatcherSettings } from "cpzUtils/settings";
-import { saveCandlebatcherState } from "cpzStorage/candlebatchers";
+} from "cpz/config/state";
+import Log from "cpz/log";
+import { combineCandlebatcherSettings } from "cpz/utils/settings";
+import { saveCandlebatcherState } from "cpz/tableStorage/candlebatchers";
 import {
   cleanCachedCandles,
   getCachedCandles,
   saveCandlesArrayToCache,
   saveCandleToCache
-} from "cpzStorage/candles";
-import { deletePrevCachedTicks, getPrevCachedTicks } from "cpzStorage/ticks";
-import { getPreviousMinuteRange, sortAsc } from "cpzUtils/helpers";
-import publishEvents from "cpzEvents";
+} from "cpz/tableStorage/candles";
+import {
+  deletePrevCachedTicks,
+  getPrevCachedTicks
+} from "cpz/tableStorage/ticks";
+import { getPreviousMinuteRange, sortAsc } from "cpz/utils/helpers";
+import publishEvents from "cpz/eventgrid";
 import {
   generateCandleRowKey,
   getCurrentTimeframes,
   handleCandleGaps,
   timeframeToTimeUnit
-} from "cpzUtils/candlesUtils";
-import { lastMinuteCandleEX } from "cpzConnector";
+} from "cpz/utils/candlesUtils";
+import { lastMinuteCandleEX } from "cpz/connector";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    types: {
+      CANDLES_NEWCANDLE_EVENT,
+      ERROR_CANDLEBATCHER_EVENT,
+      LOG_CANDLEBATCHER_EVENT
+    },
+    topics: { CANDLES_TOPIC }
+  }
+} = config;
 
 /**
  * Класс Candlebatcher
@@ -164,7 +173,7 @@ class Candlebatcher {
   logEvent(data) {
     // Публикуем событие
     publishEvents(LOG_CANDLEBATCHER_EVENT, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: this._eventSubject,
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {
@@ -529,7 +538,7 @@ class Candlebatcher {
           if (this._timeframes.includes(parseInt(timeframe, 10))) {
             /* Отправляем событие */
             await publishEvents(CANDLES_TOPIC, {
-              service: CANDLEBATCHER_SERVICE,
+              service: serviceName,
               subject: createNewCandleSubject({
                 exchange: this._exchange,
                 asset: this._asset,

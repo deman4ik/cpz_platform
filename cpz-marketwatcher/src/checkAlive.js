@@ -1,5 +1,5 @@
 import "babel-polyfill";
-import { getStartedMarketwatchers } from "cpzStorage/marketwatchers";
+import { getStartedMarketwatchers } from "cpz/tableStorage/marketwatchers";
 import {
   isProcessExists,
   createNewProcess,

@@ -2,19 +2,26 @@ import "babel-polyfill";
 import VError from "verror";
 import io from "socket.io-client";
 import { v4 as uuid } from "uuid";
-import { MARKETWATCHER_SERVICE } from "cpzServices";
-import { ERROR_MARKETWATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
-import { createErrorOutput } from "cpzUtils/error";
-import { capitalize } from "cpzUtils/helpers";
-import publishEvents from "cpzEvents";
-import Log from "cpzLog";
+import { createErrorOutput } from "cpz/utils/error";
+import { capitalize } from "cpz/utils/helpers";
+import publishEvents from "cpz/eventgrid";
+import Log from "cpz/log";
 import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
+  createCachedTickSlug,
   STATUS_ERROR,
-  createCachedTickSlug
-} from "cpzState";
+  STATUS_STARTED,
+  STATUS_STOPPED
+} from "cpz/config/state";
 import BaseProvider from "./baseProvider";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    types: { ERROR_TOPIC },
+    topics: { ERROR_MARKETWATCHER_EVENT }
+  }
+} = config;
 
 let providerInstance;
 
@@ -55,7 +62,7 @@ class CryptocompareProvider extends BaseProvider {
       const mask = valuesArray[valuesArray.length - 1].toString().slice(-1);
       if (mask === "9") {
         const tickId = uuid();
-        const obj = {
+        return {
           type: "tick",
           tickId,
           PartitionKey: createCachedTickSlug({
@@ -76,13 +83,12 @@ class CryptocompareProvider extends BaseProvider {
           volume: parseFloat(valuesArray[8]),
           tradeId: valuesArray[9]
         };
-        return obj;
       }
     }
     if (type === "0") {
       // {SubscriptionId}~{ExchangeName}~{CurrencySymbol}~{CurrencySymbol}~{Flag}~{TradeId}~{TimeStamp}~{Quantity}~{Price}~{Total}
       const tickId = uuid();
-      const obj = {
+      return {
         type: "trade",
         tickId,
         PartitionKey: createCachedTickSlug({
@@ -101,7 +107,6 @@ class CryptocompareProvider extends BaseProvider {
         volume: parseFloat(valuesArray[7]),
         price: parseFloat(valuesArray[8])
       };
-      return obj;
     }
     return null;
   }
@@ -128,7 +133,7 @@ class CryptocompareProvider extends BaseProvider {
       info: errorOutput.info
     };
     await publishEvents(ERROR_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: this._eventSubject,
       eventType: ERROR_MARKETWATCHER_EVENT,
       data: {
@@ -231,7 +236,7 @@ class CryptocompareProvider extends BaseProvider {
         info: errorOutput.info
       };
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
@@ -287,7 +292,7 @@ class CryptocompareProvider extends BaseProvider {
         info: errorOutput.info
       };
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
@@ -341,7 +346,7 @@ class CryptocompareProvider extends BaseProvider {
         info: errorOutput.info
       };
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {

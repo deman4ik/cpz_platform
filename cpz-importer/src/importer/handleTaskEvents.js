@@ -1,21 +1,21 @@
 import VError from "verror";
-import { IMPORTER_SERVICE } from "cpzServices";
-import publishEvents from "cpzEvents";
-import { createErrorOutput } from "cpzUtils/error";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import {
-  TASKS_IMPORTER_START_EVENT,
-  TASKS_IMPORTER_STARTED_EVENT,
-  TASKS_IMPORTER_STOP_EVENT,
-  TASKS_IMPORTER_STOPPED_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
+import Log from "cpz/log";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    topics: { TASKS_TOPIC },
+    types: { TASKS_IMPORTER_STARTED_EVENT, TASKS_IMPORTER_STOPPED_EVENT }
+  }
+} = config;
 
 /**
  * Запуск нового импортера свечей
@@ -25,11 +25,7 @@ import {
 
 // TODO Add definition to eventData
 async function handleImportStart(eventData) {
-  const validateStart = createValidator(TASKS_IMPORTER_START_EVENT.dataSchema);
   try {
-    // Валидация входных параметров
-    const toValidate = validateStart(eventData);
-    genErrorIfExist(toValidate);
     createNewProcess(eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
@@ -51,7 +47,7 @@ async function handleImportStart(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: IMPORTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_IMPORTER_STARTED_EVENT,
       data: {
@@ -71,10 +67,7 @@ async function handleImportStart(eventData) {
  * @param {*} eventData
  */
 async function handleImportStop(eventData) {
-  const validateStop = createValidator(TASKS_IMPORTER_STOP_EVENT.dataSchema);
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
     if (!isProcessExists(eventData.taskId)) {
       Log.warn('Importer task "%s" not started', eventData.taskId);
       return;
@@ -87,7 +80,7 @@ async function handleImportStop(eventData) {
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: IMPORTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_IMPORTER_STOPPED_EVENT,
       data: {
@@ -110,7 +103,7 @@ async function handleImportStop(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: IMPORTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_IMPORTER_STOPPED_EVENT,
       data: {

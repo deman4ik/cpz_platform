@@ -13,28 +13,10 @@ const config = {
   },
   resolve: {
     alias: {
-      cpzConfig: path.resolve(__dirname, "../cpz-shared/config"),
-      cpzEnv: path.resolve(__dirname, "../cpz-shared/config/environment"),
-      cpzDefaults: path.resolve(__dirname, "../cpz-shared/config/defaults"),
-      cpzEventTypes: path.resolve(
-        __dirname,
-        "../cpz-shared/config/events/types"
-      ),
-      cpzServices: path.resolve(__dirname, "../cpz-shared/config/services"),
-      cpzState: path.resolve(__dirname, "../cpz-shared/config/state"),
-      cpzStorageTables: path.resolve(
-        __dirname,
-        "../cpz-shared/config/storageTables"
-      ),
-      cpzStorage: path.resolve(__dirname, "../cpz-shared/tableStorage"),
-      cpzEvents: path.resolve(__dirname, "../cpz-shared/eventgrid"),
-      cpzUtils: path.resolve(__dirname, "../cpz-shared/utils"),
-      cpzDayjs: path.resolve(__dirname, "../cpz-shared/utils/lib/dayjs"),
-      cpzDB: path.resolve(__dirname, "../cpz-shared/db"),
-      cpzLog: path.resolve(__dirname, "../cpz-shared/log"),
-      cpzConnector: path.resolve(__dirname, "../cpz-shared/connector"),
+      cpz: path.resolve(__dirname, "../cpz-shared"),
       cpzAdviser: path.resolve(__dirname, "../cpz-adviser/src/adviser"),
       cpzTrader: path.resolve(__dirname, "../cpz-trader/src/trader")
+
     }
   },
   output: {

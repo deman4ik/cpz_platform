@@ -1,24 +1,30 @@
 import VError from "verror";
-import {
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STARTED_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT,
-  TASKS_BACKTESTER_STOPPED_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { BACKTESTER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
+import ServiceValidator from "cpz/validator/index";
+import config from "../config";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
 
-const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
+const {
+  serviceName,
+  events: {
+    types: {
+      TASKS_BACKTESTER_START_EVENT,
+      TASKS_BACKTESTER_STARTED_EVENT,
+      TASKS_BACKTESTER_STOP_EVENT,
+      TASKS_BACKTESTER_STOPPED_EVENT,
+      TASKS_TOPIC
+    }
+  }
+} = config;
+
+ServiceValidator.add(config.events.schemas);
+
 /**
  * Запуск бэктеста
  *
@@ -27,7 +33,7 @@ const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
 async function handleStart(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
+    ServiceValidator.check(TASKS_BACKTESTER_START_EVENT, eventData);
     createNewProcess(eventData.taskId);
     sendEventToProcess(eventData.taskId, {
       type: "start",
@@ -49,7 +55,7 @@ async function handleStart(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: BACKTESTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STARTED_EVENT,
       data: {
@@ -73,7 +79,7 @@ async function handleStart(eventData) {
 async function handleStop(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
+    ServiceValidator.check(TASKS_BACKTESTER_STOP_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
       Log.warn('Backtester task "%s" not started', eventData.taskId);
       return;
@@ -86,7 +92,7 @@ async function handleStop(eventData) {
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: BACKTESTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STOPPED_EVENT,
       data: {
@@ -109,7 +115,7 @@ async function handleStop(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: BACKTESTER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_BACKTESTER_STOPPED_EVENT,
       data: {
