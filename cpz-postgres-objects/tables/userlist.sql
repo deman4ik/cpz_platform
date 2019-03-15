@@ -25,3 +25,9 @@ alter table userlist
 alter table userlist
   add constraint c_userlist_uk4
     unique (telegram);
+
+alter table userlist
+  add constraint c_userlist_status_chk
+    check (status in (-1,0,1));  
+
+comment on column userlist.status is '-1 - deleted, 0 - temptorary disabled, 1 - normal (enabled)';
