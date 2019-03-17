@@ -1,4 +1,6 @@
 import { BASE_EVENTS } from "./base";
+import LOG_EVENTS from "./log";
+import ERROR_EVENTS from "./error";
 import CANDLES_EVENTS from "./candles";
 import SIGNALS_EVENTS from "./signals";
 import TICKS_EVENTS from "./ticks";
@@ -15,6 +17,8 @@ import TASKS_USERROBOT_EVENTS from "./tasks/userRobot";
 
 export default {
   ...BASE_EVENTS,
+  ...LOG_EVENTS,
+  ...ERROR_EVENTS,
   ...CANDLES_EVENTS,
   ...SIGNALS_EVENTS,
   ...TICKS_EVENTS,
