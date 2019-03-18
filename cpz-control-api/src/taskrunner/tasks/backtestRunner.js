@@ -1,29 +1,33 @@
 import VError from "verror";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTING,
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_FINISHED
-} from "cpzState";
-import { getBacktestById } from "cpzStorage/backtests";
-import { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS } from "cpzEventTypes";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { durationInTimeframe } from "cpzUtils/helpers";
-import { countCandlesDB } from "cpzDB";
-import Log from "cpzLog";
+} from "cpz/config/state";
+import { getBacktestById } from "cpz/tableStorage/backtests";
+import { durationInTimeframe } from "cpz/utils/helpers";
+import { countCandlesDB } from "cpz/db";
+import Log from "cpz/log";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
 import Backtest from "./backtest";
 
-const validateStart = createValidator(BACKTEST_START_PARAMS);
-const validateStop = createValidator(BACKTEST_STOP_PARAMS);
+import config from "../../config";
+
+const {
+  events: {
+    types: { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS }
+  }
+} = config;
 
 class BacktestRunner extends BaseRunner {
   static async start(context, params) {
     try {
-      genErrorIfExist(validateStart(params));
+      ServiceValidator.check(BACKTEST_START_PARAMS, params);
       let backtestState = params;
       const backtest = new Backtest(context, backtestState);
       backtest.log("start");
@@ -134,7 +138,7 @@ class BacktestRunner extends BaseRunner {
 
   static async stop(context, params) {
     try {
-      genErrorIfExist(validateStop(params));
+      ServiceValidator.check(BACKTEST_STOP_PARAMS, params);
       const backtestState = await getBacktestById(params.taskId);
       if (!backtestState) throw new Error("BacktestNotFound");
       const backtest = new Backtest(context, backtestState);

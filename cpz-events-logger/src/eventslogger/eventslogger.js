@@ -1,4 +1,4 @@
-import { createCurrentPriceSlug } from "cpzState";
+import { createCurrentPriceSlug } from "cpz/config/state";
 import {
   saveTasksEvent,
   saveSignalsEvent,
@@ -6,24 +6,27 @@ import {
   savePositionsEvent,
   saveLogsEvent,
   saveErrorsEvent
-} from "cpzStorage/events";
-import Log from "cpzLog";
-import { saveCurrentPrice } from "cpzStorage/currentPrices";
-import {
-  CANDLES_NEWCANDLE_EVENT,
-  SIGNALS_NEWSIGNAL_EVENT,
-  TRADES_ORDER_EVENT,
-  TRADES_POSITION_EVENT,
-  TASKS_USERROBOT_STARTED_EVENT,
-  TASKS_USERROBOT_STOPPED_EVENT
-} from "cpzEventTypes";
+} from "cpz/tableStorage/events";
+import Log from "cpz/log";
+import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
 import {
   saveCandlesDB,
   saveSignalsDB,
   saveOrdersDB,
-  savePositionsDB,
-  saveUserRobotHistDB
-} from "cpzDB";
+  savePositionsDB
+} from "cpz/db";
+import config from "../config";
+
+const {
+  events: {
+    types: {
+      CANDLES_NEWCANDLE_EVENT,
+      SIGNALS_NEWSIGNAL_EVENT,
+      TRADES_ORDER_EVENT,
+      TRADES_POSITION_EVENT
+    }
+  }
+} = config;
 
 class EventsLogger {
   constructor(context) {

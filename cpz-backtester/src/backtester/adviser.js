@@ -1,6 +1,6 @@
 import VError from "verror";
 import Adviser from "cpzAdviser/adviser";
-import Log from "cpzLog";
+import Log from "cpz/log";
 
 class AdviserBacktester extends Adviser {
   constructor(context, state) {

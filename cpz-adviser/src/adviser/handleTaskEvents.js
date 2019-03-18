@@ -1,26 +1,13 @@
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import VError from "verror";
-import {
-  TASKS_ADVISER_START_EVENT,
-  TASKS_ADVISER_STARTED_EVENT,
-  TASKS_ADVISER_STOPPED_EVENT,
-  TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATED_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { ADVISER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
-import { getAdviserById, updateAdviserState } from "cpzStorage/advisers";
-import Adviser from "./adviser";
 
-const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
+import Log from "cpz/log";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
+import { getAdviserById, updateAdviserState } from "cpz/tableStorage/advisers";
+import Adviser from "./adviser";
+import config from "../config";
 
 /**
  * Запуск нового советника
@@ -29,16 +16,21 @@ const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
  * @param {*} eventData
  */
 async function handleStart(context, eventData) {
+  const {
+    events: {
+      topics: { TASKS_TOPIC },
+      types: { TASKS_ADVISER_STARTED_EVENT }
+    },
+    serviceName
+  } = config;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
     // Инициализируем класс советника
     const adviser = new Adviser(context, eventData);
     // Сохраняем состояние
     adviser.end(STATUS_STARTED);
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STARTED_EVENT,
       data: {
@@ -61,7 +53,7 @@ async function handleStart(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STARTED_EVENT,
       data: {
@@ -83,9 +75,14 @@ async function handleStart(context, eventData) {
  * @param {*} eventData
  */
 async function handleStop(context, eventData) {
+  const {
+    events: {
+      topics: { TASKS_TOPIC },
+      types: { TASKS_ADVISER_STOPPED_EVENT }
+    },
+    serviceName
+  } = config;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние советника по уникальному ключу
     const adviserState = await getAdviserById(eventData.taskId);
     // Генерируем новое состояние
@@ -106,7 +103,7 @@ async function handleStop(context, eventData) {
     await updateAdviserState(newState);
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STOPPED_EVENT,
       data: {
@@ -129,7 +126,7 @@ async function handleStop(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_STOPPED_EVENT,
       data: {
@@ -150,9 +147,14 @@ async function handleStop(context, eventData) {
  * @param {*} eventData
  */
 async function handleUpdate(context, eventData) {
+  const {
+    events: {
+      topics: { TASKS_TOPIC },
+      types: { TASKS_ADVISER_UPDATED_EVENT }
+    },
+    serviceName
+  } = config;
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateUpdate(eventData));
     const adviserState = await getAdviserById(eventData.taskId);
     const newState = {
       RowKey: adviserState.RowKey,
@@ -171,7 +173,7 @@ async function handleUpdate(context, eventData) {
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_UPDATED_EVENT,
       data: {
@@ -194,7 +196,7 @@ async function handleUpdate(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_ADVISER_UPDATED_EVENT,
       data: {

@@ -4,29 +4,34 @@ import {
   STATUS_STARTED,
   STATUS_STOPPING,
   STATUS_STOPPED
-} from "cpzState";
-import { getUserRobotById, deleteUserRobotState } from "cpzStorage/userRobots";
+} from "cpz/config/state";
 import {
-  USER_ROBOT_START_PARAMS,
-  USER_ROBOT_STOP_PARAMS,
-  USER_ROBOT_UPDATE_PARAMS
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+  getUserRobotById,
+  deleteUserRobotState
+} from "cpz/tableStorage/userRobots";
+import Log from "cpz/log";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 import UserRobot from "./userRobot";
 import TraderRunner from "../services/traderRunner";
 import AdviserRunner from "../services/adviserRunner";
 import ExWatcherRunner from "./exwatcherRunner";
+import config from "../../config";
 
-const validateStart = createValidator(USER_ROBOT_START_PARAMS);
-const validateStop = createValidator(USER_ROBOT_STOP_PARAMS);
-const validateUpdate = createValidator(USER_ROBOT_UPDATE_PARAMS);
+const {
+  events: {
+    types: {
+      USER_ROBOT_START_PARAMS,
+      USER_ROBOT_STOP_PARAMS,
+      USER_ROBOT_UPDATE_PARAMS
+    }
+  }
+} = config;
 
 class UserRobotRunner extends BaseRunner {
   static async create(context, robotParams) {
     try {
-      genErrorIfExist(validateStart(robotParams));
+      ServiceValidator.check(USER_ROBOT_START_PARAMS, robotParams);
       const userRobotState = await getUserRobotById(robotParams.id);
       if (userRobotState) {
         if (
@@ -152,7 +157,7 @@ class UserRobotRunner extends BaseRunner {
 
   static async stop(context, robotParams) {
     try {
-      genErrorIfExist(validateStop(robotParams));
+      ServiceValidator.check(USER_ROBOT_STOP_PARAMS, robotParams);
       const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(context, userRobotState);
@@ -207,7 +212,7 @@ class UserRobotRunner extends BaseRunner {
 
   static async update(context, robotParams) {
     try {
-      genErrorIfExist(validateUpdate(robotParams));
+      ServiceValidator.check(USER_ROBOT_UPDATE_PARAMS, robotParams);
       const userRobotState = await getUserRobotById(robotParams.id);
       if (!userRobotState) throw new Error("RobotNotFound");
       const userRobot = new UserRobot(context, userRobotState);

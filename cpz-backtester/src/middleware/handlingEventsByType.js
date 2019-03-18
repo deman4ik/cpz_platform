@@ -1,10 +1,12 @@
-import Log from "cpzLog";
-import {
+import Log from "cpz/log";
+import config from "../config";
+
+const {
   SUB_VALIDATION_EVENT,
   SUB_DELETED_EVENT,
   TASKS_BACKTESTER_START_EVENT,
   TASKS_BACKTESTER_STOP_EVENT
-} from "cpzEventTypes";
+} = config.events.types;
 
 /**
  * Event handling by type
@@ -16,8 +18,8 @@ import {
  * */
 export default (req, res, next) => {
   const neededEvents = [
-    TASKS_BACKTESTER_START_EVENT.eventType,
-    TASKS_BACKTESTER_STOP_EVENT.eventType
+    TASKS_BACKTESTER_START_EVENT,
+    TASKS_BACKTESTER_STOP_EVENT
   ];
   const events = req.body;
   // Hack for https://github.com/MicrosoftDocs/azure-docs/issues/14325
@@ -26,17 +28,21 @@ export default (req, res, next) => {
   }
   // Getting first event for check his type
   const [event] = events;
-  if (event.eventType === SUB_VALIDATION_EVENT.eventType) {
+  if (event.eventType === SUB_VALIDATION_EVENT) {
     Log.info(
       `Got ${event.eventType} event, validationCode: ${
         event.validationCode
       }, topic: ${event.topic}`
     );
+    Log.request(req, res);
+    Log.clearContext();
     res.status(200).json({
       validationResponse: event.validationCode
     });
-  } else if (event.eventType === SUB_DELETED_EVENT.eventType) {
+  } else if (event.eventType === SUB_DELETED_EVENT) {
     Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
+    Log.request(req, res);
+    Log.clearContext();
     res.status(200).end();
     // In this place if Event Grid batch, we expect what all events are same one type
   } else if (neededEvents.indexOf(event.eventType) !== -1) {
@@ -46,6 +52,8 @@ export default (req, res, next) => {
     next();
   } else {
     Log.error(`Unknown Event Type: ${event.eventType}`);
+    Log.request(req, res);
+    Log.clearContext();
     res.status(202).end();
   }
 };

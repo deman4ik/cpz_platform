@@ -1,4 +1,4 @@
-import { createErrorOutput } from "cpzUtils/error";
+import { createErrorOutput } from "cpz/utils/error";
 import MarketwatcherRunner from "../../taskrunner/services/marketwatcherRunner";
 
 async function startMarketwatcherService(_, { params }, { context }) {

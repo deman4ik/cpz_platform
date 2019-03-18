@@ -4,23 +4,17 @@ import {
   STATUS_STOPPED,
   STATUS_BUSY,
   STATUS_ERROR
-} from "cpzState";
-import publishEvents from "cpzEvents";
-import {
-  SIGNALS_TOPIC,
-  LOG_TOPIC,
-  ERROR_TOPIC,
-  ERROR_ADVISER_EVENT
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { ADVISER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
+} from "cpz/config/state";
+import publishEvents from "cpz/events";
+import Log from "cpz/log";
+import { createErrorOutput } from "cpz/utils/error";
 import {
   getPendingCandlesByAdviserId,
   deletePendingCandle
-} from "cpzStorage/candles";
-import { getAdviserById } from "cpzStorage/advisers";
+} from "cpz/tableStorage/candles";
+import { getAdviserById } from "cpz/tableStorage/advisers";
 import Adviser from "./adviser";
+import config from "../config";
 
 /**
  * Основная задача советника
@@ -32,6 +26,13 @@ import Adviser from "./adviser";
  */
 async function execute(context, state, candle, child = false) {
   let adviser;
+  const {
+    events: {
+      types: { SIGNALS_TOPIC, LOG_TOPIC },
+      topics: { ERROR_ADVISER_EVENT, ERROR_TOPIC }
+    },
+    serviceName
+  } = config;
   try {
     // Создаем экземпляр класса Adviser
     adviser = new Adviser(context, state);
@@ -101,7 +102,7 @@ async function execute(context, state, candle, child = false) {
 
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: "AdviserExecutionError",
       eventType: ERROR_ADVISER_EVENT,
       data: {

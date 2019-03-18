@@ -1,12 +1,6 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
 import {
-  TASKS_CANDLEBATCHER_START_EVENT,
-  TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
@@ -14,31 +8,37 @@ import {
   STATUS_BUSY,
   createCandlebatcherSlug,
   createCandlebatcherTaskSubject
-} from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
 import {
   findCandlebatcher,
   getCandlebatcherById
-} from "cpzStorage/candlebatchers";
-import { arraysDiff } from "cpzUtils/helpers";
+} from "cpz/tableStorage/candlebatchers";
+import { arraysDiff } from "cpz/utils/helpers";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-const validateStart = createValidator(
-  TASKS_CANDLEBATCHER_START_EVENT.dataSchema
-);
-const validateStop = createValidator(TASKS_CANDLEBATCHER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(
-  TASKS_CANDLEBATCHER_UPDATE_EVENT.dataSchema
-);
+import config from "../../config";
+
+const {
+  serviceName,
+  events: {
+    types: {
+      TASKS_CANDLEBATCHER_START_EVENT,
+      TASKS_CANDLEBATCHER_STOP_EVENT,
+      TASKS_CANDLEBATCHER_UPDATE_EVENT
+    },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
+
 
 class CandlebatcherRunner extends BaseRunner {
   static async start(context, props) {
     try {
       let taskId = uuid();
 
-      genErrorIfExist(validateStart({ ...props, taskId }));
+      ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, { ...props, taskId });
       const {
         settings,
         providerType,
@@ -84,7 +84,7 @@ class CandlebatcherRunner extends BaseRunner {
       }
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createCandlebatcherTaskSubject({
           exchange,
           asset,
@@ -116,7 +116,7 @@ class CandlebatcherRunner extends BaseRunner {
 
   static async stop(context, props) {
     try {
-      genErrorIfExist(validateStop(props));
+      ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, props);
       const { taskId } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
       if (!candlebatcher)
@@ -131,7 +131,7 @@ class CandlebatcherRunner extends BaseRunner {
         };
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createCandlebatcherTaskSubject({
           exchange: candlebatcher.exchange,
           asset: candlebatcher.asset,
@@ -160,7 +160,7 @@ class CandlebatcherRunner extends BaseRunner {
 
   static async update(context, props) {
     try {
-      genErrorIfExist(validateUpdate(props));
+      ServiceValidator.check(TASKS_CANDLEBATCHER_UPDATE_EVENT, props);
       const { taskId, timeframes, settings } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
       if (!candlebatcher)
@@ -171,7 +171,7 @@ class CandlebatcherRunner extends BaseRunner {
           "Failed to find candlebatcher"
         );
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createCandlebatcherTaskSubject({
           exchange: candlebatcher.exchange,
           asset: candlebatcher.asset,

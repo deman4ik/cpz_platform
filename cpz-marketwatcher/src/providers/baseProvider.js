@@ -1,20 +1,24 @@
 import VError from "verror";
-import { STATUS_PENDING, createCurrentPriceSlug } from "cpzState";
-import { MARKETWATCHER_SERVICE } from "cpzServices";
-import {
-  TICKS_NEWTICK_EVENT,
-  LOG_MARKETWATCHER_EVENT,
-  ERROR_MARKETWATCHER_EVENT,
-  LOG_TOPIC,
-  ERROR_TOPIC,
-  TICKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { createErrorOutput } from "cpzUtils/error";
-import publishEvents from "cpzEvents";
-import { saveMarketwatcherState } from "cpzStorage/marketwatchers";
-import { saveCurrentPrice } from "cpzStorage/currentPrices";
-import { saveCachedTick } from "cpzStorage/ticks";
+import { createCurrentPriceSlug, STATUS_PENDING } from "cpz/config/state";
+import Log from "cpz/log";
+import { createErrorOutput } from "cpz/utils/error";
+import publishEvents from "cpz/eventgrid";
+import { saveMarketwatcherState } from "cpz/tableStorage/marketwatchers";
+import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
+import { saveCachedTick } from "cpz/tableStorage/ticks";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    types: { LOG_TOPIC, TICKS_TOPIC, ERROR_TOPIC },
+    topics: {
+      LOG_MARKETWATCHER_EVENT,
+      TICKS_NEWTICK_EVENT,
+      ERROR_MARKETWATCHER_EVENT
+    }
+  }
+} = config;
 
 class BaseProvider {
   constructor(state) {
@@ -39,6 +43,14 @@ class BaseProvider {
     this._socketStatus = state.status || "none";
     /* Метаданные стореджа */
     this._metadata = state.metadata;
+  }
+
+  get status() {
+    return this._status;
+  }
+
+  get socketStatus() {
+    return this._socketStatus;
   }
 
   /**
@@ -76,7 +88,7 @@ class BaseProvider {
   logEvent(data) {
     // Публикуем событие
     publishEvents(LOG_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: this._eventSubject,
       eventType: LOG_MARKETWATCHER_EVENT,
       data: {
@@ -86,29 +98,25 @@ class BaseProvider {
     });
   }
 
-  get status() {
-    return this._status;
-  }
-
-  get socketStatus() {
-    return this._socketStatus;
-  }
-
   /* eslint-disable */
-  async start() {}
+  async start() {
+  }
 
-  async stop() {}
+  async stop() {
+  }
 
-  async subscribe() {}
+  async subscribe() {
+  }
 
-  async unsubscribe() {}
+  async unsubscribe() {
+  }
 
   /* eslint-enable */
 
   async _publishTick(tick) {
     try {
       await publishEvents(TICKS_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: TICKS_NEWTICK_EVENT,
         data: {
@@ -135,7 +143,7 @@ class BaseProvider {
       };
       await this._save();
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
@@ -186,7 +194,7 @@ class BaseProvider {
       };
       await this._save();
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {
@@ -225,7 +233,7 @@ class BaseProvider {
         info: errorOutput.info
       };
       await publishEvents(ERROR_TOPIC, {
-        service: MARKETWATCHER_SERVICE,
+        service: serviceName,
         subject: this._eventSubject,
         eventType: ERROR_MARKETWATCHER_EVENT,
         data: {

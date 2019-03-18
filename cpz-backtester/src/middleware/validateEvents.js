@@ -1,9 +1,11 @@
-import Log from "cpzLog";
-import {
+import Log from "cpz/log";
+import ServiceValidator from "cpz/validator/index";
+import config from "../config";
+
+const {
   TASKS_BACKTESTER_START_EVENT,
   TASKS_BACKTESTER_STOP_EVENT
-} from "cpzEventTypes";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+} = config.events.types;
 /**
  * Validate events by target schema
  * if events is not valid call Log.warn() and skip even
@@ -15,27 +17,27 @@ import { createValidator, genErrorIfExist } from "cpzUtils/validation";
  * */
 export default (req, res, next) => {
   const [event] = req.body;
-  const validatorStartEvent = createValidator(
-    TASKS_BACKTESTER_START_EVENT.dataSchema
-  );
-  const validatorStopEvent = createValidator(
-    TASKS_BACKTESTER_STOP_EVENT.dataSchema
-  );
+
   /* eslint no-restricted-syntax: ["error"] */
-  if (event.eventType === TASKS_BACKTESTER_START_EVENT.eventType) {
+  if (event.eventType === TASKS_BACKTESTER_START_EVENT) {
     try {
-      genErrorIfExist(validatorStartEvent(event.data));
+      ServiceValidator.check(TASKS_BACKTESTER_START_EVENT, event.data);
       req.body = event;
+      next();
     } catch (e) {
       Log.warn(e, "Invalid event format");
     }
-  } else if (event.eventType === TASKS_BACKTESTER_STOP_EVENT.eventType) {
+  } else if (event.eventType === TASKS_BACKTESTER_STOP_EVENT) {
     try {
-      genErrorIfExist(validatorStopEvent(event.data));
+      ServiceValidator.check(TASKS_BACKTESTER_STOP_EVENT, event.data);
       req.body = event;
+      next();
     } catch (e) {
       Log.warn(e, "Invalid event format");
     }
+  } else {
+    res.status(202).end();
+    Log.request(req, res);
+    Log.clearContext();
   }
-  next();
 };

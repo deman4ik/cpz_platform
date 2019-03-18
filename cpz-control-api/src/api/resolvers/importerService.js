@@ -1,4 +1,4 @@
-import { createErrorOutput } from "cpzUtils/error";
+import { createErrorOutput } from "cpz/utils/error";
 import ImporterRunner from "../../taskrunner/services/importerRunner";
 
 async function startImporterService(_, { params }, { context }) {

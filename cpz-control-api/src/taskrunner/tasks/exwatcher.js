@@ -1,6 +1,6 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -11,16 +11,19 @@ import {
   VALID_TIMEFRAMES,
   createWatcherSlug,
   createExWatcherTaskSubject
-} from "cpzState";
-import {
-  TASKS_TOPIC,
-  TASKS_EXWATCHER_STARTED_EVENT,
-  TASKS_EXWATCHER_STOPPED_EVENT
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import publishEvents from "cpzEvents";
-import { saveExWatcherState } from "cpzStorage/exwatchers";
-import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpzDefaults";
+} from "cpz/config/state";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { saveExWatcherState } from "cpz/tableStorage/exwatchers";
+import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpz/config/defaults";
+import config from "../../config";
+
+const {
+  events: {
+    types: { TASKS_EXWATCHER_STARTED_EVENT, TASKS_EXWATCHER_STOPPED_EVENT },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
 
 class ExWatcher {
   constructor(context, state) {

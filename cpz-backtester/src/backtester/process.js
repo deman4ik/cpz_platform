@@ -1,11 +1,11 @@
 import "babel-polyfill";
-import Log from "cpzLog";
-import { BACKTESTER_SERVICE } from "cpzServices";
+import Log from "cpz/log";
+import config from "../config";
 import Backtester from "./backtester";
 
 Log.config({
   key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: BACKTESTER_SERVICE
+  serviceName: config.serviceName
 });
 
 process.on("message", async m => {

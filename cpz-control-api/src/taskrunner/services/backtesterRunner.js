@@ -1,31 +1,33 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
 import {
-  TASKS_BACKTESTER_START_EVENT,
-  TASKS_BACKTESTER_STOP_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_FINISHED,
   createBacktesterTaskSubject
-} from "cpzState";
-import { getBacktesterById } from "cpzStorage/backtesters";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
+} from "cpz/config/state";
+import { getBacktesterById } from "cpz/tableStorage/backtesters";
+import publishEvents from "cpz/eventgrid";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-const validateStart = createValidator(TASKS_BACKTESTER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_BACKTESTER_STOP_EVENT.dataSchema);
+import config from "../../config";
+
+const {
+  serviceName,
+  events: {
+    types: { TASKS_BACKTESTER_START_EVENT, TASKS_BACKTESTER_STOP_EVENT },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
+
 class BacktesterRunner extends BaseRunner {
   static async start(context, props) {
     try {
       const taskId = props.taskId || uuid();
 
-      genErrorIfExist(validateStart({ ...props, taskId }));
+      ServiceValidator.check(TASKS_BACKTESTER_START_EVENT, { ...props, taskId });
       const {
         robotId,
         userId,
@@ -42,7 +44,7 @@ class BacktesterRunner extends BaseRunner {
       } = props;
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createBacktesterTaskSubject({
           exchange,
           asset,
@@ -83,7 +85,7 @@ class BacktesterRunner extends BaseRunner {
 
   static async stop(context, props) {
     try {
-      genErrorIfExist(validateStop(props));
+      ServiceValidator.check(TASKS_BACKTESTER_STOP_EVENT, props);
       const { taskId } = props;
       const backtester = await getBacktesterById({
         taskId
@@ -100,7 +102,7 @@ class BacktesterRunner extends BaseRunner {
       )
         return { taskId, status: backtester.status };
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createBacktesterTaskSubject({
           exchange: backtester.exchange,
           asset: backtester.asset,

@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/graphql.js",
+  "scriptFile": "./index.js",
+  "entryPoint": "graphql",
   "bindings": [
     {
       "authLevel": "anonymous",

@@ -2,18 +2,25 @@
  * Обработка новой свечи
  */
 import VError from "verror";
-import { CANDLEBATCHER_SERVICE } from "cpzServices";
 import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
   STATUS_BUSY,
-  STATUS_ERROR
-} from "cpzState";
-import Log from "cpzLog";
-import { ERROR_CANDLEBATCHER_EVENT, ERROR_TOPIC } from "cpzEventTypes";
-import publishEvents from "cpzEvents";
-import { createErrorOutput } from "cpzUtils/error";
+  STATUS_ERROR,
+  STATUS_STARTED,
+  STATUS_STOPPED
+} from "cpz/config/state";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
 import Candlebatcher from "./candlebatcher";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    topics: { ERROR_TOPIC },
+    types: { ERROR_CANDLEBATCHER_EVENT }
+  }
+} = config;
 
 async function execute(context, state) {
   let candlebatcher;
@@ -65,7 +72,7 @@ async function execute(context, state) {
     }
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: "CandlebatcherTimerError",
       eventType: ERROR_CANDLEBATCHER_EVENT,
       data: {
@@ -79,4 +86,5 @@ async function execute(context, state) {
     });
   }
 }
+
 export default execute;

@@ -9,21 +9,28 @@ import {
   STATUS_FINISHED,
   createBacktestSlug,
   createBacktestTaskSubject
-} from "cpzState";
-import {
-  TASKS_TOPIC,
-  TASKS_BACKTEST_STARTED_EVENT,
-  TASKS_BACKTEST_STOPPED_EVENT,
-  TASKS_BACKTEST_FINISHED_EVENT
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import publishEvents from "cpzEvents";
-import { saveBacktestState } from "cpzStorage/backtests";
+} from "cpz/config/state";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { saveBacktestState } from "cpz/tableStorage/backtests";
 import {
   combineBacktesterSettings,
   combineAdvserSettings,
   combineTraderSettings
-} from "cpzUtils/settings";
+} from "cpz/utils/settings";
+
+import config from "../../config";
+
+const {
+  events: {
+    types: {
+      TASKS_BACKTEST_STARTED_EVENT,
+      TASKS_BACKTEST_STOPPED_EVENT,
+      TASKS_BACKTEST_FINISHED_EVENT
+    },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
 
 class Backtest {
   constructor(context, state) {

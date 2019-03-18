@@ -1,5 +1,5 @@
-import { getRobotDB } from "cpzDB";
-import { createErrorOutput } from "cpzUtils/error";
+import { getRobotDB } from "cpz/db";
+import { createErrorOutput } from "cpz/utils/error";
 import BacktestRunner from "../../taskrunner/tasks/backtestRunner";
 
 async function startBacktest(

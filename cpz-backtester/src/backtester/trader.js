@@ -1,7 +1,7 @@
 import VError from "verror";
 import Trader from "cpzTrader/trader";
-import Log from "cpzLog";
-import { POS_STATUS_NEW, POS_STATUS_OPEN } from "cpzState";
+import Log from "cpz/log";
+import { POS_STATUS_NEW, POS_STATUS_OPEN } from "cpz/config/state";
 
 class TraderBacktester extends Trader {
   clearEvents() {

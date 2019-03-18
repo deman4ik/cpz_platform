@@ -1,5 +1,5 @@
-import { getUserRobotDB } from "cpzDB";
-import { createErrorOutput } from "cpzUtils/error";
+import { getUserRobotDB } from "cpz/db";
+import { createErrorOutput } from "cpz/utils/error";
 import UserRobotRunner from "../../taskrunner/tasks/userRobotRunner";
 
 async function startUserRobot(_, { userRobotId, overrideParams }, { context }) {

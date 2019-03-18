@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import VError from "verror";
-import { ADVISER_SERVICE } from "cpzServices";
 import {
   createAdviserSlug,
   createNewSignalSubject,
@@ -10,15 +9,15 @@ import {
   STATUS_FINISHED,
   STATUS_STARTED,
   STATUS_STOPPED
-} from "cpzState";
-import Log from "cpzLog";
-import { LOG_ADVISER_EVENT, SIGNALS_NEWSIGNAL_EVENT } from "cpzEventTypes";
-import { combineAdvserSettings } from "cpzUtils/settings";
-import { getCachedCandlesByKey } from "cpzStorage/candles";
-import { saveAdviserState } from "cpzStorage/advisers";
+} from "cpz/config/state";
+import Log from "cpz/log";
+import { combineAdvserSettings } from "cpz/utils/settings";
+import { getCachedCandlesByKey } from "cpz/tableStorage/candles";
+import { saveAdviserState } from "cpz/tableStorage/advisers";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
+import config from "../config";
 
 /**
  * Класс советника
@@ -181,7 +180,7 @@ class Adviser {
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._eventSubject,
-      eventType: LOG_ADVISER_EVENT.eventType,
+      eventType: config.events.types.LOG_ADVISER_EVENT,
       data: {
         taskId: this._taskId,
         ...data
@@ -671,7 +670,7 @@ class Adviser {
       dataVersion: "1.0",
       eventTime: new Date(),
       subject: this._createSubject(),
-      eventType: SIGNALS_NEWSIGNAL_EVENT.eventType,
+      eventType: config.events.types.SIGNALS_NEWSIGNAL_EVENT,
       data: {
         ...signal,
         signalId: uuid(),
@@ -683,7 +682,7 @@ class Adviser {
         timeframe: this._timeframe,
         candleId: this._candle.id,
         candleTimestamp: this._candle.timestamp,
-        service: ADVISER_SERVICE,
+        service: config.serviceName,
         timestamp: dayjs.utc().toISOString()
       }
     };

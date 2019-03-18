@@ -1,33 +1,28 @@
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import VError from "verror";
-import {
-  TASKS_CANDLEBATCHER_START_EVENT,
-  TASKS_CANDLEBATCHER_STARTED_EVENT,
-  TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_STOPPED_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT,
-  TASKS_CANDLEBATCHER_UPDATED_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpzState";
-import publishEvents from "cpzEvents";
-import { CANDLEBATCHER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
+import Log from "cpz/log";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_BUSY } from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
 import {
   getCandlebatcherById,
   updateCandlebatcherState
-} from "cpzStorage/candlebatchers";
+} from "cpz/tableStorage/candlebatchers";
 import Candlebatcher from "./candlebatcher";
+import config from "../config";
 
-const validateStart = createValidator(
-  TASKS_CANDLEBATCHER_START_EVENT.dataSchema
-);
-const validateStop = createValidator(TASKS_CANDLEBATCHER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(
-  TASKS_CANDLEBATCHER_UPDATE_EVENT.dataSchema
-);
+const {
+  serviceName,
+  events: {
+    topics: { TASKS_TOPIC },
+    types: {
+      TASKS_CANDLEBATCHER_STARTED_EVENT,
+      TASKS_CANDLEBATCHER_STOPPED_EVENT,
+      TASKS_CANDLEBATCHER_UPDATED_EVENT
+    }
+  }
+} = config;
+
 /**
  * Запуск нового загрузчика свечей
  *
@@ -36,16 +31,13 @@ const validateUpdate = createValidator(
  */
 async function handleStart(context, eventData) {
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
     // Инициализируем новый загрузчик
     const candlebatcher = new Candlebatcher(context, eventData);
-
     // Сохраняем состояние
     candlebatcher.end(STATUS_STARTED);
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       data: {
@@ -68,7 +60,7 @@ async function handleStart(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       data: {
@@ -90,8 +82,6 @@ async function handleStart(context, eventData) {
  */
 async function handleStop(context, eventData) {
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
     // Запрашиваем текущее состояние по уникальному ключу
     const candlebatcherState = await getCandlebatcherById(eventData.taskId);
 
@@ -114,7 +104,7 @@ async function handleStop(context, eventData) {
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_STOPPED_EVENT,
       data: {
@@ -137,7 +127,7 @@ async function handleStop(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       data: {
@@ -159,8 +149,6 @@ async function handleStop(context, eventData) {
  */
 async function handleUpdate(context, eventData) {
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateUpdate(eventData));
     const candlebatcherState = await getCandlebatcherById(eventData.taskId);
 
     const newState = {
@@ -180,7 +168,7 @@ async function handleUpdate(context, eventData) {
 
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_UPDATED_EVENT,
       data: {
@@ -203,7 +191,7 @@ async function handleUpdate(context, eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: CANDLEBATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_CANDLEBATCHER_UPDATED_EVENT,
       data: {

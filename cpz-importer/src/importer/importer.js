@@ -1,16 +1,6 @@
 import VError from "verror";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import { v4 as uuid } from "uuid";
-import { IMPORTER_SERVICE } from "cpzServices";
-import {
-  ERROR_IMPORTER_EVENT,
-  ERROR_TOPIC,
-  LOG_IMPORTER_EVENT,
-  LOG_TOPIC,
-  TASKS_IMPORTER_FINISHED_EVENT,
-  TASKS_IMPORTER_STARTED_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
 import {
   CANDLE_CREATED,
   CANDLE_IMPORTED,
@@ -21,25 +11,25 @@ import {
   STATUS_FINISHED,
   STATUS_STARTED,
   VALID_TIMEFRAMES
-} from "cpzState";
-import publishEvents from "cpzEvents";
-import Log from "cpzLog";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import Log from "cpz/log";
 import {
   chunkArray,
   completedPercent,
   divideDateByDays,
   durationMinutes,
   sortAsc
-} from "cpzUtils/helpers";
+} from "cpz/utils/helpers";
 import {
   clearTempCandles,
   saveCandlesArrayToCache,
   saveCandlesArrayToTemp
-} from "cpzStorage/candles";
-import { saveImporterState } from "cpzStorage/importers";
-import { saveCandlesDB } from "cpzDB";
-import { createErrorOutput } from "cpzUtils/error";
-import { minuteCandlesEX, tradesEX } from "cpzConnector";
+} from "cpz/tableStorage/candles";
+import { saveImporterState } from "cpz/tableStorage/importers";
+import { saveCandlesDB } from "cpz/db";
+import { createErrorOutput } from "cpz/utils/error";
+import { minuteCandlesEX, tradesEX } from "cpz/connector";
 import {
   chunkDates,
   createMinutesList,
@@ -47,7 +37,21 @@ import {
   generateCandleRowKey,
   getCurrentTimeframes,
   handleCandleGaps
-} from "cpzUtils/candlesUtils";
+} from "cpz/utils/candlesUtils";
+import config from "../config";
+
+const {
+  serviceName,
+  events: {
+    types: {
+      ERROR_IMPORTER_EVENT,
+      LOG_IMPORTER_EVENT,
+      TASKS_IMPORTER_FINISHED_EVENT,
+      TASKS_IMPORTER_STARTED_EVENT
+    },
+    topics: { ERROR_TOPIC, LOG_TOPIC, TASKS_TOPIC }
+  }
+} = config;
 
 /* Types descriptions */
 
@@ -262,42 +266,6 @@ class Importer {
             low: 3303,
             close: 3459,
             volume: 235253
-          },
-          {
-            id: "a44c1258-cadc-48b8-992c-e0315662e548",
-            PartitionKey: "bitfinex.BTC.USD",
-            RowKey: "000000003460000",
-            taskId: "f5db5753-1989-4f48-901b-e92e965322ac",
-            type: "previous",
-            exchange: "bitfinex",
-            asset: "BTC",
-            currency: "USD",
-            timeframe: 1,
-            time: 1550749380000,
-            timestamp: "2019-02-21T11:43:00.000Z",
-            open: 300,
-            high: 3700,
-            low: 3303,
-            close: 3459,
-            volume: 235253
-          },
-          {
-            id: "a44c1258-cadc-48b8-992c-e0315662e548",
-            PartitionKey: "bitfinex.BTC.USD",
-            RowKey: "000000003460000",
-            taskId: "f5db5753-1989-4f48-901b-e92e965322ac",
-            type: "previous",
-            exchange: "bitfinex",
-            asset: "BTC",
-            currency: "USD",
-            timeframe: 1,
-            time: 1550749140000,
-            timestamp: "2019-02-21T11:39:00.000Z",
-            open: 300,
-            high: 3700,
-            low: 3303,
-            close: 3459,
-            volume: 235253
           }
         ]
    * */
@@ -339,7 +307,7 @@ class Importer {
    */
   logEvent(data) {
     publishEvents(LOG_TOPIC, {
-      service: IMPORTER_SERVICE,
+      service: serviceName,
       subject: this.eventSubject,
       eventType: LOG_IMPORTER_EVENT,
       data: {
@@ -774,7 +742,7 @@ class Importer {
   async execute() {
     try {
       await publishEvents(TASKS_TOPIC, {
-        service: IMPORTER_SERVICE,
+        service: serviceName,
         subject: this.eventSubject,
         eventType: TASKS_IMPORTER_STARTED_EVENT,
         data: {
@@ -940,7 +908,7 @@ class Importer {
         .diff(dayjs(this.startedAt).utc(), "minute");
       this.log(`Finished import in ${duration} minutes!!!`);
       await publishEvents(TASKS_TOPIC, {
-        service: IMPORTER_SERVICE,
+        service: serviceName,
         subject: this.eventSubject,
         eventType: TASKS_IMPORTER_FINISHED_EVENT,
         data: {
@@ -969,7 +937,7 @@ class Importer {
       await this.save();
       // Публикуем событие - ошибка
       await publishEvents(ERROR_TOPIC, {
-        service: IMPORTER_SERVICE,
+        service: serviceName,
         subject: this.eventSubject,
         eventType: ERROR_IMPORTER_EVENT,
         data: {

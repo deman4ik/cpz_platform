@@ -1,27 +1,18 @@
 import VError from "verror";
 import {
-  ERROR_ADVISER_EVENT,
-  CANDLES_NEWCANDLE_EVENT,
-  CANDLES_HANDLED_EVENT,
-  CANDLES_TOPIC,
-  ERROR_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTED,
   STATUS_BUSY,
   CANDLE_PREVIOUS,
   createAdviserSlug
-} from "cpzState";
-import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { ADVISER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
-import { savePendingCandle } from "cpzStorage/candles";
-import { getActiveAdvisersBySlug } from "cpzStorage/advisers";
+} from "cpz/config/state";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
+import { savePendingCandle } from "cpz/tableStorage/candles";
+import { getActiveAdvisersBySlug } from "cpz/tableStorage/advisers";
 import execute from "./execute";
+import config from "../config";
 
-const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
 /**
  * Обработка новой свечи
  *
@@ -30,9 +21,14 @@ const validateNewCandle = createValidator(CANDLES_NEWCANDLE_EVENT.dataSchema);
  */
 async function handleCandle(context, eventData) {
   try {
-    // Валидация входных параметров
-    genErrorIfExist(validateNewCandle(eventData.candle));
     const { candle } = eventData;
+    const {
+      events: {
+        types: { CANDLES_HANDLED_EVENT },
+        topics: { CANDLES_TOPIC }
+      },
+      serviceName
+    } = config;
 
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
     if (candle.type === CANDLE_PREVIOUS) return;
@@ -140,7 +136,7 @@ async function handleCandle(context, eventData) {
 
     // Публикуем событие - успех
     await publishEvents(CANDLES_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: `${candle.exchange}/${candle.asset}/${candle.currency}/${
         candle.timeframe
       }`,
@@ -167,9 +163,16 @@ async function handleCandle(context, eventData) {
       )
     );
     Log.error(errorOutput);
+    const {
+      events: {
+        types: { ERROR_ADVISER_EVENT },
+        topics: { ERROR_TOPIC }
+      },
+      serviceName
+    } = config;
     // Публикуем событие - ошибка
     await publishEvents(ERROR_TOPIC, {
-      service: ADVISER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: ERROR_ADVISER_EVENT,
       data: {

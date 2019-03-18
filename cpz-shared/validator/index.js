@@ -1,6 +1,11 @@
 import ServiceError from "../error";
 import validator from "./validator";
 
+/**
+ * Validator Service
+ * @class
+ * Validate data by schema
+ */
 class ServiceValidator {
   constructor() {
     this._validators = {};
@@ -12,6 +17,12 @@ class ServiceValidator {
     });
   }
 
+  /**
+   * Check data by schema
+   * @method
+   * @param {Object} schemaName - needed schema
+   * @param {Object} data - data to validate
+   * */
   check(schemaName, data) {
     if (!Object.prototype.hasOwnProperty.call(this._validators, schemaName))
       throw new Error(`Validation schema "${schemaName}" doesn't exist`);

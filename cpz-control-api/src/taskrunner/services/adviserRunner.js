@@ -1,35 +1,38 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
 import {
-  TASKS_ADVISER_START_EVENT,
-  TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_BUSY,
   createAdviserTaskSubject
-} from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE, ADVISER_SERVICE } from "cpzServices";
-import { findAdviser, getAdviserById } from "cpzStorage/advisers";
-import { findOtherActiveUserRobotsByServiceId } from "cpzStorage/userRobots";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import { findAdviser, getAdviserById } from "cpz/tableStorage/advisers";
+import { findOtherActiveUserRobotsByServiceId } from "cpz/tableStorage/userRobots";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
+import config from "../../config";
 
-const validateStart = createValidator(TASKS_ADVISER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_ADVISER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(TASKS_ADVISER_UPDATE_EVENT.dataSchema);
+const {
+  serviceName,
+  services: { ADVISER_SERVICE },
+  events: {
+    types: {
+      TASKS_ADVISER_START_EVENT,
+      TASKS_ADVISER_STOP_EVENT,
+      TASKS_ADVISER_UPDATE_EVENT
+    },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
+
 class AdviserRunner extends BaseRunner {
   static async start(context, props) {
     try {
       const taskId = uuid();
-
-      genErrorIfExist(validateStart({ ...props, taskId }));
+      ServiceValidator.check(TASKS_ADVISER_START_EVENT, { ...props, taskId });
       const {
         robotId,
         exchange,
@@ -53,7 +56,7 @@ class AdviserRunner extends BaseRunner {
       }
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createAdviserTaskSubject({
           exchange,
           asset,
@@ -88,7 +91,7 @@ class AdviserRunner extends BaseRunner {
 
   static async stop(context, props) {
     try {
-      genErrorIfExist(validateStop(props));
+      ServiceValidator.check(TASKS_ADVISER_STOP_EVENT, props);
       const { taskId, userRobotId } = props;
       const adviser = await getAdviserById(taskId);
       if (!adviser)
@@ -109,7 +112,7 @@ class AdviserRunner extends BaseRunner {
         return { taskId, status: adviser.status };
       }
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createAdviserTaskSubject({
           exchange: adviser.exchange,
           asset: adviser.asset,
@@ -137,7 +140,7 @@ class AdviserRunner extends BaseRunner {
 
   static async update(context, props) {
     try {
-      genErrorIfExist(validateUpdate(props));
+      ServiceValidator.check(TASKS_ADVISER_UPDATE_EVENT, props);
       const { taskId, settings } = props;
       const adviser = await getAdviserById(taskId);
       if (!adviser)
@@ -149,7 +152,7 @@ class AdviserRunner extends BaseRunner {
         );
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createAdviserTaskSubject({
           exchange: adviser.exchange,
           asset: adviser.asset,

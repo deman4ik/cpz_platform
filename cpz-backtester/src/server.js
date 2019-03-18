@@ -2,33 +2,30 @@ import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
-import Log from "cpzLog";
-import { BACKTESTER_SERVICE } from "cpzServices";
-import { checkEnvVars } from "cpzUtils/environment";
-import backtesterEnv from "cpzEnv/backtester";
+import Log from "cpz/log";
+import { checkEnvVars } from "cpz/utils/environment";
+import backtesterEnv from "cpz/config/environment/backtester";
 import { v4 as uuid } from "uuid";
+import ServiceValidator from "cpz/validator";
 import handleTaskEvents from "./routes/taskEvents";
-import checkAuth from "./middleware/checkAuth";
-import handlingEventsByType from "./middleware/handlingEventsByType";
-import validateEvents from "./middleware/validateEvents";
+import { validateEvents, handlingEventsByType, checkAuth } from "./middleware";
+import config from "./config";
 
+// Setup Log
 Log.config({
   key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: BACKTESTER_SERVICE
+  serviceName: config.serviceName
 });
 checkEnvVars(backtesterEnv.variables);
+
+// Setup Validator
+ServiceValidator(config.events.schemas);
 
 const server = express();
 
 server.use(helmet());
 server.use(bodyParser.json());
 
-Log.addContext({
-  executionContext: {
-    invocationId: uuid(),
-    functionName: "taskEvents"
-  }
-});
 server.get("/", (req, res) => res.status(200).end());
 server.post(
   "/api/taskEvents",

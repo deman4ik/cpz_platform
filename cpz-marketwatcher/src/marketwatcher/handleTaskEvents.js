@@ -1,35 +1,33 @@
 import VError from "verror";
-import {
-  TASKS_MARKETWATCHER_START_EVENT,
-  TASKS_MARKETWATCHER_STARTED_EVENT,
-  TASKS_MARKETWATCHER_STOP_EVENT,
-  TASKS_MARKETWATCHER_STOPPED_EVENT,
-  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UPDATED_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { MARKETWATCHER_SERVICE } from "cpzServices";
-import { createErrorOutput } from "cpzUtils/error";
+import Log from "cpz/log";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
+import ServiceValidator from "cpz/validator/index";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
+import config from "../config";
 
-const validateStart = createValidator(
-  TASKS_MARKETWATCHER_START_EVENT.dataSchema
-);
-const validateStop = createValidator(TASKS_MARKETWATCHER_STOP_EVENT.dataSchema);
-const validateSubscribe = createValidator(
-  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT.dataSchema
-);
-const validateUnsubscribe = createValidator(
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.dataSchema
-);
+const {
+  serviceName,
+  events: {
+    types: {
+      TASKS_MARKETWATCHER_START_EVENT,
+      TASKS_MARKETWATCHER_STARTED_EVENT,
+      TASKS_MARKETWATCHER_STOP_EVENT,
+      TASKS_MARKETWATCHER_STOPPED_EVENT,
+      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
+      TASKS_MARKETWATCHER_UPDATED_EVENT,
+      TASKS_TOPIC
+    }
+  }
+} = config;
+
+// Setup validator
+ServiceValidator.add(config.events.schemas);
 
 // TODO: Startup processes from storage
 /**
@@ -40,7 +38,8 @@ const validateUnsubscribe = createValidator(
 async function handleStart(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateStart(eventData));
+
+    ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, eventData);
     if (isProcessExists(eventData.taskId)) {
       Log.warn('Marketwatcher task "%s" already started', eventData.taskId);
       return;
@@ -52,7 +51,7 @@ async function handleStart(eventData) {
     });
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
@@ -75,7 +74,7 @@ async function handleStart(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
       data: {
@@ -98,7 +97,7 @@ async function handleStart(eventData) {
 async function handleStop(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateStop(eventData));
+    ServiceValidator.check(TASKS_MARKETWATCHER_STOP_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
       Log.warn(`Marketwatcher task "${eventData.taskId}" not started`);
       return;
@@ -109,7 +108,7 @@ async function handleStop(eventData) {
     });
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
       data: {
@@ -132,7 +131,7 @@ async function handleStop(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
       data: {
@@ -155,7 +154,7 @@ async function handleStop(eventData) {
 async function handleSubscribe(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateSubscribe(eventData));
+    ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
       throw new VError(
         'Marketwatcher task "%s"  not started',
@@ -169,7 +168,7 @@ async function handleSubscribe(eventData) {
     });
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
@@ -192,7 +191,7 @@ async function handleSubscribe(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
@@ -215,7 +214,7 @@ async function handleSubscribe(eventData) {
 async function handleUnsubscribe(eventData) {
   try {
     // Валидация входных параметров
-    genErrorIfExist(validateUnsubscribe(eventData));
+    ServiceValidator.check(TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
       throw new VError(
         'Marketwatcher task "%s"  not started',
@@ -229,7 +228,7 @@ async function handleUnsubscribe(eventData) {
     });
     // Публикуем событие - успех
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {
@@ -252,7 +251,7 @@ async function handleUnsubscribe(eventData) {
     Log.error(errorOutput);
     // Публикуем событие - ошибка
     await publishEvents(TASKS_TOPIC, {
-      service: MARKETWATCHER_SERVICE,
+      service: serviceName,
       subject: eventData.eventSubject,
       eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
       data: {

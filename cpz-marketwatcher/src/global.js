@@ -1,9 +1,9 @@
 import { fork } from "child_process";
-import { tryParseJSON } from "cpzUtils/helpers";
-import { getMarketwatcherById } from "cpzStorage/marketwatchers";
-import { STATUS_STOPPED } from "cpzState";
-import dayjs from "cpzDayjs";
-import Log from "cpzLog";
+import { tryParseJSON } from "cpz/utils/helpers";
+import { getMarketwatcherById } from "cpz/tableStorage/marketwatchers";
+import { STATUS_STOPPED } from "cpz/config/state";
+import dayjs from "cpz/utils/lib/dayjs";
+import Log from "cpz/log";
 
 const marketwatcherProcesses = {};
 
