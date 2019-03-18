@@ -1,6 +1,7 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/funcEvents.js",
+  "scriptFile": "../index.js",
+  "entryPoint": "handleEvent",
   "bindings": [
     {
       "authLevel": "anonymous",
