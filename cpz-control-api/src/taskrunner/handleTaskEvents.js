@@ -1,77 +1,87 @@
 import { VError } from "verror";
-import {
-  TASKS_EXWATCHER_STARTED_EVENT,
-  TASKS_EXWATCHER_STOPPED_EVENT,
-  TASKS_IMPORTER_STARTED_EVENT,
-  TASKS_IMPORTER_STOPPED_EVENT,
-  TASKS_IMPORTER_FINISHED_EVENT,
-  TASKS_MARKETWATCHER_STARTED_EVENT,
-  TASKS_MARKETWATCHER_STOPPED_EVENT,
-  TASKS_MARKETWATCHER_UPDATED_EVENT,
-  TASKS_CANDLEBATCHER_STARTED_EVENT,
-  TASKS_CANDLEBATCHER_STOPPED_EVENT,
-  TASKS_CANDLEBATCHER_UPDATED_EVENT,
-  TASKS_ADVISER_STARTED_EVENT,
-  TASKS_ADVISER_STOPPED_EVENT,
-  TASKS_ADVISER_UPDATED_EVENT,
-  TASKS_TRADER_STARTED_EVENT,
-  TASKS_TRADER_STOPPED_EVENT,
-  TASKS_TRADER_UPDATED_EVENT,
-  TASKS_BACKTESTER_STARTED_EVENT,
-  TASKS_BACKTESTER_STOPPED_EVENT,
-  TASKS_BACKTESTER_FINISHED_EVENT,
-  ERROR_CONTROL_EVENT,
-  ERROR_TOPIC
-} from "cpzEventTypes";
-import {
-  CONTROL_SERVICE,
-  MARKETWATCHER_SERVICE,
-  CANDLEBATCHER_SERVICE,
-  ADVISER_SERVICE,
-  TRADER_SERVICE,
-  EXWATCHER_SERVICE,
-  IMPORTER_SERVICE,
-  BACKTESTER_SERVICE
-} from "cpzServices";
-import Log from "cpzLog";
+import Log from "cpz/log";
 import {
   STATUS_STARTED,
   STATUS_PENDING,
   STATUS_STOPPED,
   STATUS_ERROR,
   STATUS_FINISHED
-} from "cpzState";
-import publishEvents from "cpzEvents";
-import { createErrorOutput } from "cpzUtils/error";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import { createErrorOutput } from "cpz/utils/error";
 import {
   findExWatchersByServiceId,
   findExWatchersByImporterId,
   getExWatcherById,
   deleteExWatcherState
-} from "cpzStorage/exwatchers";
-import { findUserRobotsByServiceId } from "cpzStorage/userRobots";
-import { findBacktestsByServiceId } from "cpzStorage/backtests";
-import { getImporterById, deleteImporterState } from "cpzStorage/importers";
+} from "cpz/tableStorage/exwatchers";
+import { findUserRobotsByServiceId } from "cpz/tableStorage/userRobots";
+import { findBacktestsByServiceId } from "cpz/tableStorage/backtests";
+import {
+  getImporterById,
+  deleteImporterState
+} from "cpz/tableStorage/importers";
 import {
   getBacktesterById,
   deleteBacktesterState
-} from "cpzStorage/backtesters";
+} from "cpz/tableStorage/backtesters";
 import {
   getMarketwatcherById,
   deleteMarketwatcherState
-} from "cpzStorage/marketwatchers";
+} from "cpz/tableStorage/marketwatchers";
 import {
   getCandlebatcherById,
   deleteCandlebatcherState
-} from "cpzStorage/candlebatchers";
-import { getAdviserById, deleteAdviserState } from "cpzStorage/advisers";
-import { getTraderById, deleteTraderState } from "cpzStorage/traders";
+} from "cpz/tableStorage/candlebatchers";
+import { getAdviserById, deleteAdviserState } from "cpz/tableStorage/advisers";
+import { getTraderById, deleteTraderState } from "cpz/tableStorage/traders";
 import Backtest from "./tasks/backtest";
 import BacktestRunner from "./tasks/backtestRunner";
 import UserRobot from "./tasks/userRobot";
 import UserRobotRunner from "./tasks/userRobotRunner";
 import ExWatcher from "./tasks/exwatcher";
 import ExWatcherRunner from "./tasks/exwatcherRunner";
+
+import config from "../config";
+
+const {
+  services: {
+    MARKETWATCHER_SERVICE,
+    CANDLEBATCHER_SERVICE,
+    ADVISER_SERVICE,
+    TRADER_SERVICE,
+    EXWATCHER_SERVICE,
+    IMPORTER_SERVICE,
+    CONTROL_SERVICE,
+    BACKTESTER_SERVICE
+  },
+  events: {
+    types: {
+      TASKS_EXWATCHER_STARTED_EVENT,
+      TASKS_EXWATCHER_STOPPED_EVENT,
+      TASKS_IMPORTER_STARTED_EVENT,
+      TASKS_IMPORTER_STOPPED_EVENT,
+      TASKS_IMPORTER_FINISHED_EVENT,
+      TASKS_MARKETWATCHER_STARTED_EVENT,
+      TASKS_MARKETWATCHER_STOPPED_EVENT,
+      TASKS_MARKETWATCHER_UPDATED_EVENT,
+      TASKS_CANDLEBATCHER_STARTED_EVENT,
+      TASKS_CANDLEBATCHER_STOPPED_EVENT,
+      TASKS_CANDLEBATCHER_UPDATED_EVENT,
+      TASKS_ADVISER_STARTED_EVENT,
+      TASKS_ADVISER_STOPPED_EVENT,
+      TASKS_ADVISER_UPDATED_EVENT,
+      TASKS_TRADER_STARTED_EVENT,
+      TASKS_TRADER_STOPPED_EVENT,
+      TASKS_TRADER_UPDATED_EVENT,
+      TASKS_BACKTESTER_STARTED_EVENT,
+      TASKS_BACKTESTER_STOPPED_EVENT,
+      TASKS_BACKTESTER_FINISHED_EVENT,
+      ERROR_CONTROL_EVENT
+    },
+    topics: { ERROR_TOPIC }
+  }
+} = config;
 
 async function handleStarted(context, eventData) {
   try {

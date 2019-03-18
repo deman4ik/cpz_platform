@@ -1,35 +1,37 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
 import {
-  TASKS_TRADER_START_EVENT,
-  TASKS_TRADER_STOP_EVENT,
-  TASKS_TRADER_UPDATE_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_BUSY,
   createTraderTaskSubject
-} from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
-import { findTrader, getTraderById } from "cpzStorage/traders";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import { findTrader, getTraderById } from "cpz/tableStorage/traders";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-const validateStart = createValidator(TASKS_TRADER_START_EVENT.dataSchema);
-const validateStop = createValidator(TASKS_TRADER_STOP_EVENT.dataSchema);
-const validateUpdate = createValidator(TASKS_TRADER_UPDATE_EVENT.dataSchema);
+import config from "../../config";
 
+const {
+  serviceName,
+  events: {
+    types: {
+      TASKS_TRADER_START_EVENT,
+      TASKS_TRADER_STOP_EVENT,
+      TASKS_TRADER_UPDATE_EVENT
+    },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
 class TraderRunner extends BaseRunner {
   static async start(context, props) {
     try {
       const taskId = uuid();
 
-      genErrorIfExist(validateStart({ ...props, taskId }));
+      ServiceValidator.check(TASKS_TRADER_START_EVENT, { ...props, taskId });
       const {
         robotId,
         userId,
@@ -50,7 +52,7 @@ class TraderRunner extends BaseRunner {
       }
 
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createTraderTaskSubject({
           exchange,
           asset,
@@ -86,14 +88,14 @@ class TraderRunner extends BaseRunner {
 
   static async stop(context, props) {
     try {
-      genErrorIfExist(validateStop(props));
+      ServiceValidator.check(TASKS_TRADER_STOP_EVENT, props);
       const { taskId } = props;
       const trader = await getTraderById(taskId);
       if (!trader) return { taskId, status: STATUS_STOPPED };
       if (trader.status === STATUS_STOPPED)
         return { taskId, status: STATUS_STOPPED };
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createTraderTaskSubject({
           exchange: trader.exchange,
           asset: trader.asset,
@@ -122,7 +124,7 @@ class TraderRunner extends BaseRunner {
 
   static async update(context, props) {
     try {
-      genErrorIfExist(validateUpdate(props));
+      ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, props);
       const { taskId, settings } = props;
       const trader = await getTraderById(taskId);
       if (!trader)
@@ -133,7 +135,7 @@ class TraderRunner extends BaseRunner {
           "Failed to find trader"
         );
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: createTraderTaskSubject({
           exchange: trader.exchange,
           asset: trader.asset,

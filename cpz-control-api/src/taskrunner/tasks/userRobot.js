@@ -1,6 +1,6 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -9,20 +9,23 @@ import {
   STATUS_ERROR,
   createRobotSlug,
   createUserRobotTaskSubject
-} from "cpzState";
-import {
-  TASKS_TOPIC,
-  TASKS_USERROBOT_STARTED_EVENT,
-  TASKS_USERROBOT_STOPPED_EVENT
-} from "cpzEventTypes";
-import publishEvents from "cpzEvents";
-import Log from "cpzLog";
-import { saveUserRobotState } from "cpzStorage/userRobots";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
+import Log from "cpz/log";
+import { saveUserRobotState } from "cpz/tableStorage/userRobots";
 import {
   combineCandlebatcherSettings,
   combineAdvserSettings,
   combineTraderSettings
-} from "cpzUtils/settings";
+} from "cpz/utils/settings";
+import config from "../../config";
+
+const {
+  events: {
+    types: { TASKS_USERROBOT_STARTED_EVENT, TASKS_USERROBOT_STOPPED_EVENT },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
 
 class UserRobot {
   constructor(context, state) {

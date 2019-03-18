@@ -1,4 +1,4 @@
-import { createErrorOutput } from "cpzUtils/error";
+import { createErrorOutput } from "cpz/utils/error";
 import AdviserRunner from "../../taskrunner/services/adviserRunner";
 
 async function startAdviserService(_, { params }, { context }) {

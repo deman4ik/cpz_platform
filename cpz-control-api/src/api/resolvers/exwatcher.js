@@ -1,4 +1,4 @@
-import { createErrorOutput } from "cpzUtils/error";
+import { createErrorOutput } from "cpz/utils/error";
 import ExWatcherRunner from "../../taskrunner/tasks/exwatcherRunner";
 
 async function startExWatcher(_, { params }, { context }) {

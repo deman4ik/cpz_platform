@@ -1,43 +1,39 @@
 import VError from "verror";
 import { v4 as uuid } from "uuid";
 import {
-  TASKS_MARKETWATCHER_START_EVENT,
-  TASKS_MARKETWATCHER_STOP_EVENT,
-  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-  TASKS_TOPIC
-} from "cpzEventTypes";
-import {
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING
-} from "cpzState";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import publishEvents from "cpzEvents";
-import { CONTROL_SERVICE } from "cpzServices";
+} from "cpz/config/state";
+import publishEvents from "cpz/eventgrid";
 import {
   findMarketwatcherByExchange,
   getMarketwatcherById
-} from "cpzStorage/marketwatchers";
+} from "cpz/tableStorage/marketwatchers";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-const validateStart = createValidator(
-  TASKS_MARKETWATCHER_START_EVENT.dataSchema
-);
-const validateStop = createValidator(TASKS_MARKETWATCHER_STOP_EVENT.dataSchema);
-const validateSubscribe = createValidator(
-  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT.dataSchema
-);
-const validateUnsubscribe = createValidator(
-  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT.dataSchema
-);
+import config from "../../config";
+
+const {
+  serviceName,
+  events: {
+    types: {
+      TASKS_MARKETWATCHER_START_EVENT,
+      TASKS_MARKETWATCHER_STOP_EVENT,
+      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
+    },
+    topics: { TASKS_TOPIC }
+  }
+} = config;
 class MarketwatcherRunner extends BaseRunner {
   static async start(context, props) {
     try {
       let taskId = uuid();
-      genErrorIfExist(validateStart({ ...props, taskId }));
+      ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, { ...props, taskId });
       const { debug, exchange, providerType, subscriptions } = props;
 
       const marketwatcher = await findMarketwatcherByExchange(exchange);
@@ -66,7 +62,7 @@ class MarketwatcherRunner extends BaseRunner {
         }
       }
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: exchange,
         eventType: TASKS_MARKETWATCHER_START_EVENT,
         data: {
@@ -92,7 +88,7 @@ class MarketwatcherRunner extends BaseRunner {
 
   static async stop(context, props) {
     try {
-      genErrorIfExist(validateStop(props));
+      ServiceValidator.check(TASKS_MARKETWATCHER_STOP_EVENT, props);
       const { taskId } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
@@ -106,7 +102,7 @@ class MarketwatcherRunner extends BaseRunner {
           status: STATUS_STOPPED
         };
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: marketwatcher.exchange,
         eventType: TASKS_MARKETWATCHER_STOP_EVENT,
         data: {
@@ -132,7 +128,7 @@ class MarketwatcherRunner extends BaseRunner {
 
   static async subscribe(context, props) {
     try {
-      genErrorIfExist(validateSubscribe(props));
+      ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, props);
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
@@ -153,7 +149,7 @@ class MarketwatcherRunner extends BaseRunner {
       });
       if (newSubsciptions.length > 0) {
         await publishEvents(TASKS_TOPIC, {
-          service: CONTROL_SERVICE,
+          service: serviceName,
           subject: marketwatcher.exchange,
           eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
           data: {
@@ -177,7 +173,7 @@ class MarketwatcherRunner extends BaseRunner {
 
   static async unsubscribe(context, props) {
     try {
-      genErrorIfExist(validateUnsubscribe(props));
+      ServiceValidator.check(TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT, props);
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
@@ -188,7 +184,7 @@ class MarketwatcherRunner extends BaseRunner {
           "Failed to find marketwatcher"
         );
       await publishEvents(TASKS_TOPIC, {
-        service: CONTROL_SERVICE,
+        service: serviceName,
         subject: marketwatcher.exchange,
         eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
         data: {

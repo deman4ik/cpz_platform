@@ -1,5 +1,5 @@
 import VError from "verror";
-import dayjs from "cpzDayjs";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTING,
   STATUS_STARTED,
@@ -7,30 +7,36 @@ import {
   STATUS_STOPPED,
   STATUS_FINISHED,
   createWatcherSlug
-} from "cpzState";
-import { getExWatcherById, deleteExWatcherState } from "cpzStorage/exwatchers";
+} from "cpz/config/state";
 import {
-  EXWATCHER_START_PARAMS,
-  EXWATCHER_STOP_PARAMS,
-  EXWATCHER_UPDATE_PARAMS
-} from "cpzEventTypes";
-import Log from "cpzLog";
-import { createValidator, genErrorIfExist } from "cpzUtils/validation";
-import { getMaxTimeframeDateFrom } from "cpzUtils/candlesUtils";
+  getExWatcherById,
+  deleteExWatcherState
+} from "cpz/tableStorage/exwatchers";
+import Log from "cpz/log";
+import { getMaxTimeframeDateFrom } from "cpz/utils/candlesUtils";
+import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 import ExWatcher from "./exwatcher";
 import CandlebatcherRunner from "../services/candlebatcherRunner";
 import MarketwatcherRunner from "../services/marketwatcherRunner";
 import ImporterRunner from "../services/importerRunner";
 
-const validateStart = createValidator(EXWATCHER_START_PARAMS);
-const validateStop = createValidator(EXWATCHER_STOP_PARAMS);
-const validateUpdate = createValidator(EXWATCHER_UPDATE_PARAMS);
+import config from "../../config";
+
+const {
+  events: {
+    types: {
+      EXWATCHER_START_PARAMS,
+      EXWATCHER_STOP_PARAMS,
+      EXWATCHER_UPDATE_PARAMS
+    }
+  }
+} = config;
 
 class ExWatcherRunner extends BaseRunner {
   static async create(context, params) {
     try {
-      genErrorIfExist(validateStart(params));
+      ServiceValidator.check(EXWATCHER_START_PARAMS, params);
       const exWatcherState = await getExWatcherById(
         createWatcherSlug({
           exchange: params.exchange,
@@ -228,7 +234,7 @@ class ExWatcherRunner extends BaseRunner {
 
   static async stop(context, params) {
     try {
-      genErrorIfExist(validateStop(params));
+      ServiceValidator.check(EXWATCHER_STOP_PARAMS, params);
       const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(context, exWatcherState);
@@ -301,7 +307,7 @@ class ExWatcherRunner extends BaseRunner {
 
   static async update(context, params) {
     try {
-      genErrorIfExist(validateUpdate(params));
+      ServiceValidator.check(EXWATCHER_UPDATE_PARAMS, params);
       const exWatcherState = await getExWatcherById(params.taskId);
       if (!exWatcherState) throw new Error("ExWatcherNotFound");
       const exWatcher = new ExWatcher(context, exWatcherState);

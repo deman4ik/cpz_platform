@@ -1,4 +1,4 @@
-import { createErrorOutput } from "cpzUtils/error";
+import { createErrorOutput } from "cpz/utils/error";
 import CandlebatcherRunner from "../../taskrunner/services/candlebatcherRunner";
 
 async function startCandlebatcherService(_, { params }, { context }) {
