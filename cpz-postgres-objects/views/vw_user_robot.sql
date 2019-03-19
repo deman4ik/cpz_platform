@@ -18,9 +18,11 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.balance_init*ncurrate     as nBALANCE_INIT_C, -- "Initial capital" in currency
        (u.balance_init+u.profit)          as nBALANCE_CURRENT, -- "Robot balance" in coins !!2DO
        (u.balance_init+u.profit)*ncurrate as nBALANCE_CURRENT_C, -- "Robot balance" in currency
+       r.sCURCODE     as sCURCODE,
        u.last_started AS dSTARTED,
        u.dt_from      AS dFROM,
        u.dt_to        AS dTO,
+       date_part('day',(CURRENT_DATE-u.last_started)) as nDAYS_ACTIVE,
        u.robot_status AS nSTATUS,
        (select
           json_agg ( row_to_json(p) )
@@ -32,7 +34,20 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
             and ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
                  (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
           order by dDATE asc
-        ) p) as jPERF_ARRAY -- performance mini-chart
+        ) p) as jPERF_ARRAY, -- performance mini-chart
+        (select row_to_json(tt)
+          from (
+          select ddate, nMDD, nMDD*ncurrate as nMDD_C
+          from (
+            select ddate, nprofit,
+                   lag(nprofit) over (order by ddate) as nprev,
+                   (lag(nprofit) over (order by ddate))-nprofit as nMDD
+            from vw_user_robot_performance pf
+            where
+              ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
+               (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
+          ) t order by nMDD asc
+          ) tt  limit  1)  as  jMDD
 FROM
   (select
      uu.*,
@@ -50,4 +65,4 @@ FROM
    join      robot r on (uu.robot_id = r.id)
    left join user_robot p on (uu.linked_user_robot_id = p.id)
   ) u,
-  (select 4012 as ncurrate) r
+  (select 4012 as nCURRATE, '$' as sCURCODE) r
