@@ -4,19 +4,19 @@ create table backtest
     constraint c_backtest_pk
     primary key                 not null,
   user_id       uuid
-    constraint c_positions_userlist_fk
+    constraint c_backtest_userlist_fk
     references userlist         not null,    
   robot_id      numeric(17)     not null
-    constraint c_positions_robot_fk
+    constraint c_backtest_robot_fk
     references robot,
   exchange      varchar(30)     not null
-    constraint c_positions_exchange_fk
+    constraint c_backtest_exchange_fk
     references exchange,
   asset         varchar(10)     not null
-    constraint c_positions_asset_fk
+    constraint c_backtest_asset_fk
     references asset,
   currency      varchar(10)     not null
-    constraint c_positions_currency_fk
+    constraint c_backtest_currency_fk
     references currency,
   timeframe       integer       not null,  
   dt_from         timestamp     not null,
