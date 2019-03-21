@@ -22,4 +22,4 @@ project.lock.json
 /data
 .secrets
 appsettings.json
-local.settings.json
+cpz-auth-service/local.settings.json

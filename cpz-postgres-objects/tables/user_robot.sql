@@ -38,7 +38,7 @@ alter table user_robot add constraint c_user_robot_status_chk check (robot_statu
 comment on column user_robot.robot_status is '
 -1 - deleted
 0 - default
-1 - subscribed to signals
+1 - followed (added to dashboard)
 5 - starting
 10 - started (running)
 15 - stopping
