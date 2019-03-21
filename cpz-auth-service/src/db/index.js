@@ -1,10 +1,8 @@
-import bcrypt from "bcrypt";
-
-
 const users = [
   {
     id: 1,
     email: "test1@email.ru",
+    status: "pending",
     password: "123456",
     refreshToken: null
   },
@@ -12,6 +10,7 @@ const users = [
     id: 2,
     email: "test2@email.ru",
     password: "654321",
+    status: "verified",
     refreshToken: null
   }
 ];
@@ -30,15 +29,29 @@ const isUserExist = email => {
   return decision;
 };
 
-const addNewUser = async (email, pass) => {
-  const passwordHash = await bcrypt.hash(pass, 10);
-  const id = Math.floor(Math.random() * (3 - 100)) + 3
-  users.push({
+const addNewUser = async (email, pass, code) => {
+  const id = Math.floor(Math.random() * (3 - 100)) + 3;
+  const user = {
     id, // uniq Id
     email,
-    password: passwordHash
-  });
-  return id;
+    password: pass,
+    status: "pending",
+    registrationCode: code
+  };
+  users.push(user);
+  return user;
 };
 
-export { findUserByEmail, isUserExist, addNewUser };
+const updateRefreshToken = (userId, token) => {
+  let result = false;
+  const userIndex = users.findIndex(u => u.id === userId);
+  if (userIndex !== -1) {
+    users[userIndex].refreshToken = token;
+    result = true;
+  } else {
+    console.error("Can't find user by id");
+  }
+  return result;
+};
+
+export { findUserByEmail, isUserExist, addNewUser, updateRefreshToken };
