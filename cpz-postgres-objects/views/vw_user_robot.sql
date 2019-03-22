@@ -25,6 +25,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.dt_to        AS dTO,
        date_part('day',(CURRENT_DATE-u.last_started)) as nDAYS_ACTIVE,
        u.robot_status AS nSTATUS,
+       u.linked_user_robot_id as uidLINKED_USER_ROBOT_ID,
        (select
           json_agg ( row_to_json(p) )
         from (
