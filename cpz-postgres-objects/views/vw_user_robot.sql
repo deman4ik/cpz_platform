@@ -8,6 +8,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.name         AS sROBOT_NAME,
        u.asset        AS sASSET,
        u.exchange     AS sEXCHANGE,
+       u.timeframe    AS nTIMEFRAME,
        u.volume                    as nVOLUME, -- volume in coins
        round(u.volume*ncurrate,2)  as nVOLUME_C, -- volume in currency
        u.profit                    as nPROFIT, -- performance in coins
@@ -24,6 +25,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.dt_to        AS dTO,
        date_part('day',(CURRENT_DATE-u.last_started)) as nDAYS_ACTIVE,
        u.robot_status AS nSTATUS,
+       u.linked_user_robot_id as uidLINKED_USER_ROBOT_ID,
        (select
           json_agg ( row_to_json(p) )
         from (
@@ -51,7 +53,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
 FROM
   (select
      uu.*,
-     r.name, r.asset, r.exchange,
+     r.name, r.asset, r.exchange, r.timeframe,
      p.robot_id as linked_robot_id, p.user_id as linked_user_id, p.balance_init as linked_balance_init,
      (select sum(profit)
          from positions
