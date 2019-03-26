@@ -50,7 +50,11 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
               ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
                (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
           ) t order by nMDD asc
-          ) tt  limit  1)  as  jMDD
+          ) tt  limit  1)  as  jMDD,
+       (select json_build_object('date',candle_timestamp, 'price',price,'action', action,'note', order_type)
+        from signal s
+        where s.robot_id = u.robot_id
+          and s.candle_timestamp in (select max(candle_timestamp) from signal where robot_id = u.robot_id)) as jLAST_SIGNAL
 FROM
   (select
      uu.*,
