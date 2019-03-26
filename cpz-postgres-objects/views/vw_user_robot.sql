@@ -7,6 +7,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.robot_id     AS nROBOT_ID,
        u.name         AS sROBOT_NAME,
        u.asset        AS sASSET,
+       u.currency     AS sCURRENCY,
        u.exchange     AS sEXCHANGE,
        u.timeframe    AS nTIMEFRAME,
        u.volume                    as nVOLUME, -- volume in coins
@@ -53,7 +54,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
 FROM
   (select
      uu.*,
-     r.name, r.asset, r.exchange, r.timeframe,
+     r.name, r.asset, r.currency, r.exchange, r.timeframe,
      p.robot_id as linked_robot_id, p.user_id as linked_user_id, p.balance_init as linked_balance_init,
      (select sum(profit)
          from positions
