@@ -16,4 +16,8 @@ create table user_settings
 	notif_method varchar(240) default 'mail'::character varying not null
 );
 
+alter table user_settings
+  add constraint c_user_settings_notif_method_chk
+    check (notif_method in ('mail','telegram'));
+
 

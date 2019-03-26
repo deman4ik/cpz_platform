@@ -3,11 +3,11 @@ drop view vw_candles5;
 create view vw_candles5 as
 SELECT t."timestamp",
        t."time",
-       t.open as o,
-       t.high as h,
-       t.low  as l,
-       t.close as c,
-       t.volume as v,
+       t.open,
+       t.high,
+       t.low,
+       t.close,
+       t.volume,
        t.exchange,
        t.asset,
        t.currency
