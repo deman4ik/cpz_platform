@@ -1,6 +1,6 @@
 import util from "util";
-import VError from "verror";
 import * as appInsights from "applicationinsights";
+import ServiceError from "../error";
 import dayjs from "../utils/lib/dayjs";
 
 const SEVERITY_LEVEL = appInsights.Contracts.SeverityLevel;
@@ -34,7 +34,7 @@ class Log {
       appInsights
         .setup()
         .setAutoDependencyCorrelation(true)
-        .setAutoCollectRequests(true)
+        .setAutoCollectRequests(false)
         .setAutoCollectPerformance(true)
         .setAutoCollectExceptions(true)
         .setAutoCollectDependencies(true)
@@ -75,10 +75,10 @@ class Log {
    *   @property {string} functionName
    * @memberof Log
    */
-  addContext(context) {
+  addContext(context, commonProps = {}) {
     if (!context)
-      throw new VError(
-        { name: "LogError" },
+      throw new ServiceError(
+        { name: ServiceError.types.LOG_ERROR },
         "Failed to add context to Log Instance"
       );
     const { log, executionContext } = context;
@@ -89,7 +89,7 @@ class Log {
     }
     this._executionContext.InvocationId = executionContext.invocationId;
     this._executionContext.FunctionName = executionContext.functionName;
-
+    this._executionContext = { ...this._executionContext, ...commonProps };
     this._updateAppInsightsCommonProperties();
   }
 
@@ -206,7 +206,16 @@ class Log {
    * @memberof Log
    */
   error(props, ...args) {
-    this._log(SEVERITY_LEVEL.Error, props, args);
+    let properties;
+    let messages;
+    if (props instanceof ServiceError) {
+      properties = props.json;
+      messages = [props.format(), ...args];
+    } else {
+      properties = props;
+      messages = args;
+    }
+    this._log(SEVERITY_LEVEL.Error, properties, messages);
   }
 
   /**
@@ -223,17 +232,16 @@ class Log {
   /**
    * Отправка события в службу аналитики
    *
+   * @param {string} eventType
    * @param {Object} eventData
    * @memberof Log
    */
-  event(eventData) {
-    this._logInfo(JSON.stringify(eventData));
+  event(eventType, eventData) {
+    this._logInfo(`${eventType} event`, JSON.stringify(eventData));
     if (this._appInstightsKey) {
       if (eventData) {
-        // TODO: Parse base Event Types from config
-        const name = eventData.name || "UnknownEvent"; // TODO: Create constant
         appInsights.defaultClient.trackEvent({
-          name,
+          eventType,
           properties: eventData
         });
       }
@@ -249,11 +257,19 @@ class Log {
   exception(errorData) {
     if (this._appInstightsKey) {
       if (errorData) {
-        // TODO: Check errorData type - Error or VError
-        const errorString = JSON.stringify(errorData); // TODO: Better VError stringify
-        this._logError(errorString);
+        let data;
+        let string;
+        if (errorData instanceof ServiceError) {
+          data = errorData.json;
+          string = errorData.toString(true);
+        } else {
+          data = errorData;
+          string = JSON.stringify(errorData);
+        }
+
+        this._logError(string);
         appInsights.defaultClient.trackException({
-          exception: errorData
+          exception: data
         });
       }
     }

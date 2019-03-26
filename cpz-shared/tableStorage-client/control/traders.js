@@ -1,6 +1,8 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
+import { STATUS_STARTED } from "../../config/state";
+import dayjs from "../../utils/lib/dayjs";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -14,7 +16,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getTraderById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_TRADERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_TRADERS_TABLE, taskId);
 
 /**
  * Query traders by uniq keys
@@ -25,7 +27,7 @@ const getTraderById = async taskId =>
  * @returns {Object[]}
  */
 const getTraderByKeys = async ({ RowKey, PartitionKey }) =>
-  this.client.getEntityByKeys(TABLES.STORAGE_TRADERS_TABLE, {
+  client.getEntityByKeys(TABLES.STORAGE_TRADERS_TABLE, {
     RowKey,
     PartitionKey
   });
@@ -57,7 +59,7 @@ const findTrader = async ({ robotId, userId }) => {
         robotIdFilter
       )
     );
-    const traders = await this.client.queryEntities(
+    const traders = await client.queryEntities(
       TABLES.STORAGE_TRADERS_TABLE,
       query
     );
@@ -93,24 +95,14 @@ const getActiveTradersBySlug = async slug => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
-    const statusFilter = TableQuery.combineFilters(
-      startedStatusFilter,
-      TableUtilities.TableOperators.OR,
-      busyStatusFilter
-    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
         partitionKeyFilter,
         TableUtilities.TableOperators.AND,
-        statusFilter
+        startedStatusFilter
       )
     );
-    return await this.client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
+    return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -125,37 +117,103 @@ const getActiveTradersBySlug = async slug => {
 };
 
 /**
- * Query stop requested Traders
+ * Query active Traders
+ *
+ * @param {string} slug
+ * @param {number} robotId
  * @returns {Object[]}
  */
-const getActiveTradersWithStopRequested = async () => {
+const getActiveTradersBySlugAndRobotId = async ({ slug, robotId }) => {
   try {
+    const partitionKeyFilter = TableQuery.stringFilter(
+      "PartitionKey",
+      TableUtilities.QueryComparisons.EQUAL,
+      slug
+    );
     const startedStatusFilter = TableQuery.stringFilter(
       "status",
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const stopRequestedFilter = TableQuery.booleanFilter(
-      "stopRequested",
+    const robotIdFilter = TableQuery.doubleFilter(
+      "robotId",
       TableUtilities.QueryComparisons.EQUAL,
-      true
+      robotId
     );
-
+    const combinedFilters = TableQuery.combineFilters(
+      partitionKeyFilter,
+      TableUtilities.TableOperators.AND,
+      startedStatusFilter
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        startedStatusFilter,
+        combinedFilters,
         TableUtilities.TableOperators.AND,
-        stopRequestedFilter
+        robotIdFilter
       )
     );
-    return await this.client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
+    return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
         name: ServiceError.types.TABLE_STORAGE_ERROR,
-        cause: error
+        cause: error,
+        info: { slug, robotId }
       },
-      "Failed to read active traders with Stop requested"
+      'Failed to read traders by slug "%s" and robotId "%s"',
+      slug,
+      robotId
+    );
+  }
+};
+
+/**
+ * Query active Traders with active positions
+ *
+ * @returns {Object[]}
+ */
+const getIdledTradersWithActivePositions = async (minutes = 1) => {
+  const idleTimestamp = dayjs
+    .utc()
+    .add(minutes, "minute")
+    .toDate();
+  try {
+    const idleFilter = TableQuery.dateFilter(
+      "Timestamp",
+      TableUtilities.QueryComparisons.LESS_THAN,
+      idleTimestamp
+    );
+    const hasActivePositionsFilter = TableQuery.booleanFilter(
+      "hasActivePositions",
+      TableUtilities.QueryComparisons.EQUAL,
+      true
+    );
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+    const combinedFilter = TableQuery.combineFilters(
+      hasActivePositionsFilter,
+      TableUtilities.TableOperators.AND,
+      startedStatusFilter
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        idleFilter,
+        TableUtilities.TableOperators.AND,
+        combinedFilter
+      )
+    );
+    return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error,
+        info: { minutes, idleTimestamp }
+      },
+      "Failed to read traders with active positions"
     );
   }
 };
@@ -166,7 +224,7 @@ const getActiveTradersWithStopRequested = async () => {
  * @param {Object} state
  */
 const saveTraderState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_TRADERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_TRADERS_TABLE, state);
 
 /**
  * Update Trader state
@@ -174,7 +232,7 @@ const saveTraderState = async state =>
  * @param {Object} state
  */
 const updateTraderState = async state =>
-  this.client.mergeEntity(TABLES.STORAGE_TRADERS_TABLE, state);
+  client.mergeEntity(TABLES.STORAGE_TRADERS_TABLE, state);
 
 /**
  * Delete Trader state with all Positions
@@ -187,7 +245,7 @@ const deleteTraderState = async ({ RowKey, PartitionKey }) => {
   try {
     const traderState = await getTraderByKeys({ RowKey, PartitionKey });
     if (traderState && traderState.RowKey && traderState.PartitionKey) {
-      await this.client.deleteEntity(TABLES.STORAGE_TRADERS_TABLE, {
+      await client.deleteEntity(TABLES.STORAGE_TRADERS_TABLE, {
         RowKey: traderState.RowKey,
         PartitionKey: traderState.PartitionKey
       });
@@ -213,7 +271,8 @@ export {
   getTraderByKeys,
   findTrader,
   getActiveTradersBySlug,
-  getActiveTradersWithStopRequested,
+  getActiveTradersBySlugAndRobotId,
+  getIdledTradersWithActivePositions,
   saveTraderState,
   updateTraderState,
   deleteTraderState

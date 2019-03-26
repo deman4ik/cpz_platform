@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import dayjs from "../../utils/lib/dayjs";
 import { STATUS_STARTED } from "../../config/state";
@@ -16,7 +17,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getImporterById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_IMPORTERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_IMPORTERS_TABLE, taskId);
 
 /**
  * Find Active Importer
@@ -66,7 +67,7 @@ const findActiveImporter = async ({ slug, dateFrom, dateTo }) => {
         dateFilter
       )
     );
-    const importers = await this.client.queryEntities(
+    const importers = await client.queryEntities(
       TABLES.STORAGE_IMPORTERS_TABLE,
       query
     );
@@ -90,7 +91,7 @@ const findActiveImporter = async ({ slug, dateFrom, dateTo }) => {
  * @param {Object} state
  */
 const saveImporterState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_IMPORTERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_IMPORTERS_TABLE, state);
 
 /**
  * Update Importer State
@@ -98,7 +99,7 @@ const saveImporterState = async state =>
  * @param {Object} state
  */
 const updateImporterState = async state =>
-  this.client.mergeEntity(TABLES.STORAGE_IMPORTERS_TABLE, state);
+  client.mergeEntity(TABLES.STORAGE_IMPORTERS_TABLE, state);
 
 /**
  * Delete Importer state
@@ -108,7 +109,7 @@ const updateImporterState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteImporterState = async ({ RowKey, PartitionKey, metadata }) =>
-  this.client.deleteEntity(TABLES.STORAGE_IMPORTERS_TABLE, {
+  client.deleteEntity(TABLES.STORAGE_IMPORTERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

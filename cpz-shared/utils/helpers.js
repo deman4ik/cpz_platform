@@ -53,17 +53,44 @@ function tryParseJSON(jsonString) {
 }
 
 /**
+ * timestamp (количество секунд с условного конца отсчета)
+ *
+ * @return {string}
+ */
+function getTimestamp() {
+  const timestamp = dayjs.utc().valueOf();
+  const invertedString = timestamp.toString();
+  const pad = "000000000000000";
+
+  return pad.substring(0, pad.length - invertedString.length) + invertedString;
+}
+
+/**
  * Инвертированный timestamp (количество секунд с условного конца отсчета)
  *
  * @param {Date} time
  * @return {string}
  */
 function getInvertedTimestamp(time) {
-  const inverted = new Date("3000-01-01").valueOf() - dayjs.utc(time).valueOf();
-  const invertedString = inverted.toString();
+  const invertedTimestamp =
+    new Date("3000-01-01").valueOf() - dayjs.utc(time).valueOf();
+  const invertedString = invertedTimestamp.toString();
   const pad = "000000000000000";
 
   return pad.substring(0, pad.length - invertedString.length) + invertedString;
+}
+
+/**
+ * Генерация ключа строки
+ * Каждое новое значение всегда больше предыдущего
+ * Применяется в Azure Table Storage для ASC сортировки строк в таблице по RowKey
+ *
+ * @returns {string}
+ */
+function generateKey() {
+  const timestamp = getTimestamp();
+  const uid = uuid();
+  return `${timestamp}_${uid}`;
 }
 
 /**
@@ -73,10 +100,10 @@ function getInvertedTimestamp(time) {
  *
  * @returns {string}
  */
-function generateKey() {
-  const inverted = getInvertedTimestamp(dayjs.utc());
+function generateInvertedKey() {
+  const timestamp = getInvertedTimestamp(dayjs.utc());
   const uid = uuid();
-  return `${inverted}_${uid}`;
+  return `${timestamp}_${uid}`;
 }
 
 /**
@@ -319,14 +346,23 @@ const hasQueryByPath = (obj, str) => {
   return true;
 };
 
+const flatten = (arr, depth = 1) =>
+  arr.reduce(
+    (a, v) =>
+      a.concat(depth > 1 && Array.isArray(v) ? flatten(v, depth - 1) : v),
+    []
+  );
+
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export {
   sortAsc,
   sortDesc,
   tryParseJSON,
+  getTimestamp,
   getInvertedTimestamp,
   generateKey,
+  generateInvertedKey,
   getQueryByPath,
   durationMinutes,
   hasQueryByPath,
@@ -341,5 +377,6 @@ export {
   filterOutNonUnique,
   precision,
   correctWithLimit,
+  flatten,
   sleep
 };

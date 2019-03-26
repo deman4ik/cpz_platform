@@ -52,7 +52,7 @@ const _positionStep = {
   }
 };
 
-const TRADES_EVENTS = {
+const TRADES_ORDER_EVENT_SCHEMA = {
   [TRADES_ORDER_EVENT]: {
     mode: {
       description: "Service run mode.",
@@ -73,11 +73,6 @@ const TRADES_EVENTS = {
     userId: {
       description: "User uniq Id.",
       type: "uuid",
-      empty: false
-    },
-    adviserId: {
-      description: "Adviser task Id.",
-      type: "string",
       empty: false
     },
     orderId: { description: "Uniq Order Id.", type: "string", empty: false },
@@ -162,7 +157,9 @@ const TRADES_EVENTS = {
       description: "Executed volume.",
       type: "number"
     }
-  },
+  }
+};
+const TRADES_POSITION_EVENT_SCHEMA = {
   [TRADES_POSITION_EVENT]: {
     positionId: {
       description: "Uniq Position Id.",
@@ -183,11 +180,6 @@ const TRADES_EVENTS = {
     userId: {
       description: "User uniq Id.",
       type: "uuid",
-      empty: false
-    },
-    adviserId: {
-      description: "Adviser task Id.",
-      type: "string",
       empty: false
     },
     exchange: { description: "Exchange code.", type: "exchange" },
@@ -213,16 +205,6 @@ const TRADES_EVENTS = {
       type: "string",
       values: [ORDER_DIRECTION_BUY, ORDER_DIRECTION_SELL]
     },
-    options: {
-      description: "Position options.",
-      type: "object",
-      optional: true
-    },
-    settings: {
-      description: "Position settings.",
-      type: "object",
-      props: TRADER_SETTINGS
-    },
     entry: {
       description: "Position entry.",
       type: "object",
@@ -236,4 +218,4 @@ const TRADES_EVENTS = {
   }
 };
 
-export default TRADES_EVENTS;
+export { TRADES_ORDER_EVENT_SCHEMA, TRADES_POSITION_EVENT_SCHEMA };

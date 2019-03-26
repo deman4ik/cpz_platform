@@ -13,7 +13,12 @@ class ServiceValidator {
 
   add(schemas) {
     Object.keys(schemas).forEach(key => {
-      this._validators[key] = validator.compile(schemas[key]);
+      try {
+        this._validators[key] = validator.compile(schemas[key]);
+      } catch (e) {
+        console.error(key, e);
+        throw e;
+      }
     });
   }
 

@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 
 const { TableQuery, TableUtilities } = azure;
@@ -14,7 +15,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getExWatcherById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_EXWATCHERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_EXWATCHERS_TABLE, taskId);
 
 /**
  * Find Exchange Data Watchers by any service Id
@@ -33,10 +34,7 @@ const findExWatchersByServiceId = async ({ taskId, serviceName }) => {
         taskId
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_EXWATCHERS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_EXWATCHERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -73,10 +71,7 @@ const findExWatchersByImporterId = async ({ taskId }) => {
         )
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_EXWATCHERS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_EXWATCHERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -95,7 +90,7 @@ const findExWatchersByImporterId = async ({ taskId }) => {
  * @param {Object} state
  */
 const saveExWatcherState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_EXWATCHERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_EXWATCHERS_TABLE, state);
 
 /**
  * Delete Exchange Data Watcher state
@@ -105,7 +100,7 @@ const saveExWatcherState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteExWatcherState = async ({ RowKey, PartitionKey, metadata }) =>
-  this.client.deleteEntity(TABLES.STORAGE_EXWATCHERS_TABLE, {
+  client.deleteEntity(TABLES.STORAGE_EXWATCHERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

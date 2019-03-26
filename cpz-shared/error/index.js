@@ -154,6 +154,6 @@ ServiceError.$$defaultFormatPattern =
   "{name}: {message}\ninfo: {info}\nstack: {stack}";
 
 ServiceError.$$fullStackFormatPattern =
-  "{name}: {message}\ninfo: {info}\nfullStack: {fullStack}";
+  "{name}: {message}\ninfo: {info}\nstack: {stack}\nfullStack: {fullStack}";
 
 export default ServiceError;

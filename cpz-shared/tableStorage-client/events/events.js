@@ -1,3 +1,5 @@
+import client from "./index";
+
 const TABLES = {
   STORAGE_TASKS_EVENTS_TABLE: "TasksEvents",
   STORAGE_SIGNALS_EVENTS_TABLE: "SignalsEvents",
@@ -13,7 +15,7 @@ const TABLES = {
  * @param {Object} data
  */
 const saveTasksEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_TASKS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_TASKS_EVENTS_TABLE, data);
 
 /**
  * Save signals event
@@ -21,7 +23,7 @@ const saveTasksEvent = data =>
  * @param {Object} data
  */
 const saveSignalsEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_SIGNALS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_SIGNALS_EVENTS_TABLE, data);
 
 /**
  * Save orders event
@@ -29,7 +31,7 @@ const saveSignalsEvent = data =>
  * @param {Object} data
  */
 const saveOrdersEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_ORDERS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_ORDERS_EVENTS_TABLE, data);
 
 /**
  * Save positions event
@@ -37,7 +39,7 @@ const saveOrdersEvent = data =>
  * @param {Object} data
  */
 const savePositionsEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_POSITIONS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_POSITIONS_EVENTS_TABLE, data);
 
 /**
  * Save logs event
@@ -45,7 +47,7 @@ const savePositionsEvent = data =>
  * @param {Object} data
  */
 const saveLogsEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_LOGS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_LOGS_EVENTS_TABLE, data);
 
 /**
  * Save erros event
@@ -53,7 +55,7 @@ const saveLogsEvent = data =>
  * @param {Object} data
  */
 const saveErrorsEvent = data =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_ERRORS_EVENTS_TABLE, data);
+  client.insertOrMergeEntity(TABLES.STORAGE_ERRORS_EVENTS_TABLE, data);
 
 export {
   saveTasksEvent,

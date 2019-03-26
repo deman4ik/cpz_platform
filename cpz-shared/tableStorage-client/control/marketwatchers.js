@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STOPPED } from "../../config/state";
 
@@ -14,7 +15,7 @@ const TABLES = {
  * @param {string} taskId - Marketwatcher task id
  */
 const getMarketwatcherById = async taskId =>
-  this.market.getEntityByRowKey(TABLES.STORAGE_MARKETWATCHERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_MARKETWATCHERS_TABLE, taskId);
 
 /**
  * Query Started Marketwatchers
@@ -30,7 +31,7 @@ const getStartedMarketwatchers = async () => {
         STATUS_STOPPED
       )
     );
-    return await this.market.queryEntities(
+    return await client.queryEntities(
       TABLES.STORAGE_MARKETWATCHERS_TABLE,
       query
     );
@@ -59,7 +60,7 @@ const findMarketwatcherByExchange = async exchange => {
         exchange
       )
     );
-    const marketwatchers = await this.market.queryEntities(
+    const marketwatchers = await client.queryEntities(
       TABLES.STORAGE_MARKETWATCHERS_TABLE,
       query
     );
@@ -82,7 +83,7 @@ const findMarketwatcherByExchange = async exchange => {
  * @param {Object} state
  */
 const saveMarketwatcherState = async state =>
-  this.market.insertOrMergeEntity(TABLES.STORAGE_MARKETWATCHERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_MARKETWATCHERS_TABLE, state);
 
 /**
  * Delete Marketwatcher state
@@ -92,7 +93,7 @@ const saveMarketwatcherState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteMarketwatcherState = async ({ RowKey, PartitionKey, metadata }) =>
-  this.market.deleteEntity(TABLES.STORAGE_MARKETWATCHERS_TABLE, {
+  client.deleteEntity(TABLES.STORAGE_MARKETWATCHERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

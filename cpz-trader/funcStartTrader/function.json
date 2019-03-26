@@ -1,0 +1,11 @@
+{
+  "disabled": false,
+  "entryPoint": "run",
+  "bindings": [
+    {
+      "name": "input",
+      "type": "activityTrigger",
+      "direction": "in"
+    }
+  ]
+}

@@ -5,6 +5,15 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const fs = require("fs");
 const path = require("path");
 
+function findEntryPoints() {
+  const entry = {};
+  fs.readdirSync(path.resolve(__dirname, "src/funcs")).forEach(file => {
+    const key = file.replace(".js", "");
+    entry[key] = path.resolve(__dirname, `src/funcs/${file}`);
+  });
+  return entry;
+}
+
 /**
  * Finds all functions entry points from /src/funcs
  *
@@ -13,26 +22,26 @@ const path = require("path");
 const config = {
   mode: process.env.NODE_ENV || "production",
   watch: false,
-  entry: path.resolve(__dirname, "src/index.js"),
+  entry: findEntryPoints(),
   resolve: {
     alias: {
       cpz: path.resolve(__dirname, "../cpz-shared")
     }
   },
   output: {
-    filename: "service.js",
+    filename: "[name].js",
     path: `${__dirname}/dist`,
     libraryTarget: "commonjs2"
   },
   module: {
     rules: [
       {
-        use: {
+        /* use: {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"]
           }
-        },
+        }, */
         test: /\.js$/,
         exclude: /node_modules/
       }
@@ -44,7 +53,6 @@ const config = {
   plugins: [
     new CleanWebpackPlugin(),
     new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({
       banner: 'require("source-map-support").install();',

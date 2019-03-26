@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import dayjs from "../../utils/lib/dayjs";
 import { CANDLE_PREVIOUS } from "../../config/state";
@@ -50,7 +51,7 @@ const _getCandles = async (tableName, { dateFrom, dateTo, slug }) => {
         partitionKeyFilter
       )
     );
-    return await this.client.queryEntities(tableName, query);
+    return await client.queryEntities(tableName, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -71,7 +72,7 @@ const _getCandles = async (tableName, { dateFrom, dateTo, slug }) => {
  * @returns {Object[]}
  */
 const getPendingCandlesByAdviserId = adviserId =>
-  this.client.getEntitiesByPartitionKey(
+  client.getEntitiesByPartitionKey(
     TABLES.STORAGE_CANDLESPENDING_TABLE,
     adviserId
   );
@@ -82,7 +83,7 @@ const getPendingCandlesByAdviserId = adviserId =>
  * @param {Object} candle
  */
 const savePendingCandle = candle =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
+  client.insertOrMergeEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
 
 /**
  * Delete pending candle
@@ -90,7 +91,7 @@ const savePendingCandle = candle =>
  * @param {Object} candle
  */
 const deletePendingCandle = candle =>
-  this.client.deleteEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
+  client.deleteEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
 
 /**
  * Query cached candles
@@ -118,7 +119,7 @@ const getCachedCandlesByKey = async (key, limit) => {
         )
       )
       .top(limit);
-    return await this.client.queryEntities(
+    return await client.queryEntities(
       TABLES.STORAGE_CANDLESCACHED_TABLE,
       query
     );
@@ -190,7 +191,7 @@ const countCachedCandles = async ({ slug, dateFrom, dateTo }) => {
       )
       .select("RowKey");
 
-    return await this.client.countEntities(
+    return await client.countEntities(
       TABLES.STORAGE_CANDLESCACHED_TABLE,
       query
     );
@@ -212,7 +213,7 @@ const countCachedCandles = async ({ slug, dateFrom, dateTo }) => {
  * @param {Object} candle
  */
 const saveCandleToCache = candle =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_CANDLESCACHED_TABLE, candle);
+  client.insertOrMergeEntity(TABLES.STORAGE_CANDLESCACHED_TABLE, candle);
 
 /**
  * Save cached candles
@@ -220,7 +221,7 @@ const saveCandleToCache = candle =>
  * @param {Object[]} candles
  */
 const saveCandlesArrayToCache = candles =>
-  this.client.insertOrMergeArray(TABLES.STORAGE_CANDLESCACHED_TABLE, candles);
+  client.insertOrMergeArray(TABLES.STORAGE_CANDLESCACHED_TABLE, candles);
 
 /**
  * Delete cached candles
@@ -228,7 +229,7 @@ const saveCandlesArrayToCache = candles =>
  * @param {Object[]} candles
  */
 const deleteCachedCandlesArray = candles =>
-  this.client.deleteArray(TABLES.STORAGE_CANDLESCACHED_TABLE, candles);
+  client.deleteArray(TABLES.STORAGE_CANDLESCACHED_TABLE, candles);
 
 /**
  * Clean outdated cached candles
@@ -259,7 +260,7 @@ const cleanCachedCandles = async ({ slug, dateTo }) => {
         )
       )
       .select("PartitionKey", "RowKey");
-    const candles = await this.client.queryEntities(
+    const candles = await client.queryEntities(
       TABLES.STORAGE_CANDLESCACHED_TABLE,
       query
     );
@@ -294,7 +295,7 @@ const getTempCandles = ({ dateFrom, dateTo, slug }) =>
  * @param {Object[]} candles
  */
 const saveCandlesArrayToTemp = candles =>
-  this.client.insertOrMergeArray(TABLES.STORAGE_CANDLESTEMP_TABLE, candles);
+  client.insertOrMergeArray(TABLES.STORAGE_CANDLESTEMP_TABLE, candles);
 
 /**
  * Delete temp candles
@@ -302,7 +303,7 @@ const saveCandlesArrayToTemp = candles =>
  * @param {Object[]} candles
  */
 const deleteTempCandlesArray = candles =>
-  this.client.deleteArray(TABLES.STORAGE_CANDLESTEMP_TABLE, candles);
+  client.deleteArray(TABLES.STORAGE_CANDLESTEMP_TABLE, candles);
 
 /**
  * Delete all temp candles for service task id
@@ -319,7 +320,7 @@ const clearTempCandles = async taskId => {
     const query = new TableQuery()
       .where(taskIdFilter)
       .select("PartitionKey", "RowKey");
-    const candles = await this.client.queryEntities(
+    const candles = await client.queryEntities(
       TABLES.STORAGE_CANDLESTEMP_TABLE,
       query
     );

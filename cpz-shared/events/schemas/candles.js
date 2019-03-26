@@ -3,8 +3,9 @@ import {
   CANDLES_NEWCANDLE_EVENT,
   CANDLES_HANDLED_EVENT
 } from "../types/candles";
+import { ADVISER_SERVICE } from "../../config/services";
 
-const CANDLES_EVENTS = {
+const CANDLES_NEWCANDLE_EVENT_SCHEMA = {
   [CANDLES_NEWCANDLE_EVENT]: {
     id: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "exchange" },
@@ -24,51 +25,24 @@ const CANDLES_EVENTS = {
     high: { description: "Candle Highest Price.", type: "number" },
     low: { description: "Trade Lowest Price.", type: "number" },
     volume: { description: "Candle Volume.", type: "number" }
-  },
+  }
+};
+const CANDLES_HANDLED_EVENT_SCHEMA = {
   [CANDLES_HANDLED_EVENT]: {
     id: { description: "Uniq Candle Id.", type: "string", empty: false },
-    service: {
+    taskId: {
+      description: "Uniq task id.",
+      type: "string",
+      empty: false
+    },
+    serviceName: {
       description: "Sevice name handeling event",
       type: "string",
-      values: ["adviser", "trader"]
+      values: [ADVISER_SERVICE]
     },
-    success: {
-      description: "Success execution list",
-      type: "array",
-      items: "string",
-      optional: true
-    },
-    error: {
-      description: "Error execution list",
-      type: "array",
-      items: {
-        type: "object",
-        props: {
-          taskId: { type: "string", empty: false },
-          error: BASE_ERROR
-        }
-      },
-      optional: true
-    },
-    successPending: {
-      description: "Success queued list",
-      type: "array",
-      items: "string",
-      optional: true
-    },
-    errorPending: {
-      description: "Error queued list",
-      type: "array",
-      items: {
-        type: "object",
-        props: {
-          taskId: { type: "string", empty: false },
-          error: BASE_ERROR
-        }
-      },
-      optional: true
-    }
+    success: { description: "Success Sign.", type: "boolean" },
+    error: BASE_ERROR
   }
 };
 
-export default CANDLES_EVENTS;
+export { CANDLES_NEWCANDLE_EVENT_SCHEMA, CANDLES_HANDLED_EVENT_SCHEMA };

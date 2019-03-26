@@ -3,10 +3,9 @@ import EventGrid from "azure-eventgrid";
 import url from "url";
 import { v4 as uuid } from "uuid";
 import ServiceError from "../error";
-import retry from "../utils/retry";
 import Log from "../log";
 import ServiceValidator from "../validator";
-import typesByTopics, * as types from "./types";
+import typesByTopics from "./types";
 
 /**
  * Event Grid Service Client
@@ -42,17 +41,6 @@ class EG {
       dataVersion: "1.0",
       eventTime: new Date()
     };
-  }
-
-  /**
-   * Event Types
-   *
-   * @readonly
-   * @static
-   * @memberof EG
-   */
-  static get types() {
-    return types;
   }
 
   /**
@@ -154,25 +142,19 @@ class EG {
   async publish(eventType, eventData) {
     try {
       // Get Event Grid Topic name by Event Type
-      const topic = EG._getTopicByEventType(eventType);
+      const topic = this._getTopicByEventType(eventType);
       // Merge Event Data with common properties
-      const newEvent = this._mergeEventData(eventData);
+      const newEvent = this._mergeEventData({ eventType, ...eventData });
       // Validate Event Data by Type Schema
       ServiceValidator.check(eventType, newEvent.data);
 
-      await retry(
-        async () => {
-          // Get Event Grid Client for Topic
-          const { client, host } = this._clients[topic];
-          // Publish Event to Event Grid Topic
-          await client.publishEvents(host, [newEvent]);
-        },
-        {
-          retries: 3,
-          minTimeout: 200,
-          maxTimeout: 1000
-        }
-      );
+      // Get Event Grid Client for Topic
+      const { client, endpoint } = this._clients[topic];
+
+      // Publish Event to Event Grid Topic
+      await client.publishEvents(endpoint, [newEvent]);
+
+      Log.event(eventType, newEvent);
     } catch (error) {
       const err = new ServiceError(
         {

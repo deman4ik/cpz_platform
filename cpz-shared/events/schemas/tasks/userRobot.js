@@ -85,10 +85,16 @@ const USER_ROBOT_UPDATE_PARAMS = {
 /**
  * Событие - Робот запущен
  */
-const TASKS_USERROBOT_EVENTS = {
-  [USER_ROBOT_START]: USER_ROBOT_START_PARAMS,
-  [USER_ROBOT_STOP]: USER_ROBOT_STOP_PARAMS,
-  [USER_ROBOT_UPDATE]: USER_ROBOT_UPDATE_PARAMS,
+const USER_ROBOT_START_SCHEMA = {
+  [USER_ROBOT_START]: USER_ROBOT_START_PARAMS
+};
+const USER_ROBOT_STOP_SCHEMA = {
+  [USER_ROBOT_STOP]: USER_ROBOT_STOP_PARAMS
+};
+const USER_ROBOT_UPDATE_SCHEMA = {
+  [USER_ROBOT_UPDATE]: USER_ROBOT_UPDATE_PARAMS
+};
+const TASKS_USERROBOT_STARTED_EVENT_SCHEMA = {
   [TASKS_USERROBOT_STARTED_EVENT]: {
     ...USER_ROBOT_START_PARAMS,
     status: { description: "Current status.", type: "string", empty: false },
@@ -97,7 +103,9 @@ const TASKS_USERROBOT_EVENTS = {
       type: "datetime"
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_USERROBOT_STOPPED_EVENT_SCHEMA = {
   [TASKS_USERROBOT_STOPPED_EVENT]: {
     ...USER_ROBOT_STOP_PARAMS,
     status: { description: "Current status.", type: "string", empty: false },
@@ -106,7 +114,9 @@ const TASKS_USERROBOT_EVENTS = {
       type: "datetime"
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_USERROBOT_UPDATED_EVENT_SCHEMA = {
   [TASKS_USERROBOT_UPDATED_EVENT]: {
     ...USER_ROBOT_UPDATE_PARAMS,
     status: { description: "Current status.", type: "string", empty: false },
@@ -114,4 +124,11 @@ const TASKS_USERROBOT_EVENTS = {
   }
 };
 
-export default TASKS_USERROBOT_EVENTS;
+export {
+  USER_ROBOT_START_SCHEMA,
+  USER_ROBOT_STOP_SCHEMA,
+  USER_ROBOT_UPDATE_SCHEMA,
+  TASKS_USERROBOT_STARTED_EVENT_SCHEMA,
+  TASKS_USERROBOT_STOPPED_EVENT_SCHEMA,
+  TASKS_USERROBOT_UPDATED_EVENT_SCHEMA
+};

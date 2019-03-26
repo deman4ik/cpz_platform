@@ -3,8 +3,8 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "AzureWebJobsStorage": "",
+    "AZ_STORAGE_CONTROL_CS": "",
     "AZ_STORAGE_MARKET_CS": "",
-    "AZ_STORAGE_TRADE_CS": "",
     "API_KEY": "test",
     "EG_TASKS_ENDPOINT": "https://localhost:443",
     "EG_TASKS_KEY": "test",
@@ -12,6 +12,8 @@
     "EG_SIGNALS_KEY": "test",
     "EG_LOG_ENDPOINT": "https://localhost:443",
     "EG_LOG_KEY": "test",
+    "EG_ERROR_ENDPOINT": "https://localhost:443",
+    "EG_ERROR_KEY": "test",
     "EG_TRADES_ENDPOINT": "https://localhost:443",
     "EG_TRADES_KEY": "test",
     "CONNECTOR_API_ENDPOINT": "",

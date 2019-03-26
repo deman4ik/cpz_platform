@@ -20,13 +20,14 @@ const DB_ERROR = "DBError";
 
 const VALIDATION_ERROR = "ValidationError";
 
+const LOG_ERROR = "LogError";
+
 export * from "./marketwatcher";
 export * from "./candlebatcher";
 export * from "./backtester";
 export * from "./connector";
 export * from "./exwatcher";
 export * from "./provider";
-export * from "./position";
 export * from "./importer";
 export * from "./adviser";
 export * from "./trader";
@@ -47,5 +48,6 @@ export {
   NETWOKR_ERROR,
   RETRY_ERROR,
   DB_ERROR,
-  VALIDATION_ERROR
+  VALIDATION_ERROR,
+  LOG_ERROR
 };

@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
 
@@ -15,7 +16,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getAdviserById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_ADVISERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_ADVISERS_TABLE, taskId);
 
 /**
  * Find Adviser
@@ -32,7 +33,7 @@ const findAdviser = async ({ robotId }) => {
       robotId
     );
     const query = new TableQuery().where(robotIdFilter);
-    const advisers = await this.client.queryEntities(
+    const advisers = await client.queryEntities(
       TABLES.STORAGE_ADVISERS_TABLE,
       query
     );
@@ -85,10 +86,7 @@ const getActiveAdvisersBySlug = async slug => {
         statusFilter
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_ADVISERS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -107,7 +105,7 @@ const getActiveAdvisersBySlug = async slug => {
  * @param {Object} state
  */
 const saveAdviserState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_ADVISERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_ADVISERS_TABLE, state);
 
 /**
  * Updates current Adviser State
@@ -115,7 +113,7 @@ const saveAdviserState = async state =>
  * @param {Object} state
  */
 const updateAdviserState = async state =>
-  this.client.mergeEntity(TABLES.STORAGE_ADVISERS_TABLE, state);
+  client.mergeEntity(TABLES.STORAGE_ADVISERS_TABLE, state);
 
 /**
  * Delete Adviser state
@@ -125,7 +123,7 @@ const updateAdviserState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
-  this.client.deleteEntity(TABLES.STORAGE_ADVISERS_TABLE, {
+  client.deleteEntity(TABLES.STORAGE_ADVISERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

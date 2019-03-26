@@ -1,3 +1,5 @@
+import client from "./index";
+
 const TABLES = {
   STORAGE_CURRENTPRICES_TABLE: "CurrentPrices"
 };
@@ -7,7 +9,7 @@ const TABLES = {
  * @param {string} slug
  */
 const getCurrentPrice = async slug =>
-  this.client.getEntityByKeys(TABLES.STORAGE_CURRENTPRICES_TABLE, {
+  client.getEntityByKeys(TABLES.STORAGE_CURRENTPRICES_TABLE, {
     PartitionKey: slug,
     RowKey: slug
   });
@@ -18,7 +20,7 @@ const getCurrentPrice = async slug =>
  * @param {number} price
  */
 const saveCurrentPrice = async price =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_CURRENTPRICES_TABLE, price);
+  client.insertOrMergeEntity(TABLES.STORAGE_CURRENTPRICES_TABLE, price);
 
 export { getCurrentPrice, saveCurrentPrice };
 export default Object.values(TABLES);

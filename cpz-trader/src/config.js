@@ -1,102 +1,44 @@
 import { TRADER_SERVICE } from "cpz/config/services";
-import {
-  TASKS_TOPIC,
-  CANDLES_TOPIC,
-  TICKS_TOPIC,
-  SIGNALS_TOPIC,
-  TRADES_TOPIC,
-  LOG_TOPIC,
-  ERROR_TOPIC
-} from "cpz/events/topics";
-import {
-  BASE_EVENT,
-  SUB_VALIDATION_EVENT,
-  SUB_DELETED_EVENT
-} from "cpz/events/types/base";
-import {
-  CANDLES_NEWCANDLE_EVENT,
-  CANDLES_HANDLED_EVENT
-} from "cpz/events/types/candles";
-import {
-  ERROR_TRADER_ERROR_EVENT,
-  ERROR_TRADER_WARN_EVENT
-} from "cpz/events/types/error";
-import { LOG_TRADER_LOG_EVENT } from "cpz/events/types/log";
-import {
-  SIGNALS_NEWSIGNAL_EVENT,
-  SIGNALS_HANDLED_EVENT
-} from "cpz/events/types/signals";
-import {
-  TICKS_NEWTICK_EVENT,
-  TICKS_HANDLED_EVENT
-} from "cpz/events/types/ticks";
-import {
-  TRADES_ORDER_EVENT,
-  TRADES_POSITION_EVENT
-} from "cpz/events/types/trades";
-import {
-  TASKS_TRADER_START_EVENT,
-  TASKS_TRADER_STARTED_EVENT,
-  TASKS_TRADER_STOP_EVENT,
-  TASKS_TRADER_STOPPED_EVENT,
-  TASKS_TRADER_UPDATE_EVENT,
-  TASKS_TRADER_UPDATED_EVENT
-} from "cpz/events/types/tasks/trader";
-import schemas from "cpz/events/schemas";
 
-export default {
-  serviceName: TRADER_SERVICE,
-  events: {
-    topics: {
-      TASKS_TOPIC,
-      CANDLES_TOPIC,
-      TICKS_TOPIC,
-      SIGNALS_TOPIC,
-      TRADES_TOPIC,
-      LOG_TOPIC,
-      ERROR_TOPIC
-    },
-    types: {
-      BASE_EVENT,
-      SUB_VALIDATION_EVENT,
-      SUB_DELETED_EVENT,
-      CANDLES_NEWCANDLE_EVENT,
-      CANDLES_HANDLED_EVENT,
-      ERROR_TRADER_ERROR_EVENT,
-      ERROR_TRADER_WARN_EVENT,
-      LOG_TRADER_LOG_EVENT,
-      SIGNALS_NEWSIGNAL_EVENT,
-      SIGNALS_HANDLED_EVENT,
-      TICKS_NEWTICK_EVENT,
-      TICKS_HANDLED_EVENT,
-      TRADES_ORDER_EVENT,
-      TRADES_POSITION_EVENT,
-      TASKS_TRADER_START_EVENT,
-      TASKS_TRADER_STARTED_EVENT,
-      TASKS_TRADER_STOP_EVENT,
-      TASKS_TRADER_STOPPED_EVENT,
-      TASKS_TRADER_UPDATE_EVENT,
-      TASKS_TRADER_UPDATED_EVENT
-    },
-    schemas: {
-      [BASE_EVENT]: schemas[BASE_EVENT],
-      [CANDLES_NEWCANDLE_EVENT]: schemas[CANDLES_NEWCANDLE_EVENT],
-      [CANDLES_HANDLED_EVENT]: schemas[CANDLES_HANDLED_EVENT],
-      [ERROR_TRADER_ERROR_EVENT]: schemas[ERROR_TRADER_ERROR_EVENT],
-      [ERROR_TRADER_WARN_EVENT]: schemas[ERROR_TRADER_WARN_EVENT],
-      [LOG_TRADER_LOG_EVENT]: schemas[LOG_TRADER_LOG_EVENT],
-      [SIGNALS_NEWSIGNAL_EVENT]: schemas[SIGNALS_NEWSIGNAL_EVENT],
-      [SIGNALS_HANDLED_EVENT]: schemas[SIGNALS_HANDLED_EVENT],
-      [TICKS_NEWTICK_EVENT]: schemas[TICKS_NEWTICK_EVENT],
-      [TICKS_HANDLED_EVENT]: schemas[TICKS_HANDLED_EVENT],
-      [TRADES_ORDER_EVENT]: schemas[TRADES_ORDER_EVENT],
-      [TRADES_POSITION_EVENT]: schemas[TRADES_POSITION_EVENT],
-      [TASKS_TRADER_START_EVENT]: schemas[TASKS_TRADER_START_EVENT],
-      [TASKS_TRADER_STARTED_EVENT]: schemas[TASKS_TRADER_STARTED_EVENT],
-      [TASKS_TRADER_STOP_EVENT]: schemas[TASKS_TRADER_STOP_EVENT],
-      [TASKS_TRADER_STOPPED_EVENT]: schemas[TASKS_TRADER_STOPPED_EVENT],
-      [TASKS_TRADER_UPDATE_EVENT]: schemas[TASKS_TRADER_UPDATE_EVENT],
-      [TASKS_TRADER_UPDATED_EVENT]: schemas[TASKS_TRADER_UPDATED_EVENT]
-    }
-  }
+const SERVICE_NAME = TRADER_SERVICE;
+
+const FUNCTIONS = {
+  HTTP_TASK_EVENTS: "funcTaskEvents",
+  HTTP_SIGNAL_EVENTS: "funcSignalEvents",
+  HTTP_CANDLE_EVENTS: "funcCandleEvents",
+  HTTP_TICK_EVENTS: "funcTickEvents",
+  TIMER: "funcTimer",
+  ORCHESTRATOR: "funcOrchestrator",
+  ACTIVITY_CHECK_PRICE: "funcCheckPrice",
+  ACTIVITY_CLOSE_ACTIVE_POSITIONS: "funcCloseActivePositions",
+  ACTIVITY_DELETE_ACTION: "funcDeleteAction",
+  ACTIVITY_EVENT_PUBLISH: "funcEventPublish",
+  ACTIVITY_EXECUTE_ORDERS: "funcExecuteOrders",
+  ACTIVITY_GET_CURRENT_RPICE: "funcGetCurrentPrice",
+  ACTIVITY_HANDLE_ORDERS: "funcHandleOrders",
+  ACTIVITY_HANDLE_SIGNAL: "funcHandleSignal",
+  ACTIVITY_LOAD_ACTION: "funcLoadAction",
+  ACTIVITY_SAVE_STATE: "funcSaveState",
+  ACTIVITY_START_TRADER: "funcStartTrader",
+  ACTIVITY_STOP_TRADER: "funcStopTrader",
+  ACTIVITY_UPDATE_TRADER: "funcUpdateTrader"
 };
+const INTERNAL = {
+  actions: {
+    START: "start",
+    STOP: "stop",
+    UPDATE: "update",
+    SIGNAL: "signal",
+    PRICE: "price",
+    CHECK: "check"
+  },
+  status: {
+    READY: "ready",
+    BUSY: "busy"
+  },
+  events: {
+    TRADER_ACTION: "traderAction"
+  },
+  traderIdleMinutes: 1
+};
+export { SERVICE_NAME, FUNCTIONS, INTERNAL };

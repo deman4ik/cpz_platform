@@ -8,7 +8,7 @@ import {
   TASKS_IMPORTER_FINISHED_EVENT
 } from "../../types/tasks/importer";
 
-const TASKS_IMPORTER_EVENTS = {
+const TASKS_IMPORTER_START_EVENT_SCHEMA = {
   [TASKS_IMPORTER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -59,14 +59,18 @@ const TASKS_IMPORTER_EVENTS = {
       optional: true,
       empty: false
     }
-  },
+  }
+};
+const TASKS_IMPORTER_STOP_EVENT_SCHEMA = {
   [TASKS_IMPORTER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_IMPORTER_STARTED_EVENT_SCHEMA = {
   [TASKS_IMPORTER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -74,7 +78,9 @@ const TASKS_IMPORTER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_IMPORTER_STOPPED_EVENT_SCHEMA = {
   [TASKS_IMPORTER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -82,7 +88,9 @@ const TASKS_IMPORTER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_IMPORTER_FINISHED_EVENT_SCHEMA = {
   [TASKS_IMPORTER_FINISHED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -92,4 +100,10 @@ const TASKS_IMPORTER_EVENTS = {
   }
 };
 
-export default TASKS_IMPORTER_EVENTS;
+export {
+  TASKS_IMPORTER_START_EVENT_SCHEMA,
+  TASKS_IMPORTER_STOP_EVENT_SCHEMA,
+  TASKS_IMPORTER_STARTED_EVENT_SCHEMA,
+  TASKS_IMPORTER_STOPPED_EVENT_SCHEMA,
+  TASKS_IMPORTER_FINISHED_EVENT_SCHEMA
+};

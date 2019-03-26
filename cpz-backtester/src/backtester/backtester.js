@@ -1,5 +1,5 @@
 import dayjs from "cpz/utils/lib/dayjs";
-import VError from "verror";
+import ServiceError from "cpz/error";
 import {
   BACKTEST_MODE,
   createBacktesterSlug,
@@ -14,7 +14,11 @@ import {
   combineBacktesterSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
-import { chunkNumberToArray, generateKey, sortAsc } from "cpz/utils/helpers";
+import {
+  chunkNumberToArray,
+  generateInvertedKey,
+  sortAsc
+} from "cpz/utils/helpers";
 import { createErrorOutput } from "cpz/utils/error";
 import {
   deleteBacktesterState,
@@ -118,25 +122,6 @@ class Backtester {
     Log.error(`Backtester ${this.eventSubject}:`, ...args);
   }
 
-  /**
-   * Логирование в EventGrid в топик CPZ-LOGS
-   *
-   * @param {*} data
-   * @memberof Adviser
-   */
-  logEvent(data) {
-    // Публикуем событие
-    publishEvents(LOG_TOPIC, {
-      service: config.serviceName,
-      subject: this.eventSubject,
-      eventType: LOG_BACKTESTER_EVENT,
-      data: {
-        taskId: this.taskId,
-        ...data
-      }
-    });
-  }
-
   getCurrentState() {
     return {
       ...this.initialState,
@@ -159,9 +144,9 @@ class Backtester {
       await saveBacktesterState(this.getCurrentState());
       await saveBacktestsDB(this.getCurrentState());
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "BacktesterError",
+          name: ServiceError.types.BACKTESTER_ERROR,
           cause: error,
           info: {
             taskId: this.taskId
@@ -236,9 +221,9 @@ class Backtester {
         // Если загрузили меньше свечей чем запросили
         if (requiredHistoryCandles.length < this.requiredHistoryMaxBars) {
           // Генерируем ошибку
-          throw new VError(
+          throw new ServiceError(
             {
-              name: "HistoryRangeError",
+              name: ServiceError.types.BACKTEST_HISTORY_RANGE_ERROR,
               info: {
                 requiredHistoryMaxBars: this.requiredHistoryMaxBars,
                 actualHistoryMaxBars: requiredHistoryCandles.length
@@ -299,10 +284,11 @@ class Backtester {
 
         for (const candle of historyCandles) {
           await this.adviserBacktester.handleCandle(candle);
-          await this.traderBacktester.handleCandle(candle);
-
+          this.traderBacktester.handleCandle(candle);
+          this.traderBacktester.executeOrders();
           for (const signal of this.adviserBacktester.signals) {
-            await this.traderBacktester.handleSignal(signal.data);
+            this.traderBacktester.handleSignal(signal.data);
+            this.traderBacktester.executeOrders();
           }
 
           const indicators = {};
@@ -323,7 +309,7 @@ class Backtester {
               });
               /* Disabled save to storage
               signalsToSave.push({
-                RowKey: generateKey(),
+                RowKey: generateInvertedKey(),
                 PartitionKey: this.taskId,
                 backtesterId: this.taskId,
                 backtesterCandleId: candle.id,
@@ -351,17 +337,17 @@ class Backtester {
                 backtesterCandleOpen: candle.open,
                 backtesterCandleClose: candle.close,
                 backtesterCandleLow: candle.low,
-                RowKey: generateKey(),
+                RowKey: generateInvertedKey(),
                 PartitionKey: this.taskId
               });
             });
           }
           // Если есть хотя бы одно событие для отправка
-          if (this.traderBacktester.events.length > 0) {
-            const positions = this.traderBacktester.events.filter(
-              event => event.eventType === TRADES_POSITION_EVENT
-            );
-            const orders = this.traderBacktester.events.filter(
+          if (Object.keys(this.traderBacktester.events).length > 0) {
+            const positions = Object.values(
+              this.traderBacktester.events
+            ).filter(event => event.eventType === TRADES_POSITION_EVENT);
+            const orders = Object.values(this.traderBacktester.events).filter(
               event => event.eventType === TRADES_ORDER_EVENT
             );
             positions.forEach(positionEvent => {
@@ -445,7 +431,7 @@ class Backtester {
                 status: orderEvent.data.status,
                 executed: orderEvent.data.executed,
                 signalId: orderEvent.data.signalId,
-                RowKey: generateKey(),
+                RowKey: generateInvertedKey(),
                 PartitionKey: this.taskId
               });
               /* */
@@ -517,9 +503,9 @@ class Backtester {
         "minutes"
       );
     } catch (error) {
-      const err = new VError(
+      const err = new ServiceError(
         {
-          name: "BacktestError",
+          name: ServiceError.types.BACKTESTER_ERROR,
           cause: error
         },
         'Failed to execute backtest taskId: "%s"',

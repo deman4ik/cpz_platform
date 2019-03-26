@@ -8,14 +8,25 @@ const { entityGenerator } = TableUtilities;
  * Azure Table Storage API and helpers
  */
 class TableStorage {
-  constructor(connectionString) {
+  async init(connectionString, tables) {
     try {
       this.tableService = azure
         .createTableService(connectionString)
         .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
+      if (!tables || !Array.isArray(tables) || tables.length === 0)
+        throw new ServiceError(
+          {
+            name: ServiceError.types.TABLE_STORAGE_ERROR
+          },
+          "Wrong Table Storage tables list"
+        );
+
+      await Promise.all(
+        tables.map(async table => {
+          this.createTableIfNotExists(table);
+        })
+      );
     } catch (error) {
-      console.log(connectionString);
-      console.log(error);
       throw new ServiceError(
         { name: ServiceError.types.TABLE_STORAGE_ERROR, cause: error },
         "Failed to create table storage client."

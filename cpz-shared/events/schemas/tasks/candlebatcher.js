@@ -10,7 +10,7 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT
 } from "../../types/tasks/candlebatcher";
 
-const TASKS_CANDLEBATCHER_EVENTS = {
+const TASKS_CANDLEBATCHER_START_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -37,14 +37,18 @@ const TASKS_CANDLEBATCHER_EVENTS = {
       type: "object",
       props: CANDLEBATCHER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_CANDLEBATCHER_STOP_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_CANDLEBATCHER_UPDATE_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_UPDATE_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -56,7 +60,9 @@ const TASKS_CANDLEBATCHER_EVENTS = {
       type: "object",
       props: CANDLEBATCHER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_CANDLEBATCHER_STARTED_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -64,7 +70,9 @@ const TASKS_CANDLEBATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_CANDLEBATCHER_STOPPED_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -72,7 +80,9 @@ const TASKS_CANDLEBATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA = {
   [TASKS_CANDLEBATCHER_UPDATED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -83,4 +93,11 @@ const TASKS_CANDLEBATCHER_EVENTS = {
   }
 };
 
-export default TASKS_CANDLEBATCHER_EVENTS;
+export {
+  TASKS_CANDLEBATCHER_START_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_STOP_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_UPDATE_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_STARTED_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_STOPPED_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA
+};

@@ -5,7 +5,7 @@ import {
   SIGNALS_HANDLED_EVENT
 } from "../types/signals";
 
-const SIGNALS_EVENTS = {
+const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
   [SIGNALS_NEWSIGNAL_EVENT]: {
     signalId: { description: "Uniq Candle Id.", type: "string", empty: false },
     exchange: { description: "Exchange code.", type: "exchange" },
@@ -68,8 +68,6 @@ const SIGNALS_EVENTS = {
       description: "Trader parameters.",
       type: "object",
       props: {
-        slippageStep: TRADER_SETTINGS.slippageStep,
-        deviation: TRADER_SETTINGS.deviation,
         volume: TRADER_SETTINGS.volume,
         positionCode: {
           description: "Position code.",
@@ -80,51 +78,24 @@ const SIGNALS_EVENTS = {
       },
       optional: true
     }
-  },
+  }
+};
+const SIGNALS_HANDLED_EVENT_SCHEMA = {
   [SIGNALS_HANDLED_EVENT]: {
     signalId: { description: "Uniq Signal Id.", type: "string", empty: false },
-    service: {
+    taskId: {
+      description: "Uniq task id.",
+      type: "string",
+      empty: false
+    },
+    serviceName: {
       description: "Sevice name handeling event",
       type: "string",
       values: ["trader"]
     },
-    success: {
-      description: "Success execution list",
-      type: "array",
-      items: "string",
-      optional: true
-    },
-    error: {
-      description: "Error execution list",
-      type: "array",
-      items: {
-        type: "object",
-        props: {
-          taskId: { type: "string", empty: false },
-          error: BASE_ERROR
-        }
-      },
-      optional: true
-    },
-    successPending: {
-      description: "Success queued list",
-      type: "array",
-      items: "string",
-      optional: true
-    },
-    errorPending: {
-      description: "Error queued list",
-      type: "array",
-      items: {
-        type: "object",
-        props: {
-          taskId: { type: "string", empty: false },
-          error: BASE_ERROR
-        }
-      },
-      optional: true
-    }
+    success: { description: "Success Sign.", type: "boolean" },
+    error: BASE_ERROR
   }
 };
 
-export default SIGNALS_EVENTS;
+export { SIGNALS_NEWSIGNAL_EVENT_SCHEMA, SIGNALS_HANDLED_EVENT_SCHEMA };

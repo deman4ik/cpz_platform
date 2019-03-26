@@ -1,7 +1,6 @@
 {
   "disabled": false,
-  "scriptFile": "../index.js",
-  "entryPoint": "tickEvents",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",
@@ -15,6 +14,11 @@
       "type": "http",
       "direction": "out",
       "name": "res"
+    },
+    {
+      "name": "starter",
+      "type": "orchestrationClient",
+      "direction": "in"
     }
   ]
 }

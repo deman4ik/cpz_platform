@@ -1,29 +1,22 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
+import {
+  ORDER_STATUS_OPEN,
+  ORDER_STATUS_CLOSED,
+  ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
+  ORDER_TASK_OPENBYMARKET,
+  ORDER_TASK_SETLIMIT,
+  ORDER_TASK_CHECKLIMIT
+} from "cpz/config/state";
 import Trader from "cpzTrader/trader";
-import Log from "cpz/log";
-import { POS_STATUS_NEW, POS_STATUS_OPEN } from "cpz/config/state";
 
 class TraderBacktester extends Trader {
   clearEvents() {
-    this._events = [];
-  }
-
-  log(...args) {
-    if (this._settings.debug) {
-      Log.debug(`Trader ${this._eventSubject}:`, ...args);
-    }
-  }
-
-  logInfo(...args) {
-    Log.info(`Trader ${this._eventSubject}:`, ...args);
-  }
-
-  logError(...args) {
-    Log.error(`Trader ${this._eventSubject}:`, ...args);
+    this._eventsToSend = {};
   }
 
   // Обработка новой свечи
-  async handleCandle(candle) {
+  handleCandle(candle) {
     try {
       // По умолчанию берем цену закрытия свечи
       let price = candle.close;
@@ -43,37 +36,89 @@ class TraderBacktester extends Trader {
         }, c:${candle.close}`,
         `price: ${price}`
       );
-      this.handlePrice({ price, timestamp: candle.timestamp });
-      /* eslint-disable no-restricted-syntax */
-      for (const key of Object.keys(this._currentPositions)) {
-        /* eslint-disable no-await-in-loop */
-        const position = this._currentPositions[key];
-        if (
-          position.status === POS_STATUS_NEW ||
-          position.status === POS_STATUS_OPEN
-        ) {
-          const requiredOrders = position.getRequiredOrders(price);
-          if (requiredOrders.length > 0) {
-            await this.executeOrders(requiredOrders);
-          }
-        }
-        /* no-await-in-loop */
-      }
-      /*  no-restricted-syntax */
+      this.checkPrice({
+        price,
+        timestamp: candle.timestamp,
+        candleId: candle.id,
+        tickId: null
+      });
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "TraderError",
+          name: ServiceError.types.TRADER_ERROR,
           cause: error,
           info: {
             taskId: this._taskId,
             robotId: this._robotId,
-            adviserId: this._adviserId,
-            userId: this._userId,
-            eventSubject: this._eventSubject
+            userId: this._userId
           }
         },
         'Error while handling candle trader "%s"',
+        this._taskId
+      );
+    }
+  }
+
+  executeOrders() {
+    try {
+      while (Object.keys(this._ordersToExecute).length > 0) {
+        const executedOrders = Object.values(this._ordersToExecute).map(
+          order => {
+            const orderResult = { ...order };
+            // Если задача - проверить исполнения объема
+            if (order.task === ORDER_TASK_CHECKLIMIT) {
+              // Если режим - эмуляция или бэктест
+              // Считаем, что ордер исполнен
+              orderResult.status = ORDER_STATUS_CLOSED;
+              // Полностью - т.е. по заданному объему
+              orderResult.executed = order.volume;
+
+              // Если задача - выставить лимитный или рыночный ордер
+            } else if (
+              order.task === ORDER_TASK_SETLIMIT ||
+              order.task === ORDER_TASK_OPENBYMARKET
+            ) {
+              // Устанавливаем объем из параметров
+              const orderToExecute = { ...order };
+              if (order.task === ORDER_TASK_OPENBYMARKET) {
+                orderToExecute.price = this._lastPrice.price;
+              }
+              if (order.orderType === ORDER_TYPE_LIMIT) {
+                // Если режим - эмуляция или бэктест
+                // Если тип ордера - лимитный
+                // Считаем, что ордер успешно выставлен на биржу
+                orderResult.status = ORDER_STATUS_OPEN;
+                orderResult.exLastTrade = this._lastPrice.timestamp;
+                orderResult.average = this._lastPrice.price;
+              } else if (order.orderType === ORDER_TYPE_MARKET) {
+                // Если режим - эмуляция или бэктест
+                // Если тип ордера - по рынку
+                // Считаем, что ордер исполнен
+                orderResult.status = ORDER_STATUS_CLOSED;
+                // Полностью - т.е. по заданному объему
+                orderResult.executed = orderToExecute.volume;
+                orderResult.exLastTrade = this._lastPrice.timestamp;
+                orderResult.average = orderResult.price;
+              }
+            }
+            orderResult.task = null;
+            return orderResult;
+          }
+        );
+        this.handleOrders(executedOrders);
+      }
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_ERROR,
+          cause: error,
+          info: {
+            taskId: this._taskId,
+            robotId: this._robotId,
+            userId: this._userId
+          }
+        },
+        'Error while executing orders trader "%s"',
         this._taskId
       );
     }

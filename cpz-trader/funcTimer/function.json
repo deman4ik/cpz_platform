@@ -1,13 +1,12 @@
 {
   "disabled": false,
-  "scriptFile": "../index.js",
-  "entryPoint": "timerEvent",
+  "entryPoint": "run",
   "bindings": [
     {
       "name": "TraderTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "1 * * * * *"
+      "schedule": "30 * * * * *"
     }
   ]
 }

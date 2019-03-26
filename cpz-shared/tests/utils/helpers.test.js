@@ -36,7 +36,7 @@ test("Timestamp should be correct inverted", () => {
 });
 
 test("Should be successful Key ", () => {
-  expect(helpers.generateKey()).toMatch(
+  expect(helpers.generateInvertedKey()).toMatch(
     /^\d{15}_[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
   );
 });

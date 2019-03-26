@@ -24,7 +24,7 @@ export default (context, req, neededEvents) => {
   // Getting first event for check his type
   const [event] = events;
 
-  if (event.eventType === SUB_VALIDATION_EVENT.eventType) {
+  if (event.eventType === SUB_VALIDATION_EVENT) {
     Log.info(
       `Got ${event.eventType} event, validationCode: ${
         event.validationCode
@@ -42,7 +42,7 @@ export default (context, req, neededEvents) => {
     Log.request(context.req, context.res);
     Log.clearContext();
     context.done();
-  } else if (event.eventType === SUB_DELETED_EVENT.eventType) {
+  } else if (event.eventType === SUB_DELETED_EVENT) {
     Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
     context.res = {
       status: 200,
@@ -55,9 +55,8 @@ export default (context, req, neededEvents) => {
     context.done();
     // In this place if Event Grid batch, we expect what all events are same one type
   } else if (neededEvents.indexOf(event.eventType) !== -1) {
-    Log.info(
-      `Got ${event.eventType} event, data ${JSON.stringify(event.data)}`
-    );
+    Log.info(`Got ${event.eventType} event`);
+    Log.debug(`data ${JSON.stringify(event.data)}`);
   } else {
     Log.error(`Unknown Event Type: ${event.eventType}`);
     Log.request(context.req, context.res);

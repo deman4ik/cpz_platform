@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STARTED, STATUS_STARTING } from "../../config/state";
 
@@ -14,7 +15,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getUserRobotById = async id =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_USERROBOTS_TABLE, id);
+  client.getEntityByRowKey(TABLES.STORAGE_USERROBOTS_TABLE, id);
 
 /**
  * Find User Robots by any service Id
@@ -33,10 +34,7 @@ const findUserRobotsByServiceId = async ({ taskId, serviceName }) => {
         taskId
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_USERROBOTS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_USERROBOTS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -101,10 +99,7 @@ const findOtherActiveUserRobotsByServiceId = async ({
         combinedStatusFilters
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_USERROBOTS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_USERROBOTS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -122,7 +117,7 @@ const findOtherActiveUserRobotsByServiceId = async ({
  * @param {Object} state
  */
 const saveUserRobotState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_USERROBOTS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_USERROBOTS_TABLE, state);
 
 /**
  * Delete User Robot state with trader
@@ -133,7 +128,7 @@ const saveUserRobotState = async state =>
  */
 const deleteUserRobotState = async ({ RowKey, PartitionKey, metadata }) => {
   try {
-    await this.client.deleteEntity(TABLES.STORAGE_USERROBOTS_TABLE, {
+    await client.deleteEntity(TABLES.STORAGE_USERROBOTS_TABLE, {
       RowKey,
       PartitionKey,
       metadata

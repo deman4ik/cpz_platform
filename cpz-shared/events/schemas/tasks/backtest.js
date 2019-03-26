@@ -12,7 +12,7 @@ import {
   TASKS_BACKTEST_FINISHED_EVENT
 } from "../../types/tasks/backtest";
 
-const TASKS_BACKTEST_EVENTS = {
+const BACKTEST_START_SCHEMA = {
   [BACKTEST_START]: {
     robotId: {
       description: "Robot uniq Id.",
@@ -50,14 +50,18 @@ const TASKS_BACKTEST_EVENTS = {
       props: TRADER_SETTINGS,
       optional: true
     }
-  },
+  }
+};
+const BACKTEST_STOP_SCHEMA = {
   [BACKTEST_STOP]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_BACKTEST_STARTED_EVENT_SCHEMA = {
   [TASKS_BACKTEST_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -65,7 +69,9 @@ const TASKS_BACKTEST_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_BACKTEST_STOPPED_EVENT_SCHEMA = {
   [TASKS_BACKTEST_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -73,7 +79,9 @@ const TASKS_BACKTEST_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_BACKTEST_FINISHED_EVENT_SCHEMA = {
   [TASKS_BACKTEST_FINISHED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -84,4 +92,10 @@ const TASKS_BACKTEST_EVENTS = {
   }
 };
 
-export default TASKS_BACKTEST_EVENTS;
+export {
+  BACKTEST_START_SCHEMA,
+  BACKTEST_STOP_SCHEMA,
+  TASKS_BACKTEST_STARTED_EVENT_SCHEMA,
+  TASKS_BACKTEST_STOPPED_EVENT_SCHEMA,
+  TASKS_BACKTEST_FINISHED_EVENT_SCHEMA
+};

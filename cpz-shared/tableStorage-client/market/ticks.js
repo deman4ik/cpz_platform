@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import dayjs from "../../utils/lib/dayjs";
 
@@ -14,7 +15,7 @@ const TABLES = {
  * @param {Object[]} ticks
  */
 const deletePrevCachedTicksArray = ticks =>
-  this.client.deleteArray(TABLES.STORAGE_TICKSCACHED_TABLE, ticks);
+  client.deleteArray(TABLES.STORAGE_TICKSCACHED_TABLE, ticks);
 
 const deletePrevCachedTicks = async ({ dateTo, slug }) => {
   try {
@@ -35,7 +36,7 @@ const deletePrevCachedTicks = async ({ dateTo, slug }) => {
         partitionKeyFilter
       )
     );
-    const ticks = await this.client.queryEntities(
+    const ticks = await client.queryEntities(
       TABLES.STORAGE_TICKSCACHED_TABLE,
       query
     );
@@ -110,10 +111,7 @@ const getPrevCachedTicks = async ({ dateFrom, dateTo, slug }) => {
         partitionKeyFilter
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_TICKSCACHED_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_TICKSCACHED_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -132,7 +130,7 @@ const getPrevCachedTicks = async ({ dateFrom, dateTo, slug }) => {
  * @param {Object} tick
  */
 const saveCachedTick = async tick =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_TICKSCACHED_TABLE, tick);
+  client.insertOrMergeEntity(TABLES.STORAGE_TICKSCACHED_TABLE, tick);
 
 export {
   deletePrevCachedTicksArray,

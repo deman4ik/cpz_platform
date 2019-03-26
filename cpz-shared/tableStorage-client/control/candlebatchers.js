@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STARTED } from "../../config/state";
 
@@ -14,7 +15,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getCandlebatcherById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_CANDLEBATCHERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_CANDLEBATCHERS_TABLE, taskId);
 
 /**
  * Query Started Candlebatchers
@@ -30,7 +31,7 @@ const getStartedCandlebatchers = async () => {
         STATUS_STARTED
       )
     );
-    return await this.client.queryEntities(
+    return await client.queryEntities(
       TABLES.STORAGE_CANDLEBATCHERS_TABLE,
       query
     );
@@ -52,10 +53,7 @@ const getStartedCandlebatchers = async () => {
  * @returns {Object[]}
  */
 const findCandlebatcher = async ({ slug }) =>
-  this.client.getEntityByPartitionKey(
-    TABLES.STORAGE_CANDLEBATCHERS_TABLE,
-    slug
-  );
+  client.getEntityByPartitionKey(TABLES.STORAGE_CANDLEBATCHERS_TABLE, slug);
 
 /**
  * Creates new or update current Candlebatcher State
@@ -63,7 +61,7 @@ const findCandlebatcher = async ({ slug }) =>
  * @param {Object} state
  */
 const saveCandlebatcherState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, state);
 
 /**
  * Updates current Candlebatcher State
@@ -71,7 +69,7 @@ const saveCandlebatcherState = async state =>
  * @param {Object} state
  */
 const updateCandlebatcherState = async state =>
-  this.client.mergeEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, state);
+  client.mergeEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, state);
 
 /**
  * Delete Candlebatcher state
@@ -81,7 +79,7 @@ const updateCandlebatcherState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteCandlebatcherState = async ({ RowKey, PartitionKey, metadata }) =>
-  this.client.deleteEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, {
+  client.deleteEntity(TABLES.STORAGE_CANDLEBATCHERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

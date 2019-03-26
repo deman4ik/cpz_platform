@@ -1,4 +1,5 @@
 import azure from "azure-storage";
+import client from "./index";
 import ServiceError from "../../error";
 
 const TABLES = {
@@ -7,7 +8,7 @@ const TABLES = {
 
 const { TableQuery, TableUtilities } = azure;
 
-this.client.createTableIfNotExists(TABLES.STORAGE_BACKTESTS_TABLE);
+client.createTableIfNotExists(TABLES.STORAGE_BACKTESTS_TABLE);
 /**
  * Query Backtest State by uniq Task ID
  *
@@ -15,7 +16,7 @@ this.client.createTableIfNotExists(TABLES.STORAGE_BACKTESTS_TABLE);
  * @returns {Object}
  */
 const getBacktestById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_BACKTESTS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_BACKTESTS_TABLE, taskId);
 
 /**
  * Find Backtest by any service Id
@@ -33,10 +34,7 @@ const findBacktestsByServiceId = async ({ taskId, serviceName }) => {
         taskId
       )
     );
-    return await this.client.queryEntities(
-      TABLES.STORAGE_BACKTESTS_TABLE,
-      query
-    );
+    return await client.queryEntities(TABLES.STORAGE_BACKTESTS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
       {
@@ -54,7 +52,7 @@ const findBacktestsByServiceId = async ({ taskId, serviceName }) => {
  * @param {Object} state
  */
 const saveBacktestState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_BACKTESTS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_BACKTESTS_TABLE, state);
 
 /**
  * Delete Backtest state and all Backtester Items
@@ -64,7 +62,7 @@ const saveBacktestState = async state =>
  *  @property {string} input.PartitionKey
  */
 const deleteBacktestState = async ({ RowKey, PartitionKey, metadata }) => {
-  await this.client.deleteEntity(TABLES.STORAGE_BACKTESTS_TABLE, {
+  await client.deleteEntity(TABLES.STORAGE_BACKTESTS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

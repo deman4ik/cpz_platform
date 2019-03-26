@@ -1,47 +1,45 @@
 import { BASE_EVENT } from "../types/base";
 
-const BASE_EVENTS = {
+const BASE_EVENT_SCHEMA = {
   [BASE_EVENT]: {
-    event: {
-      id: {
-        description: "An unique identifier for the event.",
-        type: "string",
-        empty: false
-      },
-      topic: {
-        description: "The resource path of the event source.",
-        type: "string",
-        empty: false
-      },
-      subject: {
-        description: "A resource path relative to the topic path.",
-        type: "string",
-        empty: true
-      },
-      data: {
-        description: "Event data specific to the event type.",
-        type: "object"
-      },
-      eventType: {
-        description: "The type of the event that occurred.",
-        type: "string",
-        empty: false
-      },
-      eventTime: {
-        description: "The time (in UTC) the event was generated.",
-        type: "string",
-        empty: false
-      },
-      metadataVersion: {
-        description: "The schema version of the event metadata.",
-        type: "string",
-        empty: false
-      },
-      dataVersion: {
-        description: "The schema version of the data object.",
-        type: "string",
-        empty: false
-      }
+    id: {
+      description: "An unique identifier for the event.",
+      type: "string",
+      empty: false
+    },
+    topic: {
+      description: "The resource path of the event source.",
+      type: "string",
+      empty: false
+    },
+    subject: {
+      description: "A resource path relative to the topic path.",
+      type: "string",
+      empty: true
+    },
+    data: {
+      description: "Event data specific to the event type.",
+      type: "object"
+    },
+    eventType: {
+      description: "The type of the event that occurred.",
+      type: "string",
+      empty: false
+    },
+    eventTime: {
+      description: "The time (in UTC) the event was generated.",
+      type: "string",
+      empty: false
+    },
+    metadataVersion: {
+      description: "The schema version of the event metadata.",
+      type: "string",
+      empty: false
+    },
+    dataVersion: {
+      description: "The schema version of the data object.",
+      type: "string",
+      empty: false
     }
   }
 };
@@ -65,8 +63,13 @@ const BASE_ERROR = {
       description: "Error details.",
       type: "object",
       optional: true
+    },
+    stack: {
+      description: "Error stack.",
+      type: "array",
+      optional: true
     }
   }
 };
 
-export { BASE_EVENTS, BASE_ERROR };
+export { BASE_EVENT_SCHEMA, BASE_ERROR };

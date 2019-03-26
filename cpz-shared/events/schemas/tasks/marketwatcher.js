@@ -9,7 +9,7 @@ import {
   TASKS_MARKETWATCHER_UPDATED_EVENT
 } from "../../types/tasks/marketwatcher";
 
-const TASKS_MARKETWATCHER_EVENTS = {
+const TASKS_MARKETWATCHER_START_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -47,14 +47,18 @@ const TASKS_MARKETWATCHER_EVENTS = {
         }
       }
     }
-  },
+  }
+};
+const TASKS_MARKETWATCHER_STOP_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_MARKETWATCHER_SUBSCRIBE_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_SUBSCRIBE_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -81,7 +85,9 @@ const TASKS_MARKETWATCHER_EVENTS = {
         }
       }
     }
-  },
+  }
+};
+const TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -107,7 +113,9 @@ const TASKS_MARKETWATCHER_EVENTS = {
         }
       }
     }
-  },
+  }
+};
+const TASKS_MARKETWATCHER_STARTED_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -115,7 +123,9 @@ const TASKS_MARKETWATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_MARKETWATCHER_STOPPED_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id. - 'nameProvider'",
@@ -123,7 +133,9 @@ const TASKS_MARKETWATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_MARKETWATCHER_UPDATED_EVENT_SCHEMA = {
   [TASKS_MARKETWATCHER_UPDATED_EVENT]: {
     taskId: {
       description: "Uniq task id. - 'nameProvider'",
@@ -134,4 +146,12 @@ const TASKS_MARKETWATCHER_EVENTS = {
   }
 };
 
-export default TASKS_MARKETWATCHER_EVENTS;
+export {
+  TASKS_MARKETWATCHER_START_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_STOP_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_STARTED_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_STOPPED_EVENT_SCHEMA,
+  TASKS_MARKETWATCHER_UPDATED_EVENT_SCHEMA
+};

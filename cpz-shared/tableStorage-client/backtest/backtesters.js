@@ -1,3 +1,5 @@
+import client from "./index";
+
 const TABLES = {
   STORAGE_BACKTESTERS_TABLE: "Backtesters", // Backtester
   STORAGE_BACKTESTERITEMS_TABLE: "BacktesterItems", // Backtester
@@ -13,7 +15,7 @@ const TABLES = {
  * @returns {Object}
  */
 const getBacktesterById = async taskId =>
-  this.client.getEntityByRowKey(TABLES.STORAGE_BACKTESTERS_TABLE, taskId);
+  client.getEntityByRowKey(TABLES.STORAGE_BACKTESTERS_TABLE, taskId);
 
 /**
  * Creates new or update current Backtester State
@@ -21,7 +23,7 @@ const getBacktesterById = async taskId =>
  * @param {Object} state
  */
 const saveBacktesterState = async state =>
-  this.client.insertOrMergeEntity(TABLES.STORAGE_BACKTESTERS_TABLE, state);
+  client.insertOrMergeEntity(TABLES.STORAGE_BACKTESTERS_TABLE, state);
 
 /**
  * Saves backtestitem
@@ -29,7 +31,7 @@ const saveBacktesterState = async state =>
  * @param {Object} state
  */
 const saveBacktesterItems = async items =>
-  this.client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERITEMS_TABLE, items);
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERITEMS_TABLE, items);
 
 /**
  * Saves backtest strategy logs
@@ -37,10 +39,7 @@ const saveBacktesterItems = async items =>
  * @param {Object} state
  */
 const saveBacktesterStratLogs = async items =>
-  this.client.insertOrMergeArray(
-    TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE,
-    items
-  );
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE, items);
 
 /**
  * Saves backtest signals
@@ -48,7 +47,7 @@ const saveBacktesterStratLogs = async items =>
  * @param {Object} state
  */
 const saveBacktesterSignals = async items =>
-  this.client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERSIGNALS_TABLE, items);
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERSIGNALS_TABLE, items);
 
 /**
  * Saves backtest orders
@@ -56,7 +55,7 @@ const saveBacktesterSignals = async items =>
  * @param {Object} state
  */
 const saveBacktesterOrders = async items =>
-  this.client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERORDERS_TABLE, items);
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERORDERS_TABLE, items);
 
 /**
  * Saves backtest positions
@@ -64,10 +63,7 @@ const saveBacktesterOrders = async items =>
  * @param {Object} state
  */
 const saveBacktesterPositions = async items =>
-  this.client.insertOrMergeArray(
-    TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE,
-    items
-  );
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE, items);
 /**
  * Delete Backtester state and all Backtester Items
  *
@@ -76,46 +72,37 @@ const saveBacktesterPositions = async items =>
  *  @property {string} input.PartitionKey
  */
 const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
-  const items = await this.client.getEntitiesByPartitionKey(
+  const items = await client.getEntitiesByPartitionKey(
     TABLES.STORAGE_BACKTESTERITEMS_TABLE,
     RowKey
   );
-  await this.client.deleteArray(TABLES.STORAGE_BACKTESTERITEMS_TABLE, items);
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERITEMS_TABLE, items);
 
-  const strLogs = await this.client.getEntitiesByPartitionKey(
+  const strLogs = await client.getEntitiesByPartitionKey(
     TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE,
     RowKey
   );
-  await this.client.deleteArray(
-    TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE,
-    strLogs
-  );
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE, strLogs);
 
-  const signals = await this.client.getEntitiesByPartitionKey(
+  const signals = await client.getEntitiesByPartitionKey(
     TABLES.STORAGE_BACKTESTERSIGNALS_TABLE,
     RowKey
   );
-  await this.client.deleteArray(
-    TABLES.STORAGE_BACKTESTERSIGNALS_TABLE,
-    signals
-  );
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERSIGNALS_TABLE, signals);
 
-  const orders = await this.client.getEntitiesByPartitionKey(
+  const orders = await client.getEntitiesByPartitionKey(
     TABLES.STORAGE_BACKTESTERORDERS_TABLE,
     RowKey
   );
-  await this.client.deleteArray(TABLES.STORAGE_BACKTESTERORDERS_TABLE, orders);
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERORDERS_TABLE, orders);
 
-  const positions = await this.client.getEntitiesByPartitionKey(
+  const positions = await client.getEntitiesByPartitionKey(
     TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE,
     RowKey
   );
-  await this.client.deleteArray(
-    TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE,
-    positions
-  );
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE, positions);
 
-  await this.client.deleteEntity(TABLES.STORAGE_BACKTESTERS_TABLE, {
+  await client.deleteEntity(TABLES.STORAGE_BACKTESTERS_TABLE, {
     RowKey,
     PartitionKey,
     metadata

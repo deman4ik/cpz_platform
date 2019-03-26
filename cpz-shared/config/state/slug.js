@@ -18,12 +18,12 @@ function createAdviserSlug({ exchange, asset, currency, timeframe }) {
   return `${exchange}.${asset}.${currency}.${timeframe}`;
 }
 
-function createTraderSlug({ exchange, asset, currency, timeframe, robotId }) {
-  return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
+function createTraderSlug({ exchange, asset, currency }) {
+  return `${exchange}.${asset}.${currency}`;
 }
 
-function createPositionSlug({ exchange, asset, currency }) {
-  return `${exchange}.${asset}.${currency}`;
+function createPositionSlug({ exchange, asset, currency, timeframe, robotId }) {
+  return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
 
 function createBacktesterSlug({

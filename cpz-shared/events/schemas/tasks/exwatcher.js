@@ -10,7 +10,7 @@ import {
   TASKS_EXWATCHER_UPDATED_EVENT
 } from "../../types/tasks/exwatcher";
 
-const TASKS_EXWATCHER_EVENTS = {
+const EXWATCHER_START_SCHEMA = {
   [EXWATCHER_START]: {
     exchange: { description: "Exchange code.", type: "exchange" },
     asset: { description: "Base currency.", type: "currency" },
@@ -40,14 +40,18 @@ const TASKS_EXWATCHER_EVENTS = {
       props: CANDLEBATCHER_SETTINGS,
       optional: true
     }
-  },
+  }
+};
+const EXWATCHER_STOP_SCHEMA = {
   [EXWATCHER_STOP]: {
     taskId: {
       description: "Uniq watcher id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const EXWATCHER_UPDATE_SCHEMA = {
   [EXWATCHER_UPDATE]: {
     taskId: {
       description: "Uniq watcher id.",
@@ -59,7 +63,9 @@ const TASKS_EXWATCHER_EVENTS = {
       type: "object",
       props: CANDLEBATCHER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_EXWATCHER_STARTED_EVENT_SCHEMA = {
   [TASKS_EXWATCHER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -67,7 +73,9 @@ const TASKS_EXWATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA = {
   [TASKS_EXWATCHER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -75,7 +83,9 @@ const TASKS_EXWATCHER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA = {
   [TASKS_EXWATCHER_UPDATED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -86,4 +96,11 @@ const TASKS_EXWATCHER_EVENTS = {
   }
 };
 
-export default TASKS_EXWATCHER_EVENTS;
+export {
+  EXWATCHER_START_SCHEMA,
+  EXWATCHER_STOP_SCHEMA,
+  EXWATCHER_UPDATE_SCHEMA,
+  TASKS_EXWATCHER_STARTED_EVENT_SCHEMA,
+  TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA,
+  TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA
+};

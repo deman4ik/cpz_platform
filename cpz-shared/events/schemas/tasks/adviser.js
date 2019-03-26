@@ -9,10 +9,7 @@ import {
   TASKS_ADVISER_UPDATED_EVENT
 } from "../../types/tasks/adviser";
 
-/**
- * Событие - Запуск нового советника
- */
-const TASKS_ADVISER_EVENTS = {
+const TASKS_ADVISER_START_EVENT_SCHEMA = {
   [TASKS_ADVISER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -41,14 +38,18 @@ const TASKS_ADVISER_EVENTS = {
       type: "object",
       props: ADVISER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_ADVISER_STOP_EVENT_SCHEMA = {
   [TASKS_ADVISER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_ADVISER_UPDATE_EVENT_SCHEMA = {
   [TASKS_ADVISER_UPDATE_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -60,7 +61,9 @@ const TASKS_ADVISER_EVENTS = {
       type: "object",
       props: ADVISER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_ADVISER_STARTED_EVENT_SCHEMA = {
   [TASKS_ADVISER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -68,7 +71,9 @@ const TASKS_ADVISER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_ADVISER_STOPPED_EVENT_SCHEMA = {
   [TASKS_ADVISER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -76,7 +81,9 @@ const TASKS_ADVISER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_ADVISER_UPDATED_EVENT_SCHEMA = {
   [TASKS_ADVISER_UPDATED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -87,4 +94,11 @@ const TASKS_ADVISER_EVENTS = {
   }
 };
 
-export default TASKS_ADVISER_EVENTS;
+export {
+  TASKS_ADVISER_START_EVENT_SCHEMA,
+  TASKS_ADVISER_STOP_EVENT_SCHEMA,
+  TASKS_ADVISER_UPDATE_EVENT_SCHEMA,
+  TASKS_ADVISER_STARTED_EVENT_SCHEMA,
+  TASKS_ADVISER_STOPPED_EVENT_SCHEMA,
+  TASKS_ADVISER_UPDATED_EVENT_SCHEMA
+};

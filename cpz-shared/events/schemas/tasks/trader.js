@@ -9,7 +9,7 @@ import {
   TASKS_TRADER_UPDATED_EVENT
 } from "../../types/tasks/trader";
 
-const TASKS_TRADER_EVENTS = {
+const TASKS_TRADER_START_EVENT_SCHEMA = {
   [TASKS_TRADER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -38,14 +38,18 @@ const TASKS_TRADER_EVENTS = {
       type: "object",
       props: TRADER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_TRADER_STOP_EVENT_SCHEMA = {
   [TASKS_TRADER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_TRADER_UPDATE_EVENT_SCHEMA = {
   [TASKS_TRADER_UPDATE_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -57,7 +61,9 @@ const TASKS_TRADER_EVENTS = {
       type: "object",
       props: TRADER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_TRADER_STARTED_EVENT_SCHEMA = {
   [TASKS_TRADER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -65,7 +71,9 @@ const TASKS_TRADER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_TRADER_STOPPED_EVENT_SCHEMA = {
   [TASKS_TRADER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -73,7 +81,9 @@ const TASKS_TRADER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_TRADER_UPDATED_EVENT_SCHEMA = {
   [TASKS_TRADER_UPDATED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -84,4 +94,11 @@ const TASKS_TRADER_EVENTS = {
   }
 };
 
-export default TASKS_TRADER_EVENTS;
+export {
+  TASKS_TRADER_START_EVENT_SCHEMA,
+  TASKS_TRADER_STOP_EVENT_SCHEMA,
+  TASKS_TRADER_UPDATE_EVENT_SCHEMA,
+  TASKS_TRADER_STARTED_EVENT_SCHEMA,
+  TASKS_TRADER_STOPPED_EVENT_SCHEMA,
+  TASKS_TRADER_UPDATED_EVENT_SCHEMA
+};

@@ -12,7 +12,7 @@ import {
   TASKS_BACKTESTER_FINISHED_EVENT
 } from "../../types/tasks/backtester";
 
-const TASKS_BACKTESTER_EVENTS = {
+const TASKS_BACKTESTER_START_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_START_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -64,14 +64,18 @@ const TASKS_BACKTESTER_EVENTS = {
       type: "object",
       props: TRADER_SETTINGS
     }
-  },
+  }
+};
+const TASKS_BACKTESTER_STOP_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_STOP_EVENT]: {
     taskId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
     }
-  },
+  }
+};
+const TASKS_BACKTESTER_STARTED_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_STARTED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -79,7 +83,9 @@ const TASKS_BACKTESTER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_BACKTESTER_STOPPED_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_STOPPED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -87,7 +93,9 @@ const TASKS_BACKTESTER_EVENTS = {
       empty: false
     },
     error: BASE_ERROR
-  },
+  }
+};
+const TASKS_BACKTESTER_FINISHED_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_FINISHED_EVENT]: {
     taskId: {
       description: "Uniq task id.",
@@ -98,4 +106,10 @@ const TASKS_BACKTESTER_EVENTS = {
   }
 };
 
-export default TASKS_BACKTESTER_EVENTS;
+export {
+  TASKS_BACKTESTER_START_EVENT_SCHEMA,
+  TASKS_BACKTESTER_STOP_EVENT_SCHEMA,
+  TASKS_BACKTESTER_STARTED_EVENT_SCHEMA,
+  TASKS_BACKTESTER_STOPPED_EVENT_SCHEMA,
+  TASKS_BACKTESTER_FINISHED_EVENT_SCHEMA
+};
