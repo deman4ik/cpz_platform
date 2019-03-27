@@ -1,3 +1,3 @@
-const func = require("../dist/handleSignal");
+const { handleSignal } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = handleSignal;

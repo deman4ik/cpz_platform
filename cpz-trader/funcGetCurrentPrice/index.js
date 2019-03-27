@@ -1,3 +1,3 @@
-const func = require("../dist/getCurrentPrice");
+const { getCurrentPrice } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = getCurrentPrice;

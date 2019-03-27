@@ -304,4 +304,4 @@ const orchestrator = df.orchestrator(function* trader(context) {
   return result;
 });
 
-export { orchestrator };
+export default orchestrator;

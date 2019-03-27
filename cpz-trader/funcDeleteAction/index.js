@@ -1,3 +1,3 @@
-const func = require("../dist/deleteAction");
+const { deleteAction } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = deleteAction;

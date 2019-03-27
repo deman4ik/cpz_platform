@@ -1,3 +1,3 @@
-const { orchestrator } = require("../dist/orchestrator");
+const { orchestrator } = require("../dist/service");
 
 module.exports = orchestrator;

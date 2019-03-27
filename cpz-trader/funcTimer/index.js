@@ -1,3 +1,3 @@
-const func = require("../dist/timer");
+const { timer } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = timer;

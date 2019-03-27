@@ -1,3 +1,3 @@
-const func = require("../dist/closeActivePositions");
+const { closeActivePositions } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = closeActivePositions;

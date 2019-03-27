@@ -1,3 +1,3 @@
-const func = require("../dist/eventPublish");
+const { eventPublish } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = eventPublish;

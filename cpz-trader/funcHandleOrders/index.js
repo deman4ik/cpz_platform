@@ -1,3 +1,3 @@
-const func = require("../dist/handleOrders");
+const { handleOrders } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = handleOrders;

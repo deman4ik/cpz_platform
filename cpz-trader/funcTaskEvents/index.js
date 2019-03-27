@@ -1,3 +1,3 @@
-const func = require("../dist/taskEvents");
+const { taskEvents } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = taskEvents;

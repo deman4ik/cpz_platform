@@ -1,3 +1,3 @@
-const func = require("../dist/saveState");
+const { saveState } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = saveState;

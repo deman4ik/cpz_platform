@@ -1,3 +1,3 @@
-const func = require("../dist/startTrader");
+const { startTrader } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = startTrader;

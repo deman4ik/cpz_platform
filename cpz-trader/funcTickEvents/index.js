@@ -1,3 +1,3 @@
-const func = require("../dist/tickEvents");
+const { tickEvents } = require("../dist/service");
 
-module.exports = func.default;
+module.exports = tickEvents;
