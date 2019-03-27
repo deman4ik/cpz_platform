@@ -13,7 +13,10 @@ class CCXTPublicProvider extends BasePublicProvider {
     this.ccxt = {};
     this._retryOptions = {
       retries: 100,
-      minTimeout: 100
+      minTimeout: 100,
+      onFailedAttempt: error => {
+        Log.warn(error);
+      }
     };
   }
 

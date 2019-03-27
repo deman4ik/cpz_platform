@@ -15,7 +15,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     this._retryOptions = {
       retries: 10,
       minTimeout: 100,
-      maxTimeout: 500
+      maxTimeout: 500,
+      onFailedAttempt: error => {
+        Log.warn(error);
+      }
     };
   }
 
