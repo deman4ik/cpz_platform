@@ -2,6 +2,7 @@ import * as df from "durable-functions";
 import VError from "verror";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
+import { STATUS_STOPPED } from "cpz/config/state";
 import {
   ERROR_TRADER_ERROR_EVENT,
   ERROR_TRADER_WARN_EVENT
@@ -75,6 +76,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
       Log.debug("Waiting for external event");
       nextAction = yield context.df.waitForExternalEvent(TRADER_ACTION);
     }
+    //TODO: Save and Check last action
     // Если есть новое действие (или пришел внешний эвент с действием)
     // Устанавливаем стутс - занят
     context.df.setCustomStatus(BUSY);
@@ -239,17 +241,14 @@ const orchestrator = df.orchestrator(function* trader(context) {
 
     result = state;
   } catch (e) {
-    if (!stateSaved)
-      yield context.df.callActivityWithRetry(
-        ACTIVITY_SAVE_STATE,
-        retryOptions,
-        {
-          state
-        }
-      );
     let error;
+    // Если ошибка сгенерирована сервисом
     if (e instanceof ServiceError) {
+      // Провеярем флаг - критическая ошибка
       const { critical } = VError.info(e);
+      // Если критическая - останавливаем оркестрацию
+      if (critical) stop = true;
+      // Генерируем ошибку оркестрации
       const errorName = critical
         ? ServiceError.types.TRADER_ORCHESTRATOR_EXCEPTION
         : ServiceError.types.TRADER_ORCHESTRATOR_ERROR;
@@ -263,9 +262,8 @@ const orchestrator = df.orchestrator(function* trader(context) {
         },
         "Trader orchestrator error"
       );
-
-      if (critical) stop = true;
     } else {
+      // Если ошибка сгенерирована рантаймом
       error = new ServiceError(
         {
           name: ServiceError.types.TRADER_ORCHESTRATOR_EXCEPTION,
@@ -276,26 +274,82 @@ const orchestrator = df.orchestrator(function* trader(context) {
         },
         "Trader orchestrator error"
       );
+      // Считаем что ошибка критическая - останавливаем оркестрацию
       stop = true;
     }
+    // Если нужно остановить оркестрацию
+    if (stop && state.status !== STATUS_STOPPED) {
+      // Меняем стейт
+      const { currentState, currentEvents } = yield context.df.callActivity(
+        ACTIVITY_STOP_TRADER,
+        { state }
+      );
+      state = currentState;
+      // Устанавливаем флаг - необходимо сохранить стейт
+      stateSaved = false;
+      eventsToSend = { ...eventsToSend, ...currentEvents };
+    }
+
+    // Если стейт еще не сохранен - сохраняем
+    if (!stateSaved) {
+      try {
+        yield context.df.callActivityWithRetry(
+          ACTIVITY_SAVE_STATE,
+          retryOptions,
+          {
+            state
+          }
+        );
+      } catch (saveStateError) {
+        error = new ServiceError(
+          {
+            name: ServiceError.types.TRADER_ORCHESTRATOR_EXCEPTION,
+            cause: error,
+            info: {
+              ...traderStateToCommonProps(state),
+              error: saveStateError
+            }
+          },
+          "Failed to save state while handling orchestrator error."
+        );
+      }
+    }
+    // Логиируем исключение
     Log.exception(error);
-    yield context.df.callActivityWithRetry(
-      ACTIVITY_EVENT_PUBLISH,
-      retryOptions,
-      {
-        state: traderStateToCommonProps(state),
-        data: {
-          eventType: stop ? ERROR_TRADER_ERROR_EVENT : ERROR_TRADER_WARN_EVENT,
-          eventData: {
-            subject: state.taskId,
-            data: {
-              taskId: state.taskId,
-              error: error.json
+    // Отправляем события
+    try {
+      yield context.df.callActivityWithRetry(
+        ACTIVITY_EVENT_PUBLISH,
+        retryOptions,
+        {
+          state: traderStateToCommonProps(state),
+          data: {
+            eventType: stop
+              ? ERROR_TRADER_ERROR_EVENT
+              : ERROR_TRADER_WARN_EVENT,
+            eventData: {
+              subject: state.taskId,
+              data: {
+                taskId: state.taskId,
+                error: error.json
+              }
             }
           }
         }
-      }
-    );
+      );
+    } catch (eventPublishError) {
+      error = new ServiceError(
+        {
+          name: ServiceError.types.TRADER_ORCHESTRATOR_EXCEPTION,
+          cause: error,
+          info: {
+            ...traderStateToCommonProps(state),
+            error: eventPublishError
+          }
+        },
+        "Failed to send events while handling orchestrator error."
+      );
+    }
     result = error;
   }
   Log.clearContext();

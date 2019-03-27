@@ -16,6 +16,7 @@ const {
 
 async function handleTimer(context) {
   try {
+    //TODO: Check TraderActions
     const traders = await getIdledTradersWithActivePositions(traderIdleMinutes);
 
     if (traders && traders.length > 0) {

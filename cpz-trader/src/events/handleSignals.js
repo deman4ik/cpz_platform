@@ -17,6 +17,7 @@ const {
 async function handleSignal(context, eventData) {
   try {
     Log.debug("handleSignal", eventData);
+    //TODO: action priority
     const { exchange, asset, currency, robotId } = eventData;
     const traders = await getActiveTradersBySlugAndRobotId({
       slug: createTraderSlug({
