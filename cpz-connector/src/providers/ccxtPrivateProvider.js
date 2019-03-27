@@ -1,6 +1,6 @@
 import ccxt from "ccxt";
 import VError from "verror";
-import pretry from "p-retry";
+import retry from "async-retry";
 import dayjs from "cpzDayjs";
 import Log from "cpzLog";
 import { ORDER_TYPE_MARKET_FORCE } from "cpzState";
@@ -16,7 +16,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       retries: 10,
       minTimeout: 100,
       maxTimeout: 500,
-      onFailedAttempt: error => {
+      onRetry: error => {
         Log.warn(error);
       }
     };
@@ -43,7 +43,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       const call = async () => {
         await this.ccxt.loadMarkets();
       };
-      await pretry(call, this._retryOptions);
+      await retry(call, this._retryOptions);
     } catch (error) {
       throw new VError(
         {
@@ -83,13 +83,13 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async _handleExchangeError(context, e) {
+  async _handleExchangeError(e, context, bail) {
     if (e instanceof ccxt.ExchangeError) {
       if (this._keys.main.active && this._keys.spare.specified) {
         await this.init(context, "spare");
         throw e;
       }
-      throw new pretry.AbortError(e);
+      bail(e);
     }
     throw e;
   }
@@ -110,15 +110,15 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     try {
       Log.debug("getBalance()");
       await this._checkKeysVersion(context, keys);
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.fetchBalance();
         } catch (e) {
-          await this._handleExchangeError(context, e);
+          await this._handleExchangeError(e, context, bail);
           return null;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       // TODO: filter by coin
       return {
         success: true,
@@ -202,7 +202,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       );
       const orderParams = { ...this.getOrderParams(), ...params };
       this.clearOrderCache();
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.createOrder(
             this.getSymbol(asset, currency),
@@ -213,11 +213,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             orderParams
           );
         } catch (e) {
-          await this._handleExchangeError(e);
+          await this._handleExchangeError(e, context, bail);
           return null;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       return {
         success: true,
         order: {
@@ -258,18 +258,18 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     try {
       Log.debug("checkOrder()");
       await this._checkKeysVersion(context, keys);
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.fetchOrder(
             exId,
             this.getSymbol(asset, currency)
           );
         } catch (e) {
-          await this._handleExchangeError(e);
+          await this._handleExchangeError(e, context, bail);
           return null;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       // TODO: kraken parse response.info.closetm
       return {
         success: true,
@@ -318,16 +318,16 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     try {
       Log.debug("cancelOrder()");
       await this._checkKeysVersion(context, keys);
-      const call = async () => {
+      const call = async bail => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
         } catch (e) {
-          await this._handleExchangeError(e);
+          await this._handleExchangeError(e, context, bail);
         }
       };
       let err;
       try {
-        await pretry(call, this._retryOptions);
+        await retry(call, this._retryOptions);
       } catch (error) {
         err = { name: error.constructor.name, message: error.message };
       }

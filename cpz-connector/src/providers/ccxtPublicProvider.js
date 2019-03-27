@@ -1,6 +1,6 @@
 import ccxt from "ccxt";
 import VError from "verror";
-import pretry from "p-retry";
+import retry from "async-retry";
 import dayjs from "cpzDayjs";
 import Log from "cpzLog";
 import BasePublicProvider from "./basePublicProvider";
@@ -14,7 +14,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     this._retryOptions = {
       retries: 100,
       minTimeout: 100,
-      onFailedAttempt: error => {
+      onRetry: error => {
         Log.warn(error);
       }
     };
@@ -28,7 +28,7 @@ class CCXTPublicProvider extends BasePublicProvider {
       const call = async () => {
         await this.ccxt.loadMarkets();
       };
-      await pretry(call, this._retryOptions);
+      await retry(call, this._retryOptions);
     } catch (error) {
       throw new VError(
         {
@@ -94,7 +94,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     try {
       Log.debug("loadLastMinuteCandle()");
       const dateStart = dayjs.utc(date).add(-2, "minute");
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.fetchOHLCV(
             this.getSymbol(asset, currency),
@@ -103,11 +103,11 @@ class CCXTPublicProvider extends BasePublicProvider {
             1
           );
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          if (e instanceof ccxt.ExchangeError) bail(e);
           throw e;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       const latestCandle = response[0];
       return {
         success: true,
@@ -145,7 +145,7 @@ class CCXTPublicProvider extends BasePublicProvider {
           ? date
           : dayjs.utc().add(-1, "minute");
 
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.fetchOHLCV(
             this.getSymbol(asset, currency),
@@ -154,11 +154,11 @@ class CCXTPublicProvider extends BasePublicProvider {
             limit
           );
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          if (e instanceof ccxt.ExchangeError) bail(e);
           throw e;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       if (!response)
         return {
           success: false,
@@ -203,7 +203,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
           : dayjs.utc().add(-1, "minute");
-      const call = async () => {
+      const call = async bail => {
         try {
           return await this.ccxt.fetchTrades(
             this.getSymbol(asset, currency),
@@ -212,11 +212,11 @@ class CCXTPublicProvider extends BasePublicProvider {
             this.getTradesParams(dateToLoad)
           );
         } catch (e) {
-          if (e instanceof ccxt.ExchangeError) throw new pretry.AbortError(e);
+          if (e instanceof ccxt.ExchangeError) bail(e);
           throw e;
         }
       };
-      const response = await pretry(call, this._retryOptions);
+      const response = await retry(call, this._retryOptions);
       if (!response)
         return {
           success: false,

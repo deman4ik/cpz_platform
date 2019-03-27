@@ -26,6 +26,7 @@
     "@babel/runtime": "^7.3.4",
     "apollo-server-azure-functions": "^2.4.8",
     "applicationinsights": "1.2.0",
+    "async-retry": "^1.2.3",
     "azure-eventgrid": "^1.5.0",
     "azure-keyvault": "3.0.4",
     "azure-storage": "^2.10.2",
@@ -40,7 +41,6 @@
     "graphql-type-json": "0.2.1",
     "https-proxy-agent": "2.2.1",
     "opencollective": "1.0.3",
-    "p-retry": "3.0.1",
     "uuid": "3.3.2",
     "verror": "1.10.0"
   },
