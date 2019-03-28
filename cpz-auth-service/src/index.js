@@ -1,120 +1,143 @@
+import "babel-polyfill";
+import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken";
+import Db from "cpz/db-client";
 import bcrypt from "bcrypt";
-import { addNewUser, findUserByEmail, isUserExist, updateRefreshToken } from "./db";
+import Log from "cpz/log";
+import { checkEnvVars } from "cpz/utils/environment";
+import authEnv from "cpz/config/environment/auth";
+import { sendCode } from "./mailer";
 import config from "./config";
 
-const { ACCESS_EXPIRES, JWT_SECRET, REFRESH_EXPIRES, AUTH_ISSUER } = config;
+const { BAD_VALIDATE_CODE_COUNT, BAD_LOGIN_COUNT, SERVICE_NAME } = config;
+
+const { ACCESS_EXPIRES, REFRESH_EXPIRES, AUTH_ISSUER } = config;
+const emailReqex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const passRegex = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_!@#$%^&*-])){8,}/;
+const {
+  JWT_SECRET,
+  DB_API_ENDPOINT,
+  ADMIN_SECRET,
+  APPINSIGHTS_INSTRUMENTATIONKEY
+} = process.env;
 
 // TODO check HTTPS connection
 // TODO check request endpoint
-// TODO is User blocked
-
-// TODO REFACTOR
 
 class AuthService {
+  constructor() {
+    this.config = config;
+    this.init();
+  }
+
+  init() {
+    console.log("init start");
+    // Check environment variables
+    checkEnvVars(authEnv.variables);
+    Log.config({
+      key: APPINSIGHTS_INSTRUMENTATIONKEY,
+      serviceName: SERVICE_NAME
+    });
+    this.db = new Db({ endpoint: DB_API_ENDPOINT, key: ADMIN_SECRET });
+  }
+
   async registration(context, req) {
-    const { email, password } = req.body;
-    if (!!email || !!password) {
-      context.res = {
-        status: 400,
-        body: "Bad registration data",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
+    try {
+      const { email, password } = req.body || false;
 
-    const userExist = isUserExist(email);
-
-    function isSuitablePassword(psw) {
-      let result = false;
-      if (
-        psw.length > 8 &&
-        // Password contains one or more digit
-        psw.search(/\d+/) !== -1 &&
-        // Password contains one o more word character
-        psw.search(/[a-z]+/) !== -1 &&
-        // Password contains one o more capital word character
-        psw.search(/[A-Z]+/) !== -1
-      ) {
-        result = true;
+      if (!email || !password) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad registration data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
       }
-      return result;
-    }
 
-    if (userExist) {
-      context.res = {
-        status: 400,
-        body: "Email already registered",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    } else if (isSuitablePassword(password)) {
-      // Generate password Hash
-      const passwordHash = bcrypt.hashSync(password, 10);
+      // Password check expected complexity
+      if (!passRegex.test(password)) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Weak password" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+      // Email check expected format
+      if (!emailReqex.test(email)) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Incorrect email address" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const user = await this.db.findUserByEmail(email);
+
+      if (user && user.status === 1) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Email already registered" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
       // Generate 5 digit registration code
       const code = Math.floor(10000 + Math.random() * 90000);
-      const user = addNewUser(email, passwordHash, code);
 
-      // TODO Send code to email provider (email, code)
+      if (user && user.status === 2) {
+        // Send email with code
+        await sendCode(email, code);
 
-      context.res = {
-        status: 200
-      };
-      context.done();
-    }
-  }
+        context.res = {
+          status: 200,
+          body: JSON.stringify({ message: "Check email" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
 
-  checkRegistrationCode(context, req) {
-    const code = req.body;
+      // Generate password Hash
+      const passwordHash = bcrypt.hashSync(password, 10);
 
-    const user = findUserByCode(code);
-
-    if (user) {
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
-      const accessToken = jwt.sign(
-        {
-          userId: user.id
-        },
-        JWT_SECRET,
-        {
-          issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
-        }
+      const newUser = await this.db.createUser(
+        uuid(),
+        email,
+        passwordHash,
+        code
       );
 
-      const refreshToken = jwt.sign(
-        {
-          userId: user.id
-        },
-        JWT_SECRET,
-        {
-          issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
-        }
-      );
-      // Save Refresh Token in DB
-      updateRefreshToken(user.id, JSON.stringify(refreshToken));
+      // Send email with code
+      await sendCode(email, code);
 
       context.res = {
         status: 200,
-        body: {
-          expiresIn,
-          accessToken,
-          refreshToken
-        },
+        body: JSON.stringify({ id: newUser.id, message: "User created" }),
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } else {
+    } catch (error) {
+      Log.error(error);
       context.res = {
-        status: 400,
-        body: "Bad registration code",
+        status: 500,
         headers: {
           "Content-Type": "application/json"
         }
@@ -123,57 +146,47 @@ class AuthService {
     }
   }
 
-  refreshTokens(context, req) {
-    const token = req.body;
-    let verifiedToken;
-
+  async finalizeRegistration(context, req) {
     try {
-      verifiedToken = jwt.verify(token, JWT_SECRET);
-    } catch (e) {
-      context.res = {
-        status: 401,
-        body: "Unverified token",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
+      const { id, code } = req.body || false;
 
-    const { exp, iss } = veririedToken;
+      const user = await this.db.findUserByCode(id, code);
 
-    if (now > exp) {
-      // Need refresh token
-      context.res = {
-        status: 401,
-        body: "Token Expire",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
-    if (iss !== AUTH_ISSUER) {
-      // TODO DELETE REFRESH TOKEN FROM DB
-      context.res = {
-        status: 401,
-        body: "Not expect Issuer",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
+      if (!user) {
+        await this.db.updateRegCodeCount(id, 1);
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad registration code" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
 
-    const { id } = verifiedToken;
+      if (user.bad_regcode_count > BAD_VALIDATE_CODE_COUNT) {
+        await this.db.blockUser(id);
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "User blocked" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
 
-    const user = findUserById(id);
-
-    if (user.verifiedToken === refreshToken) {
       const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
       const accessToken = jwt.sign(
         {
-          userId: user.id
+          userId: user.id,
+          "https://hasura.io/jwt/claims": {
+            "x-hasura-default-role": "user",
+            "x-hasura-allowed-roles": ["user"],
+            "x-hasura-user-id": user.id
+          }
         },
         JWT_SECRET,
         {
@@ -193,24 +206,24 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      updateRefreshToken(user.id, JSON.stringify(refreshToken));
+      await this.db.finalizeRegistration(user.id, JSON.stringify(refreshToken));
 
       context.res = {
         status: 200,
-        body: {
+        body: JSON.stringify({
           expiresIn,
           accessToken,
           refreshToken
-        },
+        }),
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } else {
+    } catch (error) {
+      Log.error(error);
       context.res = {
-        status: 401,
-        body: {},
+        status: 500,
         headers: {
           "Content-Type": "application/json"
         }
@@ -219,119 +232,380 @@ class AuthService {
     }
   }
 
-  login(context, req) {
-    const { email, password } = req.body;
-    if (!!email || !!password) {
-      context.res = {
-        status: 400,
-        body: "Bad login data",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
-
-    const user = findUserByEmail(email);
-
-    const isEqueal = bcrypt.compareSync(password, user.password);
-
-    if (isEqueal) {
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
-      const accessToken = jwt.sign(
-        {
-          userId: user.id
-        },
-        JWT_SECRET,
-        {
-          issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
-        }
-      );
-
-      const refreshToken = jwt.sign(
-        {
-          userId: user.id
-        },
-        JWT_SECRET,
-        {
-          issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
-        }
-      );
-      // Save Refresh Token in DB
-      updateRefreshToken(user.id, JSON.stringify(refreshToken));
-
-      context.res = {
-        status: 200,
-        body: {
-          expiresIn,
-          accessToken,
-          refreshToken
-        },
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    } else {
-      context.res = {
-        status: 401,
-        body: "Bad password",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
-  }
-
-  validateToken(context, req) {
-    const now = new Date().getTime();
-    const token = req.body;
-    let veririedToken;
+  async validateToken(context, req) {
+    const { id, accessToken } = req.body;
     try {
-      veririedToken = jwt.verify(token, JWT_SECRET);
+      jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
     } catch (e) {
+      await this.db.deleteRefreshToken(id);
       context.res = {
         status: 401,
-        body: "Unverified token",
+        body: JSON.stringify({ message: "Unverified token" }),
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
+      return;
     }
-
-    const { exp, iss } = veririedToken;
-
-    if (now > exp) {
-      // Need refresh token
-      context.res = {
-        status: 401,
-        body: "Token Expire",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
-    if (iss !== AUTH_ISSUER) {
-      // TODO DELETE REFRESH TOKEN FROM DB
-      context.res = {
-        status: 401,
-        body: "Not expect Issuer",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-    }
-
     context.res = {
       status: 200
     };
     context.done();
+  }
+
+  async refreshTokens(context, req) {
+    try {
+      const { token } = req.body || false;
+
+      if (!token) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad request data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      let verifiedToken;
+
+      try {
+        verifiedToken = jwt.verify(token, JWT_SECRET, { issuer: AUTH_ISSUER });
+      } catch (e) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Unverified token" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const user = this.db.findUserById(verifiedToken.id);
+
+      if (user.refresh_tokens !== verifiedToken.refreshToken) {
+        await this.db.deleteRefreshToken(user.id);
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Bad token" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const accessToken = jwt.sign(
+        {
+          userId: user.id,
+          "https://hasura.io/jwt/claims": {
+            "x-hasura-default-role": "user",
+            "x-hasura-allowed-roles": ["user"],
+            "x-hasura-user-id": user.id
+          }
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: ACCESS_EXPIRES
+        }
+      );
+
+      const refreshToken = jwt.sign(
+        {
+          userId: user.id
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: REFRESH_EXPIRES
+        }
+      );
+      // Save Refresh Token in DB
+      await this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+
+      context.res = {
+        status: 200,
+        body: JSON.stringify({
+          expiresIn,
+          accessToken,
+          refreshToken
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    } catch (error) {
+      Log.error(error);
+      context.res = {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    }
+  }
+
+  async login(context, req) {
+    try {
+      const { email, password } = req.body || false;
+      if (!email || !password) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad login data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const user = await this.db.findUserByEmail(email);
+
+      if (user.bad_login_count > BAD_LOGIN_COUNT) {
+        await this.db.blockUser(user.id);
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "User blocked" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const isEqual = bcrypt.compareSync(password, user.pwdhash);
+
+      if (!isEqual) {
+        await this.db.updateLoginCount(user.id, 1);
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Bad password" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const accessToken = jwt.sign(
+        {
+          userId: user.id,
+          "https://hasura.io/jwt/claims": {
+            "x-hasura-default-role": "user",
+            "x-hasura-allowed-roles": ["user"],
+            "x-hasura-user-id": user.id
+          }
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: ACCESS_EXPIRES
+        }
+      );
+
+      const refreshToken = jwt.sign(
+        {
+          userId: user.id
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: REFRESH_EXPIRES
+        }
+      );
+      // Save Refresh Token in DB
+      this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+
+      context.res = {
+        status: 200,
+        body: JSON.stringify({
+          expiresIn,
+          accessToken,
+          refreshToken
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    } catch (error) {
+      Log.error(error);
+      context.res = {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    }
+  }
+
+  async resetPassword(context, req) {
+    try {
+      const { email } = req.body || false;
+
+      if (!email) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad registration data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const user = await this.db.findUserByEmail(email);
+
+      if (!user && user.status !== -1) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Email not found" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+      const code = Math.floor(10000 + Math.random() * 90000);
+      await this.db.setCode(user.id, code);
+
+      // Send email with code
+      await sendCode(email, code);
+
+      context.res = {
+        status: 200,
+        body: JSON.stringify({ id: user.id, message: "Check code on email" })
+      };
+      context.done();
+    } catch (error) {
+      Log.error(error);
+      context.res = {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    }
+  }
+
+  async finalizeResetPassword(context, req) {
+    try {
+      const { id, code, password } = req.body || false;
+
+      // Password check expected complexity
+      if (!passRegex.test(password)) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "Weak password" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      const user = await this.db.findUserByCode(id, code);
+
+      if (!user) {
+        await this.db.updateRegCodeCount(id, 1);
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad reset password code" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      if (user.bad_regcode_count > BAD_VALIDATE_CODE_COUNT) {
+        await this.db.blockUser(id);
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "User blocked" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      // Generate password Hash
+      const hash = bcrypt.hashSync(password, 10);
+      // Save new pass
+      await this.db.setNewPass(id, hash);
+
+      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const accessToken = jwt.sign(
+        {
+          userId: user.id,
+          "https://hasura.io/jwt/claims": {
+            "x-hasura-default-role": "user",
+            "x-hasura-allowed-roles": ["user"],
+            "x-hasura-user-id": user.id
+          }
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: ACCESS_EXPIRES
+        }
+      );
+
+      const refreshToken = jwt.sign(
+        {
+          userId: user.id
+        },
+        JWT_SECRET,
+        {
+          issuer: "cpz-auth-server",
+          expiresIn: REFRESH_EXPIRES
+        }
+      );
+      // Save Refresh Token in DB
+      await this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+
+      context.res = {
+        status: 200,
+        body: JSON.stringify({
+          expiresIn,
+          accessToken,
+          refreshToken
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    } catch (error) {
+      Log.error(error);
+      context.res = {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+    }
   }
 }
 

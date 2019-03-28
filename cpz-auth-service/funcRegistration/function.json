@@ -1,0 +1,21 @@
+{
+  "disabled": false,
+  "_originalEntryPoint": false,
+  "scriptFile": "../index.js",
+  "entryPoint": "registration",
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "route": "registration",
+      "methods": ["post"]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}

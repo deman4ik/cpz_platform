@@ -1,0 +1,13 @@
+export default {
+  variables: [
+    "NODE_TLS_REJECT_UNAUTHORIZED",
+    "FUNCTIONS_WORKER_RUNTIME",
+    "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "JWT_SECRET",
+    "DB_API_ENDPOINT",
+    "ADMIN_SECRET",
+    "MAILGUN_API",
+    "MAILGUN_DOMAIN",
+    "DEBUG"
+  ]
+};
