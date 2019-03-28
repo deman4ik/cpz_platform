@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
+    "webpack": "webpack",
     "watch": "webpack --watch",
     "dev": "func start --cors * --port 8111",
     "test": "echo \"Error: no test specified\" && exit 1"
