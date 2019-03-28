@@ -1,0 +1,21 @@
+{
+  "disabled": false,
+  "_originalEntryPoint": false,
+  "scriptFile": "../index.js",
+  "entryPoint": "refreshTokens",
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "route": "refreshTokens",
+      "methods": ["post"]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ]
+}

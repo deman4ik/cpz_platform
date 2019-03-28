@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DB_API_ENDPOINT": "https://hasura-dee.herokuapp.com/v1alpha1/graphql",
+    "ADMIN_SECRET": "tupoparol",
+    "JWT_SECRET": "7tzBNVfjpMkNDi2yARAAKzQlk8O2IKoKe32",
+    "MAILGUN_API": "3b00559957ba3cb20b239bf5025d5f05-e51d0a44-eb1c1f1b",
+    "MAILGUN_DOMAIN": "sandboxb3c5adc6185f453d8abee198c71550ee.mailgun.org",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+    "DEBUG": true
+  }
+}

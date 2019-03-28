@@ -1,17 +1,16 @@
 {
   "disabled": false,
+  "_originalEntryPoint": false,
   "scriptFile": "../index.js",
-  "entryPoint": "register",
+  "entryPoint": "finalizeRegistration",
   "bindings": [
     {
-      "authLevel": "function",
+      "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
+      "route": "finalizeRegistration",
+      "methods": ["post"]
     },
     {
       "type": "http",
