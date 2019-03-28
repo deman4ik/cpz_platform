@@ -6,7 +6,7 @@ const axios = require("axios");
   const incorrectCode = "1234567890";
   let request;
 
-  const endpoint = "http://localhost:8104/api/checkRegistrationCode";
+  const endpoint = "http://localhost:8111/api/checkRegistrationCode";
 
   try {
     console.log("Пробуем зарегистрироваться с неправильным кодом");

@@ -2,14 +2,14 @@ const axios = require("axios");
 
 (async () => {
   // берем из регистрации
-  const correctLogin = "govolojin@postemail.net";
-  const correctPass = "1oLksdsl90l";
+  const correctLogin = "test@example.com";
+  const correctPass = "!Qwertyuiop0";
   const incorrectLogin = "test@tes,r";
   const incorrectPass = "1234567890";
   let request;
   let token;
 
-  const endpoint = "http://localhost:8104/api/login";
+  const endpoint = "http://localhost:8111/api/login";
 
   try {
     console.log("Пробуем обновить с неправильными данными");

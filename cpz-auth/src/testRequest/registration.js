@@ -1,13 +1,13 @@
 const axios = require("axios");
 
 (async () => {
-  const correctLogin = "firi@the-first.email";
-  const correctPass = "1oLksdsl90l$";
+  const correctLogin = "test@example.com";
+  const correctPass = "!Qwertyuiop0";
   const incorrectLogin = "test@tes,r";
   const incorrectPass = "1234567890";
   let request;
 
-  const endpoint = "http://localhost:8104/api/registration";
+  const endpoint = "http://localhost:8111/api/registration";
 
   try {
     console.log("Пробуем зарегистрироваться с неправильной почтой");

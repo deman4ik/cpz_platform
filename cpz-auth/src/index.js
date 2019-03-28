@@ -7,40 +7,43 @@ import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import authEnv from "cpz/config/environment/auth";
 import { sendCode } from "./mailer";
-import config from "./config";
+import { SERVICE_NAME, INTERNAL } from "./config";
 
-const { BAD_VALIDATE_CODE_COUNT, BAD_LOGIN_COUNT, SERVICE_NAME } = config;
+const {
+  BAD_VALIDATE_CODE_COUNT,
+  BAD_LOGIN_COUNT,
+  ACCESS_EXPIRES,
+  REFRESH_EXPIRES,
+  AUTH_ISSUER
+} = INTERNAL;
 
-const { ACCESS_EXPIRES, REFRESH_EXPIRES, AUTH_ISSUER } = config;
 const emailReqex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegex = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_!@#$%^&*-])){8,}/;
 const {
   JWT_SECRET,
   DB_API_ENDPOINT,
-  ADMIN_SECRET,
+  DB_API_ACCESS_KEY,
   APPINSIGHTS_INSTRUMENTATIONKEY
 } = process.env;
 
-// TODO check HTTPS connection
 // TODO check request endpoint
 
 class AuthService {
   constructor() {
-    this.config = config;
     this.init();
   }
 
   init() {
-    console.log("init start");
     // Check environment variables
     checkEnvVars(authEnv.variables);
     Log.config({
       key: APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
-    this.db = new Db({ endpoint: DB_API_ENDPOINT, key: ADMIN_SECRET });
+    this.db = new Db({ endpoint: DB_API_ENDPOINT, key: DB_API_ACCESS_KEY });
   }
 
+  // TODO: Add API KEY
   async registration(context, req) {
     try {
       const { email, password } = req.body || false;

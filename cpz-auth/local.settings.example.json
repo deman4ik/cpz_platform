@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DB_API_ENDPOINT": "",
+    "DB_API_ACCESS_KEY": "",
+    "JWT_SECRET": "",
+    "MAILGUN_API": "",
+    "MAILGUN_DOMAIN": "",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+    "DEBUG": true
+  }
+}

@@ -15,7 +15,6 @@ class DB {
     this.client = new GraphQLClient(endpoint, {
       headers: {
         "X-Hasura-Admin-Secret": key
-        // TODO: Authorization
       }
     });
 

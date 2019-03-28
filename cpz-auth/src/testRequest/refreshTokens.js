@@ -8,7 +8,7 @@ const axios = require("axios");
     "eyJhbGciuoJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NmIyYThkNC03ZTkyLTQwNTAtYjkzYS01MTZiMGJkOWZmNmMiLCJpYXQiOjE1NTM2Mzg2MTAsImV4cCI6MTU1NjIzMDYxMCwiaXNzIjoiY3B6LWF1dGgtc2VydmVyIn0.4zB7T5lxmtDoUKd4l8WKugX8Yck7EIJ0DQ7e3si3hpI";
   let request;
 
-  const endpoint = "http://localhost:8104/api/refreshTokens";
+  const endpoint = "http://localhost:8111/api/refreshTokens";
 
   try {
     console.log("Пробуем обновить с неправильным токеном");

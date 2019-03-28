@@ -8,6 +8,7 @@ const TRADER_SERVICE = "trader";
 const BACKTESTER_SERVICE = "backtester";
 const EVENTS_LOGGER_SERVICE = "eventslogger";
 const CONNECTOR_SERVICE = "connector";
+const AUTH_SERVICE = "auth";
 
 export {
   CONTROL_SERVICE,
@@ -19,5 +20,6 @@ export {
   TRADER_SERVICE,
   BACKTESTER_SERVICE,
   EVENTS_LOGGER_SERVICE,
-  CONNECTOR_SERVICE
+  CONNECTOR_SERVICE,
+  AUTH_SERVICE
 };

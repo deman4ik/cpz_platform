@@ -1,4 +1,3 @@
-require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
@@ -21,12 +20,6 @@ const config = {
   module: {
     rules: [
       {
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"]
-          }
-        },
         test: /\.js$/,
         exclude: /node_modules/
       }
