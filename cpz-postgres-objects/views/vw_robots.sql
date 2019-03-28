@@ -1,7 +1,6 @@
-drop view vw_user_robot;
+drop view vw_robots;
 
-create view vw_user_robot as
-
+create view vw_robots as
 SELECT u.id           AS uidUSER_ROBOT_ID,
        u.user_id      AS uidUSER_ID,
        u.robot_id     AS nROBOT_ID,
@@ -34,8 +33,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
           from vw_user_robot_performance pf
           where
                 pf.ddate >= (current_date - 10)
-            and ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
-                 (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
+            and pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id
           order by dDATE asc
         ) p) as jPERF_ARRAY, -- performance mini-chart
         (select row_to_json(tt)
@@ -47,8 +45,7 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
                    (lag(nprofit) over (order by ddate))-nprofit as nMDD
             from vw_user_robot_performance pf
             where
-              ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
-               (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
+              pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id
           ) t order by nMDD asc
           ) tt  limit  1)  as  jMDD,
        (select json_build_object('date',candle_timestamp, 'price',price,'action', action,'note', order_type)
@@ -59,17 +56,18 @@ FROM
   (select
      uu.*,
      r.name, r.asset, r.currency, r.exchange, r.timeframe,
-     p.robot_id as linked_robot_id, p.user_id as linked_user_id, p.balance_init as linked_balance_init,
      (select sum(profit)
          from positions
          where
            run_mode != 'backtest' and
-           ((user_id = uu.user_id and robot_id = uu.robot_id) or
-           (user_id = p.user_id and robot_id = p.robot_id))
+           user_id = uu.user_id and robot_id = uu.robot_id
      ) as profit -- !!2DO
    from
-     user_robot uu
-   join      robot r on (uu.robot_id = r.id)
-   left join user_robot p on (uu.linked_user_robot_id = p.id)
+     user_robot uu,
+     robot r
+   where
+         uu.robot_id = r.id
+     and uu.robot_status = 0
   ) u,
   (select 4012 as nCURRATE, '$' as sCURCODE) r
+;
