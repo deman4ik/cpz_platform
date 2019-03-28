@@ -114,15 +114,8 @@ async function findUserById(id) {
   refresh_tokens 
   email
   }} `;
-  const variables = {
-    objects: [
-      {
-        id
-      }
-    ]
-  };
   try {
-    request = await this.client.request(query);
+    request = await this.client.request(query, { id });
     if (request.cpz_userlist.length) {
       [user] = request.cpz_userlist;
     }
