@@ -2,15 +2,26 @@ import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { checkEnvVars } from "cpz/utils/environment";
 import traderEnv from "cpz/config/environment/trader";
-import BaseService from "cpz/services/baseService";
-import { SERVICE_NAME } from "../config";
+import { SERVICE_NAME, INTERNAL } from "../config";
 import Trader from "../state/trader";
 import { traderStateToCommonProps } from "../utils/helpers";
 
-class HandleSignal extends BaseService {
+const {
+  actions: { START, UPDATE, STOP, SIGNAL, PRICE, ORDER, CLOSE_ACTIVE_POSITIONS }
+} = INTERNAL;
+
+class ExecuteTrader {
   constructor() {
-    super();
     this.init();
+    this.allowedActions = [
+      START,
+      UPDATE,
+      STOP,
+      SIGNAL,
+      PRICE,
+      ORDER,
+      CLOSE_ACTIVE_POSITIONS
+    ];
   }
 
   init() {
@@ -28,32 +39,30 @@ class HandleSignal extends BaseService {
     }
   }
 
-  async run(context, { state, data }) {
+  async run(context, { action, state, data }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("handleSignal", state, data);
+      Log.debug("execute trader", action, data, state);
+      if (!this.allowedActions.includes(action))
+        throw new Error(`Invalid trader action "${action}"`);
       const trader = new Trader(state);
-      trader.handleSignal(data);
-      Log.debug("handleSignalResult", trader.currentState);
+      trader[action](data);
       Log.clearContext();
       return trader.currentState;
     } catch (e) {
-      let error;
-      if (e instanceof ServiceError) {
-        error = e;
-      } else {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.TRADER_HANDLE_SIGNAL_ERROR,
-            cause: e,
-            info: {
-              ...traderStateToCommonProps(state),
-              ...data
-            }
-          },
-          "Failed to handle signal"
-        );
-      }
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.TRADER_EXECUTE_ERROR,
+          cause: e,
+          info: {
+            ...traderStateToCommonProps(state),
+            traderAction: action,
+            data
+          }
+        },
+        "Failed to execute trader"
+      );
+
       Log.exception(error);
       Log.clearContext();
       throw error;
@@ -61,5 +70,5 @@ class HandleSignal extends BaseService {
   }
 }
 
-const func = new HandleSignal();
+const func = new ExecuteTrader();
 export default func;

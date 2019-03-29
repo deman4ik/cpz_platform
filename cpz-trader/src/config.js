@@ -9,28 +9,24 @@ const FUNCTIONS = {
   HTTP_TICK_EVENTS: "funcTickEvents",
   TIMER: "funcTimer",
   ORCHESTRATOR: "funcOrchestrator",
-  ACTIVITY_CHECK_PRICE: "funcCheckPrice",
-  ACTIVITY_CLOSE_ACTIVE_POSITIONS: "funcCloseActivePositions",
   ACTIVITY_DELETE_ACTION: "funcDeleteAction",
   ACTIVITY_EVENT_PUBLISH: "funcEventPublish",
   ACTIVITY_EXECUTE_ORDERS: "funcExecuteOrders",
   ACTIVITY_GET_CURRENT_RPICE: "funcGetCurrentPrice",
-  ACTIVITY_HANDLE_ORDERS: "funcHandleOrders",
-  ACTIVITY_HANDLE_SIGNAL: "funcHandleSignal",
   ACTIVITY_LOAD_ACTION: "funcLoadAction",
   ACTIVITY_SAVE_STATE: "funcSaveState",
-  ACTIVITY_START_TRADER: "funcStartTrader",
-  ACTIVITY_STOP_TRADER: "funcStopTrader",
-  ACTIVITY_UPDATE_TRADER: "funcUpdateTrader"
+  ACTIVITY_EXECUTE_TRADER: "funcExecuteTrader"
 };
 const INTERNAL = {
   actions: {
     START: "start",
     STOP: "stop",
     UPDATE: "update",
-    SIGNAL: "signal",
-    PRICE: "price",
-    CHECK: "check"
+    SIGNAL: "handleSignal",
+    PRICE: "checkPrice",
+    CHECK: "CHECK",
+    ORDERS: "handleOrders",
+    CLOSE_ACTIVE_POSITIONS: "closeActivePositions"
   },
   status: {
     READY: "ready",

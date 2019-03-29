@@ -11,23 +11,28 @@ import { SERVICE_NAME, FUNCTIONS, INTERNAL } from "../config";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 const {
-  ACTIVITY_CHECK_PRICE,
-  ACTIVITY_CLOSE_ACTIVE_POSITIONS,
   ACTIVITY_DELETE_ACTION,
   ACTIVITY_EVENT_PUBLISH,
   ACTIVITY_EXECUTE_ORDERS,
   ACTIVITY_GET_CURRENT_RPICE,
-  ACTIVITY_HANDLE_ORDERS,
-  ACTIVITY_HANDLE_SIGNAL,
+
   ACTIVITY_LOAD_ACTION,
   ACTIVITY_SAVE_STATE,
-  ACTIVITY_START_TRADER,
-  ACTIVITY_STOP_TRADER,
-  ACTIVITY_UPDATE_TRADER
+
+  ACTIVITY_EXECUTE_TRADER
 } = FUNCTIONS;
 
 const {
-  actions: { START, UPDATE, STOP, SIGNAL, PRICE, CHECK },
+  actions: {
+    START,
+    UPDATE,
+    STOP,
+    SIGNAL,
+    PRICE,
+    CHECK,
+    ORDERS,
+    CLOSE_ACTIVE_POSITIONS
+  },
 
   status: { READY, BUSY },
   events: { TRADER_ACTION }
@@ -82,16 +87,24 @@ const orchestrator = df.orchestrator(function* trader(context) {
     context.df.setCustomStatus(BUSY);
     // Проверяем тип действия
     const { type, data } = nextAction;
-    if (type === PRICE) {
-      // Проверка позиций по новой цене
-      // Проверка цены, с указаним цены из эвента
-      const { currentState, currentOrders } = yield context.df.callActivity(
-        ACTIVITY_CHECK_PRICE,
-        { state, data }
-      );
-      // Обновление стейта
+    if (
+      type === PRICE ||
+      type === SIGNAL ||
+      type === START ||
+      type === UPDATE
+    ) {
+      const {
+        currentState,
+        currentOrders,
+        currentEvents
+      } = yield context.df.callActivit(ACTIVITY_EXECUTE_TRADER, {
+        action: type,
+        state,
+        data
+      });
       state = currentState;
       ordersToExecute = { ...ordersToExecute, ...currentOrders };
+      eventsToSend = { ...eventsToSend, ...currentEvents };
     } else if (type === CHECK) {
       // Проверка позиций по текущей цене
       // Загрузка текущей цены из стореджа
@@ -121,45 +134,25 @@ const orchestrator = df.orchestrator(function* trader(context) {
         );
       }
       // Проверка цены, с указанием цены из стореджа
-      const { currentState, currentOrders } = yield context.df.callActivit(
-        ACTIVITY_CHECK_PRICE,
-        { state, data: currentPrice }
-      );
-      // Обновление стейта
+      const {
+        currentState,
+        currentOrders,
+        currentEvents
+      } = yield context.df.callActivit(ACTIVITY_EXECUTE_TRADER, {
+        action: PRICE,
+        state,
+        data: currentPrice
+      });
       state = currentState;
       ordersToExecute = { ...ordersToExecute, ...currentOrders };
-    } else if (type === SIGNAL) {
-      // Обработка нового сигнала
-      const { currentState, currentOrders } = yield context.df.callActivity(
-        ACTIVITY_HANDLE_SIGNAL,
-        { state, data }
-      );
-      // Обновление стейта
-      state = currentState;
-      ordersToExecute = { ...ordersToExecute, ...currentOrders };
-    } else if (type === START) {
-      // Формирование события о запуске
-      const { currentState, currentEvents } = yield context.df.callActivity(
-        ACTIVITY_START_TRADER,
-        { state }
-      );
-      state = currentState;
-      eventsToSend = { ...eventsToSend, ...currentEvents };
-    } else if (type === UPDATE) {
-      const { currentState, currentEvents } = yield context.df.callActivity(
-        ACTIVITY_UPDATE_TRADER,
-        {
-          state,
-          data: data.settings
-        }
-      );
-      state = currentState;
       eventsToSend = { ...eventsToSend, ...currentEvents };
     } else if (type === STOP) {
       const { currentState, currentOrders } = yield context.df.callActivity(
-        ACTIVITY_CLOSE_ACTIVE_POSITIONS,
+        ACTIVITY_EXECUTE_TRADER,
         {
-          state
+          action: CLOSE_ACTIVE_POSITIONS,
+          state,
+          data: null
         }
       );
       state = currentState;
@@ -192,7 +185,8 @@ const orchestrator = df.orchestrator(function* trader(context) {
         currentState,
         currentEvents,
         currentOrders
-      } = yield context.df.callActivity(ACTIVITY_HANDLE_ORDERS, {
+      } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
+        action: ORDERS,
         state: traderStateToCommonProps(state),
         data: executedOrders.filter(({ task }) => !!task)
       });
@@ -204,8 +198,8 @@ const orchestrator = df.orchestrator(function* trader(context) {
 
     if (stop) {
       const { currentState, currentEvents } = yield context.df.callActivity(
-        ACTIVITY_STOP_TRADER,
-        { state }
+        ACTIVITY_EXECUTE_TRADER,
+        { action: STOP, state, data: null }
       );
       state = currentState;
       eventsToSend = { ...eventsToSend, ...currentEvents };
@@ -281,8 +275,8 @@ const orchestrator = df.orchestrator(function* trader(context) {
     if (stop && state.status !== STATUS_STOPPED) {
       // Меняем стейт
       const { currentState, currentEvents } = yield context.df.callActivity(
-        ACTIVITY_STOP_TRADER,
-        { state }
+        ACTIVITY_EXECUTE_TRADER,
+        { action: STOP, state, data: null }
       );
       state = currentState;
       // Устанавливаем флаг - необходимо сохранить стейт
@@ -349,6 +343,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
         },
         "Failed to send events while handling orchestrator error."
       );
+      Log.exception(error);
     }
     result = error;
   }
