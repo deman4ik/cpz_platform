@@ -1,4 +1,4 @@
-import ServiceError from "cpz/error";
+import ServiceError from "../error";
 
 async function createUser(id, email, pwdhash, code) {
   let request;
