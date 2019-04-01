@@ -3,21 +3,23 @@ import ServiceError from "../error";
 async function createUser(id, email, pwdhash, code) {
   let request;
   let createdUser;
-  const query = `mutation insert_userlist($objects: [cpz_userlist_insert_input!]! ) {
-  insert_cpz_userlist(objects: $objects) {
+  const query = `mutation createUser($user: [cpz_userlist_insert_input!]!) {
+  insert_cpz_userlist(objects: $user) {
     returning {
       id
+      email
     }
   }
 }`;
   const variables = {
-    objects: [
+    user: [
       {
         id,
         email,
         pwdhash,
         reg_code: code.toString(),
-        status: 2
+        status: 2,
+        userroles: { data: { role_id: "user" } }
       }
     ]
   };
@@ -41,22 +43,34 @@ async function createUser(id, email, pwdhash, code) {
 }
 
 async function findUserByEmail(email) {
+  email = email.toLowerCase();
   let request;
   let user;
-  const query = `query($email: String!) {
+  const query = `query findUserByEmail($email: String!) {
   cpz_userlist(
-  where: {email :{_ilike: $email}}
+  where: {email :{_eq: $email}}
   )
   {
   id
   email
   pwdhash
   bad_login_count
-  }}`;
+  userroles{
+  role_id
+  }
+  }
+}`;
   try {
     request = await this.client.request(query, { email });
     if (request.cpz_userlist.length) {
-      [user] = request.cpz_userlist;
+      user = {
+        id: request.cpz_userlist[0].id,
+        refresh_tokens: request.cpz_userlist[0].refresh_tokens,
+        email: request.cpz_userlist[0].email,
+        pwdhash: request.cpz_userlist[0].pwdhash,
+        bad_login_count: request.cpz_userlist[0].bad_login_count,
+        role: request.cpz_userlist[0].userroles[0].role_id
+      };
     }
     return user;
   } catch (error) {
@@ -74,7 +88,7 @@ async function findUserByEmail(email) {
 async function findUserByCode(id, code) {
   let request;
   let user;
-  const query = `query findByCode($id: uuid $code: String){
+  const query = `query findUserByCode($id: uuid $code: String){
   cpz_userlist(
   where: {id : {_eq: $id} reg_code: {_eq: $code}}) 
   {
@@ -83,12 +97,21 @@ async function findUserByCode(id, code) {
   email
   reg_code
   bad_regcode_count
+  userroles{
+        role_id
+      }
   }}`;
   try {
     request = await this.client.request(query, { id, code });
-    console.log("REQUEST", request);
     if (request.cpz_userlist.length) {
-      [user] = request.cpz_userlist;
+      user = {
+        id: request.cpz_userlist[0].id,
+        refresh_tokens: request.cpz_userlist[0].refresh_tokens,
+        email: request.cpz_userlist[0].email,
+        reg_code: request.cpz_userlist[0].reg_code,
+        bad_regcode_count: request.cpz_userlist[0].bad_regcode_count,
+        role: request.cpz_userlist[0].userroles[0].role_id
+      };
     }
     return user;
   } catch (error) {
@@ -106,18 +129,26 @@ async function findUserByCode(id, code) {
 async function findUserById(id) {
   let request;
   let user;
-  const query = `query findByCode($id: uuid) {
+  const query = `query findUserById($id: uuid) {
   cpz_userlist(
   where: {id : {_eq: $id}}) 
   {
   id
   refresh_tokens 
   email
+  userroles{
+        role_id
+      }
   }} `;
   try {
     request = await this.client.request(query, { id });
     if (request.cpz_userlist.length) {
-      [user] = request.cpz_userlist;
+      user = {
+        id: request.cpz_userlist[0].id,
+        refresh_tokens: request.cpz_userlist[0].refresh_tokens,
+        email: request.cpz_userlist[0].email,
+        role: request.cpz_userlist[0].userroles[0].role_id
+      };
     }
     return user;
   } catch (error) {
@@ -135,7 +166,7 @@ async function findUserById(id) {
 async function updateRefreshToken(id, token) {
   let request;
   let updatedToken;
-  const query = `mutation update_userlist($id: uuid $token: String) {
+  const query = `mutation updateRefreshToken($id: uuid $token: String) {
   update_cpz_userlist(
   where: {id : {_eq: $id}},
   _set: { 
@@ -150,7 +181,6 @@ async function updateRefreshToken(id, token) {
   }}}`;
   try {
     request = await this.client.request(query, { id, token });
-    console.log("REQUEST", request);
     if (request.update_cpz_userlist.length) {
       updatedToken = request.update_cpz_userlist[0].refreshToken;
     }
@@ -170,7 +200,7 @@ async function updateRefreshToken(id, token) {
 async function finalizeRegistration(id, token) {
   let request;
   let updatedToken;
-  const query = `mutation update_userlist($id: uuid $token: String) {
+  const query = `mutation updateUserRegFin($id: uuid $token: String) {
   update_cpz_userlist(
   where: {id : {_eq: $id}},
   _set: { 
@@ -204,7 +234,7 @@ async function finalizeRegistration(id, token) {
 }
 
 async function setCode(id, code) {
-  const query = `mutation update_userlist($id: uuid $code: String) {
+  const query = `mutation updateUserRegCode($id: uuid $code: String) {
   update_cpz_userlist(
   where: {id : {_eq: $id}},
   _set: {
@@ -231,7 +261,7 @@ async function setCode(id, code) {
 }
 
 async function updateRegCodeCount(id, value) {
-  const query = `mutation update_userlist($id: uuid, $value: Int) {
+  const query = `mutation updateUserRegCodeCount($id: uuid, $value: Int) {
   update_cpz_userlist(
     where: { id: { _eq: $id } }
     _inc: { bad_regcode_count: $value }
@@ -254,7 +284,7 @@ async function updateRegCodeCount(id, value) {
 }
 
 async function updateLoginCount(id, value) {
-  const query = `mutation update_userlist($id: uuid, $value: Int) {
+  const query = `mutation updateUserLoginCount($id: uuid, $value: Int) {
   update_cpz_userlist(
     where: { id: { _eq: $id } }
     _inc: { bad_login_count: $value }
@@ -277,7 +307,7 @@ async function updateLoginCount(id, value) {
 }
 
 async function blockUser(id) {
-  const query = `mutation update_userlist($id: uuid) {
+  const query = `mutation blockUser($id: uuid) {
   update_cpz_userlist(
     where: { id: { _eq: $id } }
     _set: { status: 0}
@@ -300,7 +330,7 @@ async function blockUser(id) {
 }
 
 async function setNewPass(id, password) {
-  const query = `mutation update_userlist($id: uuid, $password: String) {
+  const query = `mutation updateUserPass($id: uuid, $password: String) {
   update_cpz_userlist(
     where: { id: { _eq: $id } }
     _set: { pwdhash: $password}
@@ -325,7 +355,7 @@ async function setNewPass(id, password) {
 async function deleteRefreshToken(id) {
   let request;
   let success = false;
-  const query = `mutation update_userlist($id: String) {
+  const query = `mutation updateUserRefreshToken($id: String) {
   update_cpz_userlist(
   where: {id : {_eq: $id}, 
   _set: {

@@ -9,24 +9,18 @@ import authEnv from "cpz/config/environment/auth";
 import { sendCode } from "./mailer";
 import { SERVICE_NAME, INTERNAL } from "./config";
 
-const {
-  BAD_VALIDATE_CODE_COUNT,
-  BAD_LOGIN_COUNT,
-  ACCESS_EXPIRES,
-  REFRESH_EXPIRES,
-  AUTH_ISSUER
-} = INTERNAL;
+const { BAD_VALIDATE_CODE_COUNT, BAD_LOGIN_COUNT, AUTH_ISSUER } = INTERNAL;
 
 const emailReqex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegex = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_!@#$%^&*-])){8,}/;
 const {
+  ACCESS_EXPIRES,
+  REFRESH_EXPIRES,
   JWT_SECRET,
   DB_API_ENDPOINT,
   DB_API_ACCESS_KEY,
   APPINSIGHTS_INSTRUMENTATIONKEY
 } = process.env;
-
-// TODO check request endpoint
 
 class AuthService {
   constructor() {
@@ -102,9 +96,9 @@ class AuthService {
       const code = Math.floor(10000 + Math.random() * 90000);
 
       if (user && user.status === 2) {
+        await this.db.setCode(user.id, code);
         // Send email with code
         await sendCode(email, code);
-
         context.res = {
           status: 200,
           body: JSON.stringify({ message: "Check email" }),
@@ -153,6 +147,18 @@ class AuthService {
     try {
       const { id, code } = req.body || false;
 
+      if (!id || !code) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad registration data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
       const user = await this.db.findUserByCode(id, code);
 
       if (!user) {
@@ -186,7 +192,7 @@ class AuthService {
         {
           userId: user.id,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "user",
+            "x-hasura-default-role": user.role,
             "x-hasura-allowed-roles": ["user"],
             "x-hasura-user-id": user.id
           }
@@ -209,7 +215,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      await this.db.finalizeRegistration(user.id, JSON.stringify(refreshToken));
+      await this.db.finalizeRegistration(user.id, refreshToken);
 
       context.res = {
         status: 200,
@@ -237,6 +243,19 @@ class AuthService {
 
   async validateToken(context, req) {
     const { id, accessToken } = req.body;
+
+    if (!id || !accessToken) {
+      context.res = {
+        status: 400,
+        body: JSON.stringify({ message: "Bad data" }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+      context.done();
+      return;
+    }
+
     try {
       jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
     } catch (e) {
@@ -289,9 +308,9 @@ class AuthService {
         return;
       }
 
-      const user = this.db.findUserById(verifiedToken.id);
+      const user = await this.db.findUserById(verifiedToken.userId);
 
-      if (user.refresh_tokens !== verifiedToken.refreshToken) {
+      if (token !== user.refresh_tokens) {
         await this.db.deleteRefreshToken(user.id);
         context.res = {
           status: 401,
@@ -308,7 +327,7 @@ class AuthService {
         {
           userId: user.id,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "user",
+            "x-hasura-default-role": user.role,
             "x-hasura-allowed-roles": ["user"],
             "x-hasura-user-id": user.id
           }
@@ -331,7 +350,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      await this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+      await this.db.updateRefreshToken(user.id, refreshToken);
 
       context.res = {
         status: 200,
@@ -374,6 +393,30 @@ class AuthService {
 
       const user = await this.db.findUserByEmail(email);
 
+      if (user.status === -1 || user.status === 0) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "User blocked or disabled" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      if (user.status === 2) {
+        context.res = {
+          status: 401,
+          body: JSON.stringify({ message: "User pending registration" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
       if (user.bad_login_count > BAD_LOGIN_COUNT) {
         await this.db.blockUser(user.id);
         context.res = {
@@ -406,7 +449,7 @@ class AuthService {
         {
           userId: user.id,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "user",
+            "x-hasura-default-role": user.role,
             "x-hasura-allowed-roles": ["user"],
             "x-hasura-user-id": user.id
           }
@@ -462,7 +505,7 @@ class AuthService {
       if (!email) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad registration data" }),
+          body: JSON.stringify({ message: "Bad data" }),
           headers: {
             "Content-Type": "application/json"
           }
@@ -473,10 +516,22 @@ class AuthService {
 
       const user = await this.db.findUserByEmail(email);
 
-      if (!user && user.status !== -1) {
+      if (!user) {
         context.res = {
           status: 400,
           body: JSON.stringify({ message: "Email not found" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      if (user.status === -1 || user.status === 0) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "User deleted or blocked" }),
           headers: {
             "Content-Type": "application/json"
           }
@@ -511,6 +566,17 @@ class AuthService {
     try {
       const { id, code, password } = req.body || false;
 
+      if (!id || !code || !password) {
+        context.res = {
+          status: 400,
+          body: JSON.stringify({ message: "Bad data" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
       // Password check expected complexity
       if (!passRegex.test(password)) {
         context.res = {
@@ -562,7 +628,7 @@ class AuthService {
         {
           userId: user.id,
           "https://hasura.io/jwt/claims": {
-            "x-hasura-default-role": "user",
+            "x-hasura-default-role": user.role,
             "x-hasura-allowed-roles": ["user"],
             "x-hasura-user-id": user.id
           }

@@ -3,6 +3,8 @@
   "Values": {
     "NODE_TLS_REJECT_UNAUTHORIZED": 0,
     "FUNCTIONS_WORKER_RUNTIME": "node",
+    "ACCESS_EXPIRES": 600,
+    "REFRESH_EXPIRES": 2.592e6,
     "DB_API_ENDPOINT": "",
     "DB_API_ACCESS_KEY": "",
     "JWT_SECRET": "",

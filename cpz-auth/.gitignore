@@ -28,6 +28,7 @@ dist
 .python_packages/
 
 # Python Environments
+tests/.env
 .env
 .venv
 env/
