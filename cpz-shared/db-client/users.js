@@ -31,7 +31,6 @@ async function createUser(id, email, pwdhash, code) {
     };
     return createdUser;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -43,7 +42,6 @@ async function createUser(id, email, pwdhash, code) {
 }
 
 async function findUserByEmail(email) {
-  email = email.toLowerCase();
   let request;
   let user;
   const query = `query findUserByEmail($email: String!) {
@@ -53,6 +51,7 @@ async function findUserByEmail(email) {
   {
   id
   email
+  status
   pwdhash
   bad_login_count
   userroles{
@@ -67,6 +66,7 @@ async function findUserByEmail(email) {
         id: request.cpz_userlist[0].id,
         refresh_tokens: request.cpz_userlist[0].refresh_tokens,
         email: request.cpz_userlist[0].email,
+        status: request.cpz_userlist[0].status,
         pwdhash: request.cpz_userlist[0].pwdhash,
         bad_login_count: request.cpz_userlist[0].bad_login_count,
         role: request.cpz_userlist[0].userroles[0].role_id
@@ -74,7 +74,6 @@ async function findUserByEmail(email) {
     }
     return user;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -115,7 +114,6 @@ async function findUserByCode(id, code) {
     }
     return user;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -152,7 +150,6 @@ async function findUserById(id) {
     }
     return user;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -186,7 +183,6 @@ async function updateRefreshToken(id, token) {
     }
     return updatedToken;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -222,7 +218,6 @@ async function finalizeRegistration(id, token) {
     }
     return updatedToken;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -249,7 +244,6 @@ async function setCode(id, code) {
   try {
     await this.client.request(query, { id, code });
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -272,7 +266,6 @@ async function updateRegCodeCount(id, value) {
   try {
     await this.client.request(query, { id, value });
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -295,7 +288,6 @@ async function updateLoginCount(id, value) {
   try {
     await this.client.request(query, { id, value });
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -318,7 +310,6 @@ async function blockUser(id) {
   try {
     await this.client.request(query, { id });
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -341,7 +332,6 @@ async function setNewPass(id, password) {
   try {
     await this.client.request(query, { id, password });
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,
@@ -375,7 +365,6 @@ async function deleteRefreshToken(id) {
     }
     return success;
   } catch (error) {
-    if (error instanceof ServiceError) throw error;
     throw new ServiceError(
       {
         name: ServiceError.types.DB_ERROR,

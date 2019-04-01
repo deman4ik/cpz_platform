@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import ServiceError from "cpz/error";
 import jwt from "jsonwebtoken";
 import Db from "cpz/db-client";
 import bcrypt from "bcrypt";
@@ -21,6 +22,7 @@ const {
   APPINSIGHTS_INSTRUMENTATIONKEY
 } = process.env;
 
+//TODO: Email case sensivity
 class AuthService {
   constructor() {
     this.init();
@@ -46,7 +48,7 @@ class AuthService {
       if (!email || !password) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad registration data" }),
+          body: { message: "Bad registration data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -59,7 +61,7 @@ class AuthService {
       if (!passRegex.test(password)) {
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "Weak password" }),
+          body: { message: "Weak password" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -102,7 +104,7 @@ class AuthService {
         await sendCode(email, code);
         context.res = {
           status: 200,
-          body: JSON.stringify({ message: "Check email" }),
+          body: { message: "Check email" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -126,17 +128,24 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({ id: newUser.id, message: "User created" }),
+        body: { id: newUser.id, message: "User created" },
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to register"
+      );
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
@@ -152,7 +161,7 @@ class AuthService {
       if (!id || !code) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad registration data" }),
+          body: { message: "Bad registration data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -167,7 +176,7 @@ class AuthService {
         await this.db.updateRegCodeCount(id, 1);
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad registration code" }),
+          body: { message: "Bad registration code" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -180,7 +189,7 @@ class AuthService {
         await this.db.blockUser(id);
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "User blocked" }),
+          body: { message: "User blocked" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -201,7 +210,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.accessExpires
         }
       );
@@ -212,7 +221,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.refreshExpires
         }
       );
@@ -221,21 +230,28 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({
+        body: {
           expiresIn,
           accessToken,
           refreshToken
-        }),
+        },
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to finalize registration"
+      );
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
@@ -245,38 +261,57 @@ class AuthService {
   }
 
   async validateToken(context, req) {
-    const { id, accessToken } = req.body;
-
-    if (!id || !accessToken) {
-      context.res = {
-        status: 400,
-        body: JSON.stringify({ message: "Bad data" }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      };
-      context.done();
-      return;
-    }
-
     try {
-      jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
-    } catch (e) {
-      await this.db.deleteRefreshToken(id);
+      const { id, accessToken } = req.body;
+
+      if (!id || !accessToken) {
+        context.res = {
+          status: 400,
+          body: { message: "Bad data" },
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
+
+      try {
+        jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
+      } catch (e) {
+        await this.db.deleteRefreshToken(id);
+        context.res = {
+          status: 401,
+          body: { message: "Unverified token" },
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
       context.res = {
-        status: 401,
-        body: JSON.stringify({ message: "Unverified token" }),
+        status: 200
+      };
+      context.done();
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to validate token"
+      );
+      Log.error(error);
+      context.res = {
+        status: 500,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-      return;
     }
-    context.res = {
-      status: 200
-    };
-    context.done();
   }
 
   async refreshTokens(context, req) {
@@ -286,7 +321,7 @@ class AuthService {
       if (!token) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad request data" }),
+          body: { message: "Bad request data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -302,7 +337,7 @@ class AuthService {
       } catch (e) {
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "Unverified token" }),
+          body: { message: "Unverified token" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -317,7 +352,7 @@ class AuthService {
         await this.db.deleteRefreshToken(user.id);
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "Bad token" }),
+          body: { message: "Bad token" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -337,7 +372,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.accessExpires
         }
       );
@@ -348,7 +383,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.refreshExpires
         }
       );
@@ -357,21 +392,28 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({
+        body: {
           expiresIn,
           accessToken,
           refreshToken
-        }),
+        },
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to refresh token"
+      );
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
@@ -386,7 +428,7 @@ class AuthService {
       if (!email || !password) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad login data" }),
+          body: { message: "Bad login data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -396,11 +438,22 @@ class AuthService {
       }
 
       const user = await this.db.findUserByEmail(email);
+      if (!user) {
+        context.res = {
+          status: 401,
+          body: { message: "User not found" },
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+        context.done();
+        return;
+      }
 
       if (user.status === -1 || user.status === 0) {
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "User blocked or disabled" }),
+          body: { message: "User blocked or disabled" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -412,7 +465,7 @@ class AuthService {
       if (user.status === 2) {
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "User pending registration" }),
+          body: { message: "User pending registration" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -425,7 +478,7 @@ class AuthService {
         await this.db.blockUser(user.id);
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "User blocked" }),
+          body: { message: "User blocked" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -440,7 +493,7 @@ class AuthService {
         await this.db.updateLoginCount(user.id, 1);
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "Bad password" }),
+          body: { message: "Bad password" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -461,7 +514,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.accessExpires
         }
       );
@@ -472,7 +525,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.refreshExpires
         }
       );
@@ -481,21 +534,29 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({
+        body: {
           expiresIn,
           accessToken,
           refreshToken
-        }),
+        },
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to login"
+      );
+
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
@@ -511,7 +572,7 @@ class AuthService {
       if (!email) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad data" }),
+          body: { message: "Bad data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -525,7 +586,7 @@ class AuthService {
       if (!user) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Email not found" }),
+          body: { message: "Email not found" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -537,7 +598,7 @@ class AuthService {
       if (user.status === -1 || user.status === 0) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "User deleted or blocked" }),
+          body: { message: "User deleted or blocked" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -553,14 +614,21 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({ id: user.id, message: "Check code on email" })
+        body: { id: user.id, message: "Check code on email" }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to reset password"
+      );
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
@@ -576,7 +644,7 @@ class AuthService {
       if (!id || !code || !password) {
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad data" }),
+          body: { message: "Bad data" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -588,7 +656,7 @@ class AuthService {
       if (!passRegex.test(password)) {
         context.res = {
           status: 401,
-          body: JSON.stringify({ message: "Weak password" }),
+          body: { message: "Weak password" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -603,7 +671,7 @@ class AuthService {
         await this.db.updateRegCodeCount(id, 1);
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "Bad reset password code" }),
+          body: { message: "Bad reset password code" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -616,7 +684,7 @@ class AuthService {
         await this.db.blockUser(id);
         context.res = {
           status: 400,
-          body: JSON.stringify({ message: "User blocked" }),
+          body: { message: "User blocked" },
           headers: {
             "Content-Type": "application/json"
           }
@@ -642,7 +710,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.accessExpires
         }
       );
@@ -653,7 +721,7 @@ class AuthService {
         },
         JWT_SECRET,
         {
-          issuer: "cpz-auth-server",
+          issuer: AUTH_ISSUER,
           expiresIn: this.refreshExpires
         }
       );
@@ -662,21 +730,28 @@ class AuthService {
 
       context.res = {
         status: 200,
-        body: JSON.stringify({
+        body: {
           expiresIn,
           accessToken,
           refreshToken
-        }),
+        },
         headers: {
           "Content-Type": "application/json"
         }
       };
       context.done();
-    } catch (error) {
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.AUTH_ERROR,
+          cause: e
+        },
+        "Failed to finalize reset password"
+      );
       Log.error(error);
       context.res = {
         status: 500,
-        body: error,
+        body: error.json,
         headers: {
           "Content-Type": "application/json"
         }
