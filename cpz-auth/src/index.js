@@ -135,6 +135,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
@@ -233,6 +234,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
@@ -368,6 +370,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
@@ -444,7 +447,9 @@ class AuthService {
         context.done();
         return;
       }
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+
+      const accessExpires = parseInt(ACCESS_EXPIRES, 10);
+      const expiresIn = new Date().getTime() + accessExpires;
       const accessToken = jwt.sign(
         {
           userId: user.id,
@@ -457,7 +462,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
+          expiresIn: accessExpires
         }
       );
 
@@ -490,6 +495,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
@@ -554,6 +560,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
@@ -669,6 +676,7 @@ class AuthService {
       Log.error(error);
       context.res = {
         status: 500,
+        body: error,
         headers: {
           "Content-Type": "application/json"
         }
