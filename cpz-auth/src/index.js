@@ -30,6 +30,8 @@ class AuthService {
   init() {
     // Check environment variables
     checkEnvVars(authEnv.variables);
+    this.accessExpires = parseInt(ACCESS_EXPIRES, 10);
+    this.refreshExpires = REFRESH_EXPIRES;
     Log.config({
       key: APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
@@ -188,7 +190,7 @@ class AuthService {
         return;
       }
 
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const expiresIn = new Date().getTime() + this.accessExpires;
       const accessToken = jwt.sign(
         {
           userId: user.id,
@@ -201,7 +203,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
+          expiresIn: this.accessExpires
         }
       );
 
@@ -212,7 +214,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
+          expiresIn: this.refreshExpires
         }
       );
       // Save Refresh Token in DB
@@ -324,7 +326,7 @@ class AuthService {
         context.done();
         return;
       }
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const expiresIn = new Date().getTime() + this.accessExpires;
       const accessToken = jwt.sign(
         {
           userId: user.id,
@@ -337,7 +339,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
+          expiresIn: this.accessExpires
         }
       );
 
@@ -348,7 +350,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
+          expiresIn: this.refreshExpires
         }
       );
       // Save Refresh Token in DB
@@ -448,8 +450,7 @@ class AuthService {
         return;
       }
 
-      const accessExpires = parseInt(ACCESS_EXPIRES, 10);
-      const expiresIn = new Date().getTime() + accessExpires;
+      const expiresIn = new Date().getTime() + this.accessExpires;
       const accessToken = jwt.sign(
         {
           userId: user.id,
@@ -462,7 +463,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: accessExpires
+          expiresIn: this.accessExpires
         }
       );
 
@@ -473,7 +474,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
+          expiresIn: this.refreshExpires
         }
       );
       // Save Refresh Token in DB
@@ -630,7 +631,7 @@ class AuthService {
       // Save new pass
       await this.db.setNewPass(id, hash);
 
-      const expiresIn = new Date().getTime() + ACCESS_EXPIRES;
+      const expiresIn = new Date().getTime() + this.accessExpires;
       const accessToken = jwt.sign(
         {
           userId: user.id,
@@ -643,7 +644,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: ACCESS_EXPIRES
+          expiresIn: this.accessExpires
         }
       );
 
@@ -654,7 +655,7 @@ class AuthService {
         JWT_SECRET,
         {
           issuer: "cpz-auth-server",
-          expiresIn: REFRESH_EXPIRES
+          expiresIn: this.refreshExpires
         }
       );
       // Save Refresh Token in DB
