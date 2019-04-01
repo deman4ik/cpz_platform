@@ -1,4 +1,3 @@
-import ServiceError from "cpz/error";
 import { v4 as uuid } from "uuid";
 import jwt from "jsonwebtoken";
 import Db from "cpz/db-client";
@@ -204,14 +203,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.accessExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
 
@@ -223,15 +214,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.refreshExpires
-        },
-
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
       // Save Refresh Token in DB
@@ -278,14 +260,7 @@ class AuthService {
     }
 
     try {
-      jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER }, err => {
-        if (err) {
-          throw new ServiceError(
-            { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-            "Failed to verify JWT."
-          );
-        }
-      });
+      jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
     } catch (e) {
       await this.db.deleteRefreshToken(id);
       context.res = {
@@ -323,19 +298,7 @@ class AuthService {
       let verifiedToken;
 
       try {
-        verifiedToken = jwt.verify(
-          token,
-          JWT_SECRET,
-          { issuer: AUTH_ISSUER },
-          err => {
-            if (err) {
-              throw new ServiceError(
-                { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-                "Failed to verify JWT."
-              );
-            }
-          }
-        );
+        verifiedToken = jwt.verify(token, JWT_SECRET, { issuer: AUTH_ISSUER });
       } catch (e) {
         context.res = {
           status: 401,
@@ -376,14 +339,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.accessExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
 
@@ -395,14 +350,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.refreshExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
       // Save Refresh Token in DB
@@ -516,14 +463,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.accessExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
 
@@ -535,14 +474,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.refreshExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
       // Save Refresh Token in DB
@@ -713,14 +644,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.accessExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
 
@@ -732,14 +655,6 @@ class AuthService {
         {
           issuer: "cpz-auth-server",
           expiresIn: this.refreshExpires
-        },
-        err => {
-          if (err) {
-            throw new ServiceError(
-              { name: ServiceError.types.AUTH_JWT_ERROR, cause: err },
-              "Failed to sign JWT."
-            );
-          }
         }
       );
       // Save Refresh Token in DB
