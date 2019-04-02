@@ -5,7 +5,8 @@ import traderEnv from "cpz/config/environment/trader";
 import BaseService from "cpz/services/baseService";
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import traderActionTables, {
-  getNextTraderAction
+  getNextTraderAction,
+  deleteTraderAction
 } from "cpz/tableStorage-client/control/traderActions";
 import { SERVICE_NAME } from "../config";
 import { traderStateToCommonProps } from "../utils/helpers";
@@ -36,12 +37,30 @@ class LoadAction extends BaseService {
     }
   }
 
-  async run(context, { state }) {
+  async run(context, { state, lastAction }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
       Log.debug("loadAction", state);
-      const nextAction = await getNextTraderAction(state.taskId);
+      let nextAction;
+      let loaded = false;
+      /* eslint-disable no-await-in-loop */
+      while (!loaded) {
+        nextAction = await getNextTraderAction(state.taskId);
+
+        loaded = true;
+        // Если есть следующее действие
+        if (nextAction) {
+          await deleteTraderAction(nextAction);
+          // Если есть предыдущее действие и id действий равны
+          if (lastAction && lastAction.actionId === nextAction.id) {
+            // грузим заново
+            loaded = false;
+            Log.warn("Action '%s' have already been processed", nextAction.id);
+          }
+        }
+      }
       Log.debug("loadActionResult", nextAction);
+      /* no-await-in-loop */
       Log.clearContext();
       return nextAction;
     } catch (e) {

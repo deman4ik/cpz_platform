@@ -7,6 +7,7 @@ import ConnectorClient from "cpz/connector-client";
 import BaseService from "cpz/services/baseService";
 import {
   REALTIME_MODE,
+  EMULATOR_MODE,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_TYPE_LIMIT,
@@ -64,8 +65,9 @@ class ExecuteOrders extends BaseService {
         lastPrice,
         settings
       } = state;
+      let currentPrice = lastPrice;
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("executeOrders", state, order);
+      Log.debug("executeOrders", state, orderResult);
 
       // Если задача - проверить исполнения объема
       if (order.task === ORDER_TASK_CHECKLIMIT) {
@@ -88,19 +90,28 @@ class ExecuteOrders extends BaseService {
           orderResult.status = ORDER_STATUS_CLOSED;
           // Полностью - т.е. по заданному объему
           orderResult.executed = order.volume;
+          orderResult.remaining = 0;
+          orderResult.exLastTrade = currentPrice.timestamp;
         }
         // Если задача - выставить лимитный или рыночный ордер
       } else if (
         order.task === ORDER_TASK_SETLIMIT ||
         order.task === ORDER_TASK_OPENBYMARKET
       ) {
-        // Устанавливаем объем из параметров
         const orderToExecute = { ...order };
-        if (order.task === ORDER_TASK_OPENBYMARKET) {
-          const { price } = await getCurrentPrice(
-            createCurrentPriceSlug({ exchange, asset, currency })
-          );
-          orderToExecute.price = price;
+        if (
+          settings.mode === REALTIME_MODE ||
+          settings.mode === EMULATOR_MODE
+        ) {
+          if (order.task === ORDER_TASK_OPENBYMARKET) {
+            const marketPrice = await getCurrentPrice(
+              createCurrentPriceSlug({ exchange, asset, currency })
+            );
+            if (marketPrice && marketPrice.price) {
+              currentPrice = marketPrice;
+              orderToExecute.price = marketPrice.price;
+            }
+          }
         }
         // Если режим - в реальном времени
         if (settings.mode === REALTIME_MODE) {
@@ -134,16 +145,21 @@ class ExecuteOrders extends BaseService {
           // Если тип ордера - лимитный
           // Считаем, что ордер успешно выставлен на биржу
           orderResult.status = ORDER_STATUS_OPEN;
-          orderResult.exLastTrade = lastPrice.timestamp;
-          orderResult.average = lastPrice.price;
+          orderResult.exId = order.orderId;
+          orderResult.exTimestamp = currentPrice.timestamp;
+          orderResult.average = currentPrice.price;
+          orderResult.remaining = order.volume;
         } else if (order.orderType === ORDER_TYPE_MARKET) {
           // Если режим - эмуляция или бэктест
           // Если тип ордера - по рынку
           // Считаем, что ордер исполнен
           orderResult.status = ORDER_STATUS_CLOSED;
+          orderResult.exId = order.orderId;
+          orderResult.exTimestamp = currentPrice.timestamp;
           // Полностью - т.е. по заданному объему
           orderResult.executed = orderToExecute.volume;
-          orderResult.exLastTrade = lastPrice.timestamp;
+          orderResult.remaining = 0;
+          orderResult.exLastTrade = currentPrice.timestamp;
           orderResult.average = orderResult.price;
         }
       } else if (order.task === ORDER_TASK_CANCEL) {

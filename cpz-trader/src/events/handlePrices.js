@@ -1,4 +1,5 @@
 import * as df from "durable-functions";
+import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { CANDLE_PREVIOUS, createTraderSlug } from "cpz/config/state";
@@ -32,6 +33,7 @@ async function handlePrice(context, currentPrice) {
           const status = await client.getStatus(taskId);
           if (status && status.runtimeStatus === "Running") {
             const action = {
+              id: uuid(),
               type: PRICE,
               data: {
                 price: currentPrice.price,

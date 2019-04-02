@@ -256,24 +256,21 @@ class Log {
    * @param {*} errorData
    * @memberof Log
    */
-  exception(errorData) {
+  exception(props, ...args) {
+    let properties;
+    let messages;
+    if (props instanceof ServiceError) {
+      properties = props.json;
+      messages = [props.format(), ...args];
+    } else {
+      properties = props;
+      messages = args;
+    }
+    this._log(SEVERITY_LEVEL.Error, properties, messages);
     if (this._appInstightsKey) {
-      if (errorData) {
-        let data;
-        let string;
-        if (errorData instanceof ServiceError) {
-          data = errorData.json;
-          string = errorData.toString(true);
-        } else {
-          data = errorData;
-          string = JSON.stringify(errorData);
-        }
-
-        this._logError(string);
-        appInsights.defaultClient.trackException({
-          exception: data
-        });
-      }
+      appInsights.defaultClient.trackException({
+        exception: properties
+      });
     }
   }
 

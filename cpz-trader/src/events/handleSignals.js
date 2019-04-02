@@ -1,4 +1,5 @@
 import * as df from "durable-functions";
+import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { generateKey } from "cpz/utils/helpers";
@@ -17,7 +18,7 @@ const {
 async function handleSignal(context, eventData) {
   try {
     Log.debug("handleSignal", eventData);
-    //TODO: action priority
+    // TODO: action priority
     const { exchange, asset, currency, robotId } = eventData;
     const traders = await getActiveTradersBySlugAndRobotId({
       slug: createTraderSlug({
@@ -32,7 +33,7 @@ async function handleSignal(context, eventData) {
       const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId }) => {
-          const action = { type: SIGNAL, data: eventData };
+          const action = { id: uuid(), type: SIGNAL, data: eventData };
           const status = await client.getStatus(taskId);
           if (status && status.runtimeStatus === "Running") {
             if (status.customStatus === READY) {

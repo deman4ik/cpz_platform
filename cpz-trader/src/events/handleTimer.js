@@ -1,4 +1,5 @@
 import * as df from "durable-functions";
+import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import { generateKey } from "cpz/utils/helpers";
@@ -9,21 +10,21 @@ import { INTERNAL } from "../config";
 
 const {
   traderIdleMinutes,
-  actions: { TIMER },
+  actions: { CHECK },
   events: { TRADER_ACTION },
   status: { READY }
 } = INTERNAL;
 
 async function handleTimer(context) {
   try {
-    //TODO: Check TraderActions
+    // TODO: Check TraderActions
     const traders = await getIdledTradersWithActivePositions(traderIdleMinutes);
 
     if (traders && traders.length > 0) {
       const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId }) => {
-          const action = { type: TIMER };
+          const action = { id: uuid(), type: CHECK };
           const status = await client.getStatus(taskId);
           if (status && status.runtimeStatus === "Running") {
             if (status.customStatus === READY) {

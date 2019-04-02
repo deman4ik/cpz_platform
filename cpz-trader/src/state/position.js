@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import Log from "cpz/log";
 import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_SHORT,
@@ -138,7 +139,7 @@ class Position {
    * @memberof Position
    */
   _createOrder(signal, positionDirection, settings) {
-    this.log("Creating new order...");
+    Log.debug("Creating new order...");
     const {
       signalId,
       orderType,
@@ -228,7 +229,7 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price, settings) {
-    this.log(
+    Log.debug(
       `checkOrder() ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
@@ -287,7 +288,7 @@ class Position {
    * @memberof Position
    */
   getOrdersToExecute(price, settings) {
-    this.log(
+    Log.debug(
       `getOrdersToExecute() position: ${this._code}, entry: ${
         this._entry.status
       }, exit: ${this._exit.status}, price: ${price}`
@@ -315,7 +316,7 @@ class Position {
         .filter(order => !!order);
     }
     if (requiredOrders.length > 0) {
-      this.log(
+      Log.debug(
         `${requiredOrders.length} order required position ${
           this._code
         }, price: ${price}`
@@ -359,7 +360,7 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
-    this.log(
+    Log.debug(
       `Executed ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${

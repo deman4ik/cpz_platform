@@ -15,11 +15,6 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
       description: "Timeframe in minutes.",
       type: "int"
     },
-    adviserId: {
-      description: "Adviser task Id.",
-      type: "string",
-      empty: false
-    },
     robotId: {
       description: "Robot uniq Id.",
       type: "int",

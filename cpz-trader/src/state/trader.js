@@ -25,7 +25,8 @@ import {
   ORDER_TASK_CANCEL,
   STATUS_PENDING,
   STATUS_STARTED,
-  STATUS_STOPPED
+  STATUS_STOPPED,
+  createTraderSlug
 } from "cpz/config/state";
 import {
   TASKS_TRADER_STARTED_EVENT,
@@ -56,6 +57,14 @@ class Trader {
       this._currency = state.currency;
       /* Таймфрейм */
       this._timeframe = state.timeframe;
+      /* Ключ партиции */
+      this._PartitionKey =
+        state.PartitionKey ||
+        createTraderSlug({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency
+        });
       /* Настройки трейдера */
       this._settings = combineTraderSettings(state.settings);
       /* Статус */
@@ -71,6 +80,8 @@ class Trader {
         candleId: null,
         tickId: null
       };
+      /* Последнее действие */
+      this._lastAction = state.lastAction || { actionId: null };
       /* Текущие позиции */
       this._positions = {};
       this.positions = state.activePositions;
@@ -82,26 +93,6 @@ class Trader {
       Log.error(e);
       throw e;
     }
-  }
-
-  /**
-   * Логирование в консоль
-   *
-   * @param {*} args
-   * @memberof Trader
-   */
-  log(...args) {
-    if (this._settings.debug) {
-      Log.debug(`Trader ${this._taskId}:`, ...args);
-    }
-  }
-
-  logInfo(...args) {
-    Log.info(`Trader ${this._taskId}:`, ...args);
-  }
-
-  logError(...args) {
-    Log.error(`Trader ${this._taskId}:`, ...args);
   }
 
   /**
@@ -141,6 +132,10 @@ class Trader {
         position.status === POS_STATUS_NEW ||
         position.status === POS_STATUS_OPEN
     );
+  }
+
+  set lastAction(action) {
+    if (action && action.actionId) this._lastAction = action;
   }
 
   start() {
@@ -289,7 +284,7 @@ class Trader {
    * @memberof Trader
    */
   _createPosition({ positionId, action, settings: { positionCode } }) {
-    this.log("Creating new Position", positionCode, positionId);
+    Log.debug("Creating new Position", positionCode, positionId);
     this._positions[positionId] = new Position({
       id: positionId,
       code: positionCode,
@@ -308,7 +303,7 @@ class Trader {
    */
   handleSignal(signal) {
     try {
-      this.log(
+      Log.debug(
         `handleSignal() position: ${signal.settings.positionCode}, ${
           signal.action
         }, ${signal.price}, from ${signal.priceSource}`
@@ -378,6 +373,10 @@ class Trader {
 
   checkPrice({ price, timestamp, candleId, tickId }) {
     try {
+      if (!price || !timestamp) {
+        Log.error("No current price!");
+        return;
+      }
       if (
         dayjs.utc(this._lastPrice.timestamp).valueOf() >=
         dayjs.utc(timestamp).valueOf()
@@ -531,7 +530,7 @@ class Trader {
    */
   get state() {
     return {
-      PartitionKey: this._taskId,
+      PartitionKey: this._PartitionKey,
       RowKey: this._taskId,
       taskId: this._taskId,
       robotId: this._robotId,
@@ -544,6 +543,7 @@ class Trader {
       settings: this._settings,
       lastSignal: this._lastSignal,
       lastPrice: this._lastPrice,
+      lastAction: this._lastAction,
       activePositions: this.activePositions,
       hasActivePositions: this.activePositions.length > 0
     };

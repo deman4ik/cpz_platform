@@ -26,7 +26,8 @@ const ERROR_SCHEMA = {
   taskId: {
     description: "Uniq task id.",
     type: "string",
-    empty: false
+    empty: false,
+    optional: true
   },
   error: BASE_ERROR
 };

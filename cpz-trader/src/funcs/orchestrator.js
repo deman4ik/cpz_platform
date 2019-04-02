@@ -55,7 +55,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
   // Следующее действие
   let nextAction = null;
   // Признак действия из очереди
-  let isQueueAction = false;
+  // let isQueueAction = false;
   // Признак остановки трейдера
   let stop = false;
   // Текущий стейт трейдера сохранен в сторедж
@@ -69,9 +69,10 @@ const orchestrator = df.orchestrator(function* trader(context) {
     nextAction = yield context.df.callActivityWithRetry(
       ACTIVITY_LOAD_ACTION,
       retryOptions,
-      { state: traderStateToCommonProps(state) }
+      { state: traderStateToCommonProps(state), lastAction: state.lastAction }
     );
-    isQueueAction = !!nextAction;
+
+    // isQueueAction = !!nextAction;
 
     // Если новых действие нет
     if (!nextAction) {
@@ -81,12 +82,19 @@ const orchestrator = df.orchestrator(function* trader(context) {
       Log.debug("Waiting for external event");
       nextAction = yield context.df.waitForExternalEvent(TRADER_ACTION);
     }
-    //TODO: Save and Check last action
+
+    // Если действие уже обработано, выходим
+    if (state.lastAction && nextAction.id === state.lastAction.actionId) {
+      Log.warn("Action '%s' have already been processed", nextAction.id);
+      yield context.df.continueAsNew(state);
+      return state;
+    }
+
     // Если есть новое действие (или пришел внешний эвент с действием)
     // Устанавливаем стутс - занят
     context.df.setCustomStatus(BUSY);
     // Проверяем тип действия
-    const { type, data } = nextAction;
+    const { id, type, data } = nextAction;
     if (
       type === PRICE ||
       type === SIGNAL ||
@@ -97,10 +105,11 @@ const orchestrator = df.orchestrator(function* trader(context) {
         currentState,
         currentOrders,
         currentEvents
-      } = yield context.df.callActivit(ACTIVITY_EXECUTE_TRADER, {
-        action: type,
-        state,
-        data
+      } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
+        actionType: type,
+        actionId: id,
+        actionData: data,
+        state
       });
       state = currentState;
       ordersToExecute = { ...ordersToExecute, ...currentOrders };
@@ -138,10 +147,11 @@ const orchestrator = df.orchestrator(function* trader(context) {
         currentState,
         currentOrders,
         currentEvents
-      } = yield context.df.callActivit(ACTIVITY_EXECUTE_TRADER, {
-        action: PRICE,
-        state,
-        data: currentPrice
+      } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
+        actionType: PRICE,
+        actionId: id,
+        actionData: currentPrice,
+        state
       });
       state = currentState;
       ordersToExecute = { ...ordersToExecute, ...currentOrders };
@@ -150,9 +160,10 @@ const orchestrator = df.orchestrator(function* trader(context) {
       const { currentState, currentOrders } = yield context.df.callActivity(
         ACTIVITY_EXECUTE_TRADER,
         {
-          action: CLOSE_ACTIVE_POSITIONS,
-          state,
-          data: null
+          actionType: CLOSE_ACTIVE_POSITIONS,
+          actionId: id,
+          actionData: null,
+          state
         }
       );
       state = currentState;
@@ -172,23 +183,37 @@ const orchestrator = df.orchestrator(function* trader(context) {
           ACTIVITY_EXECUTE_ORDERS,
           retryOptions,
           {
-            state: traderStateToCommonProps(state),
+            state,
             data: order
           }
         )
       );
       /* no-loop-func */
       // Исполняем ордера параллельно
-      const executedOrders = yield context.df.Task.all(orderExecuteTasks);
+      let executedOrders = [];
+      try {
+        executedOrders = yield context.df.Task.all(orderExecuteTasks);
+      } catch (e) {
+        throw new ServiceError(
+          {
+            name: ServiceError.types.TRADER_EXECUTE_ORDER_ERROR,
+            info: {
+              error: e
+            }
+          },
+          "Failed to execute orders after retries."
+        );
+      }
       // Обрабатываем результат исполнения ордеров
       const {
         currentState,
         currentEvents,
         currentOrders
       } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
-        action: ORDERS,
-        state: traderStateToCommonProps(state),
-        data: executedOrders.filter(({ task }) => !!task)
+        actionType: ORDERS,
+        actionId: null,
+        actionData: executedOrders.filter(({ task }) => !task), // только исполненные ордера
+        state
       });
       // Обновляем стейт
       state = currentState;
@@ -199,7 +224,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
     if (stop) {
       const { currentState, currentEvents } = yield context.df.callActivity(
         ACTIVITY_EXECUTE_TRADER,
-        { action: STOP, state, data: null }
+        { actionType: STOP, actionId: null, actionData: null, state }
       );
       state = currentState;
       eventsToSend = { ...eventsToSend, ...currentEvents };
@@ -214,27 +239,52 @@ const orchestrator = df.orchestrator(function* trader(context) {
           data: event
         })
       );
-      yield context.df.Task.all(eventPublishTasks);
+      try {
+        yield context.df.Task.all(eventPublishTasks);
+      } catch (e) {
+        throw new ServiceError(
+          {
+            name: ServiceError.types.TRADER_EVENTS_PUBLISH_ERROR,
+            info: {
+              error: e
+            }
+          },
+          "Failed to publish events after retries."
+        );
+      }
     }
     // Сохраняем стейт в сторедж
-    stateSaved = yield context.df.callActivityWithRetry(
-      ACTIVITY_SAVE_STATE,
-      retryOptions,
-      {
-        state
-      }
-    );
+    try {
+      stateSaved = yield context.df.callActivityWithRetry(
+        ACTIVITY_SAVE_STATE,
+        retryOptions,
+        {
+          state
+        }
+      );
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_SAVE_STATE_ERROR,
+          info: {
+            error: e
+          }
+        },
+        "Failed to save trader state after retries."
+      );
+    }
 
     // Если задача трейдера из очереди, удаляем элемент из очереди
-    if (isQueueAction)
+    /* if (isQueueAction)
       yield context.df.callActivityWithRetry(
         ACTIVITY_DELETE_ACTION,
         retryOptions,
         { state: traderStateToCommonProps(state), data: nextAction }
-      );
+      ); */
 
     result = state;
   } catch (e) {
+    Log.error(`ORCHESTRATOR ${JSON.stringify(e)}`);
     let error;
     // Если ошибка сгенерирована сервисом
     if (e instanceof ServiceError) {
@@ -276,7 +326,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
       // Меняем стейт
       const { currentState, currentEvents } = yield context.df.callActivity(
         ACTIVITY_EXECUTE_TRADER,
-        { action: STOP, state, data: null }
+        { actionType: STOP, actionId: null, actionData: null, state }
       );
       state = currentState;
       // Устанавливаем флаг - необходимо сохранить стейт
@@ -308,8 +358,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
         );
       }
     }
-    // Логиируем исключение
-    Log.exception(error);
+
     // Отправляем события
     try {
       yield context.df.callActivityWithRetry(
@@ -345,7 +394,9 @@ const orchestrator = df.orchestrator(function* trader(context) {
       );
       Log.exception(error);
     }
-    result = error;
+    // Логгируем исключение
+    Log.exception(error);
+    result = error.json;
   }
   Log.clearContext();
   // Если трейдер не остановлен - перезапускаем оркестратор с текущим стейтом

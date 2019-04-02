@@ -1,6 +1,7 @@
+import * as df from "durable-functions";
+import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import * as df from "durable-functions";
 import dayjs from "cpz/utils/lib/dayjs";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { INTERNAL, FUNCTIONS } from "../config";
@@ -33,6 +34,7 @@ async function handleStart(context, eventData) {
       PartitionKey: taskId,
       RowKey: "TASK",
       createdAt: dayjs.utc().toISOString(),
+      id: uuid(),
       type: START
     });
     await client.startNew(ORCHESTRATOR, taskId, eventData);
@@ -59,7 +61,7 @@ async function handleStop(context, eventData) {
   Log.debug("handleStop", eventData);
   const { taskId } = eventData;
   try {
-    const action = { type: STOP, data: eventData };
+    const action = { id: uuid(), type: STOP, data: eventData };
     const client = df.getClient(context);
     const status = await client.getStatus(taskId);
     if (status && status.runtimeStatus === "Running") {
@@ -99,7 +101,7 @@ async function handleUpdate(context, eventData) {
   Log.debug("handleUpdate", eventData);
   const { taskId } = eventData;
   try {
-    const action = { type: UPDATE, data: eventData };
+    const action = { id: uuid(), type: UPDATE, data: eventData };
     const client = df.getClient(context);
     const status = await client.getStatus(taskId);
     if (status && status.runtimeStatus === "Running") {

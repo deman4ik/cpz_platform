@@ -7,6 +7,11 @@
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "30 * * * * *"
+    },
+    {
+      "name": "starter",
+      "type": "orchestrationClient",
+      "direction": "in"
     }
   ]
 }

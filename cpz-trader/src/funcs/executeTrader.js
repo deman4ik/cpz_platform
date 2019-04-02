@@ -7,7 +7,15 @@ import Trader from "../state/trader";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 const {
-  actions: { START, UPDATE, STOP, SIGNAL, PRICE, ORDER, CLOSE_ACTIVE_POSITIONS }
+  actions: {
+    START,
+    UPDATE,
+    STOP,
+    SIGNAL,
+    PRICE,
+    ORDERS,
+    CLOSE_ACTIVE_POSITIONS
+  }
 } = INTERNAL;
 
 class ExecuteTrader {
@@ -19,7 +27,7 @@ class ExecuteTrader {
       STOP,
       SIGNAL,
       PRICE,
-      ORDER,
+      ORDERS,
       CLOSE_ACTIVE_POSITIONS
     ];
   }
@@ -39,14 +47,15 @@ class ExecuteTrader {
     }
   }
 
-  async run(context, { action, state, data }) {
+  async run(context, { actionType, actionId, actionData, state }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("execute trader", action, data, state);
-      if (!this.allowedActions.includes(action))
-        throw new Error(`Invalid trader action "${action}"`);
+      Log.debug("execute trader", actionType, actionId, actionData, state);
+      if (!this.allowedActions.includes(actionType))
+        throw new Error(`Invalid trader action "${actionType}"`);
       const trader = new Trader(state);
-      trader[action](data);
+      if (actionId) trader.action = { actionId, actionType, actionData };
+      trader[actionType](actionData);
       Log.clearContext();
       return trader.currentState;
     } catch (e) {
@@ -56,8 +65,7 @@ class ExecuteTrader {
           cause: e,
           info: {
             ...traderStateToCommonProps(state),
-            traderAction: action,
-            data
+            traderAction: { actionId, actionType, actionData }
           }
         },
         "Failed to execute trader"

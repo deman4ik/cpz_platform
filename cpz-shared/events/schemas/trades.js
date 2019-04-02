@@ -36,19 +36,23 @@ const _positionStep = {
       ORDER_STATUS_CLOSED,
       ORDER_STATUS_CANCELED,
       ORDER_STATUS_ERROR
-    ]
+    ],
+    optional: true
   },
   price: {
     description: "Position price in quote currency.",
-    type: "number"
+    type: "number",
+    optional: true
   },
   date: {
     description: "Position timestamp in UTC.",
-    type: "datetime"
+    type: "datetime",
+    optional: true
   },
   executed: {
     description: "Position executed volume.",
-    type: "number"
+    type: "number",
+    optional: true
   }
 };
 
@@ -161,7 +165,7 @@ const TRADES_ORDER_EVENT_SCHEMA = {
 };
 const TRADES_POSITION_EVENT_SCHEMA = {
   [TRADES_POSITION_EVENT]: {
-    positionId: {
+    id: {
       description: "Uniq Position Id.",
       type: "string",
       empty: false
@@ -213,7 +217,8 @@ const TRADES_POSITION_EVENT_SCHEMA = {
     exit: {
       description: "Position exit.",
       type: "object",
-      props: _positionStep
+      props: _positionStep,
+      optional: true
     }
   }
 };
