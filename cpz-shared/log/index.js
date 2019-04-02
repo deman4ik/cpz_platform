@@ -50,6 +50,8 @@ class Log {
       appInsights.defaultClient.commonProperties = {
         ...this._executionContext
       };
+    } else {
+      this.warn("Logger runs in TEST mode.");
     }
   }
 
