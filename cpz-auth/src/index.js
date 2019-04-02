@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken";
 import Db from "cpz/db-client";
 import bcrypt from "bcrypt";
 import Log from "cpz/log";
+import Mailer from "cpz/mailer";
 import { checkEnvVars } from "cpz/utils/environment";
 import authEnv from "cpz/config/environment/auth";
-import { sendCode } from "./mailer";
 import { SERVICE_NAME, INTERNAL } from "./config";
 
 const { BAD_VALIDATE_CODE_COUNT, BAD_LOGIN_COUNT, AUTH_ISSUER } = INTERNAL;
@@ -19,10 +19,12 @@ const {
   JWT_SECRET,
   DB_API_ENDPOINT,
   DB_API_ACCESS_KEY,
-  APPINSIGHTS_INSTRUMENTATIONKEY
+  APPINSIGHTS_INSTRUMENTATIONKEY,
+  MAILGUN_API,
+  MAILGUN_DOMAIN
 } = process.env;
 
-//TODO: Email case sensivity
+// TODO: Email case sensivity
 class AuthService {
   constructor() {
     this.init();
@@ -37,6 +39,7 @@ class AuthService {
       key: APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
+    this.mailer = new Mailer({ apiKey: MAILGUN_API, domain: MAILGUN_DOMAIN });
     this.db = new Db({ endpoint: DB_API_ENDPOINT, key: DB_API_ACCESS_KEY });
   }
 
@@ -101,7 +104,11 @@ class AuthService {
       if (user && user.status === 2) {
         await this.db.setCode(user.id, code);
         // Send email with code
-        await sendCode(email, code);
+        await this.mailer.send({
+          to: email,
+          subject: "🚀 Cryptuoso - Please verify your email!",
+          text: `Greetings! Your confirmation code is ${code}.\n\nCryptuoso`
+        });
         context.res = {
           status: 200,
           body: { message: "Check email" },
@@ -124,7 +131,12 @@ class AuthService {
       );
 
       // Send email with code
-      await sendCode(email, code);
+      await this.mailer.send({
+        to: email,
+        subject:
+          "🚀 Your Cryptuoso account is created! Please verify your email!",
+        text: `Greetings! Your confirmation code is ${code}.\n\nCryptuoso`
+      });
 
       context.res = {
         status: 200,
@@ -610,7 +622,13 @@ class AuthService {
       await this.db.setCode(user.id, code);
 
       // Send email with code
-      await sendCode(email, code);
+      await this.mailer.send({
+        to: email,
+        subject: "🚀 Cryptuoso - Reset password!",
+        text: `Greetings! We received a request to reset your Cryptuoso account password. Your confirmation code is ${code}.\n
+        If you did not request a password reset, feel free to disregard this email — your password will not be changed.
+        \n\nCryptuoso`
+      });
 
       context.res = {
         status: 200,

@@ -22,6 +22,8 @@ const VALIDATION_ERROR = "ValidationError";
 
 const LOG_ERROR = "LogError";
 
+const MAILER_ERROR = "MailerError";
+
 export * from "./marketwatcher";
 export * from "./candlebatcher";
 export * from "./backtester";
@@ -50,5 +52,6 @@ export {
   RETRY_ERROR,
   DB_ERROR,
   VALIDATION_ERROR,
-  LOG_ERROR
+  LOG_ERROR,
+  MAILER_ERROR
 };
