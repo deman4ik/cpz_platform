@@ -31,22 +31,14 @@ async function handlePrice(context, currentPrice) {
       await Promise.all(
         traders.map(async ({ taskId, lastPrice }) => {
           Log.warn(
-            dayjs(lastPrice.timestamp)
-              .utc()
-              .toISOString(),
-            dayjs(currentPrice.timestamp)
-              .utc()
-              .toISOString()
+            dayjs.utc(lastPrice.timestamp).toISOString(),
+            dayjs.utc(currentPrice.timestamp).toISOString()
           );
           if (
             !lastPrice.timestamp ||
             (lastPrice.timestamp &&
-              dayjs(lastPrice.timestamp)
-                .utc()
-                .valueOf() <
-                dayjs(currentPrice.timestamp)
-                  .utc()
-                  .valueOf())
+              dayjs.utc(lastPrice.timestamp).valueOf() <
+                dayjs.utc(currentPrice.timestamp).valueOf())
           ) {
             const status = await client.getStatus(taskId);
             if (status && status.runtimeStatus === "Running") {
