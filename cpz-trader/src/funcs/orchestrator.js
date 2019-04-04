@@ -240,7 +240,10 @@ const orchestrator = df.orchestrator(function* trader(context) {
         })
       );
       try {
-        yield context.df.Task.all(eventPublishTasks);
+        const eventPublishResults = yield context.df.Task.all(
+          eventPublishTasks
+        );
+        Log.warn("eventPublishResults", eventPublishResults);
       } catch (e) {
         throw new ServiceError(
           {
@@ -275,12 +278,15 @@ const orchestrator = df.orchestrator(function* trader(context) {
     }
 
     // Если задача трейдера из очереди, удаляем элемент из очереди
-    /* if (isQueueAction)
-      yield context.df.callActivityWithRetry(
-        ACTIVITY_DELETE_ACTION,
-        retryOptions,
-        { state: traderStateToCommonProps(state), data: nextAction }
-      ); */
+    /* if (isQueueAction) 
+    yield context.df.callActivityWithRetry(
+      ACTIVITY_DELETE_ACTION,
+      retryOptions,
+      {
+        state: traderStateToCommonProps(state),
+        data: { PartitionKey: "ass", RowKey: "sasd" }
+      }
+    );*/
 
     result = state;
   } catch (e) {
@@ -301,7 +307,8 @@ const orchestrator = df.orchestrator(function* trader(context) {
           name: errorName,
           cause: e,
           info: {
-            ...traderStateToCommonProps(state)
+            ...traderStateToCommonProps(state),
+            critical
           }
         },
         "Trader orchestrator error"
@@ -313,6 +320,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
           name: ServiceError.types.TRADER_ORCHESTRATOR_EXCEPTION,
           info: {
             ...traderStateToCommonProps(state),
+            critical: true,
             error: e
           }
         },

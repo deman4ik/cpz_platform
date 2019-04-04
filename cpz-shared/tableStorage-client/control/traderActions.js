@@ -52,8 +52,11 @@ const saveTraderAction = async action =>
  *
  * @param {object} action
  */
-const deleteTraderAction = async action =>
-  client.deleteEntity(TABLES.STORAGE_TRADER_ACTIONS_TABLE, action);
+const deleteTraderAction = async ({ PartitionKey, RowKey }) =>
+  client.deleteEntity(TABLES.STORAGE_TRADER_ACTIONS_TABLE, {
+    PartitionKey,
+    RowKey
+  });
 
 export { getNextTraderAction, saveTraderAction, deleteTraderAction };
 export default Object.values(TABLES);

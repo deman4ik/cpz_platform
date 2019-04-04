@@ -10,6 +10,7 @@ import {
   EMULATOR_MODE,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
+  ORDER_STATUS_CANCELED,
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
   ORDER_TASK_OPENBYMARKET,
@@ -68,7 +69,7 @@ class ExecuteOrders extends BaseService {
       let currentPrice = lastPrice;
       Log.addContext(context, traderStateToCommonProps(state));
       Log.debug("executeOrders", state, orderResult);
-
+      Log.warn("currentPrice", currentPrice);
       // Если задача - проверить исполнения объема
       if (order.task === ORDER_TASK_CHECKLIMIT) {
         // Если режим - в реальном времени
@@ -107,10 +108,12 @@ class ExecuteOrders extends BaseService {
             const marketPrice = await getCurrentPrice(
               createCurrentPriceSlug({ exchange, asset, currency })
             );
+            Log.warn("marketPrice", marketPrice);
             if (marketPrice && marketPrice.price) {
               currentPrice = marketPrice;
               orderToExecute.price = marketPrice.price;
             }
+            Log.warn("currentPrice", currentPrice);
           }
         }
         // Если режим - в реальном времени
@@ -140,42 +143,51 @@ class ExecuteOrders extends BaseService {
               .startOf("minute")
               .toISOString()
           };
-        } else if (order.orderType === ORDER_TYPE_LIMIT) {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - лимитный
-          // Считаем, что ордер успешно выставлен на биржу
-          orderResult.status = ORDER_STATUS_OPEN;
-          orderResult.exId = order.orderId;
-          orderResult.exTimestamp = currentPrice.timestamp;
-          orderResult.average = currentPrice.price;
-          orderResult.remaining = order.volume;
-        } else if (order.orderType === ORDER_TYPE_MARKET) {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - по рынку
-          // Считаем, что ордер исполнен
-          orderResult.status = ORDER_STATUS_CLOSED;
-          orderResult.exId = order.orderId;
-          orderResult.exTimestamp = currentPrice.timestamp;
-          // Полностью - т.е. по заданному объему
-          orderResult.executed = orderToExecute.volume;
-          orderResult.remaining = 0;
-          orderResult.exLastTrade = currentPrice.timestamp;
-          orderResult.average = orderResult.price;
+        } else {
+          if (order.task === ORDER_TASK_SETLIMIT) {
+            // Если режим - эмуляция или бэктест
+            // Если тип ордера - лимитный
+            // Считаем, что ордер успешно выставлен на биржу
+            orderResult.status = ORDER_STATUS_OPEN;
+            orderResult.exId = order.orderId;
+            orderResult.exTimestamp = currentPrice.timestamp;
+            orderResult.average = currentPrice.price;
+            orderResult.remaining = order.volume;
+          }
+          if (order.task === ORDER_TASK_OPENBYMARKET) {
+            // Если режим - эмуляция или бэктест
+            // Если тип ордера - по рынку
+            // Считаем, что ордер исполнен
+            orderResult.status = ORDER_STATUS_CLOSED;
+            orderResult.exId = order.orderId;
+            orderResult.exTimestamp = currentPrice.timestamp;
+            // Полностью - т.е. по заданному объему
+            orderResult.executed = orderToExecute.volume;
+            orderResult.remaining = 0;
+            orderResult.exLastTrade = currentPrice.timestamp;
+            orderResult.price = currentPrice.price;
+            orderResult.average = currentPrice.price;
+          }
         }
       } else if (order.task === ORDER_TASK_CANCEL) {
-        const currentOrder = await this.connector.cancelOrder({
-          exchange,
-          asset,
-          currency,
-          userId,
-          keys: settings.keys,
-          exId: order.exId
-        });
+        if (settings.mode === REALTIME_MODE) {
+          const currentOrder = await this.connector.cancelOrder({
+            exchange,
+            asset,
+            currency,
+            userId,
+            keys: settings.keys,
+            exId: order.exId
+          });
 
-        orderResult = { ...orderResult, ...currentOrder };
+          orderResult = { ...orderResult, ...currentOrder };
+        } else {
+          orderResult = { ...orderResult, status: ORDER_STATUS_CANCELED };
+        }
       }
       orderResult.task = null;
       orderResult.error = null;
+      Log.warn("orderResult", orderResult);
       Log.clearContext();
       return orderResult;
     } catch (e) {

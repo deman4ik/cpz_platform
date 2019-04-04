@@ -84,7 +84,7 @@ class Trader {
       this._lastAction = state.lastAction || { actionId: null };
       /* Текущие позиции */
       this._positions = {};
-      this.positions = state.activePositions;
+      this.positionInstances = state.activePositions;
       /* События для отправки */
       this._eventsToSend = {};
       /* Ордера для обработки */
@@ -119,15 +119,27 @@ class Trader {
     return Object.values(this._positions).map(position => position.state);
   }
 
-  set positions(positions) {
+  get activePositions() {
+    return this.positions.filter(
+      position =>
+        position.status === POS_STATUS_NEW ||
+        position.status === POS_STATUS_OPEN
+    );
+  }
+
+  set positionInstances(positions) {
     if (positions && Array.isArray(positions) && positions.length > 0)
       positions.forEach(position => {
         this._positions[position.id] = new Position(position);
       });
   }
 
-  get activePositions() {
-    return this.positions.filter(
+  get positionInstances() {
+    return Object.values(this._positions);
+  }
+
+  get activePositionInstances() {
+    return this.positionInstances.filter(
       position =>
         position.status === POS_STATUS_NEW ||
         position.status === POS_STATUS_OPEN
@@ -188,42 +200,18 @@ class Trader {
     };
   }
 
-  _closePosition(positionId) {
-    try {
-      const position = this._positions[positionId];
-      const closeSignal = {
-        signalId: uuid(),
-        price: null,
-        timestamp: dayjs.utc().toISOString(),
-        orderType: ORDER_TYPE_MARKET_FORCE,
-        positionId: position.positionId,
-        settings: {
-          positionCode: position.code,
-          volume: position.exit.remaining
-        }
-      };
-      if (position.direction === ORDER_DIRECTION_BUY) {
-        closeSignal.action = TRADE_ACTION_CLOSE_LONG;
-      } else {
-        closeSignal.action = TRADE_ACTION_CLOSE_SHORT;
-      }
-      this.handleSignal(closeSignal);
-    } catch (e) {
-      throw new ServiceError(
-        {
-          name: ServiceError.types.TRADER_CLOSE_POSITION_ERROR,
-          cause: e
-        },
-        "Failed to close position"
-      );
-    }
-  }
-
   closeActivePositions() {
     try {
-      Object.keys(this._positions).forEach(positionId => {
-        this._closePosition(positionId);
+      const ordersToExecute = flatten(
+        this.activePositionInstances.map(position =>
+          position.getOrdersToClosePosition()
+        )
+      );
+      Log.warn("ordersToExecute", ordersToExecute);
+      ordersToExecute.forEach(order => {
+        this._ordersToExecute[order.orderId] = this._baseOrder(order);
       });
+      Log.warn("this._ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
         {
@@ -309,7 +297,10 @@ class Trader {
         }, ${signal.price}, from ${signal.priceSource}`
       );
       // Если сигнал уже обрабатывалась - выходим
-      if (signal.signalId === this._lastSignal.signalId) return;
+      if (signal.signalId === this._lastSignal.signalId) {
+        Log.warn("Signal '%s' already handled.", signal.signalId);
+        return;
+      }
       // Если сигнал на открытие позиции
       if (
         signal.action === TRADE_ACTION_LONG ||
@@ -327,7 +318,15 @@ class Trader {
         );
       } else {
         // Если сигнал на закрытие позиции
-
+        if (
+          !Object.prototype.hasOwnProperty.call(
+            this._positions,
+            signal.positionId
+          )
+        ) {
+          Log.warn("Position '%s' not found!", signal.positionId);
+          return;
+        }
         // Создаем ордер на закрытие позиции
         this._positions[signal.positionId].createExitOrder(
           signal,
@@ -380,19 +379,24 @@ class Trader {
       if (
         dayjs.utc(this._lastPrice.timestamp).valueOf() >=
         dayjs.utc(timestamp).valueOf()
-      )
-        return;
-
-      this._lastPrice = {
-        price,
-        timestamp,
-        candleId,
-        tickId
-      };
+      ) {
+        Log.warn(
+          "Already checked newer price. Last checked price time '%s', current price time '%s'",
+          this._lastPrice.timestamp,
+          timestamp
+        );
+      } else {
+        this._lastPrice = {
+          price,
+          timestamp,
+          candleId,
+          tickId
+        };
+      }
 
       const ordersToExecute = flatten(
-        this.activePositions.map(position =>
-          position.getOrdersToExecute(price, this._settings)
+        this.activePositionInstances.map(position =>
+          position.getOrdersToExecute(this._lastPrice.price, this._settings)
         )
       );
       ordersToExecute.forEach(order => {

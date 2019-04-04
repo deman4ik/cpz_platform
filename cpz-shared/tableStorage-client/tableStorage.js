@@ -1,6 +1,7 @@
 import azure from "azure-storage";
 import ServiceError from "../error";
 import { tryParseJSON, chunkArray } from "../utils/helpers";
+import Log from "../log";
 
 const { TableQuery, TableUtilities } = azure;
 const { entityGenerator } = TableUtilities;
@@ -239,17 +240,22 @@ class TableStorage {
     return new Promise((resolve, reject) => {
       const entity = this.objectToEntity(data);
       this.tableService.deleteEntity(tableName, entity, error => {
-        if (error)
-          reject(
-            new ServiceError(
-              {
-                name: ServiceError.types.TABLE_STORAGE_ERROR,
-                cause: error
-              },
-              'Failed to delete entity from "%s"',
-              tableName
-            )
+        if (error) {
+          const err = new ServiceError(
+            {
+              name: ServiceError.types.TABLE_STORAGE_ERROR,
+              cause: error
+            },
+            'Failed to delete entity from "%s"',
+            tableName
           );
+          if (error.code === "ResourceNotFound") {
+            resolve(true);
+            Log.warn(err.json);
+          } else {
+            reject(err);
+          }
+        }
         resolve(true);
       });
     });

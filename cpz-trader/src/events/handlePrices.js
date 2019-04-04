@@ -39,7 +39,8 @@ async function handlePrice(context, currentPrice) {
                 price: currentPrice.price,
                 timestamp: currentPrice.timestamp,
                 tickId: currentPrice.tickId,
-                candleId: currentPrice.candleId
+                candleId: currentPrice.candleId,
+                source: currentPrice.source
               }
             };
             if (status.customStatus === READY) {
@@ -75,7 +76,7 @@ async function handleTick(context, eventData) {
     exchange,
     asset,
     currency,
-    time,
+
     timestamp,
     price,
     tradeId
@@ -86,11 +87,11 @@ async function handleTick(context, eventData) {
       exchange,
       asset,
       currency,
-      time,
       timestamp,
       price,
       tickId: tradeId,
-      candleId: null
+      candleId: null,
+      source: "tick"
     };
     await handlePrice(context, currentPrice);
   } catch (e) {
@@ -106,16 +107,7 @@ async function handleTick(context, eventData) {
 }
 
 async function handleCandle(context, eventData) {
-  const {
-    type,
-    exchange,
-    asset,
-    currency,
-    time,
-    timestamp,
-    price,
-    id
-  } = eventData;
+  const { type, exchange, asset, currency, timestamp, price, id } = eventData;
   try {
     Log.debug("handleCandle", eventData);
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
@@ -124,11 +116,11 @@ async function handleCandle(context, eventData) {
       exchange,
       asset,
       currency,
-      time,
       timestamp,
       price,
       tickId: null,
-      candleId: id
+      candleId: id,
+      source: "tick"
     };
     await handlePrice(context, currentPrice);
   } catch (e) {

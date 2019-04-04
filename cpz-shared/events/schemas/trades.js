@@ -89,7 +89,8 @@ const TRADES_ORDER_EVENT_SCHEMA = {
     },
     price: {
       description: "Price in quote currency.",
-      type: "number"
+      type: "number",
+      optional: true
     },
     volume: {
       description: "Order planned volume.",
@@ -139,27 +140,33 @@ const TRADES_ORDER_EVENT_SCHEMA = {
     },
     exId: {
       description: "Exchange order id.",
-      type: "string"
+      type: "string",
+      optional: true
     },
     exTimestamp: {
       description: "Order created in exchange timestamp UTC.",
-      type: "datetime"
+      type: "datetime",
+      optional: true
     },
     exLastTrade: {
       description: "Order last trade in exchange timestamp UTC.",
-      type: "datetime"
+      type: "datetime",
+      optional: true
     },
     average: {
       description: "Average executed price.",
-      type: "number"
+      type: "number",
+      optional: true
     },
     remaining: {
       description: "Temaining amount to fill.",
-      type: "number"
+      type: "number",
+      optional: true
     },
     executed: {
       description: "Executed volume.",
-      type: "number"
+      type: "number",
+      optional: true
     }
   }
 };

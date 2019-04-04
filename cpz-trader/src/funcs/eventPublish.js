@@ -98,7 +98,7 @@ class EventPublish extends BaseService {
       // TODO: Save event to storage
       Log.exception(error);
       Log.clearContext();
-      throw error;
+      return false;
     }
   }
 }

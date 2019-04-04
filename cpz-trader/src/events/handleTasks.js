@@ -4,6 +4,7 @@ import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import dayjs from "cpz/utils/lib/dayjs";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
+import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import { INTERNAL, FUNCTIONS } from "../config";
 
 const {
@@ -30,6 +31,17 @@ async function handleStart(context, eventData) {
       Log.warn(`Trader "${taskId}" already started`);
       return;
     }
+    let newTraderState = eventData;
+    // Если есть предыдущее состояние трейдера
+    const traderState = await getTraderById(taskId);
+    if (traderState) {
+      // Соедениям с текущим состоянием
+      newTraderState = {
+        ...traderState,
+        ...newTraderState
+      };
+    }
+    // Сохраняем новое задание трейдеру - старт
     await saveTraderAction({
       PartitionKey: taskId,
       RowKey: "TASK",
@@ -37,7 +49,8 @@ async function handleStart(context, eventData) {
       id: uuid(),
       type: START
     });
-    await client.startNew(ORCHESTRATOR, taskId, eventData);
+    // Запускаем новый оркестратор трейдера
+    await client.startNew(ORCHESTRATOR, taskId, newTraderState);
   } catch (e) {
     throw new ServiceError(
       {
