@@ -2,7 +2,9 @@ export default {
   variables: [
     "FUNCTIONS_WORKER_RUNTIME",
     "AzureWebJobsStorage",
+    "AZ_STORAGE_CONTROL_CS",
     "AZ_STORAGE_MARKET_CS",
+    "AZ_STORAGE_EVENT_CS",
     "API_KEY",
     "EG_TASKS_ENDPOINT",
     "EG_TASKS_KEY",

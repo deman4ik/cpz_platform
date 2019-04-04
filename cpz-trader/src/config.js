@@ -9,7 +9,6 @@ const FUNCTIONS = {
   HTTP_TICK_EVENTS: "funcTickEvents",
   TIMER: "funcTimer",
   ORCHESTRATOR: "funcOrchestrator",
-  ACTIVITY_DELETE_ACTION: "funcDeleteAction",
   ACTIVITY_EVENT_PUBLISH: "funcEventPublish",
   ACTIVITY_EXECUTE_ORDERS: "funcExecuteOrders",
   ACTIVITY_GET_CURRENT_RPICE: "funcGetCurrentPrice",

@@ -5,6 +5,7 @@
     "AzureWebJobsStorage": "",
     "AZ_STORAGE_CONTROL_CS": "",
     "AZ_STORAGE_MARKET_CS": "",
+    "AZ_STORAGE_EVENT_CS": "",
     "API_KEY": "test",
     "EG_TASKS_ENDPOINT": "https://localhost:443",
     "EG_TASKS_KEY": "test",

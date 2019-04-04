@@ -11,7 +11,6 @@ import { SERVICE_NAME, FUNCTIONS, INTERNAL } from "../config";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 const {
-  ACTIVITY_DELETE_ACTION,
   ACTIVITY_EVENT_PUBLISH,
   ACTIVITY_EXECUTE_ORDERS,
   ACTIVITY_GET_CURRENT_RPICE,
@@ -54,8 +53,6 @@ const orchestrator = df.orchestrator(function* trader(context) {
   let ordersToExecute = {};
   // Следующее действие
   let nextAction = null;
-  // Признак действия из очереди
-  // let isQueueAction = false;
   // Признак остановки трейдера
   let stop = false;
   // Текущий стейт трейдера сохранен в сторедж
@@ -71,8 +68,6 @@ const orchestrator = df.orchestrator(function* trader(context) {
       retryOptions,
       { state: traderStateToCommonProps(state), lastAction: state.lastAction }
     );
-
-    // isQueueAction = !!nextAction;
 
     // Если новых действие нет
     if (!nextAction) {
@@ -243,7 +238,9 @@ const orchestrator = df.orchestrator(function* trader(context) {
         const eventPublishResults = yield context.df.Task.all(
           eventPublishTasks
         );
-        Log.warn("eventPublishResults", eventPublishResults);
+        const failedEvents = eventPublishResults.filter(res => res === false);
+        if (failedEvents.length > 0)
+          Log.exception("Failed to publish '%d' events", failedEvents.length);
       } catch (e) {
         throw new ServiceError(
           {
@@ -276,17 +273,6 @@ const orchestrator = df.orchestrator(function* trader(context) {
         "Failed to save trader state after retries."
       );
     }
-
-    // Если задача трейдера из очереди, удаляем элемент из очереди
-    /* if (isQueueAction) 
-    yield context.df.callActivityWithRetry(
-      ACTIVITY_DELETE_ACTION,
-      retryOptions,
-      {
-        state: traderStateToCommonProps(state),
-        data: { PartitionKey: "ass", RowKey: "sasd" }
-      }
-    );*/
 
     result = state;
   } catch (e) {

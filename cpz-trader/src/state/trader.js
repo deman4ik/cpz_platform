@@ -1,6 +1,5 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
-import { v4 as uuid } from "uuid";
 import { combineTraderSettings } from "cpz/utils/settings";
 import {
   REALTIME_MODE,
@@ -8,8 +7,6 @@ import {
   EMULATOR_MODE,
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
-  TRADE_ACTION_CLOSE_SHORT,
-  TRADE_ACTION_CLOSE_LONG,
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
   POS_STATUS_CLOSED,
@@ -21,7 +18,6 @@ import {
   ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
-  ORDER_TYPE_MARKET_FORCE,
   ORDER_TASK_CANCEL,
   STATUS_PENDING,
   STATUS_STARTED,
@@ -34,7 +30,8 @@ import {
   TASKS_TRADER_UPDATED_EVENT,
   TRADES_ORDER_EVENT,
   TRADES_POSITION_EVENT,
-  ERROR_TRADER_WARN_EVENT
+  ERROR_TRADER_WARN_EVENT,
+  ERROR_TRADER_ERROR_EVENT
 } from "cpz/events/types";
 import { flatten } from "cpz/utils/helpers";
 import dayjs from "cpz/utils/lib/dayjs";
@@ -451,12 +448,14 @@ class Trader {
   }
 
   _createErrorOrderEvent(order) {
+    const { critical = false } = order.error.info;
     return {
-      eventType: ERROR_TRADER_WARN_EVENT,
+      eventType: critical ? ERROR_TRADER_ERROR_EVENT : ERROR_TRADER_WARN_EVENT,
       eventData: {
         subject: this._taskId,
         data: {
           taskId: this._taskId,
+          critical,
           error: order.error
         }
       }
@@ -499,6 +498,7 @@ class Trader {
 
         const currentOrder = { ...order };
         if (
+          this._settings.mode !== BACKTEST_MODE &&
           order.exTimestamp &&
           order.status === ORDER_STATUS_OPEN &&
           dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >

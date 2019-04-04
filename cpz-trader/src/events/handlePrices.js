@@ -25,36 +25,56 @@ async function handlePrice(context, currentPrice) {
         currency
       })
     );
-
+    Log.warn("traders", traders);
     if (traders && traders.length > 0) {
       const client = df.getClient(context);
       await Promise.all(
-        traders.map(async ({ taskId }) => {
-          const status = await client.getStatus(taskId);
-          if (status && status.runtimeStatus === "Running") {
-            const action = {
-              id: uuid(),
-              type: PRICE,
-              data: {
-                price: currentPrice.price,
-                timestamp: currentPrice.timestamp,
-                tickId: currentPrice.tickId,
-                candleId: currentPrice.candleId,
-                source: currentPrice.source
+        traders.map(async ({ taskId, lastPrice }) => {
+          Log.warn(
+            dayjs(lastPrice.timestamp)
+              .utc()
+              .toISOString(),
+            dayjs(currentPrice.timestamp)
+              .utc()
+              .toISOString()
+          );
+          if (
+            !lastPrice.timestamp ||
+            (lastPrice.timestamp &&
+              dayjs(lastPrice.timestamp)
+                .utc()
+                .valueOf() <
+                dayjs(currentPrice.timestamp)
+                  .utc()
+                  .valueOf())
+          ) {
+            const status = await client.getStatus(taskId);
+            if (status && status.runtimeStatus === "Running") {
+              const action = {
+                id: uuid(),
+                type: PRICE,
+                data: {
+                  price: currentPrice.price,
+                  timestamp: currentPrice.timestamp,
+                  tickId: currentPrice.tickId,
+                  candleId: currentPrice.candleId,
+                  source: currentPrice.source
+                }
+              };
+              if (status.customStatus === READY) {
+                await client.raiseEvent(taskId, TRADER_ACTION, action);
+              } else {
+                // TODO: save price action only if timestamp greater
+                await saveTraderAction({
+                  PartitionKey: taskId,
+                  RowKey: PRICE,
+                  createdAt: dayjs.utc().toISOString(),
+                  ...action
+                });
               }
-            };
-            if (status.customStatus === READY) {
-              await client.raiseEvent(taskId, TRADER_ACTION, action);
             } else {
-              await saveTraderAction({
-                PartitionKey: taskId,
-                RowKey: PRICE,
-                createdAt: dayjs.utc().toISOString(),
-                ...action
-              });
+              Log.error(`Trader "${taskId}" not started`);
             }
-          } else {
-            Log.error(`Trader "${taskId}" not started`);
           }
         })
       );

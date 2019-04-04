@@ -5,6 +5,10 @@ import traderEnv from "cpz/config/environment/trader";
 import EventGrid from "cpz/events";
 import BaseService from "cpz/services/baseService";
 import ServiceValidator from "cpz/validator";
+import EventsStorageClient from "cpz/tableStorage-client/events";
+import EventTables, {
+  saveTraderFailedEvent
+} from "cpz/tableStorage-client/events/events";
 import {
   TASKS_TOPIC,
   SIGNALS_TOPIC,
@@ -69,6 +73,8 @@ class EventPublish extends BaseService {
         ERROR_TOPIC
       });
       EventGrid.config(EGConfig);
+      // Table Storage
+      EventsStorageClient.init(process.env.AZ_STORAGE_EVENT_CS, EventTables);
     } catch (e) {
       Log.exception(e);
       throw e;
@@ -95,8 +101,14 @@ class EventPublish extends BaseService {
         },
         "Failed to publish event"
       );
-      // TODO: Save event to storage
       Log.exception(error);
+      const event = { ...data, error: error.json };
+      Log.event(event.eventType, event);
+      try {
+        await saveTraderFailedEvent(event);
+      } catch (storageErr) {
+        Log.exception(storageErr);
+      }
       Log.clearContext();
       return false;
     }

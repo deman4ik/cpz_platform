@@ -1,5 +1,4 @@
 import candleEvents from "./funcs/candleEvents";
-import deleteAction from "./funcs/deleteAction";
 import eventPublish from "./funcs/eventPublish";
 import executeOrders from "./funcs/executeOrders";
 import getCurrentPrice from "./funcs/getCurrentPrice";
@@ -14,7 +13,6 @@ import executeTrader from "./funcs/executeTrader";
 
 export {
   candleEvents,
-  deleteAction,
   eventPublish,
   executeOrders,
   getCurrentPrice,
