@@ -99,17 +99,13 @@ class BaseProvider {
   }
 
   /* eslint-disable */
-  async start() {
-  }
+  async start() {}
 
-  async stop() {
-  }
+  async stop() {}
 
-  async subscribe() {
-  }
+  async subscribe() {}
 
-  async unsubscribe() {
-  }
+  async unsubscribe() {}
 
   /* eslint-enable */
 
@@ -170,7 +166,10 @@ class BaseProvider {
         await saveCurrentPrice({
           PartitionKey: slug,
           RowKey: slug,
+          timestamp: tick.timestamp,
           price: tick.price,
+          tickId: tick.tickId,
+          candleId: null,
           source: "tick"
         });
       }

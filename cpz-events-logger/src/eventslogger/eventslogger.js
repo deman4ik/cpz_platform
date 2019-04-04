@@ -40,13 +40,24 @@ class EventsLogger {
       const type = event.eventType;
       if (type === CANDLES_NEWCANDLE_EVENT.eventType) {
         if (this.logToStorage) {
-          const { close, exchange, asset, currency, timeframe } = event.data;
+          const {
+            id,
+            timestamp,
+            close,
+            exchange,
+            asset,
+            currency,
+            timeframe
+          } = event.data;
           if (timeframe === 1) {
             const slug = createCurrentPriceSlug({ exchange, asset, currency });
             await saveCurrentPrice({
               PartitionKey: slug,
               RowKey: slug,
+              timestamp,
               price: close,
+              candleId: id,
+              tickId: null,
               source: "candle"
             });
           }
