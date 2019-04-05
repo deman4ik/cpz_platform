@@ -33,7 +33,8 @@ SELECT p.id,
        oo.order_ex_num as o_ex_num_open,
        oc.status as o_status_close, oc.created_at as o_created_at_close, oc.order_type as o_type_close, oc.order_price as o_price_close, oc.candle_timestamp as o_candle_timestamp_close,
        oc.order_ex_num as o_ex_num_close,
-       p.OID
+       p.OID,
+       p.run_mode
 FROM positions p
 left join backtest b on (p.backtest_id = b.id)
 left join orders oo on (p.id = oo.position_id and oo.action in ('short','long'))

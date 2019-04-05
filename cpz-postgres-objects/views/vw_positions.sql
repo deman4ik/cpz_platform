@@ -20,7 +20,8 @@ SELECT p.id,
        p.entry_balance,
        p.exit_balance, 
        p.profit,
-       p.code as note
+       p.code as note,
+       ur.robot_status
 FROM positions p, user_robot ur
 where p.run_mode != 'backtest'
   and p.robot_id = ur.robot_id
