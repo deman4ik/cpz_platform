@@ -212,7 +212,7 @@ class Log {
     let messages;
     if (props instanceof ServiceError) {
       properties = props.json;
-      messages = [props.format(), ...args];
+      messages = [props.toString(true), ...args];
     } else {
       properties = props;
       messages = args;
@@ -261,7 +261,7 @@ class Log {
     let messages;
     if (props instanceof ServiceError) {
       properties = props.json;
-      messages = [props.format(), ...args];
+      messages = [props.toString(true), ...args];
     } else {
       properties = props;
       messages = args;

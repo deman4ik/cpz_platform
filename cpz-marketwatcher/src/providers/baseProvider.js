@@ -6,6 +6,7 @@ import publishEvents from "cpz/eventgrid";
 import { saveMarketwatcherState } from "cpz/tableStorage/marketwatchers";
 import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
 import { saveCachedTick } from "cpz/tableStorage/ticks";
+import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import config from "../config";
 
 const {
@@ -165,7 +166,8 @@ class BaseProvider {
         });
         await saveCurrentPrice({
           PartitionKey: slug,
-          RowKey: slug,
+          RowKey: generateCandleRowKey(tick.time),
+          time: tick.time,
           timestamp: tick.timestamp,
           price: tick.price,
           tickId: tick.tickId,

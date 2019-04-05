@@ -15,6 +15,7 @@ import {
   saveOrdersDB,
   savePositionsDB
 } from "cpz/db";
+import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import config from "../config";
 
 const {
@@ -42,6 +43,7 @@ class EventsLogger {
         if (this.logToStorage) {
           const {
             id,
+            time,
             timestamp,
             close,
             exchange,
@@ -53,7 +55,8 @@ class EventsLogger {
             const slug = createCurrentPriceSlug({ exchange, asset, currency });
             await saveCurrentPrice({
               PartitionKey: slug,
-              RowKey: slug,
+              RowKey: generateCandleRowKey(time),
+              time,
               timestamp,
               price: close,
               candleId: id,

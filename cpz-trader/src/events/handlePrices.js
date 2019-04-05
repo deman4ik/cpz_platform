@@ -30,16 +30,8 @@ async function handlePrice(context, currentPrice) {
       const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId, lastPrice }) => {
-          Log.warn(
-            dayjs.utc(lastPrice.timestamp).toISOString(),
-            dayjs.utc(currentPrice.timestamp).toISOString()
-          );
-          if (
-            !lastPrice.timestamp ||
-            (lastPrice.timestamp &&
-              dayjs.utc(lastPrice.timestamp).valueOf() <
-                dayjs.utc(currentPrice.timestamp).valueOf())
-          ) {
+          const { time } = lastPrice;
+          if (!time || (time && time < currentPrice.time)) {
             const status = await client.getStatus(taskId);
             if (status && status.runtimeStatus === "Running") {
               const action = {
@@ -47,6 +39,7 @@ async function handlePrice(context, currentPrice) {
                 type: PRICE,
                 data: {
                   price: currentPrice.price,
+                  time: currentPrice.time,
                   timestamp: currentPrice.timestamp,
                   tickId: currentPrice.tickId,
                   candleId: currentPrice.candleId,
@@ -88,7 +81,7 @@ async function handleTick(context, eventData) {
     exchange,
     asset,
     currency,
-
+    time,
     timestamp,
     price,
     tradeId
@@ -119,20 +112,30 @@ async function handleTick(context, eventData) {
 }
 
 async function handleCandle(context, eventData) {
-  const { type, exchange, asset, currency, timestamp, price, id } = eventData;
+  const {
+    type,
+    exchange,
+    asset,
+    currency,
+    time,
+    timestamp,
+    close,
+    id,
+    timeframe
+  } = eventData;
   try {
     Log.debug("handleCandle", eventData);
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
-    if (type === CANDLE_PREVIOUS) return;
+    if (type === CANDLE_PREVIOUS || timeframe !== 1) return;
     const currentPrice = {
       exchange,
       asset,
       currency,
       timestamp,
-      price,
+      price: close,
       tickId: null,
       candleId: id,
-      source: "tick"
+      source: "candle"
     };
     await handlePrice(context, currentPrice);
   } catch (e) {

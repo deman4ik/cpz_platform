@@ -73,6 +73,7 @@ class Trader {
       /* Последняя цена */
       this._lastPrice = state.lastPrice || {
         price: null,
+        time: null,
         timestamp: null,
         candleId: null,
         tickId: null
@@ -350,6 +351,7 @@ class Trader {
           );
         }
       }
+      //TODO: Gen handle signal event
       // Последний обработанный сигнал
       this._lastSignal = signal;
     } catch (e) {
@@ -367,16 +369,13 @@ class Trader {
     }
   }
 
-  checkPrice({ price, timestamp, candleId, tickId }) {
+  checkPrice({ price, time, timestamp, candleId, tickId }) {
     try {
-      if (!price || !timestamp) {
+      if (!price || !time) {
         Log.error("No current price!");
         return;
       }
-      if (
-        dayjs.utc(this._lastPrice.timestamp).valueOf() >=
-        dayjs.utc(timestamp).valueOf()
-      ) {
+      if (time >= this._lastPrice.time) {
         Log.warn(
           "Already checked newer price. Last checked price time '%s', current price time '%s'",
           this._lastPrice.timestamp,
@@ -385,6 +384,7 @@ class Trader {
       } else {
         this._lastPrice = {
           price,
+          time,
           timestamp,
           candleId,
           tickId
@@ -407,6 +407,7 @@ class Trader {
           info: {
             taskId: this._taskId,
             price,
+            time,
             timestamp,
             candleId,
             tickId
