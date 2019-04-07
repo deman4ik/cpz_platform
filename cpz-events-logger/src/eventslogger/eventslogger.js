@@ -15,7 +15,6 @@ import {
   saveOrdersDB,
   savePositionsDB
 } from "cpz/db";
-import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import config from "../config";
 
 const {
