@@ -40,6 +40,7 @@ class GetCurrentPrice extends BaseService {
       Log.debug("getCurrentPice", state, data);
       const currentPrice = await getCurrentPrice(createCurrentPriceSlug(data));
       Log.debug("getCurrentPiceResult", currentPrice);
+      if (!currentPrice) throw new Error("No current price");
       Log.clearContext();
       return currentPrice;
     } catch (e) {

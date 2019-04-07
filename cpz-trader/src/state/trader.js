@@ -289,6 +289,7 @@ class Trader {
    */
   handleSignal(signal) {
     try {
+      if (!signal) throw new Error("No signal data");
       Log.debug(
         `handleSignal() position: ${signal.settings.positionCode}, ${
           signal.action
@@ -351,7 +352,7 @@ class Trader {
           );
         }
       }
-      //TODO: Gen handle signal event
+      // TODO: Gen handle signal event
       // Последний обработанный сигнал
       this._lastSignal = signal;
     } catch (e) {
@@ -369,12 +370,13 @@ class Trader {
     }
   }
 
-  checkPrice({ price, time, timestamp, candleId, tickId }) {
+  checkPrice(currentPrice) {
     try {
-      if (!price || !time) {
+      if (!currentPrice || !currentPrice.price || !currentPrice.time) {
         Log.error("No current price!");
         return;
       }
+      const { price, time, timestamp, candleId, tickId } = currentPrice;
       if (time >= this._lastPrice.time) {
         Log.warn(
           "Already checked newer price. Last checked price time '%s', current price time '%s'",
@@ -406,11 +408,7 @@ class Trader {
           cause: e,
           info: {
             taskId: this._taskId,
-            price,
-            time,
-            timestamp,
-            candleId,
-            tickId
+            currentPrice
           }
         },
         "Error while handling signal"
@@ -475,6 +473,7 @@ class Trader {
 
   handleOrders(orders) {
     try {
+      if (!Array.isArray(orders)) throw new Error("Orders are not array");
       orders.forEach(order => {
         // Сохраняем ордер в позиции и генерируем события
         this._positions[order.positionId].handleOrder(order);
