@@ -350,6 +350,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       };
     }
   }
+
+  // TODO: new method - reopen order
+  // cancels order and opens new with new price
 }
 
 export default CCXTPrivateProvider;

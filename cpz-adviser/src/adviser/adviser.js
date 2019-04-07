@@ -174,6 +174,7 @@ class Adviser {
    * @memberof Adviser
    */
   logEvent(data) {
+    // TODO: parse data (object, array, string)
     // Публикуем событие
     const newLogEvent = {
       id: uuid(),
