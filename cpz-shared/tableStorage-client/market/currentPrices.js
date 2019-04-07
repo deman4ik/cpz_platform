@@ -1,5 +1,6 @@
 import ServiceError from "../../error";
 import client from "./index";
+import { maxArrOfObj } from "../../utils/helpers";
 
 const TABLES = {
   STORAGE_CURRENTPRICES_TABLE: "CurrentPrices"
@@ -18,7 +19,9 @@ const getCurrentPrice = async slug => {
         RowKey: slug
       }
     );
-    if (prices && prices.length > 0) return prices[0];
+    if (prices && prices.length > 0) {
+      return maxArrOfObj(prices, "time");
+    }
     return null;
   } catch (error) {
     throw new ServiceError(

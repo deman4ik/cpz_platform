@@ -55,13 +55,12 @@ class EventsLogger {
             const slug = createCurrentPriceSlug({ exchange, asset, currency });
             await saveCurrentPrice({
               PartitionKey: slug,
-              RowKey: generateCandleRowKey(time),
+              RowKey: "candle",
               time,
               timestamp,
               price: close,
               candleId: id,
-              tickId: null,
-              source: "candle"
+              tickId: null
             });
           }
         }

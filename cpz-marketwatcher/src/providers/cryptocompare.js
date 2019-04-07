@@ -164,8 +164,8 @@ class CryptocompareProvider extends BaseProvider {
             currentPrice.type
           } ${currentPrice.price}`
         );
+        await this._saveTrade(currentPrice);
         if (currentPrice.type === "tick") await this._publishTick(currentPrice);
-        if (currentPrice.type === "trade") await this._saveTrade(currentPrice);
       }
     });
 

@@ -6,7 +6,6 @@ import publishEvents from "cpz/eventgrid";
 import { saveMarketwatcherState } from "cpz/tableStorage/marketwatchers";
 import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
 import { saveCachedTick } from "cpz/tableStorage/ticks";
-import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import config from "../config";
 
 const {
@@ -157,7 +156,7 @@ class BaseProvider {
 
   async _saveTrade(tick) {
     try {
-      await saveCachedTick(tick);
+      if (tick.type === "trade") await saveCachedTick(tick);
       if (tick.type === "tick") {
         const slug = createCurrentPriceSlug({
           exchange: tick.exchange,
@@ -166,13 +165,12 @@ class BaseProvider {
         });
         await saveCurrentPrice({
           PartitionKey: slug,
-          RowKey: generateCandleRowKey(tick.time),
+          RowKey: "tick",
           time: tick.time,
           timestamp: tick.timestamp,
           price: tick.price,
           tickId: tick.tickId,
-          candleId: null,
-          source: "tick"
+          candleId: null
         });
       }
     } catch (error) {
