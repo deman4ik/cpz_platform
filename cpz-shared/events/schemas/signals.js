@@ -78,15 +78,10 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
 const SIGNALS_HANDLED_EVENT_SCHEMA = {
   [SIGNALS_HANDLED_EVENT]: {
     signalId: { description: "Uniq Signal Id.", type: "string", empty: false },
-    taskId: {
+    traderId: {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    serviceName: {
-      description: "Sevice name handeling event",
-      type: "string",
-      values: ["trader"]
     },
     success: { description: "Success Sign.", type: "boolean" },
     error: BASE_ERROR

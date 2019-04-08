@@ -276,7 +276,6 @@ const orchestrator = df.orchestrator(function* trader(context) {
 
     result = state;
   } catch (e) {
-    context.log.warn(e.message);
     let error;
     // Если ошибка сгенерирована сервисом
     if (e instanceof ServiceError) {
@@ -307,8 +306,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
           cause: e,
           info: {
             ...traderStateToCommonProps(state),
-            critical: true,
-            error: e
+            critical: true
           }
         },
         "Trader orchestrator error"
@@ -316,7 +314,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
       // Считаем что ошибка критическая - останавливаем оркестрацию
       stop = true;
     }
-
+    Log.exception(error);
     // Если нужно остановить оркестрацию
     if (stop && state.status !== STATUS_STOPPED) {
       // Меняем стейт

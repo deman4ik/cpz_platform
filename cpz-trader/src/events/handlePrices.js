@@ -30,36 +30,48 @@ async function handlePrice(context, currentPrice) {
       const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId, lastPrice }) => {
-          const { time } = lastPrice;
-          if (!time || (time && time < currentPrice.time)) {
-            const status = await client.getStatus(taskId);
-            if (status && status.runtimeStatus === "Running") {
-              const action = {
-                id: uuid(),
-                type: PRICE,
-                data: {
-                  price: currentPrice.price,
-                  time: currentPrice.time,
-                  timestamp: currentPrice.timestamp,
-                  tickId: currentPrice.tickId,
-                  candleId: currentPrice.candleId,
-                  source: currentPrice.source
+          try {
+            const { time } = lastPrice;
+            if (!time || (time && time < currentPrice.time)) {
+              const status = await client.getStatus(taskId);
+              if (status && status.runtimeStatus === "Running") {
+                const action = {
+                  id: uuid(),
+                  type: PRICE,
+                  data: {
+                    price: currentPrice.price,
+                    time: currentPrice.time,
+                    timestamp: currentPrice.timestamp,
+                    tickId: currentPrice.tickId,
+                    candleId: currentPrice.candleId,
+                    source: currentPrice.source
+                  }
+                };
+                if (status.customStatus === READY) {
+                  await client.raiseEvent(taskId, TRADER_ACTION, action);
+                } else {
+                  // TODO: save price action only if timestamp greater
+                  await saveTraderAction({
+                    PartitionKey: taskId,
+                    RowKey: PRICE,
+                    createdAt: dayjs.utc().toISOString(),
+                    ...action
+                  });
                 }
-              };
-              if (status.customStatus === READY) {
-                await client.raiseEvent(taskId, TRADER_ACTION, action);
               } else {
-                // TODO: save price action only if timestamp greater
-                await saveTraderAction({
-                  PartitionKey: taskId,
-                  RowKey: PRICE,
-                  createdAt: dayjs.utc().toISOString(),
-                  ...action
-                });
+                Log.error(`Trader "${taskId}" not started`);
               }
-            } else {
-              Log.error(`Trader "${taskId}" not started`);
             }
+          } catch (e) {
+            const error = new ServiceError(
+              {
+                name: ServiceError.types.TRADER_PRICES_EVENTS_ERROR,
+                cause: e,
+                info: { taskId, lastPrice, currentPrice }
+              },
+              "Failed to handle Price Event"
+            );
+            Log.exception(error);
           }
         })
       );
@@ -69,7 +81,7 @@ async function handlePrice(context, currentPrice) {
       {
         name: ServiceError.types.TRADER_PRICES_EVENTS_ERROR,
         cause: e,
-        info: { ...currentPrice }
+        info: { currentPrice }
       },
       "Failed to handle Price Event"
     );

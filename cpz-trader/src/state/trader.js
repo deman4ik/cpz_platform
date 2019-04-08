@@ -28,6 +28,7 @@ import {
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOPPED_EVENT,
   TASKS_TRADER_UPDATED_EVENT,
+  SIGNALS_HANDLED_EVENT,
   TRADES_ORDER_EVENT,
   TRADES_POSITION_EVENT,
   ERROR_TRADER_WARN_EVENT,
@@ -205,11 +206,9 @@ class Trader {
           position.getOrdersToClosePosition()
         )
       );
-      Log.warn("ordersToExecute", ordersToExecute);
       ordersToExecute.forEach(order => {
         this._ordersToExecute[order.orderId] = this._baseOrder(order);
       });
-      Log.warn("this._ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
         {
@@ -352,11 +351,15 @@ class Trader {
           );
         }
       }
-      // TODO: Gen handle signal event
+
+      this._eventsToSend[
+        `O-${signal.signalId}`
+      ] = this._createSignalHandledEvent({ signalId: signal.signalId });
+
       // Последний обработанный сигнал
       this._lastSignal = signal;
     } catch (e) {
-      throw new ServiceError(
+      const error = new ServiceError(
         {
           name: ServiceError.types.TRADER_HANDLE_SIGNAL_ERROR,
           cause: e,
@@ -367,6 +370,14 @@ class Trader {
         },
         "Error while handling signal"
       );
+      Log.exception(error);
+      this._eventsToSend[
+        `O-${signal.signalId}`
+      ] = this._createSignalHandledEvent({
+        signalId: signal.signalId,
+        success: false,
+        error: error.json
+      });
     }
   }
 
@@ -377,21 +388,22 @@ class Trader {
         return;
       }
       const { price, time, timestamp, candleId, tickId } = currentPrice;
-      if (time >= this._lastPrice.time) {
+      if (this._lastPrice.time && time >= this._lastPrice.time) {
         Log.warn(
-          "Already checked newer price. Last checked price time '%s', current price time '%s'",
+          "Already checked same or newer price. Last checked price time '%s', current price time '%s'",
           this._lastPrice.timestamp,
           timestamp
         );
-      } else {
-        this._lastPrice = {
-          price,
-          time,
-          timestamp,
-          candleId,
-          tickId
-        };
+        return;
       }
+
+      this._lastPrice = {
+        price,
+        time,
+        timestamp,
+        candleId,
+        tickId
+      };
 
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position =>
@@ -414,6 +426,23 @@ class Trader {
         "Error while handling signal"
       );
     }
+  }
+
+  // TODO: Log warn events if debug is on
+
+  _createSignalHandledEvent({ signalId, success = true, error = null }) {
+    return {
+      eventType: SIGNALS_HANDLED_EVENT,
+      eventData: {
+        subject: this._taskId,
+        data: {
+          traderId: this._taskId,
+          signalId,
+          success,
+          error
+        }
+      }
+    };
   }
 
   _baseTradeEvent(event) {

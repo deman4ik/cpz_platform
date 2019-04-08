@@ -1,6 +1,7 @@
 import ServiceError from "../../error";
 import client from "./index";
 import { maxArrOfObj } from "../../utils/helpers";
+import Log from "../../log";
 
 const TABLES = {
   STORAGE_CURRENTPRICES_TABLE: "CurrentPrices"
@@ -14,11 +15,9 @@ const getCurrentPrice = async slug => {
   try {
     const prices = await client.getEntitiesByPartitionKey(
       TABLES.STORAGE_CURRENTPRICES_TABLE,
-      {
-        PartitionKey: slug,
-        RowKey: slug
-      }
+      slug
     );
+    Log.warn("getCurrentPrice prices", prices);
     if (prices && prices.length > 0) {
       return maxArrOfObj(prices, "time");
     }

@@ -356,10 +356,10 @@ const flatten = (arr, depth = 1) =>
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const maxArrOfObj = (arr, propName) =>
-  [...arr].sort((a, b) => b[propName] - a[propName]).slice(0, 1);
+  [...arr].sort((a, b) => b[propName] - a[propName])[0];
 
 const minArrOfObj = (arr, propName) =>
-  [...arr].sort((a, b) => a[propName] - b[propName]).slice(0, 1);
+  [...arr].sort((a, b) => a[propName] - b[propName])[0];
 
 export {
   sortAsc,
