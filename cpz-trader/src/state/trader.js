@@ -428,7 +428,7 @@ class Trader {
         return;
       }
       const { price, time, timestamp, candleId, tickId } = currentPrice;
-      if (this._lastPrice.time && time >= this._lastPrice.time) {
+      if (this._lastPrice.time && this._lastPrice.time >= time) {
         Log.warn(
           "Already checked same or newer price. Last checked price time '%s', current price time '%s'",
           this._lastPrice.timestamp,
