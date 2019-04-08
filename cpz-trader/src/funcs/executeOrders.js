@@ -22,6 +22,7 @@ import marketTables, {
   getCurrentPrice
 } from "cpz/tableStorage-client/market/currentPrices";
 import { SERVICE_NAME } from "../config";
+import Trader from "../state/trader";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 class ExecuteOrders extends BaseService {
@@ -52,7 +53,7 @@ class ExecuteOrders extends BaseService {
     }
   }
 
-  async run(context, { state, data: order }) {
+  async execute({ state, order }) {
     let orderResult = { ...order };
     try {
       const {
@@ -65,7 +66,7 @@ class ExecuteOrders extends BaseService {
         settings
       } = state;
       let currentPrice = lastPrice;
-      Log.addContext(context, traderStateToCommonProps(state));
+
       // Если задача - проверить исполнения объема
       if (order.task === ORDER_TASK_CHECK) {
         // Если режим - в реальном времени
@@ -186,7 +187,7 @@ class ExecuteOrders extends BaseService {
       orderResult.task = null;
       orderResult.error = null;
       Log.warn("orderResult", orderResult);
-      Log.clearContext();
+
       return orderResult;
     } catch (e) {
       const error = new ServiceError(
@@ -197,13 +198,50 @@ class ExecuteOrders extends BaseService {
         },
         "Failed to execute order"
       );
-      // TODO:
+
       Log.error(error);
 
-      Log.clearContext();
       // Возвращаем ордер как есть
       orderResult.error = error.json;
       return orderResult;
+    }
+  }
+
+  async run(context, { state, data: orders }) {
+    try {
+      Log.addContext(context, traderStateToCommonProps(state));
+      Log.debug("execute orders", orders, state);
+      let ordersToExecute = orders;
+      const trader = new Trader(state);
+      /* eslint-disable no-await-in-loop */
+      while (Object.keys(ordersToExecute).length > 0) {
+        const executedOrders = await Promise.all(
+          Object.values(ordersToExecute).map(async order =>
+            this.execute({ state, order })
+          )
+        );
+        if (executedOrders.length > 0) {
+          trader.handleOrders(executedOrders);
+        }
+        const { currentOrders } = trader.currentState;
+        ordersToExecute = currentOrders;
+      }
+
+      /*  no-await-in-loop */
+      Log.clearContext();
+      return trader.currentState;
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.TRADER_EXECUTE_ORDERS_ERROR,
+          cause: e,
+          info: { ...traderStateToCommonProps(state) }
+        },
+        "Failed to execute orders"
+      );
+      Log.exception(error);
+      Log.clearContext();
+      throw error;
     }
   }
 }

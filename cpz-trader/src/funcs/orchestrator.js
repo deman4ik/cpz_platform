@@ -13,11 +13,8 @@ import { traderStateToCommonProps } from "../utils/helpers";
 const {
   ACTIVITY_EVENT_PUBLISH,
   ACTIVITY_EXECUTE_ORDERS,
-  ACTIVITY_GET_CURRENT_RPICE,
-
   ACTIVITY_LOAD_ACTION,
   ACTIVITY_SAVE_STATE,
-
   ACTIVITY_EXECUTE_TRADER
 } = FUNCTIONS;
 
@@ -128,60 +125,20 @@ const orchestrator = df.orchestrator(function* trader(context) {
     }
 
     // Если есть ордера для исполнения
-    while (Object.keys(ordersToExecute).length > 0) {
-      // Формируем массив из задач по исполнению ордеров
-
-      /* eslint-disable no-loop-func */
-      const orderExecuteTasks = Object.values(ordersToExecute).map(order =>
-        context.df.callActivityWithRetry(
-          ACTIVITY_EXECUTE_ORDERS,
-          retryOptions,
-          {
-            state,
-            data: order
-          }
-        )
-      );
-      /* no-loop-func */
-      // Исполняем ордера параллельно
-      let executedOrders = [];
-      try {
-        executedOrders = yield context.df.Task.all(orderExecuteTasks);
-      } catch (e) {
-        throw new ServiceError(
-          {
-            name: ServiceError.types.TRADER_EXECUTE_ORDER_ERROR,
-            info: {
-              error: e
-            }
-          },
-          "Failed to execute orders after retries."
-        );
-      }
-      // Обрабатываем результат исполнения ордеров
+    if (Object.keys(ordersToExecute).length > 0) {
+      // Исполняем ордера
       const {
         currentState,
         currentEvents,
         currentOrders
-      } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
-        actionType: ORDERS,
-        actionId: null,
-        actionData: executedOrders.filter(({ task }) => !task), // только исполненные ордера
+      } = yield context.df.callActivity(ACTIVITY_EXECUTE_ORDERS, {
+        data: ordersToExecute,
         state
       });
       // Обновляем стейт
       state = currentState;
       eventsToSend = { ...eventsToSend, ...currentEvents };
       ordersToExecute = currentOrders;
-    }
-
-    if (stop) {
-      const { currentState, currentEvents } = yield context.df.callActivity(
-        ACTIVITY_EXECUTE_TRADER,
-        { actionType: STOP, actionId: null, actionData: null, state }
-      );
-      state = currentState;
-      eventsToSend = { ...eventsToSend, ...currentEvents };
     }
 
     // Если есть события для отправки
