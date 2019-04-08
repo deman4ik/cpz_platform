@@ -39,10 +39,10 @@ export default (context, req, neededEvents) => {
         "Content-Type": "application/json"
       }
     };
-    Log.request(context.req, context.res);
-    Log.clearContext();
-    context.done();
-  } else if (event.eventType === SUB_DELETED_EVENT) {
+
+    return null;
+  }
+  if (event.eventType === SUB_DELETED_EVENT) {
     Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
     context.res = {
       status: 200,
@@ -50,18 +50,17 @@ export default (context, req, neededEvents) => {
         "Content-Type": "application/json"
       }
     };
-    Log.request(context.req, context.res);
-    Log.clearContext();
-    context.done();
+
+    return null;
     // In this place if Event Grid batch, we expect what all events are same one type
-  } else if (neededEvents.indexOf(event.eventType) !== -1) {
+  }
+  if (neededEvents.indexOf(event.eventType) !== -1) {
     Log.info(`Got ${event.eventType} event`);
     Log.debug(`data ${JSON.stringify(event.data)}`);
   } else {
     Log.error(`Unknown Event Type: ${event.eventType}`);
-    Log.request(context.req, context.res);
-    Log.clearContext();
-    context.done();
+
+    return null;
   }
   return event;
 };
