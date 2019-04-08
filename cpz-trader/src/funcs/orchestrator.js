@@ -92,6 +92,7 @@ const orchestrator = df.orchestrator(function* trader(context) {
     const { id, type, data } = nextAction;
     if (
       type === PRICE ||
+      type === CHECK ||
       type === SIGNAL ||
       type === START ||
       type === UPDATE
@@ -104,48 +105,6 @@ const orchestrator = df.orchestrator(function* trader(context) {
         actionType: type,
         actionId: id,
         actionData: data,
-        state
-      });
-      state = currentState;
-      ordersToExecute = { ...ordersToExecute, ...currentOrders };
-      eventsToSend = { ...eventsToSend, ...currentEvents };
-    } else if (type === CHECK) {
-      // Проверка позиций по текущей цене
-      // Загрузка текущей цены из стореджа
-      let currentPrice;
-      try {
-        currentPrice = yield context.df.callActivityWithRetry(
-          ACTIVITY_GET_CURRENT_RPICE,
-          retryOptions,
-          {
-            state: traderStateToCommonProps(state),
-            data: {
-              exchange: state.exchange,
-              asset: state.asset,
-              currency: state.currency
-            }
-          }
-        );
-      } catch (e) {
-        throw new ServiceError(
-          {
-            name: ServiceError.types.TRADER_GET_CURRENT_PRICE_ERROR,
-            info: {
-              error: e
-            }
-          },
-          "Failed to get current price after retries."
-        );
-      }
-      // Проверка цены, с указанием цены из стореджа
-      const {
-        currentState,
-        currentOrders,
-        currentEvents
-      } = yield context.df.callActivity(ACTIVITY_EXECUTE_TRADER, {
-        actionType: PRICE,
-        actionId: id,
-        actionData: currentPrice,
         state
       });
       state = currentState;

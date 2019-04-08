@@ -11,9 +11,9 @@ import {
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_CANCELED,
-  ORDER_TASK_OPENBYMARKET,
-  ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT,
+  ORDER_TASK_OPEN_MARKET,
+  ORDER_TASK_OPEN_LIMIT,
+  ORDER_TASK_CHECK,
   ORDER_TASK_CANCEL,
   createCurrentPriceSlug
 } from "cpz/config/state";
@@ -66,10 +66,8 @@ class ExecuteOrders extends BaseService {
       } = state;
       let currentPrice = lastPrice;
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("executeOrders", state, orderResult);
-      Log.warn("currentPrice", currentPrice);
       // Если задача - проверить исполнения объема
-      if (order.task === ORDER_TASK_CHECKLIMIT) {
+      if (order.task === ORDER_TASK_CHECK) {
         // Если режим - в реальном времени
         if (settings.mode === REALTIME_MODE) {
           // Запрашиваем статус ордера с биржи
@@ -94,24 +92,26 @@ class ExecuteOrders extends BaseService {
         }
         // Если задача - выставить лимитный или рыночный ордер
       } else if (
-        order.task === ORDER_TASK_SETLIMIT ||
-        order.task === ORDER_TASK_OPENBYMARKET
+        order.task === ORDER_TASK_OPEN_LIMIT ||
+        order.task === ORDER_TASK_OPEN_MARKET
       ) {
         const orderToExecute = { ...order };
         if (
           settings.mode === REALTIME_MODE ||
           settings.mode === EMULATOR_MODE
         ) {
-          if (order.task === ORDER_TASK_OPENBYMARKET) {
-            const marketPrice = await getCurrentPrice(
-              createCurrentPriceSlug({ exchange, asset, currency })
-            );
-            Log.warn("marketPrice", marketPrice);
-            if (marketPrice && marketPrice.price) {
-              currentPrice = marketPrice;
-              orderToExecute.price = marketPrice.price;
+          if (order.task === ORDER_TASK_OPEN_MARKET) {
+            try {
+              const marketPrice = await getCurrentPrice(
+                createCurrentPriceSlug({ exchange, asset, currency })
+              );
+              if (marketPrice && marketPrice.price) {
+                currentPrice = marketPrice;
+                orderToExecute.price = marketPrice.price;
+              }
+            } catch (e) {
+              Log.exception(e);
             }
-            Log.warn("currentPrice", currentPrice);
           }
         }
         // Если режим - в реальном времени
@@ -142,7 +142,7 @@ class ExecuteOrders extends BaseService {
               .toISOString()
           };
         } else {
-          if (order.task === ORDER_TASK_SETLIMIT) {
+          if (order.task === ORDER_TASK_OPEN_LIMIT) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - лимитный
             // Считаем, что ордер успешно выставлен на биржу
@@ -152,7 +152,7 @@ class ExecuteOrders extends BaseService {
             orderResult.average = currentPrice.price;
             orderResult.remaining = order.volume;
           }
-          if (order.task === ORDER_TASK_OPENBYMARKET) {
+          if (order.task === ORDER_TASK_OPEN_MARKET) {
             // Если режим - эмуляция или бэктест
             // Если тип ордера - по рынку
             // Считаем, что ордер исполнен

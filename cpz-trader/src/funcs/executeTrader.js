@@ -13,6 +13,7 @@ const {
     STOP,
     SIGNAL,
     PRICE,
+    CHECK,
     ORDERS,
     CLOSE_ACTIVE_POSITIONS
   }
@@ -27,6 +28,7 @@ class ExecuteTrader {
       STOP,
       SIGNAL,
       PRICE,
+      CHECK,
       ORDERS,
       CLOSE_ACTIVE_POSITIONS
     ];

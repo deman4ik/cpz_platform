@@ -32,9 +32,9 @@ const ORDER_STATUS_ERROR = "error"; // Произошла ошибка во вр
 /**
  * Задание для ордера
  */
-const ORDER_TASK_OPENBYMARKET = "openByMarket"; // Выставить ордер по рынку
-const ORDER_TASK_SETLIMIT = "setLimit"; // Выставить лимитный ордер
-const ORDER_TASK_CHECKLIMIT = "checkLimit"; // Проверить выполненный объем ордера на бирже
+const ORDER_TASK_OPEN_MARKET = "openMarket"; // Выставить ордер по рынку
+const ORDER_TASK_OPEN_LIMIT = "openLimit"; // Выставить лимитный ордер
+const ORDER_TASK_CHECK = "check"; // Проверить выполненный объем ордера на бирже
 const ORDER_TASK_CANCEL = "cancel"; // Отменить ордер
 
 export {
@@ -57,8 +57,8 @@ export {
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR,
-  ORDER_TASK_OPENBYMARKET,
-  ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT,
+  ORDER_TASK_OPEN_MARKET,
+  ORDER_TASK_OPEN_LIMIT,
+  ORDER_TASK_CHECK,
   ORDER_TASK_CANCEL
 };

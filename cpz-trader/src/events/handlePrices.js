@@ -25,7 +25,6 @@ async function handlePrice(context, currentPrice) {
         currency
       })
     );
-    Log.warn("traders", traders);
     if (traders && traders.length > 0) {
       const client = df.getClient(context);
       await Promise.all(

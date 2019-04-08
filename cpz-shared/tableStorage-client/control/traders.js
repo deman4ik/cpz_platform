@@ -175,7 +175,7 @@ const getActiveTradersBySlugAndRobotId = async ({ slug, robotId }) => {
 const getIdledTradersWithActivePositions = async (minutes = 1) => {
   const idleTimestamp = dayjs
     .utc()
-    .add(minutes, "minute")
+    .add(-minutes, "minute")
     .toDate();
   try {
     const idleFilter = TableQuery.dateFilter(

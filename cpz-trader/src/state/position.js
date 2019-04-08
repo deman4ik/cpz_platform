@@ -18,9 +18,9 @@ import {
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
   ORDER_TYPE_MARKET_FORCE,
-  ORDER_TASK_OPENBYMARKET,
-  ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT,
+  ORDER_TASK_OPEN_MARKET,
+  ORDER_TASK_OPEN_LIMIT,
+  ORDER_TASK_CHECK,
   ORDER_TASK_CANCEL,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
@@ -169,7 +169,7 @@ class Position {
       action, // Торговое действие
       task:
         orderType === ORDER_TYPE_MARKET || orderType === ORDER_TYPE_MARKET_FORCE
-          ? ORDER_TASK_OPENBYMARKET
+          ? ORDER_TASK_OPEN_MARKET
           : null, // Задача ордера
       error: null // Ошибка выполнения ордера
     };
@@ -348,7 +348,7 @@ class Position {
             return {
               ...order,
               price: order.price + settings.slippageStep,
-              task: ORDER_TASK_SETLIMIT
+              task: ORDER_TASK_OPEN_LIMIT
             };
           }
         }
@@ -359,7 +359,7 @@ class Position {
             return {
               ...order,
               price: order.price - settings.slippageStep,
-              task: ORDER_TASK_SETLIMIT
+              task: ORDER_TASK_OPEN_LIMIT
             };
           }
         }
@@ -367,13 +367,19 @@ class Position {
       // Ордер уже выставлен
     } else if (order.status === ORDER_STATUS_OPEN) {
       // Если покупаем и текущая цена ниже цены сигнала
+      // ИЛИ
       // Если продаем и текущая цена выше цены сигнала
+      // ИЛИ
+      // Если вышел таймаут
       if (
         (order.direction === ORDER_DIRECTION_BUY && price <= order.price) ||
-        (order.direction === ORDER_DIRECTION_SELL && price >= order.price)
+        (order.direction === ORDER_DIRECTION_SELL && price >= order.price) ||
+        (order.exTimestamp &&
+          dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
+            settings.openOrderTimeout)
       ) {
         // Нужно проверить ордер на бирже
-        return { ...order, task: ORDER_TASK_CHECKLIMIT };
+        return { ...order, task: ORDER_TASK_CHECK };
       }
     }
     // Не нужно ничего делать
@@ -441,13 +447,13 @@ class Position {
       // Проверяем все ордера на открытие позиции ожидающие обработки
       openOrders = Object.values(this._entryOrders)
         .filter(order => order.status === ORDER_STATUS_OPEN)
-        .map(order => ({ ...order, task: ORDER_TASK_CHECKLIMIT }));
+        .map(order => ({ ...order, task: ORDER_TASK_CHECK }));
     } else if (this._exit.status === ORDER_STATUS_OPEN) {
       // Если ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       openOrders = Object.values(this._exitOrders)
         .filter(order => order.status === ORDER_STATUS_OPEN)
-        .map(order => ({ ...order, task: ORDER_TASK_CHECKLIMIT }));
+        .map(order => ({ ...order, task: ORDER_TASK_CHECK }));
     }
     // Возвращаем массив ордеров для дальнейшей обработки
     return openOrders;

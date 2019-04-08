@@ -4,9 +4,9 @@ import {
   ORDER_STATUS_CLOSED,
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
-  ORDER_TASK_OPENBYMARKET,
-  ORDER_TASK_SETLIMIT,
-  ORDER_TASK_CHECKLIMIT
+  ORDER_TASK_OPEN_MARKET,
+  ORDER_TASK_OPEN_LIMIT,
+  ORDER_TASK_CHECK
 } from "cpz/config/state";
 import Trader from "cpzTrader/trader";
 
@@ -66,7 +66,7 @@ class TraderBacktester extends Trader {
           order => {
             const orderResult = { ...order };
             // Если задача - проверить исполнения объема
-            if (order.task === ORDER_TASK_CHECKLIMIT) {
+            if (order.task === ORDER_TASK_CHECK) {
               // Если режим - эмуляция или бэктест
               // Считаем, что ордер исполнен
               orderResult.status = ORDER_STATUS_CLOSED;
@@ -75,12 +75,12 @@ class TraderBacktester extends Trader {
 
               // Если задача - выставить лимитный или рыночный ордер
             } else if (
-              order.task === ORDER_TASK_SETLIMIT ||
-              order.task === ORDER_TASK_OPENBYMARKET
+              order.task === ORDER_TASK_OPEN_LIMIT ||
+              order.task === ORDER_TASK_OPEN_MARKET
             ) {
               // Устанавливаем объем из параметров
               const orderToExecute = { ...order };
-              if (order.task === ORDER_TASK_OPENBYMARKET) {
+              if (order.task === ORDER_TASK_OPEN_MARKET) {
                 orderToExecute.price = this._lastPrice.price;
               }
               if (order.orderType === ORDER_TYPE_LIMIT) {

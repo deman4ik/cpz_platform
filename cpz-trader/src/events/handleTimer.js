@@ -32,7 +32,7 @@ async function handleTimer(context) {
             } else {
               await saveTraderAction({
                 PartitionKey: taskId,
-                RowKey: generateKey(),
+                RowKey: CHECK,
                 createdAt: dayjs.utc().toISOString(),
                 ...action
               });

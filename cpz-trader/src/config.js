@@ -23,7 +23,7 @@ const INTERNAL = {
     UPDATE: "update",
     SIGNAL: "handleSignal",
     PRICE: "checkPrice",
-    CHECK: "CHECK",
+    CHECK: "checkOpen",
     ORDERS: "handleOrders",
     CLOSE_ACTIVE_POSITIONS: "closeActivePositions"
   },

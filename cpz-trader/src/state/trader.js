@@ -381,6 +381,28 @@ class Trader {
     }
   }
 
+  checkOpen() {
+    try {
+      const ordersToExecute = flatten(
+        this.activePositionInstances.map(position => position.getOpenOrders())
+      );
+      ordersToExecute.forEach(order => {
+        this._ordersToExecute[order.orderId] = this._baseOrder(order);
+      });
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_CHECK_OPEN_ERROR,
+          cause: e,
+          info: {
+            taskId: this._taskId
+          }
+        },
+        "Failed to check open orders"
+      );
+    }
+  }
+
   checkPrice(currentPrice) {
     try {
       if (!currentPrice || !currentPrice.price || !currentPrice.time) {
@@ -423,7 +445,7 @@ class Trader {
             currentPrice
           }
         },
-        "Error while handling signal"
+        "Failed to check price"
       );
     }
   }

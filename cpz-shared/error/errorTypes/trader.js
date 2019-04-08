@@ -4,6 +4,7 @@ const TRADER_EXECUTE_ORDER_ERROR = "TradersExecuteOrderError";
 const TRADER_HANDLE_ORDERS_ERROR = "TraderHandleOrdersError";
 const TRADER_HANDLE_SIGNAL_ERROR = "TraderHandleSignalError";
 const TRADER_CHECK_PRICE_ERROR = "TraderCheckPriceError";
+const TRADER_CHECK_OPEN_ERROR = "TraderCheckOpenError";
 const TRADER_NOT_FOUND_ERROR = "TraderNotFound";
 const TRADER_START_ERROR = "TradersStartError";
 const TRADER_UPDATE_ERROR = "TradersUpdateError";
@@ -30,6 +31,7 @@ export {
   TRADER_NOT_FOUND_ERROR,
   TRADER_EXECUTE_ORDER_ERROR,
   TRADER_CHECK_PRICE_ERROR,
+  TRADER_CHECK_OPEN_ERROR,
   TRADER_START_ERROR,
   TRADER_UPDATE_ERROR,
   TRADER_STOP_ERROR,
