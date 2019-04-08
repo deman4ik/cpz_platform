@@ -199,15 +199,33 @@ class Trader {
     };
   }
 
-  closeActivePositions() {
+  closePosition(positionId) {
     try {
-      const ordersToExecute = flatten(
-        this.activePositionInstances.map(position =>
-          position.getOrdersToClosePosition()
-        )
-      );
+      this._positions[positionId].requestClose = true;
+      const ordersToExecute = this._positions[
+        positionId
+      ].getOrdersToClosePosition();
       ordersToExecute.forEach(order => {
         this._ordersToExecute[order.orderId] = this._baseOrder(order);
+      });
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_CLOSE_POSITION_ERROR,
+          cause: e,
+          info: {
+            positionId
+          }
+        },
+        "Failed to close position"
+      );
+    }
+  }
+
+  closeActivePositions() {
+    try {
+      this.activePositions.forEach(({ positionId }) => {
+        this.closePosition(positionId);
       });
     } catch (e) {
       throw new ServiceError(
@@ -528,26 +546,34 @@ class Trader {
       orders.forEach(order => {
         // Сохраняем ордер в позиции и генерируем события
         this._positions[order.positionId].handleOrder(order);
-
+        // Если ордер в статусе закрыт или отменен
         if (
           order.status === ORDER_STATUS_CLOSED ||
           order.status === ORDER_STATUS_CANCELED
         ) {
+          // генерируем событие ордер
           this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
             order
           );
+          // генерируем событие позиция
           this._eventsToSend[
             `P-${order.positionId}`
           ] = this._createPositionEvent(
             this._positions[order.positionId].state
           );
+          // или возникла ошибка при работе с ордером на бирже
         } else if (order.error) {
+          // генерируем событие ошибка трейдера
           this._eventsToSend[
             `O-${order.orderId}`
           ] = this._createErrorOrderEvent(order);
         }
 
         const currentOrder = { ...order };
+        // Если режим реалтайм или эмуляция
+        // указано время выставления ордера
+        // ордер выставлен на бирже
+        // и таймаут для выставленных ордеров истек
         if (
           this._settings.mode !== BACKTEST_MODE &&
           order.exTimestamp &&
@@ -555,12 +581,17 @@ class Trader {
           dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
             this._settings.openOrderTimeout
         ) {
+          // Отменяем текущий ордер
           currentOrder.task = ORDER_TASK_CANCEL;
           this._ordersToExecute[currentOrder.orderId] = currentOrder;
         } else if (
-          order.status === ORDER_STATUS_CANCELED &&
-          order.positionCode === ORDER_POS_DIR_EXIT
+          // Если ордер на выход из позиции отменен
+          // Или позиция должна быть закрыта
+          (order.status === ORDER_STATUS_CANCELED &&
+            order.positionCode === ORDER_POS_DIR_EXIT) ||
+          this._positions[order.positionId].requestClose
         ) {
+          // Закрываем позицию
           this.closePosition(order.positionId);
         } else {
           this._ordersToExecute = {};

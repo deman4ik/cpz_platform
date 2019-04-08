@@ -42,6 +42,7 @@ class Position {
     this._direction = state.direction;
     /* Текущий статус ["new","open","closed","closedAuto","canceled","error"] */
     this._status = state.status || POS_STATUS_NEW;
+    this._requestClose = state.requestClose || false;
     this._entry = state.entry || {
       /* Текущий статус открытия ["new","open","closed","canceled","error"] */
       status: null,
@@ -81,6 +82,14 @@ class Position {
 
   set status(status) {
     this._status = status;
+  }
+
+  get requestClose() {
+    return this._requestClose;
+  }
+
+  set requestClose(requestClose) {
+    this._requestClose = requestClose;
   }
 
   /**
@@ -518,6 +527,7 @@ class Position {
       id: this._id,
       code: this._code,
       status: this._status,
+      requestClose: this._requestClose,
       direction: this._direction,
       entry: this._entry,
       exit: this._exit,
