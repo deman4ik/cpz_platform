@@ -92,6 +92,14 @@ class Position {
     this._requestClose = requestClose;
   }
 
+  get entryStatus() {
+    return this._entry.status;
+  }
+
+  get exitStatus() {
+    return this._exit.status;
+  }
+
   /**
    * Текущий обрабатываемый ордер
    *

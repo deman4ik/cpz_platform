@@ -352,9 +352,22 @@ class Trader {
         if (this._positions[signal.positionId].status === POS_STATUS_NEW) {
           // Отменяем позицию
           this._positions[signal.positionId].status = POS_STATUS_CANCELED;
+          // Если вход в текущую позицию все еще открыт
+        } else if (
+          this._positions[signal.positionId].entryStatus === ORDER_STATUS_OPEN
+        ) {
+          // Проверяем ордер на открытие
+          const ordersToExecute = this._positions[
+            signal.positionId
+          ].getOpenOrders();
+
+          ordersToExecute.forEach(order => {
+            this._ordersToExecute[order.orderId] = this._baseOrder(order);
+          });
         }
       }
       if (
+        this._positions[signal.positionId].entryStatus !== ORDER_STATUS_OPEN &&
         this._positions[signal.positionId].status !== POS_STATUS_CANCELED &&
         this._positions[signal.positionId].status !== POS_STATUS_CLOSED &&
         this._positions[signal.positionId].status !== POS_STATUS_CLOSED_AUTO
@@ -371,7 +384,7 @@ class Trader {
       }
 
       this._eventsToSend[
-        `O-${signal.signalId}`
+        `S-${signal.signalId}`
       ] = this._createSignalHandledEvent({ signalId: signal.signalId });
 
       // Последний обработанный сигнал
@@ -571,8 +584,8 @@ class Trader {
 
         const currentOrder = { ...order };
         // Если режим реалтайм или эмуляция
-        // указано время выставления ордера
-        // ордер выставлен на бирже
+        // и указано время выставления ордера
+        // и ордер выставлен на бирже
         // и таймаут для выставленных ордеров истек
         if (
           this._settings.mode !== BACKTEST_MODE &&
