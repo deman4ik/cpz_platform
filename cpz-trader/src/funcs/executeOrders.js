@@ -191,6 +191,7 @@ class ExecuteOrders extends BaseService {
       }
       orderResult.task = null;
       orderResult.error = null;
+      orderResult.lastCheck = dayjs.utc().toISOString();
       Log.warn("orderResult", orderResult);
 
       return orderResult;
