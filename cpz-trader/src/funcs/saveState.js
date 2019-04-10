@@ -39,7 +39,6 @@ class SaveState extends BaseService {
   async run(context, { state }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("saveState", state);
       await saveTraderState(state);
       Log.clearContext();
       return true;

@@ -84,7 +84,6 @@ class EventPublish extends BaseService {
   async run(context, { state, data }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("eventPublish", state, data);
       const { eventType, eventData } = data;
       await EventGrid.publish(eventType, eventData);
       Log.clearContext();

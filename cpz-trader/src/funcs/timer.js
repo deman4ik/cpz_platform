@@ -79,7 +79,7 @@ class Timer extends BaseService {
       Log.error(error);
       await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
         subject: SERVICE_NAME,
-        data: error.json
+        data: { error: error.json }
       });
     }
     Log.clearContext();

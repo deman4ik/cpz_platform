@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED } from "../../config/state";
+import { STATUS_STARTED, STATUS_STOPPING } from "../../config/state";
 import dayjs from "../../utils/lib/dayjs";
 
 const { TableQuery, TableUtilities } = azure;
@@ -95,11 +95,21 @@ const getActiveTradersBySlug = async slug => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
+    const stoppingStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STOPPING
+    );
+    const statusFilter = TableQuery.combineFilters(
+      startedStatusFilter,
+      TableUtilities.TableOperators.OR,
+      stoppingStatusFilter
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
         partitionKeyFilter,
         TableUtilities.TableOperators.AND,
-        startedStatusFilter
+        statusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
@@ -117,13 +127,13 @@ const getActiveTradersBySlug = async slug => {
 };
 
 /**
- * Query active Traders
+ * Query started Traders
  *
  * @param {string} slug
  * @param {number} robotId
  * @returns {Object[]}
  */
-const getActiveTradersBySlugAndRobotId = async ({ slug, robotId }) => {
+const getStartedTradersBySlugAndRobotId = async ({ slug, robotId }) => {
   try {
     const partitionKeyFilter = TableQuery.stringFilter(
       "PartitionKey",
@@ -271,7 +281,7 @@ export {
   getTraderByKeys,
   findTrader,
   getActiveTradersBySlug,
-  getActiveTradersBySlugAndRobotId,
+  getStartedTradersBySlugAndRobotId,
   getIdledTradersWithActivePositions,
   saveTraderState,
   updateTraderState,

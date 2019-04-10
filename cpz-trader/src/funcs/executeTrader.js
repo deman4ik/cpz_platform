@@ -7,7 +7,7 @@ import Trader from "../state/trader";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 const {
-  actions: { START, UPDATE, STOP, SIGNAL, PRICE, CHECK, CLOSE_ACTIVE_POSITIONS }
+  actions: { START, UPDATE, STOP, SIGNAL, PRICE, CHECK, REQUEST_STOP, ERROR }
 } = INTERNAL;
 
 class ExecuteTrader {
@@ -17,10 +17,11 @@ class ExecuteTrader {
       START,
       UPDATE,
       STOP,
+      REQUEST_STOP,
       SIGNAL,
       PRICE,
       CHECK,
-      CLOSE_ACTIVE_POSITIONS
+      ERROR
     ];
   }
 

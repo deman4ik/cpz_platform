@@ -55,7 +55,12 @@ class ExecuteOrders extends BaseService {
 
   async execute({ state, order }) {
     let orderResult = { ...order };
+
     try {
+      if (!orderResult.task) {
+        Log.error("No order task!", orderResult);
+        return orderResult;
+      }
       const {
         exchange,
         asset,
@@ -211,23 +216,14 @@ class ExecuteOrders extends BaseService {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
       Log.debug("execute orders", orders, state);
-      let ordersToExecute = orders;
-      const trader = new Trader(state);
-      /* eslint-disable no-await-in-loop */
-      while (Object.keys(ordersToExecute).length > 0) {
-        const executedOrders = await Promise.all(
-          Object.values(ordersToExecute).map(async order =>
-            this.execute({ state, order })
-          )
-        );
-        if (executedOrders.length > 0) {
-          trader.handleOrders(executedOrders);
-        }
-        const { currentOrders } = trader.currentState;
-        ordersToExecute = currentOrders;
-      }
 
-      /*  no-await-in-loop */
+      const executedOrders = await Promise.all(
+        Object.values(orders).map(async order => this.execute({ state, order }))
+      );
+      Log.debug("executedOrders", executedOrders);
+      const trader = new Trader(state);
+      trader.handleOrders(executedOrders);
+
       Log.clearContext();
       return trader.currentState;
     } catch (e) {

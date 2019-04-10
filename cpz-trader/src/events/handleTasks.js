@@ -21,7 +21,6 @@ const { ORCHESTRATOR } = FUNCTIONS;
  * @param {object} eventData
  */
 async function handleStart(context, eventData) {
-  Log.debug("handleStart", eventData);
   const { taskId } = eventData;
 
   try {
@@ -45,9 +44,9 @@ async function handleStart(context, eventData) {
     await saveTraderAction({
       PartitionKey: taskId,
       RowKey: "TASK",
-      createdAt: dayjs.utc().toISOString(),
       id: uuid(),
-      type: START
+      type: START,
+      actionTime: dayjs.utc().valueOf()
     });
     // Запускаем новый оркестратор трейдера
     await client.startNew(ORCHESTRATOR, taskId, newTraderState);
@@ -71,22 +70,21 @@ async function handleStart(context, eventData) {
  * @param {object} eventData
  */
 async function handleStop(context, eventData) {
-  Log.debug("handleStop", eventData);
   const { taskId } = eventData;
   try {
-    const action = { id: uuid(), type: STOP, data: eventData };
     const client = df.getClient(context);
     const status = await client.getStatus(taskId);
-    if (status && status.runtimeStatus === "Running") {
+    if (status) {
+      await saveTraderAction({
+        PartitionKey: taskId,
+        RowKey: "TASK",
+        id: uuid(),
+        type: STOP,
+        actionTime: dayjs.utc().valueOf(),
+        data: eventData
+      });
       if (status.customStatus === READY) {
-        await client.raiseEvent(taskId, TRADER_ACTION, action);
-      } else {
-        await saveTraderAction({
-          PartitionKey: taskId,
-          RowKey: "TASK",
-          createdAt: dayjs.utc().toISOString(),
-          ...action
-        });
+        await client.raiseEvent(taskId, TRADER_ACTION);
       }
     } else {
       Log.warn(`Trader "${taskId}" not started`);
@@ -111,22 +109,21 @@ async function handleStop(context, eventData) {
  * @param {object} eventData
  */
 async function handleUpdate(context, eventData) {
-  Log.debug("handleUpdate", eventData);
   const { taskId } = eventData;
   try {
-    const action = { id: uuid(), type: UPDATE, data: eventData };
     const client = df.getClient(context);
     const status = await client.getStatus(taskId);
-    if (status && status.runtimeStatus === "Running") {
+    if (status) {
+      await saveTraderAction({
+        PartitionKey: taskId,
+        RowKey: "TASK",
+        id: uuid(),
+        type: UPDATE,
+        actionTime: dayjs.utc().valueOf(),
+        data: eventData
+      });
       if (status.customStatus === READY) {
-        await client.raiseEvent(taskId, TRADER_ACTION, action);
-      } else {
-        await saveTraderAction({
-          PartitionKey: taskId,
-          RowKey: "TASK",
-          createdAt: dayjs.utc().toISOString(),
-          ...action
-        });
+        await client.raiseEvent(taskId, TRADER_ACTION);
       }
     } else {
       throw Error(`Trader "${taskId}" not started`);

@@ -5,7 +5,7 @@ import ServiceError from "cpz/error";
 import { generateKey } from "cpz/utils/helpers";
 import { createTraderSlug } from "cpz/config/state";
 import dayjs from "cpz/utils/lib/dayjs";
-import { getActiveTradersBySlugAndRobotId } from "cpz/tableStorage-client/control/traders";
+import { getStartedTradersBySlugAndRobotId } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { INTERNAL } from "../config";
 
@@ -17,10 +17,8 @@ const {
 
 async function handleSignal(context, eventData) {
   try {
-    Log.debug("handleSignal", eventData);
-    // TODO: action priority
     const { exchange, asset, currency, robotId } = eventData;
-    const traders = await getActiveTradersBySlugAndRobotId({
+    const traders = await getStartedTradersBySlugAndRobotId({
       slug: createTraderSlug({
         exchange,
         asset,
@@ -28,23 +26,23 @@ async function handleSignal(context, eventData) {
       }),
       robotId
     });
-
     if (traders && traders.length > 0) {
       const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId }) => {
-          const action = { id: uuid(), type: SIGNAL, data: eventData };
           const status = await client.getStatus(taskId);
-          if (status && status.runtimeStatus === "Running") {
+          Log.warn(status.runtimeStatus, status.customStatus);
+          if (status) {
+            await saveTraderAction({
+              PartitionKey: taskId,
+              RowKey: generateKey(),
+              id: uuid(),
+              type: SIGNAL,
+              actionTime: dayjs.utc(eventData.timestamp).valueOf(),
+              data: eventData
+            });
             if (status.customStatus === READY) {
-              await client.raiseEvent(taskId, TRADER_ACTION, action);
-            } else {
-              await saveTraderAction({
-                PartitionKey: taskId,
-                RowKey: generateKey(),
-                createdAt: dayjs.utc().toISOString(),
-                ...action
-              });
+              await client.raiseEvent(taskId, TRADER_ACTION);
             }
           } else {
             Log.error(`Trader "${taskId}" not started`);
@@ -59,7 +57,7 @@ async function handleSignal(context, eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to handle Tick Event"
+      "Failed to handle Signal Event"
     );
   }
 }

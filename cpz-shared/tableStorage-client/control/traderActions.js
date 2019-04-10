@@ -1,8 +1,6 @@
-import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-
-const { TableQuery, TableUtilities } = azure;
+import { minArrOfObj } from "../../utils/helpers";
 
 const TABLES = {
   STORAGE_TRADER_ACTIONS_TABLE: "TraderActions"
@@ -15,17 +13,13 @@ const TABLES = {
  */
 const getNextTraderAction = async taskId => {
   try {
-    const partitionKeyFilter = TableQuery.stringFilter(
-      "PartitionKey",
-      TableUtilities.QueryComparisons.EQUAL,
+    const actions = await client.getEntitiesByPartitionKey(
+      TABLES.STORAGE_TRADER_ACTIONS_TABLE,
       taskId
     );
-    const query = new TableQuery().where(partitionKeyFilter);
-    const actions = await client.queryEntities(
-      TABLES.STORAGE_TRADER_ACTIONS_TABLE,
-      query
-    );
-    if (actions && actions.length > 0) return actions[0];
+    if (actions && actions.length > 0) {
+      return minArrOfObj(actions, "actionTime");
+    }
     return null;
   } catch (error) {
     throw new ServiceError(

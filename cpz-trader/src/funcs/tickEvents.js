@@ -93,7 +93,7 @@ class TickEvents extends BaseService {
 
         await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
           subject: SERVICE_NAME,
-          data: error.json
+          data: { error: error.json }
         });
       }
     }

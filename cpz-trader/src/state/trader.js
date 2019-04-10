@@ -12,16 +12,14 @@ import {
   POS_STATUS_CLOSED,
   POS_STATUS_CLOSED_AUTO,
   POS_STATUS_OPEN,
-  ORDER_POS_DIR_EXIT,
   ORDER_STATUS_OPEN,
-  ORDER_STATUS_CANCELED,
-  ORDER_STATUS_CLOSED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
-  ORDER_TASK_CANCEL,
   STATUS_PENDING,
   STATUS_STARTED,
+  STATUS_STOPPING,
   STATUS_STOPPED,
+  STATUS_ERROR,
   createTraderSlug
 } from "cpz/config/state";
 import {
@@ -35,7 +33,6 @@ import {
   ERROR_TRADER_ERROR_EVENT
 } from "cpz/events/types";
 import { flatten } from "cpz/utils/helpers";
-import dayjs from "cpz/utils/lib/dayjs";
 import Position from "./position";
 
 class Trader {
@@ -199,12 +196,27 @@ class Trader {
     };
   }
 
-  closePosition(positionId) {
+  requestStop() {
+    try {
+      this._status = STATUS_STOPPING;
+      this._closeActivePositions();
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_STOP_ERROR,
+          cause: e
+        },
+        "Failed to stop trader"
+      );
+    }
+  }
+
+  _closePosition(positionId) {
     try {
       this._positions[positionId].requestClose = true;
       const ordersToExecute = this._positions[
         positionId
-      ].getOrdersToClosePosition();
+      ].getOrdersToClosePosition(this._settings);
       ordersToExecute.forEach(order => {
         this._ordersToExecute[order.orderId] = this._baseOrder(order);
       });
@@ -222,10 +234,10 @@ class Trader {
     }
   }
 
-  closeActivePositions() {
+  _closeActivePositions() {
     try {
-      this.activePositions.forEach(({ positionId }) => {
-        this.closePosition(positionId);
+      this.activePositions.forEach(({ id }) => {
+        this._closePosition(id);
       });
     } catch (e) {
       throw new ServiceError(
@@ -246,7 +258,7 @@ class Trader {
           this._settings.mode === EMULATOR_MODE
         ) {
           // In realtime and emulation - closing all active positions
-          this.closeActivePositions();
+          this._closeActivePositions();
         } else if (this._settings.mode === BACKTEST_MODE) {
           if (this.activePositions.length > 0) {
             throw new ServiceError(
@@ -412,7 +424,7 @@ class Trader {
     }
   }
 
-  checkOpen() {
+  checkOrders() {
     try {
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position => position.getOpenOrders())
@@ -460,7 +472,10 @@ class Trader {
 
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position =>
-          position.getOrdersToExecute(this._lastPrice.price, this._settings)
+          position.getOrdersToExecuteByPrice(
+            this._lastPrice.price,
+            this._settings
+          )
         )
       );
       ordersToExecute.forEach(order => {
@@ -513,6 +528,21 @@ class Trader {
     };
   }
 
+  _createErrorEvent(error) {
+    const { critical = false } = error.info;
+    return {
+      eventType: critical ? ERROR_TRADER_ERROR_EVENT : ERROR_TRADER_WARN_EVENT,
+      eventData: {
+        subject: this._taskId,
+        data: {
+          taskId: this._taskId,
+          critical,
+          error
+        }
+      }
+    };
+  }
+
   /**
    * Создать событие Ордер
    *
@@ -555,61 +585,38 @@ class Trader {
 
   handleOrders(orders) {
     try {
+      Log.debug("handleOrders", orders);
       if (!Array.isArray(orders)) throw new Error("Orders are not array");
+
       orders.forEach(order => {
         // Сохраняем ордер в позиции и генерируем события
         this._positions[order.positionId].handleOrder(order);
+
         // Если ордер в статусе закрыт или отменен
-        if (
+        /*  if (
           order.status === ORDER_STATUS_CLOSED ||
           order.status === ORDER_STATUS_CANCELED
-        ) {
-          // генерируем событие ордер
-          this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
-            order
-          );
-          // генерируем событие позиция
-          this._eventsToSend[
-            `P-${order.positionId}`
-          ] = this._createPositionEvent(
-            this._positions[order.positionId].state
-          );
-          // или возникла ошибка при работе с ордером на бирже
-        } else if (order.error) {
+        ) { */
+        // генерируем событие ордер
+        this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
+          order
+        );
+        // генерируем событие позиция
+        this._eventsToSend[`P-${order.positionId}`] = this._createPositionEvent(
+          this._positions[order.positionId].state
+        );
+        // или возникла ошибка при работе с ордером на бирже
+        //   } else
+
+        if (order.error) {
           // генерируем событие ошибка трейдера
           this._eventsToSend[
             `O-${order.orderId}`
           ] = this._createErrorOrderEvent(order);
         }
-
-        const currentOrder = { ...order };
-        // Если режим реалтайм или эмуляция
-        // и указано время выставления ордера
-        // и ордер выставлен на бирже
-        // и таймаут для выставленных ордеров истек
-        if (
-          this._settings.mode !== BACKTEST_MODE &&
-          order.exTimestamp &&
-          order.status === ORDER_STATUS_OPEN &&
-          dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
-            this._settings.openOrderTimeout
-        ) {
-          // Отменяем текущий ордер
-          currentOrder.task = ORDER_TASK_CANCEL;
-          this._ordersToExecute[currentOrder.orderId] = currentOrder;
-        } else if (
-          // Если ордер на выход из позиции отменен
-          // Или позиция должна быть закрыта
-          (order.status === ORDER_STATUS_CANCELED &&
-            order.positionCode === ORDER_POS_DIR_EXIT) ||
-          this._positions[order.positionId].requestClose
-        ) {
-          // Закрываем позицию
-          this.closePosition(order.positionId);
-        } else {
-          this._ordersToExecute = {};
-        }
       });
+
+      Log.debug("handleOrders ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
         {
@@ -617,6 +624,23 @@ class Trader {
           cause: e
         },
         "Failed to handle orders"
+      );
+    }
+  }
+
+  setError(error) {
+    try {
+      const { critical = false } = error.info;
+      if (critical) this._status = STATUS_ERROR;
+      this._error = error;
+      this._eventsToSend.error = this._createErrorEvent(error);
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_SET_ERROR_ERROR,
+          cause: e
+        },
+        "Failed to set error"
       );
     }
   }

@@ -55,8 +55,9 @@ export default (context, req, neededEvents) => {
     // In this place if Event Grid batch, we expect what all events are same one type
   }
   if (neededEvents.indexOf(event.eventType) !== -1) {
-    Log.info(`Got ${event.eventType} event`);
-    Log.debug(`data ${JSON.stringify(event.data)}`);
+    Log.info(
+      `Got ${event.eventType} event data: ${JSON.stringify(event.data)}`
+    );
   } else {
     Log.error(`Unknown Event Type: ${event.eventType}`);
 

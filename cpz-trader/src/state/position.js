@@ -25,7 +25,8 @@ import {
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
   ORDER_POS_DIR_ENTRY,
-  ORDER_POS_DIR_EXIT
+  ORDER_POS_DIR_EXIT,
+  BACKTEST_MODE
 } from "cpz/config/state";
 import dayjs from "cpz/utils/lib/dayjs";
 
@@ -119,7 +120,8 @@ class Position {
     if (
       this._entry.status === ORDER_STATUS_OPEN ||
       this._entry.status === ORDER_STATUS_CLOSED ||
-      this._exit.status === ORDER_STATUS_OPEN
+      this._exit.status === ORDER_STATUS_OPEN ||
+      this._exit.status === ORDER_STATUS_CANCELED
     ) {
       this._status = POS_STATUS_OPEN;
     }
@@ -134,10 +136,7 @@ class Position {
     ) {
       this._status = POS_STATUS_CLOSED_AUTO;
     }
-    if (
-      this._entry.status === ORDER_STATUS_CANCELED ||
-      this._exit.status === ORDER_STATUS_CANCELED
-    ) {
+    if (this._entry.status === ORDER_STATUS_CANCELED) {
       this._status = POS_STATUS_CANCELED;
     }
     if (
@@ -158,7 +157,7 @@ class Position {
    * @memberof Position
    */
   _createOrder(signal, positionDirection, settings) {
-    Log.debug("Creating new order...");
+    Log.debug("Creating new order...", signal);
     const {
       signalId,
       orderType,
@@ -177,6 +176,7 @@ class Position {
         (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
         settings.volume,
       createdAt: dayjs.utc().toISOString(), // Дата и время создания
+      lastCheck: dayjs.utc().toISOString(),
       status: ORDER_STATUS_NEW, // Статус ордера
       direction:
         action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT
@@ -242,23 +242,27 @@ class Position {
    * Создать ордер на принудительный выход из позиции
    *
    * @param {number} volume объем выхода
+   * @param {Object} settings настройки трейдера
    * @memberof Position
    */
-  _createCloseOrder(volume) {
-    this.createExitOrder({
-      signalId: uuid(),
-      price: null,
-      timestamp: dayjs.utc().toISOString(),
-      orderType: ORDER_TYPE_MARKET_FORCE,
-      positionId: this._id,
-      action:
-        this._direction === ORDER_DIRECTION_BUY
-          ? TRADE_ACTION_CLOSE_LONG
-          : TRADE_ACTION_CLOSE_SHORT,
-      settings: {
-        volume
-      }
-    });
+  _createCloseOrder(volume, settings) {
+    this.createExitOrder(
+      {
+        signalId: uuid(),
+        price: null,
+        timestamp: dayjs.utc().toISOString(),
+        orderType: ORDER_TYPE_MARKET_FORCE,
+        positionId: this._id,
+        action:
+          this._direction === ORDER_DIRECTION_BUY
+            ? TRADE_ACTION_CLOSE_LONG
+            : TRADE_ACTION_CLOSE_SHORT,
+        settings: {
+          volume
+        }
+      },
+      settings
+    );
   }
 
   /**
@@ -267,11 +271,13 @@ class Position {
    * @returns {[Object]}
    * @memberof Position
    */
-  getOrdersToClosePosition() {
+  getOrdersToClosePosition(settings) {
+    Log.debug("position getOrdersToClosePosition");
     // Необходимые ордера для закрытия позиции
     let requiredOrders = [];
 
     if (this._entry.status === ORDER_STATUS_NEW) {
+      Log.debug("entry new");
       // Если ордер на открытие не выставлен на биржу
       // помечаем что позиция отменена
       this._entry.status = ORDER_STATUS_CANCELED;
@@ -281,42 +287,75 @@ class Position {
       });
       this.setStatus();
     } else if (this._entry.status === ORDER_STATUS_OPEN) {
+      Log.debug("entry open");
+      // Если ордер на открытие не выставл
       // Если ордер на открытие выставлен на биржу
       // Если ордер на открытие еще не исполнен
       if (!this._entry.executed || this._entry.executed === 0) {
+        Log.debug("entry not executed");
         // Отменяем ордера на открытие
         requiredOrders = Object.values(this._entryOrders)
           .filter(order => order.status === ORDER_STATUS_OPEN)
           .map(order => ({ ...order, task: ORDER_TASK_CANCEL }));
       } else {
+        Log.debug("entry executed", this._entry.executed);
         // Если ордер на открытие частично исполнен
         // Создаем новый ордер на принудительное закрытие позиции
-        this._createCloseOrder(this._entry.executed);
+        this._createCloseOrder(this._entry.executed, settings);
 
         requiredOrders = Object.values(this._exitOrders).filter(
           order => order.task
         );
       }
-    } else if (!this._exit.status || this._exit.status === ORDER_STATUS_NEW) {
-      // Если ордер на закрытие позиции не выставлен на биржу
-      // Если есть созданные ордера на закрытие помечаем их как отмененные
+      // Если ордер на открытие позиции отменен
+    } else if (this._entry.status === ORDER_STATUS_CANCELED) {
+      Log.debug("entry canceled");
+      // Если ордер на открытие еще не исполнен
+      if (!this._entry.executed || this._entry.executed === 0) {
+        Log.debug("entry not executed");
+        // Больше ничего не надо делать, выходим
+        return requiredOrders;
+      }
+      Log.debug("entry executed", this._entry.executed);
+      // Если ордер на открытие частично исполнен
+      // Создаем новый ордер на принудительное закрытие позиции
+      this._createCloseOrder(this._entry.executed, settings);
+
+      requiredOrders = Object.values(this._exitOrders).filter(
+        order => order.task
+      );
+    } else if (
+      this._entry.status === ORDER_STATUS_CLOSED &&
+      (!this._exit.status || this._exit.status === ORDER_STATUS_NEW)
+    ) {
+      Log.debug("entry closed - exit none/new");
+      // Если ордер на открытие позиции исполнен и
+      // ордер на закрытие позиции не выставлен на биржу
+      // или есть созданные ордера на закрытие помечаем их как отмененные
       Object.keys(this._exitOrders).forEach(key => {
         if (this._exitOrders[key].status === ORDER_STATUS_NEW)
           this._exitOrders[key].status = ORDER_STATUS_CANCELED;
       });
       // Создаем новый ордер на принудительное закрытие позиции
-      this._createCloseOrder(this._entry.executed);
+      this._createCloseOrder(this._entry.executed, settings);
       requiredOrders = Object.values(this._exitOrders).filter(
         order => order.task
       );
     } else if (this._exit.status === ORDER_STATUS_OPEN) {
+      Log.debug("exit open");
       // Если ордер на закрытие позиции выставлен на биржу
       // Отменяем выставленные ордера на закрытие
+      // при условии что это не принудительный ордер на закрытие
       requiredOrders = Object.values(this._exitOrders)
-        .filter(order => order.status === ORDER_STATUS_OPEN)
+        .filter(
+          order =>
+            order.status === ORDER_STATUS_OPEN &&
+            order.type !== ORDER_TYPE_MARKET_FORCE
+        )
         .map(order => ({ ...order, task: ORDER_TASK_CANCEL }));
       return requiredOrders;
     } else if (this._exit.status === ORDER_STATUS_CANCELED) {
+      Log.debug("exit canceled");
       // Если ордер на закрытие позиции отменен
       // По умолчанию объем закрытия = объему открытия позиции
       let volume = this._entry.executed;
@@ -327,7 +366,7 @@ class Position {
       // Если все еще нужно что-то закрывать
       if (volume > 0) {
         // Создаем новый ордер на принудительное закрытие позиции
-        this._createCloseOrder(volume);
+        this._createCloseOrder(volume, settings);
         requiredOrders = Object.values(this._exitOrders).filter(
           order => order.task
         );
@@ -348,7 +387,7 @@ class Position {
    */
   _checkOrder(order, price, settings) {
     Log.debug(
-      `checkOrder() ${order.orderId}, position: ${this._code}, status: ${
+      `position checkOrder ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
         order.task
@@ -362,6 +401,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_BUY) {
           if (price <= order.price) {
             // Нужно выставить лимитный ордер
+            Log.debug(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price + settings.slippageStep,
@@ -373,6 +413,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_SELL) {
           if (price >= order.price) {
             // Нужно выставить лимитный ордер
+            Log.debug(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price - settings.slippageStep,
@@ -387,16 +428,28 @@ class Position {
       // ИЛИ
       // Если продаем и текущая цена выше цены сигнала
       // ИЛИ
-      // Если вышел таймаут
+      // Если последний раз проверяли больше чем минуту назад
       if (
         (order.direction === ORDER_DIRECTION_BUY && price <= order.price) ||
         (order.direction === ORDER_DIRECTION_SELL && price >= order.price) ||
-        (order.exTimestamp &&
-          dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
-            settings.openOrderTimeout)
+        dayjs.utc().diff(dayjs.utc(order.lastCheck), "minute") > 1
       ) {
         // Нужно проверить ордер на бирже
+        Log.debug(ORDER_TASK_CHECK);
         return { ...order, task: ORDER_TASK_CHECK };
+      }
+      // Если не в режиме бэктеста
+      // проверяли недавно и таймаут открытого ордера истек
+      if (
+        settings.mode !== BACKTEST_MODE &&
+        dayjs.utc().diff(dayjs.utc(order.lastCheck), "minute") <= 1 &&
+        order.exTimestamp &&
+        dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
+          settings.openOrderTimeout
+      ) {
+        // Отменяем ордер
+        Log.debug(ORDER_TASK_CANCEL);
+        return { ...order, task: ORDER_TASK_CANCEL };
       }
     }
     // Не нужно ничего делать
@@ -411,9 +464,9 @@ class Position {
    *
    * @memberof Position
    */
-  getOrdersToExecute(price, settings) {
+  getOrdersToExecuteByPrice(price, settings) {
     Log.debug(
-      `getOrdersToExecute() position: ${this._code}, entry: ${
+      `position getOrdersToExecuteByPrice position: ${this._code}, entry: ${
         this._entry.status
       }, exit: ${this._exit.status}, price: ${price}`
     );
@@ -423,6 +476,7 @@ class Position {
       this._entry.status === ORDER_STATUS_NEW ||
       this._entry.status === ORDER_STATUS_OPEN
     ) {
+      Log.debug("entry new/open");
       // Если ордера на открытие позиции ожидают обработки
       // Проверяем все ордера на открытие позиции ожидающие обработки
       requiredOrders = Object.values(this._entryOrders)
@@ -433,6 +487,7 @@ class Position {
       (this._exit.status === ORDER_STATUS_NEW ||
         this._exit.status === ORDER_STATUS_OPEN)
     ) {
+      Log.debug("entry closed - exit new/open");
       // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       requiredOrders = Object.values(this._exitOrders)
@@ -451,29 +506,46 @@ class Position {
   }
 
   /**
-   * Выборка открытых ордеров, которые необходимо проверить не бирже
+   * Выборка ордеров для дальнейшей обработки на бирже
    *
    * @returns
    * @memberof Position
    */
-  getOpenOrders() {
-    let openOrders = [];
+  getOrdersToExecute(settings) {
+    Log.debug("postition getOrdersToExecute");
+    let requiredOrders = [];
 
     if (this._entry.status === ORDER_STATUS_OPEN) {
       // Если ордера на открытие позиции ожидают обработки
       // Проверяем все ордера на открытие позиции ожидающие обработки
-      openOrders = Object.values(this._entryOrders)
+      requiredOrders = Object.values(this._entryOrders)
         .filter(order => order.status === ORDER_STATUS_OPEN)
         .map(order => ({ ...order, task: ORDER_TASK_CHECK }));
     } else if (this._exit.status === ORDER_STATUS_OPEN) {
       // Если ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
-      openOrders = Object.values(this._exitOrders)
+      requiredOrders = Object.values(this._exitOrders)
         .filter(order => order.status === ORDER_STATUS_OPEN)
         .map(order => ({ ...order, task: ORDER_TASK_CHECK }));
+    } else if (this._exit.status === ORDER_STATUS_CANCELED) {
+      // Если ордер на закрытие позиции отменен
+      // По умолчанию объем закрытия = объему открытия позиции
+      let volume = this._entry.executed;
+      // Если уже какой-то объем на закрытие исполнился
+      if (this._exit.executed && this._exit.executed > 0)
+        // Вычитаем этот объем из объема открытия
+        volume -= this._exit.executed;
+      // Если все еще нужно что-то закрывать
+      if (volume > 0) {
+        // Создаем новый ордер на принудительное закрытие позиции
+        this._createCloseOrder(volume, settings);
+        requiredOrders = Object.values(this._exitOrders).filter(
+          order => order.task
+        );
+      }
     }
     // Возвращаем массив ордеров для дальнейшей обработки
-    return openOrders;
+    return requiredOrders;
   }
 
   /**
@@ -485,7 +557,7 @@ class Position {
    */
   handleOrder(order) {
     Log.debug(
-      `Executed ${order.orderId}, position: ${this._code}, status: ${
+      `postiion Executed ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
         order.task

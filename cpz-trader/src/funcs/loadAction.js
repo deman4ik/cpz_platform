@@ -40,7 +40,6 @@ class LoadAction extends BaseService {
   async run(context, { state, lastAction }) {
     try {
       Log.addContext(context, traderStateToCommonProps(state));
-      Log.debug("loadAction", state);
       let nextAction;
       let loaded = false;
       /* eslint-disable no-await-in-loop */
@@ -59,7 +58,6 @@ class LoadAction extends BaseService {
           }
         }
       }
-      Log.debug("loadActionResult", nextAction);
       /* no-await-in-loop */
       Log.clearContext();
       return nextAction;

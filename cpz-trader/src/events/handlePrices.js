@@ -3,7 +3,6 @@ import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { CANDLE_PREVIOUS, createTraderSlug } from "cpz/config/state";
-import dayjs from "cpz/utils/lib/dayjs";
 import { getActiveTradersBySlug } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { INTERNAL } from "../config";
@@ -31,12 +30,23 @@ async function handlePrice(context, currentPrice) {
         traders.map(async ({ taskId, lastPrice }) => {
           try {
             const { time } = lastPrice;
+            Log.warn(
+              "handlePrice currentPrice.timestamp",
+              currentPrice.timestamp,
+              "lastPrice.timestamp",
+              lastPrice.timestamp
+            );
             if (!time || (time && time < currentPrice.time)) {
               const status = await client.getStatus(taskId);
-              if (status && status.runtimeStatus === "Running") {
-                const action = {
+              Log.warn(status.runtimeStatus, status.customStatus);
+              if (status) {
+                // TODO: save price action only if timestamp greater
+                await saveTraderAction({
+                  PartitionKey: taskId,
+                  RowKey: PRICE,
                   id: uuid(),
                   type: PRICE,
+                  actionTime: currentPrice.time,
                   data: {
                     price: currentPrice.price,
                     time: currentPrice.time,
@@ -45,17 +55,9 @@ async function handlePrice(context, currentPrice) {
                     candleId: currentPrice.candleId,
                     source: currentPrice.source
                   }
-                };
+                });
                 if (status.customStatus === READY) {
-                  await client.raiseEvent(taskId, TRADER_ACTION, action);
-                } else {
-                  // TODO: save price action only if timestamp greater
-                  await saveTraderAction({
-                    PartitionKey: taskId,
-                    RowKey: PRICE,
-                    createdAt: dayjs.utc().toISOString(),
-                    ...action
-                  });
+                  await client.raiseEvent(taskId, TRADER_ACTION);
                 }
               } else {
                 Log.error(`Trader "${taskId}" not started`);
@@ -98,7 +100,6 @@ async function handleTick(context, eventData) {
     tradeId
   } = eventData;
   try {
-    Log.debug("handleTick", eventData);
     const currentPrice = {
       exchange,
       asset,
@@ -136,7 +137,6 @@ async function handleCandle(context, eventData) {
     timeframe
   } = eventData;
   try {
-    Log.debug("handleCandle", eventData);
     /* Если свеча сгенерирована по предыдущим данным - пропускаем */
     if (type === CANDLE_PREVIOUS || timeframe !== 1) return;
     const currentPrice = {

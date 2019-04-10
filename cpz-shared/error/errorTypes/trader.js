@@ -5,11 +5,12 @@ const TRADER_EXECUTE_ORDERS_ERROR = "TradersExecuteOrdersError";
 const TRADER_HANDLE_ORDERS_ERROR = "TraderHandleOrdersError";
 const TRADER_HANDLE_SIGNAL_ERROR = "TraderHandleSignalError";
 const TRADER_CHECK_PRICE_ERROR = "TraderCheckPriceError";
-const TRADER_CHECK_OPEN_ERROR = "TraderCheckOpenError";
+const TRADER_CHECK_ORDERS_ERROR = "TraderCheckOrdersError";
 const TRADER_NOT_FOUND_ERROR = "TraderNotFound";
 const TRADER_START_ERROR = "TradersStartError";
 const TRADER_UPDATE_ERROR = "TradersUpdateError";
 const TRADER_STOP_ERROR = "TradersStopError";
+const TRADER_SET_ERROR_ERROR = "TradersSetErrorError";
 const TRADER_TICKS_EVENTS_ERROR = "TraderTicksEventsError";
 const TRADER_CANDLES_EVENTS_ERROR = "TraderCandlesEventsError";
 const TRADER_PRICES_EVENTS_ERROR = "TraderPricesEventsError";
@@ -33,10 +34,11 @@ export {
   TRADER_EXECUTE_ORDER_ERROR,
   TRADER_EXECUTE_ORDERS_ERROR,
   TRADER_CHECK_PRICE_ERROR,
-  TRADER_CHECK_OPEN_ERROR,
+  TRADER_CHECK_ORDERS_ERROR,
   TRADER_START_ERROR,
   TRADER_UPDATE_ERROR,
   TRADER_STOP_ERROR,
+  TRADER_SET_ERROR_ERROR,
   TRADER_ERROR,
   TRADER_TICKS_EVENTS_ERROR,
   TRADER_CANDLES_EVENTS_ERROR,

@@ -1,7 +1,6 @@
 import candleEvents from "./funcs/candleEvents";
 import eventPublish from "./funcs/eventPublish";
 import executeOrders from "./funcs/executeOrders";
-import getCurrentPrice from "./funcs/getCurrentPrice";
 import loadAction from "./funcs/loadAction";
 import orchestrator from "./funcs/orchestrator";
 import saveState from "./funcs/saveState";
@@ -15,7 +14,6 @@ export {
   candleEvents,
   eventPublish,
   executeOrders,
-  getCurrentPrice,
   loadAction,
   orchestrator,
   saveState,
