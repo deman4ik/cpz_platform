@@ -371,7 +371,7 @@ class Trader {
           // Проверяем ордер на открытие
           const ordersToExecute = this._positions[
             signal.positionId
-          ].getOpenOrders();
+          ].getOrdersToExecute();
 
           ordersToExecute.forEach(order => {
             this._ordersToExecute[order.orderId] = this._baseOrder(order);
@@ -427,7 +427,9 @@ class Trader {
   checkOrders() {
     try {
       const ordersToExecute = flatten(
-        this.activePositionInstances.map(position => position.getOpenOrders())
+        this.activePositionInstances.map(position =>
+          position.getOrdersToExecute()
+        )
       );
       ordersToExecute.forEach(order => {
         this._ordersToExecute[order.orderId] = this._baseOrder(order);
