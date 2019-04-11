@@ -23,7 +23,6 @@
   "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC",
   "dependencies": {
-    "@babel/runtime": "^7.4.2",
     "applicationinsights": "1.2.0",
     "azure-eventgrid": "1.5.0",
     "azure-storage": "2.10.2",
