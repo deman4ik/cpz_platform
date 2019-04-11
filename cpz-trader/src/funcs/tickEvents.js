@@ -74,7 +74,7 @@ class TickEvents extends BaseService {
       try {
         ServiceValidator.check(TICKS_NEWTICK_EVENT, data);
         // Handling ticks
-        await handleTick(context, data);
+        await handleTick(data);
       } catch (e) {
         let error;
         if (e instanceof ServiceError) {

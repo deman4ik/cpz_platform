@@ -13,7 +13,7 @@ import ControlStorageClient from "cpz/tableStorage-client/control";
 import traderTables from "cpz/tableStorage-client/control/traders";
 import traderActionTables from "cpz/tableStorage-client/control/traderActions";
 import { SERVICE_NAME } from "../config";
-import handleTimer from "../events/handleTimer";
+import handleIdleTimer from "../events/handleIdleTimer";
 
 class Timer extends BaseService {
   constructor() {
@@ -58,10 +58,10 @@ class Timer extends BaseService {
     const timestamp = new Date().toISOString();
     try {
       if (timer.isPastDue) {
-        Log.warn("Timer trigger is running late!");
+        Log.warn("Idle Timer trigger is running late!");
       }
-      Log.debug("Timer trigger function ran!", timestamp);
-      await handleTimer(context);
+      Log.debug("Idle Timer trigger function ran!", timestamp);
+      await handleIdleTimer();
     } catch (e) {
       let error;
       if (e instanceof ServiceError) {

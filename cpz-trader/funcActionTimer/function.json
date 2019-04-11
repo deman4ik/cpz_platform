@@ -6,12 +6,7 @@
       "name": "TraderTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "30 * * * * *"
-    },
-    {
-      "name": "starter",
-      "type": "orchestrationClient",
-      "direction": "in"
+      "schedule": "*/5 * * * * *"
     }
   ]
 }

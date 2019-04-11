@@ -1,0 +1,12 @@
+{
+  "disabled": false,
+  "entryPoint": "run",
+  "bindings": [
+    {
+      "name": "TraderTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "30 * * * * *"
+    }
+  ]
+}

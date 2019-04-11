@@ -10,7 +10,7 @@
     "extensions": "func extensions install",
     "webpack": "webpack",
     "webpack:watch": "webpack --watch",
-    "build": "func extensions install && webpack"
+    "build": "webpack"
   },
   "keywords": [
     "cryptuoso",
@@ -29,20 +29,12 @@
     "azure-storage": "2.10.2",
     "babel-polyfill": "6.26.0",
     "dayjs": "^1.8.11",
-    "durable-functions": "^1.1.4",
     "fastest-validator": "^0.6.17",
     "graphql-request": "1.8.2",
-    "p-retry": "^4.0.0",
     "uuid": "3.3.2",
     "verror": "1.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.0",
-    "@babel/plugin-transform-runtime": "^7.4.0",
-    "@babel/preset-env": "^7.4.2",
-    "@babel/register": "^7.4.0",
-    "babel-cli": "6.26.0",
-    "babel-loader": "8.0.5",
     "clean-webpack-plugin": "^2.0.1",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "13.1.0",

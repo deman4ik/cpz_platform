@@ -14,11 +14,6 @@
       "type": "http",
       "direction": "out",
       "name": "res"
-    },
-    {
-      "name": "starter",
-      "type": "orchestrationClient",
-      "direction": "in"
     }
   ]
 }

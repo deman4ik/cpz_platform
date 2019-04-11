@@ -1,19 +1,15 @@
-import * as df from "durable-functions";
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { CANDLE_PREVIOUS, createTraderSlug } from "cpz/config/state";
 import { getActiveTradersBySlug } from "cpz/tableStorage-client/control/traders";
-import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
-import { INTERNAL } from "../config";
+import {
+  getTraderActionByKeys,
+  saveTraderAction
+} from "cpz/tableStorage-client/control/traderActions";
+import { PRICE } from "../config";
 
-const {
-  actions: { PRICE },
-  status: { READY },
-  events: { TRADER_ACTION }
-} = INTERNAL;
-
-async function handlePrice(context, currentPrice) {
+async function handlePrice(currentPrice) {
   try {
     Log.debug("handlePrice", currentPrice);
     const { exchange, asset, currency } = currentPrice;
@@ -25,7 +21,6 @@ async function handlePrice(context, currentPrice) {
       })
     );
     if (traders && traders.length > 0) {
-      const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId, lastPrice }) => {
           try {
@@ -37,31 +32,32 @@ async function handlePrice(context, currentPrice) {
               lastPrice.timestamp
             );
             if (!time || (time && time < currentPrice.time)) {
-              const status = await client.getStatus(taskId);
-              Log.warn(status.runtimeStatus, status.customStatus);
-              if (status) {
-                // TODO: save price action only if timestamp greater
-                await saveTraderAction({
-                  PartitionKey: taskId,
-                  RowKey: PRICE,
-                  id: uuid(),
-                  type: PRICE,
-                  actionTime: currentPrice.time,
-                  data: {
-                    price: currentPrice.price,
-                    time: currentPrice.time,
-                    timestamp: currentPrice.timestamp,
-                    tickId: currentPrice.tickId,
-                    candleId: currentPrice.candleId,
-                    source: currentPrice.source
-                  }
-                });
-                if (status.customStatus === READY) {
-                  await client.raiseEvent(taskId, TRADER_ACTION);
+              // Ищем последнее действие с ценой
+              const prevPriceAction = await getTraderActionByKeys({
+                PartitionKey: taskId,
+                RowKey: PRICE
+              });
+              // Если действие с ценой есть в очереди
+              // и дата цены больше, чем текущая цена
+              if (prevPriceAction && prevPriceAction.time > currentPrice.time)
+                return; // выходим
+
+              // Сохраняем действие трейдеру
+              await saveTraderAction({
+                PartitionKey: taskId,
+                RowKey: PRICE,
+                id: uuid(),
+                type: PRICE,
+                actionTime: currentPrice.time,
+                data: {
+                  price: currentPrice.price,
+                  time: currentPrice.time,
+                  timestamp: currentPrice.timestamp,
+                  tickId: currentPrice.tickId,
+                  candleId: currentPrice.candleId,
+                  source: currentPrice.source
                 }
-              } else {
-                Log.error(`Trader "${taskId}" not started`);
-              }
+              });
             }
           } catch (e) {
             const error = new ServiceError(
@@ -70,7 +66,7 @@ async function handlePrice(context, currentPrice) {
                 cause: e,
                 info: { taskId, lastPrice, currentPrice }
               },
-              "Failed to handle Price Event"
+              `Failed to save price action for trader ${taskId}`
             );
             Log.exception(error);
           }
@@ -89,7 +85,7 @@ async function handlePrice(context, currentPrice) {
   }
 }
 
-async function handleTick(context, eventData) {
+async function handleTick(eventData) {
   const {
     exchange,
     asset,
@@ -111,7 +107,7 @@ async function handleTick(context, eventData) {
       candleId: null,
       source: "tick"
     };
-    await handlePrice(context, currentPrice);
+    await handlePrice(currentPrice);
   } catch (e) {
     throw new ServiceError(
       {
@@ -124,7 +120,7 @@ async function handleTick(context, eventData) {
   }
 }
 
-async function handleCandle(context, eventData) {
+async function handleCandle(eventData) {
   const {
     type,
     exchange,
@@ -150,7 +146,7 @@ async function handleCandle(context, eventData) {
       candleId: id,
       source: "candle"
     };
-    await handlePrice(context, currentPrice);
+    await handlePrice(currentPrice);
   } catch (e) {
     throw new ServiceError(
       {

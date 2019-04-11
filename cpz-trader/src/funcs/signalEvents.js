@@ -73,7 +73,7 @@ class SignalEvents extends BaseService {
         // Validate event by target schema
         ServiceValidator.check(SIGNALS_NEWSIGNAL_EVENT, data);
         // Handling signal
-        await handleSignalEvent(context, data);
+        await handleSignalEvent(data);
         // Calling context.done for finalize function
       } catch (e) {
         let error;

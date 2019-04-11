@@ -6,15 +6,8 @@ import * as orders from "./orders";
 import * as trades from "./trades";
 
 class ConnectorClient {
-  constructor({ endpoint, key }) {
-    if (!endpoint || !key)
-      throw new Error("Invalid connector client credentials");
-    this.client = new GraphQLClient(endpoint, {
-      headers: {
-        "api-key": key
-        // TODO: Authorization
-      }
-    });
+  constructor() {
+    this.client = null;
     this.getBalance = balance.getBalanceEX.bind(this);
     this.lastMinuteCandle = candles.lastMinuteCandleEX.bind(this);
     this.minuteCandles = candles.minuteCandlesEX.bind(this);
@@ -24,6 +17,17 @@ class ConnectorClient {
     this.checkOrder = orders.checkOrderEX.bind(this);
     this.trades = trades.tradesEX.bind(this);
   }
-}
 
-export default ConnectorClient;
+  init({ endpoint, key }) {
+    if (!endpoint || !key)
+      throw new Error("Invalid connector client credentials");
+    this.client = new GraphQLClient(endpoint, {
+      headers: {
+        "api-key": key
+        // TODO: Authorization
+      }
+    });
+  }
+}
+const client = new ConnectorClient();
+export default client;

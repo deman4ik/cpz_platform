@@ -64,6 +64,7 @@ class Trader {
       this._settings = combineTraderSettings(state.settings);
       /* Статус */
       this._status = state.status || STATUS_PENDING;
+      this._stopRequested = state.stopRequested || false;
       /* Текущий сигнал */
       this._signal = {};
       /* Последнтй сигнал */
@@ -91,6 +92,10 @@ class Trader {
     }
   }
 
+  get taskId() {
+    return this._taskId;
+  }
+
   /**
    * События для отправки
    *
@@ -98,7 +103,7 @@ class Trader {
    * @memberof Position
    */
   get events() {
-    return this._eventsToSend;
+    return Object.values(this._eventsToSend);
   }
 
   /**
@@ -108,7 +113,7 @@ class Trader {
    * @memberof Position
    */
   get orders() {
-    return this._ordersToExecute;
+    return Object.values(this._ordersToExecute);
   }
 
   get positions() {
@@ -142,8 +147,16 @@ class Trader {
     );
   }
 
+  get hasActivePositions() {
+    return this.activePositions.length > 0;
+  }
+
   set lastAction(action) {
     if (action && action.actionId) this._lastAction = action;
+  }
+
+  get stopRequested() {
+    return this._stopRequested;
   }
 
   start() {
@@ -198,7 +211,7 @@ class Trader {
 
   requestStop() {
     try {
-      this._status = STATUS_STOPPING;
+      this._stopRequested = true;
       this._closeActivePositions();
     } catch (e) {
       throw new ServiceError(
@@ -665,20 +678,25 @@ class Trader {
       currency: this._currency,
       timeframe: this._timeframe,
       status: this._status,
+      stopRequested: this._stopRequested,
       settings: this._settings,
       lastSignal: this._lastSignal,
       lastPrice: this._lastPrice,
       lastAction: this._lastAction,
       activePositions: this.activePositions,
-      hasActivePositions: this.activePositions.length > 0
+      hasActivePositions: this.hasActivePositions
     };
   }
 
-  get currentState() {
+  get props() {
     return {
-      currentState: this.state,
-      currentEvents: this.events,
-      currentOrders: this.orders
+      taskId: this._taskId,
+      robotId: this._robotId,
+      userId: this._userId,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe
     };
   }
 }

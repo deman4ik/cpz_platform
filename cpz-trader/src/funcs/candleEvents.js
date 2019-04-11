@@ -78,7 +78,7 @@ class CandleEvents extends BaseService {
         // Validate event by target schema
         ServiceValidator.check(CANDLES_NEWCANDLE_EVENT, data);
         // Handling candle
-        await handleCandle(context, data);
+        await handleCandle(data);
       } catch (e) {
         let error;
         if (e instanceof ServiceError) {

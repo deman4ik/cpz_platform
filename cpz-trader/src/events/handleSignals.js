@@ -1,24 +1,17 @@
-import * as df from "durable-functions";
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { generateKey } from "cpz/utils/helpers";
 import { createTraderSlug } from "cpz/config/state";
 import dayjs from "cpz/utils/lib/dayjs";
-import { getStartedTradersBySlugAndRobotId } from "cpz/tableStorage-client/control/traders";
+import { getTradersReadyForSignals } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
-import { INTERNAL } from "../config";
+import { SIGNAL } from "../config";
 
-const {
-  actions: { SIGNAL },
-  status: { READY },
-  events: { TRADER_ACTION }
-} = INTERNAL;
-
-async function handleSignal(context, eventData) {
+async function handleSignal(eventData) {
   try {
-    const { exchange, asset, currency, robotId } = eventData;
-    const traders = await getStartedTradersBySlugAndRobotId({
+    const { exchange, asset, currency, robotId, timestamp } = eventData;
+    const traders = await getTradersReadyForSignals({
       slug: createTraderSlug({
         exchange,
         asset,
@@ -27,25 +20,27 @@ async function handleSignal(context, eventData) {
       robotId
     });
     if (traders && traders.length > 0) {
-      const client = df.getClient(context);
       await Promise.all(
         traders.map(async ({ taskId }) => {
-          const status = await client.getStatus(taskId);
-          Log.warn(status.runtimeStatus, status.customStatus);
-          if (status) {
+          try {
             await saveTraderAction({
               PartitionKey: taskId,
               RowKey: generateKey(),
               id: uuid(),
               type: SIGNAL,
-              actionTime: dayjs.utc(eventData.timestamp).valueOf(),
+              actionTime: dayjs.utc(timestamp).valueOf(),
               data: eventData
             });
-            if (status.customStatus === READY) {
-              await client.raiseEvent(taskId, TRADER_ACTION);
-            }
-          } else {
-            Log.error(`Trader "${taskId}" not started`);
+          } catch (e) {
+            const error = new ServiceError(
+              {
+                name: ServiceError.types.TRADER_HANDLE_PRICE_ERROR,
+                cause: e,
+                info: { ...eventData, taskId }
+              },
+              `Failed to save signal action for trader ${taskId}`
+            );
+            Log.exception(error);
           }
         })
       );
