@@ -7,7 +7,6 @@ import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import {
   STATUS_STARTED,
   STATUS_BUSY,
-  STATUS_STOPPING,
   STATUS_STOPPED,
   STATUS_ERROR
 } from "cpz/config/state";
@@ -31,7 +30,7 @@ async function handleRun(eventData) {
       return;
     }
 
-    // Следующее дейсвтие
+    // Следующее действие
     let nextAction = null;
 
     // Загружаем следующее действие из очереди
@@ -98,16 +97,15 @@ async function handleStart(eventData) {
     const traderState = await getTraderById(taskId);
 
     if (traderState) {
-      // Если трейдер статус трейдера занят/запущен/останавливаетс
+      // Если трейдер статус трейдера занят/запущен
       if (
-        [STATUS_BUSY, STATUS_STARTED, STATUS_STOPPING].includes(
-          traderState.status
-        )
+        [STATUS_BUSY, STATUS_STARTED].includes(traderState.status) ||
+        traderState.stopRequested
       ) {
         Log.warn(
           `Got Trader.Start event but Trader ${taskId} is ${
             traderState.status
-          } =(`
+          } and stop requested is ${traderState.stopRequested} =(`
         );
         // Выходим
         return;
@@ -160,9 +158,14 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус трейдера остановлен/останавливается
-    if ([STATUS_STOPPED, STATUS_STOPPING].includes(traderState.status)) {
+    if (
+      [STATUS_STOPPED].includes(traderState.status) ||
+      traderState.stopRequested
+    ) {
       Log.warn(
-        `Got Trader.Stop event but Trader ${taskId} is ${traderState.status} =(`
+        `Got Trader.Stop event but Trader ${taskId} is ${
+          traderState.status
+        } and stop requested is ${traderState.stopRequested} =(`
       );
       // Выходим
       return;
@@ -206,11 +209,14 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус трейдера остановлен/останавливается
-    if ([STATUS_STOPPED, STATUS_STOPPING].includes(traderState.status)) {
+    if (
+      [STATUS_STOPPED].includes(traderState.status) ||
+      traderState.stopRequested
+    ) {
       Log.warn(
         `Got Trader.Update event but Trader ${taskId} is ${
           traderState.status
-        } =(`
+        } and stop requested is ${traderState.stopRequested} =(`
       );
       // Выходим
       return;
