@@ -25,12 +25,6 @@ async function handlePrice(currentPrice) {
         traders.map(async ({ taskId, lastPrice }) => {
           try {
             const { time } = lastPrice;
-            Log.warn(
-              "handlePrice currentPrice.timestamp",
-              currentPrice.timestamp,
-              "lastPrice.timestamp",
-              lastPrice.timestamp
-            );
             if (!time || (time && time < currentPrice.time)) {
               // Ищем последнее действие с ценой
               const prevPriceAction = await getTraderActionByKeys({

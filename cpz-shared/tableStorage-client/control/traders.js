@@ -184,7 +184,6 @@ const getTradersReadyForSignals = async ({ slug, robotId }) => {
         statusFilter
       )
     );
-    Log.warn(query);
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(

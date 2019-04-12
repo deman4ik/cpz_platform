@@ -19,7 +19,6 @@ async function handleSignal(eventData) {
       }),
       robotId
     });
-    Log.warn("handleSignal", traders);
     if (traders && traders.length > 0) {
       await Promise.all(
         traders.map(async ({ taskId }) => {
