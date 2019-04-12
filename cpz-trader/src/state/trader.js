@@ -227,7 +227,7 @@ class Trader {
 
   _closePosition(positionId) {
     try {
-      this._positions[positionId].requestClose = true;
+      this._positions[positionId].closeRequested = true;
       const ordersToExecute = this._positions[
         positionId
       ].getOrdersToClosePosition(this._settings);
@@ -343,6 +343,16 @@ class Trader {
         Log.warn("Signal '%s' already handled.", signal.signalId);
         return;
       }
+      // Если сигнал от другого робота
+      if (signal.robotId !== this._robotId) {
+        Log.warn("Wrong signal '%s'", signal.signalId);
+        return;
+      }
+
+      this._eventsToSend[
+        `S-${signal.signalId}`
+      ] = this._createSignalHandledEvent({ signalId: signal.signalId });
+
       // Если сигнал на открытие позиции
       if (
         signal.action === TRADE_ACTION_LONG ||
@@ -408,10 +418,6 @@ class Trader {
           );
         }
       }
-
-      this._eventsToSend[
-        `S-${signal.signalId}`
-      ] = this._createSignalHandledEvent({ signalId: signal.signalId });
 
       // Последний обработанный сигнал
       this._lastSignal = signal;
@@ -626,7 +632,7 @@ class Trader {
         if (order.error) {
           // генерируем событие ошибка трейдера
           this._eventsToSend[
-            `O-${order.orderId}`
+            `OE-${order.orderId}`
           ] = this._createErrorOrderEvent(order);
         }
       });

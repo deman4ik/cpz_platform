@@ -43,7 +43,7 @@ class Position {
     this._direction = state.direction;
     /* Текущий статус ["new","open","closed","closedAuto","canceled","error"] */
     this._status = state.status || POS_STATUS_NEW;
-    this._requestClose = state.requestClose || false;
+    this._closeRequested = state.closeRequested || false;
     this._entry = state.entry || {
       /* Текущий статус открытия ["new","open","closed","canceled","error"] */
       status: null,
@@ -85,12 +85,12 @@ class Position {
     this._status = status;
   }
 
-  get requestClose() {
-    return this._requestClose;
+  get closeRequested() {
+    return this._closeRequested;
   }
 
-  set requestClose(requestClose) {
-    this._requestClose = requestClose;
+  set closeRequested(closeRequested) {
+    this._closeRequested = closeRequested;
   }
 
   get entryStatus() {
@@ -421,6 +421,14 @@ class Position {
             };
           }
         }
+      } else if (
+        order.orderType === ORDER_TYPE_MARKET ||
+        order.orderType === ORDER_TYPE_MARKET_FORCE
+      ) {
+        return {
+          ...order,
+          task: ORDER_TASK_OPEN_MARKET
+        };
       }
       // Ордер уже выставлен
     } else if (order.status === ORDER_STATUS_OPEN) {
@@ -607,7 +615,7 @@ class Position {
       id: this._id,
       code: this._code,
       status: this._status,
-      requestClose: this._requestClose,
+      closeRequested: this._closeRequested,
       direction: this._direction,
       entry: this._entry,
       exit: this._exit,
