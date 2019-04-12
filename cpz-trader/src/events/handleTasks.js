@@ -39,37 +39,41 @@ async function handleRun(eventData) {
     if (nextAction) {
       // Меняем статус трейдера - занят
       traderState.status = STATUS_BUSY;
-      await saveState(traderState);
+      const lock = await saveState(traderState, true);
 
-      // Пока есть действия
-      /* eslint-disable no-await-in-loop */
-      while (nextAction) {
+      if (lock) {
+        // Пока есть действия
+        /* eslint-disable no-await-in-loop */
+        while (nextAction) {
+          Log.debug(
+            `Trader ${taskId} - ${STATUS_BUSY} - processing ${
+              nextAction.type
+            } action.`
+          );
+          // Исполняем трейдер - получаем обновленный стейт
+          traderState = await execute(traderState, nextAction);
+          // Загружаем следующее действие из очереди
+          nextAction = await loadAction(
+            traderState.taskId,
+            traderState.lastAction
+          );
+        }
+        /* no-await-in-loop */
+
+        // Если действие больше нет и статус не поменялся
+        if (traderState.status === STATUS_BUSY) {
+          // Меняем статус трейдера - запущен
+          traderState.status = STATUS_STARTED;
+          await saveState(traderState);
+        }
         Log.debug(
-          `Trader ${taskId} - ${STATUS_BUSY} - processing ${
-            nextAction.type
-          } action.`
+          `Trader ${taskId} - ${
+            traderState.status
+          } - finished processing actions.`
         );
-        // Исполняем трейдер - получаем обновленный стейт
-        traderState = await execute(traderState, nextAction);
-        // Загружаем следующее действие из очереди
-        nextAction = await loadAction(
-          traderState.taskId,
-          traderState.lastAction
-        );
+      } else {
+        Log.warn(`Trader ${taskId} already processing...`);
       }
-      /* no-await-in-loop */
-
-      // Если действие больше нет и статус не поменялся
-      if (traderState.status === STATUS_BUSY) {
-        // Меняем статус трейдера - запущен
-        traderState.status = STATUS_STARTED;
-        await saveState(traderState);
-      }
-      Log.debug(
-        `Trader ${taskId} - ${
-          traderState.status
-        } - finished processing actions.`
-      );
     }
   } catch (e) {
     throw new ServiceError(

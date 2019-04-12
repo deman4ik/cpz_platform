@@ -1,10 +1,17 @@
 import ServiceError from "cpz/error";
-import { saveTraderState } from "cpz/tableStorage-client/control/traders";
+import {
+  saveTraderState,
+  updateTraderState
+} from "cpz/tableStorage-client/control/traders";
 import { traderStateToCommonProps } from "../utils/helpers";
 
-async function saveState(state) {
+async function saveState(state, update = false) {
   try {
+    if (update) {
+      return await updateTraderState(state);
+    }
     await saveTraderState(state);
+    return true;
   } catch (e) {
     const error = new ServiceError(
       {

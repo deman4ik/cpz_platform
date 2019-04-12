@@ -197,31 +197,20 @@ class TableStorage {
       const entity = this.objectToEntity(data);
       this.tableService.mergeEntity(tableName, entity, error => {
         if (error) {
-          let err;
+          const err = new ServiceError(
+            {
+              name: ServiceError.types.TABLE_STORAGE_ERROR,
+              cause: error
+            },
+            'Failed to merge entity in "%s"',
+            tableName
+          );
           if (error.code === "UpdateConditionNotSatisfied") {
-            err = new ServiceError(
-              {
-                name: ServiceError.types.TABLE_STORAGE_ENTITY_MUTATION_ERROR,
-                cause: error,
-                info: {
-                  tableName,
-                  entity
-                }
-              },
-              'Entity mutation in "%s"',
-              tableName
-            );
+            resolve(false);
+            Log.warn(err.json);
           } else {
-            err = new ServiceError(
-              {
-                name: ServiceError.types.TABLE_STORAGE_ERROR,
-                cause: error
-              },
-              'Failed to merge entity in "%s"',
-              tableName
-            );
+            reject(err);
           }
-          reject(err);
         }
         resolve(true);
       });
