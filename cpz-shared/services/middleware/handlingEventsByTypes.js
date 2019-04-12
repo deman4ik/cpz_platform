@@ -23,8 +23,6 @@ export default (context, req, neededEvents) => {
 
   // Getting first event for check his type
   const [event] = events;
-  Log.warn(event.eventType);
-  Log.warn(SUB_VALIDATION_EVENT);
   if (event.eventType === SUB_VALIDATION_EVENT) {
     Log.info(
       `Got ${event.eventType} event, validationCode: ${

@@ -58,17 +58,18 @@ async function handleRun(eventData) {
         );
       }
       /* no-await-in-loop */
-      Log.debug(
-        `Trader ${taskId} - ${
-          traderState.status
-        } - finished processing actions.`
-      );
+
       // Если действие больше нет и статус не поменялся
       if (traderState.status === STATUS_BUSY) {
         // Меняем статус трейдера - запущен
         traderState.status = STATUS_STARTED;
         await saveState(traderState);
       }
+      Log.debug(
+        `Trader ${taskId} - ${
+          traderState.status
+        } - finished processing actions.`
+      );
     }
   } catch (e) {
     throw new ServiceError(

@@ -3,6 +3,7 @@ import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
 import dayjs from "../../utils/lib/dayjs";
+import Log from "../../log";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -169,7 +170,7 @@ const getTradersReadyForSignals = async ({ slug, robotId }) => {
     const combinedOneFilters = TableQuery.combineFilters(
       partitionKeyFilter,
       TableUtilities.TableOperators.AND,
-      statusFilter
+      robotIdFilter
     );
     const combinedTwoFilters = TableQuery.combineFilters(
       combinedOneFilters,
@@ -180,9 +181,10 @@ const getTradersReadyForSignals = async ({ slug, robotId }) => {
       TableQuery.combineFilters(
         combinedTwoFilters,
         TableUtilities.TableOperators.AND,
-        robotIdFilter
+        statusFilter
       )
     );
+    Log.warn(query);
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
   } catch (error) {
     throw new ServiceError(
@@ -263,13 +265,13 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
     const combinedFilter = TableQuery.combineFilters(
       hasActivePositionsFilter,
       TableUtilities.TableOperators.AND,
-      statusFilter
+      idleFilter
     );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        idleFilter,
+        combinedFilter,
         TableUtilities.TableOperators.AND,
-        combinedFilter
+        statusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
@@ -278,7 +280,7 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
       {
         name: ServiceError.types.TABLE_STORAGE_ERROR,
         cause: error,
-        info: { minutes, idleTimestamp }
+        info: { seconds, idleTimestamp }
       },
       "Failed to read traders with active positions"
     );
