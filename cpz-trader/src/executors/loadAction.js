@@ -16,9 +16,9 @@ async function loadAction(taskId, lastAction) {
       loaded = true;
       // Если есть следующее действие
       if (nextAction) {
-        await deleteTraderAction(nextAction);
+        const lock = await deleteTraderAction(nextAction);
         // Если есть предыдущее действие и id действий равны
-        if (lastAction && lastAction.actionId === nextAction.id) {
+        if (!lock || (lastAction && lastAction.actionId === nextAction.id)) {
           // грузим заново
           loaded = false;
           Log.warn("Action '%s' have already been processed", nextAction.id);

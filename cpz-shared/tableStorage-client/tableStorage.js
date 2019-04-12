@@ -250,7 +250,7 @@ class TableStorage {
             tableName
           );
           if (error.code === "ResourceNotFound") {
-            resolve(true);
+            resolve(false);
             Log.warn(err.json);
           } else {
             reject(err);
