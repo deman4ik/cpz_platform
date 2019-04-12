@@ -17,7 +17,6 @@ import {
   ORDER_DIRECTION_SELL,
   STATUS_PENDING,
   STATUS_STARTED,
-  STATUS_STOPPING,
   STATUS_STOPPED,
   STATUS_ERROR,
   createTraderSlug
@@ -537,7 +536,6 @@ class Trader {
       traderId: this._taskId,
       robotId: this._robotId,
       userId: this._userId,
-      adviserId: this._adviserId,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

@@ -27,9 +27,9 @@ create table positions
   exit_date     timestamp,
   exit_price    numeric,
 
-  slippage_step numeric         not null default 0,
-  deviation     numeric         not null default 0,
-  quantity      numeric         not null,
+  slippage_step numeric,
+  deviation     numeric,
+  quantity      numeric,
   action        varchar(10),
   /*calculated*/
   bars_held     integer,

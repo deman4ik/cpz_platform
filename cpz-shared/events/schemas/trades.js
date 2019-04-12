@@ -1,4 +1,3 @@
-import { TRADER_SETTINGS } from "./settings";
 import {
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
@@ -176,6 +175,12 @@ const TRADES_POSITION_EVENT_SCHEMA = {
       description: "Uniq Position Id.",
       type: "string",
       empty: false
+    },
+    code: {
+      description: "Position Code.",
+      type: "string",
+      empty: false,
+      optional: true
     },
     mode: {
       description: "Service run mode.",

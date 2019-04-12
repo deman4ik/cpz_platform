@@ -26,6 +26,7 @@ class DB {
     this.countCandles = candles.countCandlesDB.bind(this);
     this.saveOrders = orders.saveOrdersDB.bind(this);
     this.savePositions = positions.savePositionsDB.bind(this);
+    this.saveEventPositions = positions.saveEventPositionsDB.bind(this);
     this.getRobot = robots.getRobotDB.bind(this);
     this.saveSignals = signals.saveSignalsDB.bind(this);
     this.saveUserRobotHist = userRobotHist.saveUserRobotHistDB.bind(this);
