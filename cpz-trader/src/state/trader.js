@@ -161,6 +161,7 @@ class Trader {
 
   start() {
     this._status = STATUS_STARTED;
+    this._stopRequested = false;
     this._eventsToSend.Start = {
       eventType: TASKS_TRADER_STARTED_EVENT,
       eventData: {
@@ -174,6 +175,7 @@ class Trader {
 
   stop() {
     this._status = STATUS_STOPPED;
+    this._stopRequested = false;
     this._eventsToSend.Stop = {
       eventType: TASKS_TRADER_STOPPED_EVENT,
       eventData: {
