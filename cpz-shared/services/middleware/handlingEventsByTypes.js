@@ -1,7 +1,7 @@
 import {
   SUB_DELETED_EVENT,
   SUB_VALIDATION_EVENT
-} from "../../config/events/types";
+} from "../../events/types/base";
 import Log from "../../log";
 
 /**
@@ -23,17 +23,18 @@ export default (context, req, neededEvents) => {
 
   // Getting first event for check his type
   const [event] = events;
-
+  Log.warn(event.eventType);
+  Log.warn(SUB_VALIDATION_EVENT);
   if (event.eventType === SUB_VALIDATION_EVENT) {
     Log.info(
       `Got ${event.eventType} event, validationCode: ${
-        event.validationCode
+        event.data.validationCode
       }, topic: ${event.topic}`
     );
     context.res = {
       status: 200,
       body: {
-        validationResponse: event.validationCode
+        validationResponse: event.data.validationCode
       },
       headers: {
         "Content-Type": "application/json"
