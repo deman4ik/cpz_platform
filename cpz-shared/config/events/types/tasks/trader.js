@@ -118,12 +118,22 @@ const TASKS_TRADER_UPDATED_EVENT = {
     error: BASE_ERROR
   }
 };
-
+const TASKS_TRADER_RUN_EVENT = {
+  eventType: "CPZ.Tasks.Trader.Run",
+  dataSchema: {
+    taskId: {
+      description: "Uniq task id.",
+      type: "string",
+      empty: false
+    }
+  }
+};
 export {
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_STOPPED_EVENT,
   TASKS_TRADER_UPDATE_EVENT,
-  TASKS_TRADER_UPDATED_EVENT
+  TASKS_TRADER_UPDATED_EVENT,
+  TASKS_TRADER_RUN_EVENT
 };

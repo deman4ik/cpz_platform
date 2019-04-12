@@ -8,7 +8,8 @@ import {
 import {
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STOP_EVENT,
-  TASKS_TRADER_UPDATE_EVENT
+  TASKS_TRADER_UPDATE_EVENT,
+  TASKS_TRADER_RUN_EVENT
 } from "../types/tasks/trader";
 import { CANDLES_NEWCANDLE_EVENT } from "../types/candles/candles";
 import { TICKS_NEWTICK_EVENT } from "../types/ticks/ticks";
@@ -24,7 +25,8 @@ export default {
       types: [
         TASKS_TRADER_START_EVENT.eventType,
         TASKS_TRADER_STOP_EVENT.eventType,
-        TASKS_TRADER_UPDATE_EVENT.eventType
+        TASKS_TRADER_UPDATE_EVENT.eventType,
+        TASKS_TRADER_RUN_EVENT.eventType
       ]
     },
     {
