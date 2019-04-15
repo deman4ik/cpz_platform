@@ -26,3 +26,4 @@ local.settings.json
 .nyc_output
 coverage
 .env
+package-lock.json

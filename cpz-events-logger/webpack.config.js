@@ -1,4 +1,3 @@
-require("@babel/register");
 const webpack = require("webpack");
 const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
@@ -12,7 +11,7 @@ const config = {
   },
   mode: process.env.NODE_ENV || "development",
   watch: false,
-  entry: path.resolve(__dirname, "src/index.js"),
+  entry: path.resolve(__dirname, "src/index"),
   resolve: {
     alias: {
       cpz: path.resolve(__dirname, "../cpz-shared")
@@ -26,12 +25,6 @@ const config = {
   module: {
     rules: [
       {
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"]
-          }
-        },
         test: /\.js$/,
         exclude: /node_modules/
       }

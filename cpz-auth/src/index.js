@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import jwt from "jsonwebtoken";
-import Db from "cpz/db-client";
+import DB from "cpz/db-client";
 import bcrypt from "bcrypt";
 import Log from "cpz/log";
 import Mailer from "cpz/mailer";
@@ -40,7 +40,7 @@ class AuthService {
       serviceName: SERVICE_NAME
     });
     this.mailer = new Mailer({ apiKey: MAILGUN_API, domain: MAILGUN_DOMAIN });
-    this.db = new Db({ endpoint: DB_API_ENDPOINT, key: DB_API_ACCESS_KEY });
+    DB.init({ endpoint: DB_API_ENDPOINT, key: DB_API_ACCESS_KEY });
   }
 
   // TODO: Add API KEY

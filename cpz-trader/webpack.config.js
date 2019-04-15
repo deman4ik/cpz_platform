@@ -3,11 +3,6 @@ const nodeExternals = require("webpack-node-externals");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const path = require("path");
 
-/**
- * Finds all functions entry points from /src/funcs
- *
- * @returns {object} entry
- */
 const config = {
   mode: process.env.NODE_ENV || "production",
   watch: false,

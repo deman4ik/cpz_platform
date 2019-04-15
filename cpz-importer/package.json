@@ -27,7 +27,6 @@
   "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC",
   "dependencies": {
-    "@babel/runtime": "^7.3.4",
     "applicationinsights": "1.2.0",
     "azure-eventgrid": "1.5.0",
     "azure-storage": "^2.10.2",
@@ -45,12 +44,6 @@
     "verror": "1.10.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-transform-runtime": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/register": "7.0.0",
-    "babel-cli": "6.26.0",
-    "babel-loader": "8.0.5",
     "clean-webpack-plugin": "^2.0.0",
     "esdoc": "^1.1.0",
     "esdoc-accessor-plugin": "^1.0.0",

@@ -8,3 +8,4 @@ coverage
 dist
 *.rar
 junit.xml
+package-lock.json

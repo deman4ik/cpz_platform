@@ -63,7 +63,7 @@ class TaskEvents extends BaseService {
   init() {
     try {
       // Check environment variables
-      checkEnvVars(traderEnv.variables);
+      checkEnvVars(traderEnv);
       // Configure Logger
       Log.config({
         key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
