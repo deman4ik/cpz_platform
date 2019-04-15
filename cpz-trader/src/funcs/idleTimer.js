@@ -15,7 +15,7 @@ import traderActionTables from "cpz/tableStorage-client/control/traderActions";
 import { SERVICE_NAME } from "../config";
 import handleIdleTimer from "../events/handleIdleTimer";
 
-class Timer extends BaseService {
+class IdleTimer extends BaseService {
   constructor() {
     super();
     this.init();
@@ -24,7 +24,7 @@ class Timer extends BaseService {
   init() {
     try {
       // Check environment variables
-      checkEnvVars(traderEnv.variables);
+      checkEnvVars(traderEnv);
       // Configure Logger
       Log.config({
         key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
@@ -87,5 +87,5 @@ class Timer extends BaseService {
   }
 }
 
-const func = new Timer();
+const func = new IdleTimer();
 export default func;

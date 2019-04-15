@@ -25,7 +25,7 @@ class TickEvents extends BaseService {
 
   init() {
     // Check environment variables
-    checkEnvVars(traderEnv.variables);
+    checkEnvVars(traderEnv);
     // Configure Logger
     Log.config({
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,

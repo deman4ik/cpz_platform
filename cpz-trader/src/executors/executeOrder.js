@@ -13,7 +13,11 @@ import {
   ORDER_TASK_CANCEL,
   createCurrentPriceSlug
 } from "cpz/config/state";
-import ConnectorClient from "cpz/connector-client";
+import {
+  createOrderEX,
+  cancelOrderEX,
+  checkOrderEX
+} from "cpz/connector-client/orders";
 import { getCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
 import { traderStateToCommonProps } from "../utils/helpers";
 
@@ -41,7 +45,7 @@ async function executeOrder(state, order) {
       // Если режим - в реальном времени
       if (settings.mode === REALTIME_MODE) {
         // Запрашиваем статус ордера с биржи
-        const currentOrder = await ConnectorClient.checkOrder({
+        const currentOrder = await checkOrderEX({
           exchange,
           asset,
           currency,
@@ -84,7 +88,7 @@ async function executeOrder(state, order) {
       // Если режим - в реальном времени
       if (settings.mode === REALTIME_MODE) {
         // Публикуем ордер на биржу
-        const currentOrder = await ConnectorClient.createOrder({
+        const currentOrder = await createOrderEX({
           exchange,
           asset,
           currency,
@@ -136,7 +140,7 @@ async function executeOrder(state, order) {
       }
     } else if (order.task === ORDER_TASK_CANCEL) {
       if (settings.mode === REALTIME_MODE) {
-        const currentOrder = await ConnectorClient.cancelOrder({
+        const currentOrder = await cancelOrderEX({
           exchange,
           asset,
           currency,
