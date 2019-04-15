@@ -1,3 +1,6 @@
+import { v4 as uuid } from "uuid";
+import dayjs from "cpz/utils/lib/dayjs";
+import ServiceError from "cpz/error";
 import { createCurrentPriceSlug } from "cpz/config/state";
 import {
   saveTasksEvent,
@@ -6,31 +9,24 @@ import {
   savePositionsEvent,
   saveLogsEvent,
   saveErrorsEvent
-} from "cpz/tableStorage/events";
+} from "cpz/tableStorage-client/events/events";
 import Log from "cpz/log";
-import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
+import { ERROR_TOPIC } from "cpz/events/topics";
+import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
+import { saveCandlesDB } from "cpz/db-client/candles";
+import { saveSignalsDB } from "cpz/db-client/signals";
+import { savePositionsDB } from "cpz/db-client/positions";
+import { saveOrdersDB } from "cpz/db-client/orders";
+import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
+import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import {
-  saveCandlesDB,
-  saveSignalsDB,
-  saveOrdersDB,
-  savePositionsDB
-} from "cpz/db";
-import config from "../config";
-
-const {
-  events: {
-    types: {
-      CANDLES_NEWCANDLE_EVENT,
-      SIGNALS_NEWSIGNAL_EVENT,
-      TRADES_ORDER_EVENT,
-      TRADES_POSITION_EVENT
-    }
-  }
-} = config;
+  TRADES_ORDER_EVENT,
+  TRADES_POSITION_EVENT
+} from "cpz/events/types/trades";
+import { SERVICE_NAME } from "../config";
 
 class EventsLogger {
-  constructor(context) {
-    this.context = context;
+  constructor() {
     this.logToStorage = process.env.LOG_TABLE_STORAGE;
     this.logToPostgre = process.env.LOG_POSTGRE;
   }
@@ -132,8 +128,35 @@ class EventsLogger {
         // if (this.logToPostgre) await saveErrorEventDB(eventData);
         return;
       }
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.EVENTSLOGGER_LOG_EVENT_ERROR,
+          cause: e,
+          info: {
+            ...event
+          }
+        },
+        "Failed to log event."
+      );
+      Log.exception(error);
+      try {
+        const id = uuid();
+        await saveErrorsEvent({
+          RowKey: id,
+          PartitionKey: `Eventslogger.Error`,
+          eventId: id,
+          eventTopic: ERROR_TOPIC,
+          eventSubject: SERVICE_NAME,
+          eventType: "CPZ.Eventslogger.Error",
+          eventTime: dayjs.utc().toDate(),
+          eventMetadataVersion: null,
+          eventDataVersion: null,
+          error: error.json
+        });
+      } catch (saveLogError) {
+        Log.exception(saveLogError);
+      }
     }
   }
 }

@@ -1,17 +1,14 @@
 {
   "disabled": false,
-  "scriptFile": "../index.js",
-  "entryPoint": "handleEvent",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route":"events",
-      "methods": [
-        "post"
-      ]
+      "route": "events",
+      "methods": ["post"]
     },
     {
       "type": "http",

@@ -40,7 +40,7 @@ class Relay {
     );
   }
 
-  async send(context, event) {
+  async send(event) {
     try {
       if (this._mode) {
         const endpoints = this._findEndpoints(event.eventType);
