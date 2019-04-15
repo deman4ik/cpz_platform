@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 
 function mapForDB(backtester) {
   return {
@@ -29,7 +30,7 @@ async function isBacktestExistsDB(id) {
     id
   }
 }`;
-    const response = await this.client.request(query, { id });
+    const response = await DB.request(query, { id });
 
     return response && response.cpz_backtest_by_pk;
   } catch (error) {
@@ -70,7 +71,7 @@ async function saveBacktestsDB(data) {
       };
     }
 
-    await this.client.request(query, variables);
+    await DB.request(query, variables);
   } catch (error) {
     throw new ServiceError(
       {
@@ -93,7 +94,7 @@ async function deleteBacktestDB(id) {
         affected_rows
       }
     }`;
-    await this.client.request(query, { id });
+    await DB.request(query, { id });
   } catch (error) {
     throw new ServiceError(
       {

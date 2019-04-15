@@ -1,4 +1,5 @@
-import VError from "verror";
+import ServiceError from "../error";
+import Connector from "./index";
 
 async function tradesEX({ exchange, proxy, asset, currency, date, limit }) {
   try {
@@ -38,16 +39,16 @@ async function tradesEX({ exchange, proxy, asset, currency, date, limit }) {
       currency
     };
 
-    const { trades } = await this.client.request(query, variables);
+    const { trades } = await Connector.request(query, variables);
     if (!trades.success) {
       const { name, info, message } = trades.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return trades.trades;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to load trades."

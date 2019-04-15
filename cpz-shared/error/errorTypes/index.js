@@ -39,6 +39,7 @@ export * from "./task";
 export * from "./eventgrid";
 export * from "./tableStorage";
 export * from "./auth";
+export * from "./eventslogger";
 
 export {
   IMPORT_CANDLES_ERROR,

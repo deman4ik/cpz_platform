@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 import { chunkArray } from "../utils/helpers";
 
 async function saveSignalsDB(data) {
@@ -35,7 +36,7 @@ async function saveSignalsDB(data) {
               }))
             };
 
-            await this.client.request(query, variables);
+            await DB.request(query, variables);
           } catch (error) {
             throw error;
           }

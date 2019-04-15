@@ -1,4 +1,5 @@
-import VError from "verror";
+import ServiceError from "../error";
+import Connector from "./index";
 
 async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
   try {
@@ -33,16 +34,16 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
       currency
     };
 
-    const { lastMinuteCandle } = await this.client.request(query, variables);
+    const { lastMinuteCandle } = await Connector.request(query, variables);
     if (!lastMinuteCandle.success) {
       const { name, info, message } = lastMinuteCandle.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return lastMinuteCandle.candle;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to load last minute candle."
@@ -94,16 +95,16 @@ async function minuteCandlesEX({
       currency
     };
 
-    const { minuteCandles } = await this.client.request(query, variables);
+    const { minuteCandles } = await Connector.request(query, variables);
     if (!minuteCandles.success) {
       const { name, info, message } = minuteCandles.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return minuteCandles.candles;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to load minute candles."

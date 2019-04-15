@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 import { CANDLE_PREVIOUS } from "../config/state";
 import { chunkArray } from "../utils/helpers";
 
@@ -40,7 +41,7 @@ async function saveCandlesDB({ timeframe, candles }) {
               }))
             };
 
-            await this.client.request(query, variables);
+            await DB.request(query, variables);
           } catch (error) {
             errors.push(error);
           }
@@ -130,7 +131,7 @@ async function getCandlesDB({
       limit,
       excludeCandleType: CANDLE_PREVIOUS
     };
-    const response = await this.client.request(query, variables);
+    const response = await DB.request(query, variables);
     const candles = response[table];
     return candles.map(candle => ({
       ...candle,
@@ -185,7 +186,7 @@ async function countCandlesDB({
       dateFrom,
       dateTo
     };
-    const response = await this.client.request(query, variables);
+    const response = await DB.request(query, variables);
     return response[`${table}_aggregate`].aggregate.count;
   } catch (error) {
     throw new ServiceError(

@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 import { chunkArray } from "../utils/helpers";
 
 function mapForDB(order) {
@@ -63,7 +64,7 @@ async function saveOrdersDB(data) {
               objects: chunk.map(order => mapForDB(order))
             };
 
-            await this.client.request(query, variables);
+            await DB.request(query, variables);
           } catch (error) {
             errors.push(error);
           }

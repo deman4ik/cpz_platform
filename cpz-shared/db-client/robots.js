@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 
 async function getRobotDB(robotId) {
   try {
@@ -20,7 +21,7 @@ async function getRobotDB(robotId) {
     const variables = {
       robotId
     };
-    const response = await this.client.request(query, variables);
+    const response = await DB.request(query, variables);
     if (response.cpz_robot_by_pk) {
       return {
         robotId: response.cpz_robot_by_pk.id,

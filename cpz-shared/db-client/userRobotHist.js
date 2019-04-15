@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 
 const getEventAction = eventType =>
   eventType
@@ -28,7 +29,7 @@ async function saveUserRobotHistDB(data) {
       }))
     };
 
-    await this.client.request(query, variables);
+    await DB.request(query, variables);
   } catch (error) {
     throw new ServiceError(
       {

@@ -1,4 +1,5 @@
-import VError from "verror";
+import ServiceError from "../error";
+import Connector from "./index";
 
 async function marketEX({ exchange, proxy, asset, currency }) {
   try {
@@ -26,16 +27,16 @@ async function marketEX({ exchange, proxy, asset, currency }) {
       currency
     };
 
-    const { market } = await this.client.request(query, variables);
+    const { market } = await Connector.request(query, variables);
     if (!market.success) {
       const { name, info, message } = market.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return market.market;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to load market info."

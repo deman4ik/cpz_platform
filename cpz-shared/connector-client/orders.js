@@ -1,4 +1,5 @@
-import VError from "verror";
+import ServiceError from "../error";
+import Connector from "./index";
 
 async function createOrderEX({
   exchange,
@@ -37,16 +38,16 @@ async function createOrderEX({
       }
     };
 
-    const { createOrder } = await this.client.request(query, variables);
+    const { createOrder } = await Connector.request(query, variables);
     if (!createOrder.success) {
       const { name, info, message } = createOrder.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return createOrder.order;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to create order."
@@ -93,16 +94,16 @@ async function cancelOrderEX({
       }
     };
 
-    const { cancelOrder } = await this.client.request(query, variables);
+    const { cancelOrder } = await Connector.request(query, variables);
     if (!cancelOrder.success) {
       const { name, info, message } = cancelOrder.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return cancelOrder.order;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to cancel order."
@@ -145,16 +146,16 @@ async function checkOrderEX({
       }
     };
 
-    const { order } = await this.client.request(query, variables);
+    const { order } = await Connector.request(query, variables);
     if (!order.success) {
       const { name, info, message } = order.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return order.order;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to check order."

@@ -1,4 +1,5 @@
-import VError from "verror";
+import ServiceError from "../error";
+import Connector from "./index";
 
 async function getBalanceEX({ exchange, proxy, userId, keys }) {
   try {
@@ -22,16 +23,16 @@ async function getBalanceEX({ exchange, proxy, userId, keys }) {
       }
     };
 
-    const { balance } = await this.client.request(query, variables);
+    const { balance } = await Connector.request(query, variables);
     if (!balance.success) {
       const { name, info, message } = balance.error;
-      throw new VError({ name, info }, message);
+      throw new ServiceError({ name, info }, message);
     }
     return balance.balance;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "ConnectorAPIError",
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
         cause: error
       },
       "Failed to get user balance."

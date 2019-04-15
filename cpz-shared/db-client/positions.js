@@ -1,4 +1,5 @@
 import ServiceError from "../error";
+import DB from "./index";
 import { chunkArray } from "../utils/helpers";
 
 function mapForDB(position) {
@@ -51,7 +52,7 @@ async function savePositionsDB(data) {
               objects: chunk.map(position => mapForDB(position))
             };
 
-            await this.client.request(query, variables);
+            await DB.request(query, variables);
           } catch (error) {
             errors.push(error);
           }
@@ -126,7 +127,7 @@ async function saveEventPositionsDB(data) {
               objects: chunk.map(position => mapEventForDB(position))
             };
 
-            await this.client.request(query, variables);
+            await DB.request(query, variables);
           } catch (error) {
             throw error;
           }
