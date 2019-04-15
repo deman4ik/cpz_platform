@@ -44,6 +44,7 @@ class Position {
     /* Текущий статус ["new","open","closed","closedAuto","canceled","error"] */
     this._status = state.status || POS_STATUS_NEW;
     this._closeRequested = state.closeRequested || false;
+    this._reason = state.reason;
     this._entry = state.entry || {
       /* Текущий статус открытия ["new","open","closed","canceled","error"] */
       status: null,
@@ -65,6 +66,7 @@ class Position {
     this._entryOrders = state.entryOrders || {};
     /* Ордера закрытия */
     this._exitOrders = state.exitOrders || {};
+    this._executed = state.executed;
   }
 
   /**
@@ -83,6 +85,10 @@ class Position {
 
   set status(status) {
     this._status = status;
+  }
+
+  set reason(reason) {
+    this._reason = reason;
   }
 
   get closeRequested() {
@@ -208,9 +214,9 @@ class Position {
     // Изменяем статус открытия позиции
     this._entry.status = this._currentOrder.status;
     this._entry.price = this._currentOrder.price;
-    this._entry.date = this._currentOrder.createdAt;
-    this._entry.executed = this._currentOrder.executed;
-    this._entry.remaining = this._currentOrder.remaining;
+    this._entry.date = null;
+    this._entry.executed = null;
+    this._entry.remaining = null;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -231,9 +237,9 @@ class Position {
     // Изменяем статус закрытия позиции
     this._exit.status = this._currentOrder.status;
     this._exit.price = this._currentOrder.price;
-    this._exit.date = this._currentOrder.createdAt;
-    this._exit.executed = this._currentOrder.executed;
-    this._exit.remaining = this._currentOrder.remaining;
+    this._exit.date = null;
+    this._exit.executed = null;
+    this._exit.remaining = null;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -457,6 +463,7 @@ class Position {
       ) {
         // Отменяем ордер
         Log.debug(ORDER_TASK_CANCEL);
+        this._reason = `${order.positionDirection}_timeout`;
         return { ...order, task: ORDER_TASK_CANCEL };
       }
     }
@@ -580,7 +587,7 @@ class Position {
       // Изменяем статус открытия позиции
       this._entry.status = order.status || this._entry.status;
       this._entry.price = order.average || this._entry.price;
-      this._entry.date = order.exLastTrade || this._entry.date;
+      this._entry.date = order.exLastTrade;
       this._entry.executed = order.executed || this._entry.executed;
       this._entry.remaining = order.remaining || this._entry.remaining;
     } else {
@@ -597,12 +604,13 @@ class Position {
         this._exit.status = POS_STATUS_CLOSED_AUTO;
 
       this._exit.price = order.average || this._exit.price;
-      this._exit.date = order.exLastTrade || this._exit.date;
+      this._exit.date = order.exLastTrade;
       this._exit.executed = order.executed || this._exit.executed;
       this._exit.remaining = order.remaining || this._exit.remaining;
     }
     // Устанавливаем статус позиции
     this.setStatus();
+    this._executed = this._exit.executed || this._entry.executed;
   }
 
   /**
@@ -620,7 +628,9 @@ class Position {
       entry: this._entry,
       exit: this._exit,
       entryOrders: this._entryOrders,
-      exitOrders: this._exitOrders
+      exitOrders: this._exitOrders,
+      reason: this._reason,
+      executed: this._executed
     };
   }
 }

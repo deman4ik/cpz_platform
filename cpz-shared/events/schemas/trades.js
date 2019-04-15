@@ -231,6 +231,17 @@ const TRADES_POSITION_EVENT_SCHEMA = {
       type: "object",
       props: _positionStep,
       optional: true
+    },
+    reason: {
+      description: "Сause of an emergency.",
+      type: "string",
+      empty: false,
+      optional: true
+    },
+    executed: {
+      description: "Executed volume.",
+      type: "number",
+      optional: true
     }
   }
 };

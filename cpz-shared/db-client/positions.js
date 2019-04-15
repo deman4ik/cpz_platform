@@ -98,7 +98,9 @@ function mapEventForDB(position) {
     entry_date: position.entry.date,
     entry_price: position.entry.price,
     exit_date: position.exit.date,
-    exit_price: position.exit.price
+    exit_price: position.exit.price,
+    quantity: position.executed,
+    reason: position.reason
   };
 }
 async function saveEventPositionsDB(data) {

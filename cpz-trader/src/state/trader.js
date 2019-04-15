@@ -213,7 +213,7 @@ class Trader {
   requestStop() {
     try {
       this._stopRequested = true;
-      this._closeActivePositions();
+      this._closeActivePositions("stop_requested");
     } catch (e) {
       throw new ServiceError(
         {
@@ -225,9 +225,10 @@ class Trader {
     }
   }
 
-  _closePosition(positionId) {
+  _closePosition(positionId, reason) {
     try {
       this._positions[positionId].closeRequested = true;
+      this._positions[positionId].reason = reason;
       const ordersToExecute = this._positions[
         positionId
       ].getOrdersToClosePosition(this._settings);
@@ -248,10 +249,10 @@ class Trader {
     }
   }
 
-  _closeActivePositions() {
+  _closeActivePositions(reason) {
     try {
       this.activePositions.forEach(({ id }) => {
-        this._closePosition(id);
+        this._closePosition(id, reason);
       });
     } catch (e) {
       throw new ServiceError(
@@ -272,7 +273,7 @@ class Trader {
           this._settings.mode === EMULATOR_MODE
         ) {
           // In realtime and emulation - closing all active positions
-          this._closeActivePositions();
+          this._closeActivePositions("new_pos_signal");
         } else if (this._settings.mode === BACKTEST_MODE) {
           if (this.activePositions.length > 0) {
             throw new ServiceError(
@@ -388,6 +389,7 @@ class Trader {
         if (this._positions[signal.positionId].status === POS_STATUS_NEW) {
           // Отменяем позицию
           this._positions[signal.positionId].status = POS_STATUS_CANCELED;
+          this._positions[signal.positionId].reason = "exit_signal";
           // Если вход в текущую позицию все еще открыт
         } else if (
           this._positions[signal.positionId].entryStatus === ORDER_STATUS_OPEN

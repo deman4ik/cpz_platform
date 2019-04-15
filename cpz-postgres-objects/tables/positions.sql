@@ -42,7 +42,8 @@ create table positions
     constraint c_positions_backtest_fk
       references backtest
         ON DELETE CASCADE,
-  run_mode  varchar(10)  
+  run_mode  varchar(10),
+  reason    varchar(20)  
 ) 
 with OIDS;
 
@@ -92,6 +93,6 @@ comment on column positions.historic is '0 - normal, 1 - uploaded historic data,
 comment on column positions.trader_id is 'trader process id | becktester process id';
 comment on column positions.code is 'user code/number for particular position, comes from strategy';
 comment on column positions.signal_id is 'last signal for open or close';
+comment on column positions.reason is 'cause of an emergency';
 
 comment on table positions is 'Positions = round trips';
-
