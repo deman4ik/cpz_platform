@@ -5,6 +5,7 @@ import { checkEnvVars } from "cpz/utils/environment";
 import traderEnv from "cpz/config/environment/trader";
 import BaseService from "cpz/services/baseService";
 import EventGrid from "cpz/events";
+import { LOG_TOPIC, ERROR_TOPIC } from "cpz/events/topics";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import { ERROR_TRADER_ERROR_EVENT } from "cpz/events/types/error";
 import {
@@ -40,6 +41,12 @@ class SignalEvents extends BaseService {
         ERROR_TRADER_ERROR_EVENT_SCHEMA
       ]);
       ServiceValidator.add(schemas);
+      // Configure Event Grid Client
+      const EGConfig = super.EGConfig({
+        LOG_TOPIC,
+        ERROR_TOPIC
+      });
+      EventGrid.config(EGConfig);
       // Table Storage
       ControlStorageClient.init(process.env.AZ_STORAGE_CONTROL_CS, [
         ...traderTables,
