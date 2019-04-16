@@ -30,7 +30,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       this.ccxt = new ccxt[this._exchangeName]({
         agent: this._proxyAgent,
         apiKey: this._keys[keyType].APIKey.value,
-        secret: this._keys[keyType].APISecret.value
+        secret: this._keys[keyType].APISecret.value,
+        enableRateLimit: true
       });
 
       this._keys[keyType].active = true;

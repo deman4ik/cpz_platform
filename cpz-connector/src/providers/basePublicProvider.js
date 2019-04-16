@@ -10,28 +10,28 @@ class BasePublicProvider {
 
   async getMarket() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'getMarket' not impemented in this Provider"
     );
   }
 
   async loadPreviousCandle() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'loadPreviousCandle' not impemented in this Provider"
     );
   }
 
   async loadCandles() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'loadCandles' not impemented in this Provider"
     );
   }
 
   async loadTrades() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'loadTrades' not impemented in this Provider"
     );
   }

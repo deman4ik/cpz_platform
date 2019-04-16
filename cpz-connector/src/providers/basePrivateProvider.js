@@ -136,28 +136,28 @@ class BasePrivateProvider {
 
   async getBalance() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'createOrder' not impemented in this Provider"
     );
   }
 
   async createOrder() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'createOrder' not impemented in this Provider"
     );
   }
 
   async checkOrder() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'checkOrder' not impemented in this Provider"
     );
   }
 
   async cancelOrder() {
     throw new VError(
-      { name: "NotImlementedError" },
+      { name: "NotImplementedError" },
       "Method 'cancelOrder' not impemented in this Provider"
     );
   }

@@ -98,7 +98,7 @@ describe("Base Private Provider tests", () => {
     const provider = new Provider(input);
     try {
       const balance = await provider.getBalance();
-      expect(balance).toThrow("NotImlementedError");
+      expect(balance).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -108,7 +108,7 @@ describe("Base Private Provider tests", () => {
     const provider = new Provider(input);
     try {
       const createOrder = await provider.createOrder();
-      expect(createOrder).toThrow("NotImlementedError");
+      expect(createOrder).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -117,7 +117,7 @@ describe("Base Private Provider tests", () => {
     const provider = new Provider(input);
     try {
       const checkOrder = await provider.checkOrder();
-      expect(checkOrder).toThrow("NotImlementedError");
+      expect(checkOrder).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -126,7 +126,7 @@ describe("Base Private Provider tests", () => {
     const provider = new Provider(input);
     try {
       const cancelOrder = await provider.cancelOrder();
-      expect(cancelOrder).toThrow("NotImlementedError");
+      expect(cancelOrder).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }

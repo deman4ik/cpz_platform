@@ -45,7 +45,7 @@ describe("Base Public Provider tests", () => {
     const provider = new Provider(input);
     try {
       const getMarket = await provider.getMarket();
-      expect(getMarket).toThrow("NotImlementedError");
+      expect(getMarket).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -55,7 +55,7 @@ describe("Base Public Provider tests", () => {
     const provider = new Provider(input);
     try {
       const loadPreviousCandle = await provider.loadPreviousCandle();
-      expect(loadPreviousCandle).toThrow("NotImlementedError");
+      expect(loadPreviousCandle).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -65,7 +65,7 @@ describe("Base Public Provider tests", () => {
     const provider = new Provider(input);
     try {
       const loadCandles = await provider.loadCandles();
-      expect(loadCandles).toThrow("NotImlementedError");
+      expect(loadCandles).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
@@ -75,7 +75,7 @@ describe("Base Public Provider tests", () => {
     const provider = new Provider(input);
     try {
       const loadTrades = await provider.loadTrades();
-      expect(loadTrades).toThrow("NotImlementedError");
+      expect(loadTrades).toThrow("NotImplementedError");
     } catch (e) {
       expect(e).toBeTruthy();
     }
