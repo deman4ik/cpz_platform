@@ -16,6 +16,7 @@ import {
   ORDER_STATUS_CANCELED,
   ORDER_STATUS_ERROR,
   ORDER_TYPE_LIMIT,
+  ORDER_TYPE_STOP,
   ORDER_TYPE_MARKET,
   ORDER_TYPE_MARKET_FORCE,
   ORDER_TASK_OPEN_MARKET,
@@ -428,13 +429,40 @@ class Position {
           }
         }
       } else if (
+        // Тип ордера маркет (выставляется как лимит)
         order.orderType === ORDER_TYPE_MARKET ||
+        // Тип ордера настоящий маркет
         order.orderType === ORDER_TYPE_MARKET_FORCE
       ) {
         return {
           ...order,
           task: ORDER_TASK_OPEN_MARKET
         };
+      } else if (order.orderType === ORDER_TYPE_STOP) {
+        // Если покупаем
+        if (order.direction === ORDER_DIRECTION_BUY) {
+          if (price >= order.price) {
+            // Нужно выставить лимитный ордер
+            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            return {
+              ...order,
+              price: order.price + settings.slippageStep,
+              task: ORDER_TASK_OPEN_LIMIT
+            };
+          }
+        }
+        // Если продаем
+        if (order.direction === ORDER_DIRECTION_SELL) {
+          if (price <= order.price) {
+            // Нужно выставить лимитный ордер
+            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            return {
+              ...order,
+              price: order.price - settings.slippageStep,
+              task: ORDER_TASK_OPEN_LIMIT
+            };
+          }
+        }
       }
       // Ордер уже выставлен
     } else if (order.status === ORDER_STATUS_OPEN) {

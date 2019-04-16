@@ -19,7 +19,7 @@ const TRADE_ACTION_CLOSE_SHORT = "closeShort"; // закрыть коротку 
 const ORDER_TYPE_LIMIT = "limit"; // лимитный ордер (по указанной цене)
 const ORDER_TYPE_MARKET = "market"; // рыночной ордер (эмулируется лимитным ордером по текущей цене, для учета проскальзывания)
 const ORDER_TYPE_MARKET_FORCE = "marketForce"; // рыночной ордер (используется для автоматического закрытия позиций)
-const ORDER_TYPE_STOP = "stop"; // стоп ордер - не используется
+const ORDER_TYPE_STOP = "stop"; // стоп ордер
 
 /**
  * Направление торговли ордера

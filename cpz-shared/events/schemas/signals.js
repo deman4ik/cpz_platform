@@ -4,6 +4,15 @@ import {
   SIGNALS_NEWSIGNAL_EVENT,
   SIGNALS_HANDLED_EVENT
 } from "../types/signals";
+import {
+  TRADE_ACTION_LONG,
+  TRADE_ACTION_CLOSE_LONG,
+  TRADE_ACTION_SHORT,
+  TRADE_ACTION_CLOSE_SHORT,
+  ORDER_TYPE_LIMIT,
+  ORDER_TYPE_MARKET,
+  ORDER_TYPE_STOP
+} from "../../config/state/types";
 
 const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
   [SIGNALS_NEWSIGNAL_EVENT]: {
@@ -27,12 +36,17 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
     action: {
       description: "Signal type.",
       type: "string",
-      values: ["long", "closeLong", "short", "closeShort"]
+      values: [
+        TRADE_ACTION_LONG,
+        TRADE_ACTION_CLOSE_LONG,
+        TRADE_ACTION_SHORT,
+        TRADE_ACTION_CLOSE_SHORT
+      ]
     },
     orderType: {
       description: "Order type.",
       type: "string",
-      values: ["stop", "limit", "market"],
+      values: [ORDER_TYPE_STOP, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET],
       optional: true
     },
     price: {
