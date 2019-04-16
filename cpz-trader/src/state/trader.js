@@ -404,23 +404,20 @@ class Trader {
           });
         }
       }
-      if (
-        this._positions[signal.positionId].entryStatus !== ORDER_STATUS_OPEN &&
-        this._positions[signal.positionId].status !== POS_STATUS_CANCELED &&
-        this._positions[signal.positionId].status !== POS_STATUS_CLOSED &&
-        this._positions[signal.positionId].status !== POS_STATUS_CLOSED_AUTO
-      ) {
-        // Созданный ордер
-        const createdOrder = this._positions[signal.positionId].currentOrder;
-        // Если есть задача для ордера
-        if (createdOrder.task) {
-          // Немедленно исполянем ордер
-          this._ordersToExecute[createdOrder.orderId] = this._baseOrder(
-            createdOrder
-          );
-        }
-      }
 
+      if (this._lastPrice && this._lastPrice.price) {
+        const ordersToExecute = flatten(
+          this.activePositionInstances.map(position =>
+            position.getOrdersToExecuteByPrice(
+              this._lastPrice.price,
+              this._settings
+            )
+          )
+        );
+        ordersToExecute.forEach(order => {
+          this._ordersToExecute[order.orderId] = this._baseOrder(order);
+        });
+      }
       // Последний обработанный сигнал
       this._lastSignal = signal;
     } catch (e) {
