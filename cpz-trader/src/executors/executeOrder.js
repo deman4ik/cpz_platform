@@ -165,7 +165,7 @@ async function executeOrder(state, order) {
       {
         name: ServiceError.types.TRADER_EXECUTE_ORDER_ERROR,
         cause: e,
-        info: { ...traderStateToCommonProps(state), ...order }
+        info: { ...traderStateToCommonProps(state), orderId: order.orderId }
       },
       "Failed to execute order"
     );
