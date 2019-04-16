@@ -23,7 +23,7 @@ async function getBalanceEX({ exchange, proxy, userId, keys }) {
       }
     };
 
-    const { balance } = await Connector.request(query, variables);
+    const { balance } = await Connector.client.request(query, variables);
     if (!balance.success) {
       const { name, info, message } = balance.error;
       throw new ServiceError({ name, info }, message);

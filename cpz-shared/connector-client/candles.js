@@ -34,7 +34,10 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
       currency
     };
 
-    const { lastMinuteCandle } = await Connector.request(query, variables);
+    const { lastMinuteCandle } = await Connector.client.request(
+      query,
+      variables
+    );
     if (!lastMinuteCandle.success) {
       const { name, info, message } = lastMinuteCandle.error;
       throw new ServiceError({ name, info }, message);
@@ -95,7 +98,7 @@ async function minuteCandlesEX({
       currency
     };
 
-    const { minuteCandles } = await Connector.request(query, variables);
+    const { minuteCandles } = await Connector.client.request(query, variables);
     if (!minuteCandles.success) {
       const { name, info, message } = minuteCandles.error;
       throw new ServiceError({ name, info }, message);

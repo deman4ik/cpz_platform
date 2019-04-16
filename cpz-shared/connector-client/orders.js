@@ -38,7 +38,7 @@ async function createOrderEX({
       }
     };
 
-    const { createOrder } = await Connector.request(query, variables);
+    const { createOrder } = await Connector.client.request(query, variables);
     if (!createOrder.success) {
       const { name, info, message } = createOrder.error;
       throw new ServiceError({ name, info }, message);
@@ -94,7 +94,7 @@ async function cancelOrderEX({
       }
     };
 
-    const { cancelOrder } = await Connector.request(query, variables);
+    const { cancelOrder } = await Connector.client.request(query, variables);
     if (!cancelOrder.success) {
       const { name, info, message } = cancelOrder.error;
       throw new ServiceError({ name, info }, message);
@@ -146,7 +146,7 @@ async function checkOrderEX({
       }
     };
 
-    const { order } = await Connector.request(query, variables);
+    const { order } = await Connector.client.request(query, variables);
     if (!order.success) {
       const { name, info, message } = order.error;
       throw new ServiceError({ name, info }, message);

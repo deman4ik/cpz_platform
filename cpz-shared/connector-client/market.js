@@ -27,7 +27,7 @@ async function marketEX({ exchange, proxy, asset, currency }) {
       currency
     };
 
-    const { market } = await Connector.request(query, variables);
+    const { market } = await Connector.client.request(query, variables);
     if (!market.success) {
       const { name, info, message } = market.error;
       throw new ServiceError({ name, info }, message);

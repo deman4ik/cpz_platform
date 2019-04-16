@@ -39,7 +39,7 @@ async function tradesEX({ exchange, proxy, asset, currency, date, limit }) {
       currency
     };
 
-    const { trades } = await Connector.request(query, variables);
+    const { trades } = await Connector.client.request(query, variables);
     if (!trades.success) {
       const { name, info, message } = trades.error;
       throw new ServiceError({ name, info }, message);
