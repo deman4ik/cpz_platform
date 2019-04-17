@@ -13,7 +13,9 @@ class TableStorage {
     try {
       this.tableService = azure
         .createTableService(connectionString)
-        .withFilter(new azure.LinearRetryPolicyFilter(3, 2000));
+        .withFilter(
+          new azure.ExponentialRetryPolicyFilter(15, 2000, 2000, 10000)
+        );
       if (!tables || !Array.isArray(tables) || tables.length === 0)
         throw new ServiceError(
           {
