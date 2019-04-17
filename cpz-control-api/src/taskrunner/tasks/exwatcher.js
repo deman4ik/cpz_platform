@@ -1,33 +1,24 @@
-import VError from "verror";
-import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTED,
+  STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING,
-  STATUS_ERROR,
   STATUS_FINISHED,
   VALID_TIMEFRAMES,
   createWatcherSlug,
   createExWatcherTaskSubject
 } from "cpz/config/state";
+import {
+  TASKS_EXWATCHER_STARTED_EVENT,
+  TASKS_EXWATCHER_STOPPED_EVENT
+} from "cpz/events/types/tasks/exwatcher";
 import Log from "cpz/log";
-import publishEvents from "cpz/eventgrid";
-import { saveExWatcherState } from "cpz/tableStorage/exwatchers";
-import { CANDLEBATCHER_SETTINGS_DEFAULTS } from "cpz/config/defaults";
-import config from "../../config";
-
-const {
-  events: {
-    types: { TASKS_EXWATCHER_STARTED_EVENT, TASKS_EXWATCHER_STOPPED_EVENT },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
+import { combineCandlebatcherSettings } from "cpz/utils/settings";
 
 class ExWatcher {
-  constructor(context, state) {
-    this._context = context;
+  constructor(state) {
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -40,36 +31,23 @@ class ExWatcher {
     this._marketwatcherProviderType =
       state.marketwatcherProviderType || "cryptocompare";
     this._candlebatcherProviderType = state.candlebatcherProviderType || "ccxt";
-    this._candlebatcherSettings = {
-      debug:
-        (state.candlebatcherSettings && state.candlebatcherSettings.debug) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.debug,
-      proxy:
-        (state.candlebatcherSettings && state.candlebatcherSettings.proxy) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.proxy,
-      requiredHistoryMaxBars:
-        (state.candlebatcherSettings &&
-          state.candlebatcherSettings.requiredHistoryMaxBars) ||
-        CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
-    };
+    this._candlebatcherSettings = combineCandlebatcherSettings(
+      state.candlebatcherSettings
+    );
     this._marketwatcherId = state.marketwatcherId;
     this._marketwatcherStatus = state.marketwatcherStatus || STATUS_PENDING;
-    this._marketwatcherError = state.marketwatcherError;
     this._candlebatcherId = state.candlebatcherId;
     this._candlebatcherStatus = state.candlebatcherStatus || STATUS_PENDING;
-    this._candlebatcherError = state.candlebatcherError;
     this._importerHistoryId = state.importerHistoryId;
     this._importerHistoryStatus = state.importerHistoryStatus || STATUS_PENDING;
-    this._importerHistoryError = state.importerHistoryError;
     this._importerCurrentId = state.importerCurrentId;
     this._importerCurrentStatus = state.importerCurrentStatus || STATUS_PENDING;
-    this._importerCurrentError = state.importerCurrentError;
-    this._status = state.status || STATUS_PENDING;
+    this._status = state.status || STATUS_STARTING;
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._error = state.error;
     this._metadata = state.metadata;
-    this._event = null;
+    this._events = {};
   }
 
   log(...args) {
@@ -82,6 +60,7 @@ class ExWatcher {
 
   _setStatus() {
     if (
+      this._status === STATUS_STARTING &&
       this._importerHistoryStatus === STATUS_FINISHED &&
       this._candlebatcherStatus === STATUS_STARTED &&
       this._marketwatcherStatus === STATUS_STARTED &&
@@ -91,77 +70,80 @@ class ExWatcher {
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createExWatcherTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency
-        }),
-        eventType: TASKS_EXWATCHER_STARTED_EVENT.eventType,
-        data: {
-          taskId: this._taskId
+      this._events.started = {
+        eventType: TASKS_EXWATCHER_STARTED_EVENT,
+        eventData: {
+          subject: createExWatcherTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          }),
+
+          data: {
+            taskId: this._taskId
+          }
         }
       };
-      return;
-    }
-
-    if (
-      this._candlebatcherStatus === STATUS_STOPPED ||
-      this._marketwatcherStatus === STATUS_STOPPED
-    ) {
-      this._status = STATUS_STOPPED;
-      this._stoppedAt = dayjs.utc().toISOString();
-    }
-
-    if (
+    } else if (
+      this._status === STATUS_STOPPING &&
       this._candlebatcherStatus === STATUS_STOPPED &&
       this._marketwatcherStatus === STATUS_STOPPED
     ) {
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createExWatcherTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency
-        }),
-        eventType: TASKS_EXWATCHER_STOPPED_EVENT.eventType,
-        data: {
-          taskId: this._taskId
+      this._status = STATUS_STOPPED;
+      this._events.stopped = {
+        eventType: TASKS_EXWATCHER_STOPPED_EVENT,
+        eventData: {
+          subject: createExWatcherTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          }),
+
+          data: {
+            taskId: this._taskId
+          }
         }
       };
-      return;
     }
+  }
 
-    if (
-      this._candlebatcherStatus === STATUS_STOPPING ||
-      this._marketwatcherStatus === STATUS_STOPPING
-    ) {
-      this._status = STATUS_STOPPING;
-      return;
-    }
+  get exchange() {
+    return this._exchange;
+  }
 
-    if (
-      this._candlebatcherStatus === STATUS_ERROR ||
-      this._marketwatcherStatus === STATUS_ERROR
-    ) {
-      this._stoppedAt = dayjs.utc().toISOString();
-      this._status = STATUS_ERROR;
-      return;
-    }
-    this._status = STATUS_PENDING;
+  get asset() {
+    return this._asset;
+  }
+
+  get currency() {
+    return this._currency;
   }
 
   get taskId() {
     return this._taskId;
   }
 
-  get status() {
-    return this._status;
+  get timeframes() {
+    return this._timeframes;
+  }
+
+  get marketwatcherProviderType() {
+    return this._marketwatcherProviderType;
+  }
+
+  get candlebatcherProviderType() {
+    return this._candlebatcherProviderType;
+  }
+
+  get candlebatcherSettings() {
+    return this._candlebatcherSettings;
+  }
+
+  set candlebatcherSettings(candlebatcherSettings) {
+    this._candlebatcherSettings = {
+      ...this._candlebatcherSettings,
+      ...candlebatcherSettings
+    };
   }
 
   get marketwatcherId() {
@@ -232,15 +214,12 @@ class ExWatcher {
     this._setStatus();
   }
 
-  get candlebatcherSettings() {
-    return this._candlebatcherSettings;
+  get status() {
+    return this._status;
   }
 
-  set candlebatcherSettings(candlebatcherSettings) {
-    this._candlebatcherSettings = {
-      ...this._candlebatcherSettings,
-      ...candlebatcherSettings
-    };
+  get error() {
+    return this._error;
   }
 
   set error(error) {
@@ -248,10 +227,10 @@ class ExWatcher {
   }
 
   get events() {
-    return this._events;
+    return Object.values(this._events);
   }
 
-  getCurrentState() {
+  state() {
     return {
       PartitionKey: this._taskId,
       RowKey: this._taskId,
@@ -264,44 +243,18 @@ class ExWatcher {
       candlebatcherSettings: this._candlebatcherSettings,
       marketwatcherId: this._marketwatcherId,
       marketwatcherStatus: this._marketwatcherStatus,
-      marketwatcherError: this._marketwatcherError,
       candlebatcherId: this._candlebatcherId,
       candlebatcherStatus: this._candlebatcherStatus,
-      candlebatcherError: this._candlebatcherError,
       importerHistoryId: this._importerHistoryId,
       importerHistoryStatus: this._importerHistoryStatus,
-      importerHistoryError: this._importerHistoryError,
       importerCurrentId: this._importerCurrentId,
       importerCurrentStatus: this._importerCurrentStatus,
-      importerCurrentError: this._importerCurrentError,
       status: this._status,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,
       error: this._error,
       metadata: this._metadata
     };
-  }
-
-  async save() {
-    try {
-      await saveExWatcherState(this.getCurrentState());
-      if (this._event) {
-        await publishEvents(TASKS_TOPIC, [this._event]);
-        this._event = null;
-      }
-    } catch (error) {
-      throw new VError(
-        {
-          name: "ExWatcherError",
-          cause: error,
-          info: {
-            id: this._taskId
-          }
-        },
-        'Failed to save exchange data watcher "%s" state',
-        this._taskId
-      );
-    }
   }
 }
 

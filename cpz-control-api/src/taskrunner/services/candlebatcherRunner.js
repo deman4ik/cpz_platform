@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
@@ -9,36 +9,28 @@ import {
   createCandlebatcherSlug,
   createCandlebatcherTaskSubject
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
+import {
+  TASKS_CANDLEBATCHER_START_EVENT,
+  TASKS_CANDLEBATCHER_STOP_EVENT,
+  TASKS_CANDLEBATCHER_UPDATE_EVENT
+} from "cpz/events/types/tasks/candlebatcher";
 import {
   findCandlebatcher,
   getCandlebatcherById
-} from "cpz/tableStorage/candlebatchers";
+} from "cpz/tableStorage-client/control/candlebatchers";
 import { arraysDiff } from "cpz/utils/helpers";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-import config from "../../config";
-
-const {
-  serviceName,
-  events: {
-    types: {
-      TASKS_CANDLEBATCHER_START_EVENT,
-      TASKS_CANDLEBATCHER_STOP_EVENT,
-      TASKS_CANDLEBATCHER_UPDATE_EVENT
-    },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
-
-
 class CandlebatcherRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
       let taskId = uuid();
 
-      ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, { ...props, taskId });
+      ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, {
+        ...props,
+        taskId
+      });
       const {
         settings,
         providerType,
@@ -68,13 +60,14 @@ class CandlebatcherRunner extends BaseRunner {
             candlebatcher.timeframes
           );
           if (notSubscribedTimeframes.length > 0) {
-            this.update({
+            const { event } = this.update({
               taskId,
               settings,
               timeframes: [
                 ...new Set([...candlebatcher.timeframes, ...timeframes])
               ]
             });
+            return { taskId, status: STATUS_STARTED, event };
           }
           return {
             taskId,
@@ -83,113 +76,117 @@ class CandlebatcherRunner extends BaseRunner {
         }
       }
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createCandlebatcherTaskSubject({
-          exchange,
-          asset,
-          currency
-        }),
+      const event = {
         eventType: TASKS_CANDLEBATCHER_START_EVENT,
-        data: {
-          taskId,
-          settings,
-          providerType,
-          exchange,
-          asset,
-          currency,
-          timeframes
+        eventData: {
+          subject: createCandlebatcherTaskSubject({
+            exchange,
+            asset,
+            currency
+          }),
+          data: {
+            taskId,
+            settings,
+            providerType,
+            exchange,
+            asset,
+            currency,
+            timeframes
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "CandlebatcherRunnerError",
+          name: ServiceError.types.CANDLEBATCHER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to start candlebatcher"
       );
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, props);
       const { taskId } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
-      if (!candlebatcher)
-        return {
-          taskId,
-          status: STATUS_STOPPED
-        };
-      if (candlebatcher.status === STATUS_STOPPED)
+      if (!candlebatcher || candlebatcher.status === STATUS_STOPPED)
         return {
           taskId,
           status: STATUS_STOPPED
         };
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createCandlebatcherTaskSubject({
-          exchange: candlebatcher.exchange,
-          asset: candlebatcher.asset,
-          currency: candlebatcher.currency
-        }),
+      const error = {
         eventType: TASKS_CANDLEBATCHER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: createCandlebatcherTaskSubject({
+            exchange: candlebatcher.exchange,
+            asset: candlebatcher.asset,
+            currency: candlebatcher.currency
+          }),
+          data: {
+            taskId
+          }
         }
-      });
+      };
+
       return {
         taskId,
-        status: STATUS_STOPPING
+        status: STATUS_STOPPING,
+        error
       };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "CandlebatcherRunnerError",
+          name: ServiceError.types.CANDLEBATCHER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to stop candlebatcher"
       );
     }
   }
 
-  static async update(context, props) {
+  static async update(props) {
     try {
       ServiceValidator.check(TASKS_CANDLEBATCHER_UPDATE_EVENT, props);
       const { taskId, timeframes, settings } = props;
       const candlebatcher = await getCandlebatcherById(taskId);
       if (!candlebatcher)
-        throw new VError(
+        throw new ServiceError(
           {
-            name: "CandlebatcherNotFound"
+            name: ServiceError.types.CANDLEBATCHER_NOT_FOUND_ERROR,
+            info: { taskId }
           },
           "Failed to find candlebatcher"
         );
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createCandlebatcherTaskSubject({
-          exchange: candlebatcher.exchange,
-          asset: candlebatcher.asset,
-          currency: candlebatcher.currency
-        }),
+      const event = {
         eventType: TASKS_CANDLEBATCHER_UPDATE_EVENT,
-        data: {
-          taskId,
-          settings,
-          timeframes
+        eventData: {
+          subject: createCandlebatcherTaskSubject({
+            exchange: candlebatcher.exchange,
+            asset: candlebatcher.asset,
+            currency: candlebatcher.currency
+          }),
+          data: {
+            taskId,
+            settings,
+            timeframes
+          }
         }
-      });
+      };
+
+      return { event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "CandlebatcherRunnerError",
+          name: ServiceError.types.CANDLEBATCHER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to update candlebatcher"
       );

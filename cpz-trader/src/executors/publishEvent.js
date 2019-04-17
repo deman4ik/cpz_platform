@@ -1,7 +1,9 @@
+import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import EventGrid from "cpz/events";
-import { saveTraderFailedEvent } from "cpz/tableStorage-client/events/events";
+import { saveFailedEvent } from "cpz/tableStorage-client/events/events";
+import { SERVICE_NAME } from "../config";
 
 async function publishEvent(state, data) {
   try {
@@ -20,10 +22,15 @@ async function publishEvent(state, data) {
       "Failed to publish event"
     );
     Log.exception(error);
-    const event = { ...data, error: error.json };
+    const event = {
+      ...data,
+      error: error.json,
+      ParitionKey: SERVICE_NAME,
+      RowKey: uuid()
+    };
     Log.event(event.eventType, event);
     try {
-      await saveTraderFailedEvent(event);
+      await saveFailedEvent(event);
     } catch (storageErr) {
       Log.exception(storageErr);
     }

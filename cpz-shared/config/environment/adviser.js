@@ -10,5 +10,7 @@ export default [
   "EG_LOG_KEY",
   "EG_SIGNALS_ENDPOINT",
   "EG_SIGNALS_KEY",
+  "EG_CANDLES_ENDPOINT",
+  "EG_CANDLES_KEY",
   "DEBUG"
 ];

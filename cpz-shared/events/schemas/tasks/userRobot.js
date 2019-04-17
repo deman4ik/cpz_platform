@@ -70,11 +70,6 @@ const USER_ROBOT_STOP_PARAMS = {
 };
 
 const USER_ROBOT_UPDATE_PARAMS = {
-  id: {
-    description: "Uniq user robot id.",
-    type: "string",
-    empty: false
-  },
   traderSettings: {
     description: "Trader settings.",
     type: "object",
@@ -119,6 +114,11 @@ const TASKS_USERROBOT_STOPPED_EVENT_SCHEMA = {
 const TASKS_USERROBOT_UPDATED_EVENT_SCHEMA = {
   [TASKS_USERROBOT_UPDATED_EVENT]: {
     ...USER_ROBOT_UPDATE_PARAMS,
+    id: {
+      description: "Uniq user robot id.",
+      type: "string",
+      empty: false
+    },
     status: { description: "Current status.", type: "string", empty: false },
     error: BASE_ERROR
   }

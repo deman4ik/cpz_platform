@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
@@ -9,26 +9,19 @@ import {
   STATUS_FINISHED,
   createImporterSlug
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
+import {
+  TASKS_IMPORTER_START_EVENT,
+  TASKS_IMPORTER_STOP_EVENT
+} from "cpz/events/types/tasks/importer";
 import {
   findActiveImporter,
   getImporterById
-} from "cpz/tableStorage/importers";
+} from "cpz/tableStorage-client/control/importers";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-import config from "../../config";
-
-const {
-  serviceName,
-  events: {
-    types: { TASKS_IMPORTER_START_EVENT, TASKS_IMPORTER_STOP_EVENT },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
-
 class ImporterRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
       const taskId = props.taskId || uuid();
 
@@ -69,40 +62,42 @@ class ImporterRunner extends BaseRunner {
           };
       }
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createImporterSlug({ exchange, asset, currency }),
+      const event = {
         eventType: TASKS_IMPORTER_START_EVENT,
-        data: {
-          taskId,
-          debug,
-          providerType,
-          exchange,
-          asset,
-          currency,
-          timeframes,
-          requireBatching,
-          saveToCache,
-          warmUpCache,
-          dateFrom,
-          dateTo,
-          proxy
+        eventData: {
+          subject: createImporterSlug({ exchange, asset, currency }),
+          data: {
+            taskId,
+            debug,
+            providerType,
+            exchange,
+            asset,
+            currency,
+            timeframes,
+            requireBatching,
+            saveToCache,
+            warmUpCache,
+            dateFrom,
+            dateTo,
+            proxy
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterRunnerError",
+          name: ServiceError.types.IMPORTER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to start importer"
       );
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_IMPORTER_STOP_EVENT, props);
       const { taskId } = props;
@@ -118,25 +113,27 @@ class ImporterRunner extends BaseRunner {
       )
         return { taskId, status: importer.status };
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createImporterSlug({
-          exchange: importer.exchange,
-          asset: importer.asset,
-          currency: importer.currency
-        }),
+      const event = {
         eventType: TASKS_IMPORTER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: createImporterSlug({
+            exchange: importer.exchange,
+            asset: importer.asset,
+            currency: importer.currency
+          }),
+          data: {
+            taskId
+          }
         }
-      });
-      return { taskId, status: STATUS_STOPPING };
+      };
+
+      return { taskId, status: STATUS_STOPPING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterRunnerError",
+          name: ServiceError.types.IMPORTER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to stop importer"
       );

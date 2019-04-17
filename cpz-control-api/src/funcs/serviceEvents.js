@@ -4,6 +4,7 @@ import { checkEnvVars } from "cpz/utils/environment";
 import BaseService from "cpz/services/baseService";
 import controlApiEnv from "cpz/config/environment/control";
 import EventGrid from "cpz/events";
+import { LOG_TOPIC, ERROR_TOPIC } from "cpz/events/topics";
 import {
   BASE_EVENT,
   SUB_VALIDATION_EVENT,
@@ -25,7 +26,6 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
   TASKS_EXWATCHER_STARTED_EVENT_SCHEMA,
   TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA,
-  TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA,
   TASKS_IMPORTER_STARTED_EVENT_SCHEMA,
   TASKS_IMPORTER_STOPPED_EVENT_SCHEMA,
   TASKS_IMPORTER_FINISHED_EVENT_SCHEMA,
@@ -41,31 +41,18 @@ import {
 } from "cpz/events/schemas/tasks";
 import {
   ERROR_ADVISER_ERROR_EVENT_SCHEMA,
-  ERROR_ADVISER_WARN_EVENT_SCHEMA,
   ERROR_BACKTEST_ERROR_EVENT_SCHEMA,
-  ERROR_BACKTEST_WARN_EVENT_SCHEMA,
   ERROR_BACKTESTER_ERROR_EVENT_SCHEMA,
-  ERROR_BACKTESTER_WARN_EVENT_SCHEMA,
   ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA,
-  ERROR_CANDLEBATCHER_WARN_EVENT_SCHEMA,
   ERROR_EXWATCHER_ERROR_EVENT_SCHEMA,
-  ERROR_EXWATCHER_WARN_EVENT_SCHEMA,
   ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
-  ERROR_IMPORTER_WARN_EVENT_SCHEMA,
   ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
-  ERROR_MARKETWATCHER_WARN_EVENT_SCHEMA,
   ERROR_TRADER_ERROR_EVENT_SCHEMA,
-  ERROR_TRADER_WARN_EVENT_SCHEMA,
-  ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
-  ERROR_USERROBOT_WARN_EVENT_SCHEMA
+  ERROR_USERROBOT_ERROR_EVENT_SCHEMA
 } from "cpz/events/schemas/error";
+import EventHub from "cpz/eventhub-client";
 import { SERVICE_NAME } from "../config";
-import {
-  handleFinished,
-  handleStarted,
-  handleStopped,
-  handleUpdated
-} from "../taskrunner/handleServiceEvents";
+import handleServiceEvent from "../taskrunner/handleServiceEvents";
 
 class ServiceEvents extends BaseService {
   constructor() {
@@ -81,8 +68,7 @@ class ServiceEvents extends BaseService {
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
-    // Configure Validator
-    ServiceValidator.add([
+    const schemas = super.ValidatorConfig([
       TASKS_ADVISER_STARTED_EVENT_SCHEMA,
       TASKS_ADVISER_STOPPED_EVENT_SCHEMA,
       TASKS_ADVISER_UPDATED_EVENT_SCHEMA,
@@ -97,7 +83,6 @@ class ServiceEvents extends BaseService {
       TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
       TASKS_EXWATCHER_STARTED_EVENT_SCHEMA,
       TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA,
-      TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA,
       TASKS_IMPORTER_STARTED_EVENT_SCHEMA,
       TASKS_IMPORTER_STOPPED_EVENT_SCHEMA,
       TASKS_IMPORTER_FINISHED_EVENT_SCHEMA,
@@ -111,71 +96,28 @@ class ServiceEvents extends BaseService {
       TASKS_USERROBOT_STOPPED_EVENT_SCHEMA,
       TASKS_USERROBOT_UPDATED_EVENT_SCHEMA,
       ERROR_ADVISER_ERROR_EVENT_SCHEMA,
-      ERROR_ADVISER_WARN_EVENT_SCHEMA,
       ERROR_BACKTEST_ERROR_EVENT_SCHEMA,
-      ERROR_BACKTEST_WARN_EVENT_SCHEMA,
       ERROR_BACKTESTER_ERROR_EVENT_SCHEMA,
-      ERROR_BACKTESTER_WARN_EVENT_SCHEMA,
       ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA,
-      ERROR_CANDLEBATCHER_WARN_EVENT_SCHEMA,
       ERROR_EXWATCHER_ERROR_EVENT_SCHEMA,
-      ERROR_EXWATCHER_WARN_EVENT_SCHEMA,
       ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
-      ERROR_IMPORTER_WARN_EVENT_SCHEMA,
       ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
-      ERROR_MARKETWATCHER_WARN_EVENT_SCHEMA,
       ERROR_TRADER_ERROR_EVENT_SCHEMA,
-      ERROR_TRADER_WARN_EVENT_SCHEMA,
-      ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
-      ERROR_USERROBOT_WARN_EVENT_SCHEMA
+      ERROR_USERROBOT_ERROR_EVENT_SCHEMA
     ]);
-  }
-
-  /**
-   * Handling Tasks Events
-   * Operating with Trader run status.
-   *
-   * @method
-   * @param {Object} context - context of Azure Function
-   * @param {Object} req - HTTP trigger with Event Data
-   */
-  async taskEvents(context, req) {
-    Log.addContext(context);
-    // Checking that request is authorized
-    super.checkAuth(context, req);
-
-    // Handling events by target type
-    const event = this.handlingEventsByTypes(context, req);
-
-    if (event) {
-      const { eventType, subject, data } = event;
-      try {
-        // Validate events by target schema
-        ServiceValidator.check(BASE_EVENT, data);
-
-        if (eventType.includes(".Started")) {
-          await handleStarted(context, { subject, eventType, ...data });
-        } else if (eventType.includes(".Stopped")) {
-          await handleStopped(context, { subject, eventType, ...data });
-        } else if (eventType.includes(".Updated")) {
-          await handleUpdated(context, { subject, eventType, ...data });
-        } else if (eventType.includes(".Finished")) {
-          await handleFinished(context, { subject, eventType, ...data });
-        }
-        // Calling context.done for finalize function
-        context.done();
-      } catch (error) {
-        Log.error(error);
-        await EventGrid.publish(ERROR_CONTROL_ERROR_EVENT, 
-          {
-          subject: "ControlApiError",
-          data: { error: error.json }
-          );
-      }
-    }
-    Log.request(context.req, context.res);
-    Log.clearContext();
-    context.done();
+    // Configure Validator
+    ServiceValidator.add(schemas);
+    // Configure Event Grid Client
+    const EGConfig = super.EGConfig({
+      LOG_TOPIC,
+      ERROR_TOPIC
+    });
+    EventGrid.config(EGConfig);
+    // Event Hub
+    EventHub.init(
+      process.env.TASKRUNNER_EVENTHUB,
+      process.env.TASKRUNNER_EVENTHUB_NAME
+    );
   }
 
   /** @override */
@@ -223,7 +165,9 @@ class ServiceEvents extends BaseService {
       // In this place if Event Grid batch, we expect what all events are same one type
       // Search in EVENT TYPE needed status of end of string
     } else if (
-      event.eventType.search(/.Started$|.Stopped$|.Updated$|.Finished$/) !== -1
+      event.eventType.search(
+        /.Started$|.Stopped$|.Updated$|.Finished$|.Error$|.Warn$/
+      ) !== -1
     ) {
       Log.info(
         `Got ${event.eventType} event, data ${JSON.stringify(event.data)}`
@@ -235,6 +179,44 @@ class ServiceEvents extends BaseService {
       context.done();
     }
     return event;
+  }
+
+  /**
+   * Handling Service Events
+   *
+   * @method
+   * @param {Object} context - context of Azure Function
+   * @param {Object} req - HTTP trigger with Event Data
+   */
+  async run(context, req) {
+    Log.addContext(context);
+    // Checking that request is authorized
+    super.checkAuth(context, req);
+
+    // Handling events by target type
+    const event = this.handlingEventsByTypes(context, req);
+
+    if (event) {
+      const { eventType, data } = event;
+      try {
+        // Validate events by target schema
+        ServiceValidator.check(BASE_EVENT, data);
+
+        await handleServiceEvent({ eventType, data });
+
+        // Calling context.done for finalize function
+        context.done();
+      } catch (error) {
+        Log.error(error);
+        await EventGrid.publish(ERROR_CONTROL_ERROR_EVENT, {
+          subject: "ControlApiError",
+          data: { error: error.json }
+        });
+      }
+    }
+    Log.request(context.req, context.res);
+    Log.clearContext();
+    context.done();
   }
 }
 

@@ -1,10 +1,5 @@
-# import { MarketwatcherSubscription, MarketwatcherParams, MarketwatcherSubParams } from "src/api/schema/marketwatcher.graphql"
-# import { CandlebatcherParams, CandlebatcherUpdateParams  } from "src/api/schema/candlebatcher.graphql"
 # import { ImporterParams } from "src/api/schema/importer.graphql"
-# import { AdviserParams, AdviserUpdateParams } from "src/api/schema/adviser.graphql"
-# import { TraderParams, TraderUpdateParams } from "src/api/schema/trader.graphql"
-# import { BacktesterParams } from "src/api/schema/backtester.graphql"
-# import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql" 
+# import { CandlebatcherSettings, AdviserSettings, TraderSettings, BacktesterSettings } from "src/api/schema/settings.graphql"
 # import { ExWatcherParams } from "src/api/schema/exwatcher.graphql"
 # import { BacktestParams } from "src/api/schema/backtest.graphql"
 # import { UserRobotParams } from "src/api/schema/userRobot.graphql"
@@ -14,60 +9,51 @@ scalar Datetime
 scalar JSON
 
 type Query {
-    ping: String
-  }
+  ping: String
+}
 
 type Mutation {
-    # Marketwatcher
-    startMarketwatcherService(params: MarketwatcherParams!): ServiceRunnerResponse!
-    stopMarketwatcherService(taskId: String!): ServiceRunnerResponse!
-    subscribeMarketwatcherService(params: MarketwatcherSubParams!): Response!
-    unsubscribeMarketwatcherService(params: MarketwatcherSubParams!): Response!
-    # Candlebatcher
-    startCandlebatcherService(params: CandlebatcherParams!): ServiceRunnerResponse!
-    stopCandlebatcherService(taskId: String!): ServiceRunnerResponse!
-    updateCandlebatcherService(params: CandlebatcherUpdateParams!): Response!
-    # Importer 
-    startImporterService(params: ImporterParams!): ServiceRunnerResponse!
-    stopImporterService(taskId: ID!): ServiceRunnerResponse!
-    # Adviser
-    startAdviserService(params: AdviserParams!): ServiceRunnerResponse!
-    stopAdviserService(taskId: ID!): ServiceRunnerResponse!
-    updateAdviserService(params: AdviserUpdateParams!): Response!
-    # Trader
-    startTraderService(params: TraderParams!): ServiceRunnerResponse!
-    stopTraderService(taskId: ID!): ServiceRunnerResponse!
-    updateTraderService(params: TraderUpdateParams!): Response!
-    # Backtester 
-    startBacktesterService(params: BacktesterParams!): ServiceRunnerResponse!
-    stopBacktesterService(taskId: ID!): ServiceRunnerResponse!
-    # Exchange Data Watcher
-    startExWatcher(params: ExWatcherParams!): ServiceRunnerResponse!
-    stopExWatcher(taskId: String!): ServiceRunnerResponse!
-    updateExWatcher(taskId: String!, params: CandlebatcherUpdateParams!): Response!
-    # UserRobot
-    startUserRobot(userRobotId: ID!, overrideParams: UserRobotParams): ServiceRunnerResponse!
-    stopUserRobot(userRobotId: ID!): ServiceRunnerResponse!
-    updateUserRobot(userRobotId: ID!, params: TraderUpdateParams!): Response!
-    # Backtest
-    startBacktest(robotId: Int!, backtesterId: ID, overrideParams: BacktestParams): ServiceRunnerResponse!
-    stopBacktest(taskId: ID!): ServiceRunnerResponse!
+  # Importer
+  startImporter(params: ImporterParams!): ServiceRunnerResponse!
+  stopImporter(taskId: ID!): ServiceRunnerResponse!
+  # Exchange Data Watcher
+  startExWatcher(params: ExWatcherParams!): ServiceRunnerResponse!
+  stopExWatcher(taskId: String!): ServiceRunnerResponse!
+  # UserRobot
+  startUserRobot(
+    userRobotId: ID!
+    overrideParams: UserRobotParams
+  ): ServiceRunnerResponse!
+  stopUserRobot(userRobotId: ID!): ServiceRunnerResponse!
+  updateUserRobot(userRobotId: ID!, params: TraderUpdateParams!): Response!
+  # Backtest
+  startBacktest(
+    robotId: Int!
+    backtesterId: ID
+    overrideParams: BacktestParams
+  ): ServiceRunnerResponse!
+  stopBacktest(taskId: ID!): ServiceRunnerResponse!
 }
 
 type Error {
-    name: String!
-    message: String!
-    info: JSON
+  name: String!
+  message: String!
+  info: JSON
+  stack: JSON
 }
 
 type Response {
-    success: Boolean!
-    error: Error
+  success: Boolean!
+  error: Error
 }
 
 type ServiceRunnerResponse {
-    success: Boolean!
-    error: Error
-    taskId: String
-    status: String
+  success: Boolean!
+  error: Error
+  taskId: String
+  status: String
+}
+
+input TraderUpdateParams {
+  traderSettings: TraderSettings!
 }

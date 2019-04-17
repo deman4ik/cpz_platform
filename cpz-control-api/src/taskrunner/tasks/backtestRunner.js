@@ -1,148 +1,257 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTING,
   STATUS_STARTED,
+  STATUS_STOPPING,
   STATUS_STOPPED,
   STATUS_FINISHED
 } from "cpz/config/state";
-import { getBacktestById } from "cpz/tableStorage/backtests";
+import { BACKTEST_START } from "cpz/events/types/tasks/backtest";
+import {
+  getBacktestById,
+  saveBacktestState
+} from "cpz/tableStorage-client/control/backtests";
+import {
+  TASKS_IMPORTER_STARTED_EVENT,
+  TASKS_IMPORTER_STOPPED_EVENT,
+  TASKS_IMPORTER_FINISHED_EVENT,
+  TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT,
+  TASKS_BACKTESTER_FINISHED_EVENT
+} from "cpz/events/types/tasks";
 import { durationInTimeframe } from "cpz/utils/helpers";
-import { countCandlesDB } from "cpz/db";
+import { countCandlesDB } from "cpz/db-client/candles";
 import Log from "cpz/log";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
 import Backtest from "./backtest";
-
-import config from "../../config";
-
-const {
-  events: {
-    types: { BACKTEST_START_PARAMS, BACKTEST_STOP_PARAMS }
-  }
-} = config;
+import publishEvents from "../../utils/publishEvents";
 
 class BacktestRunner extends BaseRunner {
-  static async start(context, params) {
+  static async getState(taskId) {
     try {
-      ServiceValidator.check(BACKTEST_START_PARAMS, params);
-      let backtestState = params;
-      const backtest = new Backtest(context, backtestState);
+      const state = await getBacktestById(taskId);
+      if (!state)
+        throw new ServiceError(
+          {
+            name: ServiceError.types.BACKTEST_NOT_FOUND_ERROR,
+            info: { taskId }
+          },
+          "Failed to load Backtest state."
+        );
+      return state;
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.BACKTEST_RUNNER_ERROR,
+          cause: e,
+          info: { taskId }
+        },
+        "Failed to get Backtest state."
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
+
+  static async handleAction(action) {
+    try {
+      const { type, taskId, data } = action;
+      const state = await BacktestRunner.getState(taskId);
+
+      if (type === "event") {
+        BacktestRunner.handleEvent(state, data);
+      } else if (type === "start") {
+        BacktestRunner.start(state);
+      } else if (type === "stop") {
+        BacktestRunner.stop(state);
+      } else {
+        Log.error(`Unknown Backtest action type - ${type}`);
+      }
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.BACKTEST_RUNNER_ERROR,
+          cause: e,
+          info: { action }
+        },
+        "Failed to handle action with Backtest"
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
+
+  static async handleEvent(state, event) {
+    try {
+      const backtest = new Backtest(state);
+      const { eventType } = event;
+
+      // Importer
+      if (eventType === TASKS_IMPORTER_STARTED_EVENT) {
+        backtest.importerStatus = STATUS_STARTED;
+      } else if (eventType === TASKS_IMPORTER_FINISHED_EVENT) {
+        backtest.importerStatus = STATUS_FINISHED;
+      } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT) {
+        backtest.importerStatus = STATUS_STOPPED;
+      }
+
+      // Backtester
+      else if (eventType === TASKS_BACKTESTER_STARTED_EVENT) {
+        backtest.backtesterStatus = STATUS_STARTED;
+      } else if (eventType === TASKS_BACKTESTER_STOPPED_EVENT) {
+        backtest.backtesterStatus = STATUS_STOPPED;
+      } else if (eventType === TASKS_BACKTESTER_FINISHED_EVENT) {
+        backtest.backtesterStatus = STATUS_FINISHED;
+      }
+
+      await saveBacktestState(backtest.state);
+      await publishEvents(backtest.events);
+
+      if (backtest.status === STATUS_STARTING) {
+        BacktestRunner.start(backtest.state);
+      }
+      if (backtest.status === STATUS_STOPPING) {
+        BacktestRunner.stop(backtest.state);
+      }
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.BACKTEST_RUNNER_ERROR,
+          cause: e,
+          info: { ...state }
+        },
+        "Failed to handle service event with Backtest."
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
+
+  static async start(state) {
+    try {
+      ServiceValidator.check(BACKTEST_START, state);
+
+      const backtest = new Backtest(state);
       backtest.log("start");
+      backtest.status = STATUS_STARTING;
 
-      backtestState = backtest.getCurrentState();
-
+      const events = [];
       if (
-        backtestState.importerStatus !== STATUS_STARTED &&
-        backtestState.importerStatus !== STATUS_FINISHED
+        backtest.importerStatus !== STATUS_STARTED &&
+        backtest.importerStatus !== STATUS_FINISHED
       ) {
         backtest.log("Importer!");
         let dateFrom;
-        ({ dateFrom } = backtestState);
-        if (backtestState.adviserSettings.requiredHistoryMaxBars > 0) {
+        ({ dateFrom } = backtest);
+        if (backtest.adviserSettings.requiredHistoryMaxBars > 0) {
           dateFrom = dayjs
-            .utc(backtestState.dateFrom)
+            .utc(backtest.dateFrom)
             .add(
-              -backtestState.adviserSettings.requiredHistoryMaxBars *
-                backtestState.timeframe,
+              -backtest.adviserSettings.requiredHistoryMaxBars *
+                backtest.timeframe,
               "minute"
             )
             .toISOString();
         }
 
         const totalBarsInDb = await countCandlesDB({
-          exchange: backtestState.exchange,
-          asset: backtestState.asset,
-          currency: backtestState.currency,
-          timeframe: backtestState.timeframe,
+          exchange: backtest.exchange,
+          asset: backtest.asset,
+          currency: backtest.currency,
+          timeframe: backtest.timeframe,
           dateFrom,
-          dateTo: backtestState.dateTo
+          dateTo: backtest.dateTo
         });
 
         const expectedBars = durationInTimeframe(
           dateFrom,
-          backtestState.dateTo,
-          backtestState.timeframe
+          backtest.dateTo,
+          backtest.timeframe
         );
 
         if (totalBarsInDb < expectedBars) {
           const importerParams = {
-            exchange: backtestState.exchange,
-            asset: backtestState.asset,
-            currency: backtestState.currency,
-            timeframes: backtestState.timeframes,
+            exchange: backtest.exchange,
+            asset: backtest.asset,
+            currency: backtest.currency,
+            timeframes: backtest.timeframes,
             dateFrom,
-            dateTo: backtestState.dateTo,
+            dateTo: backtest.dateTo,
             saveToCache: false
           };
 
-          const result = await ImporterRunner.start(context, importerParams);
-          backtest.importerId = result.taskId;
-          backtest.importerStatus = result.status;
-          await backtest.save();
-          backtestState = backtest.getCurrentState();
+          const { taskId, status, event } = await ImporterRunner.start(
+            importerParams
+          );
+          backtest.importerId = taskId;
+          backtest.importerStatus = status;
+          events.push(event);
         } else {
           backtest.importerStatus = STATUS_FINISHED;
-          await backtest.save();
-          backtestState = backtest.getCurrentState();
         }
       }
 
       if (
-        backtestState.importerStatus === STATUS_FINISHED &&
-        backtestState.backtesterStatus !== STATUS_STARTING &&
-        backtestState.backtesterStatus !== STATUS_STARTED &&
-        backtestState.backtesterStatus !== STATUS_FINISHED
+        backtest.importerStatus === STATUS_FINISHED &&
+        backtest.backtesterStatus !== STATUS_STARTING &&
+        backtest.backtesterStatus !== STATUS_STARTED &&
+        backtest.backtesterStatus !== STATUS_FINISHED
       ) {
         backtest.log("Backtester!");
         const backtesterParams = {
-          taskId: backtestState.backtesterId,
-          robotId: backtestState.robotId,
-          userId: backtestState.userId,
-          strategyName: backtestState.strategyName,
-          exchange: backtestState.exchange,
-          asset: backtestState.asset,
-          currency: backtestState.currency,
-          timeframe: backtestState.timeframe,
-          dateFrom: backtestState.dateFrom,
-          dateTo: backtestState.dateTo,
-          settings: backtestState.settings,
-          adviserSettings: backtestState.adviserSettings,
-          traderSettings: backtestState.traderSettings
+          robotId: backtest.robotId,
+          userId: backtest.userId,
+          strategyName: backtest.strategyName,
+          exchange: backtest.exchange,
+          asset: backtest.asset,
+          currency: backtest.currency,
+          timeframe: backtest.timeframe,
+          dateFrom: backtest.dateFrom,
+          dateTo: backtest.dateTo,
+          settings: backtest.settings,
+          adviserSettings: backtest.adviserSettings,
+          traderSettings: backtest.traderSettings
         };
 
-        const result = await BacktesterRunner.start(context, backtesterParams);
-        backtest.backtesterStatus = result.status;
-        await backtest.save();
+        const { taskId, status, event } = await BacktesterRunner.start(
+          backtesterParams
+        );
+        backtest.backtesterId = taskId;
+        backtest.backtesterStatus = status;
+        events.push(event);
       }
+
+      await saveBacktestState(backtest.state);
+      await publishEvents(events);
 
       return {
         taskId: backtest.taskId,
         status: backtest.status
       };
-    } catch (error) {
-      const err = new VError(
+    } catch (e) {
+      const error = new ServiceError(
         {
-          name: "BacktestRunnerError",
-          cause: error,
-          info: params
+          name: ServiceError.types.BACKTEST_RUNNER_ERROR,
+          cause: e,
+          info: state
         },
         "Failed to start Backtest"
       );
-      Log.error(err);
-      throw err;
+      Log.error(error);
+      throw error;
     }
   }
 
-  static async stop(context, params) {
+  static async stop(state) {
     try {
-      ServiceValidator.check(BACKTEST_STOP_PARAMS, params);
-      const backtestState = await getBacktestById(params.taskId);
-      if (!backtestState) throw new Error("BacktestNotFound");
-      const backtest = new Backtest(context, backtestState);
+      const backtest = new Backtest(state);
+      backtest.status = STATUS_STOPPING;
       backtest.log("stop");
+      const events = [];
       if (
         backtest.status === STATUS_STOPPED ||
         backtest.status === STATUS_FINISHED
@@ -153,41 +262,44 @@ class BacktestRunner extends BaseRunner {
         };
 
       if (
-        backtestState.importerStatus !== STATUS_STOPPED &&
-        backtestState.importerStatus !== STATUS_FINISHED
+        backtest.importerStatus !== STATUS_STOPPED &&
+        backtest.importerStatus !== STATUS_FINISHED
       ) {
-        const result = await ImporterRunner.stop(context, {
-          taskId: backtestState.importerId
+        const { taskId, status, event } = await ImporterRunner.stop({
+          taskId: backtest.importerId
         });
-        backtest.importerId = result.taskId;
-        backtest.importerStatus = result.status;
+        backtest.importerId = taskId;
+        backtest.importerStatus = status;
+        events.push(event);
       }
 
       if (
-        backtestState.backtesterStatus !== STATUS_STOPPED &&
-        backtestState.backtesterStatus !== STATUS_FINISHED
+        backtest.backtesterStatus !== STATUS_STOPPED &&
+        backtest.backtesterStatus !== STATUS_FINISHED
       ) {
-        const result = await BacktesterRunner.stop(context, {
-          taskId: backtestState.backtesterId
+        const { taskId, status, event } = await BacktesterRunner.stop({
+          taskId: backtest.backtesterId
         });
-        backtest.backtesterId = result.taskId;
-        backtest.backtesterStatus = result.status;
+        backtest.backtesterId = taskId;
+        backtest.backtesterStatus = status;
+        events.push(event);
       }
 
-      await backtest.save();
+      await saveBacktestState(backtest.state);
+      await publishEvents(events);
 
       return { taskId: backtest.taskId, status: backtest.status };
-    } catch (error) {
-      const err = new VError(
+    } catch (e) {
+      const error = new ServiceError(
         {
-          name: "BacktestRunnerError",
-          cause: error,
-          info: params
+          name: ServiceError.types.BACKTEST_RUNNER_ERROR,
+          cause: e,
+          info: state
         },
         "Failed to stop Backtest"
       );
-      Log.error(err);
-      throw err;
+      Log.error(error);
+      throw error;
     }
   }
 }

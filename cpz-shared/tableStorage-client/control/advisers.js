@@ -19,39 +19,6 @@ const getAdviserById = async taskId =>
   client.getEntityByRowKey(TABLES.STORAGE_ADVISERS_TABLE, taskId);
 
 /**
- * Find Adviser
- *
- * @param {Object} input
- *  @property {string} input.robotId - Robot Id
- * @returns {Object}
- */
-const findAdviser = async ({ robotId }) => {
-  try {
-    const robotIdFilter = TableQuery.stringFilter(
-      "robotId",
-      TableUtilities.QueryComparisons.EQUAL,
-      robotId
-    );
-    const query = new TableQuery().where(robotIdFilter);
-    const advisers = await client.queryEntities(
-      TABLES.STORAGE_ADVISERS_TABLE,
-      query
-    );
-    if (advisers.length > 0) return advisers[0];
-    return null;
-  } catch (error) {
-    throw new ServiceError(
-      {
-        name: ServiceError.types.TABLE_STORAGE_ERROR,
-        cause: error,
-        info: { robotId }
-      },
-      "Failed to read adviser state"
-    );
-  }
-};
-
-/**
  * Query Active and Busy Advisers by Slug
  *
  * @param {string} slug
@@ -131,7 +98,6 @@ const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getAdviserById,
-  findAdviser,
   getActiveAdvisersBySlug,
   saveAdviserState,
   updateAdviserState,

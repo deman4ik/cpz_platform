@@ -1,13 +1,10 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import EventHub from "cpz/eventhub-client";
-import { STATUS_STOPPED, STATUS_STOPPING } from "cpz/config/state";
-import { EXWATCHER_SERVICE } from "cpz/config/services";
-import ExWatcherRunner from "../../taskrunner/tasks/exwatcherRunner";
+import ImporterRunner from "../../taskrunner/services/importerRunner";
 
-async function startExWatcher(_, { params }) {
+async function startImporter(_, { params }) {
   try {
-    const { taskId, status } = await ExWatcherRunner.create(params);
+    const { taskId, status } = await ImporterRunner.start(params);
     Log.clearContext();
     return {
       success: true,
@@ -35,28 +32,15 @@ async function startExWatcher(_, { params }) {
   }
 }
 
-async function stopExWatcher(_, { taskId }) {
+async function stopImporter(_, { taskId }) {
   try {
-    const state = await ExWatcherRunner.getState(taskId);
-    let result = { success: true, taskId };
-    if (
-      state &&
-      (state.status === STATUS_STOPPED || state.status === STATUS_STOPPING)
-    ) {
-      result = {
-        success: true,
-        taskId,
-        status: state.status
-      };
-    } else {
-      await EventHub.send(taskId, {
-        taskId,
-        type: "stop",
-        service: EXWATCHER_SERVICE
-      });
-    }
+    const { status } = await ImporterRunner.stop({ taskId });
     Log.clearContext();
-    return result;
+    return {
+      success: true,
+      taskId,
+      status
+    };
   } catch (e) {
     let error;
     if (e instanceof ServiceError) {
@@ -78,4 +62,4 @@ async function stopExWatcher(_, { taskId }) {
   }
 }
 
-export { startExWatcher, stopExWatcher };
+export { startImporter, stopImporter };

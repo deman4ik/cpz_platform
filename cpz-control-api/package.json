@@ -23,6 +23,7 @@
   "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
   "license": "ISC",
   "dependencies": {
+    "@azure/event-hubs": "^2.0.0",
     "apollo-datasource": "^0.3.1",
     "apollo-server-azure-functions": "^2.4.8",
     "applicationinsights": "1.2.0",

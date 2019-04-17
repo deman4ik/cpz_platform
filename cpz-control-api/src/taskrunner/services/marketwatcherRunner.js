@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
@@ -7,33 +7,27 @@ import {
   STATUS_STOPPING,
   STATUS_PENDING
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
+import {
+  TASKS_MARKETWATCHER_START_EVENT,
+  TASKS_MARKETWATCHER_STOP_EVENT,
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
+} from "cpz/events/types/tasks/marketwatcher";
 import {
   findMarketwatcherByExchange,
   getMarketwatcherById
-} from "cpz/tableStorage/marketwatchers";
+} from "cpz/tableStorage-client/control/marketwatchers";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-import config from "../../config";
-
-const {
-  serviceName,
-  events: {
-    types: {
-      TASKS_MARKETWATCHER_START_EVENT,
-      TASKS_MARKETWATCHER_STOP_EVENT,
-      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
-    },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
 class MarketwatcherRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
       let taskId = uuid();
-      ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, { ...props, taskId });
+      ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, {
+        ...props,
+        taskId
+      });
       const { debug, exchange, providerType, subscriptions } = props;
 
       const marketwatcher = await findMarketwatcherByExchange(exchange);
@@ -61,23 +55,25 @@ class MarketwatcherRunner extends BaseRunner {
           };
         }
       }
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: exchange,
+      const event = {
         eventType: TASKS_MARKETWATCHER_START_EVENT,
-        data: {
-          taskId,
-          debug,
-          exchange,
-          providerType,
-          subscriptions
+        eventData: {
+          subject: exchange,
+          data: {
+            taskId,
+            debug,
+            exchange,
+            providerType,
+            subscriptions
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "MarketwatcherRunnerError",
+          name: ServiceError.types.MARKETWATCHER_RUNNER_ERROR,
           cause: error,
           info: props
         },
@@ -86,7 +82,7 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_MARKETWATCHER_STOP_EVENT, props);
       const { taskId } = props;
@@ -101,23 +97,26 @@ class MarketwatcherRunner extends BaseRunner {
           taskId,
           status: STATUS_STOPPED
         };
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: marketwatcher.exchange,
+
+      const event = {
         eventType: TASKS_MARKETWATCHER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: marketwatcher.exchange,
+          data: {
+            taskId
+          }
         }
-      });
+      };
 
       return {
         taskId,
-        status: STATUS_STOPPING
+        status: STATUS_STOPPING,
+        event
       };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "MarketwatcherRunnerError",
+          name: ServiceError.types.MARKETWATCHER_RUNNER_ERROR,
           cause: error,
           info: props
         },
@@ -126,15 +125,16 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async subscribe(context, props) {
+  static async subscribe(props) {
     try {
       ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, props);
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
-        throw new VError(
+        throw new ServiceError(
           {
-            name: "MarketwatcherNotFound"
+            name: ServiceError.types.MARKETWATCHER_NOT_FOUND_ERROR,
+            info: { taskId }
           },
           "Failed to find marketwatcher"
         );
@@ -147,22 +147,24 @@ class MarketwatcherRunner extends BaseRunner {
         );
         if (doubles.length === 0) newSubsciptions.add(subscription);
       });
+      let event = null;
       if (newSubsciptions.length > 0) {
-        await publishEvents(TASKS_TOPIC, {
-          service: serviceName,
-          subject: marketwatcher.exchange,
+        event = {
           eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-          data: {
-            taskId,
-
-            subscriptions
+          eventData: {
+            subject: marketwatcher.exchange,
+            data: {
+              taskId,
+              subscriptions
+            }
           }
-        });
+        };
       }
+      return { event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "MarketwatcherRunnerError",
+          name: ServiceError.types.MARKETWATCHER_RUNNER_ERROR,
           cause: error,
           info: props
         },
@@ -177,25 +179,28 @@ class MarketwatcherRunner extends BaseRunner {
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
       if (!marketwatcher)
-        throw new VError(
+        throw new ServiceError(
           {
-            name: "MarketwatcherNotFound"
+            name: ServiceError.types.MARKETWATCHER_NOT_FOUND_ERROR,
+            info: { taskId }
           },
           "Failed to find marketwatcher"
         );
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: marketwatcher.exchange,
+      const event = {
         eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-        data: {
-          taskId,
-          subscriptions
+        eventData: {
+          subject: marketwatcher.exchange,
+          data: {
+            taskId,
+            subscriptions
+          }
         }
-      });
+      };
+      return { event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "MarketwatcherRunnerError",
+          name: ServiceError.types.MARKETWATCHER_RUNNER_ERROR,
           cause: error,
           info: props
         },

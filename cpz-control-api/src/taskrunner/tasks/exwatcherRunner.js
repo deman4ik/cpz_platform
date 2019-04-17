@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/lib/dayjs";
 import {
   STATUS_STARTING,
@@ -10,9 +10,20 @@ import {
 } from "cpz/config/state";
 import {
   getExWatcherById,
+  saveExWatcherState,
   deleteExWatcherState
-} from "cpz/tableStorage/exwatchers";
+} from "cpz/tableStorage-client/control/exwatchers";
 import Log from "cpz/log";
+import {
+  EXWATCHER_START,
+  TASKS_IMPORTER_STARTED_EVENT,
+  TASKS_IMPORTER_STOPPED_EVENT,
+  TASKS_IMPORTER_FINISHED_EVENT,
+  TASKS_MARKETWATCHER_STARTED_EVENT,
+  TASKS_MARKETWATCHER_STOPPED_EVENT,
+  TASKS_CANDLEBATCHER_STARTED_EVENT,
+  TASKS_CANDLEBATCHER_STOPPED_EVENT
+} from "cpz/events/types/tasks";
 import { getMaxTimeframeDateFrom } from "cpz/utils/candlesUtils";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
@@ -20,23 +31,12 @@ import ExWatcher from "./exwatcher";
 import CandlebatcherRunner from "../services/candlebatcherRunner";
 import MarketwatcherRunner from "../services/marketwatcherRunner";
 import ImporterRunner from "../services/importerRunner";
-
-import config from "../../config";
-
-const {
-  events: {
-    types: {
-      EXWATCHER_START_PARAMS,
-      EXWATCHER_STOP_PARAMS,
-      EXWATCHER_UPDATE_PARAMS
-    }
-  }
-} = config;
+import publishEvents from "../../utils/publishEvents";
 
 class ExWatcherRunner extends BaseRunner {
-  static async create(context, params) {
+  static async create(params) {
     try {
-      ServiceValidator.check(EXWATCHER_START_PARAMS, params);
+      ServiceValidator.check(EXWATCHER_START, params);
       const exWatcherState = await getExWatcherById(
         createWatcherSlug({
           exchange: params.exchange,
@@ -57,278 +57,365 @@ class ExWatcherRunner extends BaseRunner {
         await deleteExWatcherState(exWatcherState);
       }
 
-      return await ExWatcherRunner.start(context, params);
-    } catch (error) {
-      const err = new VError(
+      return await ExWatcherRunner.start(params);
+    } catch (e) {
+      const error = new ServiceError(
         {
-          name: "ExWatcherRunnerError",
-          cause: error,
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
+          cause: e,
           info: params
         },
         "Failed to create Exchange Data Watcher"
       );
-      Log.error(err);
-      throw err;
+      Log.error(error);
+      throw error;
     }
   }
 
-  static async start(context, params) {
+  static async getState(taskId) {
     try {
-      let exWatcherState = params;
-      if (exWatcherState.status === STATUS_STARTED) {
-        return {
-          taskId: exWatcherState.taskId,
-          status: exWatcherState.status
-        };
-      }
-      const exWatcher = new ExWatcher(context, exWatcherState);
-      exWatcher.log(`start`);
-      exWatcherState = exWatcher.getCurrentState();
+      const state = await getExWatcherById(taskId);
+      if (!state)
+        throw new ServiceError(
+          {
+            name: ServiceError.types.EX_WATCHER_NOT_FOUND_ERROR,
+            info: { taskId }
+          },
+          "Failed to load Exchange Data Watcher state."
+        );
+      return state;
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
+          cause: e,
+          info: { taskId }
+        },
+        "Failed to get Exchange Data Watcher state."
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
 
+  static async handleAction(action) {
+    try {
+      const { type, taskId, data } = action;
+      const state = await ExWatcherRunner.getState(taskId);
+
+      if (type === "event") {
+        ExWatcherRunner.handleEvent(state, data);
+      } else if (type === "start") {
+        ExWatcherRunner.start(state);
+      } else if (type === "stop") {
+        ExWatcherRunner.stop(state);
+      } else if (type === "update") {
+        ExWatcherRunner.update(state, data);
+      } else {
+        Log.error(`Unknown ExWatcher action type - ${type}`);
+      }
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
+          cause: e,
+          info: { action }
+        },
+        "Failed to handle action with Exchange Data Watcher"
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
+
+  static async handleEvent(state, event) {
+    try {
+      const exWatcher = new ExWatcher(state);
+      const {
+        eventType,
+        data: { taskId }
+      } = event;
+
+      // Importer
+      if (eventType === TASKS_IMPORTER_STARTED_EVENT) {
+        if (exWatcher.importerHistoryId === taskId) {
+          exWatcher.importerHistoryStatus = STATUS_STARTED;
+        } else if (exWatcher.importerCurrentId === taskId) {
+          exWatcher.importerCurrentStatus = STATUS_STARTED;
+        }
+      } else if (eventType === TASKS_IMPORTER_FINISHED_EVENT) {
+        if (exWatcher.importerHistoryId === taskId) {
+          exWatcher.importerHistoryStatus = STATUS_FINISHED;
+        } else if (exWatcher.importerCurrentId === taskId) {
+          exWatcher.importerCurrentStatus = STATUS_FINISHED;
+        }
+      } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT) {
+        if (exWatcher.importerHistoryId === taskId) {
+          exWatcher.importerHistoryStatus = STATUS_STOPPED;
+        } else if (exWatcher.importerCurrentId === taskId) {
+          exWatcher.importerCurrentStatus = STATUS_STOPPED;
+        }
+      }
+
+      // Marketwatcher
+      else if (eventType === TASKS_MARKETWATCHER_STARTED_EVENT) {
+        exWatcher.marketwatcherStatus = STATUS_STARTED;
+      } else if (eventType === TASKS_MARKETWATCHER_STOPPED_EVENT) {
+        exWatcher.marketwatcherStatus = STATUS_STOPPED;
+      }
+
+      // Candlebatcher
+      else if (eventType === TASKS_CANDLEBATCHER_STARTED_EVENT) {
+        exWatcher.candlebatcherStatus = STATUS_STARTED;
+      } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT) {
+        exWatcher.candlebatcherStatus = STATUS_STOPPED;
+      }
+
+      await saveExWatcherState(exWatcher.state);
+      await publishEvents(exWatcher.events);
+
+      if (exWatcher.status === STATUS_STARTING) {
+        ExWatcherRunner.start(exWatcher.state);
+      }
+      if (exWatcher.status === STATUS_STOPPING) {
+        ExWatcherRunner.stop(exWatcher.state);
+      }
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
+          cause: e,
+          info: { ...state }
+        },
+        "Failed to handle service event with Exchange Data Watcher."
+      );
+      Log.error(error);
+      throw error;
+    }
+  }
+
+  static async start(state) {
+    try {
+      if (state.status === STATUS_STARTED)
+        return {
+          taskId: state.taskId,
+          status: state.status
+        };
+
+      const exWatcher = new ExWatcher(state);
+      exWatcher.status = STATUS_STARTING;
+      exWatcher.log(`start`);
+      const events = [];
       if (
-        exWatcherState.importerHistoryStatus !== STATUS_STARTED &&
-        exWatcherState.importerHistoryStatus !== STATUS_FINISHED
+        exWatcher.importerHistoryStatus !== STATUS_STARTED &&
+        exWatcher.importerHistoryStatus !== STATUS_FINISHED
       ) {
         exWatcher.log("Importer History!");
-        if (exWatcherState.candlebatcherSettings.requiredHistoryMaxBars > 0) {
+        if (exWatcher.candlebatcherSettings.requiredHistoryMaxBars > 0) {
           const dateFrom = getMaxTimeframeDateFrom(
-            exWatcherState.timeframes,
-            exWatcherState.candlebatcherSettings.requiredHistoryMaxBars * 2
+            exWatcher.timeframes,
+            exWatcher.candlebatcherSettings.requiredHistoryMaxBars * 2
           );
-          // TODO: test startOf("day")
+
           const dateTo = dayjs
-            .utc(`${dayjs.utc().format("YYYY-MM-DD")}T00:00:00.000Z`)
+            .utc()
+            .startOf("day")
             .toISOString();
 
           if (dayjs.utc(dateFrom).valueOf() <= dayjs.utc(dateTo).valueOf()) {
             const importerHistoryParams = {
-              providerType: exWatcherState.candlebatcherProviderType,
-              exchange: exWatcherState.exchange,
-              asset: exWatcherState.asset,
-              currency: exWatcherState.currency,
-              timeframes: exWatcherState.timeframes,
+              providerType: exWatcher.candlebatcherProviderType,
+              exchange: exWatcher.exchange,
+              asset: exWatcher.asset,
+              currency: exWatcher.currency,
+              timeframes: exWatcher.timeframes,
               dateFrom,
               dateTo,
               saveToCache: true,
-              proxy: exWatcherState.candlebatcherSettings.proxy
+              proxy: exWatcher.candlebatcherSettings.proxy
             };
 
-            const result = await ImporterRunner.start(
-              context,
+            const { taskId, status, event } = await ImporterRunner.start(
               importerHistoryParams
             );
-            exWatcher.importerHistoryId = result.taskId;
-            exWatcher.importerHistoryStatus = result.status;
-            await exWatcher.save();
-            exWatcherState = exWatcher.getCurrentState();
+            exWatcher.importerHistoryId = taskId;
+            exWatcher.importerHistoryStatus = status;
+            events.push(event);
           } else {
             exWatcher.importerHistoryStatus = STATUS_FINISHED;
-            await exWatcher.save();
-            exWatcherState = exWatcher.getCurrentState();
           }
         } else {
           exWatcher.importerHistoryStatus = STATUS_FINISHED;
-          await exWatcher.save();
-          exWatcherState = exWatcher.getCurrentState();
         }
       }
 
       if (
-        exWatcherState.importerHistoryStatus === STATUS_FINISHED &&
-        exWatcherState.marketwatcherStatus !== STATUS_STARTED &&
-        exWatcherState.marketwatcherStatus !== STATUS_STARTING
+        exWatcher.importerHistoryStatus === STATUS_FINISHED &&
+        exWatcher.marketwatcherStatus !== STATUS_STARTED &&
+        exWatcher.marketwatcherStatus !== STATUS_STARTING
       ) {
         exWatcher.log("Marketwatcher!");
         const marketwatcherParams = {
-          exchange: exWatcherState.exchange,
-          providerType: exWatcherState.marketwatcherProviderType,
+          exchange: exWatcher.exchange,
+          providerType: exWatcher.marketwatcherProviderType,
           subscriptions: [
             {
-              asset: exWatcherState.asset,
-              currency: exWatcherState.currency
+              asset: exWatcher.asset,
+              currency: exWatcher.currency
             }
           ]
         };
 
-        const result = await MarketwatcherRunner.start(
-          context,
+        const { taskId, status, event } = await MarketwatcherRunner.start(
           marketwatcherParams
         );
-        exWatcher.marketwatcherId = result.taskId;
-        exWatcher.marketwatcherStatus = result.status;
-        await exWatcher.save();
-        exWatcherState = exWatcher.getCurrentState();
+        exWatcher.marketwatcherId = taskId;
+        exWatcher.marketwatcherStatus = status;
+        events.push(event);
       }
 
       if (
-        exWatcherState.marketwatcherStatus === STATUS_STARTED &&
-        exWatcherState.candlebatcherStatus !== STATUS_STARTED &&
-        exWatcherState.candlebatcherStatus !== STATUS_STARTING
+        exWatcher.marketwatcherStatus === STATUS_STARTED &&
+        exWatcher.candlebatcherStatus !== STATUS_STARTED &&
+        exWatcher.candlebatcherStatus !== STATUS_STARTING
       ) {
         exWatcher.log("Candlebatcher!");
         const candlebatcherParams = {
-          providerType: exWatcherState.candlebatcherProviderType,
-          exchange: exWatcherState.exchange,
-          asset: exWatcherState.asset,
-          currency: exWatcherState.currency,
-          timeframes: exWatcherState.timeframes,
-          settings: exWatcherState.candlebatcherSettings
+          providerType: exWatcher.candlebatcherProviderType,
+          exchange: exWatcher.exchange,
+          asset: exWatcher.asset,
+          currency: exWatcher.currency,
+          timeframes: exWatcher.timeframes,
+          settings: exWatcher.candlebatcherSettings
         };
 
-        const result = await CandlebatcherRunner.start(
-          context,
+        const { taskId, status, event } = await CandlebatcherRunner.start(
           candlebatcherParams
         );
-        exWatcher.candlebatcherId = result.taskId;
-        exWatcher.candlebatcherStatus = result.status;
-        await exWatcher.save();
-        exWatcherState = exWatcher.getCurrentState();
+        exWatcher.candlebatcherId = taskId;
+        exWatcher.candlebatcherStatus = status;
+        events.push(event);
       }
       if (
-        exWatcherState.candlebatcherStatus === STATUS_STARTED &&
-        exWatcherState.importerCurrentStatus !== STATUS_STARTED &&
-        exWatcherState.importerCurrentStatus !== STATUS_FINISHED
+        exWatcher.candlebatcherStatus === STATUS_STARTED &&
+        exWatcher.importerCurrentStatus !== STATUS_STARTED &&
+        exWatcher.importerCurrentStatus !== STATUS_FINISHED
       ) {
         exWatcher.log("Importer Current!");
         const importerCurrentParams = {
-          providerType: exWatcherState.candlebatcherProviderType,
-          exchange: exWatcherState.exchange,
-          asset: exWatcherState.asset,
-          currency: exWatcherState.currency,
-          timeframes: exWatcherState.timeframes,
-          // TODO: test startOf("day")
+          providerType: exWatcher.candlebatcherProviderType,
+          exchange: exWatcher.exchange,
+          asset: exWatcher.asset,
+          currency: exWatcher.currency,
+          timeframes: exWatcher.timeframes,
           dateFrom: dayjs
-            .utc(`${dayjs.utc().format("YYYY-MM-DD")}T00:00:00.000Z`)
+            .utc()
+            .startOf("day")
             .toISOString(),
           dateTo: dayjs.utc().toISOString(),
           saveToCache: true,
-          proxy: exWatcherState.candlebatcherSettings.proxy
+          proxy: exWatcher.candlebatcherSettings.proxy
         };
 
-        const result = await ImporterRunner.start(
-          context,
+        const { taskId, status, event } = await ImporterRunner.start(
           importerCurrentParams
         );
-        exWatcher.importerCurrentId = result.taskId;
-        exWatcher.importerCurrentStatus = result.status;
-        await exWatcher.save();
+        exWatcher.importerCurrentId = taskId;
+        exWatcher.importerCurrentStatus = status;
+        events.push(event);
       }
+
+      await saveExWatcherState(exWatcher.state);
+      await publishEvents([...exWatcher.events, ...events]);
 
       return {
         taskId: exWatcher.taskId,
         status: exWatcher.status
       };
-    } catch (error) {
-      const err = new VError(
+    } catch (e) {
+      const error = new ServiceError(
         {
-          name: "ExWatcherRunnerError",
-          cause: error,
-          info: params
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
+          cause: e,
+          info: state
         },
         "Failed to start Exchange Data Watcher"
       );
-      Log.error(err);
-      throw err;
+      Log.error(error);
+      throw error;
     }
   }
 
-  static async stop(context, params) {
+  static async stop(state) {
     try {
-      ServiceValidator.check(EXWATCHER_STOP_PARAMS, params);
-      const exWatcherState = await getExWatcherById(params.taskId);
-      if (!exWatcherState) throw new Error("ExWatcherNotFound");
-      const exWatcher = new ExWatcher(context, exWatcherState);
-      exWatcher.log("stop");
-      if (exWatcher.status === STATUS_STOPPED)
+      if (state.status === STATUS_STOPPED)
         return {
-          taskId: exWatcher.taskId,
+          taskId: state.taskId,
           status: STATUS_STOPPED
         };
-
+      const exWatcher = new ExWatcher(state);
+      exWatcher.status = STATUS_STOPPING;
+      exWatcher.log("stop");
+      const events = [];
       if (
-        exWatcherState.importerHistoryStatus !== STATUS_STOPPED &&
-        exWatcherState.importerHistoryStatus !== STATUS_FINISHED
+        exWatcher.importerHistoryStatus !== STATUS_STOPPED &&
+        exWatcher.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        const result = await ImporterRunner.stop(context, {
-          taskId: exWatcherState.importerHistoryId
+        const { taskId, status, event } = await ImporterRunner.stop({
+          taskId: exWatcher.importerHistoryId
         });
-        exWatcher.importerHistoryId = result.taskId;
-        exWatcher.importerHistoryStatus = result.status;
+        exWatcher.importerHistoryId = taskId;
+        exWatcher.importerHistoryStatus = status;
+        events.push(event);
       }
 
       if (
-        exWatcherState.importerCurrentStatus !== STATUS_STOPPED &&
-        exWatcherState.importerCurrentStatus !== STATUS_FINISHED
+        exWatcher.importerCurrentStatus !== STATUS_STOPPED &&
+        exWatcher.importerCurrentStatus !== STATUS_FINISHED
       ) {
-        const result = await ImporterRunner.stop(context, {
-          taskId: exWatcherState.importerCurrentId
+        const { taskId, status, event } = await ImporterRunner.stop({
+          taskId: exWatcher.importerCurrentId
         });
-        exWatcher.importerCurrentId = result.taskId;
-        exWatcher.importerCurrentStatus = result.status;
+        exWatcher.importerCurrentId = taskId;
+        exWatcher.importerCurrentStatus = status;
+        events.push(event);
       }
 
       if (
-        exWatcherState.candlebatcherStatus !== STATUS_STOPPED ||
-        exWatcherState.candlebatcherStatus !== STATUS_STOPPING
+        exWatcher.candlebatcherStatus !== STATUS_STOPPED ||
+        exWatcher.candlebatcherStatus !== STATUS_STOPPING
       ) {
-        const result = await CandlebatcherRunner.stop(context, {
-          taskId: exWatcherState.candlebatcherId
+        const { taskId, status, event } = await CandlebatcherRunner.stop({
+          taskId: exWatcher.candlebatcherId
         });
-        exWatcher.candlebatcherId = result.taskId;
-        exWatcher.candlebatcherStatus = result.status;
+        exWatcher.candlebatcherId = taskId;
+        exWatcher.candlebatcherStatus = status;
+        events.push(event);
       }
 
       if (
-        exWatcherState.marketwatcherStatus !== STATUS_STOPPED ||
-        exWatcherState.marketwatcherStatus !== STATUS_STOPPING
+        exWatcher.marketwatcherStatus !== STATUS_STOPPED ||
+        exWatcher.marketwatcherStatus !== STATUS_STOPPING
       ) {
-        const result = await MarketwatcherRunner.stop(context, {
-          taskId: exWatcherState.marketwatcherId
+        const { taskId, status, event } = await MarketwatcherRunner.stop({
+          taskId: exWatcher.marketwatcherId
         });
-        exWatcher.marketwatcherId = result.taskId;
-        exWatcher.marketwatcherStatus = result.status;
+        exWatcher.marketwatcherId = taskId;
+        exWatcher.marketwatcherStatus = status;
+        events.push(event);
       }
-      await exWatcher.save();
+      await saveExWatcherState(exWatcher.state);
+      await publishEvents([...exWatcher.events, ...events]);
 
       return { taskId: exWatcher.taskId, status: exWatcher.status };
     } catch (error) {
-      const err = new VError(
+      const err = new ServiceError(
         {
-          name: "ExWatcherRunnerError",
+          name: ServiceError.types.EX_WATCHER_RUNNER_ERROR,
           cause: error,
-          info: params
+          info: state
         },
         "Failed to stop Exchange Data Watcher"
-      );
-      Log.error(err);
-      throw err;
-    }
-  }
-
-  static async update(context, params) {
-    try {
-      ServiceValidator.check(EXWATCHER_UPDATE_PARAMS, params);
-      const exWatcherState = await getExWatcherById(params.taskId);
-      if (!exWatcherState) throw new Error("ExWatcherNotFound");
-      const exWatcher = new ExWatcher(context, exWatcherState);
-      exWatcher.log("update");
-      if (params.candlebatcherSettings) {
-        exWatcher.candlebatcherSettings = params.candlebatcherSettings;
-        await CandlebatcherRunner.update(context, {
-          taskId: exWatcherState.candlebatcherId,
-          settings: params.candlebatcherSettings
-        });
-      }
-
-      await exWatcher.save();
-    } catch (error) {
-      const err = new VError(
-        {
-          name: "ExWathcerRunnerError",
-          cause: error,
-          info: params
-        },
-        "Failed to update Exchange Data Watcher"
       );
       Log.error(err);
       throw err;

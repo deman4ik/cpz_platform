@@ -1,39 +1,29 @@
-import VError from "verror";
-import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/lib/dayjs";
 import {
+  STATUS_STARTING,
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_PENDING,
-  STATUS_ERROR,
   createRobotSlug,
   createUserRobotTaskSubject
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
+import {
+  TASKS_USERROBOT_STARTED_EVENT,
+  TASKS_USERROBOT_STOPPED_EVENT
+} from "cpz/events/types/tasks/userRobot";
 import Log from "cpz/log";
-import { saveUserRobotState } from "cpz/tableStorage/userRobots";
 import {
   combineCandlebatcherSettings,
   combineAdvserSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
-import config from "../../config";
-
-const {
-  events: {
-    types: { TASKS_USERROBOT_STARTED_EVENT, TASKS_USERROBOT_STOPPED_EVENT },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
 
 class UserRobot {
-  constructor(context, state) {
-    this._context = context;
+  constructor(state) {
     this._id = state.id;
     this._robotId = state.robotId;
     this._userId = state.userId;
-    this._userRobotId = state.userRobotId;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -53,12 +43,12 @@ class UserRobot {
     this._traderId = state.traderId;
     this._traderStatus = state.traderStatus || STATUS_PENDING;
     this._traderError = state.traderError;
-    this._status = state.status || STATUS_PENDING;
+    this._status = state.status || STATUS_STARTING;
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._error = state.error;
     this._metadata = state.metadata;
-    this._event = null;
+    this._events = {};
   }
 
   log(...args) {
@@ -71,6 +61,7 @@ class UserRobot {
 
   _setStatus() {
     if (
+      this._status === STATUS_STARTING &&
       this._traderStatus === STATUS_STARTED &&
       this._adviserStatus === STATUS_STARTED &&
       this._exwatcherStatus === STATUS_STARTED
@@ -79,104 +70,128 @@ class UserRobot {
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createUserRobotTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          robotId: this._robotId,
-          userId: this._userId
-        }),
-        eventType: TASKS_USERROBOT_STARTED_EVENT.eventType,
-        data: {
-          id: this._id,
-          robotId: this._robotId,
-          userId: this._userId,
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          strategyName: this._strategyName,
-          candlebatcherSettings: this._candlebatcherSettings,
-          adviserSettings: this._adviserSettings,
-          traderSettings: this._traderSettings,
-          status: STATUS_STARTED,
-          startedAt: this._startedAt
+      this._events.started = {
+        eventType: TASKS_USERROBOT_STARTED_EVENT,
+        eventData: {
+          subject: createUserRobotTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            robotId: this._robotId,
+            userId: this._userId
+          }),
+          data: {
+            id: this._id,
+            robotId: this._robotId,
+            userId: this._userId,
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            strategyName: this._strategyName,
+            candlebatcherSettings: this._candlebatcherSettings,
+            adviserSettings: this._adviserSettings,
+            traderSettings: this._traderSettings,
+            status: STATUS_STARTED,
+            startedAt: this._startedAt
+          }
         }
       };
-      return;
-    }
-
-    if (
-      this._traderStatus === STATUS_STOPPED ||
-      this._adviserStatus === STATUS_STOPPED ||
-      this._exwatcherStatus === STATUS_STOPPED
+    } else if (
+      this._status === STATUS_STOPPING &&
+      this._traderStatus === STATUS_STOPPED
     ) {
       this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_STOPPED;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createUserRobotTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          robotId: this._robotId,
-          userId: this._userId
-        }),
-        eventType: TASKS_USERROBOT_STOPPED_EVENT.eventType,
-        data: {
-          id: this._id,
-          robotId: this._robotId,
-          userId: this._userId,
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          strategyName: this._strategyName,
-          candlebatcherSettings: this._candlebatcherSettings,
-          adviserSettings: this._adviserSettings,
-          traderSettings: this._traderSettings,
-          status: STATUS_STOPPED,
-          stoppedAt: this._stoppedAt
+      this._events.stopped = {
+        eventType: TASKS_USERROBOT_STOPPED_EVENT,
+        eventData: {
+          subject: createUserRobotTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            robotId: this._robotId,
+            userId: this._userId
+          }),
+          data: {
+            id: this._id,
+            robotId: this._robotId,
+            userId: this._userId,
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            strategyName: this._strategyName,
+            candlebatcherSettings: this._candlebatcherSettings,
+            adviserSettings: this._adviserSettings,
+            traderSettings: this._traderSettings,
+            status: STATUS_STOPPED,
+            stoppedAt: this._stoppedAt
+          }
         }
       };
-      return;
     }
-
-    if (
-      this._traderStatus === STATUS_STOPPING ||
-      this._adviserStatus === STATUS_STOPPING ||
-      this._exwatcherStatus === STATUS_STOPPING
-    ) {
-      this._status = STATUS_STOPPING;
-      return;
-    }
-
-    if (
-      this._traderStatus === STATUS_ERROR ||
-      this._adviserStatus === STATUS_ERROR ||
-      this._exwatcherStatus === STATUS_ERROR
-    ) {
-      this._stoppedAt = dayjs.utc().toISOString();
-      this._status = STATUS_ERROR;
-      return;
-    }
-    this._status = STATUS_PENDING;
   }
 
   get id() {
     return this._id;
   }
 
-  get status() {
-    return this._status;
+  get robotId() {
+    return this._robotId;
+  }
+
+  get userId() {
+    return this._userId;
+  }
+
+  get exchange() {
+    return this._exchange;
+  }
+
+  get asset() {
+    return this._asset;
+  }
+
+  get currency() {
+    return this._currency;
+  }
+
+  get timeframe() {
+    return this._timeframe;
+  }
+
+  get strategyName() {
+    return this._strategyName;
+  }
+
+  get candlebatcherSettings() {
+    return this._candlebatcherSettings;
+  }
+
+  set candlebatcherSettings(candlebatcherSettings) {
+    this._candlebatcherSettings = {
+      ...this._candlebatcherSettings,
+      ...candlebatcherSettings
+    };
+  }
+
+  get adviserSettings() {
+    return this._adviserSettings;
+  }
+
+  set adviserSettings(adviserSettings) {
+    this._adviserSettings = { ...this._adviserSettings, ...adviserSettings };
+  }
+
+  get traderSettings() {
+    return this._traderSettings;
+  }
+
+  set traderSettings(traderSettings) {
+    this._traderSettings = { ...this._traderSettings, ...traderSettings };
   }
 
   get exwatcherId() {
@@ -230,42 +245,23 @@ class UserRobot {
     this._setStatus();
   }
 
-  get candlebatcherSettings() {
-    return this._candlebatcherSettings;
+  get status() {
+    return this._status;
   }
 
-  set candlebatcherSettings(candlebatcherSettings) {
-    this._candlebatcherSettings = {
-      ...this._candlebatcherSettings,
-      ...candlebatcherSettings
-    };
-  }
-
-  get strategyName() {
-    return this._strategyName;
-  }
-
-  get adviserSettings() {
-    return this._adviserSettings;
-  }
-
-  set adviserSettings(adviserSettings) {
-    this._adviserSettings = { ...this._adviserSettings, ...adviserSettings };
-  }
-
-  get traderSettings() {
-    return this._traderSettings;
-  }
-
-  set traderSettings(traderSettings) {
-    this._traderSettings = { ...this._traderSettings, ...traderSettings };
+  set status(status) {
+    this._status = status;
   }
 
   set error(error) {
     this._error = error;
   }
 
-  getCurrentState() {
+  get events() {
+    return Object.values(this._events);
+  }
+
+  state() {
     return {
       PartitionKey: createRobotSlug({
         exchange: this._exchange,
@@ -301,30 +297,6 @@ class UserRobot {
       error: this._error,
       metadata: this._metadata
     };
-  }
-
-  async save() {
-    try {
-      await saveUserRobotState(this.getCurrentState());
-      if (this._event) {
-        await publishEvents(TASKS_TOPIC, [this._event]);
-        this._event = null;
-      }
-    } catch (error) {
-      throw new VError(
-        {
-          name: "UserRobotError",
-          cause: error,
-          info: {
-            id: this._id,
-            robotId: this._robotId,
-            userId: this._userId
-          }
-        },
-        'Failed to save user robot "%s" state',
-        this._id
-      );
-    }
   }
 }
 

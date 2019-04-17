@@ -1,39 +1,28 @@
-import VError from "verror";
-import { v4 as uuid } from "uuid";
+import ServiceError from "cpz/error";
 import {
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
-  STATUS_BUSY,
-  createAdviserTaskSubject
+  STATUS_BUSY
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
-import { findAdviser, getAdviserById } from "cpz/tableStorage/advisers";
-import { findOtherActiveUserRobotsByServiceId } from "cpz/tableStorage/userRobots";
+import {
+  TASKS_ADVISER_START_EVENT,
+  TASKS_ADVISER_STOP_EVENT,
+  TASKS_ADVISER_UPDATE_EVENT
+} from "cpz/events/types/tasks/adviser";
+import { getAdviserById } from "cpz/tableStorage-client/control/advisers";
+import { findOtherActiveUserRobotsByServiceId } from "cpz/tableStorage-client/control/userRobots";
 import ServiceValidator from "cpz/validator";
+import { ADVISER_SERVICE } from "cpz/config/services";
 import BaseRunner from "../baseRunner";
-import config from "../../config";
-
-const {
-  serviceName,
-  services: { ADVISER_SERVICE },
-  events: {
-    types: {
-      TASKS_ADVISER_START_EVENT,
-      TASKS_ADVISER_STOP_EVENT,
-      TASKS_ADVISER_UPDATE_EVENT
-    },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
 
 class AdviserRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
-      const taskId = uuid();
-      ServiceValidator.check(TASKS_ADVISER_START_EVENT, { ...props, taskId });
+      ServiceValidator.check(TASKS_ADVISER_START_EVENT, { ...props });
       const {
+        taskId,
         robotId,
         exchange,
         asset,
@@ -43,9 +32,7 @@ class AdviserRunner extends BaseRunner {
         settings
       } = props;
 
-      const adviser = await findAdviser({
-        robotId
-      });
+      const adviser = await getAdviserById(taskId);
 
       if (adviser) {
         if (adviser.status === STATUS_STARTED || adviser.status === STATUS_BUSY)
@@ -55,41 +42,36 @@ class AdviserRunner extends BaseRunner {
           };
       }
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createAdviserTaskSubject({
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          robotId
-        }),
+      const event = {
         eventType: TASKS_ADVISER_START_EVENT,
-        data: {
-          taskId,
-          robotId,
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          strategyName,
-          settings
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId,
+            robotId,
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategyName,
+            settings
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "AdviserRunnerError",
+          name: ServiceError.types.ADVISER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to start adviser"
       );
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_ADVISER_STOP_EVENT, props);
       const { taskId, userRobotId } = props;
@@ -111,67 +93,61 @@ class AdviserRunner extends BaseRunner {
       if (userRobots.length > 0) {
         return { taskId, status: adviser.status };
       }
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createAdviserTaskSubject({
-          exchange: adviser.exchange,
-          asset: adviser.asset,
-          currency: adviser.currency,
-          timeframe: adviser.timeframe,
-          robotId: adviser.robotId
-        }),
+
+      const event = {
         eventType: TASKS_ADVISER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId
+          }
         }
-      });
-      return { taskId, status: STATUS_STOPPING };
+      };
+      return { taskId, status: STATUS_STOPPING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "AdviserRunnerError",
+          name: ServiceError.types.ADVISER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to stop adviser"
       );
     }
   }
 
-  static async update(context, props) {
+  static async update(props) {
     try {
       ServiceValidator.check(TASKS_ADVISER_UPDATE_EVENT, props);
       const { taskId, settings } = props;
       const adviser = await getAdviserById(taskId);
       if (!adviser)
-        throw new VError(
+        throw new ServiceError(
           {
-            name: "AdviserNotFound"
+            name: ServiceError.types.ADVISER_NOT_FOUND_ERROR,
+            info: { taskId }
           },
           "Failed to find adviser"
         );
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createAdviserTaskSubject({
-          exchange: adviser.exchange,
-          asset: adviser.asset,
-          currency: adviser.currency,
-          timeframe: adviser.timeframe,
-          robotId: adviser.robotId
-        }),
+      const event = {
         eventType: TASKS_ADVISER_UPDATE_EVENT,
-        data: {
-          taskId,
-          settings
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId,
+            settings
+          }
         }
-      });
+      };
+
+      return { event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "AdviserRunnerError",
+          name: ServiceError.types.ADVISER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to update adviser"
       );

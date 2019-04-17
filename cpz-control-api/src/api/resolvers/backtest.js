@@ -1,12 +1,12 @@
-import { getRobotDB } from "cpz/db";
-import { createErrorOutput } from "cpz/utils/error";
+import ServiceError from "cpz/error";
+import Log from "cpz/log";
+import EventHub from "cpz/eventhub-client";
+import { STATUS_STOPPED, STATUS_STOPPING } from "cpz/config/state";
+import { BACKTEST_SERVICE } from "cpz/config/services";
+import { getRobotDB } from "cpz/db-client/robots";
 import BacktestRunner from "../../taskrunner/tasks/backtestRunner";
 
-async function startBacktest(
-  _,
-  { robotId, backtesterId, overrideParams },
-  { context }
-) {
+async function startBacktest(_, { robotId, backtesterId, overrideParams }) {
   try {
     const robot = await getRobotDB(robotId);
     const backtestParams = {
@@ -14,45 +14,72 @@ async function startBacktest(
       backtesterId,
       ...overrideParams
     };
-    const { taskId, status } = await BacktestRunner.start(
-      context,
-      backtestParams
-    );
+    const { taskId, status } = await BacktestRunner.start(backtestParams);
+    Log.clearContext();
     return {
       success: true,
       taskId,
       status
     };
-  } catch (error) {
-    const errorOutput = createErrorOutput(error);
+  } catch (e) {
+    let error;
+    if (e instanceof ServiceError) {
+      error = e;
+    } else {
+      error = new ServiceError(
+        {
+          name: ServiceError.types.CONTROL_ERROR,
+          cause: e
+        },
+        "Failed to process request"
+      );
+    }
+    Log.clearContext();
     return {
       success: false,
-      error: {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      }
+      error: error.json
     };
   }
 }
 
-async function stopBacktest(_, { taskId }, { context }) {
+async function stopBacktest(_, { taskId }) {
   try {
-    const { status } = await BacktestRunner.stop(context, { taskId });
-    return {
-      success: true,
-      taskId,
-      status
-    };
-  } catch (error) {
-    const errorOutput = createErrorOutput(error);
+    const state = await BacktestRunner.getState(taskId);
+    let result = { success: true };
+    if (
+      state &&
+      (state.status === STATUS_STOPPED || state.status === STATUS_STOPPING)
+    ) {
+      result = {
+        success: true,
+        status: state.status
+      };
+    } else {
+      await EventHub.send(taskId, {
+        taskId,
+        type: "stop",
+        service: BACKTEST_SERVICE
+      });
+    }
+    Log.clearContext();
+    return result;
+  } catch (e) {
+    let error;
+    if (e instanceof ServiceError) {
+      error = e;
+    } else {
+      error = new ServiceError(
+        {
+          name: ServiceError.types.CONTROL_ERROR,
+          cause: e
+        },
+        "Failed to process request"
+      );
+    }
+    Log.clearContext();
     return {
       success: false,
-      error: {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      }
+      error: error.json
     };
   }
 }

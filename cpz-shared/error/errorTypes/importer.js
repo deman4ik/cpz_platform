@@ -1,5 +1,4 @@
-const IMPORTER_RUNNER_ERROR = "ImporterRunnerError";
-
 const IMPORTER_ERROR = "ImporterError";
+const IMPORT_CANDLES_ERROR = "ImportCandles";
 
-export { IMPORTER_RUNNER_ERROR, IMPORTER_ERROR };
+export { IMPORTER_ERROR, IMPORT_CANDLES_ERROR };

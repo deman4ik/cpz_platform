@@ -9,8 +9,6 @@ import {
   TRADE_ACTION_SHORT,
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
-  POS_STATUS_CLOSED,
-  POS_STATUS_CLOSED_AUTO,
   POS_STATUS_OPEN,
   ORDER_STATUS_OPEN,
   ORDER_DIRECTION_BUY,
@@ -19,7 +17,8 @@ import {
   STATUS_STARTED,
   STATUS_STOPPED,
   STATUS_ERROR,
-  createTraderSlug
+  createTraderSlug,
+  CONTROL_SUBJECT
 } from "cpz/config/state";
 import {
   TASKS_TRADER_STARTED_EVENT,
@@ -28,7 +27,6 @@ import {
   SIGNALS_HANDLED_EVENT,
   TRADES_ORDER_EVENT,
   TRADES_POSITION_EVENT,
-  ERROR_TRADER_WARN_EVENT,
   ERROR_TRADER_ERROR_EVENT
 } from "cpz/events/types";
 import { flatten } from "cpz/utils/helpers";
@@ -551,9 +549,9 @@ class Trader {
   _createErrorEvent(error) {
     const { critical = false } = error.info;
     return {
-      eventType: critical ? ERROR_TRADER_ERROR_EVENT : ERROR_TRADER_WARN_EVENT,
+      eventType: ERROR_TRADER_ERROR_EVENT,
       eventData: {
-        subject: this._taskId,
+        subject: CONTROL_SUBJECT,
         data: {
           taskId: this._taskId,
           critical,
@@ -581,9 +579,9 @@ class Trader {
   _createErrorOrderEvent(order) {
     const { critical = false } = order.error.info;
     return {
-      eventType: critical ? ERROR_TRADER_ERROR_EVENT : ERROR_TRADER_WARN_EVENT,
+      eventType: ERROR_TRADER_ERROR_EVENT,
       eventData: {
-        subject: this._taskId,
+        subject: CONTROL_SUBJECT,
         data: {
           taskId: this._taskId,
           critical,

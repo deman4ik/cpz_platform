@@ -3,7 +3,6 @@ import client from "./index";
 import ServiceError from "../../error";
 import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
 import dayjs from "../../utils/lib/dayjs";
-import Log from "../../log";
 
 const { TableQuery, TableUtilities } = azure;
 

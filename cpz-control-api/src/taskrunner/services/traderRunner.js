@@ -1,5 +1,4 @@
-import VError from "verror";
-import { v4 as uuid } from "uuid";
+import ServiceError from "cpz/error";
 import {
   STATUS_STARTED,
   STATUS_STARTING,
@@ -8,31 +7,21 @@ import {
   STATUS_BUSY,
   createTraderTaskSubject
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
-import { findTrader, getTraderById } from "cpz/tableStorage/traders";
+import {
+  TASKS_TRADER_START_EVENT,
+  TASKS_TRADER_STOP_EVENT,
+  TASKS_TRADER_UPDATE_EVENT
+} from "cpz/events/types/tasks/trader";
+import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-import config from "../../config";
-
-const {
-  serviceName,
-  events: {
-    types: {
-      TASKS_TRADER_START_EVENT,
-      TASKS_TRADER_STOP_EVENT,
-      TASKS_TRADER_UPDATE_EVENT
-    },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
 class TraderRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
-      const taskId = uuid();
-
-      ServiceValidator.check(TASKS_TRADER_START_EVENT, { ...props, taskId });
+      ServiceValidator.check(TASKS_TRADER_START_EVENT, { ...props });
       const {
+        taskId,
         robotId,
         userId,
         exchange,
@@ -42,51 +31,50 @@ class TraderRunner extends BaseRunner {
         settings
       } = props;
 
-      const trader = await findTrader({
-        userId,
-        robotId
-      });
+      const trader = await getTraderById(taskId);
       if (trader) {
         if (trader.status === STATUS_STARTED || trader.status === STATUS_BUSY)
           return { taskId, status: STATUS_STARTED };
       }
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createTraderTaskSubject({
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          robotId,
-          userId
-        }),
+      const event = {
         eventType: TASKS_TRADER_START_EVENT,
-        data: {
-          taskId,
-          robotId,
-          userId,
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          settings
+        eventData: {
+          subject: createTraderTaskSubject({
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            robotId,
+            userId
+          }),
+          data: {
+            taskId,
+            robotId,
+            userId,
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            settings
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "TraderRunnerError",
+          name: ServiceError.types.TRADER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to start trader"
       );
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_TRADER_STOP_EVENT, props);
       const { taskId } = props;
@@ -94,66 +82,72 @@ class TraderRunner extends BaseRunner {
       if (!trader) return { taskId, status: STATUS_STOPPED };
       if (trader.status === STATUS_STOPPED)
         return { taskId, status: STATUS_STOPPED };
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createTraderTaskSubject({
-          exchange: trader.exchange,
-          asset: trader.asset,
-          currency: trader.currency,
-          timeframe: trader.timeframe,
-          robotId: trader.robotId,
-          userId: trader.userId
-        }),
+      const event = {
         eventType: TASKS_TRADER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: createTraderTaskSubject({
+            exchange: trader.exchange,
+            asset: trader.asset,
+            currency: trader.currency,
+            timeframe: trader.timeframe,
+            robotId: trader.robotId,
+            userId: trader.userId
+          }),
+          data: {
+            taskId
+          }
         }
-      });
-      return { taskId, status: STATUS_STOPPING };
+      };
+
+      return { taskId, status: STATUS_STOPPING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "TraderRunnerError",
+          name: ServiceError.types.TRADER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to stop trader"
       );
     }
   }
 
-  static async update(context, props) {
+  static async update(props) {
     try {
       ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, props);
       const { taskId, settings } = props;
       const trader = await getTraderById(taskId);
       if (!trader)
-        throw new VError(
+        throw new ServiceError(
           {
-            name: "TraderNotFound"
+            name: ServiceError.types.TRADER_NOT_FOUND_ERROR,
+            info: { taskId }
           },
           "Failed to find trader"
         );
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createTraderTaskSubject({
-          exchange: trader.exchange,
-          asset: trader.asset,
-          currency: trader.currency,
-          timeframe: trader.timeframe,
-          robotId: trader.robotId,
-          userId: trader.userId
-        }),
+
+      const event = {
         eventType: TASKS_TRADER_UPDATE_EVENT,
-        data: {
-          taskId,
-          settings
+        eventData: {
+          subject: createTraderTaskSubject({
+            exchange: trader.exchange,
+            asset: trader.asset,
+            currency: trader.currency,
+            timeframe: trader.timeframe,
+            robotId: trader.robotId,
+            userId: trader.userId
+          }),
+          data: {
+            taskId,
+            settings
+          }
         }
-      });
+      };
+      return { event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "TraderRunnerError",
+          name: ServiceError.types.TRADER_RUNNER_ERROR,
           cause: error,
           info: props
         },

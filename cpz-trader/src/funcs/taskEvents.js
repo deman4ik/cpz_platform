@@ -28,10 +28,7 @@ import {
   TASKS_TRADER_STOPPED_EVENT_SCHEMA,
   TASKS_TRADER_UPDATED_EVENT_SCHEMA
 } from "cpz/events/schemas/tasks/trader";
-import {
-  ERROR_TRADER_ERROR_EVENT_SCHEMA,
-  ERROR_TRADER_WARN_EVENT_SCHEMA
-} from "cpz/events/schemas/error";
+import { ERROR_TRADER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_TRADER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
 import { PRICES_HANDLED_EVENT_SCHEMA } from "cpz/events/schemas/prices";
 import { SIGNALS_HANDLED_EVENT_SCHEMA } from "cpz/events/schemas/signals";
@@ -75,7 +72,6 @@ class TaskEvents extends BaseService {
         TASKS_TRADER_STOP_EVENT_SCHEMA,
         TASKS_TRADER_UPDATE_EVENT_SCHEMA,
         ERROR_TRADER_ERROR_EVENT_SCHEMA,
-        ERROR_TRADER_WARN_EVENT_SCHEMA,
         LOG_TRADER_LOG_EVENT_SCHEMA,
         PRICES_HANDLED_EVENT_SCHEMA,
         SIGNALS_HANDLED_EVENT_SCHEMA,

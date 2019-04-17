@@ -8,7 +8,6 @@ const TABLES = {
 
 const { TableQuery, TableUtilities } = azure;
 
-client.createTableIfNotExists(TABLES.STORAGE_BACKTESTS_TABLE);
 /**
  * Query Backtest State by uniq Task ID
  *

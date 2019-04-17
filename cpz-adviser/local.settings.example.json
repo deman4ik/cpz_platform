@@ -1,18 +1,20 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-        "NODE_TLS_REJECT_UNAUTHORIZED": 0,
-        "FUNCTIONS_WORKER_RUNTIME": "node",
-        "AzureWebJobsStorage": "",
-        "AZ_STORAGE_TRADE_CS": "",
-        "AZ_STORAGE_MARKET_CS": "",
-        "API_KEY": "test",
-        "EG_TASKS_ENDPOINT": "https://localhost:443",
-        "EG_TASKS_KEY": "test",
-        "EG_LOG_ENDPOINT": "https://localhost:443",
-        "EG_LOG_KEY": "test",
-        "EG_SIGNALS_ENDPOINT": "https://localhost:443",
-        "EG_SIGNALS_KEY": "test",
-        "DEBUG": true
-    }
+  "IsEncrypted": false,
+  "Values": {
+    "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "",
+    "AZ_STORAGE_TRADE_CS": "",
+    "AZ_STORAGE_MARKET_CS": "",
+    "API_KEY": "test",
+    "EG_TASKS_ENDPOINT": "https://localhost:443",
+    "EG_TASKS_KEY": "test",
+    "EG_LOG_ENDPOINT": "https://localhost:443",
+    "EG_LOG_KEY": "test",
+    "EG_SIGNALS_ENDPOINT": "https://localhost:443",
+    "EG_SIGNALS_KEY": "test",
+    "EG_CANDLES_ENDPOINT": "https://localhost:443",
+    "EG_CANDLES_KEY": "test",
+    "DEBUG": true
+  }
 }

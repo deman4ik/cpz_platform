@@ -3,11 +3,8 @@ import { BASE_ERROR } from "../base";
 import { CANDLEBATCHER_SETTINGS } from "../settings";
 import {
   EXWATCHER_START,
-  EXWATCHER_STOP,
-  EXWATCHER_UPDATE,
   TASKS_EXWATCHER_STARTED_EVENT,
-  TASKS_EXWATCHER_STOPPED_EVENT,
-  TASKS_EXWATCHER_UPDATED_EVENT
+  TASKS_EXWATCHER_STOPPED_EVENT
 } from "../../types/tasks/exwatcher";
 
 const EXWATCHER_START_SCHEMA = {
@@ -42,29 +39,7 @@ const EXWATCHER_START_SCHEMA = {
     }
   }
 };
-const EXWATCHER_STOP_SCHEMA = {
-  [EXWATCHER_STOP]: {
-    taskId: {
-      description: "Uniq watcher id.",
-      type: "string",
-      empty: false
-    }
-  }
-};
-const EXWATCHER_UPDATE_SCHEMA = {
-  [EXWATCHER_UPDATE]: {
-    taskId: {
-      description: "Uniq watcher id.",
-      type: "string",
-      empty: false
-    },
-    candlebatcherSettings: {
-      description: "Candlebatcher settings.",
-      type: "object",
-      props: CANDLEBATCHER_SETTINGS
-    }
-  }
-};
+
 const TASKS_EXWATCHER_STARTED_EVENT_SCHEMA = {
   [TASKS_EXWATCHER_STARTED_EVENT]: {
     taskId: {
@@ -85,22 +60,9 @@ const TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA = {
     error: BASE_ERROR
   }
 };
-const TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA = {
-  [TASKS_EXWATCHER_UPDATED_EVENT]: {
-    taskId: {
-      description: "Uniq task id.",
-      type: "string",
-      empty: false
-    },
-    error: BASE_ERROR
-  }
-};
 
 export {
   EXWATCHER_START_SCHEMA,
-  EXWATCHER_STOP_SCHEMA,
-  EXWATCHER_UPDATE_SCHEMA,
   TASKS_EXWATCHER_STARTED_EVENT_SCHEMA,
-  TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA,
-  TASKS_EXWATCHER_UPDATED_EVENT_SCHEMA
+  TASKS_EXWATCHER_STOPPED_EVENT_SCHEMA
 };

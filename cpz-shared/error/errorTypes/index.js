@@ -1,12 +1,4 @@
-const EXECUTE_ORDER_ERROR = "ExecutingOrder";
-
-const HANDLING_ORDER_ERROR = "HandlingOrder";
-
-const IMPORT_CANDLES_ERROR = "ImportCandles";
-
-const NOT_IMPL_ERROR = "NotImlementedError";
-
-const USER_ROBOT_ERROR = "UserRobotError";
+const NOT_IMPLEMENTED_ERROR = "NotImplementedError";
 
 const KEY_VAULT_ERROR = "KeyVaultError";
 
@@ -28,7 +20,6 @@ export * from "./marketwatcher";
 export * from "./candlebatcher";
 export * from "./backtester";
 export * from "./connector";
-export * from "./exwatcher";
 export * from "./provider";
 export * from "./importer";
 export * from "./adviser";
@@ -42,12 +33,8 @@ export * from "./auth";
 export * from "./eventslogger";
 
 export {
-  IMPORT_CANDLES_ERROR,
-  HANDLING_ORDER_ERROR,
-  EXECUTE_ORDER_ERROR,
-  USER_ROBOT_ERROR,
   KEY_VAULT_ERROR,
-  NOT_IMPL_ERROR,
+  NOT_IMPLEMENTED_ERROR,
   UNKNOWN_ERROR,
   NETWOKR_ERROR,
   RETRY_ERROR,

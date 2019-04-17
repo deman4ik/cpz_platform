@@ -1,40 +1,26 @@
-import VError from "verror";
-import { v4 as uuid } from "uuid";
 import {
+  STATUS_STARTING,
   STATUS_STARTED,
   STATUS_STOPPED,
-  STATUS_STOPPING,
   STATUS_PENDING,
-  STATUS_ERROR,
   STATUS_FINISHED,
   createBacktestSlug,
   createBacktestTaskSubject
 } from "cpz/config/state";
+import {
+  TASKS_BACKTEST_STARTED_EVENT,
+  TASKS_BACKTEST_STOPPED_EVENT,
+  TASKS_BACKTEST_FINISHED_EVENT
+} from "cpz/events/types/tasks/backtest";
 import Log from "cpz/log";
-import publishEvents from "cpz/eventgrid";
-import { saveBacktestState } from "cpz/tableStorage/backtests";
 import {
   combineBacktesterSettings,
   combineAdvserSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
 
-import config from "../../config";
-
-const {
-  events: {
-    types: {
-      TASKS_BACKTEST_STARTED_EVENT,
-      TASKS_BACKTEST_STOPPED_EVENT,
-      TASKS_BACKTEST_FINISHED_EVENT
-    },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
-
 class Backtest {
-  constructor(context, state) {
-    this._context = context;
+  constructor(state) {
     this._robotId = state.robotId;
     this._userId = state.userId;
     this._strategyName = state.strategyName;
@@ -47,17 +33,17 @@ class Backtest {
     this._settings = combineBacktesterSettings(state.settings);
     this._adviserSettings = combineAdvserSettings(state.adviserSettings);
     this._traderSettings = combineTraderSettings(state.traderSettings);
-    this._backtesterId = state.backtesterId || uuid();
+    this._backtesterId = state.backtesterId;
     this._taskId = this._backtesterId;
     this._backtesterStatus = state.backtesterStatus || STATUS_PENDING;
     this._backtesterError = state.backtesterError;
     this._importerId = state.importerId;
     this._importerStatus = state.importerStatus || STATUS_PENDING;
     this._importerError = state.importerError;
-    this._status = state.status || STATUS_PENDING;
+    this._status = state.status || STATUS_STARTING;
     this._error = state.error;
     this._metadata = state.metadata;
-    this._event = null;
+    this._events = {};
   }
 
   log(...args) {
@@ -70,95 +56,139 @@ class Backtest {
 
   _setStatus() {
     if (
+      this._status === STATUS_STARTING &&
       this._importerStatus === STATUS_FINISHED &&
       this._backtesterStatus === STATUS_STARTED
     ) {
       this._status = STATUS_STARTED;
       this._error = null;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createBacktestTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          robotId: this._robotId,
-          userId: this._userId
-        }),
-        eventType: TASKS_BACKTEST_STARTED_EVENT.eventType,
-        data: {
-          taskId: this._taskId
+      this._events.started = {
+        eventType: TASKS_BACKTEST_STARTED_EVENT,
+        eventData: {
+          subject: createBacktestTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            robotId: this._robotId,
+            userId: this._userId
+          }),
+
+          data: {
+            taskId: this._taskId
+          }
         }
       };
-      return;
-    }
-
-    if (this._backtesterStatus === STATUS_STOPPED) {
+    } else if (this._backtesterStatus === STATUS_STOPPED) {
       this._status = STATUS_STOPPED;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createBacktestTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          robotId: this._robotId,
-          userId: this._userId
-        }),
-        eventType: TASKS_BACKTEST_STOPPED_EVENT.eventType,
-        data: {
-          taskId: this._taskId
+      this._events.stopped = {
+        eventType: TASKS_BACKTEST_STOPPED_EVENT,
+        eventData: {
+          subject: createBacktestTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            robotId: this._robotId,
+            userId: this._userId
+          }),
+          data: {
+            taskId: this._taskId
+          }
         }
       };
-      return;
-    }
-
-    if (this._backtesterStatus === STATUS_FINISHED) {
+    } else if (this._backtesterStatus === STATUS_FINISHED) {
       this._status = STATUS_FINISHED;
-      this._event = {
-        id: uuid(),
-        dataVersion: "1.0",
-        eventTime: new Date(),
-        subject: createBacktestTaskSubject({
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          robotId: this._robotId,
-          userId: this._userId
-        }),
-        eventType: TASKS_BACKTEST_FINISHED_EVENT.eventType,
-        data: {
-          taskId: this._taskId
+      this._events.finished = {
+        eventType: TASKS_BACKTEST_FINISHED_EVENT,
+        eventData: {
+          subject: createBacktestTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
+            timeframe: this._timeframe,
+            robotId: this._robotId,
+            userId: this._userId
+          }),
+          data: {
+            taskId: this._taskId
+          }
         }
       };
-      return;
     }
-    if (this._backtesterStatus === STATUS_STOPPING) {
-      this._status = STATUS_STOPPING;
-      return;
-    }
+  }
 
-    if (
-      this._importerStatus === STATUS_ERROR ||
-      this._backtesterStatus === STATUS_ERROR
-    ) {
-      this._status = STATUS_ERROR;
-      return;
-    }
-    this._status = STATUS_PENDING;
+  get robotId() {
+    return this._robotId;
+  }
+
+  get userId() {
+    return this._userId;
+  }
+
+  get strategyName() {
+    return this._strategyName;
+  }
+
+  get exchange() {
+    return this._exchange;
+  }
+
+  get asset() {
+    return this._asset;
+  }
+
+  get currency() {
+    return this._currency;
+  }
+
+  get timeframe() {
+    return this._timeframe;
+  }
+
+  get dateFrom() {
+    return this._dateFrom;
+  }
+
+  get dateTo() {
+    return this._dateTo;
+  }
+
+  get settings() {
+    return this._settings;
+  }
+
+  set settings(settings) {
+    this._settings = {
+      ...this._settings,
+      ...settings
+    };
+  }
+
+  get adviserSettings() {
+    return this._adviserSettings;
+  }
+
+  set adviserSettings(adviserSettings) {
+    this._adviserSettings = {
+      ...this._adviserSettings,
+      ...adviserSettings
+    };
+  }
+
+  get traderSettings() {
+    return this._traderSettings;
+  }
+
+  set traderSettings(traderSettings) {
+    this._traderSettings = {
+      ...this._traderSettings,
+      ...traderSettings
+    };
   }
 
   get taskId() {
     return this._taskId;
-  }
-
-  get status() {
-    return this._status;
   }
 
   get backtesterId() {
@@ -195,37 +225,8 @@ class Backtest {
     this._setStatus();
   }
 
-  get settings() {
-    return this._settings;
-  }
-
-  set settings(settings) {
-    this._settings = {
-      ...this._settings,
-      ...settings
-    };
-  }
-
-  get adviserSettings() {
-    return this._adviserSettings;
-  }
-
-  set adviserSettings(adviserSettings) {
-    this._adviserSettings = {
-      ...this._adviserSettings,
-      ...adviserSettings
-    };
-  }
-
-  get traderSettings() {
-    return this._traderSettings;
-  }
-
-  set traderSettings(traderSettings) {
-    this._traderSettings = {
-      ...this._traderSettings,
-      ...traderSettings
-    };
+  get status() {
+    return this._status;
   }
 
   set error(error) {
@@ -233,10 +234,10 @@ class Backtest {
   }
 
   get events() {
-    return this._events;
+    return Object.values(this._events);
   }
 
-  getCurrentState() {
+  state() {
     return {
       PartitionKey: createBacktestSlug({
         exchange: this._exchange,
@@ -268,28 +269,6 @@ class Backtest {
       error: this._error,
       metadata: this._metadata
     };
-  }
-
-  async save() {
-    try {
-      await saveBacktestState(this.getCurrentState());
-      if (this._event) {
-        await publishEvents(TASKS_TOPIC, [this._event]);
-        this._event = null;
-      }
-    } catch (error) {
-      throw new VError(
-        {
-          name: "BacktestError",
-          cause: error,
-          info: {
-            id: this._taskId
-          }
-        },
-        'Failed to save backtest "%s" state',
-        this._taskId
-      );
-    }
   }
 }
 

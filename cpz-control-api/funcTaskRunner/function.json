@@ -1,0 +1,15 @@
+{
+  "disabled": false,
+  "entryPoint": "run",
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "messages",
+      "direction": "in",
+      "eventHubName": "taskrunner",
+      "connection": "TASKRUNNER_EVENTHUB",
+      "cardinality": "many",
+      "consumerGroup": "$Default"
+    }
+  ]
+}

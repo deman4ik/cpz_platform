@@ -1,33 +1,30 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import { v4 as uuid } from "uuid";
 import {
+  STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_FINISHED,
   createBacktesterTaskSubject
 } from "cpz/config/state";
-import { getBacktesterById } from "cpz/tableStorage/backtesters";
-import publishEvents from "cpz/eventgrid";
+import {
+  TASKS_BACKTESTER_START_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT
+} from "cpz/events/types/tasks/backtester";
+import { getBacktesterById } from "cpz/tableStorage-client/backtest/backtesters";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
 
-import config from "../../config";
-
-const {
-  serviceName,
-  events: {
-    types: { TASKS_BACKTESTER_START_EVENT, TASKS_BACKTESTER_STOP_EVENT },
-    topics: { TASKS_TOPIC }
-  }
-} = config;
-
 class BacktesterRunner extends BaseRunner {
-  static async start(context, props) {
+  static async start(props) {
     try {
       const taskId = props.taskId || uuid();
 
-      ServiceValidator.check(TASKS_BACKTESTER_START_EVENT, { ...props, taskId });
+      ServiceValidator.check(TASKS_BACKTESTER_START_EVENT, {
+        ...props,
+        taskId
+      });
       const {
         robotId,
         userId,
@@ -43,53 +40,63 @@ class BacktesterRunner extends BaseRunner {
         traderSettings
       } = props;
 
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createBacktesterTaskSubject({
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          robotId,
-          userId
-        }),
+      const backtester = await getBacktesterById(taskId);
+      if (backtester && backtester.status === STATUS_STARTED)
+        throw new ServiceError(
+          {
+            name: ServiceError.types.BACKTESTER_ALREADY_STARTED,
+            info: { taskId }
+          },
+          "Backtester already started"
+        );
+
+      const event = {
         eventType: TASKS_BACKTESTER_START_EVENT,
-        data: {
-          taskId,
-          robotId,
-          userId,
-          strategyName,
-          exchange,
-          asset,
-          currency,
-          timeframe,
-          settings,
-          dateFrom,
-          dateTo,
-          adviserSettings,
-          traderSettings
+        eventData: {
+          subject: createBacktesterTaskSubject({
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            robotId,
+            userId
+          }),
+          data: {
+            taskId,
+            robotId,
+            userId,
+            strategyName,
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            settings,
+            dateFrom,
+            dateTo,
+            adviserSettings,
+            traderSettings
+          }
         }
-      });
-      return { taskId, status: STATUS_STARTING };
+      };
+
+      return { taskId, status: STATUS_STARTING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "BacktesterRunnerError",
+          name: ServiceError.types.BACKTESTER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to start backtest"
       );
     }
   }
 
-  static async stop(context, props) {
+  static async stop(props) {
     try {
       ServiceValidator.check(TASKS_BACKTESTER_STOP_EVENT, props);
       const { taskId } = props;
-      const backtester = await getBacktesterById({
-        taskId
-      });
+      const backtester = await getBacktesterById(taskId);
 
       if (!backtester)
         return {
@@ -101,28 +108,31 @@ class BacktesterRunner extends BaseRunner {
         backtester.status === STATUS_FINISHED
       )
         return { taskId, status: backtester.status };
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: createBacktesterTaskSubject({
-          exchange: backtester.exchange,
-          asset: backtester.asset,
-          currency: backtester.currency,
-          timeframe: backtester.timeframe,
-          robotId: backtester.robotId,
-          userId: backtester.userId
-        }),
+
+      const event = {
         eventType: TASKS_BACKTESTER_STOP_EVENT,
-        data: {
-          taskId
+        eventData: {
+          subject: createBacktesterTaskSubject({
+            exchange: backtester.exchange,
+            asset: backtester.asset,
+            currency: backtester.currency,
+            timeframe: backtester.timeframe,
+            robotId: backtester.robotId,
+            userId: backtester.userId
+          }),
+          data: {
+            taskId
+          }
         }
-      });
-      return { taskId, status: STATUS_STOPPING };
+      };
+
+      return { taskId, status: STATUS_STOPPING, event };
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "BacktesterRunnerError",
+          name: ServiceError.types.BACKTESTER_RUNNER_ERROR,
           cause: error,
-          info: props
+          info: { ...props }
         },
         "Failed to stop backtest"
       );

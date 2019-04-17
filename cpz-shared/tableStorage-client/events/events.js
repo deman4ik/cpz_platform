@@ -7,7 +7,7 @@ const TABLES = {
   STORAGE_POSITIONS_EVENTS_TABLE: "PositionsEvents",
   STORAGE_LOGS_EVENTS_TABLE: "LogEvents",
   STORAGE_ERRORS_EVENTS_TABLE: "ErrorEvents",
-  STORAGE_TRADER_FAILED_EVENTS_TABLE: "TraderFailedEvents"
+  STORAGE_FAILED_EVENTS_TABLE: "FailedToPublishEvents"
 };
 
 /**
@@ -63,8 +63,8 @@ const saveErrorsEvent = data =>
  *
  * @param {Object} data
  */
-const saveTraderFailedEvent = data =>
-  client.insertOrMergeEntity(TABLES.STORAGE_TRADER_FAILED_EVENTS_TABLE, data);
+const saveFailedEvent = data =>
+  client.insertOrMergeEntity(TABLES.STORAGE_FAILED_EVENTS_TABLE, data);
 
 export {
   saveTasksEvent,
@@ -73,6 +73,6 @@ export {
   savePositionsEvent,
   saveLogsEvent,
   saveErrorsEvent,
-  saveTraderFailedEvent
+  saveFailedEvent
 };
 export default Object.values(TABLES);
