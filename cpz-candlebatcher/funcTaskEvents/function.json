@@ -1,7 +1,6 @@
 {
   "disabled": false,
-  "scriptFile": "../index.js",
-  "entryPoint": "taskEvents",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",
@@ -9,9 +8,7 @@
       "direction": "in",
       "name": "req",
       "route": "taskEvents",
-      "methods": [
-        "post"
-      ]
+      "methods": ["post"]
     },
     {
       "type": "http",

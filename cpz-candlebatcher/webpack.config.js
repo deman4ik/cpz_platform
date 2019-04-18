@@ -6,7 +6,9 @@ const path = require("path");
 const config = {
   mode: process.env.NODE_ENV || "production",
   watch: false,
-  entry: path.resolve(__dirname, "src/index.js"),
+  entry: {
+    service: path.resolve(__dirname, `src/index`)
+  },
   resolve: {
     alias: {
       cpz: path.resolve(__dirname, "../cpz-shared")

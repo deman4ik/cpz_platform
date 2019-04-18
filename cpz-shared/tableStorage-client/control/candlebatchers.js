@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED } from "../../config/state";
+import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -18,17 +18,28 @@ const getCandlebatcherById = async taskId =>
   client.getEntityByRowKey(TABLES.STORAGE_CANDLEBATCHERS_TABLE, taskId);
 
 /**
- * Query Started Candlebatchers
+ * Query Active Candlebatchers
  *
  * @returns {Object[]}
  */
-const getStartedCandlebatchers = async () => {
+const getActiveCandlebatchers = async () => {
   try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+    const busyStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_BUSY
+    );
+
     const query = new TableQuery().where(
-      TableQuery.stringFilter(
-        "status",
-        TableUtilities.QueryComparisons.EQUAL,
-        STATUS_STARTED
+      TableQuery.combineFilters(
+        startedStatusFilter,
+        TableUtilities.TableOperators.OR,
+        busyStatusFilter
       )
     );
     return await client.queryEntities(
@@ -87,7 +98,7 @@ const deleteCandlebatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 
 export {
   getCandlebatcherById,
-  getStartedCandlebatchers,
+  getActiveCandlebatchers,
   findCandlebatcher,
   saveCandlebatcherState,
   updateCandlebatcherState,

@@ -1,20 +1,24 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-        "NODE_TLS_REJECT_UNAUTHORIZED": 0,
-        "FUNCTIONS_WORKER_RUNTIME": "node",
-        "AzureWebJobsStorage": "",
-        "AZ_STORAGE_MARKET_CS": "",
-        "API_KEY": "test",
-        "EG_TASKS_ENDPOINT": "https://localhost:443",
-        "EG_TASKS_KEY": "test",
-        "EG_LOG_ENDPOINT": "https://localhost:443",
-        "EG_LOG_KEY": "test",
-        "EG_CANDLES_ENDPOINT": "https://localhost:443",
-        "EG_CANDLES_KEY": "test",
-        "DB_API_ENDPOINT": "",
-        "DB_API_ACCESS_KEY": " ",
-        "CONNECTOR_API_ENDPOINT": "http://localhost:8109/api/graphql",
-        "CONNECTOR_API_KEY": "test"
-    }
+  "IsEncrypted": false,
+  "Values": {
+    "NODE_TLS_REJECT_UNAUTHORIZED": 0,
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "",
+    "AZ_STORAGE_MARKET_CS": "",
+    "AZ_STORAGE_CONTROL_CS": "",
+    "AZ_STORAGE_EVENT_CS": "",
+    "API_KEY": "test",
+    "EG_TASKS_ENDPOINT": "https://localhost:443",
+    "EG_TASKS_KEY": "test",
+    "EG_LOG_ENDPOINT": "https://localhost:443",
+    "EG_LOG_KEY": "test",
+    "EG_ERROR_ENDPOINT": "https://localhost:443",
+    "EG_ERROR_KEY": "test",
+    "EG_CANDLES_ENDPOINT": "https://localhost:443",
+    "EG_CANDLES_KEY": "test",
+    "DB_API_ENDPOINT": "",
+    "DB_API_ACCESS_KEY": " ",
+    "CONNECTOR_API_ENDPOINT": "http://localhost:8109/api/graphql",
+    "CONNECTOR_API_KEY": "test"
+  }
 }

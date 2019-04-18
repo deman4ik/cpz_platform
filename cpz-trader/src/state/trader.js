@@ -1,5 +1,6 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
+import dayjs from "cpz/utils/lib/dayjs";
 import { combineTraderSettings } from "cpz/utils/settings";
 import {
   REALTIME_MODE,
@@ -62,6 +63,8 @@ class Trader {
       /* Статус */
       this._status = state.status || STATUS_PENDING;
       this._stopRequested = state.stopRequested || false;
+      this._startedAt = state.startedAt || dayjs.utc().toISOString();
+      this._stoppedAt = state.stoppedAt;
       /* Текущий сигнал */
       this._signal = {};
       /* Последнтй сигнал */
@@ -159,6 +162,7 @@ class Trader {
   start() {
     this._status = STATUS_STARTED;
     this._stopRequested = false;
+    this._startedAt = dayjs.utc().toISOString();
     this._eventsToSend.Start = {
       eventType: TASKS_TRADER_STARTED_EVENT,
       eventData: {
@@ -173,6 +177,7 @@ class Trader {
   stop() {
     this._status = STATUS_STOPPED;
     this._stopRequested = false;
+    this._stoppedAt = dayjs.utc().toISOString();
     this._eventsToSend.Stop = {
       eventType: TASKS_TRADER_STOPPED_EVENT,
       eventData: {
@@ -375,6 +380,9 @@ class Trader {
             signal.positionId
           )
         ) {
+          // TODO: Проверить другие активные позиции
+          // и если сигнал на закрытие подходит по направлению
+          // закрыть эту позицию
           Log.warn("Position '%s' not found!", signal.positionId);
           return;
         }
@@ -679,7 +687,10 @@ class Trader {
       currency: this._currency,
       timeframe: this._timeframe,
       status: this._status,
+      error: this._error,
       stopRequested: this._stopRequested,
+      startedAt: this._startedAt,
+      stoppedAt: this._stoppedAt,
       settings: this._settings,
       lastSignal: this._lastSignal,
       lastPrice: this._lastPrice,

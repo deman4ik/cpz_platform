@@ -127,13 +127,13 @@ class CCXTPublicProvider extends BasePublicProvider {
           asset,
           currency,
           timeframe: 1,
-          time: latestCandle[0],
-          timestamp: dayjs.utc(latestCandle[0]).toISOString(),
-          open: latestCandle[1],
-          high: latestCandle[2],
-          low: latestCandle[3],
-          close: latestCandle[4],
-          volume: latestCandle[5]
+          time: +latestCandle[0],
+          timestamp: dayjs.utc(+latestCandle[0]).toISOString(),
+          open: +latestCandle[1],
+          high: +latestCandle[2],
+          low: +latestCandle[3],
+          close: +latestCandle[4],
+          volume: +latestCandle[5]
         }
       };
     } catch (error) {
@@ -188,13 +188,13 @@ class CCXTPublicProvider extends BasePublicProvider {
         asset,
         currency,
         timeframe: 1,
-        time: candle[0],
-        timestamp: dayjs(candle[0]).toISOString(),
-        open: candle[1],
-        high: candle[2],
-        low: candle[3],
-        close: candle[4],
-        volume: candle[5]
+        time: +candle[0],
+        timestamp: dayjs(+candle[0]).toISOString(),
+        open: +candle[1],
+        high: +candle[2],
+        low: +candle[3],
+        close: +candle[4],
+        volume: +candle[5]
       }));
       return {
         success: true,
@@ -251,10 +251,10 @@ class CCXTPublicProvider extends BasePublicProvider {
         asset,
         currency,
         timeframe: 1,
-        time: trade.timestamp,
+        time: +trade.timestamp,
         timestamp: trade.datetime,
-        price: trade.price,
-        amount: trade.amount
+        price: +trade.price,
+        amount: +trade.amount
       }));
       return {
         success: true,

@@ -24,7 +24,7 @@ async function handleActionTimer() {
           } catch (e) {
             const error = new ServiceError(
               {
-                name: ServiceError.types.TRADER_IDLE_TIMER_ERROR,
+                name: ServiceError.types.TRADER_ACTION_TIMER_ERROR,
                 cause: e,
                 info: { taskId }
               },
@@ -38,7 +38,7 @@ async function handleActionTimer() {
   } catch (e) {
     throw new ServiceError(
       {
-        name: ServiceError.types.TRADER_IDLE_TIMER_ERROR,
+        name: ServiceError.types.TRADER_ACTION_TIMER_ERROR,
         cause: e
       },
       "Failed to handle timer"

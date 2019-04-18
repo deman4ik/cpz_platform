@@ -258,11 +258,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           exTimestamp: response.datetime,
           exLastTrade: this.getCloseOrderDate(response),
           status: response.status,
-          price: response.price,
-          average: response.average,
-          volume: response.amount,
-          remaining: response.remaining,
-          executed: response.filled || response.amount - response.remaining
+          price: +response.price,
+          average: +response.average,
+          volume: +response.amount,
+          remaining: +response.remaining,
+          executed: +response.filled || +response.amount - +response.remaining
         }
       };
       /* 
@@ -326,11 +326,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           exTimestamp: response.datetime,
           exLastTrade: this.getCloseOrderDate(response),
           status: response.status,
-          price: response.price,
-          average: response.average,
-          volume: response.amount,
-          remaining: response.remaining,
-          executed: response.filled || response.amount - response.remaining
+          price: +response.price,
+          average: +response.average,
+          volume: +response.amount,
+          remaining: +response.remaining,
+          executed: +response.filled || +response.amount - +response.remaining
         }
       };
       /*

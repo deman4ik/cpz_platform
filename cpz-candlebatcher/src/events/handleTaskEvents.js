@@ -1,33 +1,30 @@
 import { v4 as uuid } from "uuid";
+import dayjs from "cpz/utils/lib/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import dayjs from "cpz/utils/lib/dayjs";
-import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
-import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import {
   STATUS_STARTED,
-  STATUS_BUSY,
   STATUS_STOPPED,
+  STATUS_BUSY,
   STATUS_ERROR
 } from "cpz/config/state";
+import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
+import { getCandlebatcherById } from "cpz/tableStorage-client/control/candlebatchers";
 import { STOP, UPDATE, TASK } from "../config";
-import Trader from "../state/trader";
+import Candlebatcher from "../state/candlebatcher";
 import { loadAction, execute, publishEvent, saveState } from "../executors";
 
 async function handleRun(eventData) {
   const { taskId } = eventData;
   try {
-    // Загружаем текущий стейт трейдера
-    let state = await getTraderById(taskId);
-    if (!state) {
-      Log.warn(`Got Trader.Run event but Trader state not found =(`);
-      // Выходим
-      return;
-    }
-    // Если трейдер статус трейдера занят/остановлен/ошибка
+    // Загружаем текущий стейт
+    let state = await getCandlebatcherById(taskId);
+    // Если трейдер статус  занят/остановлен/ошибка
     if ([STATUS_BUSY, STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
       Log.warn(
-        `Got Trader.Run event but Trader ${taskId} is ${state.status} =(`
+        `Got Candlebatcher.Run event but Candlebatcher ${taskId} is ${
+          state.status
+        } =(`
       );
       // Выходим
       return;
@@ -40,7 +37,7 @@ async function handleRun(eventData) {
     nextAction = await loadAction(state.taskId, state.lastAction);
     // Если есть действие
     if (nextAction) {
-      // Меняем статус трейдера - занят
+      // Меняем статус  - занят
       state.status = STATUS_BUSY;
       const lock = await saveState(state, true);
 
@@ -49,11 +46,11 @@ async function handleRun(eventData) {
         /* eslint-disable no-await-in-loop */
         while (nextAction) {
           Log.debug(
-            `Trader ${taskId} - ${STATUS_BUSY} - processing ${
+            `Candlebatcher ${taskId} - ${STATUS_BUSY} - processing ${
               nextAction.type
             } action.`
           );
-          // Исполняем трейдер - получаем обновленный стейт
+          // Исполняем  - получаем обновленный стейт
           state = await execute(state, nextAction);
           // Загружаем следующее действие из очереди
           nextAction = await loadAction(state.taskId, state.lastAction);
@@ -67,38 +64,38 @@ async function handleRun(eventData) {
           await saveState(state);
         }
         Log.debug(
-          `Trader ${taskId} - ${state.status} - finished processing actions.`
+          `Candlebatcher ${taskId} - ${
+            state.status
+          } - finished processing actions.`
         );
       } else {
-        Log.warn(`Trader ${taskId} already processing...`);
+        Log.warn(`Candlebatcher ${taskId} already processing...`);
       }
     }
   } catch (e) {
     throw new ServiceError(
       {
-        name: ServiceError.types.TRADER_HANDLE_RUN_ERROR,
+        name: ServiceError.types.CANDLEBATCHER_HANDLE_RUN_ERROR,
         cause: e,
         info: { ...eventData }
       },
-      "Failed to run Trader '$s'",
+      "Failed to run Candlebatcher '$s'",
       taskId
     );
   }
 }
 
 /**
- * Starting new Trader Orchestrator
+ * Starting new Candlebatcher Orchestrator
  *
  * @param {object} eventData
  */
 async function handleStart(eventData) {
   const { taskId } = eventData;
-
   try {
-    let currentState = { ...eventData };
-    // Загружаем текущий стейт трейдера
-    const state = await getTraderById(taskId);
-
+    const currentState = { ...eventData };
+    // Инициализируем новый загрузчик
+    const state = getCandlebatcherById(taskId);
     if (state) {
       // Если статус занят/запущен
       if (
@@ -106,64 +103,58 @@ async function handleStart(eventData) {
         state.stopRequested
       ) {
         Log.warn(
-          `Got Trader.Start event but Trader ${taskId} is ${
+          `Got Candlebatcher.Start event but Candlebatcher ${taskId} is ${
             state.status
           } and stop requested is ${state.stopRequested} =(`
         );
         // Выходим
         return;
       }
-
-      // Сливаем старый и новый стейт
-      // Оставляем новые настройки
-      currentState = {
-        ...state,
-        settings: { ...state.settings, ...currentState.settings }
-      };
     }
 
-    // Инициализируем трейдер
-    const trader = new Trader(currentState);
-    trader.start();
+    // Инициализируем
+    const candlebatcher = new Candlebatcher(currentState);
+    candlebatcher.start();
 
     // Отправляем событие Started
-    const [event] = trader.events;
-    await publishEvent(trader.props, event);
+    const [event] = candlebatcher.events;
+    await publishEvent(candlebatcher.props, event);
 
     // Сохраняем стейт
-    await saveState(trader.state);
-  } catch (e) {
+    await saveState(candlebatcher.state);
+  } catch (error) {
     throw new ServiceError(
       {
-        name: ServiceError.types.TRADER_START_ERROR,
+        name: ServiceError.types.CANDLEBATCHER_START_ERROR,
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Start Trader '$s'",
+      "Failed to Start Candlebatcher '$s'",
       taskId
     );
   }
 }
-
 /**
- * Stopping Trader Orchestrator
+ * Stopping Candlebatcher Orchestrator
  *
  * @param {object} eventData
  */
 async function handleStop(eventData) {
   const { taskId } = eventData;
   try {
-    // Загружаем текущий стейт трейдера
-    const state = await getTraderById(taskId);
+    // Загружаем текущий стейт
+    const state = await getCandlebatcherById(taskId);
 
     if (!state) {
-      Log.warn(`Got Trader.Stop event but Trader state not found =(`);
+      Log.warn(
+        `Got Candlebatcher.Stop event but Candlebatcher state not found =(`
+      );
       return;
     }
-    // Если трейдер статус трейдера остановлен/останавливается
+    // Если трейдер статус - остановлен/останавливается
     if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
       Log.warn(
-        `Got Trader.Stop event but Trader ${taskId} is ${
+        `Got TraCandlebatcherder.Stop event but Candlebatcher ${taskId} is ${
           state.status
         } and stop requested is ${state.stopRequested} =(`
       );
@@ -171,8 +162,8 @@ async function handleStop(eventData) {
       return;
     }
 
-    // Сохраняем новое действие для трейдера
-    await saveTraderAction({
+    // Сохраняем новое действие
+    await saveCandlebatcherAction({
       PartitionKey: taskId,
       RowKey: TASK,
       id: uuid(),
@@ -183,43 +174,45 @@ async function handleStop(eventData) {
   } catch (e) {
     throw new ServiceError(
       {
-        name: ServiceError.types.TRADER_STOP_ERROR,
+        name: ServiceError.types.CANDLEBATCHER_STOP_ERROR,
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Stop Trader '$s'",
+      "Failed to Stop Candlebatcher '$s'",
       taskId
     );
   }
 }
 
 /**
- * Updating Trader Orchestrator State
+ * Updating Candlebatcher Orchestrator State
  *
  * @param {object} eventData
  */
 async function handleUpdate(eventData) {
   const { taskId } = eventData;
   try {
-    // Загружаем текущий стейт трейдера
-    const state = await getTraderById(taskId);
+    // Загружаем текущий стейт
+    const state = await getCandlebatcherById(taskId);
 
     if (!state) {
-      Log.warn(`Got Trader.Update event but Trader state not found =(`);
+      Log.warn(
+        `Got Candlebatcher.Update event but Candlebatcher state not found =(`
+      );
       return;
     }
-    // Если трейдер статус трейдера остановлен/останавливается
+    // Если трейдер статус  остановлен/останавливается
     if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
       Log.warn(
-        `Got Trader.Update event but Trader ${taskId} is ${
+        `Got Candlebatcher.Update event but Candlebatcher ${taskId} is ${
           state.status
         } and stop requested is ${state.stopRequested} =(`
       );
       // Выходим
       return;
     }
-    // Сохраняем новое действие для трейдера
-    await saveTraderAction({
+    // Сохраняем новое действие
+    await saveCandlebatcherAction({
       PartitionKey: taskId,
       RowKey: TASK,
       id: uuid(),
@@ -230,11 +223,11 @@ async function handleUpdate(eventData) {
   } catch (e) {
     throw new ServiceError(
       {
-        name: ServiceError.types.TRADER_UPDATE_ERROR,
+        name: ServiceError.types.CANDLEBATCHER_UPDATE_ERROR,
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Update Traders '$s' state",
+      "Failed to Update Candlebatcher '$s' state",
       taskId
     );
   }

@@ -73,7 +73,8 @@ class ServiceError extends VError {
   get main() {
     return {
       name: this.name,
-      message: this.jse_shortmsg
+      message: this.jse_shortmsg,
+      info: this.info
     };
   }
 
