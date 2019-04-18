@@ -93,13 +93,18 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadLastMinuteCandle({ date = dayjs.utc(), asset, currency }) {
+  async loadLastMinuteCandle({ date, asset, currency }) {
     try {
       Log.debug("loadLastMinuteCandle()");
       if (!this.ccxt) {
         await this.init();
       }
-      const dateStart = dayjs.utc(date).add(-2, "minute");
+      let dateStart;
+      if (date) {
+        dateStart = date;
+      } else {
+        dateStart = dayjs.utc().add(-2, "minute");
+      }
       const call = async bail => {
         try {
           return await this.ccxt.fetchOHLCV(
