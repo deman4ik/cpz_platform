@@ -173,7 +173,7 @@ async function executeOrder(state, order) {
     Log.error(error);
 
     // Возвращаем ордер как есть
-    orderResult.error = error.json;
+    orderResult.error = error.main;
     return orderResult;
   }
 }

@@ -70,6 +70,13 @@ class ServiceError extends VError {
     };
   }
 
+  get main() {
+    return {
+      name: this.name,
+      message: this.jse_shortmsg
+    };
+  }
+
   /**
    * @param {Boolean} fullStack формировать полный стэк вызова
    * @returns {string} отформатированная в строка ошибки (аналог toString)
