@@ -73,6 +73,11 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
       description: "Uniq position Id",
       type: "string"
     },
+    positionPrefix: {
+      description: "Position prefix",
+      type: "string",
+      optional: true
+    },
     settings: {
       description: "Trader parameters.",
       type: "object",

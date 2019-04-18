@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
-import { generateKey } from "cpz/utils/helpers";
 import { createTraderSlug } from "cpz/config/state";
 import dayjs from "cpz/utils/lib/dayjs";
 import { getTradersReadyForSignals } from "cpz/tableStorage-client/control/traders";
@@ -10,7 +9,15 @@ import { SIGNAL } from "../config";
 
 async function handleSignal(eventData) {
   try {
-    const { exchange, asset, currency, robotId, timestamp } = eventData;
+    const {
+      exchange,
+      asset,
+      currency,
+      robotId,
+      timestamp,
+      positionPrefix,
+      action
+    } = eventData;
     const traders = await getTradersReadyForSignals({
       slug: createTraderSlug({
         exchange,
@@ -20,12 +27,13 @@ async function handleSignal(eventData) {
       robotId
     });
     if (traders && traders.length > 0) {
+      const actionKey = positionPrefix ? `${positionPrefix}_${action}` : action;
       await Promise.all(
         traders.map(async ({ taskId }) => {
           try {
             await saveTraderAction({
               PartitionKey: taskId,
-              RowKey: generateKey(),
+              RowKey: actionKey,
               id: uuid(),
               type: SIGNAL,
               actionTime: dayjs.utc(timestamp).valueOf(),

@@ -85,7 +85,7 @@ function createNewTradeSubject({
   return `${exchange}/${asset}/${currency}/${timeframe}/${robotId}/${userId}`;
 }
 
-const CONTROL_SUBJECT = "control";
+const ATTENTION_SUBJECT = "ATTENTION";
 
 export {
   createUserRobotTaskSubject,
@@ -98,5 +98,5 @@ export {
   createNewCandleSubject,
   createNewSignalSubject,
   createNewTradeSubject,
-  CONTROL_SUBJECT
+  ATTENTION_SUBJECT
 };

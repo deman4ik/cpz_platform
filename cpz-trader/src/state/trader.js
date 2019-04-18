@@ -18,7 +18,7 @@ import {
   STATUS_STOPPED,
   STATUS_ERROR,
   createTraderSlug,
-  CONTROL_SUBJECT
+  ATTENTION_SUBJECT
 } from "cpz/config/state";
 import {
   TASKS_TRADER_STARTED_EVENT,
@@ -551,7 +551,7 @@ class Trader {
     return {
       eventType: ERROR_TRADER_ERROR_EVENT,
       eventData: {
-        subject: CONTROL_SUBJECT,
+        subject: ATTENTION_SUBJECT,
         data: {
           taskId: this._taskId,
           critical,
@@ -581,7 +581,7 @@ class Trader {
     return {
       eventType: ERROR_TRADER_ERROR_EVENT,
       eventData: {
-        subject: CONTROL_SUBJECT,
+        subject: ATTENTION_SUBJECT,
         data: {
           taskId: this._taskId,
           critical,

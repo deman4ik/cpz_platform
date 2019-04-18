@@ -139,12 +139,10 @@ class TaskEvents extends BaseService {
           case TASKS_TRADER_RUN_EVENT:
             ServiceValidator.check(TASKS_TRADER_RUN_EVENT, data);
             await handleRun(data);
-
             break;
           case TASKS_TRADER_START_EVENT:
             ServiceValidator.check(TASKS_TRADER_START_EVENT, data);
             await handleStart(data);
-
             break;
           case TASKS_TRADER_UPDATE_EVENT:
             ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, data);
