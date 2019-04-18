@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import HttpsProxyAgent from "https-proxy-agent";
 
 class BasePublicProvider {
@@ -9,29 +9,29 @@ class BasePublicProvider {
   }
 
   async getMarket() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'getMarket' not impemented in this Provider"
     );
   }
 
   async loadPreviousCandle() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'loadPreviousCandle' not impemented in this Provider"
     );
   }
 
   async loadCandles() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'loadCandles' not impemented in this Provider"
     );
   }
 
   async loadTrades() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'loadTrades' not impemented in this Provider"
     );
   }

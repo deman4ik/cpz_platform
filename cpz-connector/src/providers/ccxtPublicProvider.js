@@ -1,8 +1,8 @@
 import ccxt from "ccxt";
-import VError from "verror";
+import ServiceError from "cpz/error";
 import retry from "async-retry";
-import dayjs from "cpzDayjs";
-import Log from "cpzLog";
+import dayjs from "cpz/utils/lib/dayjs";
+import Log from "cpz/log";
 import BasePublicProvider from "./basePublicProvider";
 
 class CCXTPublicProvider extends BasePublicProvider {
@@ -10,7 +10,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     super(input);
     this._exchangeName = this._exchange.toLowerCase();
 
-    this.ccxt = {};
+    this.ccxt = null;
     this._retryOptions = {
       retries: 100,
       minTimeout: 100,
@@ -30,9 +30,9 @@ class CCXTPublicProvider extends BasePublicProvider {
       };
       await retry(call, this._retryOptions);
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "InitPublicProviderError",
+          name: ServiceError.types.CONNECTOR_INIT_PUBLIC_PROVIDER_ERROR,
           cause: error,
           info: {
             exchange: this._exchangeName
@@ -56,8 +56,11 @@ class CCXTPublicProvider extends BasePublicProvider {
     return null;
   }
 
-  async getMarket(context, { asset, currency }) {
+  async getMarket({ asset, currency }) {
     try {
+      if (!this.ccxt) {
+        await this.init();
+      }
       const response = this.ccxt.market(this.getSymbol(asset, currency));
       return {
         success: true,
@@ -90,9 +93,12 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadLastMinuteCandle(context, { date = dayjs.utc(), asset, currency }) {
+  async loadLastMinuteCandle({ date = dayjs.utc(), asset, currency }) {
     try {
       Log.debug("loadLastMinuteCandle()");
+      if (!this.ccxt) {
+        await this.init();
+      }
       const dateStart = dayjs.utc(date).add(-2, "minute");
       const call = async bail => {
         try {
@@ -134,12 +140,17 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadMinuteCandles(
-    context,
-    { date = dayjs.utc().add(-1, "hour"), limit = 60, asset, currency }
-  ) {
+  async loadMinuteCandles({
+    date = dayjs.utc().add(-1, "hour"),
+    limit = 60,
+    asset,
+    currency
+  }) {
     try {
       Log.debug("loadMinuteCandles()", dayjs.utc(date).toISOString());
+      if (!this.ccxt) {
+        await this.init();
+      }
       const dateToLoad =
         dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date
@@ -193,12 +204,17 @@ class CCXTPublicProvider extends BasePublicProvider {
     }
   }
 
-  async loadTrades(
-    context,
-    { date = dayjs.utc().add(-1, "hour"), limit = 2000, asset, currency }
-  ) {
+  async loadTrades({
+    date = dayjs.utc().add(-1, "hour"),
+    limit = 2000,
+    asset,
+    currency
+  }) {
     try {
       Log.debug("loadTrades()", dayjs.utc(date).toISOString());
+      if (!this.ccxt) {
+        await this.init();
+      }
       const dateToLoad =
         dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
           ? date

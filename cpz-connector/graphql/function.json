@@ -1,16 +1,13 @@
 {
   "disabled": false,
-  "scriptFile": "../dist/graphql.js",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
+      "methods": ["get", "post"]
     },
     {
       "type": "http",

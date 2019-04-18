@@ -1,6 +1,7 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
+import Log from "cpz/log";
 import HttpsProxyAgent from "https-proxy-agent";
-import { getSecret, decrypt } from "cpzKeyVault";
+import { getSecret, decrypt } from "cpz/keyVault";
 
 const {
   KEY_VAULT_URL,
@@ -77,9 +78,9 @@ class BasePrivateProvider {
     }
   }
 
-  async _loadAndDecrypt(context, keyType, keyName) {
+  async _loadAndDecrypt(keyType, keyName) {
     try {
-      context.log("loadAndDecrypt()");
+      Log.debug("loadAndDecrypt()");
       const encryptedData = await getSecret({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_READ_CLIENT_ID,
@@ -95,11 +96,11 @@ class BasePrivateProvider {
         keyName: this._keys[keyType][keyName].encryptionKeyName
       });
       this._keys[keyType][keyName].loaded = true;
-    } catch (error) {
-      throw new VError(
+    } catch (e) {
+      throw new ServiceError(
         {
-          name: "LoadAndDecryptSecretError",
-          cause: error,
+          name: ServiceError.types.CONNECTOR_LOAD_DECR_SECR_ERROR,
+          cause: e,
           info: {
             keyType,
             keyName
@@ -110,21 +111,21 @@ class BasePrivateProvider {
     }
   }
 
-  async _loadKeys(context, keyType) {
+  async _loadKeys(keyType) {
     try {
-      context.log("loadKeys()");
+      Log.debug("loadKeys()");
 
       const loaders = [
-        this._loadAndDecrypt(context, keyType, "APIKey"),
-        this._loadAndDecrypt(context, keyType, "APISecret")
+        this._loadAndDecrypt(keyType, "APIKey"),
+        this._loadAndDecrypt(keyType, "APISecret")
       ];
 
       await Promise.all(loaders);
-    } catch (error) {
-      throw new VError(
+    } catch (e) {
+      throw new ServiceError(
         {
-          name: "LoadAPIKeysError",
-          cause: error,
+          name: ServiceError.types.CONNECTOR_LOAD_API_KEYS_ERROR,
+          cause: e,
           info: {
             keyType
           }
@@ -135,29 +136,29 @@ class BasePrivateProvider {
   }
 
   async getBalance() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'createOrder' not impemented in this Provider"
     );
   }
 
   async createOrder() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'createOrder' not impemented in this Provider"
     );
   }
 
   async checkOrder() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'checkOrder' not impemented in this Provider"
     );
   }
 
   async cancelOrder() {
-    throw new VError(
-      { name: "NotImplementedError" },
+    throw new ServiceError(
+      { name: ServiceError.types.NOT_IMPLEMENTED_ERROR },
       "Method 'cancelOrder' not impemented in this Provider"
     );
   }

@@ -1,17 +1,17 @@
 import ccxt from "ccxt";
-import VError from "verror";
+import ServiceError from "cpz/error";
 import retry from "async-retry";
-import dayjs from "cpzDayjs";
-import Log from "cpzLog";
-import { ORDER_TYPE_MARKET_FORCE } from "cpzState";
-import { correctWithLimit, precision } from "cpzUtils/helpers";
+import dayjs from "cpz/utils/lib/dayjs";
+import Log from "cpz/log";
+import { ORDER_TYPE_MARKET_FORCE } from "cpz/config/state";
+import { correctWithLimit, precision } from "cpz/utils/helpers";
 import BasePrivateProvider from "./basePrivateProvider";
 
 class CCXTPrivateProvider extends BasePrivateProvider {
   constructor(input) {
     super(input);
 
-    this.ccxt = {};
+    this.ccxt = null;
     this._retryOptions = {
       retries: 10,
       minTimeout: 100,
@@ -22,10 +22,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     };
   }
 
-  async init(context, keyType = "main") {
+  async init(keyType = "main") {
     try {
       if (this._keys[keyType].specified && !this._keys[keyType].loaded)
-        await this._loadKeys(context, keyType);
+        await this._loadKeys(keyType);
 
       this.ccxt = new ccxt[this._exchangeName]({
         agent: this._proxyAgent,
@@ -45,11 +45,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         await this.ccxt.loadMarkets();
       };
       await retry(call, this._retryOptions);
-    } catch (error) {
-      throw new VError(
+    } catch (e) {
+      throw new ServiceError(
         {
-          name: "InitPrivateProviderError",
-          cause: error,
+          name: ServiceError.types.CONNECTOR_INIT_PR_PROVIDER_ERROR,
+          cause: e,
           info: {
             exchange: this._exchangeName,
             userId: this._userId
@@ -60,7 +60,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async _checkKeysVersion(context, keys) {
+  async _checkKeysVersion(keys) {
     if (keys) {
       if (
         keys.main &&
@@ -70,7 +70,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           keys.main.APISecret.version !== this._keys.main.APISecret.version)
       ) {
         this._setKeys({ main: keys.main });
-        await this.init(context, "main");
+        await this.init("main");
       }
 
       if (
@@ -84,13 +84,25 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  async _handleExchangeError(e, context, bail) {
+  async _handleExchangeError(e, bail) {
     if (e instanceof ccxt.ExchangeError) {
       if (this._keys.main.active && this._keys.spare.specified) {
-        await this.init(context, "spare");
+        await this.init("spare");
         throw e;
       }
-      bail(e);
+      bail(
+        new ServiceError(
+          {
+            name: ServiceError.types.CONNECTOR_EXCHANGE_ERROR,
+            cause: e,
+            info: {
+              critical: true,
+              userMessage: e.message
+            }
+          },
+          "Exchange Error."
+        )
+      );
     }
     throw e;
   }
@@ -107,15 +119,18 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     return `${asset}/${currency}`;
   }
 
-  async getBalance(context, keys) {
+  async getBalance(keys) {
     try {
       Log.debug("getBalance()");
-      await this._checkKeysVersion(context, keys);
+      await this._checkKeysVersion(keys);
+      if (!this.ccxt) {
+        await this.init();
+      }
       const call = async bail => {
         try {
           return await this.ccxt.fetchBalance();
         } catch (e) {
-          await this._handleExchangeError(e, context, bail);
+          await this._handleExchangeError(e, bail);
           return null;
         }
       };
@@ -129,11 +144,23 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           total: response.total
         }
       };
-    } catch (error) {
-      Log.error("getBalance", error);
+    } catch (e) {
+      let error;
+      if (e instanceof ServiceError) {
+        error = e;
+      } else {
+        error = new ServiceError(
+          {
+            name: ServiceError.types.CONNECTOR_ERROR,
+            cause: e
+          },
+          "Failed to fetch balance."
+        );
+      }
+      Log.error("getBalance", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -166,14 +193,14 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     );
   }
 
-  async createOrder(context, keys, order) {
+  async createOrder(keys, order) {
     try {
       /* 
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
       // TODO: Params
       Log.debug("createOrder()");
-      await this._checkKeysVersion(context, keys);
+      await this._checkKeysVersion(keys);
       const {
         direction,
         volume,
@@ -183,6 +210,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         orderType,
         params
       } = order;
+      // TODO: 'подмена' ордера - проверить что предудущий ордер действительно отменен и только после этого выставлять новый
+
+      if (!this.ccxt) {
+        await this.init();
+      }
       /* Если тип ордера строго "маркет" и биржа поддерживает маркет ордера, 
         то выставляем маркет ордер во всех остальных случаях limit */
       const type =
@@ -214,7 +246,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             orderParams
           );
         } catch (e) {
-          await this._handleExchangeError(e, context, bail);
+          await this._handleExchangeError(e, bail);
           return null;
         }
       };
@@ -246,19 +278,34 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 } */
-    } catch (error) {
-      Log.error("createOrder", error);
+    } catch (e) {
+      let error;
+      if (e instanceof ServiceError) {
+        error = e;
+      } else {
+        error = new ServiceError(
+          {
+            name: ServiceError.types.CONNECTOR_ERROR,
+            cause: e
+          },
+          "Failed to create new order."
+        );
+      }
+      Log.error("createOrder", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
 
-  async checkOrder(context, keys, { exId, asset, currency }) {
+  async checkOrder(keys, { exId, asset, currency }) {
     try {
       Log.debug("checkOrder()");
-      await this._checkKeysVersion(context, keys);
+      await this._checkKeysVersion(keys);
+      if (!this.ccxt) {
+        await this.init();
+      }
       const call = async bail => {
         try {
           return await this.ccxt.fetchOrder(
@@ -266,12 +313,12 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             this.getSymbol(asset, currency)
           );
         } catch (e) {
-          await this._handleExchangeError(e, context, bail);
+          await this._handleExchangeError(e, bail);
           return null;
         }
       };
       const response = await retry(call, this._retryOptions);
-      // TODO: kraken parse response.info.closetm
+
       return {
         success: true,
         order: {
@@ -306,24 +353,39 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 }
 */
-    } catch (error) {
-      Log.error("checkOrder", error);
+    } catch (e) {
+      let error;
+      if (e instanceof ServiceError) {
+        error = e;
+      } else {
+        error = new ServiceError(
+          {
+            name: ServiceError.types.CONNECTOR_ERROR,
+            cause: e
+          },
+          "Failed to check order."
+        );
+      }
+      Log.error("checkOrder", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
 
-  async cancelOrder(context, keys, { exId, asset, currency }) {
+  async cancelOrder(keys, { exId, asset, currency }) {
     try {
       Log.debug("cancelOrder()");
-      await this._checkKeysVersion(context, keys);
+      await this._checkKeysVersion(keys);
+      if (!this.ccxt) {
+        await this.init();
+      }
       const call = async bail => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
         } catch (e) {
-          await this._handleExchangeError(e, context, bail);
+          await this._handleExchangeError(e, bail);
         }
       };
       let err;
@@ -333,7 +395,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         err = { name: error.constructor.name, message: error.message };
       }
 
-      const checkOrder = await this.checkOrder(context, keys, {
+      const checkOrder = await this.checkOrder(keys, {
         exId,
         asset,
         currency
@@ -343,17 +405,26 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         error: err,
         ...checkOrder
       };
-    } catch (error) {
-      Log.error("cancelOrder", error);
+    } catch (e) {
+      let error;
+      if (e instanceof ServiceError) {
+        error = e;
+      } else {
+        error = new ServiceError(
+          {
+            name: ServiceError.types.CONNECTOR_ERROR,
+            cause: e
+          },
+          "Failed to cancel order."
+        );
+      }
+      Log.error("cancelOrder", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
-
-  // TODO: new method - reopen order
-  // cancels order and opens new with new price
 }
 
 export default CCXTPrivateProvider;
