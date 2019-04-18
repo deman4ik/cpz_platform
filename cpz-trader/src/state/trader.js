@@ -623,14 +623,12 @@ class Trader {
         this._eventsToSend[`P-${order.positionId}`] = this._createPositionEvent(
           this._positions[order.positionId].state
         );
-        // или возникла ошибка при работе с ордером на бирже
-        //   } else
 
+        //   } else
+        // или возникла ошибка при работе с ордером на бирже
         if (order.error) {
           // генерируем событие ошибка трейдера
-          this._eventsToSend[
-            `OE-${order.orderId}`
-          ] = this._createErrorOrderEvent(order);
+          this.setError(order.error);
         }
       });
 
