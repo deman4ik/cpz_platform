@@ -16,21 +16,21 @@ const LOG_ERROR = "LogError";
 
 const MAILER_ERROR = "MailerError";
 
-export * from "./marketwatcher";
-export * from "./candlebatcher";
-export * from "./backtester";
-export * from "./connector";
-export * from "./provider";
-export * from "./importer";
 export * from "./adviser";
-export * from "./trader";
-export * from "./robots";
-export * from "./tulip";
-export * from "./task";
-export * from "./eventgrid";
-export * from "./tableStorage";
 export * from "./auth";
+export * from "./backtester";
+export * from "./candlebatcher";
+export * from "./connector";
+export * from "./control";
+export * from "./eventgrid";
 export * from "./eventslogger";
+export * from "./importer";
+export * from "./marketwatcher";
+export * from "./robots";
+export * from "./tableStorage";
+export * from "./task";
+export * from "./trader";
+export * from "./tulip";
 
 export {
   KEY_VAULT_ERROR,

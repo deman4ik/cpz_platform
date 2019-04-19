@@ -40,7 +40,7 @@ export default {
     {
       name: `${CONTROL_SERVICE}-${TASKS_TOPIC}`,
       topic: TASKS_TOPIC,
-      url: "/api/taskEvents",
+      url: "/api/serviceEvents",
       localPort: 8107,
       types: [
         TASKS_MARKETWATCHER_STARTED_EVENT,
@@ -67,3 +67,4 @@ export default {
     }
   ]
 };
+// TODO: ERROR EVENTS!!!

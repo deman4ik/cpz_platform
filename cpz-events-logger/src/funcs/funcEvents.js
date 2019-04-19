@@ -59,22 +59,21 @@ class FuncEvents extends BaseService {
     if (event.eventType === SUB_VALIDATION_EVENT) {
       Log.info(
         `Got ${event.eventType} event, validationCode: ${
-          event.validationCode
+          event.data.validationCode
         }, topic: ${event.topic}`
       );
       context.res = {
         status: 200,
         body: {
-          validationResponse: event.validationCode
+          validationResponse: event.data.validationCode
         },
         headers: {
           "Content-Type": "application/json"
         }
       };
-      Log.request(context.req, context.res);
-      Log.clearContext();
-      context.done();
-    } else if (event.eventType === SUB_DELETED_EVENT) {
+      return null;
+    }
+    if (event.eventType === SUB_DELETED_EVENT) {
       Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
       context.res = {
         status: 200,
@@ -82,15 +81,12 @@ class FuncEvents extends BaseService {
           "Content-Type": "application/json"
         }
       };
-      Log.request(context.req, context.res);
-      Log.clearContext();
-      context.done();
+      return null;
       // In this place if Event Grid batch, we expect what all events are same one type
-    } else {
-      Log.info(
-        `Got ${event.eventType} event, data ${JSON.stringify(event.data)}`
-      );
     }
+    Log.info(
+      `Got ${event.eventType} event, data ${JSON.stringify(event.data)}`
+    );
     return event;
   }
 
@@ -102,7 +98,8 @@ class FuncEvents extends BaseService {
     const event = this.handlingEventsByTypes(context, req);
     if (event) {
       try {
-        ServiceValidator.check(BASE_EVENT, event);
+        if (!process.env.EG_EMULATOR_MODE)
+          ServiceValidator.check(BASE_EVENT, event);
         await this.eventslogger.save(event);
 
         if (process.env.EG_EMULATOR_MODE) {

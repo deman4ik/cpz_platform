@@ -37,13 +37,14 @@ async function createTimeframeCandles(state, candle) {
     if (currentTimeframes.length > 0) {
       /* Загружаем максимальный период из кэша */
       const maxTimeframe = currentTimeframes[0];
-      const loadDateFrom = currentDate
+      const loadDateFrom = dayjs
+        .utc(currentDate)
         .add(-maxTimeframe, "minute")
         .toISOString();
       /* Заполняем массив свечей - загруженные + текущая и сортируем по дате */
       let loadedCandles = await getCachedCandles({
         dateFrom: loadDateFrom,
-        dateTo: dateTo.toISOString(),
+        dateTo,
         slug: createCachedCandleSlug({
           exchange,
           asset,
@@ -83,8 +84,11 @@ async function createTimeframeCandles(state, candle) {
 
       /* Формируем свечи в необходимых таймфреймах */
       currentTimeframes.forEach(timeframe => {
-        const timeFrom = currentDate.add(-timeframe, "minute").valueOf();
-        const timeTo = currentDate.valueOf();
+        const timeFrom = dayjs
+          .utc(currentDate)
+          .add(-timeframe, "minute")
+          .valueOf();
+        const timeTo = dayjs.utc(currentDate).valueOf();
         const candles = allCandles.filter(
           c => c.time >= timeFrom && c.time < timeTo
         );

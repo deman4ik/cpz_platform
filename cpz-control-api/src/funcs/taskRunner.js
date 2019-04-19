@@ -48,7 +48,8 @@ import {
   ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
   ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
   ERROR_TRADER_ERROR_EVENT_SCHEMA,
-  ERROR_USERROBOT_ERROR_EVENT_SCHEMA
+  ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
+  ERROR_CONTROL_ERROR_EVENT_SCHEMA
 } from "cpz/events/schemas/error";
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import adviserTables from "cpz/tableStorage-client/control/advisers";
@@ -132,7 +133,8 @@ class ServiceEvents extends BaseService {
       ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
       ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
       ERROR_TRADER_ERROR_EVENT_SCHEMA,
-      ERROR_USERROBOT_ERROR_EVENT_SCHEMA
+      ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
+      ERROR_CONTROL_ERROR_EVENT_SCHEMA
     ]);
     // Configure Validator
     ServiceValidator.add(schemas);

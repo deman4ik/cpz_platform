@@ -12,7 +12,7 @@ async function publishEvent(state, data) {
   } catch (e) {
     const error = new ServiceError(
       {
-        name: ServiceError.types.TRADER_EVENTS_PUBLISH_ERROR,
+        name: ServiceError.types.CANDLEBATCHER_EVENT_PUBLISH_ERROR,
         cause: e,
         info: {
           ...state,
@@ -36,4 +36,24 @@ async function publishEvent(state, data) {
     }
   }
 }
-export default publishEvent;
+
+async function publishEvents(state, events) {
+  try {
+    if (events && Array.isArray(events) && events.length > 0) {
+      await Promise.all(events.map(async event => publishEvent(state, event)));
+    }
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.CANDLEBATCHER_EVENTS_PUBLISH_ERROR,
+        cause: e,
+        info: {
+          ...state
+        }
+      },
+      "Failed to publish events"
+    );
+    Log.exception(error);
+  }
+}
+export default publishEvents;

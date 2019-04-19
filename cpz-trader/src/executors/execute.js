@@ -4,7 +4,7 @@ import Log from "cpz/log";
 import Trader from "../state/trader";
 import { STOP, UPDATE, SIGNAL, PRICE, CHECK } from "../config";
 import executeOrder from "./executeOrder";
-import publishEvent from "./publishEvent";
+import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 
 async function execute(traderState, nextAction) {
@@ -46,29 +46,7 @@ async function execute(traderState, nextAction) {
       // Завершаем работу
       trader.stop();
     }
-
-    // Если есть события для отправки
-    if (trader.events.length > 0) {
-      await Promise.all(
-        trader.events.map(async event => {
-          try {
-            await publishEvent(trader.props, event);
-          } catch (e) {
-            const error = new ServiceError(
-              {
-                name: ServiceError.types.TRADER_EVENTS_PUBLISH_ERROR,
-                info: {
-                  error: e
-                }
-              },
-              "Failed to publish events after retries."
-            );
-            Log.exception(error);
-            throw error;
-          }
-        })
-      );
-    }
+    await publishEvents(trader.props, trader.events);
 
     await saveState(trader.state);
   } catch (e) {
@@ -121,27 +99,8 @@ async function execute(traderState, nextAction) {
       );
     }
 
-    if (trader.events.length > 0) {
-      try {
-        await Promise.all(
-          trader.events.map(async event => {
-            await publishEvent(trader.props, event);
-          })
-        );
-      } catch (eventPublishError) {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.TRADER_EXECUTE_EXCEPTION,
-            cause: error,
-            info: {
-              error: eventPublishError
-            }
-          },
-          "Failed to publish while handling execution error."
-        );
-        Log.exception(error);
-      }
-    }
+    await publishEvents(trader.props, trader.events);
+
     if (critical) {
       Log.exception(error);
     } else {

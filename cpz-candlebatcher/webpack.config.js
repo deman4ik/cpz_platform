@@ -33,7 +33,6 @@ const config = {
   plugins: [
     new CleanWebpackPlugin(),
     new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.BannerPlugin({
       banner: 'require("source-map-support").install();',

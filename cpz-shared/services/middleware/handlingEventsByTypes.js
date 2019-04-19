@@ -57,10 +57,9 @@ export default (context, req, neededEvents) => {
     Log.info(
       `Got ${event.eventType} event data: ${JSON.stringify(event.data)}`
     );
-  } else {
-    Log.error(`Unknown Event Type: ${event.eventType}`);
-
-    return null;
+    return event;
   }
-  return event;
+  Log.error(`Unknown Event Type: ${event.eventType}`);
+
+  return null;
 };

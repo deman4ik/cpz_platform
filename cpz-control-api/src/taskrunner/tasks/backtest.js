@@ -229,6 +229,10 @@ class Backtest {
     return this._status;
   }
 
+  set status(status) {
+    this._status = status;
+  }
+
   set error(error) {
     this._error = error;
   }
@@ -237,7 +241,7 @@ class Backtest {
     return Object.values(this._events);
   }
 
-  state() {
+  get state() {
     return {
       PartitionKey: createBacktestSlug({
         exchange: this._exchange,

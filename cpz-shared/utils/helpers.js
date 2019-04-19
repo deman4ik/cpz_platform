@@ -158,8 +158,8 @@ function getPreviousMinuteRange(inputDate) {
   const date = dayjs.utc(inputDate);
   const prev = date.add(-1, "minute");
   return {
-    dateFrom: prev.startOf("minute"),
-    dateTo: prev.endOf("minute")
+    dateFrom: prev.startOf("minute").toISOString(),
+    dateTo: prev.endOf("minute").toISOString()
   };
 }
 

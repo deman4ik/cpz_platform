@@ -8,12 +8,12 @@ import { candlebatcherStateToCommonProps } from "../utils/helpers";
 
 async function cleanCandles(state) {
   try {
-    const { exchange, asset, currency, timeframes } = state;
+    const { exchange, asset, currency, timeframes, settings } = state;
 
     await Promise.all(
       timeframes.map(async timeframe => {
         const { number, unit } = timeframeToTimeUnit(
-          this._settings.requiredHistoryMaxBars * 2,
+          settings.requiredHistoryMaxBars * 2,
           timeframe
         );
 
@@ -33,7 +33,7 @@ async function cleanCandles(state) {
   } catch (e) {
     const error = new ServiceError(
       {
-        name: ServiceError.types.CANDLEBATCHER_CLEAR_TICKS_ERRROR,
+        name: ServiceError.types.CANDLEBATCHER_CLEAN_CACHED_CANDLES_ERROR,
         cause: e,
         info: {
           ...candlebatcherStateToCommonProps(state)

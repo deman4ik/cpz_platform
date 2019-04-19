@@ -2,6 +2,6 @@ import execute from "./execute";
 import loadAction from "./loadAction";
 import saveState from "./saveState";
 import executeOrder from "./executeOrder";
-import publishEvent from "./publishEvent";
+import publishEvents from "./publishEvents";
 
-export { execute, loadAction, saveState, executeOrder, publishEvent };
+export { execute, loadAction, saveState, executeOrder, publishEvents };

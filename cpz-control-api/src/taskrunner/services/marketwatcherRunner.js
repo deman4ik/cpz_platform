@@ -1,4 +1,5 @@
 import ServiceError from "cpz/error";
+import Log from "cpz/log";
 import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
@@ -23,6 +24,7 @@ import BaseRunner from "../baseRunner";
 class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
+      Log.debug("MarketwatcherRunner start", props);
       let taskId = uuid();
       ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, {
         ...props,
@@ -43,15 +45,17 @@ class MarketwatcherRunner extends BaseRunner {
                 del => del.asset === sub.asset && del.currency === sub.currency
               )
           );
+          let event = null;
           if (notSubscribed.length > 0) {
-            this.subscribe({
+            event = await this.subscribe({
               taskId,
               subscriptions: notSubscribed
             });
           }
           return {
             taskId,
-            status: STATUS_STARTED
+            status: STATUS_STARTED,
+            event
           };
         }
       }

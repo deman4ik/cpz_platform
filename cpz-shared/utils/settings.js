@@ -5,7 +5,7 @@ import {
   BACKTESTER_SETTINGS_DEFAULTS
 } from "../config/defaults";
 
-const combineAdvserSettings = settings => ({
+const combineAdvserSettings = (settings = {}) => ({
   /* Режима дебага [true,false] */
   debug:
     settings.debug === undefined || settings.debug === null
@@ -26,7 +26,7 @@ const combineAdvserSettings = settings => ({
     ADVISER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
 });
 
-const combineCandlebatcherSettings = settings => ({
+const combineCandlebatcherSettings = (settings = {}) => ({
   /* Режима дебага [true,false] */
   debug:
     settings.debug === undefined || settings.debug === null
@@ -39,7 +39,7 @@ const combineCandlebatcherSettings = settings => ({
     CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars
 });
 
-const combineTraderSettings = settings => ({
+const combineTraderSettings = (settings = {}) => ({
   /* Режима дебага [true,false] */
   debug:
     settings.debug === undefined || settings.debug === null
@@ -66,7 +66,7 @@ const combineTraderSettings = settings => ({
   keys: settings.keys
 });
 
-const combineBacktesterSettings = settings => ({
+const combineBacktesterSettings = (settings = {}) => ({
   debug:
     settings.debug === undefined || settings.debug === null
       ? BACKTESTER_SETTINGS_DEFAULTS.debug

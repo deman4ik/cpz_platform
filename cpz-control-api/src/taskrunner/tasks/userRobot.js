@@ -261,7 +261,7 @@ class UserRobot {
     return Object.values(this._events);
   }
 
-  state() {
+  get state() {
     return {
       PartitionKey: createRobotSlug({
         exchange: this._exchange,

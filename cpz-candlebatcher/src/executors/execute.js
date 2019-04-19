@@ -6,7 +6,7 @@ import { STOP, UPDATE, RUN } from "../config";
 import loadCandle from "./loadCandle";
 import createCandle from "./createCandle";
 import createTimeframeCandles from "./createTimeframeCandles";
-import publishEvent from "./publishEvent";
+import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 import saveCandlesToCache from "./saveCandles";
 import cleanCachedCandles from "./cleanCachedCandles";
@@ -17,23 +17,39 @@ async function execute(candlebatcherState, nextAction) {
   const candlebatcher = new Candlebatcher(candlebatcherState);
   try {
     const { type, data } = nextAction;
+    Log.debug(`Executing - ${type} action`);
     if (type === RUN) {
       let candle = await loadCandle(candlebatcher.state);
-      if (!candle) candle = await createCandle(candlebatcher.state);
-      if (!candle) candle = candlebatcher.createPrevCandle();
+      Log.debug("Loaded candle", candle);
+      if (!candle) {
+        candle = await createCandle(candlebatcher.state);
+        Log.debug("Created candle", candle);
+      }
+      if (!candle) {
+        candle = candlebatcher.createPrevCandle();
+        Log.debug("Candle from previous", candle);
+      }
 
       if (!candle) {
         throw Error("Failed to load or create candle");
       }
-      candlebatcher.handleCandle(candle);
-      const candlesObject = await createTimeframeCandles(
-        candlebatcher.state,
-        candle
-      );
-      await saveCandlesToCache(Object.values(candlesObject));
-      await clearTicks(candlebatcher.state);
-      await cleanCachedCandles(candlebatcher.state);
-      candlebatcher.createCandleEvents(candlesObject);
+      const candleHandled = candlebatcher.handleCandle(candle);
+      Log.debug("candleHandled", candleHandled);
+      if (candleHandled) {
+        const candlesObject = await createTimeframeCandles(
+          candlebatcher.state,
+          candle
+        );
+        Log.debug("candlesObject", candlesObject);
+
+        await saveCandlesToCache(
+          candlebatcher.state,
+          Object.values(candlesObject)
+        );
+        await clearTicks(candlebatcher.state);
+        await cleanCachedCandles(candlebatcher.state);
+        candlebatcher.createCandleEvents(candlesObject);
+      }
     } else if (type === UPDATE) {
       candlebatcher.update(data);
     } else if (type === STOP) {
@@ -42,29 +58,9 @@ async function execute(candlebatcherState, nextAction) {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;
     }
-
-    // Если есть события для отправки
-    if (candlebatcher.events.length > 0) {
-      await Promise.all(
-        candlebatcher.events.map(async event => {
-          try {
-            await publishEvent(candlebatcher.props, event);
-          } catch (e) {
-            const error = new ServiceError(
-              {
-                name: ServiceError.types.CANDLEBATCHER_EVENTS_PUBLISH_ERROR,
-                info: {
-                  error: e
-                }
-              },
-              "Failed to publish events after retries."
-            );
-            Log.exception(error);
-            throw error;
-          }
-        })
-      );
-    }
+    Log.debug("Candlebatcher events", candlebatcher.events);
+    // Отправялвем события
+    await publishEvents(candlebatcher.props, candlebatcher.events);
 
     await saveState(candlebatcher.state);
   } catch (e) {
@@ -117,27 +113,8 @@ async function execute(candlebatcherState, nextAction) {
       );
     }
 
-    if (candlebatcher.events.length > 0) {
-      try {
-        await Promise.all(
-          candlebatcher.events.map(async event => {
-            await publishEvent(candlebatcher.props, event);
-          })
-        );
-      } catch (eventPublishError) {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.CANDLEBATCHER_EXECUTE_EXCEPTION,
-            cause: error,
-            info: {
-              error: eventPublishError
-            }
-          },
-          "Failed to publish while handling execution error."
-        );
-        Log.exception(error);
-      }
-    }
+    await publishEvents(candlebatcher.props, candlebatcher.events);
+
     if (critical) {
       Log.exception(error);
     } else {

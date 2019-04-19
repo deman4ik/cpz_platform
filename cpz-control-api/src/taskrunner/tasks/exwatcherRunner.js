@@ -171,6 +171,7 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.candlebatcherStatus = STATUS_STOPPED;
       }
 
+      Log.debug("exWatcher.state", exWatcher.state);
       await saveExWatcherState(exWatcher.state);
       await publishEvents(exWatcher.events);
 
@@ -196,6 +197,7 @@ class ExWatcherRunner extends BaseRunner {
 
   static async start(state) {
     try {
+      Log.debug("Start exwatcher", state);
       if (state.status === STATUS_STARTED)
         return {
           taskId: state.taskId,
@@ -269,6 +271,7 @@ class ExWatcherRunner extends BaseRunner {
         const { taskId, status, event } = await MarketwatcherRunner.start(
           marketwatcherParams
         );
+
         exWatcher.marketwatcherId = taskId;
         exWatcher.marketwatcherStatus = status;
         events.push(event);

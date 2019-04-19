@@ -48,7 +48,8 @@ import {
   ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
   ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
   ERROR_TRADER_ERROR_EVENT_SCHEMA,
-  ERROR_USERROBOT_ERROR_EVENT_SCHEMA
+  ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
+  ERROR_CONTROL_ERROR_EVENT_SCHEMA
 } from "cpz/events/schemas/error";
 import EventHub from "cpz/eventhub-client";
 import { SERVICE_NAME } from "../config";
@@ -103,7 +104,8 @@ class ServiceEvents extends BaseService {
       ERROR_IMPORTER_ERROR_EVENT_SCHEMA,
       ERROR_MARKETWATCHER_ERROR_EVENT_SCHEMA,
       ERROR_TRADER_ERROR_EVENT_SCHEMA,
-      ERROR_USERROBOT_ERROR_EVENT_SCHEMA
+      ERROR_USERROBOT_ERROR_EVENT_SCHEMA,
+      ERROR_CONTROL_ERROR_EVENT_SCHEMA
     ]);
     // Configure Validator
     ServiceValidator.add(schemas);
@@ -136,22 +138,21 @@ class ServiceEvents extends BaseService {
     if (event.eventType === SUB_VALIDATION_EVENT) {
       Log.info(
         `Got ${event.eventType} event, validationCode: ${
-          event.validationCode
+          event.data.validationCode
         }, topic: ${event.topic}`
       );
       context.res = {
         status: 200,
         body: {
-          validationResponse: event.validationCode
+          validationResponse: event.data.validationCode
         },
         headers: {
           "Content-Type": "application/json"
         }
       };
-      Log.request(context.req, context.res);
-      Log.clearContext();
-      context.done();
-    } else if (event.eventType === SUB_DELETED_EVENT) {
+      return null;
+    }
+    if (event.eventType === SUB_DELETED_EVENT) {
       Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
       context.res = {
         status: 200,
@@ -159,26 +160,22 @@ class ServiceEvents extends BaseService {
           "Content-Type": "application/json"
         }
       };
-      Log.request(context.req, context.res);
-      Log.clearContext();
-      context.done();
+      return null;
       // In this place if Event Grid batch, we expect what all events are same one type
       // Search in EVENT TYPE needed status of end of string
-    } else if (
+    }
+    if (
       event.eventType.search(
-        /.Started$|.Stopped$|.Updated$|.Finished$|.Error$|.Warn$/
+        /.Started$|.Stopped$|.Updated$|.Finished$|.Error$/
       ) !== -1
     ) {
       Log.info(
         `Got ${event.eventType} event, data ${JSON.stringify(event.data)}`
       );
-    } else {
-      Log.error(`Unknown Event Type: ${event.eventType}`);
-      Log.request(context.req, context.res);
-      Log.clearContext();
-      context.done();
+      return event;
     }
-    return event;
+    Log.error(`Unknown Event Type: ${event.eventType}`);
+    return null;
   }
 
   /**
@@ -195,17 +192,12 @@ class ServiceEvents extends BaseService {
 
     // Handling events by target type
     const event = this.handlingEventsByTypes(context, req);
-
     if (event) {
       const { eventType, data } = event;
       try {
         // Validate events by target schema
-        ServiceValidator.check(BASE_EVENT, data);
-
+        // ServiceValidator.check(BASE_EVENT, event);
         await handleServiceEvent({ eventType, data });
-
-        // Calling context.done for finalize function
-        context.done();
       } catch (error) {
         Log.error(error);
         await EventGrid.publish(ERROR_CONTROL_ERROR_EVENT, {

@@ -1,10 +1,8 @@
 import fetch from "node-fetch";
 import retry from "cpz/utils/retry";
 import Log from "cpz/log";
-import { endpoints as eventEndpoints } from "cpz/config/events/endpoints";
-import config from "../config";
-
-const { serviceName } = config;
+import eventEndpoints from "cpz/events/endpoints";
+import { SERVICE_NAME } from "../config";
 
 class Relay {
   constructor(mode, key) {
@@ -18,7 +16,7 @@ class Relay {
 
   _init() {
     Object.keys(eventEndpoints).forEach(service => {
-      if (service === serviceName) return;
+      if (service === SERVICE_NAME) return;
       const serviceEndpoints = eventEndpoints[service];
       serviceEndpoints.forEach(endpoint => {
         this._endpoints.push({

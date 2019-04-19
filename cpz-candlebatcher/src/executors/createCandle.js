@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
+import dayjs from "cpz/utils/lib/dayjs";
 import ServiceError from "cpz/error";
 import {
   CANDLE_CREATED,
@@ -17,8 +18,8 @@ async function createCandle(state) {
 
     /* Считывание тиков за предыдущую минуту */
     let ticks = await getPrevCachedTicks({
-      dateFrom: dateFrom.toISOString(),
-      dateTo: dateTo.toISOString(),
+      dateFrom,
+      dateTo,
       slug: createCachedTickSlug(exchange, asset, currency)
     });
     /* Если были тики */
@@ -33,15 +34,15 @@ async function createCandle(state) {
           currency,
           timeframe: 1
         }),
-        RowKey: generateCandleRowKey(dateFrom.valueOf()),
+        RowKey: generateCandleRowKey(dayjs.utc(dateFrom).valueOf()),
         id: uuid(),
         taskId,
         exchange,
         asset,
         currency,
         timeframe: 1,
-        time: dateFrom.valueOf(), // время в милисекундах
-        timestamp: dateFrom.toISOString(), // время в ISO UTC
+        time: dayjs.utc(dateFrom).valueOf(), // время в милисекундах
+        timestamp: dayjs.utc(dateFrom).toISOString(), // время в ISO UTC
         open: +ticks[0].price, // цена открытия - цена первого тика
         high: Math.max(...ticks.map(t => +t.price)), // максимальная цена тиков
         low: Math.min(...ticks.map(t => +t.price)), // минимальная цена тиков

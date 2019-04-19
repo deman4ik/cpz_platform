@@ -1,4 +1,5 @@
 import ServiceError from "cpz/error";
+import Log from "cpz/log";
 import { v4 as uuid } from "uuid";
 import {
   STATUS_STARTED,
@@ -25,6 +26,7 @@ import BaseRunner from "../baseRunner";
 class CandlebatcherRunner extends BaseRunner {
   static async start(props) {
     try {
+      Log.debug("CandlebatcherRunner start", props);
       let taskId = uuid();
 
       ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, {
@@ -40,14 +42,14 @@ class CandlebatcherRunner extends BaseRunner {
         timeframes
       } = props;
 
-      const candlebatcher = await findCandlebatcher({
-        slug: createCandlebatcherSlug({
+      const candlebatcher = await findCandlebatcher(
+        createCandlebatcherSlug({
           exchange,
           asset,
           currency
         })
-      });
-
+      );
+      Log.debug("candlebatcher", candlebatcher);
       if (candlebatcher) {
         ({ taskId } = candlebatcher);
 

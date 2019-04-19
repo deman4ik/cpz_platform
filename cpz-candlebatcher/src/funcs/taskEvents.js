@@ -29,6 +29,7 @@ import {
 } from "cpz/events/schemas/tasks/candlebatcher";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
+import { CANDLES_NEWCANDLE_EVENT_SCHEMA } from "cpz/events/schemas/candles";
 import MarketStorageClient from "cpz/tableStorage-client/market";
 import candleTables from "cpz/tableStorage-client/market/candles";
 import tickTables from "cpz/tableStorage-client/market/ticks";
@@ -69,7 +70,8 @@ class TaskEvents extends BaseService {
       TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
       TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA,
       ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA,
-      LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA
+      LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA,
+      CANDLES_NEWCANDLE_EVENT_SCHEMA
     ]);
     ServiceValidator.add(schemas);
     // Configure Event Grid Client
@@ -129,7 +131,7 @@ class TaskEvents extends BaseService {
             ServiceValidator.check(TASKS_CANDLEBATCHER_UPDATE_EVENT, data);
             await handleUpdate(data);
             break;
-          case TASKS_CANDLEBATCHER_STOP_EVENT.eventType:
+          case TASKS_CANDLEBATCHER_STOP_EVENT:
             ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, data);
             await handleStop(data);
             break;

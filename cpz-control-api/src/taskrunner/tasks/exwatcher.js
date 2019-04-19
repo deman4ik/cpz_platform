@@ -218,6 +218,10 @@ class ExWatcher {
     return this._status;
   }
 
+  set status(status) {
+    this._status = status;
+  }
+
   get error() {
     return this._error;
   }
@@ -230,10 +234,11 @@ class ExWatcher {
     return Object.values(this._events);
   }
 
-  state() {
+  get state() {
     return {
       PartitionKey: this._taskId,
       RowKey: this._taskId,
+      taskId: this._taskId,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

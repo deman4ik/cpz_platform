@@ -12,7 +12,7 @@ import {
 } from "cpz/config/state";
 import { STOP, UPDATE, TASK } from "../config";
 import Trader from "../state/trader";
-import { loadAction, execute, publishEvent, saveState } from "../executors";
+import { loadAction, execute, publishEvents, saveState } from "../executors";
 
 async function handleRun(eventData) {
   const { taskId } = eventData;
@@ -55,8 +55,12 @@ async function handleRun(eventData) {
           );
           // Исполняем трейдер - получаем обновленный стейт
           state = await execute(state, nextAction);
-          // Загружаем следующее действие из очереди
-          nextAction = await loadAction(state.taskId, state.lastAction);
+          if (state.status === STATUS_BUSY) {
+            // Загружаем следующее действие из очереди
+            nextAction = await loadAction(state.taskId, state.lastAction);
+          } else {
+            nextAction = null;
+          }
         }
         /* no-await-in-loop */
 
@@ -127,8 +131,8 @@ async function handleStart(eventData) {
     trader.start();
 
     // Отправляем событие Started
-    const [event] = trader.events;
-    await publishEvent(trader.props, event);
+
+    await publishEvents(trader.props, trader.events);
 
     // Сохраняем стейт
     await saveState(trader.state);

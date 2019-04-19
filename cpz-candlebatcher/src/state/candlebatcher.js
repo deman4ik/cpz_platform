@@ -64,7 +64,10 @@ class Candlebatcher {
     const { dateFrom, dateTo } = getPreviousMinuteRange();
     this._dateFrom = dateFrom;
     this._dateTo = dateTo;
-    this._currentDate = dayjs.utc().startOf("minute");
+    this._currentDate = dayjs
+      .utc()
+      .startOf("minute")
+      .toISOString();
     /* События для отправки */
     this._eventsToSend = {};
   }
@@ -126,6 +129,10 @@ class Candlebatcher {
     return this._status;
   }
 
+  set status(status) {
+    this._status = status;
+  }
+
   get dateFrom() {
     return this._dateFrom;
   }
@@ -144,15 +151,15 @@ class Candlebatcher {
           currency: this._currency,
           timeframe: 1
         }),
-        RowKey: generateCandleRowKey(this._dateFrom.valueOf()),
+        RowKey: generateCandleRowKey(dayjs.utc(this._dateFrom).valueOf()),
         id: uuid(),
         taskId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
         timeframe: 1,
-        time: this._dateFrom.valueOf(), // время в милисекундах
-        timestamp: this._dateFrom.toISOString(), // время в ISO UTC
+        time: dayjs.utc(this._dateFrom).valueOf(), // время в милисекундах
+        timestamp: dayjs.utc(this._dateFrom).toISOString(), // время в ISO UTC
         open: this._lastCandle.close, // цена открытия = цене закрытия предыдущей
         high: this._lastCandle.close, // максимальная цена = цене закрытия предыдущей
         low: this._lastCandle.close, // минимальная цена = цене закрытия предыдущей
@@ -165,7 +172,14 @@ class Candlebatcher {
   }
 
   handleCandle(candle) {
+    if (this._lastCandle) {
+      const { time } = this._lastCandle;
+      if (time && time >= candle.time) {
+        return false;
+      }
+    }
     this._lastCandle = candle;
+    return true;
   }
 
   createCandleEvents(candlesObject) {

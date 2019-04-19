@@ -1,5 +1,0 @@
-const INIT_PUBLIC_PROVIDER_ERROR = "InitPublicProviderError";
-
-const INIT_PRIVATE_PROVIDER_ERROR = "InitPrivateProviderError";
-
-export { INIT_PRIVATE_PROVIDER_ERROR, INIT_PUBLIC_PROVIDER_ERROR };

@@ -51,31 +51,8 @@ const getStartedMarketwatchers = async () => {
  * @param {string} exchange - Marketwatcher exchange
  * @returns {Object}
  */
-const findMarketwatcherByExchange = async exchange => {
-  try {
-    const query = new TableQuery().where(
-      TableQuery.stringFilter(
-        "exchange",
-        TableUtilities.QueryComparisons.EQUAL,
-        exchange
-      )
-    );
-    const marketwatchers = await client.queryEntities(
-      TABLES.STORAGE_MARKETWATCHERS_TABLE,
-      query
-    );
-    if (marketwatchers.length > 0) return marketwatchers[0];
-    return null;
-  } catch (error) {
-    throw new ServiceError(
-      {
-        name: ServiceError.types.TABLE_STORAGE_ERROR,
-        cause: error
-      },
-      "Failed to load started marketwatchers"
-    );
-  }
-};
+const findMarketwatcherByExchange = async exchange =>
+  client.getEntityByPartitionKey(TABLES.STORAGE_MARKETWATCHERS_TABLE, exchange);
 
 /**
  * Save Marketwatcher state

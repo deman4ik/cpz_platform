@@ -19,7 +19,7 @@ async function clearTicks(state) {
   } catch (e) {
     const error = new ServiceError(
       {
-        name: ServiceError.types.CANDLEBATCHER_CLEAR_TICKS_ERRROR,
+        name: ServiceError.types.CANDLEBATCHER_CLEAR_TICKS_ERROR,
         cause: e,
         info: {
           ...candlebatcherStateToCommonProps(state)

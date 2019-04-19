@@ -7,7 +7,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "taskEvents",
+      "route": "serviceEvents",
       "methods": ["post"]
     },
     {

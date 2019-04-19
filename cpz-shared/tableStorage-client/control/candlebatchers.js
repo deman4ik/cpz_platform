@@ -59,11 +59,10 @@ const getActiveCandlebatchers = async () => {
 
 /**
  * Find Candlebatcher by slug
- * @param {Object} input
- *  @property {string} input.slug - Candlebatcher Slug
+ * @param {Object} slug - Candlebatcher Slug
  * @returns {Object[]}
  */
-const findCandlebatcher = async ({ slug }) =>
+const findCandlebatcher = async slug =>
   client.getEntityByPartitionKey(TABLES.STORAGE_CANDLEBATCHERS_TABLE, slug);
 
 /**

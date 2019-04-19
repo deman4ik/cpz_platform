@@ -5,7 +5,7 @@ import createTimeframeCandles from "./createTimeframeCandles";
 import execute from "./execute";
 import loadAction from "./loadAction";
 import loadCandle from "./loadCandle";
-import publishEvent from "./publishEvent";
+import publishEvents from "./publishEvents";
 import saveCandles from "./saveCandles";
 import saveState from "./saveState";
 
@@ -17,7 +17,7 @@ export {
   execute,
   loadAction,
   loadCandle,
-  publishEvent,
+  publishEvents,
   saveCandles,
   saveState
 };

@@ -12,7 +12,7 @@ import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candleb
 import { getCandlebatcherById } from "cpz/tableStorage-client/control/candlebatchers";
 import { STOP, UPDATE, TASK } from "../config";
 import Candlebatcher from "../state/candlebatcher";
-import { loadAction, execute, publishEvent, saveState } from "../executors";
+import { loadAction, execute, publishEvents, saveState } from "../executors";
 
 async function handleRun(eventData) {
   const { taskId } = eventData;
@@ -52,8 +52,12 @@ async function handleRun(eventData) {
           );
           // Исполняем  - получаем обновленный стейт
           state = await execute(state, nextAction);
-          // Загружаем следующее действие из очереди
-          nextAction = await loadAction(state.taskId, state.lastAction);
+          if (state.status === STATUS_BUSY) {
+            // Загружаем следующее действие из очереди
+            nextAction = await loadAction(state.taskId, state.lastAction);
+          } else {
+            nextAction = null;
+          }
         }
         /* no-await-in-loop */
 
@@ -117,12 +121,11 @@ async function handleStart(eventData) {
     candlebatcher.start();
 
     // Отправляем событие Started
-    const [event] = candlebatcher.events;
-    await publishEvent(candlebatcher.props, event);
+    await publishEvents(candlebatcher.props, candlebatcher.events);
 
     // Сохраняем стейт
     await saveState(candlebatcher.state);
-  } catch (error) {
+  } catch (e) {
     throw new ServiceError(
       {
         name: ServiceError.types.CANDLEBATCHER_START_ERROR,
