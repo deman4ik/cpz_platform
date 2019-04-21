@@ -221,12 +221,27 @@ class Candlebatcher {
     };
   }
 
-  setError(error) {
+  setError(err) {
     try {
-      const { critical = false } = error.info;
+      let critical;
+      if (err instanceof ServiceError) {
+        ({ critical = false } = err.info);
+        this._error = err;
+      } else {
+        critical = true;
+        this._error = new ServiceError(
+          {
+            name: ServiceError.types.CANDLEBATCHER_ERROR,
+            cause: err,
+            info: { ...this.props }
+          },
+          "Candlebatcher '$s' error",
+          this._taskId
+        );
+      }
       if (critical) this._status = STATUS_ERROR;
-      this._error = error;
-      this._eventsToSend.error = this._createErrorEvent(error);
+
+      this._eventsToSend.error = this._createErrorEvent(this._error);
     } catch (e) {
       throw new ServiceError(
         {

@@ -69,7 +69,7 @@ async function execute(candlebatcherState, nextAction) {
     // Если ошибка сгенерирована сервисом
     if (e instanceof ServiceError) {
       // Провеярем флаг - критическая ошибка
-      ({ critical } = e.info);
+      ({ critical = false } = e.info);
       // Генерируем ошибку оркестрации
       const errorName = critical
         ? ServiceError.types.CANDLEBATCHER_EXECUTE_EXCEPTION
@@ -95,6 +95,7 @@ async function execute(candlebatcherState, nextAction) {
         "Failed to execute Candlebatcher '$s'",
         candlebatcher.taskId
       );
+      critical = true;
     }
     candlebatcher.setError(error);
     try {

@@ -66,7 +66,7 @@ const BASE_ERROR = {
     },
     stack: {
       description: "Error stack.",
-      type: "array",
+      type: "any",
       optional: true
     }
   }

@@ -55,7 +55,7 @@ async function execute(traderState, nextAction) {
     // Если ошибка сгенерирована сервисом
     if (e instanceof ServiceError) {
       // Провеярем флаг - критическая ошибка
-      ({ critical } = e.info);
+      ({ critical = false } = e.info);
       // Генерируем ошибку оркестрации
       const errorName = critical
         ? ServiceError.types.TRADER_EXECUTE_EXCEPTION
@@ -81,6 +81,7 @@ async function execute(traderState, nextAction) {
         "Failed to execute Trader '$s'",
         trader.taskId
       );
+      critical = true;
     }
     trader.setError(error);
     try {
