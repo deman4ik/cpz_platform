@@ -86,7 +86,6 @@ class ActionTimer extends BaseService {
       });
     }
     Log.clearContext();
-    context.done();
   }
 }
 

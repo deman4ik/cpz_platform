@@ -56,7 +56,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -69,7 +69,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       // Email check expected format
@@ -81,7 +81,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -95,7 +95,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       // Generate 5 digit registration code
@@ -116,7 +116,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -145,7 +145,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -162,7 +162,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -178,7 +178,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -193,7 +193,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -206,7 +206,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -251,7 +251,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -268,7 +268,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -284,7 +284,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -299,13 +299,13 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       context.res = {
         status: 200
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -322,7 +322,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -338,7 +338,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -354,7 +354,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -369,7 +369,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       const expiresIn = new Date().getTime() + this.accessExpires;
@@ -413,7 +413,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -430,7 +430,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -445,7 +445,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -458,7 +458,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -470,7 +470,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -482,7 +482,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -495,7 +495,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -510,7 +510,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -555,7 +555,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -573,7 +573,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -589,7 +589,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -603,7 +603,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -615,7 +615,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       const code = Math.floor(10000 + Math.random() * 90000);
@@ -634,7 +634,7 @@ class AuthService {
         status: 200,
         body: { id: user.id, message: "Check code on email" }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -651,7 +651,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 
@@ -667,7 +667,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
       // Password check expected complexity
@@ -679,7 +679,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -694,7 +694,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -707,7 +707,7 @@ class AuthService {
             "Content-Type": "application/json"
           }
         };
-        context.done();
+         ;
         return;
       }
 
@@ -757,7 +757,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     } catch (e) {
       const error = new ServiceError(
         {
@@ -774,7 +774,7 @@ class AuthService {
           "Content-Type": "application/json"
         }
       };
-      context.done();
+       ;
     }
   }
 }

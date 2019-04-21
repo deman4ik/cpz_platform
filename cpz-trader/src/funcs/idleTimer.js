@@ -83,7 +83,6 @@ class IdleTimer extends BaseService {
       });
     }
     Log.clearContext();
-    context.done();
   }
 }
 

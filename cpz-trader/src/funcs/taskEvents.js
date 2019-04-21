@@ -179,7 +179,6 @@ class TaskEvents extends BaseService {
     }
     Log.request(context.req, context.res);
     Log.clearContext();
-    context.done();
   }
 }
 

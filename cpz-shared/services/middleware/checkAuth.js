@@ -1,9 +1,9 @@
-import VError from "verror";
+import ServiceError from "../../error";
 import Log from "../../log";
 
 /**
  * Check request is authorized
- * If request are not authorized call context.done() with status 401
+ * If request are not authorized call   with status 401
  *
  * @function
  * @param {Object} context - context of Azure Functions
@@ -19,9 +19,13 @@ export default (context, req) => {
         "Content-Type": "application/json"
       }
     };
-    Log.warn(new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key"));
+    Log.warn(
+      new ServiceError(
+        { name: ServiceError.types.UNAUTHENTICATED },
+        "Invalid API Key"
+      )
+    );
     Log.request(context.req, context.res);
     Log.clearContext();
-    context.done();
   }
 };

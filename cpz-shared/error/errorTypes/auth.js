@@ -1,4 +1,5 @@
 const AUTH_JWT_ERROR = "AuthJWTError";
 const AUTH_ERROR = "AuthError";
+const UNAUTHENTICATED = "UNAUTHENTICATED";
 // TODO: More Error types
-export { AUTH_JWT_ERROR, AUTH_ERROR };
+export { AUTH_JWT_ERROR, AUTH_ERROR, UNAUTHENTICATED };

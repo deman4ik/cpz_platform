@@ -199,7 +199,7 @@ class ServiceEvents extends BaseService {
         }
       })
     );
-    context.done();
+    Log.clearContext();
   }
 }
 

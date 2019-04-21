@@ -139,7 +139,6 @@ class TaskEvents extends BaseService {
             Log.warn("No tasks events");
         }
         // Calling context.done for finalize function
-        context.done();
       } catch (e) {
         let error;
         if (e instanceof ServiceError) {
@@ -164,7 +163,6 @@ class TaskEvents extends BaseService {
     }
     Log.request(context.req, context.res);
     Log.clearContext();
-    context.done();
   }
 }
 
