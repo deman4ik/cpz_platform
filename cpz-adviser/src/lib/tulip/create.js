@@ -1,6 +1,6 @@
 /* from https://github.com/askmike/gekko/ */
 import tulind from "tulind";
-import VError from "verror";
+import ServiceError from "cpz/error";
 
 function isNumeric(obj) {
   return !Array.isArray(obj) && obj - parseFloat(obj) + 1 >= 0;
@@ -24,9 +24,9 @@ async function execute(params) {
     }
     return results;
   } catch (error) {
-    throw new VError(
+    throw new ServiceError(
       {
-        name: "TulipExecuteError",
+        name: ServiceError.types.TULIP_EXECUTION_ERROR,
         cause: error,
         info: {
           params
@@ -45,9 +45,9 @@ const verifyParams = (methodName, params) => {
 
   requiredParams.forEach(paramName => {
     if (!Object.prototype.hasOwnProperty.call(params, paramName)) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ValidationError",
+          name: ServiceError.types.TULIP_VALIDATION_ERROR,
           info: {
             methodName,
             paramName
@@ -60,9 +60,9 @@ const verifyParams = (methodName, params) => {
     const val = params[paramName];
 
     if (!isNumeric(val)) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ValidationError",
+          name: ServiceError.types.TULIP_VALIDATION_ERROR,
           info: {
             methodName,
             paramName

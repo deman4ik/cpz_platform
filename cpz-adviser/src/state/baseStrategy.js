@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import dayjs from "cpz/utils/lib/dayjs";
 import {
   INDICATORS_BASE,
   INDICATORS_TULIP,
@@ -12,6 +13,9 @@ import {
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL
 } from "cpz/config/state";
+import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
+import Log from "cpz/log";
+import { createLogEvent } from "../utils/helpers";
 
 class BaseStrategy {
   constructor(state) {
@@ -21,13 +25,18 @@ class BaseStrategy {
     this._asset = state.asset;
     this._currency = state.currency;
     this._timeframe = state.timeframe;
+    this._robotId = state.robotId;
     this._positions = state.positions || {};
     this._candle = null;
+    this._candles = []; // [{}]
+    this._candlesProps = {
+      open: [],
+      high: [],
+      low: [],
+      close: [],
+      volume: []
+    };
     this._indicators = state.indicators || {};
-    this._advice = state.advice; // Генерация события NewSignal
-    this._log = state.log; // Функция логирования в консоль
-    this._logEvent = state.logEvent; // Функция логирования в EventGrid в топик CPZ-LOGS
-    this._crash = state.crash; // Функция аварийной остановка советника
     this._consts = {
       TRADE_ACTION_LONG,
       TRADE_ACTION_CLOSE_LONG,
@@ -39,6 +48,7 @@ class BaseStrategy {
       ORDER_DIRECTION_BUY,
       ORDER_DIRECTION_SELL
     };
+    this._eventsToSend = {};
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -55,7 +65,60 @@ class BaseStrategy {
 
   check() {}
 
-  createPosition(positionState) {
+  get _events() {
+    return this._eventsToSend;
+  }
+
+  get _nextEventIndex() {
+    return Object.keys(this._eventsToSend).length;
+  }
+
+  _log(...args) {
+    Log.debug(`${this._robotId}`, ...args);
+  }
+
+  get log() {
+    return this._log;
+  }
+
+  _logEvent(data) {
+    this._eventsToSend[`${this._nextEventIndex}_str`] = createLogEvent(
+      this._robotId,
+      data
+    );
+  }
+
+  get logEvent() {
+    return this._logEvent;
+  }
+
+  _advice(signal) {
+    Log.debug(`Advice from ${this._robotId}`, signal);
+    this._eventsToSend[`${this._nextEventIndex}_str`] = {
+      eventType: SIGNALS_NEWSIGNAL_EVENT,
+      eventData: {
+        subject: this._robotId.toString(),
+        data: {
+          ...signal,
+          signalId: uuid(),
+          robotId: this._robotId,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          candleId: this._candle.id,
+          candleTimestamp: this._candle.timestamp,
+          timestamp: dayjs.utc().toISOString()
+        }
+      }
+    };
+  }
+
+  get advice() {
+    return this._advice;
+  }
+
+  _createPosition(positionState) {
     const positionId = uuid();
     const positionCode =
       positionState.code || positionState.positionCode || positionId;
@@ -65,8 +128,11 @@ class BaseStrategy {
     };
   }
 
-  _handleCandle(candle, indicators) {
-    this._candle = candle;
+  get createPosition() {
+    return this._createPosition;
+  }
+
+  _handleIndicators(indicators) {
     this._indicators = indicators;
     Object.keys(this._indicators).forEach(key => {
       if (this._indicators[key].variables)
@@ -78,8 +144,18 @@ class BaseStrategy {
     });
   }
 
-  get handleCandle() {
-    return this._handleCandle;
+  get handleIndicators() {
+    return this._handleIndicators;
+  }
+
+  _handleCandles(candle, candles, candlesProps) {
+    this._candle = candle;
+    this._candles = candles;
+    this._candlesProps = candlesProps;
+  }
+
+  get handleCandles() {
+    return this._handleCandles;
   }
 
   _addIndicator(name, indicatorName, options) {
@@ -147,22 +223,6 @@ class BaseStrategy {
 
   get CONSTS() {
     return this._consts;
-  }
-
-  get advice() {
-    return this._advice;
-  }
-
-  get log() {
-    return this._log;
-  }
-
-  get logEvent() {
-    return this._logEvent;
-  }
-
-  get crash() {
-    return this._crash;
   }
 }
 

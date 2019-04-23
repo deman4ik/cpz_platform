@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@azure/event-hubs": "^2.0.0",
+    "@azure/storage-blob": "^10.3.0",
     "adal-node": "0.1.28",
     "applicationinsights": "1.2.0",
     "azure-eventgrid": "1.5.0",

@@ -1,4 +1,4 @@
-import BaseIndicator from "../../adviser/baseIndicator";
+import BaseIndicator from "../../state/baseIndicator";
 import tulip from "./create";
 
 class Tulip extends BaseIndicator {

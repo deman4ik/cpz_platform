@@ -1,68 +1,9 @@
 import { ADVISER_SERVICE } from "cpz/config/services";
-import {
-  BASE_EVENT,
-  SUB_DELETED_EVENT,
-  SUB_VALIDATION_EVENT
-} from "cpz/events/types/base";
-import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
 
-import schemas from "cpz/events/schemas";
-import {
-  TASKS_ADVISER_START_EVENT,
-  TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT
-} from "cpz/events/types/tasks";
-import {
-  ERROR_ADVISER_EVENT,
-  LOG_ADVISER_EVENT,
-  TASKS_ADVISER_STARTED_EVENT,
-  TASKS_ADVISER_STOPPED_EVENT,
-  TASKS_ADVISER_UPDATED_EVENT
-} from "cpz/config/events/types";
-import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types";
-import {
-  ERROR_TOPIC,
-  LOG_TOPIC,
-  SIGNALS_TOPIC,
-  TASKS_TOPIC
-} from "cpz/config/events/endpoints/topics";
-
-export default {
-  serviceName: ADVISER_SERVICE,
-  events: {
-    topics: {
-      SIGNALS_TOPIC,
-      LOG_TOPIC,
-      ERROR_TOPIC,
-      TASKS_TOPIC
-    },
-    types: {
-      ERROR_ADVISER_EVENT,
-      BASE_EVENT,
-      SUB_VALIDATION_EVENT,
-      SUB_DELETED_EVENT,
-      CANDLES_NEWCANDLE_EVENT,
-      TASKS_ADVISER_START_EVENT,
-      TASKS_ADVISER_STARTED_EVENT,
-      TASKS_ADVISER_STOPPED_EVENT,
-      TASKS_ADVISER_UPDATED_EVENT,
-      TASKS_ADVISER_UPDATE_EVENT,
-      TASKS_ADVISER_STOP_EVENT,
-      LOG_ADVISER_EVENT,
-      SIGNALS_NEWSIGNAL_EVENT
-    },
-    schemas: {
-      [ERROR_ADVISER_EVENT]: schemas[ERROR_ADVISER_EVENT],
-      [BASE_EVENT]: schemas[BASE_EVENT],
-      [CANDLES_NEWCANDLE_EVENT]: schemas[CANDLES_NEWCANDLE_EVENT],
-      [TASKS_ADVISER_START_EVENT]: schemas[TASKS_ADVISER_START_EVENT],
-      [TASKS_ADVISER_UPDATE_EVENT]: schemas[TASKS_ADVISER_UPDATE_EVENT],
-      [TASKS_ADVISER_STOP_EVENT]: schemas[TASKS_ADVISER_STOP_EVENT],
-      [LOG_ADVISER_EVENT]: schemas[LOG_ADVISER_EVENT],
-      [SIGNALS_NEWSIGNAL_EVENT]: schemas[SIGNALS_NEWSIGNAL_EVENT],
-      [TASKS_ADVISER_STARTED_EVENT]: schemas[TASKS_ADVISER_STARTED_EVENT],
-      [TASKS_ADVISER_STOPPED_EVENT]: schemas[TASKS_ADVISER_STOPPED_EVENT],
-      [TASKS_ADVISER_UPDATED_EVENT]: schemas[TASKS_ADVISER_UPDATED_EVENT]
-    }
-  }
-};
+const SERVICE_NAME = ADVISER_SERVICE;
+const START = "start";
+const STOP = "stop";
+const UPDATE = "update";
+const TASK = "TASK";
+const CANDLE = "CANDLE";
+export { SERVICE_NAME, START, STOP, UPDATE, TASK, CANDLE };

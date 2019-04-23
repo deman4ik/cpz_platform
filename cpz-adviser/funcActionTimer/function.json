@@ -1,0 +1,12 @@
+{
+  "disabled": false,
+  "entryPoint": "run",
+  "bindings": [
+    {
+      "name": "ActionTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "*/5 * * * * *"
+    }
+  ]
+}

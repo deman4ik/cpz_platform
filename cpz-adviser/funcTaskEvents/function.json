@@ -1,7 +1,6 @@
 {
   "disabled": true,
-  "scriptFile": "../index.js",
-  "entryPoint": "taskEvents",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",

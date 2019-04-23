@@ -1,3 +1,6 @@
+import Log from "cpz/log";
+import { createLogEvent } from "../utils/helpers";
+
 class BaseIndicator {
   constructor(state) {
     this._name = state.name;
@@ -7,6 +10,7 @@ class BaseIndicator {
     this._asset = state.asset;
     this._currency = state.currency;
     this._timeframe = state.timeframe;
+    this._robotId = state.robotId;
     this._options = state.options;
     this._candle = null; // {}
     this._candles = []; // [{}]
@@ -17,9 +21,8 @@ class BaseIndicator {
       close: [],
       volume: []
     };
+    this._eventsToSend = {};
     this._tulipIndicators = state.tulipIndicators || {}; // отдельный
-    this._log = state.log; // Функция логирования в консоль
-    this._logEvent = state.logEvent; // Функция логирования в EventGrid в топик CPZ-LOGS
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -36,18 +39,45 @@ class BaseIndicator {
 
   calc() {}
 
+  get _events() {
+    return this._eventsToSend;
+  }
+
+  get _nextEventIndex() {
+    return Object.keys(this._eventsToSend).length;
+  }
+
   done() {
     return Promise.resolve();
   }
 
-  _handleCandle(candle, candles, candlesProps) {
+  _log(...args) {
+    Log.debug(`${this._robotId}`, ...args);
+  }
+
+  get log() {
+    return this._log;
+  }
+
+  _logEvent(data) {
+    this._eventsToSend[`${this._nextEventIndex}_ind`] = createLogEvent(
+      this._robotId,
+      data
+    );
+  }
+
+  get logEvent() {
+    return this._logEvent;
+  }
+
+  _handleCandles(candle, candles, candlesProps) {
     this._candle = candle;
     this._candles = candles;
     this._candlesProps = candlesProps;
   }
 
-  get handleCandle() {
-    return this._handleCandle;
+  get handleCandles() {
+    return this._handleCandles;
   }
 
   get initialized() {
@@ -88,14 +118,6 @@ class BaseIndicator {
 
   get candlesProps() {
     return this._candlesProps;
-  }
-
-  get log() {
-    return this._log;
-  }
-
-  get logEvent() {
-    return this._logEvent;
   }
 }
 

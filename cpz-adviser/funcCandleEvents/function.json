@@ -1,8 +1,6 @@
 {
   "disabled": false,
-  "_originalEntryPoint": false,
-  "scriptFile": "../index.js",
-  "entryPoint": "candleEvents",
+  "entryPoint": "run",
   "bindings": [
     {
       "authLevel": "anonymous",
