@@ -15,7 +15,7 @@ import {
 import Log from "cpz/log";
 import {
   combineBacktesterSettings,
-  combineAdvserSettings,
+  combineAdviserSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
 
@@ -31,7 +31,7 @@ class Backtest {
     this._dateFrom = state.dateFrom;
     this._dateTo = state.dateTo;
     this._settings = combineBacktesterSettings(state.settings);
-    this._adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this._adviserSettings = combineAdviserSettings(state.adviserSettings);
     this._traderSettings = combineTraderSettings(state.traderSettings);
     this._backtesterId = state.backtesterId;
     this._taskId = this._backtesterId;

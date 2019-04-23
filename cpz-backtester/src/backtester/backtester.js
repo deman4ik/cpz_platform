@@ -10,7 +10,7 @@ import {
 import publishEvents from "cpz/eventgrid";
 import Log from "cpz/log";
 import {
-  combineAdvserSettings,
+  combineAdviserSettings,
   combineBacktesterSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
@@ -67,7 +67,7 @@ class Backtester {
     this.dateFrom = state.dateFrom;
     this.dateTo = state.dateTo;
     this.settings = combineBacktesterSettings(state.settings);
-    this.adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this.adviserSettings = combineAdviserSettings(state.adviserSettings);
     this.traderSettings = combineTraderSettings(state.traderSettings);
     this.requiredHistoryCache = this.adviserSettings.requiredHistoryCache;
     this.requiredHistoryMaxBars = this.adviserSettings.requiredHistoryMaxBars;

@@ -68,39 +68,40 @@ class SignalEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    super.checkAuth(context, req);
-    // Handling event by target type
+    if (super.checkAuth(context, req)) {
+      // Handling event by target type
 
-    const event = super.handlingEventsByTypes(context, req, [
-      SIGNALS_NEWSIGNAL_EVENT
-    ]);
-    if (event) {
-      const { eventType, subject, data } = event;
-      try {
-        // Validate event by target schema
-        ServiceValidator.check(SIGNALS_NEWSIGNAL_EVENT, data);
-        // Handling signal
-        await handleSignalEvent(data);
-        // Calling context.done for finalize function
-      } catch (e) {
-        let error;
-        if (e instanceof ServiceError) {
-          error = e;
-        } else {
-          error = new ServiceError(
-            {
-              name: ServiceError.types.TRADER_SIGNALS_EVENTS_ERROR,
-              cause: e,
-              info: { subject, eventType, ...data }
-            },
-            "Failed to handle Signal Event"
-          );
+      const event = super.handlingEventsByTypes(context, req, [
+        SIGNALS_NEWSIGNAL_EVENT
+      ]);
+      if (event) {
+        const { eventType, subject, data } = event;
+        try {
+          // Validate event by target schema
+          ServiceValidator.check(SIGNALS_NEWSIGNAL_EVENT, data);
+          // Handling signal
+          await handleSignalEvent(data);
+          // Calling context.done for finalize function
+        } catch (e) {
+          let error;
+          if (e instanceof ServiceError) {
+            error = e;
+          } else {
+            error = new ServiceError(
+              {
+                name: ServiceError.types.TRADER_SIGNALS_EVENTS_ERROR,
+                cause: e,
+                info: { subject, eventType, ...data }
+              },
+              "Failed to handle Signal Event"
+            );
+          }
+          Log.error(error);
+          await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
+            subject: SERVICE_NAME,
+            data: { error: error.json }
+          });
         }
-        Log.error(error);
-        await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
-          subject: SERVICE_NAME,
-          data: { error: error.json }
-        });
       }
     }
     Log.request(context.req, context.res);

@@ -31,6 +31,7 @@ export * from "./tableStorage";
 export * from "./task";
 export * from "./trader";
 export * from "./tulip";
+export * from "./blobStorage";
 
 export {
   KEY_VAULT_ERROR,

@@ -1,7 +1,7 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/lib/dayjs";
-import { createCachedTickSlug } from "cpz/config/state";
+import { createCachedCandleSlug } from "cpz/config/state";
 import { cleanCachedCandles } from "cpz/tableStorage-client/market/candles";
 import { timeframeToTimeUnit } from "cpz/utils/candlesUtils";
 import { candlebatcherStateToCommonProps } from "../utils/helpers";
@@ -17,8 +17,22 @@ async function cleanCandles(state) {
           timeframe
         );
 
+        Log.debug(
+          "Cleaning cached candles",
+          createCachedCandleSlug({
+            exchange,
+            asset,
+            currency,
+            timeframe
+          }),
+          "to",
+          dayjs
+            .utc()
+            .add(-number, unit)
+            .toISOString()
+        );
         await cleanCachedCandles({
-          slug: createCachedTickSlug({
+          slug: createCachedCandleSlug({
             exchange,
             asset,
             currency,

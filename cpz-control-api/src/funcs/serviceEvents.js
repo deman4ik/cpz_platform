@@ -188,22 +188,22 @@ class ServiceEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    super.checkAuth(context, req);
-
-    // Handling events by target type
-    const event = this.handlingEventsByTypes(context, req);
-    if (event) {
-      const { eventType, data } = event;
-      try {
-        // Validate events by target schema
-        // ServiceValidator.check(BASE_EVENT, event);
-        await handleServiceEvent({ eventType, data });
-      } catch (error) {
-        Log.error(error);
-        await EventGrid.publish(ERROR_CONTROL_ERROR_EVENT, {
-          subject: "ControlApiError",
-          data: { error: error.json }
-        });
+    if (super.checkAuth(context, req)) {
+      // Handling events by target type
+      const event = this.handlingEventsByTypes(context, req);
+      if (event) {
+        const { eventType, data } = event;
+        try {
+          // Validate events by target schema
+          // ServiceValidator.check(BASE_EVENT, event);
+          await handleServiceEvent({ eventType, data });
+        } catch (error) {
+          Log.error(error);
+          await EventGrid.publish(ERROR_CONTROL_ERROR_EVENT, {
+            subject: "ControlApiError",
+            data: { error: error.json }
+          });
+        }
       }
     }
     Log.request(context.req, context.res);

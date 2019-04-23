@@ -3,7 +3,8 @@ import { TASKS_TOPIC, CANDLES_TOPIC } from "../topics";
 import {
   TASKS_ADVISER_START_EVENT,
   TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT
+  TASKS_ADVISER_UPDATE_EVENT,
+  TASKS_ADVISER_RUN_EVENT
 } from "../types/tasks/adviser";
 import { CANDLES_NEWCANDLE_EVENT } from "../types/candles";
 
@@ -17,7 +18,8 @@ export default {
       types: [
         TASKS_ADVISER_START_EVENT,
         TASKS_ADVISER_STOP_EVENT,
-        TASKS_ADVISER_UPDATE_EVENT
+        TASKS_ADVISER_UPDATE_EVENT,
+        TASKS_ADVISER_RUN_EVENT
       ]
     },
     {

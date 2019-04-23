@@ -666,7 +666,7 @@ class Trader {
             cause: err,
             info: { ...this.props }
           },
-          "Trader '$s' error",
+          "Trader '%s' error",
           this._taskId
         );
       }

@@ -84,7 +84,7 @@ async function handleRun(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to run Trader '$s'",
+      "Failed to run Trader '%s'",
       taskId
     );
   }
@@ -143,7 +143,7 @@ async function handleStart(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Start Trader '$s'",
+      "Failed to Start Trader '%s'",
       taskId
     );
   }
@@ -191,7 +191,7 @@ async function handleStop(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Stop Trader '$s'",
+      "Failed to Stop Trader '%s'",
       taskId
     );
   }
@@ -238,7 +238,7 @@ async function handleUpdate(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Update Traders '$s' state",
+      "Failed to Update Traders '%s' state",
       taskId
     );
   }

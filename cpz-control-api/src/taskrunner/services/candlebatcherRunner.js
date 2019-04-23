@@ -122,7 +122,7 @@ class CandlebatcherRunner extends BaseRunner {
           status: STATUS_STOPPED
         };
 
-      const error = {
+      const event = {
         eventType: TASKS_CANDLEBATCHER_STOP_EVENT,
         eventData: {
           subject: createCandlebatcherTaskSubject({
@@ -139,7 +139,7 @@ class CandlebatcherRunner extends BaseRunner {
       return {
         taskId,
         status: STATUS_STOPPING,
-        error
+        event
       };
     } catch (error) {
       throw new ServiceError(

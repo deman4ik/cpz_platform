@@ -121,60 +121,60 @@ class TaskEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    super.checkAuth(context, req);
+    if (super.checkAuth(context, req)) {
+      // Handling events by target type
+      const event = super.handlingEventsByTypes(context, req, [
+        TASKS_TRADER_START_EVENT,
+        TASKS_TRADER_STOP_EVENT,
+        TASKS_TRADER_UPDATE_EVENT,
+        TASKS_TRADER_RUN_EVENT
+      ]);
 
-    // Handling events by target type
-    const event = super.handlingEventsByTypes(context, req, [
-      TASKS_TRADER_START_EVENT,
-      TASKS_TRADER_STOP_EVENT,
-      TASKS_TRADER_UPDATE_EVENT,
-      TASKS_TRADER_RUN_EVENT
-    ]);
+      if (event) {
+        const { eventType, subject, data } = event;
+        try {
+          // Run handler base on eventType
+          switch (eventType) {
+            case TASKS_TRADER_RUN_EVENT:
+              ServiceValidator.check(TASKS_TRADER_RUN_EVENT, data);
+              await handleRun(data);
+              break;
+            case TASKS_TRADER_START_EVENT:
+              ServiceValidator.check(TASKS_TRADER_START_EVENT, data);
+              await handleStart(data);
+              break;
+            case TASKS_TRADER_UPDATE_EVENT:
+              ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, data);
+              await handleUpdate(data);
+              break;
+            case TASKS_TRADER_STOP_EVENT:
+              ServiceValidator.check(TASKS_TRADER_STOP_EVENT, data);
+              await handleStop(data);
+              break;
+            default:
+              Log.warn(event, "No tasks events");
+          }
+        } catch (e) {
+          let error;
+          if (e instanceof ServiceError) {
+            error = e;
+          } else {
+            error = new ServiceError(
+              {
+                name: ServiceError.types.TRADER_TASKS_EVENTS_ERROR,
+                cause: e,
+                info: { subject, eventType, ...data }
+              },
+              "Failed to handle Task Event"
+            );
+          }
+          Log.error(error);
 
-    if (event) {
-      const { eventType, subject, data } = event;
-      try {
-        // Run handler base on eventType
-        switch (eventType) {
-          case TASKS_TRADER_RUN_EVENT:
-            ServiceValidator.check(TASKS_TRADER_RUN_EVENT, data);
-            await handleRun(data);
-            break;
-          case TASKS_TRADER_START_EVENT:
-            ServiceValidator.check(TASKS_TRADER_START_EVENT, data);
-            await handleStart(data);
-            break;
-          case TASKS_TRADER_UPDATE_EVENT:
-            ServiceValidator.check(TASKS_TRADER_UPDATE_EVENT, data);
-            await handleUpdate(data);
-            break;
-          case TASKS_TRADER_STOP_EVENT:
-            ServiceValidator.check(TASKS_TRADER_STOP_EVENT, data);
-            await handleStop(data);
-            break;
-          default:
-            Log.warn(event, "No tasks events");
+          await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
+            subject: SERVICE_NAME,
+            data: { error: error.json }
+          });
         }
-      } catch (e) {
-        let error;
-        if (e instanceof ServiceError) {
-          error = e;
-        } else {
-          error = new ServiceError(
-            {
-              name: ServiceError.types.TRADER_TASKS_EVENTS_ERROR,
-              cause: e,
-              info: { subject, eventType, ...data }
-            },
-            "Failed to handle Task Event"
-          );
-        }
-        Log.error(error);
-
-        await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
-          subject: SERVICE_NAME,
-          data: { error: error.json }
-        });
       }
     }
     Log.request(context.req, context.res);

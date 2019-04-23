@@ -83,7 +83,7 @@ async function handleRun(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to run Candlebatcher '$s'",
+      "Failed to run Candlebatcher '%s'",
       taskId
     );
   }
@@ -132,7 +132,7 @@ async function handleStart(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Start Candlebatcher '$s'",
+      "Failed to Start Candlebatcher '%s'",
       taskId
     );
   }
@@ -181,7 +181,7 @@ async function handleStop(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Stop Candlebatcher '$s'",
+      "Failed to Stop Candlebatcher '%s'",
       taskId
     );
   }
@@ -230,7 +230,7 @@ async function handleUpdate(eventData) {
         cause: e,
         info: { ...eventData }
       },
-      "Failed to Update Candlebatcher '$s' state",
+      "Failed to Update Candlebatcher '%s' state",
       taskId
     );
   }

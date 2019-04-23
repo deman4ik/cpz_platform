@@ -5,7 +5,7 @@ import {
   BACKTESTER_SETTINGS_DEFAULTS
 } from "../config/defaults";
 
-const combineAdvserSettings = (settings = {}) => ({
+const combineAdviserSettings = (settings = {}) => ({
   /* Режима дебага [true,false] */
   debug:
     settings.debug === undefined || settings.debug === null
@@ -74,7 +74,7 @@ const combineBacktesterSettings = (settings = {}) => ({
 });
 
 export {
-  combineAdvserSettings,
+  combineAdviserSettings,
   combineCandlebatcherSettings,
   combineTraderSettings,
   combineBacktesterSettings

@@ -80,10 +80,6 @@ class Candlebatcher {
     return Object.values(this._eventsToSend);
   }
 
-  get stopRequested() {
-    return this._stopRequested;
-  }
-
   start() {
     this._status = STATUS_STARTED;
     this._startedAt = dayjs.utc().toISOString();
@@ -235,7 +231,7 @@ class Candlebatcher {
             cause: err,
             info: { ...this.props }
           },
-          "Candlebatcher '$s' error",
+          "Candlebatcher '%s' error",
           this._taskId
         );
       }

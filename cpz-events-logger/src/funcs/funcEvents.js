@@ -93,32 +93,33 @@ class FuncEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    if (!process.env.EG_EMULATOR_MODE) super.checkAuth(context, req);
-    // Handling event by target type
-    const event = this.handlingEventsByTypes(context, req);
-    if (event) {
-      try {
-        if (!process.env.EG_EMULATOR_MODE)
-          ServiceValidator.check(BASE_EVENT, event);
-        await this.eventslogger.save(event);
+    if (process.env.EG_EMULATOR_MODE || super.checkAuth(context, req)) {
+      // Handling event by target type
+      const event = this.handlingEventsByTypes(context, req);
+      if (event) {
+        try {
+          if (!process.env.EG_EMULATOR_MODE)
+            ServiceValidator.check(BASE_EVENT, event);
+          await this.eventslogger.save(event);
 
-        if (process.env.EG_EMULATOR_MODE) {
-          await this.relay.send(event);
-        }
-      } catch (e) {
-        let error;
-        if (e instanceof ServiceError) {
-          error = e;
-        } else {
-          error = new ServiceError(
-            {
-              name: ServiceError.types.EVENTSLOGGER_HANDLE_EVENT_ERROR
-            },
-            "Failed to handle event."
-          );
-        }
+          if (process.env.EG_EMULATOR_MODE) {
+            await this.relay.send(event);
+          }
+        } catch (e) {
+          let error;
+          if (e instanceof ServiceError) {
+            error = e;
+          } else {
+            error = new ServiceError(
+              {
+                name: ServiceError.types.EVENTSLOGGER_HANDLE_EVENT_ERROR
+              },
+              "Failed to handle event."
+            );
+          }
 
-        Log.exception(error.json);
+          Log.exception(error.json);
+        }
       }
     }
     // Calling context.done for finalize function

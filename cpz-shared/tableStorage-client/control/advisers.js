@@ -66,6 +66,33 @@ const getActiveAdvisersBySlug = async slug => {
     );
   }
 };
+
+/**
+ * Query Started Advisers
+ *
+ * @returns {Object[]}
+ */
+const getStartedAdvisers = async () => {
+  try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+
+    const query = new TableQuery().where(startedStatusFilter);
+    return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error,
+        info: {}
+      },
+      "Failed to read started advisers"
+    );
+  }
+};
 /**
  * Creates new or update current Adviser State
  *
@@ -99,6 +126,7 @@ const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
 export {
   getAdviserById,
   getActiveAdvisersBySlug,
+  getStartedAdvisers,
   saveAdviserState,
   updateAdviserState,
   deleteAdviserState

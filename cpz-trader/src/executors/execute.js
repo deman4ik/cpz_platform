@@ -67,7 +67,7 @@ async function execute(traderState, nextAction) {
           cause: e,
           info: { ...trader.props, invocationId }
         },
-        "Failed to execute Trader '$s'",
+        "Failed to execute Trader '%s'",
         trader.taskId
       );
     } else {
@@ -78,7 +78,7 @@ async function execute(traderState, nextAction) {
           cause: e,
           info: { ...trader.props, invocationId }
         },
-        "Failed to execute Trader '$s'",
+        "Failed to execute Trader '%s'",
         trader.taskId
       );
       critical = true;

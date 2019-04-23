@@ -81,7 +81,7 @@ async function execute(candlebatcherState, nextAction) {
           cause: e,
           info: { ...candlebatcher.props, invocationId }
         },
-        "Failed to execute Candlebatcher '$s'",
+        "Failed to execute Candlebatcher '%s'",
         candlebatcher.taskId
       );
     } else {
@@ -92,7 +92,7 @@ async function execute(candlebatcherState, nextAction) {
           cause: e,
           info: { ...candlebatcher.props, invocationId }
         },
-        "Failed to execute Candlebatcher '$s'",
+        "Failed to execute Candlebatcher '%s'",
         candlebatcher.taskId
       );
       critical = true;

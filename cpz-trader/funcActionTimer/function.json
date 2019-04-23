@@ -3,7 +3,7 @@
   "entryPoint": "run",
   "bindings": [
     {
-      "name": "TraderTimer",
+      "name": "ActionTimer",
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "*/5 * * * * *"

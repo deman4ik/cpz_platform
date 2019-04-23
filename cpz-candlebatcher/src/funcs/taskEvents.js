@@ -44,7 +44,7 @@ import {
   handleStart,
   handleStop,
   handleUpdate
-} from "../events/handleTaskEvents";
+} from "../events/handleTasks";
 
 class TaskEvents extends BaseService {
   constructor() {
@@ -104,61 +104,62 @@ class TaskEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    super.checkAuth(context, req);
-    // Handling events by target type
-    const event = super.handlingEventsByTypes(context, req, [
-      TASKS_CANDLEBATCHER_START_EVENT,
-      TASKS_CANDLEBATCHER_STOP_EVENT,
-      TASKS_CANDLEBATCHER_UPDATE_EVENT,
-      TASKS_CANDLEBATCHER_RUN_EVENT
-    ]);
+    if (super.checkAuth(context, req)) {
+      // Handling events by target type
+      const event = super.handlingEventsByTypes(context, req, [
+        TASKS_CANDLEBATCHER_START_EVENT,
+        TASKS_CANDLEBATCHER_STOP_EVENT,
+        TASKS_CANDLEBATCHER_UPDATE_EVENT,
+        TASKS_CANDLEBATCHER_RUN_EVENT
+      ]);
 
-    if (event) {
-      const { eventType, subject, data } = event;
-      try {
-        // Run handler base on eventType
-        switch (eventType) {
-          case TASKS_CANDLEBATCHER_RUN_EVENT:
-            ServiceValidator.check(TASKS_CANDLEBATCHER_RUN_EVENT, data);
-            await handleRun(data);
-            break;
-          case TASKS_CANDLEBATCHER_START_EVENT:
-            ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, data);
-            await handleStart(data);
+      if (event) {
+        const { eventType, subject, data } = event;
+        try {
+          // Run handler base on eventType
+          switch (eventType) {
+            case TASKS_CANDLEBATCHER_RUN_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_RUN_EVENT, data);
+              await handleRun(data);
+              break;
+            case TASKS_CANDLEBATCHER_START_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, data);
+              await handleStart(data);
 
-            break;
-          case TASKS_CANDLEBATCHER_UPDATE_EVENT:
-            ServiceValidator.check(TASKS_CANDLEBATCHER_UPDATE_EVENT, data);
-            await handleUpdate(data);
-            break;
-          case TASKS_CANDLEBATCHER_STOP_EVENT:
-            ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, data);
-            await handleStop(data);
-            break;
-          default:
-            Log.warn("No tasks events");
+              break;
+            case TASKS_CANDLEBATCHER_UPDATE_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_UPDATE_EVENT, data);
+              await handleUpdate(data);
+              break;
+            case TASKS_CANDLEBATCHER_STOP_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, data);
+              await handleStop(data);
+              break;
+            default:
+              Log.warn("No tasks events");
+          }
+          // Calling context.done for finalize function
+        } catch (e) {
+          let error;
+          if (e instanceof ServiceError) {
+            error = e;
+          } else {
+            error = new ServiceError(
+              {
+                name: ServiceError.types.CANDLEBATCHER_TASKS_EVENTS_ERROR,
+                cause: e,
+                info: { subject, eventType, ...data }
+              },
+              "Failed to handle Task Event"
+            );
+          }
+          Log.error(error);
+
+          await EventGrid.publish(ERROR_CANDLEBATCHER_ERROR_EVENT, {
+            subject: SERVICE_NAME,
+            data: { error: error.json }
+          });
         }
-        // Calling context.done for finalize function
-      } catch (e) {
-        let error;
-        if (e instanceof ServiceError) {
-          error = e;
-        } else {
-          error = new ServiceError(
-            {
-              name: ServiceError.types.CANDLEBATCHER_TASKS_EVENTS_ERROR,
-              cause: e,
-              info: { subject, eventType, ...data }
-            },
-            "Failed to handle Task Event"
-          );
-        }
-        Log.error(error);
-
-        await EventGrid.publish(ERROR_CANDLEBATCHER_ERROR_EVENT, {
-          subject: SERVICE_NAME,
-          data: { error: error.json }
-        });
       }
     }
     Log.request(context.req, context.res);

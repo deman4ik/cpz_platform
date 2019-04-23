@@ -15,7 +15,7 @@ import {
 import Log from "cpz/log";
 import {
   combineCandlebatcherSettings,
-  combineAdvserSettings,
+  combineAdviserSettings,
   combineTraderSettings
 } from "cpz/utils/settings";
 
@@ -32,7 +32,7 @@ class UserRobot {
     this._candlebatcherSettings = combineCandlebatcherSettings(
       state.candlebatcherSettings
     );
-    this._adviserSettings = combineAdvserSettings(state.adviserSettings);
+    this._adviserSettings = combineAdviserSettings(state.adviserSettings);
     this._traderSettings = combineTraderSettings(state.traderSettings);
     this._exwatcherId = state.exwatcherId;
     this._exwatcherStatus = state.exwatcherStatus || STATUS_PENDING;
