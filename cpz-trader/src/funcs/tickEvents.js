@@ -61,40 +61,40 @@ class TickEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    await super.checkAuth(context, req);
+    if (super.checkAuth(context, req)) {
+      // Handling events by target type
+      const event = super.handlingEventsByTypes(context, req, [
+        TICKS_NEWTICK_EVENT
+      ]);
 
-    // Handling events by target type
-    const event = await super.handlingEventsByTypes(context, req, [
-      TICKS_NEWTICK_EVENT
-    ]);
+      if (event) {
+        const { eventType, subject, data } = event;
+        // Validate event by target schema
+        try {
+          ServiceValidator.check(TICKS_NEWTICK_EVENT, data);
+          // Handling ticks
+          await handleTick(data);
+        } catch (e) {
+          let error;
+          if (e instanceof ServiceError) {
+            error = e;
+          } else {
+            error = new ServiceError(
+              {
+                name: ServiceError.types.TRADER_TASKS_EVENTS_ERROR,
+                cause: e,
+                info: { subject, eventType, ...data }
+              },
+              "Failed to handle Tick Event"
+            );
+          }
+          Log.error(error);
 
-    if (event) {
-      const { eventType, subject, data } = event;
-      // Validate event by target schema
-      try {
-        ServiceValidator.check(TICKS_NEWTICK_EVENT, data);
-        // Handling ticks
-        await handleTick(data);
-      } catch (e) {
-        let error;
-        if (e instanceof ServiceError) {
-          error = e;
-        } else {
-          error = new ServiceError(
-            {
-              name: ServiceError.types.TRADER_TASKS_EVENTS_ERROR,
-              cause: e,
-              info: { subject, eventType, ...data }
-            },
-            "Failed to handle Tick Event"
-          );
+          await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
+            subject: SERVICE_NAME,
+            data: { error: error.json }
+          });
         }
-        Log.error(error);
-
-        await EventGrid.publish(ERROR_TRADER_ERROR_EVENT, {
-          subject: SERVICE_NAME,
-          data: { error: error.json }
-        });
       }
     }
     // Calling context.done for finalize function
