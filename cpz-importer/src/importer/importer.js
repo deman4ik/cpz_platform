@@ -1,5 +1,5 @@
 import VError from "verror";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { v4 as uuid } from "uuid";
 import {
   CANDLE_CREATED,

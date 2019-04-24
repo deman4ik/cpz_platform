@@ -1,6 +1,6 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { combineTraderSettings } from "cpz/utils/settings";
 import {
   REALTIME_MODE,

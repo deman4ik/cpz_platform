@@ -1,4 +1,4 @@
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import {
   STATUS_STARTED,
   STATUS_STARTING,

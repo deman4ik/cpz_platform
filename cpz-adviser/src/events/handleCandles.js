@@ -3,7 +3,7 @@ import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { CANDLE_PREVIOUS, createAdviserSlug } from "cpz/config/state";
 
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { getActiveAdvisersBySlug } from "cpz/tableStorage-client/control/advisers";
 import { saveAdviserAction } from "cpz/tableStorage-client/control/adviserActions";
 import { CANDLE } from "../config";

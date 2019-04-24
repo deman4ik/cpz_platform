@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import retry from "cpz/utils/retry";
 import Log from "cpz/log";
 import eventEndpoints from "cpz/events/endpoints";
 import { SERVICE_NAME } from "../config";
@@ -45,18 +44,16 @@ class Relay {
         if (endpoints && endpoints.length > 0) {
           await Promise.all(
             endpoints.map(async endpoint => {
-              await retry(async () => {
-                await fetch(endpoint.url, {
-                  method: "POST",
-                  body: JSON.stringify([
-                    {
-                      ...event,
-                      topic: "cpz-events-logger",
-                      metadataVersion: "1"
-                    }
-                  ]),
-                  headers: { "Content-Type": "application/json" }
-                });
+              await fetch(endpoint.url, {
+                method: "POST",
+                body: JSON.stringify([
+                  {
+                    ...event,
+                    topic: "cpz-events-logger",
+                    metadataVersion: "1"
+                  }
+                ]),
+                headers: { "Content-Type": "application/json" }
               });
             })
           );

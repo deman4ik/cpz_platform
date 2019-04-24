@@ -1,6 +1,6 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import {
   REALTIME_MODE,
   EMULATOR_MODE,

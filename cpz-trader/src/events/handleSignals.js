@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import { createTraderSlug } from "cpz/config/state";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { getTradersReadyForSignals } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { SIGNAL } from "../config";

@@ -1,7 +1,7 @@
 import ccxt from "ccxt";
 import ServiceError from "cpz/error";
 import retry from "async-retry";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";
 import BasePublicProvider from "./basePublicProvider";
 

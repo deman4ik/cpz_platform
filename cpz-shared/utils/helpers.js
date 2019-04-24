@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import dayjs from "./lib/dayjs";
+import dayjs from "./dayjs";
 
 /**
  * Сортировка по возрастанию

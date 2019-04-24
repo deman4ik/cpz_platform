@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import { createCurrentPriceSlug } from "cpz/config/state";
 import {

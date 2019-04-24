@@ -1,5 +1,5 @@
 import ServiceError from "cpz/error";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import {
   STATUS_STARTING,
   STATUS_STARTED,

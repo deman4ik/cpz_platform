@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import {

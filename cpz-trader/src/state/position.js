@@ -29,7 +29,7 @@ import {
   ORDER_POS_DIR_EXIT,
   BACKTEST_MODE
 } from "cpz/config/state";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 
 /**
  * Класс позиции

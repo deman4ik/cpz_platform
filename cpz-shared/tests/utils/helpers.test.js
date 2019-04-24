@@ -1,4 +1,4 @@
-import dayjs from "../../utils/lib/dayjs";
+import dayjs from "../../utils/dayjs";
 import * as helpers from "../../utils/helpers";
 
 describe("Array sorting methods", () => {

@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import EventGrid from "cpz/events";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import { STATUS_STARTED } from "cpz/config/state";
 import { getActiveCandlebatchers } from "cpz/tableStorage-client/control/candlebatchers";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";

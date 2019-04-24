@@ -1,5 +1,5 @@
 import * as candlesUtils from "../../utils/candlesUtils";
-import dayjs from "../../utils/lib/dayjs";
+import dayjs from "../../utils/dayjs";
 import * as helpers from "../../utils/helpers";
 
 describe("Correct choose from timeframes", () => {

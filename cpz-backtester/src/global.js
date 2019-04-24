@@ -1,6 +1,6 @@
 import { fork } from "child_process";
 import { tryParseJSON } from "cpz/utils/helpers";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";
 
 const processes = {};

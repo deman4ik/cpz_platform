@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import dayjs from "../../utils/lib/dayjs";
+import dayjs from "../../utils/dayjs";
 
 const { TableQuery, TableUtilities } = azure;
 

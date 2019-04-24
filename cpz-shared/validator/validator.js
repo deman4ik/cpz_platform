@@ -1,5 +1,5 @@
 import FValidator from "fastest-validator";
-import dayjs from "../utils/lib/dayjs";
+import dayjs from "../utils/dayjs";
 import { hasQueryByPath } from "./helpers";
 
 /**

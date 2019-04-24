@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
-import dayjs from "cpz/utils/lib/dayjs";
+import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import {
   CANDLE_CREATED,

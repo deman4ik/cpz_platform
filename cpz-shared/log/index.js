@@ -1,7 +1,7 @@
 import util from "util";
 import * as appInsights from "applicationinsights";
 import ServiceError from "../error";
-import dayjs from "../utils/lib/dayjs";
+import dayjs from "../utils/dayjs";
 
 const SEVERITY_LEVEL = appInsights.Contracts.SeverityLevel;
 /**
