@@ -102,14 +102,11 @@ async function handleStart(eventData) {
     const state = getCandlebatcherById(taskId);
     if (state) {
       // Если статус занят/запущен
-      if (
-        [STATUS_BUSY, STATUS_STARTED].includes(state.status) ||
-        state.stopRequested
-      ) {
+      if ([STATUS_BUSY, STATUS_STARTED].includes(state.status)) {
         Log.warn(
           `Got Candlebatcher.Start event but Candlebatcher ${taskId} is ${
             state.status
-          } and stop requested is ${state.stopRequested} =(`
+          } =(`
         );
         // Выходим
         return;
@@ -155,11 +152,11 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус - остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if ([STATUS_STOPPED].includes(state.status)) {
       Log.warn(
         `Got TraCandlebatcherder.Stop event but Candlebatcher ${taskId} is ${
           state.status
-        } and stop requested is ${state.stopRequested} =(`
+        } =(`
       );
       // Выходим
       return;
@@ -205,11 +202,11 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус  остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if ([STATUS_STOPPED].includes(state.status)) {
       Log.warn(
         `Got Candlebatcher.Update event but Candlebatcher ${taskId} is ${
           state.status
-        } and stop requested is ${state.stopRequested} =(`
+        } =(`
       );
       // Выходим
       return;

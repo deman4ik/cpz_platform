@@ -12,11 +12,20 @@ async function cleanCandles(state) {
 
     await Promise.all(
       timeframes.map(async timeframe => {
-        const { number, unit } = timeframeToTimeUnit(
-          settings.requiredHistoryMaxBars * 2,
-          timeframe
-        );
+        let number;
+        let unit;
 
+        if (timeframe === 1) {
+          ({ number, unit } = timeframeToTimeUnit(
+            Math.max(...timeframes),
+            timeframe
+          ));
+        } else {
+          ({ number, unit } = timeframeToTimeUnit(
+            settings.requiredHistoryMaxBars,
+            timeframe
+          ));
+        }
         Log.debug(
           "Cleaning cached candles",
           createCachedCandleSlug({

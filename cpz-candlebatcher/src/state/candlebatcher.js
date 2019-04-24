@@ -5,6 +5,7 @@ import {
   CANDLE_PREVIOUS,
   createCachedCandleSlug,
   createCandlebatcherSlug,
+  createImporterSlug,
   createNewCandleSubject,
   STATUS_STARTED,
   STATUS_PENDING,
@@ -18,6 +19,7 @@ import {
   TASKS_CANDLEBATCHER_STOPPED_EVENT,
   TASKS_CANDLEBATCHER_UPDATED_EVENT
 } from "cpz/events/types/tasks/candlebatcher";
+import { TASKS_IMPORTER_START_EVENT } from "cpz/events/types/tasks/importer";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT } from "cpz/events/types/error";
 import { combineCandlebatcherSettings } from "cpz/utils/settings";
 import { getPreviousMinuteRange } from "cpz/utils/helpers";
@@ -172,6 +174,31 @@ class Candlebatcher {
       const { time } = this._lastCandle;
       if (time && time >= candle.time) {
         return false;
+      }
+
+      if (dayjs.utc(candle.time).diff(dayjs.utc(time), "minute") > 1) {
+        this._eventsToSend.import = {
+          eventType: TASKS_IMPORTER_START_EVENT,
+          eventData: {
+            subject: createImporterSlug({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency
+            }),
+            data: {
+              taskId: uuid(),
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              saveToCache: true,
+              dateFrom: dayjs
+                .utc()
+                .startOf("day")
+                .toISOString(),
+              dateTo: dayjs.utc().toISOString()
+            }
+          }
+        };
       }
     }
     this._lastCandle = candle;

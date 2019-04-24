@@ -97,8 +97,6 @@ class TickEvents extends BaseService {
         }
       }
     }
-    // Calling context.done for finalize function
-    Log.request(context.req, context.res);
     Log.clearContext();
   }
 }

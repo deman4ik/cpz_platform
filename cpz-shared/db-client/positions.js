@@ -52,7 +52,7 @@ async function savePositionsDB(data) {
               objects: chunk.map(position => mapForDB(position))
             };
 
-            await DB.request(query, variables);
+            await DB.client.request(query, variables);
           } catch (error) {
             errors.push(error);
           }
@@ -129,7 +129,7 @@ async function saveEventPositionsDB(data) {
               objects: chunk.map(position => mapEventForDB(position))
             };
 
-            await DB.request(query, variables);
+            await DB.client.request(query, variables);
           } catch (error) {
             throw error;
           }

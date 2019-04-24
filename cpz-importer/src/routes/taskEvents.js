@@ -15,7 +15,6 @@ const {
 
 async function eventHandler(req, res) {
   const { subject, data, eventType } = req.body;
-  Log.request(req, res);
   Log.clearContext();
   // Send 200 to EventGrid and run handler for event
   res.status(200).end();

@@ -29,6 +29,10 @@ import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
 import Backtest from "./backtest";
 import publishEvents from "../../utils/publishEvents";
+import {
+  ERROR_IMPORTER_ERROR_EVENT,
+  ERROR_BACKTESTER_ERROR_EVENT
+} from "../../../../cpz-shared/events/types/error";
 
 class BacktestRunner extends BaseRunner {
   static async getState(taskId) {
@@ -86,9 +90,12 @@ class BacktestRunner extends BaseRunner {
   }
 
   static async handleEvent(state, event) {
+    const backtest = new Backtest(state);
     try {
-      const backtest = new Backtest(state);
-      const { eventType } = event;
+      const {
+        eventType,
+        data: { error }
+      } = event;
 
       // Importer
       if (eventType === TASKS_IMPORTER_STARTED_EVENT) {
@@ -97,6 +104,8 @@ class BacktestRunner extends BaseRunner {
         backtest.importerStatus = STATUS_FINISHED;
       } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT) {
         backtest.importerStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_IMPORTER_ERROR_EVENT) {
+        backtest.importerError = error;
       }
 
       // Backtester
@@ -106,6 +115,8 @@ class BacktestRunner extends BaseRunner {
         backtest.backtesterStatus = STATUS_STOPPED;
       } else if (eventType === TASKS_BACKTESTER_FINISHED_EVENT) {
         backtest.backtesterStatus = STATUS_FINISHED;
+      } else if (eventType === ERROR_BACKTESTER_ERROR_EVENT) {
+        backtest.backtesterError = error;
       }
 
       await saveBacktestState(backtest.state);
@@ -127,16 +138,16 @@ class BacktestRunner extends BaseRunner {
         "Failed to handle service event with Backtest."
       );
       Log.error(error);
-      throw error;
+      backtest.error = error;
+      await publishEvents(backtest.events);
     }
   }
 
   static async start(state) {
+    const backtest = new Backtest(state);
     try {
       ServiceValidator.check(BACKTEST_START, state);
 
-      const backtest = new Backtest(state);
-      backtest.log("start");
       backtest.status = STATUS_STARTING;
 
       const events = [];
@@ -144,7 +155,6 @@ class BacktestRunner extends BaseRunner {
         backtest.importerStatus !== STATUS_STARTED &&
         backtest.importerStatus !== STATUS_FINISHED
       ) {
-        backtest.log("Importer!");
         let dateFrom;
         ({ dateFrom } = backtest);
         if (backtest.adviserSettings.requiredHistoryMaxBars > 0) {
@@ -201,7 +211,6 @@ class BacktestRunner extends BaseRunner {
         backtest.backtesterStatus !== STATUS_STARTED &&
         backtest.backtesterStatus !== STATUS_FINISHED
       ) {
-        backtest.log("Backtester!");
         const backtesterParams = {
           robotId: backtest.robotId,
           userId: backtest.userId,
@@ -227,11 +236,6 @@ class BacktestRunner extends BaseRunner {
 
       await saveBacktestState(backtest.state);
       await publishEvents(events);
-
-      return {
-        taskId: backtest.taskId,
-        status: backtest.status
-      };
     } catch (e) {
       const error = new ServiceError(
         {
@@ -242,15 +246,20 @@ class BacktestRunner extends BaseRunner {
         "Failed to start Backtest"
       );
       Log.error(error);
-      throw error;
+      backtest.error = error;
+      await publishEvents(backtest.events);
     }
+    return {
+      taskId: backtest.taskId,
+      status: backtest.status
+    };
   }
 
   static async stop(state) {
+    const backtest = new Backtest(state);
     try {
-      const backtest = new Backtest(state);
       backtest.status = STATUS_STOPPING;
-      backtest.log("stop");
+
       const events = [];
       if (
         backtest.status === STATUS_STOPPED ||
@@ -287,8 +296,6 @@ class BacktestRunner extends BaseRunner {
 
       await saveBacktestState(backtest.state);
       await publishEvents(events);
-
-      return { taskId: backtest.taskId, status: backtest.status };
     } catch (e) {
       const error = new ServiceError(
         {
@@ -299,8 +306,10 @@ class BacktestRunner extends BaseRunner {
         "Failed to stop Backtest"
       );
       Log.error(error);
-      throw error;
+      backtest.error = error;
+      await publishEvents(backtest.events);
     }
+    return { taskId: backtest.taskId, status: backtest.status };
   }
 }
 

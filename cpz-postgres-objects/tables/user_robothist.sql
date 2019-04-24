@@ -7,7 +7,7 @@ create table user_robothist
 			constraint c_user_robothist_user_robot_fk
 			references user_robot,	
 	action_date		   timestamp not null default CURRENT_DATE,
-	action			     varchar(10) not null,
+	action			     varchar(20) not null,
 	run_mode      	 varchar(10), -- included in tradersettings.mode
 	note					   text,
 	advisersettings  jsonb,
@@ -26,7 +26,7 @@ alter table user_robothist
     
 alter table user_robothist
   add constraint c_user_robothist_staction_chk
-    check (action in ('starting', 'started', 'updated', 'stopping', 'stopped_auto', 'stopped_user', 'error'));   
+    check (action in ('starting', 'started', 'updated', 'stopping', 'stopped_auto', 'stopped_user', 'warn', 'error'));   
         	
 create index i_user_robothist_user_robot_fk on user_robothist (user_robot_id);
 

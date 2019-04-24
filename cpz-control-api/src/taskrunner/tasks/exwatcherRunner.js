@@ -10,8 +10,7 @@ import {
 } from "cpz/config/state";
 import {
   getExWatcherById,
-  saveExWatcherState,
-  deleteExWatcherState
+  saveExWatcherState
 } from "cpz/tableStorage-client/control/exwatchers";
 import Log from "cpz/log";
 import {
@@ -26,6 +25,11 @@ import {
 } from "cpz/events/types/tasks";
 import { getMaxTimeframeDateFrom } from "cpz/utils/candlesUtils";
 import ServiceValidator from "cpz/validator";
+import {
+  ERROR_IMPORTER_ERROR_EVENT,
+  ERROR_MARKETWATCHER_ERROR_EVENT,
+  ERROR_CANDLEBATCHER_ERROR_EVENT
+} from "cpz/events/types/error";
 import BaseRunner from "../baseRunner";
 import ExWatcher from "./exwatcher";
 import CandlebatcherRunner from "../services/candlebatcherRunner";
@@ -54,7 +58,6 @@ class ExWatcherRunner extends BaseRunner {
             status: exWatcherState.status
           };
         }
-        await deleteExWatcherState(exWatcherState);
       }
 
       return await ExWatcherRunner.start(params);
@@ -129,11 +132,11 @@ class ExWatcherRunner extends BaseRunner {
   }
 
   static async handleEvent(state, event) {
+    const exWatcher = new ExWatcher(state);
     try {
-      const exWatcher = new ExWatcher(state);
       const {
         eventType,
-        data: { taskId }
+        data: { taskId, error }
       } = event;
 
       // Importer
@@ -155,6 +158,12 @@ class ExWatcherRunner extends BaseRunner {
         } else if (exWatcher.importerCurrentId === taskId) {
           exWatcher.importerCurrentStatus = STATUS_STOPPED;
         }
+      } else if (eventType === ERROR_IMPORTER_ERROR_EVENT) {
+        if (exWatcher.importerHistoryId === taskId) {
+          exWatcher.importerHistoryError = error;
+        } else if (exWatcher.importerCurrentId === taskId) {
+          exWatcher.importerCurrentError = error;
+        }
       }
 
       // Marketwatcher
@@ -162,6 +171,8 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.marketwatcherStatus = STATUS_STARTED;
       } else if (eventType === TASKS_MARKETWATCHER_STOPPED_EVENT) {
         exWatcher.marketwatcherStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_MARKETWATCHER_ERROR_EVENT) {
+        exWatcher.marketwatcherError = error;
       }
 
       // Candlebatcher
@@ -169,6 +180,8 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.candlebatcherStatus = STATUS_STARTED;
       } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT) {
         exWatcher.candlebatcherStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_CANDLEBATCHER_ERROR_EVENT) {
+        exWatcher.candlebatcherError = error;
       }
 
       Log.debug("exWatcher.state", exWatcher.state);
@@ -191,11 +204,13 @@ class ExWatcherRunner extends BaseRunner {
         "Failed to handle service event with Exchange Data Watcher."
       );
       Log.error(error);
-      throw error;
+      exWatcher.error = error;
+      await publishEvents(exWatcher.events);
     }
   }
 
   static async start(state) {
+    const exWatcher = new ExWatcher(state);
     try {
       Log.debug("Start exwatcher", state);
       if (state.status === STATUS_STARTED)
@@ -204,15 +219,13 @@ class ExWatcherRunner extends BaseRunner {
           status: state.status
         };
 
-      const exWatcher = new ExWatcher(state);
       exWatcher.status = STATUS_STARTING;
-      exWatcher.log(`start`);
+
       const events = [];
       if (
         exWatcher.importerHistoryStatus !== STATUS_STARTED &&
         exWatcher.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        exWatcher.log("Importer History!");
         if (exWatcher.candlebatcherSettings.requiredHistoryMaxBars > 0) {
           const dateFrom = getMaxTimeframeDateFrom(
             exWatcher.timeframes,
@@ -256,7 +269,6 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.marketwatcherStatus !== STATUS_STARTED &&
         exWatcher.marketwatcherStatus !== STATUS_STARTING
       ) {
-        exWatcher.log("Marketwatcher!");
         const marketwatcherParams = {
           exchange: exWatcher.exchange,
           providerType: exWatcher.marketwatcherProviderType,
@@ -282,7 +294,6 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.candlebatcherStatus !== STATUS_STARTED &&
         exWatcher.candlebatcherStatus !== STATUS_STARTING
       ) {
-        exWatcher.log("Candlebatcher!");
         const candlebatcherParams = {
           providerType: exWatcher.candlebatcherProviderType,
           exchange: exWatcher.exchange,
@@ -304,7 +315,6 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.importerCurrentStatus !== STATUS_STARTED &&
         exWatcher.importerCurrentStatus !== STATUS_FINISHED
       ) {
-        exWatcher.log("Importer Current!");
         const importerCurrentParams = {
           providerType: exWatcher.candlebatcherProviderType,
           exchange: exWatcher.exchange,
@@ -330,11 +340,6 @@ class ExWatcherRunner extends BaseRunner {
 
       await saveExWatcherState(exWatcher.state);
       await publishEvents([...exWatcher.events, ...events]);
-
-      return {
-        taskId: exWatcher.taskId,
-        status: exWatcher.status
-      };
     } catch (e) {
       const error = new ServiceError(
         {
@@ -345,20 +350,26 @@ class ExWatcherRunner extends BaseRunner {
         "Failed to start Exchange Data Watcher"
       );
       Log.error(error);
-      throw error;
+      exWatcher.error = error;
+      await publishEvents(exWatcher.events);
     }
+    return {
+      taskId: exWatcher.taskId,
+      status: exWatcher.status
+    };
   }
 
   static async stop(state) {
+    const exWatcher = new ExWatcher(state);
     try {
       if (state.status === STATUS_STOPPED)
         return {
           taskId: state.taskId,
           status: STATUS_STOPPED
         };
-      const exWatcher = new ExWatcher(state);
+
       exWatcher.status = STATUS_STOPPING;
-      exWatcher.log("stop");
+
       const events = [];
       if (
         exWatcher.importerHistoryStatus !== STATUS_STOPPED &&
@@ -409,8 +420,6 @@ class ExWatcherRunner extends BaseRunner {
       }
       await saveExWatcherState(exWatcher.state);
       await publishEvents([...exWatcher.events, ...events]);
-
-      return { taskId: exWatcher.taskId, status: exWatcher.status };
     } catch (error) {
       const err = new ServiceError(
         {
@@ -421,8 +430,10 @@ class ExWatcherRunner extends BaseRunner {
         "Failed to stop Exchange Data Watcher"
       );
       Log.error(err);
-      throw err;
+      exWatcher.error = error;
+      await publishEvents(exWatcher.events);
     }
+    return { taskId: exWatcher.taskId, status: exWatcher.status };
   }
 }
 

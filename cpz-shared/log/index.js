@@ -34,7 +34,7 @@ class Log {
       appInsights
         .setup()
         .setAutoDependencyCorrelation(true)
-        .setAutoCollectRequests(false)
+        .setAutoCollectRequests(true)
         .setAutoCollectPerformance(true)
         .setAutoCollectExceptions(true)
         .setAutoCollectDependencies(true)

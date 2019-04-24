@@ -7,12 +7,10 @@ import {
 } from "cpz/config/state";
 import {
   getUserRobotById,
-  saveUserRobotState,
-  deleteUserRobotState
+  saveUserRobotState
 } from "cpz/tableStorage-client/control/userRobots";
 import {
   USER_ROBOT_START,
-  USER_ROBOT_STOP,
   USER_ROBOT_UPDATE,
   TASKS_EXWATCHER_STARTED_EVENT,
   TASKS_EXWATCHER_STOPPED_EVENT,
@@ -21,6 +19,11 @@ import {
   TASKS_TRADER_STARTED_EVENT,
   TASKS_TRADER_STOPPED_EVENT
 } from "cpz/events/types/tasks";
+import {
+  ERROR_EXWATCHER_ERROR_EVENT,
+  ERROR_TRADER_ERROR_EVENT,
+  ERROR_ADVISER_ERROR_EVENT
+} from "cpz/events/types/error";
 import Log from "cpz/log";
 import ServiceValidator from "cpz/validator";
 import BaseRunner from "../baseRunner";
@@ -35,6 +38,7 @@ class UserRobotRunner extends BaseRunner {
     try {
       ServiceValidator.check(USER_ROBOT_START, robotParams);
       const userRobotState = await getUserRobotById(robotParams.id);
+      let params = robotParams;
       if (userRobotState) {
         if (
           userRobotState.status === STATUS_STARTED ||
@@ -45,11 +49,15 @@ class UserRobotRunner extends BaseRunner {
             status: userRobotState.status
           };
         }
-
-        await deleteUserRobotState(userRobotState);
+        params = {
+          ...userRobotState,
+          strategyName: robotParams.strategyName,
+          adviserSettings: robotParams.adviserSettings,
+          traderSettings: robotParams.traderSettings
+        };
       }
 
-      return await UserRobotRunner.start(robotParams);
+      return await UserRobotRunner.start(params);
     } catch (e) {
       const error = new ServiceError(
         {
@@ -64,14 +72,14 @@ class UserRobotRunner extends BaseRunner {
     }
   }
 
-  static async getState(taskId) {
+  static async getState(id) {
     try {
-      const state = await getUserRobotById(taskId);
+      const state = await getUserRobotById(id);
       if (!state)
         throw new ServiceError(
           {
             name: ServiceError.types.USER_ROBOT_NOT_FOUND_ERROR,
-            info: { taskId }
+            info: { id }
           },
           "Failed to load User Robot state."
         );
@@ -81,7 +89,7 @@ class UserRobotRunner extends BaseRunner {
         {
           name: ServiceError.types.USER_ROBOT_RUNNER_ERROR,
           cause: e,
-          info: { taskId }
+          info: { id }
         },
         "Failed to get User Robot state."
       );
@@ -92,6 +100,7 @@ class UserRobotRunner extends BaseRunner {
 
   static async handleAction(action) {
     try {
+      Log.debug("UserRobotRunner handleAction", action);
       const { type, taskId, data } = action;
       const state = await UserRobotRunner.getState(taskId);
 
@@ -121,15 +130,17 @@ class UserRobotRunner extends BaseRunner {
   }
 
   static async handleEvent(state, event) {
+    const userRobot = new UserRobot(state);
     try {
-      const userRobot = new UserRobot(state);
-      const { eventType } = event;
+      const { eventType, data } = event;
 
       // Exwatcher
       if (eventType === TASKS_EXWATCHER_STARTED_EVENT) {
         userRobot.exwatcherStatus = STATUS_STARTED;
       } else if (eventType === TASKS_EXWATCHER_STOPPED_EVENT) {
         userRobot.exwatcherStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_EXWATCHER_ERROR_EVENT) {
+        userRobot.exwatcherError = data.error;
       }
 
       // Adviser
@@ -137,6 +148,8 @@ class UserRobotRunner extends BaseRunner {
         userRobot.adviserStatus = STATUS_STARTED;
       } else if (eventType === TASKS_ADVISER_STOPPED_EVENT) {
         userRobot.adviserStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_ADVISER_ERROR_EVENT) {
+        userRobot.adviserError = data.error;
       }
 
       // Trader
@@ -144,11 +157,12 @@ class UserRobotRunner extends BaseRunner {
         userRobot.traderStatus = STATUS_STARTED;
       } else if (eventType === TASKS_TRADER_STOPPED_EVENT) {
         userRobot.traderStatus = STATUS_STOPPED;
+      } else if (eventType === ERROR_TRADER_ERROR_EVENT) {
+        userRobot.traderError = data.error;
       }
 
-      // TODO: Handle Error events
-
       await saveUserRobotState(userRobot.state);
+      Log.warn("userRobot.events", userRobot.events);
       await publishEvents(userRobot.events);
 
       if (userRobot.status === STATUS_STARTING) {
@@ -167,23 +181,23 @@ class UserRobotRunner extends BaseRunner {
         "Failed to handle service event with User Robot."
       );
       Log.error(error);
-      throw error;
+      userRobot.error = error;
+      await publishEvents(userRobot.events);
     }
   }
 
   static async start(state) {
+    const userRobot = new UserRobot(state);
     try {
       if (state.status === STATUS_STARTED)
         return {
           id: state.id,
           status: STATUS_STARTED
         };
-      const userRobot = new UserRobot(state);
-      userRobot.status = STATUS_STARTING;
-      userRobot.log("start");
+
+      userRobot.setStarting();
       const events = [];
       if (userRobot.exwatcherStatus !== STATUS_STARTED) {
-        userRobot.log("ExWatcher!");
         const exwatcherParams = {
           exchange: userRobot.exchange,
           asset: userRobot.asset,
@@ -203,7 +217,6 @@ class UserRobotRunner extends BaseRunner {
         userRobot.traderStatus !== STATUS_STARTED &&
         userRobot.traderStatus !== STATUS_STARTING
       ) {
-        userRobot.log("Trader!");
         const traderParams = {
           taskId: userRobot.id,
           robotId: userRobot.robotId,
@@ -228,7 +241,6 @@ class UserRobotRunner extends BaseRunner {
         userRobot.adviserStatus !== STATUS_STARTED &&
         userRobot.adviserStatus !== STATUS_STARTING
       ) {
-        userRobot.log("Adviser!");
         const adviserParams = {
           taskId: userRobot.robotId.toString(),
           robotId: userRobot.robotId,
@@ -250,10 +262,6 @@ class UserRobotRunner extends BaseRunner {
 
       await saveUserRobotState(userRobot.state);
       await publishEvents([...userRobot.events, ...events]);
-      return {
-        id: userRobot.id,
-        status: userRobot.status
-      };
     } catch (e) {
       const error = new ServiceError(
         {
@@ -264,22 +272,26 @@ class UserRobotRunner extends BaseRunner {
         "Failed to start User Robot"
       );
       Log.error(error);
-      throw error;
+      userRobot.error = error;
+      await publishEvents(userRobot.events);
     }
+    return {
+      id: userRobot.id,
+      status: userRobot.status
+    };
   }
 
   static async stop(state) {
+    const userRobot = new UserRobot(state);
     try {
-      ServiceValidator.check(USER_ROBOT_STOP, state);
-
       if (state.status === STATUS_STOPPED)
         return {
           id: state.id,
           status: STATUS_STOPPED
         };
-      const userRobot = new UserRobot(state);
-      userRobot.status = STATUS_STOPPING;
-      userRobot.log("stop");
+
+      userRobot.setStopping();
+
       const events = [];
       if (
         userRobot.traderId &&
@@ -310,8 +322,6 @@ class UserRobotRunner extends BaseRunner {
 
       await saveUserRobotState(userRobot.state);
       await publishEvents([...userRobot.events, ...events]);
-
-      return { id: userRobot.id, status: userRobot.status };
     } catch (e) {
       const error = new ServiceError(
         {
@@ -322,16 +332,17 @@ class UserRobotRunner extends BaseRunner {
         "Failed to stop User Robot"
       );
       Log.error(error);
-      throw error;
+      userRobot.error = error;
+      await publishEvents(userRobot.events);
     }
+    return { id: userRobot.id, status: userRobot.status };
   }
 
   static async update(state, settings) {
+    const userRobot = new UserRobot(state);
     try {
       ServiceValidator.check(USER_ROBOT_UPDATE, settings);
 
-      const userRobot = new UserRobot(state);
-      userRobot.log("update");
       const events = [];
       if (userRobot.traderSettings) {
         userRobot.traderSettings = {
@@ -356,7 +367,8 @@ class UserRobotRunner extends BaseRunner {
         "Failed to update User Robot"
       );
       Log.error(error);
-      throw error;
+      userRobot.error = error;
+      await publishEvents(userRobot.events);
     }
   }
 }

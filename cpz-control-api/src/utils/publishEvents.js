@@ -7,7 +7,7 @@ import { SERVICE_NAME } from "../config";
 
 async function publishEvents(events) {
   try {
-    if (events && Array.isArray(events)) {
+    if (events && Array.isArray(events) && events.length > 0) {
       await Promise.all(
         events.map(async data => {
           try {

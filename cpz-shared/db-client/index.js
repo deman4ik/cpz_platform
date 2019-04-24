@@ -2,16 +2,20 @@ import { GraphQLClient } from "graphql-request";
 
 class DB {
   constructor() {
-    this.client = null;
+    this._client = null;
   }
 
-  init({ endpoint, key }) {
+  init(endpoint, key) {
     if (!endpoint || !key) throw new Error("Invalid db client credentials");
-    this.client = new GraphQLClient(endpoint, {
+    this._client = new GraphQLClient(endpoint, {
       headers: {
         "X-Hasura-Admin-Secret": key
       }
     });
+  }
+
+  get client() {
+    return this._client;
   }
 }
 

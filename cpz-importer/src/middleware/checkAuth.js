@@ -19,7 +19,6 @@ export default (req, res, next) => {
   });
   if (req.query["api-key"] !== process.env.API_KEY) {
     Log.warn(new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key"));
-    Log.request(req, res);
     Log.clearContext();
     res.status(401).end();
   } else {

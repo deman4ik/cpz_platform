@@ -244,17 +244,17 @@ async function handleServiceEvent(event) {
         taskId,
         serviceName
       });
-
+      Log.warn(userRobots);
       await Promise.all(
         userRobots.map(async userRobotState => {
           const message = {
-            taskId: userRobotState.taskId,
+            taskId: userRobotState.id,
             type: "event",
             service: USERROBOT_SERVICE,
             data: event
           };
           try {
-            await EventHub.send(userRobotState.taskId, message);
+            await EventHub.send(userRobotState.id, message);
           } catch (e) {
             const error = new ServiceError(
               {
@@ -324,25 +324,28 @@ async function handleServiceEvent(event) {
 
 async function deleteState(taskId, eventType) {
   try {
-    if (eventType === TASKS_MARKETWATCHER_STOPPED_EVENT.eventType) {
+    if (eventType === TASKS_MARKETWATCHER_STOPPED_EVENT) {
       const marketwatcher = await getMarketwatcherById(taskId);
       if (marketwatcher) await deleteMarketwatcherState(marketwatcher);
-    } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT.eventType) {
+    } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT) {
       const candlebatcher = await getCandlebatcherById(taskId);
       if (candlebatcher) await deleteCandlebatcherState(candlebatcher);
-    } else if (eventType === TASKS_EXWATCHER_STOPPED_EVENT.eventType) {
+    } else if (eventType === TASKS_EXWATCHER_STOPPED_EVENT) {
       const exWatcher = await getExWatcherById(taskId);
       if (exWatcher) await deleteExWatcherState(exWatcher);
-    } else if (eventType === TASKS_ADVISER_STOPPED_EVENT.eventType) {
+    } else if (eventType === TASKS_ADVISER_STOPPED_EVENT) {
       const adviser = await getAdviserById(taskId);
       if (adviser) await deleteAdviserState(adviser);
-    } else if (eventType === TASKS_TRADER_STOPPED_EVENT.eventType) {
+    } else if (eventType === TASKS_TRADER_STOPPED_EVENT) {
       const trader = await getTraderById(taskId);
-      if (trader) await deleteTraderState(trader);
-    } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT.eventType) {
+      if (trader) {
+        Log.warn("deleteState", trader.PartitionKey, trader.RowKey);
+        await deleteTraderState(trader);
+      }
+    } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT) {
       const importer = await getImporterById(taskId);
       if (importer) await deleteImporterState(importer);
-    } else if (eventType === TASKS_BACKTESTER_STOPPED_EVENT.eventType) {
+    } else if (eventType === TASKS_BACKTESTER_STOPPED_EVENT) {
       const backtester = await getBacktesterById(taskId);
       if (backtester) await deleteBacktesterState(backtester);
     }

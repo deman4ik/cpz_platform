@@ -30,7 +30,7 @@ async function isBacktestExistsDB(id) {
     id
   }
 }`;
-    const response = await DB.request(query, { id });
+    const response = await DB.client.request(query, { id });
 
     return response && response.cpz_backtest_by_pk;
   } catch (error) {
@@ -71,7 +71,7 @@ async function saveBacktestsDB(data) {
       };
     }
 
-    await DB.request(query, variables);
+    await DB.client.request(query, variables);
   } catch (error) {
     throw new ServiceError(
       {
@@ -94,7 +94,7 @@ async function deleteBacktestDB(id) {
         affected_rows
       }
     }`;
-    await DB.request(query, { id });
+    await DB.client.request(query, { id });
   } catch (error) {
     throw new ServiceError(
       {

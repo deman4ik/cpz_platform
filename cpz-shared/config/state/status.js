@@ -7,7 +7,10 @@ const STATUS_PENDING = "pending"; //  Ожидает обработки
 const STATUS_BUSY = "busy"; //  Занят, выполняет обработку
 const STATUS_STOPPING = "stopping"; // Останавливается
 const STATUS_STOPPED = "stopped"; //  Остановлен
-const STATUS_ERROR = "error"; //  Произошла ошибка во время работы
+const STATUS_STOPPED_AUTO = "stopped_auto"; //  Остановлен автоматически
+const STATUS_STOPPED_USER = "stopped_user"; //  Остановлен пользователей
+const STATUS_ERROR = "error"; //  Произошла ошибка во время работы (критическая)
+const STATUS_WARN = "warn"; //  Произошла ошибка во время работы (не критическая)
 const STATUS_FINISHED = "finished"; // Обработка завершена
 
 /**
@@ -40,11 +43,14 @@ const ORDER_TASK_CANCEL = "cancel"; // Отменить ордер
 export {
   STATUS_BUSY,
   STATUS_ERROR,
+  STATUS_WARN,
   STATUS_FINISHED,
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STARTING,
   STATUS_STOPPED,
+  STATUS_STOPPED_AUTO,
+  STATUS_STOPPED_USER,
   STATUS_STOPPING,
   POS_STATUS_NEW,
   POS_STATUS_OPEN,

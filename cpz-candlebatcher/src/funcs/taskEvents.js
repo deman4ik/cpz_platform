@@ -27,6 +27,7 @@ import {
   TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
   TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA
 } from "cpz/events/schemas/tasks/candlebatcher";
+import { TASKS_IMPORTER_START_EVENT_SCHEMA } from "cpz/events/schemas/tasks/importer";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
 import { CANDLES_NEWCANDLE_EVENT_SCHEMA } from "cpz/events/schemas/candles";
@@ -71,7 +72,8 @@ class TaskEvents extends BaseService {
       TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA,
       ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA,
       LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA,
-      CANDLES_NEWCANDLE_EVENT_SCHEMA
+      CANDLES_NEWCANDLE_EVENT_SCHEMA,
+      TASKS_IMPORTER_START_EVENT_SCHEMA
     ]);
     ServiceValidator.add(schemas);
     // Configure Event Grid Client
@@ -162,7 +164,6 @@ class TaskEvents extends BaseService {
         }
       }
     }
-    Log.request(context.req, context.res);
     Log.clearContext();
   }
 }

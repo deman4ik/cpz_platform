@@ -41,7 +41,7 @@ async function saveCandlesDB({ timeframe, candles }) {
               }))
             };
 
-            await DB.request(query, variables);
+            await DB.client.request(query, variables);
           } catch (error) {
             errors.push(error);
           }
@@ -131,7 +131,7 @@ async function getCandlesDB({
       limit,
       excludeCandleType: CANDLE_PREVIOUS
     };
-    const response = await DB.request(query, variables);
+    const response = await DB.client.request(query, variables);
     const candles = response[table];
     return candles.map(candle => ({
       ...candle,
@@ -186,7 +186,7 @@ async function countCandlesDB({
       dateFrom,
       dateTo
     };
-    const response = await DB.request(query, variables);
+    const response = await DB.client.request(query, variables);
     return response[`${table}_aggregate`].aggregate.count;
   } catch (error) {
     throw new ServiceError(

@@ -37,7 +37,6 @@ export default (req, res, next) => {
     }
   } else {
     res.status(202).end();
-    Log.request(req, res);
     Log.clearContext();
   }
 };

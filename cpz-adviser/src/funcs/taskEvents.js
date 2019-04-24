@@ -162,15 +162,14 @@ class TaskEvents extends BaseService {
             );
           }
           Log.error(error);
-
+          const { taskId } = error.json.info;
           await EventGrid.publish(ERROR_ADVISER_ERROR_EVENT, {
             subject: SERVICE_NAME,
-            data: { error: error.json }
+            data: { error: error.json, taskId }
           });
         }
       }
     }
-    Log.request(context.req, context.res);
     Log.clearContext();
   }
 }

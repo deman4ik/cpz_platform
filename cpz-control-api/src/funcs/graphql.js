@@ -66,10 +66,7 @@ class Graphql extends BaseService {
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
-    DB.init({
-      endpoint: process.env.DB_API_ENDPOINT,
-      key: process.env.DB_API_ACCESS_KEY
-    });
+    DB.init(process.env.DB_API_ENDPOINT, process.env.DB_API_ACCESS_KEY);
     // Configure Validator
     const schemas = super.ValidatorConfig([
       TASKS_ADVISER_START_EVENT_SCHEMA,

@@ -34,14 +34,12 @@ export default (req, res, next) => {
         event.validationCode
       }, topic: ${event.topic}`
     );
-    Log.request(req, res);
     Log.clearContext();
     res.status(200).json({
       validationResponse: event.validationCode
     });
   } else if (event.eventType === SUB_DELETED_EVENT) {
     Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);
-    Log.request(req, res);
     Log.clearContext();
     res.status(200).end();
     // In this place if Event Grid batch, we expect what all events are same one type
@@ -52,7 +50,6 @@ export default (req, res, next) => {
     next();
   } else {
     Log.error(`Unknown Event Type: ${event.eventType}`);
-    Log.request(req, res);
     Log.clearContext();
     res.status(202).end();
   }

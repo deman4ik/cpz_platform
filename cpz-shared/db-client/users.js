@@ -25,7 +25,7 @@ async function createUser(id, email, pwdhash, code) {
     ]
   };
   try {
-    request = await DB.request(query, variables);
+    request = await DB.client.request(query, variables);
     createdUser = {
       id: request.insert_cpz_userlist.returning[0].id,
       email: request.insert_cpz_userlist.returning[0].email
@@ -61,7 +61,7 @@ async function findUserByEmail(email) {
   }
 }`;
   try {
-    request = await DB.request(query, { email });
+    request = await DB.client.request(query, { email });
     if (request.cpz_userlist.length) {
       user = {
         id: request.cpz_userlist[0].id,
@@ -102,7 +102,7 @@ async function findUserByCode(id, code) {
       }
   }}`;
   try {
-    request = await DB.request(query, { id, code });
+    request = await DB.client.request(query, { id, code });
     if (request.cpz_userlist.length) {
       user = {
         id: request.cpz_userlist[0].id,
@@ -140,7 +140,7 @@ async function findUserById(id) {
       }
   }} `;
   try {
-    request = await DB.request(query, { id });
+    request = await DB.client.request(query, { id });
     if (request.cpz_userlist.length) {
       user = {
         id: request.cpz_userlist[0].id,
@@ -178,7 +178,7 @@ async function updateRefreshToken(id, token) {
    refresh_tokens
   }}}`;
   try {
-    request = await DB.request(query, { id, token });
+    request = await DB.client.request(query, { id, token });
     if (request.update_cpz_userlist.length) {
       updatedToken = request.update_cpz_userlist[0].refreshToken;
     }
@@ -213,7 +213,7 @@ async function finalizeRegistration(id, token) {
    refresh_tokens
   }}}`;
   try {
-    request = await DB.request(query, { id, token });
+    request = await DB.client.request(query, { id, token });
     if (request.update_cpz_userlist.length) {
       updatedToken = request.update_cpz_userlist[0].refreshToken;
     }
@@ -243,7 +243,7 @@ async function setCode(id, code) {
    refresh_tokens
   }}}`;
   try {
-    await DB.request(query, { id, code });
+    await DB.client.request(query, { id, code });
   } catch (error) {
     throw new ServiceError(
       {
@@ -265,7 +265,7 @@ async function updateRegCodeCount(id, value) {
   }
 }`;
   try {
-    await DB.request(query, { id, value });
+    await DB.client.request(query, { id, value });
   } catch (error) {
     throw new ServiceError(
       {
@@ -287,7 +287,7 @@ async function updateLoginCount(id, value) {
   }
 }`;
   try {
-    await DB.request(query, { id, value });
+    await DB.client.request(query, { id, value });
   } catch (error) {
     throw new ServiceError(
       {
@@ -309,7 +309,7 @@ async function blockUser(id) {
   }
 }`;
   try {
-    await DB.request(query, { id });
+    await DB.client.request(query, { id });
   } catch (error) {
     throw new ServiceError(
       {
@@ -331,7 +331,7 @@ async function setNewPass(id, password) {
   }
 }`;
   try {
-    await DB.request(query, { id, password });
+    await DB.client.request(query, { id, password });
   } catch (error) {
     throw new ServiceError(
       {
@@ -360,7 +360,7 @@ async function deleteRefreshToken(id) {
   }
   } `;
   try {
-    request = await DB.request(query, { id });
+    request = await DB.client.request(query, { id });
     if (request.cpz_userlist.length) {
       success = true;
     }

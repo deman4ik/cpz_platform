@@ -1,5 +1,6 @@
 import azure from "azure-storage";
 import client from "./index";
+import Log from "../../log";
 import ServiceError from "../../error";
 import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
 import dayjs from "../../utils/lib/dayjs";
@@ -308,30 +309,12 @@ const updateTraderState = async state =>
  *  @property {string} input.RowKey
  *  @property {string} input.PartitionKey
  */
-const deleteTraderState = async ({ RowKey, PartitionKey }) => {
-  try {
-    const traderState = await getTraderByKeys({ RowKey, PartitionKey });
-    if (traderState && traderState.RowKey && traderState.PartitionKey) {
-      await client.deleteEntity(TABLES.STORAGE_TRADERS_TABLE, {
-        RowKey: traderState.RowKey,
-        PartitionKey: traderState.PartitionKey
-      });
-    }
-  } catch (error) {
-    if (error instanceof ServiceError) throw error;
-    throw new ServiceError(
-      {
-        name: ServiceError.types.TABLE_STORAGE_ERROR,
-        cause: error,
-        info: {
-          RowKey,
-          PartitionKey
-        }
-      },
-      "Failed to delete Trader state"
-    );
-  }
-};
+const deleteTraderState = async ({ RowKey, PartitionKey, metadata }) =>
+  client.deleteEntity(TABLES.STORAGE_TRADERS_TABLE, {
+    RowKey,
+    PartitionKey,
+    metadata
+  });
 
 export {
   getTraderById,

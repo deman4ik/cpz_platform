@@ -29,7 +29,7 @@ async function getUserRobotDB(userRobotId) {
     const variables = {
       userRobotId
     };
-    const response = await DB.request(query, variables);
+    const response = await DB.client.request(query, variables);
     if (response.cpz_user_robot_by_pk) {
       const { robotByrobotId } = response.cpz_user_robot_by_pk;
       return {

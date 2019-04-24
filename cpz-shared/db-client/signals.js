@@ -36,7 +36,7 @@ async function saveSignalsDB(data) {
               }))
             };
 
-            await DB.request(query, variables);
+            await DB.client.request(query, variables);
           } catch (error) {
             throw error;
           }

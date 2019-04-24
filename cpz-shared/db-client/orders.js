@@ -64,7 +64,7 @@ async function saveOrdersDB(data) {
               objects: chunk.map(order => mapForDB(order))
             };
 
-            await DB.request(query, variables);
+            await DB.client.request(query, variables);
           } catch (error) {
             errors.push(error);
           }

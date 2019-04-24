@@ -5,11 +5,7 @@ import BaseService from "cpz/services/baseService";
 import controlApiEnv from "cpz/config/environment/control";
 import EventGrid from "cpz/events";
 import { LOG_TOPIC, ERROR_TOPIC } from "cpz/events/topics";
-import {
-  BASE_EVENT,
-  SUB_VALIDATION_EVENT,
-  SUB_DELETED_EVENT
-} from "cpz/events/types/base";
+import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpz/events/types/base";
 import { ERROR_CONTROL_ERROR_EVENT } from "cpz/events/types/error";
 import {
   TASKS_ADVISER_STARTED_EVENT_SCHEMA,
@@ -35,9 +31,7 @@ import {
   TASKS_TRADER_STARTED_EVENT_SCHEMA,
   TASKS_TRADER_STOPPED_EVENT_SCHEMA,
   TASKS_TRADER_UPDATED_EVENT_SCHEMA,
-  TASKS_USERROBOT_STARTED_EVENT_SCHEMA,
-  TASKS_USERROBOT_STOPPED_EVENT_SCHEMA,
-  TASKS_USERROBOT_UPDATED_EVENT_SCHEMA
+  TASKS_USERROBOT_HIST_EVENT_SCHEMA
 } from "cpz/events/schemas/tasks";
 import {
   ERROR_ADVISER_ERROR_EVENT_SCHEMA,
@@ -93,9 +87,7 @@ class ServiceEvents extends BaseService {
       TASKS_TRADER_STARTED_EVENT_SCHEMA,
       TASKS_TRADER_STOPPED_EVENT_SCHEMA,
       TASKS_TRADER_UPDATED_EVENT_SCHEMA,
-      TASKS_USERROBOT_STARTED_EVENT_SCHEMA,
-      TASKS_USERROBOT_STOPPED_EVENT_SCHEMA,
-      TASKS_USERROBOT_UPDATED_EVENT_SCHEMA,
+      TASKS_USERROBOT_HIST_EVENT_SCHEMA,
       ERROR_ADVISER_ERROR_EVENT_SCHEMA,
       ERROR_BACKTEST_ERROR_EVENT_SCHEMA,
       ERROR_BACKTESTER_ERROR_EVENT_SCHEMA,
@@ -206,7 +198,6 @@ class ServiceEvents extends BaseService {
         }
       }
     }
-    Log.request(context.req, context.res);
     Log.clearContext();
   }
 }

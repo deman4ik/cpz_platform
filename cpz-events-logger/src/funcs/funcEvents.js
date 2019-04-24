@@ -14,6 +14,7 @@ import EventsStorageClient from "cpz/tableStorage-client/events";
 import eventsTables from "cpz/tableStorage-client/events/events";
 import MarketStorageClient from "cpz/tableStorage-client/market";
 import marketTables from "cpz/tableStorage-client/market/currentPrices";
+import DB from "cpz/db-client";
 import { SERVICE_NAME } from "../config";
 import EventsLogger from "../eventslogger/eventslogger";
 import Relay from "../emulator/relay";
@@ -38,6 +39,7 @@ class FuncEvents extends BaseService {
     ServiceValidator.add(schemas);
     EventsStorageClient.init(process.env.AZ_STORAGE_EVENT_CS, eventsTables);
     MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, marketTables);
+    DB.init(process.env.DB_API_ENDPOINT, process.env.DB_API_ACCESS_KEY);
     this.eventslogger = new EventsLogger();
     this.relay = new Relay(process.env.EG_EMULATOR_MODE, process.env.API_KEY);
   }
@@ -122,8 +124,6 @@ class FuncEvents extends BaseService {
         }
       }
     }
-    // Calling context.done for finalize function
-    Log.request(context.req, context.res);
     Log.clearContext();
   }
 }

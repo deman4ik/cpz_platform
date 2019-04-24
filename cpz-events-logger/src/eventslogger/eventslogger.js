@@ -15,14 +15,16 @@ import { ERROR_TOPIC } from "cpz/events/topics";
 import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
 import { saveCandlesDB } from "cpz/db-client/candles";
 import { saveSignalsDB } from "cpz/db-client/signals";
-import { savePositionsDB } from "cpz/db-client/positions";
+import { saveEventPositionsDB } from "cpz/db-client/positions";
 import { saveOrdersDB } from "cpz/db-client/orders";
+import { saveUserRobotHistDB } from "cpz/db-client/userRobotHist";
 import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import {
   TRADES_ORDER_EVENT,
   TRADES_POSITION_EVENT
 } from "cpz/events/types/trades";
+import { TASKS_USERROBOT_HIST_EVENT } from "cpz/events/types/tasks/userRobot";
 import { SERVICE_NAME } from "../config";
 
 class EventsLogger {
@@ -91,13 +93,9 @@ class EventsLogger {
             ...baseEventData,
             data: event.data
           });
-        // TODO: SAVE TO DB USER ROBOT TASK EVENTS
-        /*  if (
-          type === TASKS_USERROBOT_STARTED_EVENT.eventType ||
-          type === TASKS_USERROBOT_STOPPED_EVENT.eventType
-        ) {
+        if (type === TASKS_USERROBOT_HIST_EVENT) {
           if (this.logToPostgre) await saveUserRobotHistDB([fullEventData]);
-        } */
+        }
         return;
       }
       if (type.includes("CPZ.Signals")) {
@@ -107,14 +105,14 @@ class EventsLogger {
         }
         return;
       }
-      if (type === TRADES_ORDER_EVENT.eventType) {
+      if (type === TRADES_ORDER_EVENT) {
         if (this.logToStorage) await saveOrdersEvent(fullEventData);
         if (this.logToPostgre) await saveOrdersDB([fullEventData]);
         return;
       }
-      if (type === TRADES_POSITION_EVENT.eventType) {
+      if (type === TRADES_POSITION_EVENT) {
         if (this.logToStorage) await savePositionsEvent(fullEventData);
-        if (this.logToPostgre) await savePositionsDB([fullEventData]);
+        if (this.logToPostgre) await saveEventPositionsDB([fullEventData]);
 
         return;
       }

@@ -107,14 +107,9 @@ async function handleStart(eventData) {
     const state = getAdviserById(taskId);
     if (state) {
       // Если статус занят/запущен
-      if (
-        [STATUS_BUSY, STATUS_STARTED].includes(state.status) ||
-        state.stopRequested
-      ) {
+      if ([STATUS_BUSY, STATUS_STARTED].includes(state.status)) {
         Log.warn(
-          `Got Adviser.Start event but Adviser ${taskId} is ${
-            state.status
-          } and stop requested is ${state.stopRequested} =(`
+          `Got Adviser.Start event but Adviser ${taskId} is ${state.status} =(`
         );
         // Выходим
         return;
@@ -149,7 +144,7 @@ async function handleStart(eventData) {
       {
         name: ServiceError.types.ADVISER_START_ERROR,
         cause: e,
-        info: { ...eventData }
+        info: { ...eventData, critical: true }
       },
       "Failed to Start Adviser '%s'",
       taskId
@@ -172,11 +167,11 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус - остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if ([STATUS_STOPPED].includes(state.status)) {
       Log.warn(
         `Got TraAdviserder.Stop event but Adviser ${taskId} is ${
           state.status
-        } and stop requested is ${state.stopRequested} =(`
+        } =(`
       );
       // Выходим
       return;
@@ -220,11 +215,9 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус  остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if ([STATUS_STOPPED].includes(state.status)) {
       Log.warn(
-        `Got Adviser.Update event but Adviser ${taskId} is ${
-          state.status
-        } and stop requested is ${state.stopRequested} =(`
+        `Got Adviser.Update event but Adviser ${taskId} is ${state.status} =(`
       );
       // Выходим
       return;

@@ -4,6 +4,7 @@ import {
   STATUS_STOPPED,
   STATUS_PENDING,
   STATUS_FINISHED,
+  STATUS_ERROR,
   createBacktestSlug,
   createBacktestTaskSubject
 } from "cpz/config/state";
@@ -12,6 +13,7 @@ import {
   TASKS_BACKTEST_STOPPED_EVENT,
   TASKS_BACKTEST_FINISHED_EVENT
 } from "cpz/events/types/tasks/backtest";
+import { ERROR_BACKTEST_ERROR_EVENT } from "cpz/events/types/error";
 import Log from "cpz/log";
 import {
   combineBacktesterSettings,
@@ -44,14 +46,6 @@ class Backtest {
     this._error = state.error;
     this._metadata = state.metadata;
     this._events = {};
-  }
-
-  log(...args) {
-    Log.debug(`Backtest ${this._robotId}:`, ...args);
-  }
-
-  logInfo(...args) {
-    Log.info(`Backtest ${this._robotId}:`, ...args);
   }
 
   _setStatus() {
@@ -235,6 +229,56 @@ class Backtest {
 
   set error(error) {
     this._error = error;
+    this._createErrorEvent(this._error);
+  }
+
+  set importerError(e) {
+    this._importerError = this._parseError(e);
+    if (this._importerError.critical) {
+      this._importerStatus = STATUS_ERROR;
+      this._status = STATUS_ERROR;
+    }
+    this._createErrorEvent(this._importerError);
+  }
+
+  set backtesterError(e) {
+    this._backtesterError = this._parseError(e);
+    if (this._backtesterError.critical) {
+      this._backtesterStatus = STATUS_ERROR;
+      this._status = STATUS_ERROR;
+    }
+    this._createErrorEvent(this._backtesterError);
+  }
+
+  _parseError({ name, message, info, stack }) {
+    const { critical, userMessage } = info;
+    return {
+      name,
+      message: userMessage || message,
+      critical,
+      info,
+      stack
+    };
+  }
+
+  _createErrorEvent(error) {
+    this._events.error = {
+      eventType: ERROR_BACKTEST_ERROR_EVENT,
+      eventData: {
+        subject: createBacktestTaskSubject({
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          robotId: this._robotId,
+          userId: this._userId
+        }),
+        data: {
+          taskId: this._taskId,
+          error
+        }
+      }
+    };
   }
 
   get events() {

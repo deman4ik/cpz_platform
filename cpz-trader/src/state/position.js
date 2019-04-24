@@ -434,10 +434,20 @@ class Position {
         // Тип ордера настоящий маркет
         order.orderType === ORDER_TYPE_MARKET_FORCE
       ) {
-        return {
-          ...order,
-          task: ORDER_TASK_OPEN_MARKET
-        };
+        if (order.direction === ORDER_DIRECTION_BUY) {
+          return {
+            ...order,
+            price: order.price + settings.slippageStep,
+            task: ORDER_TASK_OPEN_MARKET
+          };
+        }
+        if (order.direction === ORDER_DIRECTION_SELL) {
+          return {
+            ...order,
+            price: order.price - settings.slippageStep,
+            task: ORDER_TASK_OPEN_MARKET
+          };
+        }
       } else if (order.orderType === ORDER_TYPE_STOP) {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
