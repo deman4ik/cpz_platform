@@ -1,12 +1,9 @@
 import * as msRestAzure from "@azure/ms-rest-nodeauth";
 import { EventGridManagementClient } from "@azure/arm-eventgrid";
-import { checkEnvVars } from "cpzUtils/environment";
+import { checkEnvVars } from "cpz/utils/environment";
 import dotenv from "dotenv-safe";
-import {
-  endpoints as eventEndpoints,
-  topics
-} from "cpzConfig/events/endpoints";
-import { EVENTS_LOGGER_SERVICE } from "cpzServices";
+import eventEndpoints from "cpz/events/endpoints";
+import topics from "cpz/events/topics";
 
 dotenv.config();
 checkEnvVars([
@@ -39,7 +36,8 @@ async function getClient() {
 
 async function createOrUpdateSub(
   EGMClient,
-  { topic, topicName, serviceName, subName, endpointUrl, eventTypes }
+  { topic, topicName, serviceName, subName, endpointUrl, eventTypes },
+  debug = false
 ) {
   const scope = `/subscriptions/${SUBSRIPTION_ID}/resourceGroups/${RESOURSE_GROUP}/providers/Microsoft.EventGrid/topics/${topicName}`;
   const properties = {
@@ -53,8 +51,7 @@ async function createOrUpdateSub(
       endpointUrl
     },
     filter: {
-      includedEventTypes:
-        serviceName === EVENTS_LOGGER_SERVICE ? null : eventTypes
+      includedEventTypes: eventTypes
     },
     retryPolicy: {
       eventTimeToLiveInMinutes: 60,
@@ -62,6 +59,10 @@ async function createOrUpdateSub(
     },
     eventDeliverySchema: "EventGridSchema"
   };
+  if (debug) {
+    console.warn(subName, scope, properties);
+    return true;
+  }
   const result = await EGMClient.eventSubscriptions.createOrUpdate(
     scope,
     subName,
@@ -160,7 +161,7 @@ function createSubscriptionsList(environment, apikey) {
   return endpoints;
 }
 
-async function createSubscriptions(client, subscriptions) {
+async function createSubscriptions(client, subscriptions, debug = false) {
   try {
     /* eslint-disable no-restricted-syntax, no-await-in-loop */
     for (const subscription of subscriptions) {
@@ -171,14 +172,18 @@ async function createSubscriptions(client, subscriptions) {
       );
 
       try {
-        await createOrUpdateSub(client, {
-          topic: subscription.topic,
-          topicName: subscription.topicName,
-          serviceName: subscription.serviceName,
-          subName: subscription.name,
-          endpointUrl: subscription.url,
-          eventTypes: subscription.types
-        });
+        await createOrUpdateSub(
+          client,
+          {
+            topic: subscription.topic,
+            topicName: subscription.topicName,
+            serviceName: subscription.serviceName,
+            subName: subscription.name,
+            endpointUrl: subscription.url,
+            eventTypes: subscription.types
+          },
+          debug
+        );
         console.log(subscription.name, "ok");
       } catch (err) {
         console.log(err);

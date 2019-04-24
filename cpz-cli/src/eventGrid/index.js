@@ -24,7 +24,11 @@ async function createSubs(args) {
       `Creating "${key}" subscriptions`,
       topicSubscriptions.map(sub => sub.name).join(", ")
     );
-    await createSubscriptions(EGMClient, topicSubscriptions);
+    await createSubscriptions(
+      EGMClient,
+      topicSubscriptions,
+      args.options.debug
+    );
   }
   /* no-restricted-syntax, no-await-in-loop */
 }

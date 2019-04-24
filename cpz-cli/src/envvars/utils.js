@@ -1,7 +1,7 @@
-import envVars from "cpzEnv";
+import envVars from "cpz/config/environment";
 import dotenv from "dotenv-safe";
 import fs from "fs";
-import { setSecret } from "cpzKeyVault";
+import { setSecret } from "cpz/keyVault";
 
 dotenv.config();
 const {

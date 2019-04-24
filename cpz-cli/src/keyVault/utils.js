@@ -1,4 +1,4 @@
-import { createKey, encrypt, setSecret } from "cpzKeyVault";
+import { createKey, encrypt, setSecret } from "cpz/keyVault";
 import dotenv from "dotenv-safe";
 
 dotenv.config();

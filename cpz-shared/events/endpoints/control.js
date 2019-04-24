@@ -1,5 +1,5 @@
 import { CONTROL_SERVICE } from "../../config/services";
-import { TASKS_TOPIC } from "../topics";
+import { TASKS_TOPIC, ERROR_TOPIC } from "../topics";
 import {
   TASKS_ADVISER_STARTED_EVENT,
   TASKS_ADVISER_STOPPED_EVENT,
@@ -71,7 +71,15 @@ export default {
         TASKS_BACKTESTER_STOPPED_EVENT,
         TASKS_BACKTESTER_FINISHED_EVENT,
         TASKS_EXWATCHER_STARTED_EVENT,
-        TASKS_EXWATCHER_STOPPED_EVENT,
+        TASKS_EXWATCHER_STOPPED_EVENT
+      ]
+    },
+    {
+      name: `${CONTROL_SERVICE}-${ERROR_TOPIC}`,
+      topic: ERROR_TOPIC,
+      url: "/api/serviceEvents",
+      localPort: 8107,
+      types: [
         ERROR_ADVISER_ERROR_EVENT,
         ERROR_BACKTESTER_ERROR_EVENT,
         ERROR_CANDLEBATCHER_ERROR_EVENT,

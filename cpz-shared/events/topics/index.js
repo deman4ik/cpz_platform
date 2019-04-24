@@ -14,3 +14,14 @@ export {
   LOG_TOPIC,
   ERROR_TOPIC
 };
+
+const topics = [
+  TASKS_TOPIC,
+  CANDLES_TOPIC,
+  TICKS_TOPIC,
+  SIGNALS_TOPIC,
+  TRADES_TOPIC,
+  LOG_TOPIC,
+  ERROR_TOPIC
+];
+export default topics;
