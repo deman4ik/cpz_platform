@@ -22,7 +22,7 @@ create table positions
   timeframe     integer         not null,
   status        varchar(10)     not null default 'none',
   direction     varchar(10)     not null,
-  entry_date    timestamp       not null,
+  entry_date    timestamp,
   entry_price   numeric,
   exit_date     timestamp,
   exit_price    numeric,
