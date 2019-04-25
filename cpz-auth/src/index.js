@@ -7,7 +7,22 @@ import Log from "cpz/log";
 import Mailer from "cpz/mailer";
 import { checkEnvVars } from "cpz/utils/environment";
 import authEnv from "cpz/config/environment/auth";
+import {
+  findUserByEmail,
+  createUser,
+  finalizeRegistration,
+  findUserByCode,
+  updateRefreshToken,
+  findUserById,
+  deleteRefreshToken,
+  updateRegCodeCount,
+  blockUser,
+  updateLoginCount,
+  setCode,
+  setNewPass
+} from "cpz/db-client/users";
 import { SERVICE_NAME, INTERNAL } from "./config";
+import { generateCode } from "./utils";
 
 const { BAD_VALIDATE_CODE_COUNT, BAD_LOGIN_COUNT, AUTH_ISSUER } = INTERNAL;
 
@@ -40,7 +55,7 @@ class AuthService {
       serviceName: SERVICE_NAME
     });
     this.mailer = new Mailer({ apiKey: MAILGUN_API, domain: MAILGUN_DOMAIN });
-    DB.init({ endpoint: DB_API_ENDPOINT, key: DB_API_ACCESS_KEY });
+    DB.init(DB_API_ENDPOINT, DB_API_ACCESS_KEY);
   }
 
   // TODO: Add API KEY
@@ -82,7 +97,7 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserByEmail(email);
+      const user = await findUserByEmail(email);
 
       if (user && user.status === 1) {
         context.res = {
@@ -95,10 +110,10 @@ class AuthService {
         return;
       }
       // Generate 5 digit registration code
-      const code = Math.floor(10000 + Math.random() * 90000);
+      const code = generateCode();
 
       if (user && user.status === 2) {
-        await this.db.setCode(user.id, code);
+        await setCode(user.id, code);
         // Send email with code
         await this.mailer.send({
           to: email,
@@ -118,12 +133,7 @@ class AuthService {
       // Generate password Hash
       const passwordHash = bcrypt.hashSync(password, 10);
 
-      const newUser = await this.db.createUser(
-        uuid(),
-        email,
-        passwordHash,
-        code
-      );
+      const newUser = await createUser(uuid(), email, passwordHash, code);
 
       // Send email with code
       await this.mailer.send({
@@ -174,10 +184,10 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserByCode(id, code);
+      const user = await findUserByCode(id, code);
 
       if (!user) {
-        await this.db.updateRegCodeCount(id, 1);
+        await updateRegCodeCount(id, 1);
         context.res = {
           status: 400,
           body: { message: "Bad registration code" },
@@ -189,7 +199,7 @@ class AuthService {
       }
 
       if (user.bad_regcode_count > BAD_VALIDATE_CODE_COUNT) {
-        await this.db.blockUser(id);
+        await blockUser(id);
         context.res = {
           status: 400,
           body: { message: "User blocked" },
@@ -228,7 +238,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      await this.db.finalizeRegistration(user.id, refreshToken);
+      await finalizeRegistration(user.id, refreshToken);
 
       context.res = {
         status: 200,
@@ -278,7 +288,7 @@ class AuthService {
       try {
         jwt.verify(accessToken, JWT_SECRET, { issuer: AUTH_ISSUER });
       } catch (e) {
-        await this.db.deleteRefreshToken(id);
+        await deleteRefreshToken(id);
         context.res = {
           status: 401,
           body: { message: "Unverified token" },
@@ -340,10 +350,10 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserById(verifiedToken.userId);
+      const user = await findUserById(verifiedToken.userId);
 
       if (token !== user.refresh_tokens) {
-        await this.db.deleteRefreshToken(user.id);
+        await deleteRefreshToken(user.id);
         context.res = {
           status: 401,
           body: { message: "Bad token" },
@@ -381,7 +391,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      await this.db.updateRefreshToken(user.id, refreshToken);
+      await updateRefreshToken(user.id, refreshToken);
 
       context.res = {
         status: 200,
@@ -427,7 +437,7 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserByEmail(email);
+      const user = await findUserByEmail(email);
       if (!user) {
         context.res = {
           status: 401,
@@ -462,7 +472,7 @@ class AuthService {
       }
 
       if (user.bad_login_count > BAD_LOGIN_COUNT) {
-        await this.db.blockUser(user.id);
+        await blockUser(user.id);
         context.res = {
           status: 400,
           body: { message: "User blocked" },
@@ -476,7 +486,7 @@ class AuthService {
       const isEqual = bcrypt.compareSync(password, user.pwdhash);
 
       if (!isEqual) {
-        await this.db.updateLoginCount(user.id, 1);
+        await updateLoginCount(user.id, 1);
         context.res = {
           status: 401,
           body: { message: "Bad password" },
@@ -515,7 +525,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+      updateRefreshToken(user.id, JSON.stringify(refreshToken));
 
       context.res = {
         status: 200,
@@ -563,7 +573,7 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserByEmail(email);
+      const user = await findUserByEmail(email);
 
       if (!user) {
         context.res = {
@@ -586,8 +596,8 @@ class AuthService {
         };
         return;
       }
-      const code = Math.floor(10000 + Math.random() * 90000);
-      await this.db.setCode(user.id, code);
+      const code = generateCode();
+      await setCode(user.id, code);
 
       // Send email with code
       await this.mailer.send({
@@ -647,10 +657,10 @@ class AuthService {
         return;
       }
 
-      const user = await this.db.findUserByCode(id, code);
+      const user = await findUserByCode(id, code);
 
       if (!user) {
-        await this.db.updateRegCodeCount(id, 1);
+        await updateRegCodeCount(id, 1);
         context.res = {
           status: 400,
           body: { message: "Bad reset password code" },
@@ -662,7 +672,7 @@ class AuthService {
       }
 
       if (user.bad_regcode_count > BAD_VALIDATE_CODE_COUNT) {
-        await this.db.blockUser(id);
+        await blockUser(id);
         context.res = {
           status: 400,
           body: { message: "User blocked" },
@@ -676,7 +686,7 @@ class AuthService {
       // Generate password Hash
       const hash = bcrypt.hashSync(password, 10);
       // Save new pass
-      await this.db.setNewPass(id, hash);
+      await setNewPass(id, hash);
 
       const expiresIn = new Date().getTime() + this.accessExpires;
       const accessToken = jwt.sign(
@@ -706,7 +716,7 @@ class AuthService {
         }
       );
       // Save Refresh Token in DB
-      await this.db.updateRefreshToken(user.id, JSON.stringify(refreshToken));
+      await updateRefreshToken(user.id, JSON.stringify(refreshToken));
 
       context.res = {
         status: 200,

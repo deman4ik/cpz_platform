@@ -2,8 +2,8 @@ const axios = require("axios");
 
 (async () => {
   // берем из регистрации
-  const correctLogin = "deman4ik@gmail.com";
-  const correctPass = "Cryptan1te!";
+  const correctLogin = "";
+  const correctPass = "!Qwertyuiop0";
   const incorrectLogin = "test@tes,r";
   const incorrectPass = "1234567890";
   let request;

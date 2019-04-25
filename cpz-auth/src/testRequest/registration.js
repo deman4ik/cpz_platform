@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 (async () => {
-  const correctLogin = "test@example.com";
+  const correctLogin = "";
   const correctPass = "!Qwertyuiop0";
   const incorrectLogin = "test@tes,r";
   const incorrectPass = "1234567890";

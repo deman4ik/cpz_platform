@@ -243,7 +243,7 @@ async function setCode(id, code) {
    refresh_tokens
   }}}`;
   try {
-    await DB.client.request(query, { id, code });
+    await DB.client.request(query, { id, code: code.toString() });
   } catch (error) {
     throw new ServiceError(
       {

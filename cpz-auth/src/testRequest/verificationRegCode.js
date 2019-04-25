@@ -1,12 +1,12 @@
 const axios = require("axios");
 
 (async () => {
-  const id = "76b2a8d4-7e92-4050-b93a-516b0bd9ff6c"; // берем из БД или с консоли
-  const correctCode = "30113"; // берем с отправленного письма
+  const id = "10bf914d-8acd-4d97-a6ad-5d6dce87e5da"; // берем из БД или с консоли
+  const correctCode = "70882"; // берем с отправленного письма
   const incorrectCode = "1234567890";
   let request;
 
-  const endpoint = "http://localhost:8111/api/checkRegistrationCode";
+  const endpoint = "http://localhost:8111/api/finalizeRegistration";
 
   try {
     console.log("Пробуем зарегистрироваться с неправильным кодом");
