@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/dayjs";
 import { v4 as uuid } from "uuid";
 import {
@@ -12,8 +12,8 @@ import {
   STATUS_STARTED,
   VALID_TIMEFRAMES
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
 import Log from "cpz/log";
+import EventGrid from "cpz/events";
 import {
   chunkArray,
   completedPercent,
@@ -25,11 +25,11 @@ import {
   clearTempCandles,
   saveCandlesArrayToCache,
   saveCandlesArrayToTemp
-} from "cpz/tableStorage/candles";
-import { saveImporterState } from "cpz/tableStorage/importers";
-import { saveCandlesDB } from "cpz/db";
-import { createErrorOutput } from "cpz/utils/error";
-import { minuteCandlesEX, tradesEX } from "cpz/connector";
+} from "cpz/tableStorage-client/market/candles";
+import { saveImporterState } from "cpz/tableStorage-client/control/importers";
+import { saveCandlesDB } from "cpz/db-client/candles";
+import { minuteCandlesEX } from "cpz/connector-client/candles";
+import { tradesEX } from "cpz/connector-client/trades";
 import {
   chunkDates,
   createMinutesList,
@@ -38,24 +38,14 @@ import {
   getCurrentTimeframes,
   handleCandleGaps
 } from "cpz/utils/candlesUtils";
-import config from "../config";
-
-const {
-  serviceName,
-  events: {
-    types: {
-      ERROR_IMPORTER_EVENT,
-      LOG_IMPORTER_EVENT,
-      TASKS_IMPORTER_FINISHED_EVENT,
-      TASKS_IMPORTER_STARTED_EVENT
-    },
-    topics: { ERROR_TOPIC, LOG_TOPIC, TASKS_TOPIC }
-  }
-} = config;
+import {
+  TASKS_IMPORTER_FINISHED_EVENT,
+  TASKS_IMPORTER_STARTED_EVENT
+} from "cpz/events/types/tasks/importer";
+import { ERROR_IMPORTER_ERROR_EVENT } from "cpz/events/types/error";
 
 /* Types descriptions */
 
-// TODO  Найти решение для объявления типа
 /**
  * An InputCandles Array
  *
@@ -100,35 +90,40 @@ const {
 /** @class Importer  */
 class Importer {
   constructor(state) {
-    /* Тема события */
-    this.eventSubject = state.eventSubject;
     /* Уникальный идентификатор задачи */
-    this.taskId = state.taskId;
+    this._taskId = state.taskId;
     /* Режима дебага [true,false] */
-    this.debug =
+    this._debug =
       state.debug === undefined || state.debug === null
         ? process.env.DEBUG
         : state.debug;
     /* Тип провайдера ['ccxt'] */
-    this.providerType = state.providerType || "ccxt";
+    this._providerType = state.providerType || "ccxt";
     /* Код биржи */
-    this.exchange = state.exchange;
+    this._exchange = state.exchange;
     /* Базовая валюта */
-    this.asset = state.asset;
+    this._asset = state.asset;
     /* Котировка валюты */
-    this.currency = state.currency;
+    this._currency = state.currency;
+    this._PartitionKey =
+      state.PartitionKey ||
+      createImporterSlug({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency
+      });
     /* Генерируемые таймфреймы [1, 5, 15, 30, 60, 120, 240, 1440] */
-    this.timeframes = state.timeframes || VALID_TIMEFRAMES;
+    this._timeframes = state.timeframes || VALID_TIMEFRAMES;
     /* Признак необходимости свертывания свечей */
-    this.requireBatching = state.requireBatching || true;
-    this.saveToCache =
+    this._requireBatching = state.requireBatching || true;
+    this._saveToCache =
       state.saveToCache === undefined || state.saveToCache === null
         ? false
         : state.saveToCache;
-    this.dateFrom = dayjs(
+    this._dateFrom = dayjs(
       `${dayjs.utc(state.dateFrom).format("YYYY-MM-DD")}T00:00:00.000Z`
     ).toISOString();
-    this.dateTo =
+    this._dateTo =
       dayjs
         .utc(state.dateTo)
         .startOf("minute")
@@ -146,44 +141,55 @@ class Importer {
             .startOf("minute")
             .toISOString();
     /* Лимит загружаемых свечей */
-    this.limit = this.getLimit();
-    this.loadDurationChunks = chunkDates(
-      this.dateFrom,
-      this.dateTo,
-      this.limit
+    this._limit = this.getLimit();
+    this._loadDurationChunks = chunkDates(
+      this._dateFrom,
+      this._dateTo,
+      this._limit
     );
-    this.log("dateFrom", state.dateFrom, this.dateFrom);
-    this.log("dateTo", state.dateTo, this.dateTo);
-    this.log("loadDurationChunks", this.loadDurationChunks);
+    this.log("dateFrom", state.dateFrom, this._dateFrom);
+    this.log("dateTo", state.dateTo, this._dateTo);
+    this.log("loadDurationChunks", this._loadDurationChunks);
     /* Всего свечей для загрузки */
-    this.loadTotalDuration = this.loadDurationChunks.total;
+    this._loadTotalDuration = this._loadDurationChunks.total;
     /* Загружено свечей */
-    this.loadCompletedDuration = 0;
+    this._loadCompletedDuration = 0;
     /* Осталось загрузить свечей */
-    this.loadLeftDuration = this.loadTotalDuration;
+    this._loadLeftDuration = this._loadTotalDuration;
     /* Процент выполнения */
-    this.loadPercent = 0;
-    this.loadedCount = 0;
-    this.gaps = 0;
+    this._loadPercent = 0;
+    this._loadedCount = 0;
+    this._gaps = 0;
     /* Всего свечей для загрузки */
-    this.processTotalDuration = this.loadTotalDuration;
+    this._processTotalDuration = this._loadTotalDuration;
     /* Загружено свечей */
-    this.processCompletedDuration = 0;
+    this._processCompletedDuration = 0;
     /* Осталось загрузить свечей */
-    this.processLeftDuration = this.processTotalDuration;
+    this._processLeftDuration = this._processTotalDuration;
     /* Процент выполнения */
-    this.processPercent = 0;
+    this._processPercent = 0;
     /* Адрес прокси сервера */
-    this.proxy = state.proxy || process.env.PROXY_ENDPOINT;
+    this._proxy = state.proxy || process.env.PROXY_ENDPOINT;
     /* Текущий статус сервиса */
-    this.status = STATUS_STARTED;
+    this._status = STATUS_STARTED;
     /* Дата и время запуска */
-    this.startedAt = dayjs.utc().toISOString();
+    this._startedAt = dayjs.utc().toISOString();
     /* Дата и время остановки */
-    this.endedAt = null;
+    this._endedAt = null;
     /* Метаданные стореджа */
-    this.metadata = state.metadata;
-    this.candles = [];
+    this._metadata = state.metadata;
+    this._candles = [];
+  }
+
+  get props() {
+    return {
+      taskId: this._taskId,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      dateFrom: this._dateFrom,
+      dateTo: this._dateTo
+    };
   }
 
   /**
@@ -284,41 +290,21 @@ class Importer {
    * @memberof Importer
    */
   log(...args) {
-    if (this.debug) {
-      Log.debug(`Importer ${this.eventSubject}:`, ...args);
-      const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Importer ${this.eventSubject}:`, ...logData]);
+    if (this._debug) {
+      Log.debug(`Importer ${this._PartitionKey}:`, ...args);
     }
   }
 
   logInfo(...args) {
-    Log.info(`Importer ${this.eventSubject}:`, ...args);
+    Log.info(`Importer ${this._PartitionKey}:`, ...args);
   }
 
   logError(...args) {
-    Log.error(`Importer ${this.eventSubject}:`, ...args);
-  }
-
-  /**
-   * Логирование в EventGrid
-   * @description Публикация события при логировании
-   * @method
-   * @param {*} data
-   */
-  logEvent(data) {
-    publishEvents(LOG_TOPIC, {
-      service: serviceName,
-      subject: this.eventSubject,
-      eventType: LOG_IMPORTER_EVENT,
-      data: {
-        taskId: this.taskId,
-        data
-      }
-    });
+    Log.error(`Importer ${this._PartitionKey}:`, ...args);
   }
 
   getLimit() {
-    switch (this.exchange) {
+    switch (this._exchange) {
       case "bitfinex":
         return 1000;
       case "kraken":
@@ -354,17 +340,17 @@ class Importer {
       if (minuteTrades && minuteTrades.length > 0) {
         candles.push({
           PartitionKey: createCachedCandleSlug({
-            exchange: this.exchange,
-            asset: this.asset,
-            currency: this.currency,
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
             timeframe: 1
           }),
           RowKey: generateCandleRowKey(minute.dateFrom),
           id: uuid(),
-          taskId: this.taskId,
-          exchange: this.exchange,
-          asset: this.asset,
-          currency: this.currency,
+          taskId: this._taskId,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
           timeframe: 1,
           time: minute.dateFrom, // время в милисекундах
           timestamp: dayjs(minute.dateFrom).toISOString(), // время в ISO UTC
@@ -393,10 +379,10 @@ class Importer {
       while (dayjs.utc(dateNext).valueOf() < dayjs.utc(dateTo).valueOf()) {
         // eslint-disable-next-line no-await-in-loop
         const response = await tradesEX({
-          proxy: this.proxy,
-          exchange: this.exchange,
-          asset: this.asset,
-          currency: this.currency,
+          proxy: this._proxy,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
           date: dayjs.utc(dateNext).toISOString()
         });
         dateNext =
@@ -453,7 +439,7 @@ class Importer {
       );
       /* Если биржа "kraken" и грузим больше чем за последние 10 часов  */
       if (
-        this.exchange === "kraken" &&
+        this._exchange === "kraken" &&
         dayjs()
           .utc()
           .diff(dayjs(dateFrom).utc(), "hours") > 10
@@ -466,10 +452,10 @@ class Importer {
         });
       }
       const response = await minuteCandlesEX({
-        proxy: this.proxy,
-        exchange: this.exchange,
-        asset: this.asset,
-        currency: this.currency,
+        proxy: this._proxy,
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
         date: dayjs(dateFrom)
           .utc()
           .toISOString(),
@@ -490,13 +476,13 @@ class Importer {
             ...candle,
             id: uuid(),
             PartitionKey: createCachedCandleSlug({
-              exchange: this.exchange,
-              asset: this.asset,
-              currency: this.currency,
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
               timeframe: 1
             }),
             RowKey: generateCandleRowKey(candle.time),
-            taskId: this.taskId,
+            taskId: this._taskId,
             type: CANDLE_IMPORTED
           }));
           if (data)
@@ -548,9 +534,9 @@ class Importer {
 
       const gappedCandles = handleCandleGaps(
         {
-          exchange: this.exchange,
-          asset: this.asset,
-          currency: this.currency,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
           timeframe: 1,
           taskId: this._taskId
         },
@@ -563,14 +549,13 @@ class Importer {
         candles = this.combineCandles(candles, gappedCandles);
       }
       return { candles, gappedCandles };
-    } catch (error) {
-      throw new VError(
+    } catch (e) {
+      throw new ServiceError(
         {
-          name: "ImporterError",
-          cause: error,
+          name: ServiceError.tasks.IMPORTER_HANDLE_GAPS_ERROR,
+          cause: e,
           info: {
-            taskId: this.taskId,
-            eventSubject: this.eventSubject
+            ...this.props
           }
         },
         `Failed to check cached candles gaps`
@@ -587,14 +572,14 @@ class Importer {
     try {
       // Инициализируем объект со свечами в различных таймфреймах
       const timeframeCandles = {};
-      this.timeframes.forEach(timeframe => {
+      this._timeframes.forEach(timeframe => {
         timeframeCandles[timeframe] = [];
         if (timeframe === 1) {
           timeframeCandles[1] = [...tempCandles];
         }
       });
       // Если не нужно свертывать свечи - выходим
-      if (!this.requireBatching) return null;
+      if (!this._requireBatching) return null;
       // Создаем список с полным количеством минут
       const fullMinutesList = createMinutesList(dateFrom, dateTo, duration); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
       fullMinutesList.forEach(time => {
@@ -606,7 +591,7 @@ class Importer {
             .valueOf() === date.valueOf()
         )
           return;
-        const currentTimeframes = getCurrentTimeframes(this.timeframes, time);
+        const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
         if (currentTimeframes.length > 0) {
           currentTimeframes.forEach(timeframe => {
             const timeFrom = date.add(-timeframe, "minute").valueOf();
@@ -618,16 +603,16 @@ class Importer {
               timeframeCandles[timeframe].push({
                 id: uuid(),
                 PartitionKey: createCachedCandleSlug({
-                  exchange: this.exchange,
-                  asset: this.asset,
-                  currency: this.currency,
+                  exchange: this._exchange,
+                  asset: this._asset,
+                  currency: this._currency,
                   timeframe
                 }),
                 RowKey: generateCandleRowKey(timeFrom),
-                taskId: this.taskId,
-                exchange: this.exchange,
-                asset: this.asset,
-                currency: this.currency,
+                taskId: this._taskId,
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
                 timeframe,
                 time: timeFrom, // время в милисекундах
                 timestamp: dayjs(timeFrom)
@@ -652,13 +637,12 @@ class Importer {
       });
       return timeframeCandles;
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterError",
+          name: ServiceError.types.IMPORTER_BATCH_CANDLES_ERROR,
           cause: error,
           info: {
-            taskId: this.taskId,
-            eventSubject: this.eventSubject
+            ...this.props
           }
         },
         `Failed to batch cached candles`
@@ -675,39 +659,24 @@ class Importer {
   async saveCandles(timeframeCandles) {
     try {
       await Promise.all(
-        this.timeframes.map(async timeframe => {
+        this._timeframes.map(async timeframe => {
           if (timeframeCandles[timeframe].length > 0) {
-            try {
-              if (this.saveToCache)
-                await saveCandlesArrayToCache(timeframeCandles[timeframe]);
-              await saveCandlesDB({
-                timeframe,
-                candles: timeframeCandles[timeframe]
-              });
-            } catch (error) {
-              throw new VError(
-                {
-                  name: "ImporterError",
-                  cause: error,
-                  info: {
-                    taskId: this.taskId,
-                    eventSubject: this.eventSubject
-                  }
-                },
-                `Failed to save timeframed candles to db`
-              );
-            }
+            if (this._saveToCache)
+              await saveCandlesArrayToCache(timeframeCandles[timeframe]);
+            await saveCandlesDB({
+              timeframe,
+              candles: timeframeCandles[timeframe]
+            });
           }
         })
       );
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterError",
+          name: ServiceError.types.IMPORTER_SAVE_CANDLES_ERROR,
           cause: error,
           info: {
-            taskId: this.taskId,
-            eventSubject: this.eventSubject
+            ...this.props
           }
         },
         `Failed to save candles`
@@ -723,15 +692,14 @@ class Importer {
   async clearTemp() {
     try {
       this.log("Clearing temp data...");
-      await clearTempCandles(this.taskId);
+      await clearTempCandles(this._taskId);
     } catch (error) {
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterError",
+          name: ServiceError.types.IMPORTER_CLEAR_TEMP_ERROR,
           cause: error,
           info: {
-            taskId: this.taskId,
-            eventSubject: this.eventSubject
+            ...this.props
           }
         },
         `Failed to clear temp candles`
@@ -741,15 +709,14 @@ class Importer {
 
   async execute() {
     try {
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: this.eventSubject,
-        eventType: TASKS_IMPORTER_STARTED_EVENT,
+      await EventGrid.publish(TASKS_IMPORTER_STARTED_EVENT, {
+        subject: this._taskId,
         data: {
-          taskId: this.taskId
+          taskId: this._taskId
         }
       });
-      const loadChunks = chunkArray(this.loadDurationChunks.chunks, 10);
+
+      const loadChunks = chunkArray(this._loadDurationChunks.chunks, 10);
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       this.log("Starting loading candles...");
       for (const loadChunk of loadChunks) {
@@ -774,10 +741,11 @@ class Importer {
         );
 
         if (retryErrorLoads.length > 0) {
-          throw new VError(
+          throw new ServiceError(
             {
-              name: "ImportCandles",
+              name: ServiceError.types.IMPORTER_LOAD_CANDLES_ERROR,
               info: {
+                ...this.props,
                 errorIterations: retryErrorLoads.map(errorLoad => ({
                   dateFrom: errorLoad.dateFrom,
                   dateTo: errorLoad.dateTo,
@@ -803,37 +771,37 @@ class Importer {
         const data = successLoads
           .map(load => load.data)
           .reduce((acc, curr) => acc.concat(curr), []);
-        this.candles = [...new Set(this.candles.concat(data))].sort((a, b) =>
+        this._candles = [...new Set(this._candles.concat(data))].sort((a, b) =>
           sortAsc(a.time, b.time)
         );
-        this.loadCompletedDuration = this.loadCompletedDuration + duration;
-        this.loadLeftDuration =
-          this.loadTotalDuration - this.loadCompletedDuration;
+        this._loadCompletedDuration = this._loadCompletedDuration + duration;
+        this._loadLeftDuration =
+          this._loadTotalDuration - this._loadCompletedDuration;
 
         // Процент выполнения
-        this.loadPercent = completedPercent(
-          this.loadCompletedDuration,
-          this.loadTotalDuration
+        this._loadPercent = completedPercent(
+          this._loadCompletedDuration,
+          this._loadTotalDuration
         );
-        this.loadedCount = this.loadedCount + loaded;
+        this._loadedCount = this._loadedCount + loaded;
         let gaps = 0;
         if (loaded < duration) {
           gaps = duration - loaded;
         }
-        this.gaps = this.gaps + gaps;
+        this._gaps = this._gaps + gaps;
         await this.save();
         this.log(
-          `Loaded ${this.loadCompletedDuration} of ${this.loadTotalDuration}${
+          `Loaded ${this._loadCompletedDuration} of ${this._loadTotalDuration}${
             gaps > 0 ? ` but gapped: ${gaps}` : ""
-          } - ${this.loadPercent}%`
+          } - ${this._loadPercent}%`
         );
       }
       /*  no-restricted-syntax, no-await-in-loop */
 
-      const fullDays = divideDateByDays(this.dateFrom, this.dateTo);
+      const fullDays = divideDateByDays(this._dateFrom, this._dateTo);
       this.log("Starting processing loaded candles...");
       for (const { dateFrom, dateTo, duration } of fullDays) {
-        let tempCandles = this.candles.filter(
+        let tempCandles = this._candles.filter(
           candle =>
             candle.time >=
               dayjs(dateFrom)
@@ -849,9 +817,9 @@ class Importer {
           dateFrom,
           dateTo,
           slug: createCachedCandleSlug({
-            exchange: this.exchange,
-            asset: this.asset,
-            currency: this.currency,
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency,
             timeframe: 1
           })
         }); */
@@ -879,131 +847,113 @@ class Importer {
           await this.saveCandles(timeframeCandles);
         }
 
-        this.processCompletedDuration =
-          this.processCompletedDuration + duration;
-        this.processLeftDuration =
-          this.processTotalDuration - this.processCompletedDuration;
+        this._processCompletedDuration =
+          this._processCompletedDuration + duration;
+        this._processLeftDuration =
+          this._processTotalDuration - this._processCompletedDuration;
 
-        this.processPercent = completedPercent(
-          this.processCompletedDuration,
-          this.processTotalDuration
+        this._processPercent = completedPercent(
+          this._processCompletedDuration,
+          this._processTotalDuration
         );
         await this.save();
         this.log(
-          `Processed ${this.processCompletedDuration} of ${
-            this.processTotalDuration
-          } - ${this.processPercent}%`
+          `Processed ${this._processCompletedDuration} of ${
+            this._processTotalDuration
+          } - ${this._processPercent}%`
         );
       }
 
       // await this.clearTemp();
-      this.endedAt = dayjs()
+      this._endedAt = dayjs()
         .utc()
         .toISOString();
-      this.status = STATUS_FINISHED;
+      this._status = STATUS_FINISHED;
 
       await this.save();
-      const duration = dayjs(this.endedAt)
+      const duration = dayjs(this._endedAt)
         .utc()
-        .diff(dayjs(this.startedAt).utc(), "minute");
+        .diff(dayjs(this._startedAt).utc(), "minute");
       this.log(`Finished import in ${duration} minutes!!!`);
-      await publishEvents(TASKS_TOPIC, {
-        service: serviceName,
-        subject: this.eventSubject,
-        eventType: TASKS_IMPORTER_FINISHED_EVENT,
+
+      await EventGrid.publish(TASKS_IMPORTER_FINISHED_EVENT, {
+        subject: this._taskId,
         data: {
-          taskId: this.taskId,
-          duration
+          taskId: this._taskId
         }
       });
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "ImporterError",
-            cause: error
-          },
-          "Failed to execute importer"
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.IMPORTER_ERROR,
+          cause: e,
+          info: {
+            critical: true,
+            ...this.props
+          }
+        },
+        "Failed to execute importer"
       );
-      this.logError(errorOutput);
+      Log.exception(error);
       // Если есть экземпляр класса
-      this.status = STATUS_ERROR;
-      this.error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
+      this._status = STATUS_ERROR;
+      this._error = error.json;
       await this.save();
       // Публикуем событие - ошибка
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this.eventSubject,
-        eventType: ERROR_IMPORTER_EVENT,
+      await EventGrid.publish(ERROR_IMPORTER_ERROR_EVENT, {
+        subject: this._taskId,
         data: {
-          taskId: this.taskId,
-          eventSubject: this.eventSubject,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
+          taskId: this._taskId,
+          error: error.json
         }
       });
     }
   }
 
-  getCurrentState() {
-    const state = {
-      PartitionKey: createImporterSlug({
-        exchange: this.exchange,
-        asset: this.asset,
-        currency: this.currency
-      }),
-      RowKey: this.taskId,
-      taskId: this.taskId,
-      eventSubject: this.eventSubject,
-      debug: this.debug,
-      providerType: this.providerType,
-      exchange: this.exchange,
-      asset: this.asset,
-      currency: this.currency,
-      timeframes: this.timeframes,
-      requireBatching: this.requireBatching,
-      saveToCache: this.saveToCache,
-      limit: this.limit,
-      loadTotalDuration: this.loadTotalDuration,
-      loadCompletedDuration: this.loadCompletedDuration,
-      loadLeftDuration: this.loadLeftDuration,
-      loadPercent: this.loadPercent,
-      processTotalDuration: this.processTotalDuration,
-      processCompletedDuration: this.processCompletedDuration,
-      processLeftDuration: this.processLeftDuration,
-      processPercent: this.processPercent,
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo,
-      proxy: this.proxy,
-      status: this.status,
-      error: this.error,
-      startedAt: this.startedAt,
-      endedAt: this.endedAt,
-      metadata: this.metadata
+  get state() {
+    return {
+      PartitionKey: this._PartitionKey,
+      RowKey: this._taskId,
+      taskId: this._taskId,
+      debug: this._debug,
+      providerType: this._providerType,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframes: this._timeframes,
+      requireBatching: this._requireBatching,
+      saveToCache: this._saveToCache,
+      limit: this._limit,
+      loadTotalDuration: this._loadTotalDuration,
+      loadCompletedDuration: this._loadCompletedDuration,
+      loadLeftDuration: this._loadLeftDuration,
+      loadPercent: this._loadPercent,
+      processTotalDuration: this._processTotalDuration,
+      processCompletedDuration: this._processCompletedDuration,
+      processLeftDuration: this._processLeftDuration,
+      processPercent: this._processPercent,
+      dateFrom: this._dateFrom,
+      dateTo: this._dateTo,
+      proxy: this._proxy,
+      status: this._status,
+      error: this._error,
+      startedAt: this._startedAt,
+      endedAt: this._endedAt,
+      metadata: this._metadata
     };
-    return state;
   }
 
   async save() {
     try {
-      await saveImporterState(this.getCurrentState());
+      await saveImporterState(this.state);
     } catch (error) {
       this.logError(error.message);
-      throw new VError(
+      throw new ServiceError(
         {
-          name: "ImporterError",
+          name: ServiceError.types.IMPORTER_SAVE_STATE_ERROR,
           cause: error,
           info: {
-            taskId: this.taskId,
-            eventSubject: this.eventSubject
+            ...this.props
           }
         },
         `Failed to save importer state`

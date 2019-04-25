@@ -1,29 +1,19 @@
-import VError from "verror";
-import publishEvents from "cpz/eventgrid";
-import { createErrorOutput } from "cpz/utils/error";
+import ServiceError from "cpz/error";
 import Log from "cpz/log";
+import { TASKS_IMPORTER_STOPPED_EVENT } from "cpz/events/types/tasks/importer";
+import { ERROR_IMPORTER_ERROR_EVENT } from "cpz/events/types/error";
+import EventGrid from "cpz/events";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
-import config from "../config";
-
-const {
-  serviceName,
-  events: {
-    topics: { TASKS_TOPIC },
-    types: { TASKS_IMPORTER_STARTED_EVENT, TASKS_IMPORTER_STOPPED_EVENT }
-  }
-} = config;
 
 /**
  * Запуск нового импортера свечей
  *
  * @param {*} eventData
  */
-
-// TODO Add definition to eventData
 async function handleImportStart(eventData) {
   try {
     createNewProcess(eventData.taskId);
@@ -31,32 +21,25 @@ async function handleImportStart(eventData) {
       type: "start",
       state: eventData
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "ImporterError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to start importer"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.IMPORTER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData,
+          critical: true
+        }
+      },
+      "Failed to start importer"
     );
-    Log.error(errorOutput);
+
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_IMPORTER_STARTED_EVENT,
+    await EventGrid.publish(ERROR_IMPORTER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
@@ -78,41 +61,30 @@ async function handleImportStop(eventData) {
       taskId: eventData.taskId
     });
 
-    // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_IMPORTER_STOPPED_EVENT,
+    await EventGrid.publish(TASKS_IMPORTER_STOPPED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "ImporterError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to stop importer"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.IMPORTER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData
+        }
+      },
+      "Failed to stop importer"
     );
-    Log.error(errorOutput);
+
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_IMPORTER_STOPPED_EVENT,
+    await EventGrid.publish(ERROR_IMPORTER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }

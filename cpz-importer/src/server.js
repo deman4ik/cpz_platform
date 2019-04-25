@@ -1,26 +1,15 @@
-import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import importerEnv from "cpz/config/environment/importer";
-import ServiceValidator from "cpz/validator";
 import handleTaskEvents from "./routes/taskEvents";
-import config from "./config";
 import { handlingEventsByType, checkAuth, validateEvents } from "./middleware";
-
-// Setup Log
-Log.config({
-  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: config.serviceName
-});
-
-// Setup ServiceValidator
-ServiceValidator.add(config.events.schemas);
+import init from "./init";
 
 checkEnvVars(importerEnv.variables);
-
+init();
 const server = express();
 
 server.use(helmet());

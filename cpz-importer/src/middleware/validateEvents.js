@@ -1,12 +1,10 @@
 import Log from "cpz/log";
 import ServiceValidator from "cpz/validator";
-import config from "../config";
+import {
+  TASKS_IMPORTER_START_EVENT,
+  TASKS_IMPORTER_STOP_EVENT
+} from "cpz/events/types/tasks/importer";
 
-const {
-  events: {
-    types: { TASKS_IMPORTER_START_EVENT, TASKS_IMPORTER_STOP_EVENT }
-  }
-} = config;
 /**
  * Validate events by target schema
  * if events is not valid call Log.warn() and exit
