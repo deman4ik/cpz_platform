@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import { v4 as uuid } from "uuid";
 
@@ -18,9 +18,13 @@ export default (req, res, next) => {
     }
   });
   if (req.query["api-key"] !== process.env.API_KEY) {
-    Log.warn(new VError({ name: "UNAUTHENTICATED" }, "Invalid API Key"));
+    const error = new ServiceError(
+      { name: ServiceError.types.UNAUTHENTICATED },
+      "Invalid API Key"
+    );
+    Log.warn(error.json);
     Log.clearContext();
-    res.status(401).end();
+    res.status(401).json({ error: error.json });
   } else {
     next();
   }

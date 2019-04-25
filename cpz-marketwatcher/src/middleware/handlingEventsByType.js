@@ -1,18 +1,11 @@
 import Log from "cpz/log";
-import config from "../config";
-
-const {
-  events: {
-    types: {
-      SUB_VALIDATION_EVENT,
-      SUB_DELETED_EVENT,
-      TASKS_MARKETWATCHER_START_EVENT,
-      TASKS_MARKETWATCHER_STOP_EVENT,
-      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
-    }
-  }
-} = config;
+import {
+  TASKS_MARKETWATCHER_START_EVENT,
+  TASKS_MARKETWATCHER_STOP_EVENT,
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
+} from "cpz/events/types/tasks/marketwatcher";
+import { SUB_VALIDATION_EVENT, SUB_DELETED_EVENT } from "cpz/events/types/base";
 
 /**
  * Event handling by type
@@ -39,12 +32,12 @@ export default (req, res, next) => {
   if (event.eventType === SUB_VALIDATION_EVENT) {
     Log.info(
       `Got ${event.eventType} event, validationCode: ${
-        event.validationCode
+        event.data.validationCode
       }, topic: ${event.topic}`
     );
     Log.clearContext();
     res.status(200).json({
-      validationResponse: event.validationCode
+      validationResponse: event.data.validationCode
     });
   } else if (event.eventType === SUB_DELETED_EVENT) {
     Log.info(`Got ${event.eventType} event: , topic: ${event.topic}`);

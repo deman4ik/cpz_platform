@@ -1,24 +1,17 @@
-import "babel-polyfill";
 import express from "express";
 import bodyParser from "body-parser";
 import helmet from "helmet";
+import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import { sleep } from "cpz/utils/helpers";
 import marketwatcherEnv from "cpz/config/environment/marketwatcher";
-import Log from "cpz/log";
-import ServiceValidator from "cpz/validator";
 import handleTaskEvents from "./routes/taskEvents";
 import checkAlive from "./checkAlive";
 import { checkAuth, handlingEventsByType, validateEvents } from "./middleware";
-import config from "./config";
+import init from "./init";
 
-Log.config({
-  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: config.serviceName
-});
 checkEnvVars(marketwatcherEnv.variables);
-
-ServiceValidator.add(config.events.schemas);
+init();
 
 const server = express();
 

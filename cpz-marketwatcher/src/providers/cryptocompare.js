@@ -1,10 +1,9 @@
-import "babel-polyfill";
-import VError from "verror";
+import ServiceError from "cpz/error";
 import io from "socket.io-client";
 import { v4 as uuid } from "uuid";
-import { createErrorOutput } from "cpz/utils/error";
 import { capitalize } from "cpz/utils/helpers";
-import publishEvents from "cpz/eventgrid";
+import EventGrid from "cpz/events";
+import { ERROR_MARKETWATCHER_ERROR_EVENT } from "cpz/events/types/error";
 import Log from "cpz/log";
 import {
   createCachedTickSlug,
@@ -13,16 +12,9 @@ import {
   STATUS_STOPPED
 } from "cpz/config/state";
 import BaseProvider from "./baseProvider";
-import config from "../config";
+import init from "../init";
 
-const {
-  serviceName,
-  events: {
-    types: { ERROR_TOPIC },
-    topics: { ERROR_MARKETWATCHER_EVENT }
-  }
-} = config;
-
+init();
 let providerInstance;
 
 class CryptocompareProvider extends BaseProvider {
@@ -111,42 +103,33 @@ class CryptocompareProvider extends BaseProvider {
     return null;
   }
 
-  async _handleError(error = "unknown connection error") {
-    this.log("error", error);
-    this._socketStatus = "error";
-    this._status = STATUS_ERROR;
-    const errorOutput = createErrorOutput(
-      new VError(
+  async _handleError(e = "unknown connection error") {
+    if (this._status !== STATUS_STOPPED) {
+      this._socketStatus = "error";
+      this._status = STATUS_ERROR;
+
+      const error = new ServiceError(
         {
-          name: "CryptocompareStreamingError",
-          cause: new Error(error),
-          info: this._getCurrentState()
+          name: ServiceError.types.MARKETWATCHER_SOCKET_ERROR,
+          cause: new Error(e),
+          info: { ...this.props }
         },
-        'Cryptocompare streaming error - task "%s"',
-        this._taskId
-      )
-    );
-    this.logError(errorOutput);
-    this._error = {
-      name: errorOutput.name,
-      message: errorOutput.message,
-      info: errorOutput.info
-    };
-    await publishEvents(ERROR_TOPIC, {
-      service: serviceName,
-      subject: this._eventSubject,
-      eventType: ERROR_MARKETWATCHER_EVENT,
-      data: {
-        taskId: this._taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
+        "Cryptocompare streaming error"
+      );
+      Log.error(error);
+
+      this._error = error.json;
+      EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
+        data: {
+          taskId: this._taskId,
+          error: error.json
         }
-      }
-    });
-    await this._save();
-    process.exit(0);
+      });
+
+      await this._save();
+      process.exit(0);
+    }
   }
 
   _subscribeToSocketEvents() {
@@ -198,11 +181,7 @@ class CryptocompareProvider extends BaseProvider {
           // И проверяем повторно
           if (this._socketStatus !== "connect") {
             // Если все еще не подключен - генерируем ошибку
-            throw new VError(
-              {
-                name: "CryptocompareStreamingError",
-                info: this._getCurrentState()
-              },
+            throw new Error(
               'Can\'t open connection to Cryptocompare - task "%s"',
               this._taskId
             );
@@ -216,36 +195,25 @@ class CryptocompareProvider extends BaseProvider {
       this._status = STATUS_STARTED;
       await this._save();
       this.log(`Marketwatcher ${this._exchange} started!`);
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "CryptocompareStreamingError",
-            cause: error,
-            info: this._getCurrentState()
-          },
-          'Cryptocompare start streaming error - task "%s"',
-          this._taskId
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_SOCKET_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Cryptocompare start streaming error - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
+
+      Log.error(error);
       this._status = STATUS_ERROR;
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
+      this._error = error.json;
+      EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
         data: {
           taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
+          error: error.json
         }
       });
       await this._save();
@@ -273,35 +241,24 @@ class CryptocompareProvider extends BaseProvider {
         subs: [...newTradeSubs, ...newTickSubs]
       });
       await this._save();
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "CryptocompareStreamingError",
-            cause: error,
-            info: this._getCurrentState()
-          },
-          'Cryptocompare subscribe streaming error - task "%s"',
-          this._taskId
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_SOCKET_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Cryptocompare subscribe streaming error - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
+
+      Log.error(error);
+      this._error = error.json;
+      EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
         data: {
           taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
+          error: error.json
         }
       });
       await this._save();
@@ -327,35 +284,24 @@ class CryptocompareProvider extends BaseProvider {
         subs: [...delTradeSubs, ...delTickSubs]
       });
       await this._save();
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "CryptocompareStreamingError",
-            cause: error,
-            info: this._getCurrentState()
-          },
-          'Cryptocompare unsubscribe streaming error - task "%s"',
-          this._taskId
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_SOCKET_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Cryptocompare unsubscribe streaming error - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
+
+      Log.error(error);
+      this._error = error.json;
+      EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
         data: {
           taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
+          error: error.json
         }
       });
       await this._save();
@@ -373,9 +319,7 @@ process.on("message", async m => {
         if (!providerInstance) {
           providerInstance = new CryptocompareProvider(eventData.state);
         } else {
-          providerInstance = new CryptocompareProvider(
-            providerInstance._getCurrentState()
-          );
+          providerInstance = new CryptocompareProvider(providerInstance.state);
         }
         await providerInstance.start(eventData.state.subscriptions);
       }

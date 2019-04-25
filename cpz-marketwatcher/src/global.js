@@ -1,6 +1,6 @@
 import { fork } from "child_process";
 import { tryParseJSON } from "cpz/utils/helpers";
-import { getMarketwatcherById } from "cpz/tableStorage/marketwatchers";
+import { getMarketwatcherById } from "cpz/tableStorage-client/control/marketwatchers";
 import { STATUS_STOPPED } from "cpz/config/state";
 import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";

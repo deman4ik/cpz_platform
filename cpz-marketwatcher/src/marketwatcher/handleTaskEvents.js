@@ -1,35 +1,23 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import publishEvents from "cpz/eventgrid";
-import { createErrorOutput } from "cpz/utils/error";
+import EventGrid from "cpz/events";
 import ServiceValidator from "cpz/validator/index";
+import {
+  TASKS_MARKETWATCHER_START_EVENT,
+  TASKS_MARKETWATCHER_STARTED_EVENT,
+  TASKS_MARKETWATCHER_STOP_EVENT,
+  TASKS_MARKETWATCHER_STOPPED_EVENT,
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
+  TASKS_MARKETWATCHER_UPDATED_EVENT
+} from "cpz/events/types/tasks/marketwatcher";
+import { ERROR_MARKETWATCHER_ERROR_EVENT } from "cpz/events/types/error";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
-import config from "../config";
 
-const {
-  serviceName,
-  events: {
-    types: {
-      TASKS_MARKETWATCHER_START_EVENT,
-      TASKS_MARKETWATCHER_STARTED_EVENT,
-      TASKS_MARKETWATCHER_STOP_EVENT,
-      TASKS_MARKETWATCHER_STOPPED_EVENT,
-      TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
-      TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-      TASKS_MARKETWATCHER_UPDATED_EVENT,
-      TASKS_TOPIC
-    }
-  }
-} = config;
-
-// Setup validator
-ServiceValidator.add(config.events.schemas);
-
-// TODO: Startup processes from storage
 /**
  * Запуск нового наблюдателя за рынком
  *
@@ -50,40 +38,31 @@ async function handleStart(eventData) {
       state: eventData
     });
     // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
+    await EventGrid.publish(TASKS_MARKETWATCHER_STARTED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "MarketwatcherError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to start marketwatcher"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.MARKETWATCHER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData
+        }
+      },
+      "Failed to start marketwatcher"
     );
-    Log.error(errorOutput);
+
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_STARTED_EVENT,
+    await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
@@ -107,40 +86,31 @@ async function handleStop(eventData) {
       type: "stop"
     });
     // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
+    await EventGrid.publish(TASKS_MARKETWATCHER_STOPPED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "MarketwatcherError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to stop marketwatcher"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.MARKETWATCHER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData
+        }
+      },
+      "Failed to stop marketwatcher"
     );
-    Log.error(errorOutput);
+
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_STOPPED_EVENT,
+    await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
@@ -156,10 +126,7 @@ async function handleSubscribe(eventData) {
     // Валидация входных параметров
     ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
-      throw new VError(
-        'Marketwatcher task "%s"  not started',
-        eventData.taskId
-      );
+      throw new Error('Marketwatcher task "%s"  not started', eventData.taskId);
     }
 
     sendEventToProcess(eventData.taskId, {
@@ -167,40 +134,31 @@ async function handleSubscribe(eventData) {
       subscriptions: eventData.subscriptions
     });
     // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
+    await EventGrid.publish(TASKS_MARKETWATCHER_UPDATED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "MarketwatcherError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to subscribe"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.MARKETWATCHER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData
+        }
+      },
+      "Failed to subscribe"
     );
-    Log.error(errorOutput);
+
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
+    await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
@@ -216,10 +174,7 @@ async function handleUnsubscribe(eventData) {
     // Валидация входных параметров
     ServiceValidator.check(TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT, eventData);
     if (!isProcessExists(eventData.taskId)) {
-      throw new VError(
-        'Marketwatcher task "%s"  not started',
-        eventData.taskId
-      );
+      throw new Error('Marketwatcher task "%s"  not started', eventData.taskId);
     }
 
     sendEventToProcess(eventData.taskId, {
@@ -227,40 +182,31 @@ async function handleUnsubscribe(eventData) {
       subscriptions: eventData.subscriptions
     });
     // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
+    await EventGrid.publish(TASKS_MARKETWATCHER_UPDATED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "MarketwatcherError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to unsubscribe"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.MARKETWATCHER_TASKS_EVENTS_ERROR,
+        cause: e,
+        info: {
+          ...eventData
+        }
+      },
+      "Failed to unsubscribe"
     );
-    Log.error(errorOutput);
+
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_MARKETWATCHER_UPDATED_EVENT,
+    await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }

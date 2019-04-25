@@ -1,12 +1,14 @@
 export default [
   "AzureWebJobsStorage",
+  "AZ_STORAGE_CONTROL_CS",
   "AZ_STORAGE_MARKET_CS",
   "API_KEY",
-  "PROXY_ENDPOINT",
   "EG_TASKS_ENDPOINT",
   "EG_TASKS_KEY",
   "EG_LOG_ENDPOINT",
   "EG_LOG_KEY",
+  "EG_ERROR_ENDPOINT",
+  "EG_ERROR_KEY",
   "EG_TICKS_ENDPOINT",
   "EG_TICKS_KEY",
   "DEBUG"

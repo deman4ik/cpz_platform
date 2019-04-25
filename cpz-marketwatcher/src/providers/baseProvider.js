@@ -1,29 +1,17 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import { createCurrentPriceSlug, STATUS_PENDING } from "cpz/config/state";
 import Log from "cpz/log";
-import { createErrorOutput } from "cpz/utils/error";
-import publishEvents from "cpz/eventgrid";
-import { saveMarketwatcherState } from "cpz/tableStorage/marketwatchers";
-import { saveCurrentPrice } from "cpz/tableStorage/currentPrices";
-import { saveCachedTick } from "cpz/tableStorage/ticks";
-import config from "../config";
-
-const {
-  serviceName,
-  events: {
-    types: { LOG_TOPIC, TICKS_TOPIC, ERROR_TOPIC },
-    topics: {
-      LOG_MARKETWATCHER_EVENT,
-      TICKS_NEWTICK_EVENT,
-      ERROR_MARKETWATCHER_EVENT
-    }
-  }
-} = config;
+import EventGrid from "cpz/events";
+import { saveMarketwatcherState } from "cpz/tableStorage-client/control/marketwatchers";
+import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
+import { saveCachedTick } from "cpz/tableStorage-client/market/ticks";
+import { TICKS_NEWTICK_EVENT } from "cpz/events/types/ticks";
+import { ERROR_MARKETWATCHER_ERROR_EVENT } from "cpz/events/types/error";
 
 class BaseProvider {
   constructor(state) {
     /* Тема события */
-    this._eventSubject = state.eventSubject || state.exchange;
+    this._PartitionKey = state.PartitionKey || state.exchange;
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
     /* Режима дебага [true,false] */
@@ -61,41 +49,12 @@ class BaseProvider {
    */
   log(...args) {
     if (this._debug) {
-      Log.debug(`${this._eventSubject}:`, ...args);
-      const logData = args.map(arg => JSON.stringify(arg));
-      process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
+      Log.debug(`${this._PartitionKey}:`, ...args);
     }
   }
 
   logInfo(...args) {
-    Log.info(`${this._eventSubject}:`, ...args);
-    const logData = args.map(arg => JSON.stringify(arg));
-    process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
-  }
-
-  logError(...args) {
-    Log.error(`${this._eventSubject}:`, ...args);
-    const logData = args.map(arg => JSON.stringify(arg));
-    process.send([`Marketwatcher ${this._eventSubject}:`, ...logData]);
-  }
-
-  /**
-   * Логирование в EventGrid в топик CPZ-LOGS
-   *
-   * @param {*} data
-   * @memberof Adviser
-   */
-  logEvent(data) {
-    // Публикуем событие
-    publishEvents(LOG_TOPIC, {
-      service: serviceName,
-      subject: this._eventSubject,
-      eventType: LOG_MARKETWATCHER_EVENT,
-      data: {
-        taskId: this._taskId,
-        data
-      }
-    });
+    Log.info(`${this._PartitionKey}:`, ...args);
   }
 
   /* eslint-disable */
@@ -111,45 +70,28 @@ class BaseProvider {
 
   async _publishTick(tick) {
     try {
-      await publishEvents(TICKS_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: TICKS_NEWTICK_EVENT,
-        data: {
-          ...tick
-        }
+      await EventGrid.publish(TICKS_NEWTICK_EVENT, {
+        subject: this._exchange,
+        data: tick
       });
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "MarketwatcherError",
-            cause: new Error(error),
-            info: this._getCurrentState()
-          },
-          'Failed to send NewTick event - task "%s"',
-          this._taskId
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_PUBLISH_TICK_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Failed to send NewTick event - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
+
+      Log.error(error);
+      this._error = error.json;
       await this._save();
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
-        data: {
-          taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
+
+      await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
+        error: error.json
       });
     }
   }
@@ -173,37 +115,24 @@ class BaseProvider {
           candleId: null
         });
       }
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "MarketwatcherError",
-            cause: new Error(error),
-            info: this._getCurrentState()
-          },
-          'Failed to send NewTick event - task "%s"',
-          this._taskId
-        )
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_SAVE_TICK_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Failed to save tick - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
+
+      Log.error(error);
+      this._error = error.json;
       await this._save();
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
-        data: {
-          taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
+
+      await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
+        error: error.json
       });
     }
   }
@@ -212,45 +141,41 @@ class BaseProvider {
     this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
-      await saveMarketwatcherState(this._getCurrentState());
-    } catch (error) {
-      const errorOutput = createErrorOutput(
-        new VError(
-          {
-            name: "MarketwatcherError",
-            cause: error,
-            info: this._getCurrentState()
-          },
-          'Failed to update marketwatcher state - task "%s"',
-          this._taskId
-        )
+      await saveMarketwatcherState(this.state);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.MARKETWATCHER_SAVE_TICK_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        'Failed to save marketwatcher state - task "%s"',
+        this._taskId
       );
-      this.logError(errorOutput);
-      this._error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
-      await publishEvents(ERROR_TOPIC, {
-        service: serviceName,
-        subject: this._eventSubject,
-        eventType: ERROR_MARKETWATCHER_EVENT,
-        data: {
-          taskId: this._taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
+
+      Log.error(error);
+      this._error = error.json;
+      await this._save();
+
+      await EventGrid.publish(ERROR_MARKETWATCHER_ERROR_EVENT, {
+        subject: this._exchange,
+        error: error.json
       });
     }
   }
 
-  _getCurrentState() {
+  get props() {
     return {
       taskId: this._taskId,
-      PartitionKey: this._exchange,
+      exchange: this._exchange,
+      subscriptions: this._subscriptions
+    };
+  }
+
+  get state() {
+    return {
+      PartitionKey: this._PartitionKey,
+      taskId: this._taskId,
       RowKey: this._taskId,
       debug: this._debug,
       exchange: this._exchange,
