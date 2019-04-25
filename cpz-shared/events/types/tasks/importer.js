@@ -1,7 +1,7 @@
 const TASKS_IMPORTER_START_EVENT = "CPZ.Tasks.Importer.Start";
 const TASKS_IMPORTER_STOP_EVENT = "CPZ.Tasks.Importer.Stop";
 const TASKS_IMPORTER_STARTED_EVENT = "CPZ.Tasks.Importer.Started";
-const TASKS_IMPORTER_STOPPED_EVENT = "CPZ.Tasks.Importer.Stoppped";
+const TASKS_IMPORTER_STOPPED_EVENT = "CPZ.Tasks.Importer.Stopped";
 const TASKS_IMPORTER_FINISHED_EVENT = "CPZ.Tasks.Importer.Finished";
 export {
   TASKS_IMPORTER_START_EVENT,
