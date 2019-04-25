@@ -299,10 +299,6 @@ class Importer {
     Log.info(`Importer ${this._PartitionKey}:`, ...args);
   }
 
-  logError(...args) {
-    Log.error(`Importer ${this._PartitionKey}:`, ...args);
-  }
-
   getLimit() {
     switch (this._exchange) {
       case "bitfinex":
@@ -414,7 +410,7 @@ class Importer {
         data: candles
       };
     } catch (error) {
-      this.logError(error.message);
+      Log.error(error.message);
       return {
         success: false,
         date: dateFrom,
@@ -506,7 +502,7 @@ class Importer {
         error: "Empty response"
       };
     } catch (error) {
-      this.logError(error.message);
+      Log.error(error.message);
       return {
         success: false,
         date: dateFrom,
@@ -946,12 +942,11 @@ class Importer {
   async save() {
     try {
       await saveImporterState(this.state);
-    } catch (error) {
-      this.logError(error.message);
+    } catch (e) {
       throw new ServiceError(
         {
           name: ServiceError.types.IMPORTER_SAVE_STATE_ERROR,
-          cause: error,
+          cause: e,
           info: {
             ...this.props
           }
