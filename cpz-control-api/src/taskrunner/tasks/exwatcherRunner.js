@@ -255,7 +255,7 @@ class ExWatcherRunner extends BaseRunner {
             );
             exWatcher.importerHistoryId = taskId;
             exWatcher.importerHistoryStatus = status;
-            events.push(event);
+            if (event) events.push(event);
           } else {
             exWatcher.importerHistoryStatus = STATUS_FINISHED;
           }
@@ -286,7 +286,7 @@ class ExWatcherRunner extends BaseRunner {
 
         exWatcher.marketwatcherId = taskId;
         exWatcher.marketwatcherStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -308,7 +308,7 @@ class ExWatcherRunner extends BaseRunner {
         );
         exWatcher.candlebatcherId = taskId;
         exWatcher.candlebatcherStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
       if (
         exWatcher.candlebatcherStatus === STATUS_STARTED &&
@@ -335,7 +335,7 @@ class ExWatcherRunner extends BaseRunner {
         );
         exWatcher.importerCurrentId = taskId;
         exWatcher.importerCurrentStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       await saveExWatcherState(exWatcher.state);
@@ -380,7 +380,7 @@ class ExWatcherRunner extends BaseRunner {
         });
         exWatcher.importerHistoryId = taskId;
         exWatcher.importerHistoryStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -392,7 +392,7 @@ class ExWatcherRunner extends BaseRunner {
         });
         exWatcher.importerCurrentId = taskId;
         exWatcher.importerCurrentStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -404,7 +404,7 @@ class ExWatcherRunner extends BaseRunner {
         });
         exWatcher.candlebatcherId = taskId;
         exWatcher.candlebatcherStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -416,7 +416,7 @@ class ExWatcherRunner extends BaseRunner {
         });
         exWatcher.marketwatcherId = taskId;
         exWatcher.marketwatcherStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
       await saveExWatcherState(exWatcher.state);
       await publishEvents([...exWatcher.events, ...events]);

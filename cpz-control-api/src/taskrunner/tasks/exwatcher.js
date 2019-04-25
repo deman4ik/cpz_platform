@@ -76,7 +76,6 @@ class ExWatcher {
             asset: this._asset,
             currency: this._currency
           }),
-
           data: {
             taskId: this._taskId
           }
@@ -96,7 +95,6 @@ class ExWatcher {
             asset: this._asset,
             currency: this._currency
           }),
-
           data: {
             taskId: this._taskId
           }

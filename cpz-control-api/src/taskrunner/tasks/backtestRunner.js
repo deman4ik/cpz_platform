@@ -199,7 +199,7 @@ class BacktestRunner extends BaseRunner {
           );
           backtest.importerId = taskId;
           backtest.importerStatus = status;
-          events.push(event);
+          if (event) events.push(event);
         } else {
           backtest.importerStatus = STATUS_FINISHED;
         }
@@ -231,7 +231,7 @@ class BacktestRunner extends BaseRunner {
         );
         backtest.backtesterId = taskId;
         backtest.backtesterStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       await saveBacktestState(backtest.state);
@@ -279,7 +279,7 @@ class BacktestRunner extends BaseRunner {
         });
         backtest.importerId = taskId;
         backtest.importerStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -291,7 +291,7 @@ class BacktestRunner extends BaseRunner {
         });
         backtest.backtesterId = taskId;
         backtest.backtesterStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       await saveBacktestState(backtest.state);

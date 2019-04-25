@@ -233,7 +233,7 @@ class UserRobotRunner extends BaseRunner {
         );
         userRobot.traderId = taskId;
         userRobot.traderStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -257,7 +257,7 @@ class UserRobotRunner extends BaseRunner {
         );
         userRobot.adviserId = taskId;
         userRobot.adviserStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       await saveUserRobotState(userRobot.state);
@@ -303,7 +303,7 @@ class UserRobotRunner extends BaseRunner {
         });
         userRobot.traderId = taskId;
         userRobot.traderStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       if (
@@ -317,7 +317,7 @@ class UserRobotRunner extends BaseRunner {
         });
         userRobot.adviserId = taskId;
         userRobot.adviserStatus = status;
-        events.push(event);
+        if (event) events.push(event);
       }
 
       await saveUserRobotState(userRobot.state);
@@ -353,7 +353,7 @@ class UserRobotRunner extends BaseRunner {
           taskId: userRobot.traderId,
           settings: userRobot.traderSettings
         });
-        events.push(event);
+        if (event) events.push(event);
       }
       await saveUserRobotState(userRobot.state);
       await publishEvents(events);
