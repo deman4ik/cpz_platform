@@ -76,7 +76,7 @@ async function execute(traderState, nextAction) {
         {
           name: ServiceError.types.TRADER_EXECUTE_EXCEPTION,
           cause: e,
-          info: { ...trader.props, invocationId }
+          info: { ...trader.props, invocationId, critical: true }
         },
         "Failed to execute Trader '%s'",
         trader.taskId

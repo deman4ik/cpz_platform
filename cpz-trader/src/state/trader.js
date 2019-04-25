@@ -618,25 +618,34 @@ class Trader {
         // Сохраняем ордер в позиции и генерируем события
         this._positions[order.positionId].handleOrder(order);
 
-        // Если ордер в статусе закрыт или отменен
-        /*  if (
-          order.status === ORDER_STATUS_CLOSED ||
-          order.status === ORDER_STATUS_CANCELED
-        ) { */
-        // генерируем событие ордер
-        this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
-          order
-        );
-        // генерируем событие позиция
-        this._eventsToSend[`P-${order.positionId}`] = this._createPositionEvent(
-          this._positions[order.positionId].state
-        );
-
-        //   } else
         // или возникла ошибка при работе с ордером на бирже
         if (order.error) {
           // генерируем событие ошибка трейдера
-          this.setError(order.error);
+          this.setError(
+            new ServiceError(
+              {
+                name: order.error.name,
+                info: order.error.info
+              },
+              order.error.message
+            )
+          );
+        } else {
+          // Если ордер в статусе закрыт или отменен
+          /*  if (
+          order.status === ORDER_STATUS_CLOSED ||
+          order.status === ORDER_STATUS_CANCELED
+        ) { */
+          // генерируем событие ордер
+          this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
+            order
+          );
+          // генерируем событие позиция
+          this._eventsToSend[
+            `P-${order.positionId}`
+          ] = this._createPositionEvent(
+            this._positions[order.positionId].state
+          );
         }
       });
 
