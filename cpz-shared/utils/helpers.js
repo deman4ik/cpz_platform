@@ -361,6 +361,22 @@ const maxArrOfObj = (arr, propName) =>
 const minArrOfObj = (arr, propName) =>
   [...arr].sort((a, b) => a[propName] - b[propName])[0];
 
+const EGConfig = topics => {
+  return topics.map(topic => ({
+    name: topic,
+    endpoint: process.env[`EG_${topic.toUpperCase()}_ENDPOINT`],
+    key: process.env[`EG_${topic.toUpperCase()}_KEY`]
+  }));
+};
+
+const ValidatorConfig = schemasList => {
+  let schema = {};
+  schemasList.forEach(s => {
+    schema = { ...schema, ...s };
+  });
+  return schema;
+};
+
 export {
   sortAsc,
   sortDesc,
@@ -386,5 +402,7 @@ export {
   flatten,
   sleep,
   maxArrOfObj,
-  minArrOfObj
+  minArrOfObj,
+  EGConfig,
+  ValidatorConfig
 };

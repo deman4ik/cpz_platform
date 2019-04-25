@@ -84,19 +84,19 @@ class TaskEvents extends BaseService {
       ]);
       ServiceValidator.add(schemas);
       // Configure Event Grid Client
-      const EGConfig = super.EGConfig({
+      const EGConfig = super.EGConfig([
         TASKS_TOPIC,
         TRADES_TOPIC,
         SIGNALS_TOPIC,
         LOG_TOPIC,
         ERROR_TOPIC
-      });
+      ]);
       EventGrid.config(EGConfig);
       // Configure Connector Client
-      ConnectorClient.init({
-        endpoint: process.env.CONNECTOR_API_ENDPOINT,
-        key: process.env.CONNECTOR_API_KEY
-      });
+      ConnectorClient.init(
+        process.env.CONNECTOR_API_ENDPOINT,
+        process.env.CONNECTOR_API_KEY
+      );
       // Table Storage
       ControlStorageClient.init(
         process.env.AZ_STORAGE_CONTROL_CS,

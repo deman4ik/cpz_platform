@@ -5,7 +5,7 @@ class ConnectorClient {
     this._client = null;
   }
 
-  init({ endpoint, key }) {
+  init(endpoint, key) {
     if (!endpoint || !key)
       throw new Error("Invalid connector client credentials");
     this._client = new GraphQLClient(endpoint, {

@@ -37,10 +37,7 @@ class IdleTimer extends BaseService {
       ]);
       ServiceValidator.add(schemas);
       // Configure Event Grid Client
-      const EGConfig = super.EGConfig({
-        LOG_TOPIC,
-        ERROR_TOPIC
-      });
+      const EGConfig = super.EGConfig([LOG_TOPIC, ERROR_TOPIC]);
       EventGrid.config(EGConfig);
       // Table Storage
       ControlStorageClient.init(process.env.AZ_STORAGE_CONTROL_CS, [

@@ -102,10 +102,7 @@ class ServiceEvents extends BaseService {
     // Configure Validator
     ServiceValidator.add(schemas);
     // Configure Event Grid Client
-    const EGConfig = super.EGConfig({
-      LOG_TOPIC,
-      ERROR_TOPIC
-    });
+    const EGConfig = super.EGConfig([LOG_TOPIC, ERROR_TOPIC]);
     EventGrid.config(EGConfig);
     // Event Hub
     EventHub.init(

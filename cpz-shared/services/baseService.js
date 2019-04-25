@@ -1,5 +1,6 @@
 import checkAuth from "./middleware/checkAuth";
 import handlingEventsByTypes from "./middleware/handlingEventsByTypes";
+import { EGConfig, ValidatorConfig } from "../utils/helpers";
 
 class BaseService {
   checkAuth(context, req) {
@@ -11,19 +12,11 @@ class BaseService {
   }
 
   ValidatorConfig(schemasList) {
-    let schema = {};
-    schemasList.forEach(s => {
-      schema = { ...schema, ...s };
-    });
-    return schema;
+    return ValidatorConfig(schemasList);
   }
 
   EGConfig(topics) {
-    return Object.values(topics).map(topic => ({
-      name: topic,
-      endpoint: process.env[`EG_${topic.toUpperCase()}_ENDPOINT`],
-      key: process.env[`EG_${topic.toUpperCase()}_KEY`]
-    }));
+    return EGConfig(topics);
   }
 }
 
