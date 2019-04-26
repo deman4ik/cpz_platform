@@ -8,9 +8,8 @@ class Relay {
     this._mode = mode;
     this._key = key;
     this._endpoints = [];
-    if (this._mode) {
-      this._init();
-    }
+
+    this._init();
   }
 
   _init() {

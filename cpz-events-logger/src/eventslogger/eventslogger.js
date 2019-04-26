@@ -100,7 +100,7 @@ class EventsLogger {
       }
       if (type.includes("CPZ.Signals")) {
         if (this.logToStorage) await saveSignalsEvent(fullEventData);
-        if (type === SIGNALS_NEWSIGNAL_EVENT.eventType) {
+        if (type === SIGNALS_NEWSIGNAL_EVENT) {
           if (this.logToPostgre) await saveSignalsDB([fullEventData]);
         }
         return;

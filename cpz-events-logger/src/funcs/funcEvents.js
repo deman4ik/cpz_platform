@@ -22,7 +22,7 @@ import Relay from "../emulator/relay";
 class FuncEvents extends BaseService {
   constructor() {
     super();
-
+    this.relay = null;
     this.init();
   }
 
@@ -41,7 +41,12 @@ class FuncEvents extends BaseService {
     MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, marketTables);
     DB.init(process.env.DB_API_ENDPOINT, process.env.DB_API_ACCESS_KEY);
     this.eventslogger = new EventsLogger();
-    this.relay = new Relay(process.env.EG_EMULATOR_MODE, process.env.API_KEY);
+    if (
+      process.env.EG_EMULATOR_MODE === "localhost" ||
+      process.env.EG_EMULATOR_MODE === "docker"
+    ) {
+      this.relay = new Relay(process.env.EG_EMULATOR_MODE, process.env.API_KEY);
+    }
   }
 
   /** @override */
@@ -95,16 +100,15 @@ class FuncEvents extends BaseService {
   async run(context, req) {
     Log.addContext(context);
     // Checking that request is authorized
-    if (process.env.EG_EMULATOR_MODE || super.checkAuth(context, req)) {
+    if (this.relay || super.checkAuth(context, req)) {
       // Handling event by target type
       const event = this.handlingEventsByTypes(context, req);
       if (event) {
         try {
-          if (!process.env.EG_EMULATOR_MODE)
-            ServiceValidator.check(BASE_EVENT, event);
+          if (!this.relay) ServiceValidator.check(BASE_EVENT, event);
           await this.eventslogger.save(event);
 
-          if (process.env.EG_EMULATOR_MODE) {
+          if (this.relay) {
             await this.relay.send(event);
           }
         } catch (e) {
