@@ -45,7 +45,8 @@ create table orders
           ON DELETE CASCADE,
     trader_id     uuid,
     candle_timestamp timestamp,
-    run_mode  varchar(10)
+    run_mode  varchar(10),
+    err_code  varchar(20)
 )
 with OIDS;
 
