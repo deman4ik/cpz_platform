@@ -36,7 +36,7 @@ class EventsLogger {
   async save(event) {
     try {
       const type = event.eventType;
-      if (type === CANDLES_NEWCANDLE_EVENT.eventType) {
+      if (type === CANDLES_NEWCANDLE_EVENT) {
         if (this.logToStorage) {
           const {
             id,

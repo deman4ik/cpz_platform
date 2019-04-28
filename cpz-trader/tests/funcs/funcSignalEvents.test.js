@@ -27,7 +27,7 @@ describe("Should show correct messages and return correct objects", () => {
 
   const data = { validationCode };
 
-  const body = [{ data, eventType: SIGNALS_NEWSIGNAL_EVENT.eventType }];
+  const body = [{ data, eventType: SIGNALS_NEWSIGNAL_EVENT }];
 
   test("Should be done", () => {
     const req = reqMock(body);
@@ -60,8 +60,8 @@ describe("Should show correct messages and return correct objects", () => {
 
   test("SUB events should work", () => {
     const req = reqMock([
-      { eventType: SUB_VALIDATION_EVENT.eventType, data },
-      { eventType: SUB_DELETED_EVENT.eventType, data }
+      { eventType: SUB_VALIDATION_EVENT, data },
+      { eventType: SUB_DELETED_EVENT, data }
     ]);
     const context = contextMock();
 

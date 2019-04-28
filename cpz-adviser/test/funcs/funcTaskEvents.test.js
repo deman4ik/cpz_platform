@@ -34,9 +34,9 @@ const validationCode = "*some_code*";
 const data = { validationCode };
 
 const body = [
-  { data, eventType: TASKS_ADVISER_START_EVENT.eventType },
-  { data, eventType: TASKS_ADVISER_STOP_EVENT.eventType },
-  { data, eventType: TASKS_ADVISER_UPDATE_EVENT.eventType }
+  { data, eventType: TASKS_ADVISER_START_EVENT },
+  { data, eventType: TASKS_ADVISER_STOP_EVENT },
+  { data, eventType: TASKS_ADVISER_UPDATE_EVENT }
 ];
 
 test("Should be done", () => {
@@ -78,8 +78,8 @@ test("Should go to error", () => {
 
 test("SUB events should work", () => {
   const req = reqMock([
-    { eventType: SUB_VALIDATION_EVENT.eventType, data },
-    { eventType: SUB_DELETED_EVENT.eventType, data }
+    { eventType: SUB_VALIDATION_EVENT, data },
+    { eventType: SUB_DELETED_EVENT, data }
   ]);
   const context = contextMock();
 

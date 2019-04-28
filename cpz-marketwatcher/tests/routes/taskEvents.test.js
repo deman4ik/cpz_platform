@@ -46,10 +46,10 @@ const data = { validationCode };
 
 test("Should call all handlers", () => {
   const req = reqMock([
-    { data, subject: {}, eventType: TASKS_MARKETWATCHER_START_EVENT.eventType },
-    { data, subject: {}, eventType: TASKS_MARKETWATCHER_STOP_EVENT.eventType },
-    { data, subject: {}, eventType: SUB.eventType },
-    { data, subject: {}, eventType: UNSUB.eventType }
+    { data, subject: {}, eventType: TASKS_MARKETWATCHER_START_EVENT },
+    { data, subject: {}, eventType: TASKS_MARKETWATCHER_STOP_EVENT },
+    { data, subject: {}, eventType: SUB },
+    { data, subject: {}, eventType: UNSUB }
   ]);
 
   const res = resMock();
@@ -83,8 +83,8 @@ test("Should go to error", () => {
 test("SUB events should work", () => {
   const res = resMock();
   const req = reqMock([
-    { eventType: SUB_VALIDATION_EVENT.eventType, data },
-    { eventType: SUB_DELETED_EVENT.eventType, data }
+    { eventType: SUB_VALIDATION_EVENT, data },
+    { eventType: SUB_DELETED_EVENT, data }
   ]);
 
   funcTaskEvents(req, res);

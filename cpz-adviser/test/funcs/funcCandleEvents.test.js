@@ -26,7 +26,7 @@ const validationCode = "*some_code*";
 
 const data = { validationCode };
 
-const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT.eventType }];
+const body = [{ data, eventType: CANDLES_NEWCANDLE_EVENT }];
 
 test("Should be done", () => {
   const req = reqMock(body);
@@ -59,8 +59,8 @@ test("Should go to error", () => {
 
 test("SUB events should work", () => {
   const req = reqMock([
-    { eventType: SUB_VALIDATION_EVENT.eventType, data },
-    { eventType: SUB_DELETED_EVENT.eventType, data }
+    { eventType: SUB_VALIDATION_EVENT, data },
+    { eventType: SUB_DELETED_EVENT, data }
   ]);
   const context = contextMock();
 

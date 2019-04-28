@@ -35,9 +35,9 @@ describe("Should show correct messages and return correct objects", () => {
   const data = { validationCode };
 
   const body = [
-    { data, eventType: TASKS_TRADER_START_EVENT.eventType },
-    { data, eventType: TASKS_TRADER_STOP_EVENT.eventType },
-    { data, eventType: TASKS_TRADER_UPDATE_EVENT.eventType }
+    { data, eventType: TASKS_TRADER_START_EVENT },
+    { data, eventType: TASKS_TRADER_STOP_EVENT },
+    { data, eventType: TASKS_TRADER_UPDATE_EVENT }
   ];
 
   test("Should be done", () => {
@@ -79,8 +79,8 @@ describe("Should show correct messages and return correct objects", () => {
 
   test("SUB events should work", () => {
     const req = reqMock([
-      { eventType: SUB_VALIDATION_EVENT.eventType, data },
-      { eventType: SUB_DELETED_EVENT.eventType, data }
+      { eventType: SUB_VALIDATION_EVENT, data },
+      { eventType: SUB_DELETED_EVENT, data }
     ]);
     const context = contextMock();
 
