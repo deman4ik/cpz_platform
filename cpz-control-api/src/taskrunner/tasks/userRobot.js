@@ -61,6 +61,9 @@ class UserRobot {
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
+      this._exwatcherError = null;
+      this._adviserStatus = null;
+      this._traderError = null;
       this._events.started = {
         eventType: TASKS_USERROBOT_HIST_EVENT,
         eventData: {

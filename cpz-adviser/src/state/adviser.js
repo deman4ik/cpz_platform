@@ -107,6 +107,7 @@ class Adviser {
     Log.debug(`Adviser ${this.taskId} - ${STATUS_STOPPED}`);
     this._status = STATUS_STOPPED;
     this._stoppedAt = dayjs.utc().toISOString();
+    this._error = null;
     this._eventsToSend.Stop = {
       eventType: TASKS_ADVISER_STOPPED_EVENT,
       eventData: {
@@ -137,7 +138,7 @@ class Adviser {
       let critical;
       if (err instanceof ServiceError) {
         ({ critical = false } = err.info);
-        this._error = err;
+        this._error = err.json;
       } else {
         critical = true;
         this._error = new ServiceError(
@@ -148,7 +149,7 @@ class Adviser {
           },
           "Adviser '%s' error",
           this._taskId
-        );
+        ).json;
       }
       if (critical) this._status = STATUS_ERROR;
 
@@ -277,7 +278,6 @@ class Adviser {
             const indicatorObject = this._baseIndicatorsCode[
               `${indicator.fileName}`
             ];
-            Log.debug(indicatorObject);
             // Берем все функции индикатора
             const indicatorFunctions = {};
             Object.getOwnPropertyNames(indicatorObject)

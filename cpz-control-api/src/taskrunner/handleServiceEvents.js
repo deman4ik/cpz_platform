@@ -78,7 +78,7 @@ import {
 
 async function handleServiceEvent(event) {
   try {
-    Log.debug("handleServiceEvent", event);
+    Log.debug(event, "handleServiceEvent");
     const {
       eventType,
       data: { taskId }

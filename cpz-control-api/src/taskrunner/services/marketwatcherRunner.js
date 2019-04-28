@@ -24,7 +24,7 @@ import BaseRunner from "../baseRunner";
 class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
-      Log.debug("MarketwatcherRunner start", props);
+      Log.debug(props, "MarketwatcherRunner start");
       let taskId = uuid();
       ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, {
         ...props,

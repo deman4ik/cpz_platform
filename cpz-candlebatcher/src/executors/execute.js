@@ -20,27 +20,27 @@ async function execute(candlebatcherState, nextAction) {
     Log.debug(`Executing - ${type} action`);
     if (type === RUN) {
       let candle = await loadCandle(candlebatcher.state);
-      Log.debug("Loaded candle", candle);
+      Log.debug(candle, "Loaded candle");
       if (!candle) {
         candle = await createCandle(candlebatcher.state);
-        Log.debug("Created candle", candle);
+        Log.debug(candle, "Created candle");
       }
       if (!candle) {
         candle = candlebatcher.createPrevCandle();
-        Log.debug("Candle from previous", candle);
+        Log.debug(candle, "Candle from previous");
       }
 
       if (!candle) {
         throw Error("Failed to load or create candle");
       }
       const candleHandled = candlebatcher.handleCandle(candle);
-      Log.debug("candleHandled", candleHandled);
+      Log.debug(candleHandled, "candleHandled");
       if (candleHandled) {
         const candlesObject = await createTimeframeCandles(
           candlebatcher.state,
           candle
         );
-        Log.debug("candlesObject", candlesObject);
+        Log.debug(candlesObject, "candlesObject");
 
         await saveCandlesToCache(
           candlebatcher.state,
@@ -58,7 +58,7 @@ async function execute(candlebatcherState, nextAction) {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;
     }
-    Log.debug("Candlebatcher events", candlebatcher.events);
+    Log.debug(candlebatcher.events, "Candlebatcher events");
     // Отправялвем события
     await publishEvents(candlebatcher.props, candlebatcher.events);
 

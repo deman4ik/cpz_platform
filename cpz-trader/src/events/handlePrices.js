@@ -11,7 +11,7 @@ import { PRICE } from "../config";
 
 async function handlePrice(currentPrice) {
   try {
-    Log.debug("handlePrice", currentPrice);
+    Log.debug(currentPrice, "handlePrice");
     const { exchange, asset, currency } = currentPrice;
     const traders = await getActiveTradersBySlug(
       createTraderSlug({

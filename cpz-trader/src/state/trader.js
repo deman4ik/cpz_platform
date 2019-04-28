@@ -163,6 +163,7 @@ class Trader {
     this._status = STATUS_STARTED;
     this._stopRequested = false;
     this._startedAt = dayjs.utc().toISOString();
+    this._error = null;
     this._eventsToSend.Start = {
       eventType: TASKS_TRADER_STARTED_EVENT,
       eventData: {
@@ -611,7 +612,7 @@ class Trader {
 
   handleOrders(orders) {
     try {
-      Log.debug("handleOrders", orders);
+      Log.debug(orders, "handleOrders");
       if (!Array.isArray(orders)) throw new Error("Orders are not array");
 
       orders.forEach(order => {
@@ -649,7 +650,7 @@ class Trader {
         }
       });
 
-      Log.debug("handleOrders ordersToExecute", this._ordersToExecute);
+      Log.debug(this._ordersToExecute, "handleOrders ordersToExecute");
     } catch (e) {
       throw new ServiceError(
         {
@@ -666,7 +667,7 @@ class Trader {
       let critical;
       if (err instanceof ServiceError) {
         ({ critical = false } = err.info);
-        this._error = err;
+        this._error = err.json;
       } else {
         critical = true;
         this._error = new ServiceError(
@@ -677,7 +678,7 @@ class Trader {
           },
           "Trader '%s' error",
           this._taskId
-        );
+        ).json;
       }
       if (critical) this._status = STATUS_ERROR;
 

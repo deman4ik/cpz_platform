@@ -100,7 +100,7 @@ class UserRobotRunner extends BaseRunner {
 
   static async handleAction(action) {
     try {
-      Log.debug("UserRobotRunner handleAction", action);
+      Log.debug(action, "UserRobotRunner handleAction");
       const { type, taskId, data } = action;
       const state = await UserRobotRunner.getState(taskId);
 

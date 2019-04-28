@@ -1,6 +1,4 @@
 import { fork } from "child_process";
-import { tryParseJSON } from "cpz/utils/helpers";
-import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";
 
 const importerProcesses = {};
@@ -14,18 +12,6 @@ function isProcessExists(taskId) {
 function createNewProcess(taskId) {
   Log.info("Creating new process ", taskId);
   importerProcesses[taskId] = fork(`./dist/importerProcess.js`);
-  importerProcesses[taskId].on("message", m => {
-    Log.debug(
-      `[${dayjs.utc().format("MM/DD/YYYY HH:mm:ss")}]`,
-      ...m.map(msg => {
-        const json = tryParseJSON(msg);
-        if (json) {
-          return json;
-        }
-        return msg;
-      })
-    );
-  });
   importerProcesses[taskId].on("exit", () => {
     delete importerProcesses[taskId];
   });

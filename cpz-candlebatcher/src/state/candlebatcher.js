@@ -85,6 +85,7 @@ class Candlebatcher {
   start() {
     this._status = STATUS_STARTED;
     this._startedAt = dayjs.utc().toISOString();
+    this._error = null;
     this._eventsToSend.Start = {
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       eventData: {
@@ -249,7 +250,7 @@ class Candlebatcher {
       let critical;
       if (err instanceof ServiceError) {
         ({ critical = false } = err.info);
-        this._error = err;
+        this._error = err.json;
       } else {
         critical = true;
         this._error = new ServiceError(
@@ -260,7 +261,7 @@ class Candlebatcher {
           },
           "Candlebatcher '%s' error",
           this._taskId
-        );
+        ).json;
       }
       if (critical) this._status = STATUS_ERROR;
 

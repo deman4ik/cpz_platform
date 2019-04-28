@@ -184,7 +184,6 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.candlebatcherError = error;
       }
 
-      Log.debug("exWatcher.state", exWatcher.state);
       await saveExWatcherState(exWatcher.state);
       await publishEvents(exWatcher.events);
 
@@ -212,7 +211,7 @@ class ExWatcherRunner extends BaseRunner {
   static async start(state) {
     const exWatcher = new ExWatcher(state);
     try {
-      Log.debug("Start exwatcher", state);
+      Log.debug(state, "Start exwatcher");
       if (state.status === STATUS_STARTED)
         return {
           taskId: state.taskId,

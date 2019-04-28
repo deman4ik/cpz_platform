@@ -164,7 +164,7 @@ class Position {
    * @memberof Position
    */
   _createOrder(signal, positionDirection, settings) {
-    Log.debug("Creating new order...", signal);
+    Log.debug(signal, "Creating new order...");
     const {
       signalId,
       orderType,

@@ -68,6 +68,8 @@ class ExWatcher {
       this._stoppedAt = null;
       this._status = STATUS_STARTED;
       this._error = null;
+      this._marketwatcherError = null;
+      this._cabdlebatcherError = null;
       this._events.started = {
         eventType: TASKS_EXWATCHER_STARTED_EVENT,
         eventData: {
