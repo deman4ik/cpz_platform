@@ -1,12 +1,13 @@
 import client from "./index";
 
 const TABLES = {
-  STORAGE_BACKTESTERS_TABLE: "Backtesters", // Backtester
-  STORAGE_BACKTESTERITEMS_TABLE: "BacktesterItems", // Backtester
-  STORAGE_BACKTESTERSTRATLOG_TABLE: "BacktesterStratLogs", // Backtester
-  STORAGE_BACKTESTERSIGNALS_TABLE: "BacktesterSignals", // Backtester
-  STORAGE_BACKTESTERORDERS_TABLE: "BacktesterOrders", // Backtester
-  STORAGE_BACKTESTERPOSITIONS_TABLE: "BacktesterPositions" // Backtester
+  STORAGE_BACKTESTERS_TABLE: "Backtesters",
+  STORAGE_BACKTESTERITEMS_TABLE: "BacktesterItems",
+  STORAGE_BACKTESTERSTRATLOG_TABLE: "BacktesterStratLogs",
+  STORAGE_BACKTESTERSIGNALS_TABLE: "BacktesterSignals",
+  STORAGE_BACKTESTERORDERS_TABLE: "BacktesterOrders",
+  STORAGE_BACKTESTERPOSITIONS_TABLE: "BacktesterPositions",
+  STORAGE_BACKTESTERERRORS_TABLE: "BacktesterErrors"
 };
 /**
  * Query Backtester State by uniq Task ID
@@ -28,7 +29,7 @@ const saveBacktesterState = async state =>
 /**
  * Saves backtestitem
  *
- * @param {Object} state
+ * @param {[Object]} items
  */
 const saveBacktesterItems = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERITEMS_TABLE, items);
@@ -36,7 +37,7 @@ const saveBacktesterItems = async items =>
 /**
  * Saves backtest strategy logs
  *
- * @param {Object} state
+ * @param {[Object]} items
  */
 const saveBacktesterStratLogs = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERSTRATLOG_TABLE, items);
@@ -44,7 +45,7 @@ const saveBacktesterStratLogs = async items =>
 /**
  * Saves backtest signals
  *
- * @param {Object} state
+ * @param {[Object]} items
  */
 const saveBacktesterSignals = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERSIGNALS_TABLE, items);
@@ -52,7 +53,7 @@ const saveBacktesterSignals = async items =>
 /**
  * Saves backtest orders
  *
- * @param {Object} state
+ * @param {[Object]} items
  */
 const saveBacktesterOrders = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERORDERS_TABLE, items);
@@ -60,10 +61,19 @@ const saveBacktesterOrders = async items =>
 /**
  * Saves backtest positions
  *
- * @param {Object} state
+ * @param {[Object]} items
  */
 const saveBacktesterPositions = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE, items);
+
+/**
+ * Saves backtest errors
+ *
+ * @param {[Object]} items
+ */
+const saveBacktesterErrors = async items =>
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERERRORS_TABLE, items);
+
 /**
  * Delete Backtester state and all Backtester Items
  *
@@ -102,6 +112,12 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
   );
   await client.deleteArray(TABLES.STORAGE_BACKTESTERPOSITIONS_TABLE, positions);
 
+  const errors = await client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_BACKTESTERERRORS_TABLE,
+    RowKey
+  );
+  await client.deleteArray(TABLES.STORAGE_BACKTESTERERRORS_TABLE, errors);
+
   await client.deleteEntity(TABLES.STORAGE_BACKTESTERS_TABLE, {
     RowKey,
     PartitionKey,
@@ -116,6 +132,7 @@ export {
   saveBacktesterSignals,
   saveBacktesterOrders,
   saveBacktesterPositions,
+  saveBacktesterErrors,
   deleteBacktesterState
 };
 export default Object.values(TABLES);

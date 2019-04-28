@@ -70,7 +70,19 @@ const combineBacktesterSettings = (settings = {}) => ({
   debug:
     settings.debug === undefined || settings.debug === null
       ? BACKTESTER_SETTINGS_DEFAULTS.debug
-      : settings.debug
+      : settings.debug,
+  trace:
+    settings.trace === undefined || settings.trace === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.trace
+      : settings.trace,
+  saveToStorage:
+    settings.saveToStorage === undefined || settings.saveToStorage === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.saveToStorage
+      : settings.saveToStorage,
+  saveToDB:
+    settings.saveToDB === undefined || settings.saveToDB === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.saveToDB
+      : settings.saveToDB
 });
 
 export {

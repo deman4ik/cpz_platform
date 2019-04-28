@@ -14,25 +14,10 @@ function isProcessExists(taskId) {
   return false;
 }
 
-function log(m) {
-  Log.debug(
-    `[${dayjs.utc().format("MM/DD/YYYY HH:mm:ss")}]`,
-    ...m.map(msg => {
-      const json = tryParseJSON(msg);
-      if (json) {
-        return json;
-      }
-      return msg;
-    })
-  );
-}
 function createNewProcess(taskId, provider) {
   const providerName = provider || "cryptocompare";
   Log.info("Creating new process ", taskId, providerName);
   marketwatcherProcesses[taskId] = fork(`./dist/${providerName}.js`);
-  marketwatcherProcesses[taskId].on("message", m => {
-    log(m);
-  });
   marketwatcherProcesses[taskId].on("exit", async () => {
     delete marketwatcherProcesses[taskId];
     const marketwatcherState = await getMarketwatcherById(taskId);

@@ -14,14 +14,12 @@ async function eventHandler(req, res) {
 
   try {
     if (eventType === TASKS_IMPORTER_START_EVENT) {
-      Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
       await handleImportStart(data);
     } else if (eventType === TASKS_IMPORTER_STOP_EVENT) {
-      Log.info(`Got ${eventType} event data ${JSON.stringify(data)}`);
       await handleImportStop(data);
     }
   } catch (error) {
-    Log.error(error);
+    Log.exception(error);
   }
   Log.clearContext();
   // Send 200 to EventGrid and run handler for event

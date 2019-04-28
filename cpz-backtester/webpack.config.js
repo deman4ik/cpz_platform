@@ -13,8 +13,8 @@ const config = {
   resolve: {
     alias: {
       cpz: path.resolve(__dirname, "../cpz-shared"),
-      cpzAdviser: path.resolve(__dirname, "../cpz-adviser/src/adviser"),
-      cpzTrader: path.resolve(__dirname, "../cpz-trader/src/state")
+      cpzAdviser: path.resolve(__dirname, "../cpz-adviser/src/"),
+      cpzTrader: path.resolve(__dirname, "../cpz-trader/src/")
     }
   },
   output: {

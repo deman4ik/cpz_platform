@@ -24,7 +24,10 @@ const TRADER_SETTINGS_DEFAULTS = {
 };
 
 const BACKTESTER_SETTINGS_DEFAULTS = {
-  debug: process.env.DEBUG || false
+  debug: process.env.DEBUG || false,
+  trace: false,
+  saveToStorage: false,
+  saveToDB: true
 };
 export {
   CANDLEBATCHER_SETTINGS_DEFAULTS,

@@ -1,98 +1,92 @@
-import VError from "verror";
-import Adviser from "cpzAdviser/adviser";
-import Log from "cpz/log";
+import ServiceError from "cpz/error";
+import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
+import { LOG_ADVISER_LOG_EVENT } from "cpz/events/types/log";
+import Adviser from "cpzAdviser/state/adviser";
+import {
+  loadStrategyCode,
+  loadStrategyState,
+  loadIndicatorsState,
+  loadBaseIndicatorsCode
+} from "cpzAdviser/executors";
 
 class AdviserBacktester extends Adviser {
-  constructor(context, state) {
-    super(context, state);
+  constructor(state) {
+    super(state);
     this._loadedHistoryCacheBars = state.loadedHistoryCacheBars || 0;
   }
 
-  log(...args) {
-    if (this._settings.debug) {
-      Log.debug(`Adviser ${this._eventSubject}:`, ...args);
+  get bSignalsEvents() {
+    return Object.values(this._eventsToSend)
+      .filter(({ eventType }) => eventType === SIGNALS_NEWSIGNAL_EVENT)
+      .map(({ eventData: { data } }) => data);
+  }
+
+  get bLogEvents() {
+    return Object.values(this._eventsToSend)
+      .filter(({ eventType }) => eventType === LOG_ADVISER_LOG_EVENT)
+      .map(({ eventData: { data } }) => data);
+  }
+
+  get bIndicatorsResults() {
+    const results = {};
+    Object.keys(this._indicators).forEach(key => {
+      results[key] = this._indicators[key].result;
+    });
+
+    return results;
+  }
+
+  async bInit() {
+    try {
+      const strategyCode = await loadStrategyCode(this.props);
+      const strategyState = await loadStrategyState(this.props);
+      this.setStrategy(strategyCode, strategyState);
+
+      const indicatorsState = await loadIndicatorsState(this.props);
+      this.indicatorsState = indicatorsState;
+      // Loading indicators
+      if (this.hasBaseIndicators) {
+        const baseIndicatorsCode = await loadBaseIndicatorsCode(
+          this.props,
+          this.baseIndicatorsFileNames
+        );
+        this.setBaseIndicatorsCode(baseIndicatorsCode);
+      }
+
+      this.setIndicators();
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.ADVISER_ERROR,
+          cause: e,
+          info: { ...this.props }
+        },
+        "Failed to init adviser"
+      );
     }
   }
 
-  logInfo(...args) {
-    Log.info(`Adviser ${this._eventSubject}:`, ...args);
-  }
-
-  logError(...args) {
-    Log.error(`Adviser ${this._eventSubject}:`, ...args);
-  }
-
-  get indicators() {
-    return this._indicators;
-  }
-
-  setCachedCandles(candles) {
+  bSetCachedCandles(candles) {
     this._candles = candles;
     this._lastCandle = this._candles[this._candles.length - 1];
     this._loadedHistoryCacheBars = this._candles.length;
   }
 
-  clearEvents() {
-    this._signals = [];
-    this._logEvents = [];
+  bClearEvents() {
+    this._eventsToSend = {};
   }
 
-  /**
-   * Обработка новой свечи
-   *
-   * @param {*} candle
-   * @memberof Adviser
-   */
-  async handleCandle(candle) {
-    try {
-      this.log(
-        "handleCandle()",
-        `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
-          candle.low
-        }, c:${candle.close}`
-      );
+  async bExecute(candle) {
+    this.handleCandle(candle);
+    this._candles = this._candles.slice(
+      Math.max(this._candles.length - this._settings.requiredHistoryMaxBars, 0)
+    );
+    // Calculation indicators
+    await this.calcIndicators();
+    // Run strategy
+    this.runStrategy();
 
-      // Обновить текущую свечу
-      this._candle = candle;
-      // Если  свеча уже обрабатывалась - выходим
-      if (this._candle.id === this._lastCandle.id) return;
-
-      // Добавляем новую  свечу
-      this._candles.push(this._candle);
-      this._candles = this._candles.slice(
-        Math.max(
-          this._candles.length - this._settings.requiredHistoryMaxBars,
-          0
-        )
-      );
-      // Подготовить свечи для индикаторов
-      this._prepareCandles();
-      // Рассчитать значения индикаторов
-      await this.calcIndicators();
-      // Считать текущее состояние индикаторов
-      this.getIndicatorsState();
-
-      // Запуск стратегии
-      this.runStrategy();
-
-      // Сгенерированные сигналы
-      this._lastSignals = this._signals;
-    } catch (error) {
-      throw new VError(
-        {
-          name: "AdviserError",
-          cause: error,
-          info: {
-            taskId: this._taskId,
-            robotId: this._robotId,
-            eventSubject: this._eventSubject,
-            strategyName: this._strategyName
-          }
-        },
-        'Failed to handle new candle for strategy "%s"',
-        this._strategyName
-      );
-    }
+    this.finalize();
   }
 }
 

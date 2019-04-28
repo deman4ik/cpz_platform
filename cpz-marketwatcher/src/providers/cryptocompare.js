@@ -339,7 +339,6 @@ process.on("message", async m => {
       break;
     default:
       Log.warn("Unknown child process event type");
-      process.send(["Unknown child process event type"]);
       break;
   }
 });

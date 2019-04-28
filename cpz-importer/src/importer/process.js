@@ -38,10 +38,8 @@ process.on("message", async m => {
     process.exit(0);
   } else if (eventData.type === "stop") {
     Log.info(`${eventData.taskId} stopped!`);
-    process.send([`Importer ${eventData.taskId} stopped!`]);
     process.exit(0);
   } else {
     Log.warn("Unknown child process event type");
-    process.send(["Unknown child process event type"]);
   }
 });

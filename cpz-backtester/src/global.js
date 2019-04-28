@@ -11,18 +11,6 @@ function isProcessExists(taskId) {
 function createNewProcess(taskId) {
   Log.info("Creating new process ", taskId);
   processes[taskId] = fork(`./dist/process.js`);
-  processes[taskId].on("message", m => {
-    Log.console(
-      `[${dayjs.utc().format("MM/DD/YYYY HH:mm:ss")}]`,
-      ...m.map(msg => {
-        const json = tryParseJSON(msg);
-        if (json) {
-          return json;
-        }
-        return msg;
-      })
-    );
-  });
   processes[taskId].on("exit", () => {
     delete processes[taskId];
   });

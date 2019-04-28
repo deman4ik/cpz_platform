@@ -8,7 +8,7 @@ import {
   SharedKeyCredential
 } from "@azure/storage-blob";
 import ServiceError from "../error";
-
+import Log from "../log";
 class BlobStorageClient {
   constructor() {
     this._serviceURL = null;
@@ -21,7 +21,7 @@ class BlobStorageClient {
     } catch (e) {
       if (e.body && e.body.Code && e.body.Code === "ContainerAlreadyExists")
         return;
-      throw new ServiceError(
+      const error = new ServiceError(
         {
           name: ServiceError.types.BLOB_STORAGE_CONTAINER_CREATE_ERROR,
           cause: e,

@@ -5,21 +5,12 @@ import helmet from "helmet";
 import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import backtesterEnv from "cpz/config/environment/backtester";
-import { v4 as uuid } from "uuid";
-import ServiceValidator from "cpz/validator";
 import handleTaskEvents from "./routes/taskEvents";
 import { validateEvents, handlingEventsByType, checkAuth } from "./middleware";
-import config from "./config";
+import init from "./init";
 
-// Setup Log
-Log.config({
-  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: config.serviceName
-});
 checkEnvVars(backtesterEnv.variables);
-
-// Setup Validator
-ServiceValidator(config.events.schemas);
+init();
 
 const server = express();
 

@@ -407,6 +407,7 @@ class Adviser {
     try {
       await Promise.all(
         Object.keys(this._indicators).map(async key => {
+          this[`_ind${key}Instance`]._eventsToSend = {};
           this[`_ind${key}Instance`].handleCandles(
             this._candle,
             this._candles,
@@ -439,6 +440,7 @@ class Adviser {
   runStrategy() {
     Log.debug(`Adviser ${this.taskId} - runStrategy()`);
     try {
+      this._strategyInstance._eventsToSend = {};
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
         this._candle,

@@ -1,12 +1,8 @@
-import "babel-polyfill";
 import Log from "cpz/log";
-import config from "../config";
+import init from "../init";
 import Backtester from "./backtester";
 
-Log.config({
-  key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
-  serviceName: config.serviceName
-});
+init();
 
 process.on("message", async m => {
   const eventData = JSON.parse(m);

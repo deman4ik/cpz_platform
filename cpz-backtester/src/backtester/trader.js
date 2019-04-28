@@ -1,3 +1,4 @@
+import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import {
   ORDER_STATUS_OPEN,
@@ -6,17 +7,66 @@ import {
   ORDER_TYPE_MARKET,
   ORDER_TASK_OPEN_MARKET,
   ORDER_TASK_OPEN_LIMIT,
-  ORDER_TASK_CHECK
+  ORDER_TASK_CHECK,
+  POS_STATUS_NEW,
+  POS_STATUS_OPEN
 } from "cpz/config/state";
-import Trader from "cpzTrader/trader";
+import {
+  TRADES_POSITION_EVENT,
+  TRADES_ORDER_EVENT
+} from "cpz/events/types/trades";
+import { ERROR_TRADER_ERROR_EVENT } from "cpz/events/types/error";
+import Trader from "cpzTrader/state/trader";
 
 class TraderBacktester extends Trader {
-  clearEvents() {
+  get bPositionEvents() {
+    const positions = {};
+    Object.keys(this._eventsToSend).forEach(key => {
+      const event = this._eventsToSend[key];
+      if (event.eventType === TRADES_POSITION_EVENT)
+        positions[key] = event.eventData.data;
+    });
+    return positions;
+  }
+
+  get bOrderEvents() {
+    const orders = {};
+    Object.keys(this._eventsToSend).forEach(key => {
+      const event = this._eventsToSend[key];
+      if (event.eventType === TRADES_ORDER_EVENT)
+        orders[key] = event.eventData.data;
+    });
+    return orders;
+  }
+
+  get bErrorEvents() {
+    return Object.values(this._eventsToSend)
+      .filter(({ eventType }) => eventType === ERROR_TRADER_ERROR_EVENT)
+      .map(({ eventData: { data } }) => data);
+  }
+
+  bClearEvents() {
     this._eventsToSend = {};
   }
 
+  bClearPositions() {
+    const activePositions = {};
+
+    Object.keys(this._positions).forEach(key => {
+      const position = this._positions[key];
+
+      if (
+        position.status === POS_STATUS_NEW ||
+        position.status === POS_STATUS_OPEN
+      )
+        activePositions[key] = position;
+    });
+
+    this._positions = activePositions;
+  }
+
   // Обработка новой свечи
-  handleCandle(candle) {
+  bHandleCandle(candle) {
     try {
       // По умолчанию берем цену закрытия свечи
       let price = candle.close;
@@ -29,8 +79,8 @@ class TraderBacktester extends Trader {
         // берем нужное поле
         price = candle[priceSource];
       }
-      this.log(
-        "handleCandle()",
+      Log.debug(
+        "Trader handleCandle()",
         `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
           candle.low
         }, c:${candle.close}`,
@@ -59,7 +109,7 @@ class TraderBacktester extends Trader {
     }
   }
 
-  executeOrders() {
+  bExecuteOrders() {
     try {
       while (Object.keys(this._ordersToExecute).length > 0) {
         const executedOrders = Object.values(this._ordersToExecute).map(

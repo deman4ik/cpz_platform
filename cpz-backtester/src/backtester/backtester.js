@@ -7,7 +7,7 @@ import {
   STATUS_FINISHED,
   STATUS_STARTED
 } from "cpz/config/state";
-import publishEvents from "cpz/eventgrid";
+import EventGrid from "cpz/events";
 import Log from "cpz/log";
 import {
   combineAdviserSettings,
@@ -19,87 +19,73 @@ import {
   generateInvertedKey,
   sortAsc
 } from "cpz/utils/helpers";
-import { createErrorOutput } from "cpz/utils/error";
 import {
   deleteBacktesterState,
   getBacktesterById,
   saveBacktesterState,
-  saveBacktesterStratLogs
-} from "cpz/tableStorage/backtesters";
+  saveBacktesterStratLogs,
+  saveBacktesterItems,
+  saveBacktesterSignals,
+  saveBacktesterOrders,
+  saveBacktesterPositions,
+  saveBacktesterErrors
+} from "cpz/tableStorage-client/backtest/backtesters";
 import {
-  countCandlesDB,
   deleteBacktestDB,
-  getCandlesDB,
   isBacktestExistsDB,
-  saveBacktestsDB,
-  saveOrdersDB,
-  savePositionsDB,
-  saveSignalsDB
-} from "cpz/db";
+  saveBacktestsDB
+} from "cpz/db-client/backtests";
+import { countCandlesDB, getCandlesDB } from "cpz/db-client/candles";
+import { saveSignalsDB } from "cpz/db-client/signals";
+import { saveOrdersDB } from "cpz/db-client/orders";
+import { savePositionsDB } from "cpz/db-client/positions";
+import {
+  TASKS_BACKTESTER_STARTED_EVENT,
+  TASKS_BACKTESTER_FINISHED_EVENT
+} from "cpz/events/types/tasks/backtester";
+import { ERROR_BACKTESTER_ERROR_EVENT } from "cpz/events/types/error";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
-import config from "../config";
-
-const {
-  events: {
-    topics: { LOG_TOPIC, TASKS_TOPIC, ERROR_TOPIC },
-    types: {
-      LOG_BACKTESTER_EVENT,
-      TASKS_BACKTESTER_STARTED_EVENT,
-      TRADES_POSITION_EVENT,
-      TRADES_ORDER_EVENT,
-      TASKS_BACKTESTER_FINISHED_EVENT,
-      ERROR_BACKTESTER_EVENT
-    }
-  }
-} = config;
 
 class Backtester {
   constructor(state) {
-    this.initialState = state;
-    this.eventSubject = state.eventSubject;
-    this.exchange = state.exchange;
-    this.asset = state.asset;
-    this.currency = state.currency;
-    this.timeframe = state.timeframe;
-    this.taskId = state.taskId;
-    this.robotId = state.robotId;
-    this.dateFrom = state.dateFrom;
-    this.dateTo = state.dateTo;
-    this.settings = combineBacktesterSettings(state.settings);
-    this.adviserSettings = combineAdviserSettings(state.adviserSettings);
-    this.traderSettings = combineTraderSettings(state.traderSettings);
-    this.requiredHistoryCache = this.adviserSettings.requiredHistoryCache;
-    this.requiredHistoryMaxBars = this.adviserSettings.requiredHistoryMaxBars;
-    this.totalBars = 0;
-    this.processedBars = 0;
-    this.leftBars = 0;
-    this.percent = 0;
-    this.oldPercent = 0;
-    this.startedAt = null;
-    this.endedAt = null;
-    this.status = STATUS_STARTED;
-    this.slug = createBacktesterSlug({
-      exchange: this.exchange,
-      asset: this.asset,
-      currency: this.currency,
-      timeframe: this.timeframe,
-      robotId: this.robotId
+    this._initialState = state;
+    this._exchange = state.exchange;
+    this._asset = state.asset;
+    this._currency = state.currency;
+    this._timeframe = state.timeframe;
+    this._taskId = state.taskId;
+    this._robotId = state.robotId;
+    this._dateFrom = state.dateFrom;
+    this._dateTo = state.dateTo;
+    this._settings = combineBacktesterSettings(state.settings);
+    this._adviserSettings = combineAdviserSettings(state.adviserSettings);
+    this._traderSettings = combineTraderSettings(state.traderSettings);
+    this._requiredHistoryCache = this._adviserSettings.requiredHistoryCache;
+    this._requiredHistoryMaxBars = this._adviserSettings.requiredHistoryMaxBars;
+    this._totalBars = 0;
+    this._processedBars = 0;
+    this._leftBars = 0;
+    this._percent = 0;
+    this._oldPercent = 0;
+    this._startedAt = null;
+    this._endedAt = null;
+    this._status = STATUS_STARTED;
+    this._slug = createBacktesterSlug({
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      robotId: this._robotId
     });
-    this.adviserBacktester = new AdviserBacktester(
-      {},
-      {
-        ...state,
-        settings: this.adviserSettings
-      }
-    );
-    this.traderBacktester = new TraderBacktester(
-      {},
-      {
-        ...state,
-        settings: { ...this.traderSettings, mode: BACKTEST_MODE }
-      }
-    );
+    this._adviserBacktester = new AdviserBacktester({
+      ...state,
+      settings: this._adviserSettings
+    });
+    this._traderBacktester = new TraderBacktester({
+      ...state,
+      settings: { ...this._traderSettings, mode: BACKTEST_MODE }
+    });
   }
 
   /**
@@ -109,97 +95,101 @@ class Backtester {
    * @memberof Adviser
    */
   log(...args) {
-    if (this.settings.debug) {
-      Log.debug(`Backtester ${this.eventSubject}:`, ...args);
+    if (this._settings.debug) {
+      Log.debug(`Backtester ${this._taskId}:`, ...args);
     }
   }
 
   logInfo(...args) {
-    Log.info(`Backtester ${this.eventSubject}:`, ...args);
+    Log.info(`Backtester ${this._taskId}:`, ...args);
   }
 
   logError(...args) {
-    Log.error(`Backtester ${this.eventSubject}:`, ...args);
+    Log.error(`Backtester ${this._taskId}:`, ...args);
   }
 
-  getCurrentState() {
+  get state() {
     return {
-      ...this.initialState,
-      PartitionKey: this.slug,
-      RowKey: this.taskId,
-      settings: this.settings,
-      totalBars: this.totalBars,
-      processedBars: this.processedBars,
-      leftBars: this.leftBars,
-      percent: this.percent,
-      startedAt: this.startedAt,
-      endedAt: this.endedAt,
-      status: this.status
+      ...this._initialState,
+      PartitionKey: this._slug,
+      RowKey: this._taskId,
+      settings: this._settings,
+      totalBars: this._totalBars,
+      processedBars: this._processedBars,
+      leftBars: this._leftBars,
+      percent: this._percent,
+      startedAt: this._startedAt,
+      endedAt: this._endedAt,
+      status: this._status
     };
   }
 
   async save() {
     try {
       // Сохраняем состояние в локальном хранилище
-      await saveBacktesterState(this.getCurrentState());
-      await saveBacktestsDB(this.getCurrentState());
+      if (this._settings.saveToStorage) await saveBacktesterState(this.state);
+      if (this._settings.saveToDB) await saveBacktestsDB(this.state);
     } catch (error) {
       throw new ServiceError(
         {
           name: ServiceError.types.BACKTESTER_ERROR,
           cause: error,
           info: {
-            taskId: this.taskId
+            taskId: this._taskId
           }
         },
         'Failed to save backtester "%s" state',
-        this.taskId
+        this._taskId
       );
     }
   }
 
   async execute() {
     try {
-      this.startedAt = dayjs.utc().toISOString();
-      const backtester = await getBacktesterById(this.taskId);
+      this._startedAt = dayjs.utc().toISOString();
+      const backtester = await getBacktesterById(this._taskId);
       if (backtester) {
         this.log(
           `Previous backtest state with taskId ${
-            this.taskId
+            this._taskId
           } found. Deleting...`
         );
         await deleteBacktesterState({
-          RowKey: this.taskId,
-          PartitionKey: this.slug
+          RowKey: this._taskId,
+          PartitionKey: this._slug
         });
       }
-      const backtesterExistsDB = await isBacktestExistsDB(this.taskId);
+      const backtesterExistsDB = await isBacktestExistsDB(this._taskId);
       if (backtesterExistsDB) {
         this.log(
           `Previous backtest state with id ${
-            this.taskId
+            this._taskId
           } found in DB. Deleting...`
         );
-        await deleteBacktestDB(this.taskId);
+        await deleteBacktestDB(this._taskId);
       }
 
-      this.log(`Starting ${this.taskId}...`);
+      await this._adviserBacktester.bInit();
+      this.log(`Starting ${this._taskId}...`);
 
       // Если необходим прогрев
-      if (this.requiredHistoryCache && this.requiredHistoryMaxBars) {
+      if (this._requiredHistoryCache && this._requiredHistoryMaxBars) {
         this.log("Warming cache...");
         // Формируем параметры запроса
         const requiredHistoryRequest = {
-          exchange: this.exchange,
-          asset: this.asset,
-          currency: this.currency,
-          timeframe: this.timeframe,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
           dateFrom: dayjs
-            .utc(this.dateFrom)
-            .add((-this.requiredHistoryMaxBars * 2) / this.timeframe, "minute")
+            .utc(this._dateFrom)
+            .add(
+              (-this._requiredHistoryMaxBars * 2) / this._timeframe,
+              "minute"
+            )
             .toISOString(),
           dateTo: dayjs
-            .utc(this.dateFrom)
+            .utc(this._dateFrom)
             .add(-1, "minute")
             .toISOString()
         };
@@ -214,122 +204,123 @@ class Backtester {
           .sort((a, b) => sortAsc(a.time, b.time))
           .slice(
             Math.max(
-              getRequiredHistoryResult.length - this.requiredHistoryMaxBars,
+              getRequiredHistoryResult.length - this._requiredHistoryMaxBars,
               0
             )
           );
         // Если загрузили меньше свечей чем запросили
-        if (requiredHistoryCandles.length < this.requiredHistoryMaxBars) {
+        if (requiredHistoryCandles.length < this._requiredHistoryMaxBars) {
           // Генерируем ошибку
           throw new ServiceError(
             {
               name: ServiceError.types.BACKTEST_HISTORY_RANGE_ERROR,
               info: {
-                requiredHistoryMaxBars: this.requiredHistoryMaxBars,
+                requiredHistoryMaxBars: this._requiredHistoryMaxBars,
                 actualHistoryMaxBars: requiredHistoryCandles.length
               }
             },
             "Can't load history required: %s bars but loaded: %s bars",
-            this.requiredHistoryMaxBars,
+            this._requiredHistoryMaxBars,
             requiredHistoryCandles.length
           );
         }
 
-        this.adviserBacktester.setCachedCandles(requiredHistoryCandles);
+        this._adviserBacktester.bSetCachedCandles(requiredHistoryCandles);
       }
       // Сохраняем начальное состояние
       await this.save();
-      await publishEvents(TASKS_TOPIC, {
-        service: config.serviceName,
-        subject: this.eventSubject,
-        eventType: TASKS_BACKTESTER_STARTED_EVENT,
+      await EventGrid.publish(TASKS_BACKTESTER_STARTED_EVENT, {
+        subject: this._taskId,
         data: {
-          taskId: this.taskId
+          taskId: this._taskId
         }
       });
 
-      this.totalBars = await countCandlesDB({
-        exchange: this.exchange,
-        asset: this.asset,
-        currency: this.currency,
-        timeframe: this.timeframe,
-        dateFrom: this.dateFrom,
-        dateTo: this.dateTo
+      this._totalBars = await countCandlesDB({
+        exchange: this._exchange,
+        asset: this._asset,
+        currency: this._currency,
+        timeframe: this._timeframe,
+        dateFrom: this._dateFrom,
+        dateTo: this._dateTo
       });
 
-      this.iterations = chunkNumberToArray(this.totalBars, 1440);
-      this.prevIteration = 0;
+      this._iterations = chunkNumberToArray(this._totalBars, 1440);
+      this._prevIteration = 0;
 
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
-      for (const iteration of this.iterations) {
+      for (const iteration of this._iterations) {
         const logsToSave = [];
-        // const signalsToSave = [];
+        const traceToSave = [];
+        const signalsToSave = [];
         const signalsToSaveDB = [];
-        // const ordersToSave = [];
-        const ordersToSaveDB = [];
-        // const positionsToSave = [];
-        const positionsToSaveDB = [];
+        const ordersToSave = [];
+        const ordersToSaveDB = {};
+        const positionsToSave = [];
+        const positionsToSaveDB = {};
+        const errorsToSave = [];
 
         const historyCandles = await getCandlesDB({
-          exchange: this.exchange,
-          asset: this.asset,
-          currency: this.currency,
-          timeframe: this.timeframe,
-          dateFrom: this.dateFrom,
-          dateTo: this.dateTo,
+          exchange: this._exchange,
+          asset: this._asset,
+          currency: this._currency,
+          timeframe: this._timeframe,
+          dateFrom: this._dateFrom,
+          dateTo: this._dateTo,
           limit: iteration,
-          offset: this.prevIteration
+          offset: this._prevIteration
         });
-        this.prevIteration = iteration;
+        this._prevIteration = iteration;
 
         for (const candle of historyCandles) {
-          await this.adviserBacktester.handleCandle(candle);
-          this.traderBacktester.handleCandle(candle);
-          this.traderBacktester.executeOrders();
-          for (const signal of this.adviserBacktester.signals) {
-            this.traderBacktester.handleSignal(signal.data);
-            this.traderBacktester.executeOrders();
+          await this._adviserBacktester.bExecute(candle);
+          this._traderBacktester.bHandleCandle(candle);
+          this._traderBacktester.bExecuteOrders();
+          for (const signal of this._adviserBacktester.bSignalsEvents) {
+            this._traderBacktester.handleSignal(signal);
+            this._traderBacktester.bExecuteOrders();
           }
 
-          const indicators = {};
-          Object.keys(this.adviserBacktester.indicators).forEach(key => {
-            indicators[key] = this.adviserBacktester.indicators[key].result;
-          });
-
-          // Если есть хотя бы одно событие для отправка
-          if (this.adviserBacktester.signals.length > 0) {
-            // Отправляем
-
-            this.adviserBacktester.signals.forEach(async signalEvent => {
-              signalsToSaveDB.push({
-                ...signalEvent.data,
-                backtesterId: this.taskId
-                /* candleId: candle.id,
-                candleTimestamp: candle.timestamp */
-              });
-              /* Disabled save to storage
-              signalsToSave.push({
-                RowKey: generateInvertedKey(),
-                PartitionKey: this.taskId,
-                backtesterId: this.taskId,
-                backtesterCandleId: candle.id,
-                backtesterCandleTimestamp: candle.timestamp,
-                signalId: signalEvent.data.signalId,
-                signalTimestamp: signalEvent.data.timestamp,
-                action: signalEvent.data.action,
-                orderType: signalEvent.data.orderType,
-                price: signalEvent.data.price,
-                priceSource: signalEvent.data.priceSource
-              });
-              */
+          if (this._settings.trace) {
+            traceToSave.push({
+              PartitionKey: this._taskId,
+              RowKey: generateInvertedKey(),
+              candleId: candle.id,
+              candleTimestamp: candle.timestamp,
+              candleTime: candle.time,
+              candleHigh: candle.high,
+              candleOpen: candle.open,
+              candleClose: candle.close,
+              candleLow: candle.low,
+              ...this._adviserBacktester.bIndicatorsResults
             });
           }
 
-          if (this.adviserBacktester.logEvents.length > 0) {
-            this.adviserBacktester.logEvents.forEach(logEvent => {
+          if (this._adviserBacktester.bSignalsEvents.length > 0) {
+            this._adviserBacktester.bSignalsEvents.forEach(signalEvent => {
+              if (this._settings.saveToDB)
+                signalsToSaveDB.push({
+                  ...signalEvent,
+                  backtesterId: this._taskId
+                });
+              if (this._settings.saveToStorage)
+                signalsToSave.push({
+                  RowKey: generateInvertedKey(),
+                  PartitionKey: this._taskId,
+                  ...signalEvent,
+                  backtesterId: this._taskId
+                });
+            });
+          }
+
+          if (
+            this._settings.debug &&
+            this._adviserBacktester.bLogEvents.length > 0
+          ) {
+            this._adviserBacktester.bLogEvents.forEach(logEvent => {
               logsToSave.push({
-                ...logEvent.data,
-                backtesterId: this.taskId,
+                ...logEvent,
+                backtesterId: this._taskId,
                 backtesterCandleId: candle.id,
                 backtesterCandleTimestamp: candle.timestamp,
                 backtesterCandleTime: candle.time,
@@ -338,202 +329,175 @@ class Backtester {
                 backtesterCandleClose: candle.close,
                 backtesterCandleLow: candle.low,
                 RowKey: generateInvertedKey(),
-                PartitionKey: this.taskId
+                PartitionKey: this._taskId
               });
             });
           }
-          // Если есть хотя бы одно событие для отправка
-          if (Object.keys(this.traderBacktester.events).length > 0) {
-            const positions = Object.values(
-              this.traderBacktester.events
-            ).filter(event => event.eventType === TRADES_POSITION_EVENT);
-            const orders = Object.values(this.traderBacktester.events).filter(
-              event => event.eventType === TRADES_ORDER_EVENT
-            );
-            positions.forEach(positionEvent => {
-              const positionsToSaveDBIndex = positionsToSaveDB.findIndex(
-                position =>
-                  position.positionId === positionEvent.data.positionId
-              );
-              if (positionsToSaveDBIndex === -1) {
-                positionsToSaveDB.push({
-                  ...positionEvent.data,
-                  backtesterId: this.taskId,
-                  entry: {
-                    ...positionEvent.data.entry,
-                    date: candle.timestamp
-                  }
-                });
-              } else {
-                positionsToSaveDB[positionsToSaveDBIndex] = {
-                  ...positionsToSaveDB[positionsToSaveDBIndex],
-                  ...positionEvent.data
-                };
-              }
 
-              /* Disabled save to storage 
-              const positionStorageData = {
-                backtesterId: this.taskId,
-                backtesterCandleId: candle.id,
-                backtesterCandleTimestamp: candle.timestamp,
-                positionId: positionEvent.data.positionId,
-                positionCode: positionEvent.data.settings.positionCode,
-                direction: positionEvent.data.direction,
-                entryStatus: positionEvent.data.entry.status,
-                entryPrice: positionEvent.data.entry.price,
-                entryDate: new Date(positionEvent.data.entry.date),
-                entryExecuted: positionEvent.data.entry.executed,
-                exitStatus: positionEvent.data.exit.status,
-                exitPrice: positionEvent.data.exit.price,
-                exitDate: new Date(positionEvent.data.exit.date),
-                exitExecuted: positionEvent.data.exit.executed,
-                RowKey: positionEvent.data.positionId,
-                PartitionKey: this.taskId
-              };
-              const positionsToSaveIndex = positionsToSave.findIndex(
-                position =>
-                  position.positionId === positionEvent.data.positionId
-              );
-              if (positionsToSaveIndex === -1) {
-                positionsToSave.push(positionStorageData);
-              } else {
-                positionsToSave[positionsToSaveIndex] = positionStorageData;
-              }
-              /* */
-            });
-
-            orders.forEach(orderEvent => {
-              const ordersToSaveDBIndex = ordersToSaveDB.findIndex(
-                order => order.orderId === orderEvent.data.orderId
-              );
-              if (ordersToSaveDBIndex === -1) {
-                ordersToSaveDB.push({
-                  ...orderEvent.data,
-                  backtesterId: this.taskId,
-                  candleTimestamp: candle.timestamp
-                });
-              } else {
-                ordersToSaveDB[ordersToSaveDBIndex] = {
-                  ...ordersToSaveDB[ordersToSaveDBIndex],
-                  ...orderEvent.data
-                };
-              }
-              /* Disabled save to storage 
-              ordersToSave.push({
-                backtesterId: this.taskId,
-                backtesterCandleId: candle.id,
-                backtesterCandleTimestamp: candle.timestamp,
-                orderId: orderEvent.data.orderId,
-                createdAt: new Date(orderEvent.data.createdAt),
-                action: orderEvent.data.action,
-                orderType: orderEvent.data.orderType,
-                price: orderEvent.data.price,
-                status: orderEvent.data.status,
-                executed: orderEvent.data.executed,
-                signalId: orderEvent.data.signalId,
+          if (this._traderBacktester.bErrorEvents.length > 0) {
+            this._traderBacktester.bErrorEvents.forEach(errorEvent => {
+              errorsToSave.push({
+                ...errorEvent,
+                PartitionKey: this._taskId,
                 RowKey: generateInvertedKey(),
-                PartitionKey: this.taskId
+                backtesterCandleId: candle.id,
+                backtesterCandleTimestamp: candle.timestamp
               });
-              /* */
+            });
+          }
+          if (Object.keys(this._traderBacktester.bPositionEvents).length > 0) {
+            Object.keys(this._traderBacktester.bPositionEvents).forEach(key => {
+              const positionEvent = this._traderBacktester.bPositionEvents[key];
+
+              if (this._settings.saveToDB) {
+                if (!positionsToSaveDB[key]) {
+                  positionsToSaveDB[key] = {
+                    ...positionEvent,
+                    backtesterId: this._taskId,
+                    entry: {
+                      ...positionEvent.entry,
+                      date: candle.timestamp
+                    }
+                  };
+                } else {
+                  positionsToSaveDB[key] = {
+                    ...positionsToSaveDB[key],
+                    ...positionEvent
+                  };
+                }
+              }
+
+              if (this._settings.saveToStorage) {
+                positionsToSave.push({
+                  ...positionEvent,
+                  backtesterId: this._taskId,
+                  backtesterCandleId: candle.id,
+                  backtesterCandleTimestamp: candle.timestamp,
+
+                  RowKey: generateInvertedKey(),
+                  PartitionKey: this._taskId
+                });
+              }
             });
           }
 
-          this.adviserBacktester.clearEvents();
-          this.traderBacktester.clearEvents();
+          if (Object.keys(this._traderBacktester.bOrderEvents).length > 0) {
+            Object.keys(this._traderBacktester.bOrderEvents).forEach(key => {
+              const orderEvent = this._traderBacktester.bOrderEvents[key];
+
+              if (this._settings.saveToDB) {
+                if (!ordersToSaveDB[key]) {
+                  ordersToSaveDB[key] = {
+                    ...orderEvent,
+                    backtesterId: this._taskId,
+                    candleTimestamp: candle.timestamp
+                  };
+                } else {
+                  ordersToSaveDB[key] = {
+                    ...ordersToSaveDB[key],
+                    ...orderEvent
+                  };
+                }
+              }
+
+              if (this._settings.saveToStorage) {
+                ordersToSave.push({
+                  ...orderEvent,
+                  backtesterId: this._taskId,
+                  backtesterCandleId: candle.id,
+                  backtesterCandleTimestamp: candle.timestamp,
+                  RowKey: generateInvertedKey(),
+                  PartitionKey: this._taskId
+                });
+              }
+            });
+          }
+
+          this._adviserBacktester.bClearEvents();
+          this._traderBacktester.bClearEvents();
+          this._traderBacktester.bClearPositions();
 
           // Обновляем статистику
 
-          this.processedBars += 1;
-          this.leftBars = this.totalBars - this.processedBars;
-          this.percent = Math.round(
-            (this.processedBars / this.totalBars) * 100
+          this._processedBars += 1;
+          this._leftBars = this._totalBars - this._processedBars;
+          this._percent = Math.round(
+            (this._processedBars / this._totalBars) * 100
           );
 
-          if (this.percent > this.oldPercent) {
-            this.log("processedBars: ", this.processedBars);
-            this.log("leftBars: ", this.leftBars);
-            this.log(`${this.percent} %`);
-            this.oldPercent = this.percent;
+          if (this._percent > this._oldPercent) {
+            this.log("processedBars: ", this._processedBars);
+            this.log("leftBars: ", this._leftBars);
+            this.log(`${this._percent} %`);
+            this._oldPercent = this._percent;
           }
         }
 
         if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
-        /* Disabled save to storage
+        if (traceToSave.length > 0) await saveBacktesterItems(traceToSave);
         if (signalsToSave.length > 0)
-          await saveBacktesterSignals(signalsToSave); 
+          await saveBacktesterSignals(signalsToSave);
         if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
         if (positionsToSave.length > 0)
           await saveBacktesterPositions(positionsToSave);
-*/
         if (signalsToSaveDB.length > 0) await saveSignalsDB(signalsToSaveDB);
-        if (positionsToSaveDB.length > 0)
-          await savePositionsDB(positionsToSaveDB);
-
-        if (ordersToSaveDB.length > 0) await saveOrdersDB(ordersToSaveDB);
-
+        if (Object.keys(positionsToSaveDB).length > 0)
+          await savePositionsDB(Object.values(positionsToSaveDB));
+        if (Object.keys(ordersToSaveDB).length > 0)
+          await saveOrdersDB(Object.values(ordersToSaveDB));
+        if (errorsToSave.length > 0) await saveBacktesterErrors(errorsToSave);
         // Сохраняем состояние пачки
         await this.save();
       }
       /* no-restricted-syntax, no-await-in-loop  */
       // Закончили обработку
-      this.status = STATUS_FINISHED;
-      this.endedAt = dayjs.utc().toISOString();
+      this._status = STATUS_FINISHED;
+      this._endedAt = dayjs.utc().toISOString();
       // Сохраняем состояние пачки
       await this.save();
 
       const duration = dayjs
-        .utc(this.endedAt)
-        .diff(dayjs.utc(this.startedAt), "minute");
-      await publishEvents(TASKS_TOPIC, {
-        service: config.serviceName,
-        subject: this.eventSubject,
-        eventType: TASKS_BACKTESTER_FINISHED_EVENT,
+        .utc(this._endedAt)
+        .diff(dayjs.utc(this._startedAt), "minute");
+      await EventGrid.publish(TASKS_BACKTESTER_FINISHED_EVENT, {
+        subject: this._taskId,
         data: {
-          taskId: this.taskId,
-          duration
+          taskId: this._taskId
         }
       });
+
       this.log(
         `Backtest finished! From`,
-        dayjs.utc(this.dateFrom).toISOString(),
+        dayjs.utc(this._dateFrom).toISOString(),
         "to",
-        dayjs.utc(this.dateTo).toISOString(),
+        dayjs.utc(this._dateTo).toISOString(),
         "in",
         duration,
         "minutes"
       );
-    } catch (error) {
-      const err = new ServiceError(
+    } catch (e) {
+      const error = new ServiceError(
         {
           name: ServiceError.types.BACKTESTER_ERROR,
-          cause: error
+          cause: e,
+          info: {
+            taskId: this._taskId,
+            critical: true
+          }
         },
         'Failed to execute backtest taskId: "%s"',
-        this.taskId
+        this._taskId
       );
-      const errorOutput = createErrorOutput(err);
-      this.log(errorOutput);
+
+      Log.error(error);
       // Если есть экземпляр класса
-      this.status = STATUS_ERROR;
-      this.error = {
-        name: errorOutput.name,
-        message: errorOutput.message,
-        info: errorOutput.info
-      };
+      this._status = STATUS_ERROR;
+      this._error = error.json;
       await this.save();
       // Публикуем событие - ошибка
-      await publishEvents(ERROR_TOPIC, {
-        service: config.serviceName,
-        subject: this.eventSubject,
-        eventType: ERROR_BACKTESTER_EVENT,
-        data: {
-          taskId: this.taskId,
-          error: {
-            name: errorOutput.name,
-            message: errorOutput.message,
-            info: errorOutput.info
-          }
-        }
+      await EventGrid.publish(ERROR_BACKTESTER_ERROR_EVENT, {
+        subject: this._taskId,
+        error: error.json
       });
     }
   }

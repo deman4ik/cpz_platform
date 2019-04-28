@@ -1,29 +1,18 @@
-import VError from "verror";
+import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import publishEvents from "cpz/eventgrid";
-import { createErrorOutput } from "cpz/utils/error";
+import EventGrid from "cpz/events";
+import {
+  TASKS_BACKTESTER_START_EVENT,
+  TASKS_BACKTESTER_STOP_EVENT,
+  TASKS_BACKTESTER_STOPPED_EVENT
+} from "cpz/events/types/tasks/backtester";
+import { ERROR_BACKTESTER_ERROR_EVENT } from "cpz/events/types/error";
 import ServiceValidator from "cpz/validator/index";
-import config from "../config";
 import {
   isProcessExists,
   createNewProcess,
   sendEventToProcess
 } from "../global";
-
-const {
-  serviceName,
-  events: {
-    types: {
-      TASKS_BACKTESTER_START_EVENT,
-      TASKS_BACKTESTER_STARTED_EVENT,
-      TASKS_BACKTESTER_STOP_EVENT,
-      TASKS_BACKTESTER_STOPPED_EVENT,
-      TASKS_TOPIC
-    }
-  }
-} = config;
-
-ServiceValidator.add(config.events.schemas);
 
 /**
  * Запуск бэктеста
@@ -39,32 +28,25 @@ async function handleStart(eventData) {
       type: "start",
       state: eventData
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "BacktesterError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to start backtester"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError,
+        cause: ServiceError.types.BACKTESTER_ERROR,
+        info: {
+          ...eventData,
+          critical: true
+        }
+      },
+      "Failed to start backtester"
     );
-    Log.error(errorOutput);
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_BACKTESTER_STARTED_EVENT,
+    await EventGrid.publish(ERROR_BACKTESTER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
@@ -91,40 +73,31 @@ async function handleStop(eventData) {
     });
 
     // Публикуем событие - успех
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_BACKTESTER_STOPPED_EVENT,
+    await EventGrid.publish(TASKS_BACKTESTER_STOPPED_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId
       }
     });
-  } catch (error) {
-    const errorOutput = createErrorOutput(
-      new VError(
-        {
-          name: "BacktesterError",
-          cause: error,
-          info: {
-            eventData
-          }
-        },
-        "Failed to stop backtester"
-      )
+  } catch (e) {
+    const error = new ServiceError(
+      {
+        name: ServiceError,
+        cause: ServiceError.types.BACKTESTER_ERROR,
+        info: {
+          ...eventData,
+          critical: true
+        }
+      },
+      "Failed to stop backtester"
     );
-    Log.error(errorOutput);
+    Log.error(error);
     // Публикуем событие - ошибка
-    await publishEvents(TASKS_TOPIC, {
-      service: serviceName,
-      subject: eventData.eventSubject,
-      eventType: TASKS_BACKTESTER_STOPPED_EVENT,
+    await EventGrid.publish(ERROR_BACKTESTER_ERROR_EVENT, {
+      subject: eventData.taskId,
       data: {
         taskId: eventData.taskId,
-        error: {
-          name: errorOutput.name,
-          message: errorOutput.message,
-          info: errorOutput.info
-        }
+        error: error.json
       }
     });
   }
