@@ -2,12 +2,7 @@ import ServiceError from "cpz/error";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import { LOG_ADVISER_LOG_EVENT } from "cpz/events/types/log";
 import Adviser from "cpzAdviser/state/adviser";
-import {
-  loadStrategyCode,
-  loadStrategyState,
-  loadIndicatorsState,
-  loadBaseIndicatorsCode
-} from "cpzAdviser/executors";
+import { loadStrategyCode, loadBaseIndicatorsCode } from "cpzAdviser/executors";
 
 class AdviserBacktester extends Adviser {
   constructor(state) {
@@ -39,12 +34,9 @@ class AdviserBacktester extends Adviser {
   async bInit() {
     try {
       const strategyCode = await loadStrategyCode(this.props);
-      const strategyState = await loadStrategyState(this.props);
-      this.setStrategy(strategyCode, strategyState);
+      this.setStrategy(strategyCode);
+      this.initStrategy();
 
-      const indicatorsState = await loadIndicatorsState(this.props);
-      this.indicatorsState = indicatorsState;
-      // Loading indicators
       if (this.hasBaseIndicators) {
         const baseIndicatorsCode = await loadBaseIndicatorsCode(
           this.props,
@@ -52,8 +44,8 @@ class AdviserBacktester extends Adviser {
         );
         this.setBaseIndicatorsCode(baseIndicatorsCode);
       }
-
       this.setIndicators();
+      this.initIndicators();
     } catch (e) {
       throw new ServiceError(
         {
