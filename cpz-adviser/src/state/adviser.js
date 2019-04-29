@@ -229,6 +229,7 @@ class Adviser {
         initialized: strategyState.initialized,
         positions: strategyState.positions,
         parameters: this._strategyParameters,
+        adviserSettings: this._settings,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,

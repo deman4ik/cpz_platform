@@ -21,6 +21,7 @@ class BaseStrategy {
   constructor(state) {
     this._initialized = state.initialized || false; // стратегия инициализирована
     this._parameters = state.parameters;
+    this._adviserSettings = state.adviserSettings;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -193,6 +194,9 @@ class BaseStrategy {
     return this._parameters;
   }
 
+  get adviserSettings() {
+    return this._adviserSettings;
+  }
   get exchange() {
     return this._exchange;
   }
