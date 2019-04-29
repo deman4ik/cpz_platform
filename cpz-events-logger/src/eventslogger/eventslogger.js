@@ -15,7 +15,7 @@ import { ERROR_TOPIC } from "cpz/events/topics";
 import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
 import { saveCandlesDB } from "cpz/db-client/candles";
 import { saveSignalsDB } from "cpz/db-client/signals";
-import { saveEventPositionsDB } from "cpz/db-client/positions";
+import { savePositionsDB } from "cpz/db-client/positions";
 import { saveOrdersDB } from "cpz/db-client/orders";
 import { saveUserRobotHistDB } from "cpz/db-client/userRobotHist";
 import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
@@ -112,7 +112,7 @@ class EventsLogger {
       }
       if (type === TRADES_POSITION_EVENT) {
         if (this.logToStorage) await savePositionsEvent(fullEventData);
-        if (this.logToPostgre) await saveEventPositionsDB([fullEventData]);
+        if (this.logToPostgre) await savePositionsDB([fullEventData]);
 
         return;
       }
