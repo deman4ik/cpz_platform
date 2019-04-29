@@ -292,6 +292,7 @@ class Adviser {
               asset: this._asset,
               currency: this._currency,
               timeframe: this._timeframe,
+              adviserSettings: this._settings,
               robotId: this._robotId,
               indicatorFunctions, // функции индикатора
               ...indicator // стейт индикатора
@@ -308,6 +309,7 @@ class Adviser {
               asset: this._asset,
               currency: this._currency,
               timeframe: this._timeframe,
+              adviserSettings: this._settings,
               robotId: this._robotId,
               options: indicator.options,
               ...indicator // стейт индикатора

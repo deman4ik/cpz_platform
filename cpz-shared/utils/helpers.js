@@ -201,7 +201,7 @@ function arraysDiff(full, part) {
 
 /**
  * Разделение массива по пачкам
- *
+ * @example chunkArray([1,2,3,4,5,6],2) -> [[1,2],[3,4],[5,6]]
  * @param {Array} array
  * @param {number} chunkSize размер пачкм
  */
@@ -212,6 +212,26 @@ function chunkArray(array, chunkSize) {
     results.push(arrayToChunk.splice(0, chunkSize));
   }
   return results;
+}
+
+/**
+ * Разделение массива по пачкам инкрементально с конца
+ * @example chunkArrayIncrEnd([1,2,3,4,5,6],2) -> [[1,2],[2,3],[3,4],[4,5],[5,6]]
+ *
+ * @param {Array} array
+ * @param {number} chunkSize размер пачкм
+ */
+function chunkArrayIncrEnd(array, chunkSize) {
+  const arrayToChunk = [...array];
+  const results = [];
+  let start = arrayToChunk.length - chunkSize;
+  let end = arrayToChunk.length;
+  while (start >= 0) {
+    results.push(arrayToChunk.slice(start, end));
+    start -= 1;
+    end -= 1;
+  }
+  return results.reverse();
 }
 
 /**
@@ -394,6 +414,7 @@ export {
   divideDateByDays,
   arraysDiff,
   chunkArray,
+  chunkArrayIncrEnd,
   chunkNumberToArray,
   capitalize,
   filterOutNonUnique,

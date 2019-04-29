@@ -197,6 +197,7 @@ class BaseStrategy {
   get adviserSettings() {
     return this._adviserSettings;
   }
+
   get exchange() {
     return this._exchange;
   }

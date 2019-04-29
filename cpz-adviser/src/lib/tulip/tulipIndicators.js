@@ -9,9 +9,7 @@ class Tulip extends BaseIndicator {
   }
 
   async calc() {
-    this.log("CALC");
     const result = await this.calculate(this.candlesProps);
-    this.log("result", result);
     const resultKeys = Object.keys(result);
     if (resultKeys.length > 0) {
       resultKeys.forEach(key => {
@@ -20,7 +18,6 @@ class Tulip extends BaseIndicator {
     } else {
       this.result = result;
     }
-    this.log("this.result", this.result);
   }
 }
 
