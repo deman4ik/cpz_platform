@@ -1,11 +1,11 @@
 drop view vw_user_robot_performance;
 
-create view vw_user_robot_performance as
+create or replace view vw_user_robot_performance as
 select
 p.user_id as uiduser_id, u.id as uiduser_robot_id, p.robot_id as nrobot_id, exchange as sexchange, asset as sasset, currency as scurrency, exit_date::date as dDATE,
-sum(p.profit) as nprofit, sum(p.profit*r.nCURRATE) as nprofit_c
+round(sum(p.profit/r.nCURRATE),8) as nprofit, sum(p.profit) as nprofit_c
 from positions p, user_robot u, user_robot uu,
-     (select 4012 as nCURRATE, '$' as sCURCODE) r
+     (select 5143 as nCURRATE, '$' as sCURCODE) r
 where (u.robot_id = p.robot_id and u.user_id = p.user_id or
        u.linked_user_robot_id = u.id and uu.robot_id = p.robot_id and uu.user_id = p.user_id)
   and p.profit is not null
