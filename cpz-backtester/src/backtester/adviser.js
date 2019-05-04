@@ -70,8 +70,15 @@ class AdviserBacktester extends Adviser {
 
   async bExecute(candle) {
     this.handleCandle(candle);
+
     this._candles = this._candles.slice(
-      Math.max(this._candles.length - this._settings.requiredHistoryMaxBars, 0)
+      Math.max(
+        this._candles.length -
+          (this._settings.requiredHistoryMaxBars > 0
+            ? this._settings.requiredHistoryMaxBars
+            : 1),
+        0
+      )
     );
     // Calculation indicators
     await this.calcIndicators();
