@@ -90,6 +90,7 @@ class Log {
       this._logError = log.error;
     }
     this._executionContext.InvocationId = executionContext.invocationId;
+    this._tagOverrides = { "ai.operation.id": executionContext.invocationId };
     this._executionContext.FunctionName = executionContext.functionName;
     this._executionContext = { ...this._executionContext, ...commonProps };
     this._updateAppInsightsCommonProperties();
@@ -163,7 +164,8 @@ class Log {
       appInsights.defaultClient.trackTrace({
         message,
         severity,
-        properties
+        properties,
+        tagOverrides: this._tagOverrides
       });
   }
 
@@ -211,7 +213,7 @@ class Log {
     let properties;
     let messages;
     if (props instanceof ServiceError) {
-      properties = props.json;
+      properties = props.main;
       messages = [props.toString(true), ...args];
     } else {
       properties = props;
@@ -244,7 +246,8 @@ class Log {
       if (eventData) {
         appInsights.defaultClient.trackEvent({
           eventType,
-          properties: eventData
+          properties: eventData,
+          tagOverrides: this._tagOverrides
         });
       }
     }
@@ -260,7 +263,7 @@ class Log {
     let properties;
     let messages;
     if (props instanceof ServiceError) {
-      properties = props.json;
+      properties = props.main;
       messages = [props.toString(true), ...args];
     } else {
       properties = props;
@@ -269,7 +272,8 @@ class Log {
     this._log(SEVERITY_LEVEL.Error, properties, messages);
     if (this._appInstightsKey) {
       appInsights.defaultClient.trackException({
-        exception: properties
+        exception: new Error(properties.message),
+        tagOverrides: this._tagOverrides
       });
     }
   }
@@ -285,7 +289,11 @@ class Log {
   metric({ name, value }) {
     if (this._appInstightsKey) {
       if (name && value) {
-        appInsights.defaultClient.trackMetric({ name, value });
+        appInsights.defaultClient.trackMetric({
+          name,
+          value,
+          tagOverrides: this._tagOverrides
+        });
       }
     }
   }
@@ -316,7 +324,8 @@ class Log {
     if (this._appInstightsKey) {
       appInsights.defaultClient.trackNodeHttpRequest({
         request,
-        response
+        response,
+        tagOverrides: this._tagOverrides
       });
     }
   }

@@ -1,16 +1,39 @@
 import { EMULATOR_MODE } from "../state";
+import dayjs from "../../utils/dayjs";
 
 const CANDLEBATCHER_SETTINGS_DEFAULTS = {
   debug: process.env.DEBUG || false,
   proxy: process.env.PROXY_ENDPOINT,
-  requiredHistoryMaxBars: 30
+  requiredHistoryMaxBars: 60
+};
+
+const IMPORTER_SETTINGS_DEFAULT = {
+  debug: process.env.DEBUG || false,
+  importCandles: {
+    dateFrom: dayjs
+      .utc()
+      .startOf("day")
+      .toISOString(),
+    dateTo: dayjs
+      .utc()
+      .startOf("minute")
+      .toISOString(),
+    proxy: process.env.PROXY_ENDPOINT,
+    providerType: "ccxt",
+    requireBatching: true,
+    saveToCache: false
+  },
+  warmupCache: {
+    barsToCache: CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars / 2
+  }
 };
 
 const ADVISER_SETTINGS_DEFAULTS = {
   debug: process.env.DEBUG || false,
   strategyParameters: {},
   requiredHistoryCache: true,
-  requiredHistoryMaxBars: 30
+  requiredHistoryMaxBars:
+    CANDLEBATCHER_SETTINGS_DEFAULTS.requiredHistoryMaxBars / 2
 };
 
 const TRADER_SETTINGS_DEFAULTS = {
@@ -30,6 +53,7 @@ const BACKTESTER_SETTINGS_DEFAULTS = {
   saveToDB: true
 };
 export {
+  IMPORTER_SETTINGS_DEFAULT,
   CANDLEBATCHER_SETTINGS_DEFAULTS,
   ADVISER_SETTINGS_DEFAULTS,
   TRADER_SETTINGS_DEFAULTS,

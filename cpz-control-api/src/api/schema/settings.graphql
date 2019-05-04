@@ -1,26 +1,44 @@
+input ImporterSettings {
+  debug: Boolean
+  importCandles: ImportCandlesOptions
+  warmupCache: WarmupCacheOptions
+}
+
+input ImportCandlesOptions {
+  dateFrom: Datetime
+  dateTo: Datetime
+  providerType: String
+  requireBatching: Boolean
+  saveToCache: Boolean
+  proxy: String
+}
+
+input WarmupCacheOptions {
+  barsToCache: Int
+}
 input CandlebatcherSettings {
-    debug: Boolean
-    proxy: String
-    requiredHistoryMaxBars: Int
+  debug: Boolean
+  proxy: String
+  requiredHistoryMaxBars: Int
 }
 
 input AdviserSettings {
-    debug: Boolean
-    strategyParameters: JSON
-    requiredHistoryCache: Boolean
-    requiredHistoryMaxBars: Int
+  debug: Boolean
+  strategyParameters: JSON
+  requiredHistoryCache: Boolean
+  requiredHistoryMaxBars: Int
 }
 
 input TraderSettings {
-    mode: String
-    debug: Boolean
-    slippageStep: Float
-    deviation: Float
-    volume: Float
-    multiPosition: Boolean
-    keys: APIPairKeysInput
+  mode: String
+  debug: Boolean
+  slippageStep: Float
+  deviation: Float
+  volume: Float
+  multiPosition: Boolean
+  keys: APIPairKeysInput
 }
 
 input BacktesterSettings {
-    debug: Boolean
+  debug: Boolean
 }

@@ -33,13 +33,19 @@ const ORDER_DIRECTION_SELL = "sell"; // продажа
 const ORDER_POS_DIR_ENTRY = "entry"; // ордер открывает позицию
 const ORDER_POS_DIR_EXIT = "exit"; // ордер закрывает позицию
 
-/*
+/**
  * Типы свечей
  */
 const CANDLE_LOADED = "loaded"; // свеча загружена с биржи в реальном времени (не удалось создать свечу из тиков)
 const CANDLE_CREATED = "created"; // свеча создана из тиков или из минутных свечей
 const CANDLE_PREVIOUS = "previous"; // свеча создана на основе данных предыдущей свечи (не удалось создать свечу из тиков и не удалось загрузить свечу с биржи )
 const CANDLE_IMPORTED = "imported"; // свеча загружена с биржи во время импорта данных
+
+/**
+ * Режимы импортера
+ */
+const IMPORTER_IMPORT_CANDLES_MODE = "importCandles";
+const IMPORTER_WARMUP_CACHE_MODE = "warmupCache";
 
 export {
   REALTIME_MODE,
@@ -60,5 +66,7 @@ export {
   CANDLE_CREATED,
   CANDLE_IMPORTED,
   CANDLE_LOADED,
-  CANDLE_PREVIOUS
+  CANDLE_PREVIOUS,
+  IMPORTER_IMPORT_CANDLES_MODE,
+  IMPORTER_WARMUP_CACHE_MODE
 };

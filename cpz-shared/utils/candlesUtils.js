@@ -89,7 +89,7 @@ function createMinutesListWithRange(
 ) {
   const list = [];
   for (let i = 0; i < duration; i += 1) {
-    const date = dayjs(dateFrom).add(i, "minute");
+    const date = dayjs.utc(dateFrom).add(i, "minute");
     list.push({
       dateFrom: date.valueOf(),
       dateTo: date.endOf("minute").valueOf()
@@ -238,7 +238,13 @@ function timeframeToTimeUnit(number, timeframe) {
  * @param {Object} timeframes массив таймфреймов в минутах
  */
 function getMaxTimeframe(timeframes) {
-  return Math.max(...Object.keys(timeframes).map(key => parseInt(key, 10)));
+  let timeframesList;
+  if (Array.isArray(timeframes)) {
+    timeframesList = timeframes;
+  } else {
+    timeframesList = Object.keys(timeframes).map(key => parseInt(key, 10));
+  }
+  return Math.max(...timeframesList);
 }
 
 /**

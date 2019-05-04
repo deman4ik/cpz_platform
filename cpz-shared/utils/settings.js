@@ -1,9 +1,66 @@
 import {
+  IMPORTER_SETTINGS_DEFAULT,
   ADVISER_SETTINGS_DEFAULTS,
   CANDLEBATCHER_SETTINGS_DEFAULTS,
   TRADER_SETTINGS_DEFAULTS,
   BACKTESTER_SETTINGS_DEFAULTS
 } from "../config/defaults";
+import dayjs from "./dayjs";
+
+const combineImporterSettings = (
+  settings = { importCandles: {}, warmupCache: {} }
+) => ({
+  /* Режима дебага [true,false] */
+  debug:
+    settings.debug === undefined || settings.debug === null
+      ? IMPORTER_SETTINGS_DEFAULT.debug
+      : settings.debug,
+  /* Адрес прокси сервера */
+  importCandles: {
+    dateFrom:
+      settings.importCandles && settings.importCandles.dateFrom
+        ? dayjs
+            .utc(settings.importCandles.dateFrom)
+            .startOf("day")
+            .toISOString()
+        : IMPORTER_SETTINGS_DEFAULT.importCandles.dateFrom,
+    dateTo:
+      settings.importCandles &&
+      dayjs
+        .utc(settings.importCandles.dateTo)
+        .startOf("minute")
+        .valueOf() <
+        dayjs
+          .utc()
+          .startOf("minute")
+          .valueOf()
+        ? dayjs
+            .utc(settings.importCandles.dateTo)
+            .startOf("minute")
+            .toISOString()
+        : IMPORTER_SETTINGS_DEFAULT.importCandles.dateTo,
+    proxy:
+      (settings.importCandles && settings.importCandles.proxy) ||
+      IMPORTER_SETTINGS_DEFAULT.importCandles.proxy,
+    mode:
+      (settings.importCandles && settings.importCandles.mode) ||
+      IMPORTER_SETTINGS_DEFAULT.importCandles.mode,
+    providerType:
+      (settings.importCandles && settings.importCandles.providerType) ||
+      IMPORTER_SETTINGS_DEFAULT.importCandles.providerType,
+    requireBatching:
+      (settings.importCandles && settings.importCandles.requireBatching) ||
+      IMPORTER_SETTINGS_DEFAULT.importCandles.requireBatching,
+    saveToCache:
+      (settings.importCandles && settings.importCandles.saveToCache) ||
+      IMPORTER_SETTINGS_DEFAULT.importCandles.saveToCache
+  },
+  warmupCache: {
+    barsToCache:
+      (settings.warmupCache && settings.warmupCache.barsToCache) ||
+      IMPORTER_SETTINGS_DEFAULT.warmupCache.barsToCache
+  }
+});
 
 const combineAdviserSettings = (settings = {}) => ({
   /* Режима дебага [true,false] */
@@ -86,6 +143,7 @@ const combineBacktesterSettings = (settings = {}) => ({
 });
 
 export {
+  combineImporterSettings,
   combineAdviserSettings,
   combineCandlebatcherSettings,
   combineTraderSettings,

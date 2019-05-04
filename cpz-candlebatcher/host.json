@@ -3,7 +3,9 @@
   "logging": {
     "fileLoggingMode": "always",
     "logLevel": {
-      "default": "Debug"
+      "default": "Debug",
+      "Host.Results": "Error",
+      "Function": "Debug"
     },
     "console": {
       "isEnabled": "true"

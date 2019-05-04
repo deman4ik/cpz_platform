@@ -426,9 +426,14 @@ class Backtester {
           );
 
           if (this._percent > this._oldPercent) {
-            this.log("processedBars: ", this._processedBars);
-            this.log("leftBars: ", this._leftBars);
-            this.log(`${this._percent} %`);
+            this.log(
+              "processedBars: ",
+              this._processedBars,
+              "leftBars: ",
+              this._leftBars,
+              `${this._percent} %`
+            );
+
             this._oldPercent = this._percent;
           }
         }

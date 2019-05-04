@@ -27,7 +27,7 @@ export default (req, res, next) => {
       next();
     }
   } catch (e) {
-    Log.warn(e, "Invalid event format");
+    Log.warn("Invalid event format", e);
     Log.clearContext();
     res.status(202).end();
   }

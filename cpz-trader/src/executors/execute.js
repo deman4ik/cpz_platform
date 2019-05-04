@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Trader from "../state/trader";
@@ -8,7 +7,6 @@ import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 
 async function execute(traderState, nextAction) {
-  const invocationId = uuid();
   const trader = new Trader(traderState);
   try {
     const { id, type, data } = nextAction;
@@ -65,7 +63,7 @@ async function execute(traderState, nextAction) {
         {
           name: errorName,
           cause: e,
-          info: { ...trader.props, invocationId }
+          info: { ...trader.props }
         },
         "Failed to execute Trader '%s'",
         trader.taskId
@@ -76,7 +74,7 @@ async function execute(traderState, nextAction) {
         {
           name: ServiceError.types.TRADER_EXECUTE_EXCEPTION,
           cause: e,
-          info: { ...trader.props, invocationId, critical: true }
+          info: { ...trader.props, critical: true }
         },
         "Failed to execute Trader '%s'",
         trader.taskId

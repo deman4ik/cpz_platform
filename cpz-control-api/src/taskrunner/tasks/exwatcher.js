@@ -48,6 +48,9 @@ class ExWatcher {
     this._importerCurrentId = state.importerCurrentId;
     this._importerCurrentStatus = state.importerCurrentStatus || STATUS_PENDING;
     this._importerCurrentError = state.importerCurrentError;
+    this._warmupCacheId = state.warmupCacheId;
+    this._warmupCacheStatus = state.warmupCacheStatus || STATUS_PENDING;
+    this._warmupCacheError = state.warmupCacheError;
     this._status = state.status || STATUS_STARTING;
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
@@ -62,7 +65,8 @@ class ExWatcher {
       this._importerHistoryStatus === STATUS_FINISHED &&
       this._candlebatcherStatus === STATUS_STARTED &&
       this._marketwatcherStatus === STATUS_STARTED &&
-      this._importerCurrentStatus === STATUS_FINISHED
+      this._importerCurrentStatus === STATUS_FINISHED &&
+      this._warmupCacheStatus === STATUS_FINISHED
     ) {
       this._startedAt = dayjs.utc().toISOString();
       this._stoppedAt = null;
@@ -248,6 +252,32 @@ class ExWatcher {
     this._createErrorEvent(this._importerCurrentError);
   }
 
+  get warmupCacheId() {
+    return this._warmupCacheId;
+  }
+
+  set warmupCacheId(warmupCacheId) {
+    this._warmupCacheId = warmupCacheId;
+  }
+
+  get warmupCacheStatus() {
+    return this._warmupCacheStatus;
+  }
+
+  set warmupCacheStatus(warmupCacheStatus) {
+    this._warmupCacheStatus = warmupCacheStatus;
+    this._setStatus();
+  }
+
+  set warmupCacheError(e) {
+    this._warmupCacheError = this._parseError(e);
+    if (this._warmupCacheError.critical) {
+      this._warmupCacheStatus = STATUS_ERROR;
+      this._status = STATUS_ERROR;
+    }
+    this._createErrorEvent(this._warmupCacheError);
+  }
+
   get status() {
     return this._status;
   }
@@ -321,6 +351,9 @@ class ExWatcher {
       importerCurrentId: this._importerCurrentId,
       importerCurrentStatus: this._importerCurrentStatus,
       importerCurrentError: this._importerCurrentError,
+      warmupCacheId: this._warmupCacheId,
+      warmupCacheStatus: this._warmupCacheStatus,
+      warmupCacheError: this._warmupCacheError,
       status: this._status,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,

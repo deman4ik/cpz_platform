@@ -1,5 +1,6 @@
 import { VALID_TIMEFRAMES } from "../../../config/state/timeframes";
 import { BASE_ERROR } from "../base";
+import { IMPORTER_SETTINGS } from "../settings";
 import {
   TASKS_IMPORTER_START_EVENT,
   TASKS_IMPORTER_STOP_EVENT,
@@ -7,6 +8,10 @@ import {
   TASKS_IMPORTER_STOPPED_EVENT,
   TASKS_IMPORTER_FINISHED_EVENT
 } from "../../types/tasks/importer";
+import {
+  IMPORTER_IMPORT_CANDLES_MODE,
+  IMPORTER_WARMUP_CACHE_MODE
+} from "../../../config/state/types";
 
 const TASKS_IMPORTER_START_EVENT_SCHEMA = {
   [TASKS_IMPORTER_START_EVENT]: {
@@ -14,17 +19,6 @@ const TASKS_IMPORTER_START_EVENT_SCHEMA = {
       description: "Uniq task id.",
       type: "string",
       empty: false
-    },
-    debug: {
-      description: "Debug mode.",
-      type: "boolean",
-      optional: true
-    },
-    providerType: {
-      description: "Data provider type.",
-      type: "string",
-      values: ["ccxt"],
-      optional: true
     },
     exchange: { description: "Exchange code.", type: "exchange" },
     asset: { description: "Base currency.", type: "currency" },
@@ -35,29 +29,15 @@ const TASKS_IMPORTER_START_EVENT_SCHEMA = {
       enum: VALID_TIMEFRAMES,
       optional: true
     },
-    requireBatching: {
-      description: "Batch loading candles",
-      type: "boolean",
-      optional: true
-    },
-    saveToCache: {
-      dataSchema: "Save current loaded candles to cache",
-      type: "boolean",
-      optional: true
-    },
-    dateFrom: {
-      description: "Import start date.",
-      type: "datefrom"
-    },
-    dateTo: {
-      description: "Import end date.",
-      type: "dateto"
-    },
-    proxy: {
-      description: "Proxy endpoint.",
+    mode: {
+      description: "Import mode.",
       type: "string",
-      optional: true,
-      empty: false
+      values: [IMPORTER_IMPORT_CANDLES_MODE, IMPORTER_WARMUP_CACHE_MODE]
+    },
+    settings: {
+      description: "Import settings.",
+      type: "object",
+      props: IMPORTER_SETTINGS
     }
   }
 };

@@ -28,7 +28,7 @@ async function publishEvent(state, data) {
       ParitionKey: SERVICE_NAME,
       RowKey: uuid()
     };
-    Log.event(event, event);
+    Log.event(event.eventType, event);
     try {
       await saveFailedEvent(event);
     } catch (storageErr) {

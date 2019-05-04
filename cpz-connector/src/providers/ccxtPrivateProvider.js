@@ -16,8 +16,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       retries: 10,
       minTimeout: 100,
       maxTimeout: 500,
-      onRetry: error => {
-        Log.warn(error);
+      onRetry: (err, i) => {
+        Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
       }
     };
   }

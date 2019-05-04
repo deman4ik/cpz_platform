@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Adviser from "../state/adviser";
@@ -14,7 +13,6 @@ import saveIndicatorsState from "./saveIndicatorsState";
 import saveStrategyState from "./saveStrategyState";
 
 async function execute(adviserState, nextAction) {
-  const invocationId = uuid();
   const adviser = new Adviser(adviserState);
   Log.debug(`Adviser ${adviser.taskId} - execute()`);
   try {
@@ -84,7 +82,7 @@ async function execute(adviserState, nextAction) {
         {
           name: errorName,
           cause: e,
-          info: { ...adviser.props, invocationId }
+          info: { ...adviser.props }
         },
         "Failed to execute Adviser '%s'",
         adviser.taskId
@@ -95,7 +93,7 @@ async function execute(adviserState, nextAction) {
         {
           name: ServiceError.types.ADVISER_EXECUTE_EXCEPTION,
           cause: e,
-          info: { ...adviser.props, invocationId }
+          info: { ...adviser.props }
         },
         "Failed to execute Adviser '%s'",
         adviser.taskId

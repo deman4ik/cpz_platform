@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Candlebatcher from "../state/candlebatcher";
@@ -13,34 +12,33 @@ import cleanCachedCandles from "./cleanCachedCandles";
 import clearTicks from "./clearTicks";
 
 async function execute(candlebatcherState, nextAction) {
-  const invocationId = uuid();
   const candlebatcher = new Candlebatcher(candlebatcherState);
   try {
     const { type, data } = nextAction;
     Log.debug(`Executing - ${type} action`);
     if (type === RUN) {
       let candle = await loadCandle(candlebatcher.state);
-      Log.debug(candle, "Loaded candle");
+      Log.debug("Loaded candle", candle);
       if (!candle) {
         candle = await createCandle(candlebatcher.state);
-        Log.debug(candle, "Created candle");
+        Log.debug("Created candle", candle);
       }
       if (!candle) {
         candle = candlebatcher.createPrevCandle();
-        Log.debug(candle, "Candle from previous");
+        Log.debug("Candle from previous", candle);
       }
 
       if (!candle) {
         throw Error("Failed to load or create candle");
       }
       const candleHandled = candlebatcher.handleCandle(candle);
-      Log.debug(candleHandled, "candleHandled");
+      Log.debug("candleHandled", candleHandled);
       if (candleHandled) {
         const candlesObject = await createTimeframeCandles(
           candlebatcher.state,
           candle
         );
-        Log.debug(candlesObject, "candlesObject");
+        Log.debug("candlesObject", candlesObject);
 
         await saveCandlesToCache(
           candlebatcher.state,
@@ -58,7 +56,7 @@ async function execute(candlebatcherState, nextAction) {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;
     }
-    Log.debug(candlebatcher.events, "Candlebatcher events");
+    Log.debug("Candlebatcher events", candlebatcher.events);
     // Отправялвем события
     await publishEvents(candlebatcher.props, candlebatcher.events);
 
@@ -79,7 +77,7 @@ async function execute(candlebatcherState, nextAction) {
         {
           name: errorName,
           cause: e,
-          info: { ...candlebatcher.props, invocationId }
+          info: { ...candlebatcher.props }
         },
         "Failed to execute Candlebatcher '%s'",
         candlebatcher.taskId
@@ -90,7 +88,7 @@ async function execute(candlebatcherState, nextAction) {
         {
           name: ServiceError.types.CANDLEBATCHER_EXECUTE_EXCEPTION,
           cause: e,
-          info: { ...candlebatcher.props, invocationId }
+          info: { ...candlebatcher.props }
         },
         "Failed to execute Candlebatcher '%s'",
         candlebatcher.taskId

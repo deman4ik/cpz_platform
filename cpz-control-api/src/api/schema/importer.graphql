@@ -1,15 +1,13 @@
-
 input ImporterParams {
-    debug: Boolean
-    providerType: String
-    exchange: String!
-    asset: String!
-    currency: String!
-    timeframes: [Int!]
-    requireBatching: Boolean
-    saveToCache: Boolean
-    dateFrom: Datetime!
-    dateTo: Datetime!
-    proxy: String
+  exchange: String!
+  asset: String!
+  currency: String!
+  timeframes: [Int!]
+  mode: ImporterMode!
+  settings: ImporterSettings
 }
 
+enum ImporterMode {
+  importCandles
+  warmupCache
+}

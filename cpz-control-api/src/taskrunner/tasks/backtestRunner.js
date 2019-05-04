@@ -20,6 +20,11 @@ import {
   TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_BACKTESTER_FINISHED_EVENT
 } from "cpz/events/types/tasks";
+import {
+  ERROR_IMPORTER_ERROR_EVENT,
+  ERROR_BACKTESTER_ERROR_EVENT
+} from "cpz/events/types/error";
+import { IMPORTER_IMPORT_CANDLES_MODE } from "cpz/config/state/types";
 import { durationInTimeframe } from "cpz/utils/helpers";
 import { countCandlesDB } from "cpz/db-client/candles";
 import Log from "cpz/log";
@@ -29,10 +34,6 @@ import BacktesterRunner from "../services/backtesterRunner";
 import ImporterRunner from "../services/importerRunner";
 import Backtest from "./backtest";
 import publishEvents from "../../utils/publishEvents";
-import {
-  ERROR_IMPORTER_ERROR_EVENT,
-  ERROR_BACKTESTER_ERROR_EVENT
-} from "../../../../cpz-shared/events/types/error";
 
 class BacktestRunner extends BaseRunner {
   static async getState(taskId) {
@@ -138,7 +139,7 @@ class BacktestRunner extends BaseRunner {
         "Failed to handle service event with Backtest."
       );
       Log.error(error);
-      backtest.error = error;
+      backtest.error = error.main;
       await publishEvents(backtest.events);
     }
   }
@@ -189,9 +190,14 @@ class BacktestRunner extends BaseRunner {
             asset: backtest.asset,
             currency: backtest.currency,
             timeframes: backtest.timeframes,
-            dateFrom,
-            dateTo: backtest.dateTo,
-            saveToCache: false
+            mode: IMPORTER_IMPORT_CANDLES_MODE,
+            settings: {
+              importCandles: {
+                dateFrom,
+                dateTo: backtest.dateTo,
+                saveToCache: false
+              }
+            }
           };
 
           const { taskId, status, event } = await ImporterRunner.start(
@@ -246,7 +252,7 @@ class BacktestRunner extends BaseRunner {
         "Failed to start Backtest"
       );
       Log.error(error);
-      backtest.error = error;
+      backtest.error = error.main;
       await publishEvents(backtest.events);
     }
     return {
@@ -306,7 +312,7 @@ class BacktestRunner extends BaseRunner {
         "Failed to stop Backtest"
       );
       Log.error(error);
-      backtest.error = error;
+      backtest.error = error.main;
       await publishEvents(backtest.events);
     }
     return { taskId: backtest.taskId, status: backtest.status };

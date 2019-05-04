@@ -21,11 +21,7 @@ import {
   durationMinutes,
   sortAsc
 } from "cpz/utils/helpers";
-import {
-  clearTempCandles,
-  saveCandlesArrayToCache,
-  saveCandlesArrayToTemp
-} from "cpz/tableStorage-client/market/candles";
+import { saveCandlesArrayToCache } from "cpz/tableStorage-client/market/candles";
 import { saveImporterState } from "cpz/tableStorage-client/control/importers";
 import { saveCandlesDB } from "cpz/db-client/candles";
 import { minuteCandlesEX } from "cpz/connector-client/candles";
@@ -43,6 +39,7 @@ import {
   TASKS_IMPORTER_STARTED_EVENT
 } from "cpz/events/types/tasks/importer";
 import { ERROR_IMPORTER_ERROR_EVENT } from "cpz/events/types/error";
+import { combineImporterSettings } from "cpz/utils/settings";
 
 /* Types descriptions */
 
@@ -92,13 +89,6 @@ class Importer {
   constructor(state) {
     /* Уникальный идентификатор задачи */
     this._taskId = state.taskId;
-    /* Режима дебага [true,false] */
-    this._debug =
-      state.debug === undefined || state.debug === null
-        ? process.env.DEBUG
-        : state.debug;
-    /* Тип провайдера ['ccxt'] */
-    this._providerType = state.providerType || "ccxt";
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -114,32 +104,16 @@ class Importer {
       });
     /* Генерируемые таймфреймы [1, 5, 15, 30, 60, 120, 240, 1440] */
     this._timeframes = state.timeframes || VALID_TIMEFRAMES;
-    /* Признак необходимости свертывания свечей */
-    this._requireBatching = state.requireBatching || true;
-    this._saveToCache =
-      state.saveToCache === undefined || state.saveToCache === null
-        ? false
-        : state.saveToCache;
-    this._dateFrom = dayjs(
-      `${dayjs.utc(state.dateFrom).format("YYYY-MM-DD")}T00:00:00.000Z`
-    ).toISOString();
-    this._dateTo =
-      dayjs
-        .utc(state.dateTo)
-        .startOf("minute")
-        .valueOf() <
-      dayjs
-        .utc()
-        .startOf("minute")
-        .valueOf()
-        ? dayjs
-            .utc(state.dateTo)
-            .startOf("minute")
-            .toISOString()
-        : dayjs
-            .utc()
-            .startOf("minute")
-            .toISOString();
+    this._mode = state.mode;
+    const { debug, importCandles } = combineImporterSettings(state.settings);
+    this._settings = {
+      debug,
+      ...importCandles
+    };
+    /* Адрес прокси сервера */
+    this._proxy = this._settings.proxy || process.env.PROXY_ENDPOINT;
+    this._dateFrom = this._settings.dateFrom;
+    this._dateTo = this._settings.dateTo;
     /* Лимит загружаемых свечей */
     this._limit = this.getLimit();
     this._loadDurationChunks = chunkDates(
@@ -168,8 +142,7 @@ class Importer {
     this._processLeftDuration = this._processTotalDuration;
     /* Процент выполнения */
     this._processPercent = 0;
-    /* Адрес прокси сервера */
-    this._proxy = state.proxy || process.env.PROXY_ENDPOINT;
+
     /* Текущий статус сервиса */
     this._status = STATUS_STARTED;
     /* Дата и время запуска */
@@ -290,7 +263,7 @@ class Importer {
    * @memberof Importer
    */
   log(...args) {
-    if (this._debug) {
+    if (this._settings.debug) {
       Log.debug(`Importer ${this._PartitionKey}:`, ...args);
     }
   }
@@ -313,7 +286,11 @@ class Importer {
   }
 
   createCandles(trades, dateFrom, dateTo) {
-    this.log("createCandles()");
+    this.log(
+      "createCandles from trades",
+      dayjs.utc(dateFrom).toISOString(),
+      dayjs.utc(dateTo).toISOString()
+    );
     const candles = [];
     const minutes = createMinutesListWithRange(dateFrom, dateTo);
     minutes.forEach(minute => {
@@ -321,14 +298,8 @@ class Importer {
         ...new Set(
           trades.filter(
             trade =>
-              trade.time >=
-                dayjs(minute.dateFrom)
-                  .utc()
-                  .valueOf() &&
-              trade.time <=
-                dayjs(minute.dateTo)
-                  .utc()
-                  .valueOf()
+              trade.time >= dayjs.utc(minute.dateFrom).valueOf() &&
+              trade.time <= dayjs.utc(minute.dateTo).valueOf()
           )
         )
       ].sort((a, b) => sortAsc(a.time, b.time));
@@ -348,13 +319,13 @@ class Importer {
           asset: this._asset,
           currency: this._currency,
           timeframe: 1,
-          time: minute.dateFrom, // время в милисекундах
-          timestamp: dayjs(minute.dateFrom).toISOString(), // время в ISO UTC
-          open: minuteTrades[0].price, // цена открытия - цена первого тика
-          high: Math.max(...minuteTrades.map(t => t.price)), // максимальная цена тиков
-          low: Math.min(...minuteTrades.map(t => t.price)), // минимальная цена тиков
-          close: minuteTrades[minuteTrades.length - 1].price, // цена закрытия - цена последнего тика
-          volume: minuteTrades.map(t => t.amount).reduce((a, b) => a + b), // объем - сумма объема всех тиков
+          time: +minute.dateFrom, // время в милисекундах
+          timestamp: dayjs.utc(minute.dateFrom).toISOString(), // время в ISO UTC
+          open: +minuteTrades[0].price, // цена открытия - цена первого тика
+          high: +Math.max(...minuteTrades.map(t => +t.price)), // максимальная цена тиков
+          low: +Math.min(...minuteTrades.map(t => +t.price)), // минимальная цена тиков
+          close: +minuteTrades[minuteTrades.length - 1].price, // цена закрытия - цена последнего тика
+          volume: +minuteTrades.map(t => t.amount).reduce((a, b) => a + b), // объем - сумма объема всех тиков
           type: CANDLE_CREATED // признак - свеча сформирована
         });
       }
@@ -366,9 +337,9 @@ class Importer {
   async loadTradesAndMakeCandles({ dateFrom, dateTo, duration }) {
     try {
       this.log(
-        "loadTradesAndMakeCandles()",
-        dayjs(dateFrom).toISOString(),
-        dayjs(dateTo).toISOString()
+        "loadTradesAndMakeCandles",
+        dayjs.utc(dateFrom).toISOString(),
+        dayjs.utc(dateTo).toISOString()
       );
       let trades = [];
       let dateNext = dateFrom;
@@ -425,20 +396,13 @@ class Importer {
     try {
       this.log(
         "loadAndSaveCandles",
-        dayjs(dateFrom)
-          .utc()
-          .toISOString(),
-        dayjs(dateTo)
-          .utc()
-          .toISOString(),
-        duration
+        dayjs.utc(dateFrom).toISOString(),
+        dayjs.utc(dateTo).toISOString()
       );
       /* Если биржа "kraken" и грузим больше чем за последние 10 часов  */
       if (
         this._exchange === "kraken" &&
-        dayjs()
-          .utc()
-          .diff(dayjs(dateFrom).utc(), "hours") > 10
+        dayjs.utc().diff(dayjs.utc(dateFrom), "hours") > 10
       ) {
         /* Собираем минутные свечи по трейдам */
         return await this.loadTradesAndMakeCandles({
@@ -452,9 +416,7 @@ class Importer {
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
-        date: dayjs(dateFrom)
-          .utc()
-          .toISOString(),
+        date: dayjs.utc(dateFrom).toISOString(),
         limit: duration
       });
       if (response && response.length > 0) {
@@ -566,6 +528,7 @@ class Importer {
    */
   batchCandles(tempCandles, dateFrom, dateTo, duration) {
     try {
+      this.log("batchCandles", dateFrom, dateTo);
       // Инициализируем объект со свечами в различных таймфреймах
       const timeframeCandles = {};
       this._timeframes.forEach(timeframe => {
@@ -575,18 +538,14 @@ class Importer {
         }
       });
       // Если не нужно свертывать свечи - выходим
-      if (!this._requireBatching) return null;
+      if (!this._settings.requireBatching) return null;
       // Создаем список с полным количеством минут
-      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
+      const fullMinutesList = createMinutesList(dateFrom, dateTo, duration + 1); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
       fullMinutesList.forEach(time => {
-        const date = dayjs(time).utc();
+        const date = dayjs.utc(time);
+        Log.warn(date.toISOString());
         // Пропускаем самую первую свечу
-        if (
-          dayjs(dateFrom)
-            .utc()
-            .valueOf() === date.valueOf()
-        )
-          return;
+        if (dayjs.utc(dateFrom).valueOf() === date.valueOf()) return;
         const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
         if (currentTimeframes.length > 0) {
           currentTimeframes.forEach(timeframe => {
@@ -611,15 +570,13 @@ class Importer {
                 currency: this._currency,
                 timeframe,
                 time: timeFrom, // время в милисекундах
-                timestamp: dayjs(timeFrom)
-                  .utc()
-                  .toISOString(), // время в ISO UTC
-                open: candles[0].open, // цена открытия - цена открытия первой свечи
-                high: Math.max(...candles.map(t => t.high)), // максимальная цена
-                low: Math.min(...candles.map(t => t.low)), // минимальная цена
-                close: candles[candles.length - 1].close, // цена закрытия - цена закрытия последней свечи
-                volume: candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
-                count: candles.length,
+                timestamp: dayjs.utc(timeFrom).toISOString(), // время в ISO UTC
+                open: +candles[0].open, // цена открытия - цена открытия первой свечи
+                high: Math.max(...candles.map(t => +t.high)), // максимальная цена
+                low: Math.min(...candles.map(t => +t.low)), // минимальная цена
+                close: +candles[candles.length - 1].close, // цена закрытия - цена закрытия последней свечи
+                volume: +candles.map(t => t.volume).reduce((a, b) => a + b), // объем - сумма объема всех свечей
+                count: +candles.length,
                 gap: candles.length !== timeframe,
                 type:
                   candles.filter(candle => candle.type === CANDLE_PREVIOUS)
@@ -631,6 +588,7 @@ class Importer {
           });
         }
       });
+      Log.debug("timeframeCandles", Object.keys(timeframeCandles));
       return timeframeCandles;
     } catch (error) {
       throw new ServiceError(
@@ -657,7 +615,7 @@ class Importer {
       await Promise.all(
         this._timeframes.map(async timeframe => {
           if (timeframeCandles[timeframe].length > 0) {
-            if (this._saveToCache)
+            if (this._settings.saveToCache)
               await saveCandlesArrayToCache(timeframeCandles[timeframe]);
             await saveCandlesDB({
               timeframe,
@@ -685,7 +643,7 @@ class Importer {
    *
    * @memberof Importer
    */
-  async clearTemp() {
+  /* async clearTemp() {
     try {
       this.log("Clearing temp data...");
       await clearTempCandles(this._taskId);
@@ -701,7 +659,7 @@ class Importer {
         `Failed to clear temp candles`
       );
     }
-  }
+  } */
 
   async execute() {
     try {
@@ -787,9 +745,9 @@ class Importer {
         this._gaps = this._gaps + gaps;
         await this.save();
         this.log(
-          `Loaded ${this._loadCompletedDuration} of ${this._loadTotalDuration}${
-            gaps > 0 ? ` but gapped: ${gaps}` : ""
-          } - ${this._loadPercent}%`
+          `Loaded ${this._loadCompletedDuration} of ${
+            this._loadTotalDuration
+          } - ${this._loadPercent}%${gaps > 0 ? ` but gapped: ${gaps}` : ""} `
         );
       }
       /*  no-restricted-syntax, no-await-in-loop */
@@ -799,14 +757,8 @@ class Importer {
       for (const { dateFrom, dateTo, duration } of fullDays) {
         let tempCandles = this._candles.filter(
           candle =>
-            candle.time >=
-              dayjs(dateFrom)
-                .utc()
-                .valueOf() &&
-            candle.time <
-              dayjs(dateTo)
-                .utc()
-                .valueOf()
+            candle.time >= dayjs.utc(dateFrom).valueOf() &&
+            candle.time < dayjs.utc(dateTo).valueOf()
         );
         /*
         await getTempCandles({
@@ -821,16 +773,17 @@ class Importer {
         }); */
         tempCandles = tempCandles.sort((a, b) => sortAsc(a.time, b.time));
 
-        const { candles, gappedCandles } = await this.handleGaps(
+        const { candles } = await this.handleGaps(
           tempCandles,
           dateFrom,
           dateTo
         );
 
+        /*
         if (gappedCandles.length > 0) {
           // Сохраняем сформированные пропущенные свечи
           await saveCandlesArrayToTemp(gappedCandles);
-        }
+        } */
 
         const timeframeCandles = this.batchCandles(
           candles,
@@ -861,15 +814,13 @@ class Importer {
       }
 
       // await this.clearTemp();
-      this._endedAt = dayjs()
-        .utc()
-        .toISOString();
+      this._endedAt = dayjs.utc().toISOString();
       this._status = STATUS_FINISHED;
 
       await this.save();
-      const duration = dayjs(this._endedAt)
-        .utc()
-        .diff(dayjs(this._startedAt).utc(), "minute");
+      const duration = dayjs
+        .utc(this._endedAt)
+        .diff(dayjs.utc(this._startedAt), "minute");
       this.log(`Finished import in ${duration} minutes!!!`);
 
       await EventGrid.publish(TASKS_IMPORTER_FINISHED_EVENT, {
@@ -911,14 +862,11 @@ class Importer {
       PartitionKey: this._PartitionKey,
       RowKey: this._taskId,
       taskId: this._taskId,
-      debug: this._debug,
-      providerType: this._providerType,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
       timeframes: this._timeframes,
-      requireBatching: this._requireBatching,
-      saveToCache: this._saveToCache,
+      mode: this._mode,
       limit: this._limit,
       loadTotalDuration: this._loadTotalDuration,
       loadCompletedDuration: this._loadCompletedDuration,
@@ -930,7 +878,7 @@ class Importer {
       processPercent: this._processPercent,
       dateFrom: this._dateFrom,
       dateTo: this._dateTo,
-      proxy: this._proxy,
+      settings: this._settings,
       status: this._status,
       error: this._error,
       startedAt: this._startedAt,

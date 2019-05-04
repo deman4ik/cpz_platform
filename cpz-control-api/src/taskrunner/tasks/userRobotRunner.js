@@ -100,7 +100,7 @@ class UserRobotRunner extends BaseRunner {
 
   static async handleAction(action) {
     try {
-      Log.debug(action, "UserRobotRunner handleAction");
+      Log.debug("UserRobotRunner handleAction", action);
       const { type, taskId, data } = action;
       const state = await UserRobotRunner.getState(taskId);
 
@@ -181,7 +181,7 @@ class UserRobotRunner extends BaseRunner {
         "Failed to handle service event with User Robot."
       );
       Log.error(error);
-      userRobot.error = error;
+      userRobot.error = error.main;
       await publishEvents(userRobot.events);
     }
   }
@@ -272,7 +272,7 @@ class UserRobotRunner extends BaseRunner {
         "Failed to start User Robot"
       );
       Log.error(error);
-      userRobot.error = error;
+      userRobot.error = error.main;
       await publishEvents(userRobot.events);
     }
     return {
@@ -298,10 +298,9 @@ class UserRobotRunner extends BaseRunner {
         (userRobot.traderStatus !== STATUS_STOPPED ||
           userRobot.traderStatus !== STATUS_STOPPING)
       ) {
-        const { taskId, status, event } = await TraderRunner.stop({
+        const { status, event } = await TraderRunner.stop({
           taskId: userRobot.traderId
         });
-        userRobot.traderId = taskId;
         userRobot.traderStatus = status;
         if (event) events.push(event);
       }
@@ -311,11 +310,11 @@ class UserRobotRunner extends BaseRunner {
         (userRobot.adviserStatus !== STATUS_STOPPED ||
           userRobot.adviserStatus !== STATUS_STOPPING)
       ) {
-        const { taskId, status, event } = await AdviserRunner.stop({
+        const { status, event } = await AdviserRunner.stop({
           taskId: userRobot.adviserId,
           userRobotId: userRobot.id
         });
-        userRobot.adviserId = taskId;
+
         userRobot.adviserStatus = status;
         if (event) events.push(event);
       }
@@ -332,7 +331,7 @@ class UserRobotRunner extends BaseRunner {
         "Failed to stop User Robot"
       );
       Log.error(error);
-      userRobot.error = error;
+      userRobot.error = error.main;
       await publishEvents(userRobot.events);
     }
     return { id: userRobot.id, status: userRobot.status };
@@ -367,7 +366,7 @@ class UserRobotRunner extends BaseRunner {
         "Failed to update User Robot"
       );
       Log.error(error);
-      userRobot.error = error;
+      userRobot.error = error.main;
       await publishEvents(userRobot.events);
     }
   }

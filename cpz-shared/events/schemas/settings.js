@@ -1,3 +1,63 @@
+const IMPORTER_SETTINGS = {
+  debug: {
+    description: "Debug mode.",
+    type: "boolean",
+    optional: true
+  },
+  importCandles: {
+    description: "Import mode options",
+    type: "object",
+    optional: true,
+    props: {
+      dateFrom: {
+        description: "Import start date.",
+        type: "datefrom",
+        optional: true
+      },
+      dateTo: {
+        description: "Import end date.",
+        type: "dateto",
+        optional: true
+      },
+      proxy: {
+        description: "Proxy endpoint.",
+        type: "string",
+        optional: true,
+        empty: false
+      },
+      providerType: {
+        description: "Data provider type.",
+        type: "string",
+        values: ["ccxt"],
+        optional: true
+      },
+      requireBatching: {
+        description: "Batch loading candles",
+        type: "boolean",
+        optional: true
+      },
+      saveToCache: {
+        description: "Save current loaded candles to cache",
+        type: "boolean",
+        optional: true
+      }
+    }
+  },
+  warmupCache: {
+    description: "Warmup mode options",
+    type: "object",
+    optional: true,
+    props: {
+      barsToCache: {
+        description: "Required number of bars in cache.",
+        type: "int",
+        integer: true,
+        optional: true
+      }
+    }
+  }
+};
+
 const CANDLEBATCHER_SETTINGS = {
   debug: {
     description: "Debug mode.",
@@ -147,6 +207,7 @@ const BACKTESTER_SETTINGS = {
   }
 };
 export {
+  IMPORTER_SETTINGS,
   CANDLEBATCHER_SETTINGS,
   ADVISER_SETTINGS,
   TRADER_SETTINGS,

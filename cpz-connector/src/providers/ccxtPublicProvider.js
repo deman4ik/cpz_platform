@@ -14,8 +14,8 @@ class CCXTPublicProvider extends BasePublicProvider {
     this._retryOptions = {
       retries: 100,
       minTimeout: 100,
-      onRetry: error => {
-        Log.warn(error);
+      onRetry: (err, i) => {
+        Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
       }
     };
   }
@@ -189,7 +189,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         currency,
         timeframe: 1,
         time: +candle[0],
-        timestamp: dayjs(+candle[0]).toISOString(),
+        timestamp: dayjs.utc(+candle[0]).toISOString(),
         open: +candle[1],
         high: +candle[2],
         low: +candle[3],

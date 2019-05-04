@@ -112,10 +112,10 @@ const TYPE_DATE_TO_KEY = "dateTo";
 validator.add("datefrom", (value, _, key, parent) => {
   const dateFrom = dayjs.utc(value);
 
-  const postfix = key.slice(TYPE_DATE_FROM_KEY.length);
+  const prefix = key.replace(TYPE_DATE_FROM_KEY, "");
 
-  const SELF_KEY = TYPE_DATE_FROM_KEY + postfix;
-  const DATE_TO_KEY = TYPE_DATE_TO_KEY + postfix;
+  const SELF_KEY = prefix + TYPE_DATE_FROM_KEY;
+  const DATE_TO_KEY = prefix + TYPE_DATE_TO_KEY;
 
   if (key !== SELF_KEY)
     return validator.makeError("keyNameError", SELF_KEY, key);
@@ -138,10 +138,10 @@ validator.add("datefrom", (value, _, key, parent) => {
 validator.add("dateto", (value, _, key, parent) => {
   const date = dayjs.utc(value);
 
-  const postfix = key.slice(TYPE_DATE_TO_KEY.length);
+  const prefix = key.replace(TYPE_DATE_TO_KEY, "");
 
-  const SELF_KEY = TYPE_DATE_TO_KEY + postfix;
-  const DATE_FROM_KEY = TYPE_DATE_FROM_KEY + postfix;
+  const SELF_KEY = prefix + TYPE_DATE_TO_KEY;
+  const DATE_FROM_KEY = prefix + TYPE_DATE_FROM_KEY;
 
   if (key !== SELF_KEY)
     return validator.makeError("keyNameError", SELF_KEY, key);

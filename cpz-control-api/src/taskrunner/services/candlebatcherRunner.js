@@ -26,7 +26,7 @@ import BaseRunner from "../baseRunner";
 class CandlebatcherRunner extends BaseRunner {
   static async start(props) {
     try {
-      Log.debug(props, "CandlebatcherRunner start");
+      Log.debug("CandlebatcherRunner start", props);
       let taskId = uuid();
 
       ServiceValidator.check(TASKS_CANDLEBATCHER_START_EVENT, {

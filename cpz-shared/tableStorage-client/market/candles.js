@@ -8,8 +8,7 @@ const { TableQuery, TableUtilities } = azure;
 
 const TABLES = {
   STORAGE_CANDLESTEMP_TABLE: "CandlesTemp",
-  STORAGE_CANDLESCACHED_TABLE: "CandlesCached",
-  STORAGE_CANDLESPENDING_TABLE: "CandlesPending"
+  STORAGE_CANDLESCACHED_TABLE: "CandlesCached"
 };
 
 /**
@@ -64,34 +63,6 @@ const _getCandles = async (tableName, { dateFrom, dateTo, slug }) => {
     );
   }
 };
-
-/**
- * Query pending candles
- *
- * @param {string} adviserId - Adviser task id
- * @returns {Object[]}
- */
-const getPendingCandlesByAdviserId = adviserId =>
-  client.getEntitiesByPartitionKey(
-    TABLES.STORAGE_CANDLESPENDING_TABLE,
-    adviserId
-  );
-
-/**
- * Save pending candle
- *
- * @param {Object} candle
- */
-const savePendingCandle = candle =>
-  client.insertOrMergeEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
-
-/**
- * Delete pending candle
- *
- * @param {Object} candle
- */
-const deletePendingCandle = candle =>
-  client.deleteEntity(TABLES.STORAGE_CANDLESPENDING_TABLE, candle);
 
 /**
  * Query cached candles
@@ -337,9 +308,6 @@ const clearTempCandles = async taskId => {
   }
 };
 export {
-  getPendingCandlesByAdviserId,
-  savePendingCandle,
-  deletePendingCandle,
   getCachedCandles,
   countCachedCandles,
   getCachedCandlesByKey,
