@@ -13,6 +13,7 @@ SELECT u.id,
        u.currency,
        u.exchange,
        u.robot_status,
+       u.enabled,
        u.strat_id,
        u.filename,
        u.last_started,
@@ -26,7 +27,7 @@ SELECT u.id,
 FROM
   (select
      uu.*,
-     r.name, r.asset, r.currency, r.exchange, r.timeframe,
+     r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled,
      s.id as strat_id, s.filename
    from
      user_robot uu,
