@@ -70,7 +70,7 @@ FROM
      robot r
    where
          uu.robot_id = r.id
-     and uu.robot_status = 0
+     and r.enabled >= 20 -- public or enabled for subscription
   ) u,
   (select 5143 as nCURRATE, '$' as sCURCODE) r
 ;
