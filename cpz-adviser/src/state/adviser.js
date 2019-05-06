@@ -8,6 +8,7 @@ import {
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STOPPED,
+  STATUS_PAUSED,
   STATUS_ERROR,
   ATTENTION_SUBJECT
 } from "cpz/config/state";
@@ -131,6 +132,14 @@ class Adviser {
         }
       }
     };
+  }
+
+  pause() {
+    this._status = STATUS_PAUSED;
+  }
+
+  resume() {
+    this._status = STATUS_STARTED;
   }
 
   setError(err) {

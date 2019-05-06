@@ -2,10 +2,15 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_ERROR,
+  STATUS_PAUSED
+} from "cpz/config/state";
 import { saveAdviserAction } from "cpz/tableStorage-client/control/adviserActions";
 import { getAdviserById } from "cpz/tableStorage-client/control/advisers";
-import { STOP, UPDATE, TASK } from "../config";
+import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
 import Adviser from "../state/adviser";
 import {
   loadAction,
@@ -28,7 +33,7 @@ async function handleRun(eventData) {
     // Загружаем текущий стейт
     let state = await getAdviserById(taskId);
     // Если трейдер статус  занят/остановлен/ошибка
-    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR, STATUS_PAUSED].includes(state.status)) {
       Log.warn(
         `Got Adviser.Run event but Adviser ${taskId} is ${state.status} =(`
       );
@@ -240,4 +245,104 @@ async function handleUpdate(eventData) {
   }
 }
 
-export { handleRun, handleStart, handleStop, handleUpdate };
+/**
+ * Pause Adviser Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handlePause(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getAdviserById(taskId);
+
+    if (!state) {
+      Log.warn(`Got Adviser.Pause event but Adviser state not found =(`);
+      return;
+    }
+    if ([STATUS_STOPPED, STATUS_PAUSED].includes(state.status)) {
+      Log.warn(
+        `Got Adviserder.Pause event but Adviser ${taskId} is ${state.status} =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveAdviserAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: PAUSE,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.ADVISER_PAUSE_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Pause Adviser '%s'",
+      taskId
+    );
+  }
+}
+
+/**
+ * Resume Adviser Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handleResume(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getAdviserById(taskId);
+
+    if (!state) {
+      Log.warn(`Got Adviser.Resume event but Adviser state not found =(`);
+      return;
+    }
+    // Если трейдер статус - остановлен/останавливается
+    if ([STATUS_STOPPED, STATUS_STARTED].includes(state.status)) {
+      Log.warn(
+        `Got Adviserder.Resume event but Adviser ${taskId} is ${
+          state.status
+        } =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveAdviserAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: RESUME,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.ADVISER_RESUME_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Resume Adviser '%s'",
+      taskId
+    );
+  }
+}
+
+export {
+  handleRun,
+  handleStart,
+  handleStop,
+  handleUpdate,
+  handlePause,
+  handleResume
+};

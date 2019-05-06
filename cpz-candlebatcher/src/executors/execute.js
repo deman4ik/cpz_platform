@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Candlebatcher from "../state/candlebatcher";
-import { STOP, UPDATE, RUN } from "../config";
+import { STOP, UPDATE, RUN, PAUSE, RESUME } from "../config";
 import loadCandle from "./loadCandle";
 import createCandle from "./createCandle";
 import createTimeframeCandles from "./createTimeframeCandles";
@@ -39,7 +39,7 @@ async function execute(candlebatcherState, nextAction) {
           candle
         );
         Log.debug("candlesObject", candlesObject);
-
+        // TODO: save candle to db
         await saveCandlesToCache(
           candlebatcher.state,
           Object.values(candlesObject)
@@ -52,11 +52,16 @@ async function execute(candlebatcherState, nextAction) {
       candlebatcher.update(data);
     } else if (type === STOP) {
       candlebatcher.stop();
+    } else if (type === PAUSE) {
+      candlebatcher.pause();
+    } else if (type === RESUME) {
+      candlebatcher.resume();
     } else {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;
     }
     Log.debug("Candlebatcher events", candlebatcher.events);
+
     // Отправялвем события
     await publishEvents(candlebatcher.props, candlebatcher.events);
 

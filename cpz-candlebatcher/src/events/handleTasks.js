@@ -2,10 +2,15 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPED,
+  STATUS_ERROR,
+  STATUS_PAUSED
+} from "cpz/config/state";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
 import { getCandlebatcherById } from "cpz/tableStorage-client/control/candlebatchers";
-import { STOP, UPDATE, TASK } from "../config";
+import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
 import Candlebatcher from "../state/candlebatcher";
 import {
   loadAction,
@@ -24,7 +29,7 @@ async function handleRun(eventData) {
     // Загружаем текущий стейт
     let state = await getCandlebatcherById(taskId);
     // Если трейдер статус  занят/остановлен/ошибка
-    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR, STATUS_PAUSED].includes(state.status)) {
       Log.warn(
         `Got Candlebatcher.Run event but Candlebatcher ${taskId} is ${
           state.status
@@ -158,10 +163,9 @@ async function handleStop(eventData) {
       );
       return;
     }
-    // Если трейдер статус - остановлен/останавливается
     if (state.status === STATUS_STOPPED) {
       Log.warn(
-        `Got TraCandlebatcherder.Stop event but Candlebatcher ${taskId} is ${
+        `Got Candlebatcherder.Stop event but Candlebatcher ${taskId} is ${
           state.status
         } =(`
       );
@@ -208,7 +212,6 @@ async function handleUpdate(eventData) {
       );
       return;
     }
-    // Если трейдер статус  остановлен/останавливается
     if ([STATUS_STOPPED].includes(state.status)) {
       Log.warn(
         `Got Candlebatcher.Update event but Candlebatcher ${taskId} is ${
@@ -240,4 +243,110 @@ async function handleUpdate(eventData) {
   }
 }
 
-export { handleRun, handleStart, handleStop, handleUpdate };
+/**
+ * Pause Candlebatcher Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handlePause(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getCandlebatcherById(taskId);
+
+    if (!state) {
+      Log.warn(
+        `Got Candlebatcher.Pause event but Candlebatcher state not found =(`
+      );
+      return;
+    }
+    if ([STATUS_STOPPED, STATUS_PAUSED].includes(state.status)) {
+      Log.warn(
+        `Got Candlebatcherder.Pause event but Candlebatcher ${taskId} is ${
+          state.status
+        } =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveCandlebatcherAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: PAUSE,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.CANDLEBATCHER_PAUSE_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Pause Candlebatcher '%s'",
+      taskId
+    );
+  }
+}
+
+/**
+ * Resume Candlebatcher Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handleResume(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getCandlebatcherById(taskId);
+
+    if (!state) {
+      Log.warn(
+        `Got Candlebatcher.Resume event but Candlebatcher state not found =(`
+      );
+      return;
+    }
+    // Если трейдер статус - остановлен/останавливается
+    if ([STATUS_STOPPED, STATUS_STARTED].includes(state.status)) {
+      Log.warn(
+        `Got Candlebatcherder.Resume event but Candlebatcher ${taskId} is ${
+          state.status
+        } =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveCandlebatcherAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: RESUME,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.CANDLEBATCHER_RESUME_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Resume Candlebatcher '%s'",
+      taskId
+    );
+  }
+}
+
+export {
+  handleRun,
+  handleStart,
+  handleStop,
+  handleUpdate,
+  handlePause,
+  handleResume
+};

@@ -4,13 +4,17 @@ import {
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
-  STATUS_BUSY,
+  STATUS_PAUSED,
+  STATUS_PAUSING,
+  STATUS_RESUMING,
   createTraderTaskSubject
 } from "cpz/config/state";
 import {
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STOP_EVENT,
-  TASKS_TRADER_UPDATE_EVENT
+  TASKS_TRADER_UPDATE_EVENT,
+  TASKS_TRADER_PAUSE_EVENT,
+  TASKS_TRADER_RESUME_EVENT
 } from "cpz/events/types/tasks/trader";
 import { getTraderById } from "cpz/tableStorage-client/control/traders";
 import ServiceValidator from "cpz/validator";
@@ -33,7 +37,7 @@ class TraderRunner extends BaseRunner {
 
       const trader = await getTraderById(taskId);
       if (trader) {
-        if (trader.status === STATUS_STARTED || trader.status === STATUS_BUSY)
+        if (trader.status === STATUS_STARTED)
           return { taskId, status: STATUS_STARTED };
       }
 
@@ -152,6 +156,84 @@ class TraderRunner extends BaseRunner {
           info: props
         },
         "Failed to update trader"
+      );
+    }
+  }
+
+  static async pause(props) {
+    try {
+      ServiceValidator.check(TASKS_TRADER_PAUSE_EVENT, props);
+      const { taskId } = props;
+      const trader = await getTraderById(taskId);
+      if (!trader) return { taskId, status: STATUS_STOPPED };
+      if (
+        [STATUS_STOPPED, STATUS_STOPPING, STATUS_PAUSED].includes(trader.status)
+      )
+        return { taskId, status: trader.status };
+      const event = {
+        eventType: TASKS_TRADER_PAUSE_EVENT,
+        eventData: {
+          subject: createTraderTaskSubject({
+            exchange: trader.exchange,
+            asset: trader.asset,
+            currency: trader.currency,
+            timeframe: trader.timeframe,
+            robotId: trader.robotId,
+            userId: trader.userId
+          }),
+          data: {
+            taskId
+          }
+        }
+      };
+
+      return { taskId, status: STATUS_PAUSING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to pause trader"
+      );
+    }
+  }
+
+  static async resume(props) {
+    try {
+      ServiceValidator.check(TASKS_TRADER_RESUME_EVENT, props);
+      const { taskId } = props;
+      const trader = await getTraderById(taskId);
+      if (!trader) return { taskId, status: STATUS_STOPPED };
+      if (trader.status === STATUS_STARTED)
+        return { taskId, status: trader.status };
+      const event = {
+        eventType: TASKS_TRADER_RESUME_EVENT,
+        eventData: {
+          subject: createTraderTaskSubject({
+            exchange: trader.exchange,
+            asset: trader.asset,
+            currency: trader.currency,
+            timeframe: trader.timeframe,
+            robotId: trader.robotId,
+            userId: trader.userId
+          }),
+          data: {
+            taskId
+          }
+        }
+      };
+
+      return { taskId, status: STATUS_RESUMING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to resume trader"
       );
     }
   }

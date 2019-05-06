@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED } from "../../config/state";
+import { STATUS_STARTED, STATUS_PAUSED } from "../../config/state";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -36,11 +36,21 @@ const getActiveAdvisersBySlug = async slug => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
+    const pausedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_PAUSED
+    );
+    const statusFilter = TableQuery.combineFilters(
+      startedStatusFilter,
+      TableUtilities.TableOperators.OR,
+      pausedStatusFilter
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
         partitionKeyFilter,
         TableUtilities.TableOperators.AND,
-        startedStatusFilter
+        statusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
@@ -53,6 +63,42 @@ const getActiveAdvisersBySlug = async slug => {
       },
       'Failed to read active advisers by slug "%s"',
       slug
+    );
+  }
+};
+
+/**
+ * Query Active Advisers
+ *
+ * @returns {Object[]}
+ */
+const getActiveAdvisers = async () => {
+  try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+    const pausedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_PAUSED
+    );
+    const statusFilter = TableQuery.combineFilters(
+      startedStatusFilter,
+      TableUtilities.TableOperators.OR,
+      pausedStatusFilter
+    );
+    const query = new TableQuery().where(statusFilter);
+    return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error,
+        info: {}
+      },
+      "Failed to read active advisers"
     );
   }
 };
@@ -84,6 +130,33 @@ const getStartedAdvisers = async () => {
   }
 };
 // TODO: getAdvisersWithActions
+
+/**
+ * Query Paused Advisers
+ *
+ * @returns {Object[]}
+ */
+const getPausedAdvisers = async () => {
+  try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_PAUSED
+    );
+
+    const query = new TableQuery().where(startedStatusFilter);
+    return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error,
+        info: {}
+      },
+      "Failed to read paused advisers"
+    );
+  }
+};
 
 /**
  * Creates new or update current Adviser State
@@ -118,7 +191,9 @@ const deleteAdviserState = async ({ RowKey, PartitionKey, metadata }) =>
 export {
   getAdviserById,
   getActiveAdvisersBySlug,
+  getActiveAdvisers,
   getStartedAdvisers,
+  getPausedAdvisers,
   saveAdviserState,
   updateAdviserState,
   deleteAdviserState

@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED } from "../../config/state";
+import { STATUS_STARTED, STATUS_PAUSED } from "../../config/state";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -29,6 +29,44 @@ const getActiveCandlebatchers = async () => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
+    const pausedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_PAUSED
+    );
+    const statusFilter = TableQuery.combineFilters(
+      startedStatusFilter,
+      TableUtilities.TableOperators.OR,
+      pausedStatusFilter
+    );
+    const query = new TableQuery().where(statusFilter);
+    return await client.queryEntities(
+      TABLES.STORAGE_CANDLEBATCHERS_TABLE,
+      query
+    );
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error
+      },
+      "Failed to load started candlebatchers"
+    );
+  }
+};
+
+/**
+ * Query Started Candlebatchers
+ *
+ * @returns {Object[]}
+ */
+const getStartedCandlebatchers = async () => {
+  try {
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
 
     const query = new TableQuery().where(startedStatusFilter);
     return await client.queryEntities(
@@ -42,6 +80,35 @@ const getActiveCandlebatchers = async () => {
         cause: error
       },
       "Failed to load started candlebatchers"
+    );
+  }
+};
+
+/**
+ * Query Paused Candlebatchers
+ *
+ * @returns {Object[]}
+ */
+const getPausedCandlebatchers = async () => {
+  try {
+    const pausedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_PAUSED
+    );
+
+    const query = new TableQuery().where(pausedStatusFilter);
+    return await client.queryEntities(
+      TABLES.STORAGE_CANDLEBATCHERS_TABLE,
+      query
+    );
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error
+      },
+      "Failed to load paused candlebatchers"
     );
   }
 };
@@ -87,6 +154,8 @@ const deleteCandlebatcherState = async ({ RowKey, PartitionKey, metadata }) =>
 export {
   getCandlebatcherById,
   getActiveCandlebatchers,
+  getStartedCandlebatchers,
+  getPausedCandlebatchers,
   findCandlebatcher,
   saveCandlebatcherState,
   updateCandlebatcherState,

@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Adviser from "../state/adviser";
-import { STOP, UPDATE, CANDLE } from "../config";
+import { STOP, UPDATE, PAUSE, RESUME, CANDLE } from "../config";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 import loadCandles from "./loadCandles";
@@ -60,6 +60,10 @@ async function execute(adviserState, nextAction) {
       adviser.update(data);
     } else if (type === STOP) {
       adviser.stop();
+    } else if (type === PAUSE) {
+      adviser.pause();
+    } else if (type === RESUME) {
+      adviser.resume();
     } else {
       Log.error("Unknown adviser action '%s'", type);
       return adviser.state;

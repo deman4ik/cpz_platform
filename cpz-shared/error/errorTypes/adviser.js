@@ -8,6 +8,8 @@ const ADVISER_HANDLE_CANDLE_ERROR = "AdviserHandleCandleError";
 const ADVISER_START_ERROR = "AdviserStartError";
 const ADVISER_STOP_ERROR = "AdviserStopError";
 const ADVISER_UPDATE_ERROR = "AdviserUpdateError";
+const ADVISER_PAUSE_ERROR = "AdviserPauseError";
+const ADVISER_RESUME_ERROR = "AdviserResumeError";
 const ADVISER_ACTION_TIMER_ERROR = "AdviserActionTimerError";
 const ADVISER_LOAD_ACTIONS_ERROR = "AdviserLoadActionsError";
 const ADVISER_EVENTS_PUBLISH_ERROR = "AdviserEventsPublishError";
@@ -44,6 +46,8 @@ export {
   ADVISER_START_ERROR,
   ADVISER_STOP_ERROR,
   ADVISER_UPDATE_ERROR,
+  ADVISER_PAUSE_ERROR,
+  ADVISER_RESUME_ERROR,
   ADVISER_ACTION_TIMER_ERROR,
   ADVISER_LOAD_ACTIONS_ERROR,
   ADVISER_EVENTS_PUBLISH_ERROR,

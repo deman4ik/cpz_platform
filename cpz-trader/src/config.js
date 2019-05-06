@@ -5,6 +5,8 @@ const TRADER_IDLE_SECONDS = 30;
 const START = "start";
 const STOP = "stop";
 const UPDATE = "update";
+const PAUSE = "pause";
+const RESUME = "resume";
 const TASK = "TASK";
 const SIGNAL = "handleSignal";
 const PRICE = "checkPrice";
@@ -16,6 +18,8 @@ export {
   START,
   STOP,
   UPDATE,
+  PAUSE,
+  RESUME,
   TASK,
   SIGNAL,
   PRICE,

@@ -4,12 +4,16 @@ import {
   STATUS_STARTING,
   STATUS_STOPPED,
   STATUS_STOPPING,
-  STATUS_BUSY
+  STATUS_PAUSED,
+  STATUS_PAUSING,
+  STATUS_RESUMING
 } from "cpz/config/state";
 import {
   TASKS_ADVISER_START_EVENT,
   TASKS_ADVISER_STOP_EVENT,
-  TASKS_ADVISER_UPDATE_EVENT
+  TASKS_ADVISER_UPDATE_EVENT,
+  TASKS_ADVISER_PAUSE_EVENT,
+  TASKS_ADVISER_RESUME_EVENT
 } from "cpz/events/types/tasks/adviser";
 import { getAdviserById } from "cpz/tableStorage-client/control/advisers";
 import { findOtherActiveUserRobotsByServiceId } from "cpz/tableStorage-client/control/userRobots";
@@ -35,7 +39,7 @@ class AdviserRunner extends BaseRunner {
       const adviser = await getAdviserById(taskId);
 
       if (adviser) {
-        if (adviser.status === STATUS_STARTED || adviser.status === STATUS_BUSY)
+        if (adviser.status === STATUS_STARTED)
           return {
             taskId,
             status: STATUS_STARTED
@@ -150,6 +154,74 @@ class AdviserRunner extends BaseRunner {
           info: { ...props }
         },
         "Failed to update adviser"
+      );
+    }
+  }
+
+  static async pause(props) {
+    try {
+      ServiceValidator.check(TASKS_ADVISER_PAUSE_EVENT, props);
+      const { taskId } = props;
+      const adviser = await getAdviserById(taskId);
+      if (!adviser)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      if ([STATUS_PAUSED, STATUS_STOPPED].includes(adviser.status))
+        return { taskId, status: adviser.status };
+      const event = {
+        eventType: TASKS_ADVISER_PAUSE_EVENT,
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId
+          }
+        }
+      };
+      return { taskId, status: STATUS_PAUSING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.ADVISER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to pause adviser"
+      );
+    }
+  }
+
+  static async resume(props) {
+    try {
+      ServiceValidator.check(TASKS_ADVISER_RESUME_EVENT, props);
+      const { taskId } = props;
+      const adviser = await getAdviserById(taskId);
+      if (!adviser)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+      if (adviser.status === STATUS_STARTED)
+        return { taskId, status: STATUS_STARTED };
+      const event = {
+        eventType: TASKS_ADVISER_RESUME_EVENT,
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId
+          }
+        }
+      };
+      return { taskId, status: STATUS_RESUMING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.ADVISER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to resume adviser"
       );
     }
   }

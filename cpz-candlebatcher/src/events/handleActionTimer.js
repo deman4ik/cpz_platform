@@ -3,7 +3,7 @@ import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import EventGrid from "cpz/events";
 import dayjs from "cpz/utils/dayjs";
-import { getActiveCandlebatchers } from "cpz/tableStorage-client/control/candlebatchers";
+import { getStartedCandlebatchers } from "cpz/tableStorage-client/control/candlebatchers";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
 import { TASKS_CANDLEBATCHER_RUN_EVENT } from "cpz/events/types/tasks/candlebatcher";
 import { isUnlocked } from "../executors";
@@ -11,7 +11,7 @@ import { RUN } from "../config";
 
 async function handleActionTimer() {
   try {
-    const candlebatchers = await getActiveCandlebatchers();
+    const candlebatchers = await getStartedCandlebatchers();
 
     if (candlebatchers && candlebatchers.length > 0) {
       await Promise.all(

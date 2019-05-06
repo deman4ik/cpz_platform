@@ -15,7 +15,9 @@ import {
   TASKS_CANDLEBATCHER_START_EVENT,
   TASKS_CANDLEBATCHER_STOP_EVENT,
   TASKS_CANDLEBATCHER_UPDATE_EVENT,
-  TASKS_CANDLEBATCHER_RUN_EVENT
+  TASKS_CANDLEBATCHER_RUN_EVENT,
+  TASKS_CANDLEBATCHER_PAUSE_EVENT,
+  TASKS_CANDLEBATCHER_RESUME_EVENT
 } from "cpz/events/types/tasks/candlebatcher";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT } from "cpz/events/types/error";
 import {
@@ -25,7 +27,9 @@ import {
   TASKS_CANDLEBATCHER_STARTED_EVENT_SCHEMA,
   TASKS_CANDLEBATCHER_STOPPED_EVENT_SCHEMA,
   TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
-  TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA
+  TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_PAUSE_EVENT_SCHEMA,
+  TASKS_CANDLEBATCHER_RESUME_EVENT_SCHEMA
 } from "cpz/events/schemas/tasks/candlebatcher";
 import { TASKS_IMPORTER_START_EVENT_SCHEMA } from "cpz/events/schemas/tasks/importer";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
@@ -46,7 +50,9 @@ import {
   handleRun,
   handleStart,
   handleStop,
-  handleUpdate
+  handleUpdate,
+  handlePause,
+  handleResume
 } from "../events/handleTasks";
 
 class TaskEvents extends BaseService {
@@ -72,6 +78,8 @@ class TaskEvents extends BaseService {
       TASKS_CANDLEBATCHER_STOPPED_EVENT_SCHEMA,
       TASKS_CANDLEBATCHER_UPDATED_EVENT_SCHEMA,
       TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA,
+      TASKS_CANDLEBATCHER_PAUSE_EVENT_SCHEMA,
+      TASKS_CANDLEBATCHER_RESUME_EVENT_SCHEMA,
       ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA,
       LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA,
       CANDLES_NEWCANDLE_EVENT_SCHEMA,
@@ -120,7 +128,9 @@ class TaskEvents extends BaseService {
         TASKS_CANDLEBATCHER_START_EVENT,
         TASKS_CANDLEBATCHER_STOP_EVENT,
         TASKS_CANDLEBATCHER_UPDATE_EVENT,
-        TASKS_CANDLEBATCHER_RUN_EVENT
+        TASKS_CANDLEBATCHER_RUN_EVENT,
+        TASKS_CANDLEBATCHER_PAUSE_EVENT,
+        TASKS_CANDLEBATCHER_RESUME_EVENT
       ]);
 
       if (event) {
@@ -144,6 +154,14 @@ class TaskEvents extends BaseService {
             case TASKS_CANDLEBATCHER_STOP_EVENT:
               ServiceValidator.check(TASKS_CANDLEBATCHER_STOP_EVENT, data);
               await handleStop(data);
+              break;
+            case TASKS_CANDLEBATCHER_PAUSE_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_PAUSE_EVENT, data);
+              await handlePause(data);
+              break;
+            case TASKS_CANDLEBATCHER_RESUME_EVENT:
+              ServiceValidator.check(TASKS_CANDLEBATCHER_RESUME_EVENT, data);
+              await handleResume(data);
               break;
             default:
               Log.warn("No tasks events");

@@ -10,6 +10,7 @@ import {
   STATUS_STARTED,
   STATUS_PENDING,
   STATUS_STOPPED,
+  STATUS_PAUSED,
   STATUS_ERROR,
   VALID_TIMEFRAMES,
   ATTENTION_SUBJECT
@@ -123,6 +124,14 @@ class Candlebatcher {
         }
       }
     };
+  }
+
+  pause() {
+    this._status = STATUS_PAUSED;
+  }
+
+  resume() {
+    this._status = STATUS_STARTED;
   }
 
   get status() {

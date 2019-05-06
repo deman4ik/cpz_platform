@@ -7,13 +7,18 @@ import {
   STATUS_STOPPED,
   STATUS_STOPPING,
   STATUS_BUSY,
+  STATUS_PAUSED,
+  STATUS_PAUSING,
+  STATUS_RESUMING,
   createCandlebatcherSlug,
   createCandlebatcherTaskSubject
 } from "cpz/config/state";
 import {
   TASKS_CANDLEBATCHER_START_EVENT,
   TASKS_CANDLEBATCHER_STOP_EVENT,
-  TASKS_CANDLEBATCHER_UPDATE_EVENT
+  TASKS_CANDLEBATCHER_UPDATE_EVENT,
+  TASKS_CANDLEBATCHER_PAUSE_EVENT,
+  TASKS_CANDLEBATCHER_RESUME_EVENT
 } from "cpz/events/types/tasks/candlebatcher";
 import {
   findCandlebatcher,
@@ -190,6 +195,76 @@ class CandlebatcherRunner extends BaseRunner {
           info: { ...props }
         },
         "Failed to update candlebatcher"
+      );
+    }
+  }
+
+  static async pause(props) {
+    try {
+      ServiceValidator.check(TASKS_CANDLEBATCHER_PAUSE_EVENT, props);
+      const { taskId } = props;
+      const candlebatcher = await getCandlebatcherById(taskId);
+      if (!candlebatcher || candlebatcher.status === STATUS_STOPPED)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+
+      if (candlebatcher.status === STATUS_PAUSED)
+        return { taskId, status: candlebatcher.status };
+      const event = {
+        eventType: TASKS_CANDLEBATCHER_PAUSE_EVENT,
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId
+          }
+        }
+      };
+      return { taskId, status: STATUS_PAUSING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.CANDLEBATCHER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to pause candlebatcher"
+      );
+    }
+  }
+
+  static async resume(props) {
+    try {
+      ServiceValidator.check(TASKS_CANDLEBATCHER_RESUME_EVENT, props);
+      const { taskId } = props;
+      const candlebatcher = await getCandlebatcherById(taskId);
+      if (!candlebatcher || candlebatcher.status === STATUS_STOPPED)
+        return {
+          taskId,
+          status: STATUS_STOPPED
+        };
+
+      if (candlebatcher.status === STATUS_STARTED)
+        return { taskId, status: candlebatcher.status };
+      const event = {
+        eventType: TASKS_CANDLEBATCHER_RESUME_EVENT,
+        eventData: {
+          subject: taskId,
+          data: {
+            taskId
+          }
+        }
+      };
+      return { taskId, status: STATUS_RESUMING, event };
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.CANDLEBATCHER_RUNNER_ERROR,
+          cause: error,
+          info: { ...props }
+        },
+        "Failed to resume candlebatcher"
       );
     }
   }

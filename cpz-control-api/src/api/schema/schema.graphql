@@ -33,6 +33,15 @@ type Mutation {
     overrideParams: BacktestParams
   ): ServiceRunnerResponse!
   stopBacktest(taskId: ID!): ServiceRunnerResponse!
+
+  pauseAdvisers: Response!
+  resumeAdvisers: Response!
+
+  pauseCandlebatchers: Response!
+  resumeCandlebatchers: Response!
+
+  pauseTraders: Response!
+  resumeTraders: Response!
 }
 
 type Error {

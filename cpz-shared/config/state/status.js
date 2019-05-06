@@ -12,6 +12,9 @@ const STATUS_STOPPED_USER = "stopped_user"; //  Остановлен польз�
 const STATUS_ERROR = "error"; //  Произошла ошибка во время работы (критическая)
 const STATUS_WARN = "warn"; //  Произошла ошибка во время работы (не критическая)
 const STATUS_FINISHED = "finished"; // Обработка завершена
+const STATUS_PAUSED = "paused"; // Пауза
+const STATUS_PAUSING = "pausing";
+const STATUS_RESUMING = "resuming";
 
 /**
  * Статус позиции
@@ -55,6 +58,9 @@ export {
   STATUS_STOPPED_AUTO,
   STATUS_STOPPED_USER,
   STATUS_STOPPING,
+  STATUS_PAUSED,
+  STATUS_PAUSING,
+  STATUS_RESUMING,
   POS_STATUS_NEW,
   POS_STATUS_OPEN,
   POS_STATUS_CLOSED,

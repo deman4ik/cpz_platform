@@ -6,9 +6,11 @@ const TRADER_HANDLE_SIGNAL_ERROR = "TraderHandleSignalError";
 const TRADER_HANDLE_RUN_ERROR = "TraderHandleRunError";
 const TRADER_CHECK_PRICE_ERROR = "TraderCheckPriceError";
 const TRADER_NOT_FOUND_ERROR = "TraderNotFound";
-const TRADER_START_ERROR = "TradersStartError";
-const TRADER_UPDATE_ERROR = "TradersUpdateError";
-const TRADER_STOP_ERROR = "TradersStopError";
+const TRADER_START_ERROR = "TraderStartError";
+const TRADER_UPDATE_ERROR = "TraderUpdateError";
+const TRADER_STOP_ERROR = "TraderStopError";
+const TRADER_PAUSE_ERROR = "TraderPauseError";
+const TRADER_RESUME_ERROR = "TraderResumeError";
 const TRADER_SET_ERROR_ERROR = "TradersSetErrorError";
 const TRADER_TICKS_EVENTS_ERROR = "TraderTicksEventsError";
 const TRADER_CANDLES_EVENTS_ERROR = "TraderCandlesEventsError";
@@ -40,6 +42,8 @@ export {
   TRADER_CHECK_PRICE_ERROR,
   TRADER_START_ERROR,
   TRADER_UPDATE_ERROR,
+  TRADER_PAUSE_ERROR,
+  TRADER_RESUME_ERROR,
   TRADER_STOP_ERROR,
   TRADER_SET_ERROR_ERROR,
   TRADER_ERROR,

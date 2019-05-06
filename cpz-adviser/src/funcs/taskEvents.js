@@ -16,7 +16,9 @@ import {
   TASKS_ADVISER_START_EVENT,
   TASKS_ADVISER_STOP_EVENT,
   TASKS_ADVISER_UPDATE_EVENT,
-  TASKS_ADVISER_RUN_EVENT
+  TASKS_ADVISER_RUN_EVENT,
+  TASKS_ADVISER_PAUSE_EVENT,
+  TASKS_ADVISER_RESUME_EVENT
 } from "cpz/events/types/tasks/adviser";
 import { ERROR_ADVISER_ERROR_EVENT } from "cpz/events/types/error";
 import {
@@ -26,7 +28,9 @@ import {
   TASKS_ADVISER_RUN_EVENT_SCHEMA,
   TASKS_ADVISER_STARTED_EVENT_SCHEMA,
   TASKS_ADVISER_UPDATED_EVENT_SCHEMA,
-  TASKS_ADVISER_STOPPED_EVENT_SCHEMA
+  TASKS_ADVISER_STOPPED_EVENT_SCHEMA,
+  TASKS_ADVISER_PAUSE_EVENT_SCHEMA,
+  TASKS_ADVISER_RESUME_EVENT_SCHEMA
 } from "cpz/events/schemas/tasks/adviser";
 import { ERROR_ADVISER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_ADVISER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
@@ -51,7 +55,9 @@ import {
   handleStart,
   handleStop,
   handleUpdate,
-  handleRun
+  handleRun,
+  handlePause,
+  handleResume
 } from "../events/handleTasks";
 import { SERVICE_NAME } from "../config";
 
@@ -74,6 +80,8 @@ class TaskEvents extends BaseService {
       TASKS_ADVISER_STOP_EVENT_SCHEMA,
       TASKS_ADVISER_UPDATE_EVENT_SCHEMA,
       TASKS_ADVISER_RUN_EVENT_SCHEMA,
+      TASKS_ADVISER_PAUSE_EVENT_SCHEMA,
+      TASKS_ADVISER_RESUME_EVENT_SCHEMA,
       TASKS_ADVISER_STARTED_EVENT_SCHEMA,
       TASKS_ADVISER_UPDATED_EVENT_SCHEMA,
       TASKS_ADVISER_STOPPED_EVENT_SCHEMA,
@@ -127,7 +135,9 @@ class TaskEvents extends BaseService {
         TASKS_ADVISER_START_EVENT,
         TASKS_ADVISER_STOP_EVENT,
         TASKS_ADVISER_UPDATE_EVENT,
-        TASKS_ADVISER_RUN_EVENT
+        TASKS_ADVISER_RUN_EVENT,
+        TASKS_ADVISER_PAUSE_EVENT,
+        TASKS_ADVISER_RESUME_EVENT
       ]);
 
       if (event) {
@@ -150,6 +160,14 @@ class TaskEvents extends BaseService {
             case TASKS_ADVISER_STOP_EVENT:
               ServiceValidator.check(TASKS_ADVISER_STOP_EVENT, data);
               await handleStop(data);
+              break;
+            case TASKS_ADVISER_PAUSE_EVENT:
+              ServiceValidator.check(TASKS_ADVISER_PAUSE_EVENT, data);
+              await handlePause(data);
+              break;
+            case TASKS_ADVISER_RESUME_EVENT:
+              ServiceValidator.check(TASKS_ADVISER_RESUME_EVENT, data);
+              await handleResume(data);
               break;
             default:
               Log.warn("No tasks events");

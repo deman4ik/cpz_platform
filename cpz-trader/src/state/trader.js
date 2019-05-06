@@ -17,6 +17,7 @@ import {
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STOPPED,
+  STATUS_PAUSED,
   STATUS_ERROR,
   createTraderSlug,
   ATTENTION_SUBJECT
@@ -201,6 +202,14 @@ class Trader {
         }
       }
     };
+  }
+
+  pause() {
+    this._status = STATUS_PAUSED;
+  }
+
+  resume() {
+    this._status = STATUS_STARTED;
   }
 
   _baseOrder(order) {

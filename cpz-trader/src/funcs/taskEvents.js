@@ -16,7 +16,9 @@ import {
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STOP_EVENT,
   TASKS_TRADER_UPDATE_EVENT,
-  TASKS_TRADER_RUN_EVENT
+  TASKS_TRADER_RUN_EVENT,
+  TASKS_TRADER_PAUSE_EVENT,
+  TASKS_TRADER_RESUME_EVENT
 } from "cpz/events/types/tasks/trader";
 import { ERROR_TRADER_ERROR_EVENT } from "cpz/events/types/error";
 import {
@@ -24,6 +26,8 @@ import {
   TASKS_TRADER_STOP_EVENT_SCHEMA,
   TASKS_TRADER_UPDATE_EVENT_SCHEMA,
   TASKS_TRADER_RUN_EVENT_SCHEMA,
+  TASKS_TRADER_PAUSE_EVENT_SCHEMA,
+  TASKS_TRADER_RESUME_EVENT_SCHEMA,
   TASKS_TRADER_STARTED_EVENT_SCHEMA,
   TASKS_TRADER_STOPPED_EVENT_SCHEMA,
   TASKS_TRADER_UPDATED_EVENT_SCHEMA
@@ -50,7 +54,9 @@ import {
   handleStart,
   handleStop,
   handleUpdate,
-  handleRun
+  handleRun,
+  handlePause,
+  handleResume
 } from "../events/handleTasks";
 
 class TaskEvents extends BaseService {
@@ -82,7 +88,9 @@ class TaskEvents extends BaseService {
         TASKS_TRADER_STARTED_EVENT_SCHEMA,
         TASKS_TRADER_STOPPED_EVENT_SCHEMA,
         TASKS_TRADER_UPDATED_EVENT_SCHEMA,
-        TASKS_TRADER_RUN_EVENT_SCHEMA
+        TASKS_TRADER_RUN_EVENT_SCHEMA,
+        TASKS_TRADER_PAUSE_EVENT_SCHEMA,
+        TASKS_TRADER_RESUME_EVENT_SCHEMA
       ]);
       ServiceValidator.add(schemas);
       // Configure Event Grid Client
@@ -134,7 +142,9 @@ class TaskEvents extends BaseService {
         TASKS_TRADER_START_EVENT,
         TASKS_TRADER_STOP_EVENT,
         TASKS_TRADER_UPDATE_EVENT,
-        TASKS_TRADER_RUN_EVENT
+        TASKS_TRADER_RUN_EVENT,
+        TASKS_TRADER_PAUSE_EVENT,
+        TASKS_TRADER_RESUME_EVENT
       ]);
 
       if (event) {
@@ -157,6 +167,14 @@ class TaskEvents extends BaseService {
             case TASKS_TRADER_STOP_EVENT:
               ServiceValidator.check(TASKS_TRADER_STOP_EVENT, data);
               await handleStop(data);
+              break;
+            case TASKS_TRADER_PAUSE_EVENT:
+              ServiceValidator.check(TASKS_TRADER_PAUSE_EVENT, data);
+              await handlePause(data);
+              break;
+            case TASKS_TRADER_RESUME_EVENT:
+              ServiceValidator.check(TASKS_TRADER_RESUME_EVENT, data);
+              await handleResume(data);
               break;
             default:
               Log.warn(event, "No tasks events");

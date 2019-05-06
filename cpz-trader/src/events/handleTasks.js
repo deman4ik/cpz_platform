@@ -4,8 +4,14 @@ import Log from "cpz/log";
 import dayjs from "cpz/utils/dayjs";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { getTraderById } from "cpz/tableStorage-client/control/traders";
-import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
-import { STOP, UPDATE, TASK } from "../config";
+import {
+  STATUS_STARTED,
+  STATUS_STOPPING,
+  STATUS_STOPPED,
+  STATUS_ERROR,
+  STATUS_PAUSED
+} from "cpz/config/state";
+import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
 import Trader from "../state/trader";
 import {
   loadAction,
@@ -29,7 +35,7 @@ async function handleRun(eventData) {
       return;
     }
     // Если трейдер статус трейдера занят/остановлен/ошибка
-    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR, STATUS_PAUSED].includes(state.status)) {
       Log.warn(
         `Got Trader.Run event but Trader ${taskId} is ${state.status} =(`
       );
@@ -211,7 +217,10 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус трейдера остановлен/останавливается
-    if (state.status === STATUS_STOPPED || state.stopRequested) {
+    if (
+      [STATUS_STOPPED, STATUS_STOPPING].includes(state.status) ||
+      state.stopRequested
+    ) {
       Log.warn(
         `Got Trader.Update event but Trader ${taskId} is ${
           state.status
@@ -242,4 +251,106 @@ async function handleUpdate(eventData) {
   }
 }
 
-export { handleRun, handleStart, handleStop, handleUpdate };
+/**
+ * Pause Trader Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handlePause(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getTraderById(taskId);
+
+    if (!state) {
+      Log.warn(`Got Trader.Pause event but Trader state not found =(`);
+      return;
+    }
+    if (
+      [STATUS_STOPPING, STATUS_STOPPED, STATUS_PAUSED].includes(state.status)
+    ) {
+      Log.warn(
+        `Got Traderder.Pause event but Trader ${taskId} is ${state.status} =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveTraderAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: PAUSE,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TRADER_PAUSE_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Pause Trader '%s'",
+      taskId
+    );
+  }
+}
+
+/**
+ * Resume Trader Orchestrator
+ *
+ * @param {object} eventData
+ */
+async function handleResume(eventData) {
+  const { taskId } = eventData;
+  try {
+    // Загружаем текущий стейт
+    const state = await getTraderById(taskId);
+
+    if (!state) {
+      Log.warn(`Got Trader.Resume event but Trader state not found =(`);
+      return;
+    }
+    // Если трейдер статус - остановлен/останавливается
+    if (
+      [STATUS_STOPPING, STATUS_STOPPED, STATUS_STARTED].includes(state.status)
+    ) {
+      Log.warn(
+        `Got Traderder.Resume event but Trader ${taskId} is ${state.status} =(`
+      );
+      // Выходим
+      return;
+    }
+
+    // Сохраняем новое действие
+    await saveTraderAction({
+      PartitionKey: taskId,
+      RowKey: TASK,
+      id: uuid(),
+      type: RESUME,
+      actionTime: dayjs.utc().valueOf(),
+      data: eventData
+    });
+  } catch (e) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TRADER_RESUME_ERROR,
+        cause: e,
+        info: { ...eventData }
+      },
+      "Failed to Resume Trader '%s'",
+      taskId
+    );
+  }
+}
+
+export {
+  handleRun,
+  handleStart,
+  handleStop,
+  handleUpdate,
+  handlePause,
+  handleResume
+};
