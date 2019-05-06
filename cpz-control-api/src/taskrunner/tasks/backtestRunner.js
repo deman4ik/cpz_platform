@@ -126,9 +126,6 @@ class BacktestRunner extends BaseRunner {
       if (backtest.status === STATUS_STARTING) {
         BacktestRunner.start(backtest.state);
       }
-      if (backtest.status === STATUS_STOPPING) {
-        BacktestRunner.stop(backtest.state);
-      }
     } catch (e) {
       const error = new ServiceError(
         {

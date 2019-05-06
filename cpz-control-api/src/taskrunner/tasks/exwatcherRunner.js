@@ -210,9 +210,6 @@ class ExWatcherRunner extends BaseRunner {
       if (exWatcher.status === STATUS_STARTING) {
         ExWatcherRunner.start(exWatcher.state);
       }
-      if (exWatcher.status === STATUS_STOPPING) {
-        ExWatcherRunner.stop(exWatcher.state);
-      }
     } catch (e) {
       const error = new ServiceError(
         {

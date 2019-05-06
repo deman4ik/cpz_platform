@@ -168,9 +168,6 @@ class UserRobotRunner extends BaseRunner {
       if (userRobot.status === STATUS_STARTING) {
         UserRobotRunner.start(userRobot.state);
       }
-      if (userRobot.status === STATUS_STOPPING) {
-        UserRobotRunner.stop(userRobot.state);
-      }
     } catch (e) {
       const error = new ServiceError(
         {
