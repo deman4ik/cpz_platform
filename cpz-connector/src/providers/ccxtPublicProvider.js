@@ -157,9 +157,9 @@ class CCXTPublicProvider extends BasePublicProvider {
         await this.init();
       }
       const dateToLoad =
-        dayjs.utc(date).valueOf() < dayjs.utc().add(-1, "minute")
+        dayjs.utc(date).valueOf() < dayjs.utc().add(-2, "minute")
           ? date
-          : dayjs.utc().add(-1, "minute");
+          : dayjs.utc().add(-2, "minute");
 
       const call = async bail => {
         try {
@@ -183,19 +183,28 @@ class CCXTPublicProvider extends BasePublicProvider {
             message: "Failed to get response from exchange"
           }
         };
-      const candles = response.map(candle => ({
-        exchange: this._exchangeName,
-        asset,
-        currency,
-        timeframe: 1,
-        time: +candle[0],
-        timestamp: dayjs.utc(+candle[0]).toISOString(),
-        open: +candle[1],
-        high: +candle[2],
-        low: +candle[3],
-        close: +candle[4],
-        volume: +candle[5]
-      }));
+      const candles = response
+        .map(candle => ({
+          exchange: this._exchangeName,
+          asset,
+          currency,
+          timeframe: 1,
+          time: +candle[0],
+          timestamp: dayjs.utc(+candle[0]).toISOString(),
+          open: +candle[1],
+          high: +candle[2],
+          low: +candle[3],
+          close: +candle[4],
+          volume: +candle[5]
+        }))
+        .filter(
+          candle =>
+            candle.time <=
+            dayjs
+              .utc()
+              .add(-2, "minute")
+              .valueOf()
+        );
       return {
         success: true,
         candles
