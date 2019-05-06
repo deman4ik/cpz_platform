@@ -40,6 +40,9 @@ const ORDER_TASK_OPEN_LIMIT = "openLimit"; // Выставить лимитны�
 const ORDER_TASK_CHECK = "check"; // Проверить выполненный объем ордера на бирже
 const ORDER_TASK_CANCEL = "cancel"; // Отменить ордер
 
+const BLOB_LEASE_STATUS_LOCKED = "locked";
+const BLOB_LEASE_STATUS_UNLOCKED = "unlocked";
+
 export {
   STATUS_BUSY,
   STATUS_ERROR,
@@ -66,5 +69,7 @@ export {
   ORDER_TASK_OPEN_MARKET,
   ORDER_TASK_OPEN_LIMIT,
   ORDER_TASK_CHECK,
-  ORDER_TASK_CANCEL
+  ORDER_TASK_CANCEL,
+  BLOB_LEASE_STATUS_LOCKED,
+  BLOB_LEASE_STATUS_UNLOCKED
 };
