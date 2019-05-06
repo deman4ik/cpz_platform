@@ -85,6 +85,7 @@ class Candlebatcher {
   start() {
     this._status = STATUS_STARTED;
     this._startedAt = dayjs.utc().toISOString();
+    this._stoppedAt = null;
     this._error = null;
     this._eventsToSend.Start = {
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,

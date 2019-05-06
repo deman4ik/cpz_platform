@@ -14,6 +14,8 @@ import { TASKS_CANDLEBATCHER_RUN_EVENT_SCHEMA } from "cpz/events/schemas/tasks/c
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import candlebatcherTables from "cpz/tableStorage-client/control/candlebatchers";
 import candlebatcherActionTables from "cpz/tableStorage-client/control/candlebatcherActions";
+import BlobStorageClient from "cpz/blobStorage";
+import { CANDLEBATCHER_LOCK } from "cpz/blobStorage/containers";
 import ServiceError from "cpz/error";
 import { SERVICE_NAME } from "../config";
 import handleActionTimer from "../events/handleActionTimer";
@@ -51,6 +53,11 @@ class ActionTimer extends BaseService {
       ...candlebatcherTables,
       ...candlebatcherActionTables
     ]);
+    BlobStorageClient.init(
+      process.env.AZ_STORAGE_BLOB_NAME,
+      process.env.AZ_STORAGE_BLOB_KEY,
+      [CANDLEBATCHER_LOCK]
+    );
   }
 
   async run(context, timer) {

@@ -9,6 +9,7 @@ import publishEvents from "./publishEvents";
 import saveCandles from "./saveCandles";
 import saveState from "./saveState";
 
+export * from "./lock";
 export {
   cleanCachedCandles,
   clearTicks,

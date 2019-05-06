@@ -3,10 +3,10 @@ import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import EventGrid from "cpz/events";
 import dayjs from "cpz/utils/dayjs";
-import { STATUS_STARTED } from "cpz/config/state";
 import { getActiveCandlebatchers } from "cpz/tableStorage-client/control/candlebatchers";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
 import { TASKS_CANDLEBATCHER_RUN_EVENT } from "cpz/events/types/tasks/candlebatcher";
+import { isUnlocked } from "../executors";
 import { RUN } from "../config";
 
 async function handleActionTimer() {
@@ -15,7 +15,7 @@ async function handleActionTimer() {
 
     if (candlebatchers && candlebatchers.length > 0) {
       await Promise.all(
-        candlebatchers.map(async ({ taskId, status }) => {
+        candlebatchers.map(async ({ taskId }) => {
           try {
             await saveCandlebatcherAction({
               PartitionKey: taskId,
@@ -24,7 +24,8 @@ async function handleActionTimer() {
               type: RUN,
               actionTime: dayjs.utc().valueOf()
             });
-            if (status === STATUS_STARTED)
+            const unlocked = await isUnlocked(taskId);
+            if (unlocked)
               await EventGrid.publish(TASKS_CANDLEBATCHER_RUN_EVENT, {
                 subject: taskId,
                 data: { taskId }

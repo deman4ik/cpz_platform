@@ -39,6 +39,8 @@ import candlebatcherTables from "cpz/tableStorage-client/control/candlebatchers"
 import candlebatcherActionTables from "cpz/tableStorage-client/control/candlebatcherActions";
 import EventsStorageClient from "cpz/tableStorage-client/events";
 import eventTables from "cpz/tableStorage-client/events/events";
+import BlobStorageClient from "cpz/blobStorage";
+import { CANDLEBATCHER_LOCK } from "cpz/blobStorage/containers";
 import { SERVICE_NAME } from "../config";
 import {
   handleRun,
@@ -93,6 +95,12 @@ class TaskEvents extends BaseService {
       ...candlebatcherActionTables
     ]);
     EventsStorageClient.init(process.env.AZ_STORAGE_EVENT_CS, eventTables);
+
+    BlobStorageClient.init(
+      process.env.AZ_STORAGE_BLOB_NAME,
+      process.env.AZ_STORAGE_BLOB_KEY,
+      [CANDLEBATCHER_LOCK]
+    );
   }
 
   /**

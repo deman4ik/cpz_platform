@@ -29,19 +29,8 @@ const getActiveCandlebatchers = async () => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
 
-    const query = new TableQuery().where(
-      TableQuery.combineFilters(
-        startedStatusFilter,
-        TableUtilities.TableOperators.OR,
-        busyStatusFilter
-      )
-    );
+    const query = new TableQuery().where(startedStatusFilter);
     return await client.queryEntities(
       TABLES.STORAGE_CANDLEBATCHERS_TABLE,
       query

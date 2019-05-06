@@ -2,17 +2,21 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY,
-  STATUS_ERROR
-} from "cpz/config/state";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
 import { getCandlebatcherById } from "cpz/tableStorage-client/control/candlebatchers";
 import { STOP, UPDATE, TASK } from "../config";
 import Candlebatcher from "../state/candlebatcher";
-import { loadAction, execute, publishEvents, saveState } from "../executors";
+import {
+  loadAction,
+  execute,
+  publishEvents,
+  saveState,
+  createLockBlob,
+  lock,
+  unlock,
+  renewLock
+} from "../executors";
 
 async function handleRun(eventData) {
   const { taskId } = eventData;
@@ -20,11 +24,20 @@ async function handleRun(eventData) {
     // Загружаем текущий стейт
     let state = await getCandlebatcherById(taskId);
     // Если трейдер статус  занят/остановлен/ошибка
-    if ([STATUS_BUSY, STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
       Log.warn(
         `Got Candlebatcher.Run event but Candlebatcher ${taskId} is ${
           state.status
         } =(`
+      );
+      // Выходим
+      return;
+    }
+    // Блокируем
+    const leaseId = await lock(taskId);
+    if (!leaseId) {
+      Log.warn(
+        `Got Candlebatcher.Run event but Candlebatcher ${taskId} is busy =(`
       );
       // Выходим
       return;
@@ -37,44 +50,36 @@ async function handleRun(eventData) {
     nextAction = await loadAction(state.taskId, state.lastAction);
     // Если есть действие
     if (nextAction) {
-      // Меняем статус  - занят
-      state.status = STATUS_BUSY;
-      const lock = await saveState(state, true);
-
-      if (lock) {
-        // Пока есть действия
-        /* eslint-disable no-await-in-loop */
-        while (nextAction) {
-          Log.debug(
-            `Candlebatcher ${taskId} - ${STATUS_BUSY} - processing ${
-              nextAction.type
-            } action.`
-          );
-          // Исполняем  - получаем обновленный стейт
-          state = await execute(state, nextAction);
-          if (state.status === STATUS_BUSY) {
-            // Загружаем следующее действие из очереди
-            nextAction = await loadAction(state.taskId, state.lastAction);
-          } else {
-            nextAction = null;
-          }
-        }
-        /* no-await-in-loop */
-
-        // Если действие больше нет и статус не поменялся
-        if (state.status === STATUS_BUSY) {
-          // Меняем статус трейдера - запущен
-          state.status = STATUS_STARTED;
-          await saveState(state);
-        }
+      // Пока есть действия
+      /* eslint-disable no-await-in-loop */
+      while (nextAction) {
         Log.debug(
-          `Candlebatcher ${taskId} - ${
-            state.status
-          } - finished processing actions.`
+          `Candlebatcher ${taskId} - processing ${nextAction.type} action.`
         );
-      } else {
-        Log.warn(`Candlebatcher ${taskId} already processing...`);
+        // Исполняем  - получаем обновленный стейт
+        state = await execute(state, nextAction);
+        if (state.status === STATUS_STARTED) {
+          // Загружаем следующее действие из очереди
+          nextAction = await loadAction(state.taskId, state.lastAction);
+          // Если есть следующее действие
+          if (nextAction) {
+            // Обновляем время блокировки
+            await renewLock(taskId, leaseId);
+          }
+        } else {
+          nextAction = null;
+        }
       }
+      /* no-await-in-loop */
+
+      // Если действий больше нет - освобождаем
+      await unlock(taskId, leaseId);
+
+      Log.debug(
+        `Candlebatcher ${taskId} - ${
+          state.status
+        } - finished processing actions.`
+      );
     }
   } catch (e) {
     throw new ServiceError(
@@ -102,7 +107,7 @@ async function handleStart(eventData) {
     const state = getCandlebatcherById(taskId);
     if (state) {
       // Если статус занят/запущен
-      if ([STATUS_BUSY, STATUS_STARTED].includes(state.status)) {
+      if (state.status === STATUS_STARTED) {
         Log.warn(
           `Got Candlebatcher.Start event but Candlebatcher ${taskId} is ${
             state.status
@@ -117,11 +122,13 @@ async function handleStart(eventData) {
     const candlebatcher = new Candlebatcher(currentState);
     candlebatcher.start();
 
-    // Отправляем событие Started
-    await publishEvents(candlebatcher.props, candlebatcher.events);
-
+    // Создаем файл блокировки
+    await createLockBlob(taskId);
     // Сохраняем стейт
     await saveState(candlebatcher.state);
+
+    // Отправляем событие Started
+    await publishEvents(candlebatcher.props, candlebatcher.events);
   } catch (e) {
     throw new ServiceError(
       {
@@ -152,7 +159,7 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус - остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status)) {
+    if (state.status === STATUS_STOPPED) {
       Log.warn(
         `Got TraCandlebatcherder.Stop event but Candlebatcher ${taskId} is ${
           state.status
