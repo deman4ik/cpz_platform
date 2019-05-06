@@ -678,7 +678,7 @@ class Importer {
         const errorLoads = loadIterationResult.filter(
           result => result.success === false
         );
-        this.log("erroLoads", errorLoads);
+
         const retryLoadIterationResult = await Promise.all(
           errorLoads.map(async ({ dateFrom, dateTo, duration }) =>
             this.loadCandles({ dateFrom, dateTo, duration })
