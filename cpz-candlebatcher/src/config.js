@@ -7,6 +7,6 @@ const UPDATE = "update";
 const TASK = "TASK";
 const RUN = "RUN";
 
-const LOCK_PERIOD = 59;
+const LOCK_PERIOD = 50;
 
 export { SERVICE_NAME, START, STOP, UPDATE, TASK, RUN, LOCK_PERIOD };

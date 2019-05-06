@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
+import { STATUS_STARTED } from "../../config/state";
 
 const { TableQuery, TableUtilities } = azure;
 
