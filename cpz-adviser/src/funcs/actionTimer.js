@@ -13,6 +13,8 @@ import { TASKS_ADVISER_RUN_EVENT_SCHEMA } from "cpz/events/schemas/tasks/adviser
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import adviserTables from "cpz/tableStorage-client/control/advisers";
 import adviserActionTables from "cpz/tableStorage-client/control/adviserActions";
+import BlobStorageClient from "cpz/blobStorage";
+import { ADVISER_LOCK } from "cpz/blobStorage/containers";
 import { SERVICE_NAME } from "../config";
 import handleActionTimer from "../events/handleActionTimer";
 
@@ -46,6 +48,11 @@ class ActionTimer extends BaseService {
         ...adviserTables,
         ...adviserActionTables
       ]);
+      BlobStorageClient.init(
+        process.env.AZ_STORAGE_BLOB_NAME,
+        process.env.AZ_STORAGE_BLOB_KEY,
+        [ADVISER_LOCK]
+      );
     } catch (e) {
       Log.exception(e);
       throw e;

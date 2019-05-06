@@ -44,7 +44,8 @@ import {
   STRATEGY_CODE,
   STRATEGY_STATE,
   INDICATORS_CODE,
-  INDICATORS_STATE
+  INDICATORS_STATE,
+  ADVISER_LOCK
 } from "cpz/blobStorage/containers";
 import {
   handleStart,
@@ -100,7 +101,13 @@ class TaskEvents extends BaseService {
     BlobStorageClient.init(
       process.env.AZ_STORAGE_BLOB_NAME,
       process.env.AZ_STORAGE_BLOB_KEY,
-      [STRATEGY_CODE, STRATEGY_STATE, INDICATORS_CODE, INDICATORS_STATE]
+      [
+        STRATEGY_CODE,
+        STRATEGY_STATE,
+        INDICATORS_CODE,
+        INDICATORS_STATE,
+        ADVISER_LOCK
+      ]
     );
   }
 

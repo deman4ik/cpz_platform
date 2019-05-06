@@ -10,6 +10,7 @@ import saveIndicatorsState from "./saveIndicatorsState";
 import saveState from "./saveState";
 import saveStrategyState from "./saveStrategyState";
 
+export * from "./lock";
 export {
   execute,
   loadAction,

@@ -2,12 +2,7 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import {
-  STATUS_STARTED,
-  STATUS_STOPPED,
-  STATUS_BUSY,
-  STATUS_ERROR
-} from "cpz/config/state";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
 import { saveAdviserAction } from "cpz/tableStorage-client/control/adviserActions";
 import { getAdviserById } from "cpz/tableStorage-client/control/advisers";
 import { STOP, UPDATE, TASK } from "../config";
@@ -20,7 +15,11 @@ import {
   publishEvents,
   saveState,
   saveStrategyState,
-  saveIndicatorsState
+  saveIndicatorsState,
+  createLockBlob,
+  lock,
+  unlock,
+  renewLock
 } from "../executors";
 
 async function handleRun(eventData) {
@@ -29,14 +28,20 @@ async function handleRun(eventData) {
     // Загружаем текущий стейт
     let state = await getAdviserById(taskId);
     // Если трейдер статус  занят/остановлен/ошибка
-    if ([STATUS_BUSY, STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
       Log.warn(
         `Got Adviser.Run event but Adviser ${taskId} is ${state.status} =(`
       );
       // Выходим
       return;
     }
-
+    // Блокируем
+    const leaseId = await lock(taskId);
+    if (!leaseId) {
+      Log.warn(`Got Adviser.Run event but Adviser ${taskId} is busy =(`);
+      // Выходим
+      return;
+    }
     // Следующее действие
     let nextAction = null;
 
@@ -44,42 +49,31 @@ async function handleRun(eventData) {
     nextAction = await loadAction(state.taskId, state.lastAction);
     // Если есть действие
     if (nextAction) {
-      // Меняем статус  - занят
-      state.status = STATUS_BUSY;
-      const lock = await saveState(state, true);
-
-      if (lock) {
-        // Пока есть действия
-        /* eslint-disable no-await-in-loop */
-        while (nextAction) {
-          Log.debug(
-            `Adviser ${taskId} - ${STATUS_BUSY} - processing ${
-              nextAction.type
-            } action.`
-          );
-          // Исполняем  - получаем обновленный стейт
-          state = await execute(state, nextAction);
-          if (state.status === STATUS_BUSY) {
-            // Загружаем следующее действие из очереди
-            nextAction = await loadAction(state.taskId, state.lastAction);
-          } else {
-            nextAction = null;
+      // Пока есть действия
+      /* eslint-disable no-await-in-loop */
+      while (nextAction) {
+        Log.debug(`Adviser ${taskId} - processing ${nextAction.type} action.`);
+        // Исполняем  - получаем обновленный стейт
+        state = await execute(state, nextAction);
+        if (state.status === STATUS_STARTED) {
+          // Загружаем следующее действие из очереди
+          nextAction = await loadAction(state.taskId, state.lastAction);
+          // Если есть следующее действие
+          if (nextAction) {
+            // Обновляем время блокировки
+            await renewLock(taskId, leaseId);
           }
+        } else {
+          nextAction = null;
         }
-        /* no-await-in-loop */
-
-        // Если действие больше нет и статус не поменялся
-        if (state.status === STATUS_BUSY) {
-          // Меняем статус трейдера - запущен
-          state.status = STATUS_STARTED;
-          await saveState(state);
-        }
-        Log.debug(
-          `Adviser ${taskId} - ${state.status} - finished processing actions.`
-        );
-      } else {
-        Log.warn(`Adviser ${taskId} already processing...`);
       }
+      /* no-await-in-loop */
+
+      // Если действий больше нет - освобождаем
+      await unlock(taskId, leaseId);
+      Log.debug(
+        `Adviser ${taskId} - ${state.status} - finished processing actions.`
+      );
     }
   } catch (e) {
     throw new ServiceError(
@@ -107,7 +101,7 @@ async function handleStart(eventData) {
     const state = getAdviserById(taskId);
     if (state) {
       // Если статус занят/запущен
-      if ([STATUS_BUSY, STATUS_STARTED].includes(state.status)) {
+      if (state.status === STATUS_STARTED) {
         Log.warn(
           `Got Adviser.Start event but Adviser ${taskId} is ${state.status} =(`
         );
@@ -132,6 +126,8 @@ async function handleStart(eventData) {
     adviser.initIndicators();
     adviser.start();
 
+    // Создаем файл блокировки
+    await createLockBlob(taskId);
     // Сохраняем стейт
     await saveIndicatorsState(adviser.props, adviser.indicators);
     await saveStrategyState(adviser.props, adviser.strategy);
@@ -167,7 +163,7 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус - остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status)) {
+    if (state.status === STATUS_STOPPED) {
       Log.warn(
         `Got TraAdviserder.Stop event but Adviser ${taskId} is ${
           state.status
@@ -215,7 +211,7 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус  остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status)) {
+    if (state.status === STATUS_STOPPED) {
       Log.warn(
         `Got Adviser.Update event but Adviser ${taskId} is ${state.status} =(`
       );

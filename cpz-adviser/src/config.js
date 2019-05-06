@@ -6,4 +6,5 @@ const STOP = "stop";
 const UPDATE = "update";
 const TASK = "TASK";
 const CANDLE = "CANDLE";
-export { SERVICE_NAME, START, STOP, UPDATE, TASK, CANDLE };
+const LOCK_PERIOD = 50;
+export { SERVICE_NAME, START, STOP, UPDATE, TASK, CANDLE, LOCK_PERIOD };

@@ -4,6 +4,7 @@ import EventGrid from "cpz/events";
 import { TASKS_ADVISER_RUN_EVENT } from "cpz/events/types/tasks/adviser";
 import { getStartedAdvisers } from "cpz/tableStorage-client/control/advisers";
 import { adviserHasActions } from "cpz/tableStorage-client/control/adviserActions";
+import { isUnlocked } from "../executors";
 
 async function handleActionTimer() {
   try {
@@ -16,10 +17,13 @@ async function handleActionTimer() {
             const hasActions = await adviserHasActions(taskId);
 
             if (hasActions) {
-              await EventGrid.publish(TASKS_ADVISER_RUN_EVENT, {
-                subject: taskId,
-                data: { taskId }
-              });
+              const unlocked = await isUnlocked(taskId);
+              if (unlocked) {
+                await EventGrid.publish(TASKS_ADVISER_RUN_EVENT, {
+                  subject: taskId,
+                  data: { taskId }
+                });
+              }
             }
           } catch (e) {
             const error = new ServiceError(

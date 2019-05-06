@@ -1,7 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
 import ServiceError from "../../error";
-import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
+import { STATUS_STARTED } from "../../config/state";
 
 const { TableQuery, TableUtilities } = azure;
 
@@ -36,21 +36,11 @@ const getActiveAdvisersBySlug = async slug => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
-    const statusFilter = TableQuery.combineFilters(
-      startedStatusFilter,
-      TableUtilities.TableOperators.OR,
-      busyStatusFilter
-    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
         partitionKeyFilter,
         TableUtilities.TableOperators.AND,
-        statusFilter
+        startedStatusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
@@ -93,6 +83,8 @@ const getStartedAdvisers = async () => {
     );
   }
 };
+// TODO: getAdvisersWithActions
+
 /**
  * Creates new or update current Adviser State
  *
