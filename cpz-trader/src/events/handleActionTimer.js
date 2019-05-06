@@ -4,6 +4,7 @@ import EventGrid from "cpz/events";
 import { TASKS_TRADER_RUN_EVENT } from "cpz/events/types/tasks/trader";
 import { getStartedTraders } from "cpz/tableStorage-client/control/traders";
 import { traderHasActions } from "cpz/tableStorage-client/control/traderActions";
+import { isUnlocked } from "../executors";
 
 async function handleActionTimer() {
   try {
@@ -16,10 +17,13 @@ async function handleActionTimer() {
             const hasActions = await traderHasActions(taskId);
 
             if (hasActions) {
-              await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
-                subject: taskId,
-                data: { taskId }
-              });
+              const unlocked = await isUnlocked(taskId);
+              if (unlocked) {
+                await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
+                  subject: taskId,
+                  data: { taskId }
+                });
+              }
             }
           } catch (e) {
             const error = new ServiceError(

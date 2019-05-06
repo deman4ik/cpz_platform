@@ -43,6 +43,8 @@ import ControlStorageClient from "cpz/tableStorage-client/control";
 import traderActionTables from "cpz/tableStorage-client/control/traderActions";
 import marketTables from "cpz/tableStorage-client/market/currentPrices";
 import eventTables from "cpz/tableStorage-client/events/events";
+import BlobStorageClient from "cpz/blobStorage";
+import { TRADER_LOCK } from "cpz/blobStorage/containers";
 import { SERVICE_NAME } from "../config";
 import {
   handleStart,
@@ -104,6 +106,11 @@ class TaskEvents extends BaseService {
       );
       MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, marketTables);
       EventsStorageClient.init(process.env.AZ_STORAGE_EVENT_CS, eventTables);
+      BlobStorageClient.init(
+        process.env.AZ_STORAGE_BLOB_NAME,
+        process.env.AZ_STORAGE_BLOB_KEY,
+        [TRADER_LOCK]
+      );
     } catch (e) {
       Log.exception(e);
       throw e;

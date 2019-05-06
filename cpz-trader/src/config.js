@@ -9,7 +9,7 @@ const TASK = "TASK";
 const SIGNAL = "handleSignal";
 const PRICE = "checkPrice";
 const CHECK = "checkOrders";
-
+const LOCK_PERIOD = 50;
 export {
   SERVICE_NAME,
   TRADER_IDLE_SECONDS,
@@ -19,5 +19,6 @@ export {
   TASK,
   SIGNAL,
   PRICE,
-  CHECK
+  CHECK,
+  LOCK_PERIOD
 };

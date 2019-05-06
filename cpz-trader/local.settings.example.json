@@ -6,6 +6,8 @@
     "AZ_STORAGE_CONTROL_CS": "",
     "AZ_STORAGE_MARKET_CS": "",
     "AZ_STORAGE_EVENT_CS": "",
+    "AZ_STORAGE_BLOB_NAME": "",
+    "AZ_STORAGE_BLOB_KEY": "",
     "API_KEY": "test",
     "EG_TASKS_ENDPOINT": "https://localhost:443",
     "EG_TASKS_KEY": "test",

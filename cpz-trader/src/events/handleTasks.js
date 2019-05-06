@@ -4,15 +4,19 @@ import Log from "cpz/log";
 import dayjs from "cpz/utils/dayjs";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { getTraderById } from "cpz/tableStorage-client/control/traders";
-import {
-  STATUS_STARTED,
-  STATUS_BUSY,
-  STATUS_STOPPED,
-  STATUS_ERROR
-} from "cpz/config/state";
+import { STATUS_STARTED, STATUS_STOPPED, STATUS_ERROR } from "cpz/config/state";
 import { STOP, UPDATE, TASK } from "../config";
 import Trader from "../state/trader";
-import { loadAction, execute, publishEvents, saveState } from "../executors";
+import {
+  loadAction,
+  execute,
+  publishEvents,
+  saveState,
+  createLockBlob,
+  lock,
+  unlock,
+  renewLock
+} from "../executors";
 
 async function handleRun(eventData) {
   const { taskId } = eventData;
@@ -25,14 +29,20 @@ async function handleRun(eventData) {
       return;
     }
     // Если трейдер статус трейдера занят/остановлен/ошибка
-    if ([STATUS_BUSY, STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
+    if ([STATUS_STOPPED, STATUS_ERROR].includes(state.status)) {
       Log.warn(
         `Got Trader.Run event but Trader ${taskId} is ${state.status} =(`
       );
       // Выходим
       return;
     }
-
+    // Блокируем
+    const leaseId = await lock(taskId);
+    if (!leaseId) {
+      Log.warn(`Got Trader.Run event but Trader ${taskId} is busy =(`);
+      // Выходим
+      return;
+    }
     // Следующее действие
     let nextAction = null;
 
@@ -40,42 +50,32 @@ async function handleRun(eventData) {
     nextAction = await loadAction(state.taskId, state.lastAction);
     // Если есть действие
     if (nextAction) {
-      // Меняем статус трейдера - занят
-      state.status = STATUS_BUSY;
-      const lock = await saveState(state, true);
-
-      if (lock) {
-        // Пока есть действия
-        /* eslint-disable no-await-in-loop */
-        while (nextAction) {
-          Log.debug(
-            `Trader ${taskId} - ${STATUS_BUSY} - processing ${
-              nextAction.type
-            } action.`
-          );
-          // Исполняем трейдер - получаем обновленный стейт
-          state = await execute(state, nextAction);
-          if (state.status === STATUS_BUSY) {
-            // Загружаем следующее действие из очереди
-            nextAction = await loadAction(state.taskId, state.lastAction);
-          } else {
-            nextAction = null;
+      // Пока есть действия
+      /* eslint-disable no-await-in-loop */
+      while (nextAction) {
+        Log.debug(`Trader ${taskId}  - processing ${nextAction.type} action.`);
+        // Исполняем трейдер - получаем обновленный стейт
+        state = await execute(state, nextAction);
+        if (state.status === STATUS_STARTED) {
+          // Загружаем следующее действие из очереди
+          nextAction = await loadAction(state.taskId, state.lastAction);
+          // Если есть следующее действие
+          if (nextAction) {
+            // Обновляем время блокировки
+            await renewLock(taskId, leaseId);
           }
+        } else {
+          nextAction = null;
         }
-        /* no-await-in-loop */
-
-        // Если действие больше нет и статус не поменялся
-        if (state.status === STATUS_BUSY) {
-          // Меняем статус трейдера - запущен
-          state.status = STATUS_STARTED;
-          await saveState(state);
-        }
-        Log.debug(
-          `Trader ${taskId} - ${state.status} - finished processing actions.`
-        );
-      } else {
-        Log.warn(`Trader ${taskId} already processing...`);
       }
+      /* no-await-in-loop */
+
+      // Если действий больше нет - освобождаем
+      await unlock(taskId, leaseId);
+
+      Log.debug(
+        `Trader ${taskId} - ${state.status} - finished processing actions.`
+      );
     }
   } catch (e) {
     throw new ServiceError(
@@ -105,10 +105,7 @@ async function handleStart(eventData) {
 
     if (state) {
       // Если статус занят/запущен
-      if (
-        [STATUS_BUSY, STATUS_STARTED].includes(state.status) ||
-        state.stopRequested
-      ) {
+      if (state.status === STATUS_STARTED || state.stopRequested) {
         Log.warn(
           `Got Trader.Start event but Trader ${taskId} is ${
             state.status
@@ -130,12 +127,13 @@ async function handleStart(eventData) {
     const trader = new Trader(currentState);
     trader.start();
 
-    // Отправляем событие Started
-
-    await publishEvents(trader.props, trader.events);
-
+    // Создаем файл блокировки
+    await createLockBlob(taskId);
     // Сохраняем стейт
     await saveState(trader.state);
+
+    // Отправляем событие Started
+    await publishEvents(trader.props, trader.events);
   } catch (e) {
     throw new ServiceError(
       {
@@ -165,7 +163,7 @@ async function handleStop(eventData) {
       return;
     }
     // Если трейдер статус трейдера остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if (state.status === STATUS_STOPPED || state.stopRequested) {
       Log.warn(
         `Got Trader.Stop event but Trader ${taskId} is ${
           state.status
@@ -213,7 +211,7 @@ async function handleUpdate(eventData) {
       return;
     }
     // Если трейдер статус трейдера остановлен/останавливается
-    if ([STATUS_STOPPED].includes(state.status) || state.stopRequested) {
+    if (state.status === STATUS_STOPPED || state.stopRequested) {
       Log.warn(
         `Got Trader.Update event but Trader ${taskId} is ${
           state.status

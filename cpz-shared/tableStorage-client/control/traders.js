@@ -1,8 +1,7 @@
 import azure from "azure-storage";
 import client from "./index";
-import Log from "../../log";
 import ServiceError from "../../error";
-import { STATUS_STARTED, STATUS_BUSY } from "../../config/state";
+import { STATUS_STARTED } from "../../config/state";
 import dayjs from "../../utils/dayjs";
 
 const { TableQuery, TableUtilities } = azure;
@@ -96,21 +95,11 @@ const getActiveTradersBySlug = async slug => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
-    const statusFilter = TableQuery.combineFilters(
-      startedStatusFilter,
-      TableUtilities.TableOperators.OR,
-      busyStatusFilter
-    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
         partitionKeyFilter,
         TableUtilities.TableOperators.AND,
-        statusFilter
+        startedStatusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
@@ -151,22 +140,11 @@ const getTradersReadyForSignals = async ({ slug, robotId }) => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
     const robotIdFilter = TableQuery.doubleFilter(
       "robotId",
       TableUtilities.QueryComparisons.EQUAL,
       robotId
     );
-    const statusFilter = TableQuery.combineFilters(
-      startedStatusFilter,
-      TableUtilities.TableOperators.OR,
-      busyStatusFilter
-    );
-
     const combinedOneFilters = TableQuery.combineFilters(
       partitionKeyFilter,
       TableUtilities.TableOperators.AND,
@@ -181,7 +159,7 @@ const getTradersReadyForSignals = async ({ slug, robotId }) => {
       TableQuery.combineFilters(
         combinedTwoFilters,
         TableUtilities.TableOperators.AND,
-        statusFilter
+        startedStatusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);
@@ -224,6 +202,7 @@ const getStartedTraders = async () => {
     );
   }
 };
+// TODO: getTradersWithActions
 
 /**
  * Query active Traders with active positions
@@ -251,16 +230,6 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
       TableUtilities.QueryComparisons.EQUAL,
       STATUS_STARTED
     );
-    const busyStatusFilter = TableQuery.stringFilter(
-      "status",
-      TableUtilities.QueryComparisons.EQUAL,
-      STATUS_BUSY
-    );
-    const statusFilter = TableQuery.combineFilters(
-      startedStatusFilter,
-      TableUtilities.TableOperators.OR,
-      busyStatusFilter
-    );
     const combinedFilter = TableQuery.combineFilters(
       hasActivePositionsFilter,
       TableUtilities.TableOperators.AND,
@@ -270,7 +239,7 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
       TableQuery.combineFilters(
         combinedFilter,
         TableUtilities.TableOperators.AND,
-        statusFilter
+        startedStatusFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_TRADERS_TABLE, query);

@@ -13,6 +13,8 @@ import { TASKS_TRADER_RUN_EVENT_SCHEMA } from "cpz/events/schemas/tasks/trader";
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import traderTables from "cpz/tableStorage-client/control/traders";
 import traderActionTables from "cpz/tableStorage-client/control/traderActions";
+import BlobStorageClient from "cpz/blobStorage";
+import { TRADER_LOCK } from "cpz/blobStorage/containers";
 import { SERVICE_NAME } from "../config";
 import handleActionTimer from "../events/handleActionTimer";
 
@@ -46,6 +48,11 @@ class ActionTimer extends BaseService {
         ...traderTables,
         ...traderActionTables
       ]);
+      BlobStorageClient.init(
+        process.env.AZ_STORAGE_BLOB_NAME,
+        process.env.AZ_STORAGE_BLOB_KEY,
+        [TRADER_LOCK]
+      );
     } catch (e) {
       Log.exception(e);
       throw e;
