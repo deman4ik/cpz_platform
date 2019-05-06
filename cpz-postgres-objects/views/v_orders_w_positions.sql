@@ -1,6 +1,6 @@
-drop view v_positions_w_orders;
+drop view v_orders_w_positions;
 
-create or replace view v_positions_w_orders as
+create view v_orders_w_positions as
 SELECT p.id,
        p.user_id,
        p.robot_id,
@@ -35,26 +35,11 @@ SELECT p.id,
        oc.order_ex_num as o_ex_num_close,
        p.OID,
        p.run_mode
-FROM 
-  (select 
-     pp.*, pp.OID,
-     (select first_value(id) OVER (order by created_at desc)
-       from orders 
-       where position_id = pp.id and action in ('short','long') 
-       limit 1
-     ) as order_open_id,
-     (select first_value(id) OVER (order by created_at desc)
-        from orders 
-        where position_id = pp.id and action in ('closeShort','closeLong') 
-        limit 1
-     ) as order_close_id
-     from 
-     positions pp
-  ) p
+FROM positions p
 left join backtest b on (p.backtest_id = b.id)
-left join orders oo on oo.id = p.order_open_id
-left join orders oc on oc.id = p.order_close_id;
+left join orders oo on (p.id = oo.position_id and oo.action in ('short','long'))
+left join orders oc on (p.id = oc.position_id and oc.action in ('closeShort','closeLong'));
 
-alter table v_positions_w_orders
+alter table v_orders_w_positions
   owner to cpz;
 
