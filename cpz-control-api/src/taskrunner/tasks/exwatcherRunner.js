@@ -247,10 +247,15 @@ class ExWatcherRunner extends BaseRunner {
       ) {
         const maxTimeframe = getMaxTimeframe(exWatcher.timeframes);
 
-        let dateFrom = getMaxTimeframeDateFrom(
-          exWatcher.timeframes,
-          exWatcher.candlebatcherSettings.requiredHistoryMaxBars
-        );
+        let dateFrom = dayjs
+          .utc(
+            getMaxTimeframeDateFrom(
+              exWatcher.timeframes,
+              exWatcher.candlebatcherSettings.requiredHistoryMaxBars
+            )
+          )
+          .startOf("day")
+          .toISOString();
 
         const dateTo = dayjs
           .utc()
@@ -270,7 +275,6 @@ class ExWatcherRunner extends BaseRunner {
           candles.length <
           exWatcher.candlebatcherSettings.requiredHistoryMaxBars
         ) {
-          /*
           if (candles.length > 0) {
             Log.warn(dateFrom, dateTo);
             Log.warn(
@@ -279,7 +283,7 @@ class ExWatcherRunner extends BaseRunner {
             );
             const lastCandle = candles[candles.length - 1];
             dateFrom = lastCandle.timestamp;
-          }*/
+          }
 
           const importerHistoryParams = {
             exchange: exWatcher.exchange,
