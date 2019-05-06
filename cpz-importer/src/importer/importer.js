@@ -121,9 +121,6 @@ class Importer {
       this._dateTo,
       this._limit
     );
-    this.log("dateFrom", state.dateFrom, this._dateFrom);
-    this.log("dateTo", state.dateTo, this._dateTo);
-    this.log("loadDurationChunks", this._loadDurationChunks);
     /* Всего свечей для загрузки */
     this._loadTotalDuration = this._loadDurationChunks.total;
     /* Загружено свечей */
@@ -543,7 +540,6 @@ class Importer {
       const fullMinutesList = createMinutesList(dateFrom, dateTo, duration + 1); // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
       fullMinutesList.forEach(time => {
         const date = dayjs.utc(time);
-        Log.warn(date.toISOString());
         // Пропускаем самую первую свечу
         if (dayjs.utc(dateFrom).valueOf() === date.valueOf()) return;
         const currentTimeframes = getCurrentTimeframes(this._timeframes, time);
@@ -588,7 +584,6 @@ class Importer {
           });
         }
       });
-      Log.debug("timeframeCandles", Object.keys(timeframeCandles));
       return timeframeCandles;
     } catch (error) {
       throw new ServiceError(

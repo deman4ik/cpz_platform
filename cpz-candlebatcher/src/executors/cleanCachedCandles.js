@@ -12,19 +12,37 @@ async function cleanCandles(state) {
 
     await Promise.all(
       timeframes.map(async timeframe => {
-        let number;
-        let unit;
-
+        let dateTo;
         if (timeframe === 1) {
-          ({ number, unit } = timeframeToTimeUnit(
+          const { number, unit } = timeframeToTimeUnit(
             Math.max(...timeframes),
             timeframe
-          ));
-        } else {
-          ({ number, unit } = timeframeToTimeUnit(
+          );
+          dateTo = dayjs
+            .utc()
+            .add(-number + 1, unit)
+            .startOf("minute")
+            .toISOString();
+        } else if (timeframe >= 1440) {
+          const { number, unit } = timeframeToTimeUnit(
             settings.requiredHistoryMaxBars,
             timeframe
-          ));
+          );
+          dateTo = dayjs
+            .utc()
+            .add(-number + 1, unit)
+            .startOf("day")
+            .toISOString();
+        } else {
+          const { number, unit } = timeframeToTimeUnit(
+            settings.requiredHistoryMaxBars,
+            timeframe
+          );
+          dateTo = dayjs
+            .utc()
+            .add(-number + 1, unit)
+            .startOf("minute")
+            .toISOString();
         }
         Log.debug(
           "Cleaning cached candles",
@@ -35,10 +53,7 @@ async function cleanCandles(state) {
             timeframe
           }),
           "to",
-          dayjs
-            .utc()
-            .add(-number, unit)
-            .toISOString()
+          dateTo
         );
         await cleanCachedCandles({
           slug: createCachedCandleSlug({
@@ -47,7 +62,7 @@ async function cleanCandles(state) {
             currency,
             timeframe
           }),
-          dateTo: dayjs.utc().add(-number, unit)
+          dateTo
         });
       })
     );
