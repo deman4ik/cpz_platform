@@ -41,6 +41,7 @@ input TraderSettings {
 
 input BacktesterSettings {
   debug: Boolean
+  local: Boolean
   trace: Boolean
   saveToStorage: Boolean
   saveToDB: Boolean

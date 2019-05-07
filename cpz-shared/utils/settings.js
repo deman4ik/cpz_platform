@@ -128,6 +128,10 @@ const combineBacktesterSettings = (settings = {}) => ({
     settings.debug === undefined || settings.debug === null
       ? BACKTESTER_SETTINGS_DEFAULTS.debug
       : settings.debug,
+  local:
+    settings.local === undefined || settings.local === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.local
+      : settings.local,
   trace:
     settings.trace === undefined || settings.trace === null
       ? BACKTESTER_SETTINGS_DEFAULTS.trace

@@ -204,6 +204,26 @@ const BACKTESTER_SETTINGS = {
     description: "Debug mode.",
     type: "boolean",
     optional: true
+  },
+  local: {
+    description: "Use local strategy and indicators source code.",
+    type: "boolean",
+    optional: true
+  },
+  trace: {
+    description: "Trace candles to storage.",
+    type: "boolean",
+    optional: true
+  },
+  saveToStorage: {
+    description: "Save output to Table Storage.",
+    type: "boolean",
+    optional: true
+  },
+  saveToDB: {
+    description: "Save output to DB.",
+    type: "boolean",
+    optional: true
   }
 };
 export {

@@ -169,7 +169,7 @@ class Backtester {
         await deleteBacktestDB(this._taskId);
       }
 
-      await this._adviserBacktester.bInit();
+      await this._adviserBacktester.bInit(this._settings.local);
       this.log(`Starting ${this._taskId}...`);
 
       // Если необходим прогрев

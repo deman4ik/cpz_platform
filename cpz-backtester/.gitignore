@@ -26,3 +26,5 @@ local.settings.json
 *.save
 *.bak
 package-lock.json
+strategies
+indicators

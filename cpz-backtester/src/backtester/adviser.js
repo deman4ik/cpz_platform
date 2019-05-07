@@ -31,17 +31,33 @@ class AdviserBacktester extends Adviser {
     return results;
   }
 
-  async bInit() {
+  async bInit(local = false) {
     try {
-      const strategyCode = await loadStrategyCode(this.props);
+      let strategyCode;
+      if (local) {
+        /* eslint-disable import/no-dynamic-require, global-require */
+        strategyCode = require(`../strategies/${this._strategyName}`);
+        /* import/no-dynamic-require, global-require */
+      } else {
+        strategyCode = await loadStrategyCode(this.props);
+      }
       this.setStrategy(strategyCode);
       this.initStrategy();
 
       if (this.hasBaseIndicators) {
-        const baseIndicatorsCode = await loadBaseIndicatorsCode(
-          this.props,
-          this.baseIndicatorsFileNames
-        );
+        let baseIndicatorsCode;
+        if (local) {
+          baseIndicatorsCode = this.baseIndicatorsFileNames.map(fileName => {
+            /* eslint-disable import/no-dynamic-require, global-require */
+            return { fileName, code: require(`../indicators/${fileName}`) };
+            /* import/no-dynamic-require, global-require */
+          });
+        } else {
+          baseIndicatorsCode = await loadBaseIndicatorsCode(
+            this.props,
+            this.baseIndicatorsFileNames
+          );
+        }
         this.setBaseIndicatorsCode(baseIndicatorsCode);
       }
       this.setIndicators();
