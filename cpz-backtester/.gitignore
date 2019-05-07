@@ -26,5 +26,7 @@ local.settings.json
 *.save
 *.bak
 package-lock.json
-strategies
-indicators
+src/strategies/*
+!src/strategies/.gitkeep
+src/indicators/*
+!src/indicators/.gitkeep
