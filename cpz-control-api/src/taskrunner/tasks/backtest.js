@@ -14,7 +14,7 @@ import {
   TASKS_BACKTEST_FINISHED_EVENT
 } from "cpz/events/types/tasks/backtest";
 import { ERROR_BACKTEST_ERROR_EVENT } from "cpz/events/types/error";
-import Log from "cpz/log";
+import { v4 as uuid } from "uuid";
 import {
   combineBacktesterSettings,
   combineAdviserSettings,
@@ -35,7 +35,7 @@ class Backtest {
     this._settings = combineBacktesterSettings(state.settings);
     this._adviserSettings = combineAdviserSettings(state.adviserSettings);
     this._traderSettings = combineTraderSettings(state.traderSettings);
-    this._backtesterId = state.backtesterId;
+    this._backtesterId = state.backtesterId || uuid();
     this._taskId = this._backtesterId;
     this._backtesterStatus = state.backtesterStatus || STATUS_PENDING;
     this._backtesterError = state.backtesterError;

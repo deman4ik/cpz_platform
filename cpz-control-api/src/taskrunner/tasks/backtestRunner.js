@@ -186,7 +186,6 @@ class BacktestRunner extends BaseRunner {
             exchange: backtest.exchange,
             asset: backtest.asset,
             currency: backtest.currency,
-            timeframes: backtest.timeframes,
             mode: IMPORTER_IMPORT_CANDLES_MODE,
             settings: {
               importCandles: {
@@ -215,6 +214,7 @@ class BacktestRunner extends BaseRunner {
         backtest.backtesterStatus !== STATUS_FINISHED
       ) {
         const backtesterParams = {
+          taskId: backtest.backtesterId,
           robotId: backtest.robotId,
           userId: backtest.userId,
           strategyName: backtest.strategyName,
