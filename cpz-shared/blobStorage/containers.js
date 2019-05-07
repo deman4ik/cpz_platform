@@ -5,6 +5,7 @@ const INDICATORS_STATE = "indicators-state";
 const CANDLEBATCHER_LOCK = "candlebatcher-lock";
 const ADVISER_LOCK = "adviser-lock";
 const TRADER_LOCK = "trader-lock";
+const BACKTESTER_LOGS = "backtester-logs";
 
 export {
   STRATEGY_CODE,
@@ -13,5 +14,6 @@ export {
   INDICATORS_STATE,
   CANDLEBATCHER_LOCK,
   ADVISER_LOCK,
-  TRADER_LOCK
+  TRADER_LOCK,
+  BACKTESTER_LOGS
 };

@@ -1,5 +1,6 @@
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
+import { json2csvAsync } from "json-2-csv";
 import {
   BACKTEST_MODE,
   createBacktesterSlug,
@@ -8,6 +9,7 @@ import {
   STATUS_STARTED
 } from "cpz/config/state";
 import EventGrid from "cpz/events";
+import BlobStorageClient from "cpz/blobStorage";
 import Log from "cpz/log";
 import {
   combineAdviserSettings,
@@ -44,6 +46,7 @@ import {
   TASKS_BACKTESTER_FINISHED_EVENT
 } from "cpz/events/types/tasks/backtester";
 import { ERROR_BACKTESTER_ERROR_EVENT } from "cpz/events/types/error";
+import { BACKTESTER_LOGS } from "cpz/blobStorage/containers";
 import AdviserBacktester from "./adviser";
 import TraderBacktester from "./trader";
 
@@ -247,7 +250,7 @@ class Backtester {
 
       this._iterations = chunkNumberToArray(this._totalBars, 1440);
       this._prevIteration = 0;
-
+      let logsToSaveCSV = [];
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const iteration of this._iterations) {
         const logsToSave = [];
@@ -438,6 +441,7 @@ class Backtester {
           }
         }
 
+        logsToSaveCSV = [...logsToSaveCSV, ...logsToSave];
         if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
         if (traceToSave.length > 0) await saveBacktesterItems(traceToSave);
         if (signalsToSave.length > 0)
@@ -455,6 +459,14 @@ class Backtester {
         await this.save();
       }
       /* no-restricted-syntax, no-await-in-loop  */
+
+      this.log("Saving log events to csv");
+      const logsCSV = await json2csvAsync(logsToSaveCSV);
+      await BlobStorageClient.upload(
+        BACKTESTER_LOGS,
+        `${this._taskId}_logEvents.csv`,
+        logsCSV
+      );
       // Закончили обработку
       this._status = STATUS_FINISHED;
       this._endedAt = dayjs.utc().toISOString();

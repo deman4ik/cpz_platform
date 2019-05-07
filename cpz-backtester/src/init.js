@@ -19,7 +19,8 @@ import {
   STRATEGY_CODE,
   STRATEGY_STATE,
   INDICATORS_CODE,
-  INDICATORS_STATE
+  INDICATORS_STATE,
+  BACKTESTER_LOGS
 } from "cpz/blobStorage/containers";
 import { EGConfig, ValidatorConfig } from "cpz/utils/helpers";
 import { SERVICE_NAME } from "./config";
@@ -49,7 +50,13 @@ function init() {
   BlobStorageClient.init(
     process.env.AZ_STORAGE_BLOB_NAME,
     process.env.AZ_STORAGE_BLOB_KEY,
-    [STRATEGY_CODE, STRATEGY_STATE, INDICATORS_CODE, INDICATORS_STATE]
+    [
+      STRATEGY_CODE,
+      STRATEGY_STATE,
+      INDICATORS_CODE,
+      INDICATORS_STATE,
+      BACKTESTER_LOGS
+    ]
   );
 }
 
