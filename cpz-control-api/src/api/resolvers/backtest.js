@@ -6,11 +6,17 @@ import { BACKTEST_SERVICE } from "cpz/config/services";
 import { getRobotDB } from "cpz/db-client/robots";
 import BacktestRunner from "../../taskrunner/tasks/backtestRunner";
 
-async function startBacktest(_, { robotId, overrideParams }) {
+async function startBacktest(
+  _,
+  { robotId, userId, dateFrom, dateTo, overrideParams }
+) {
   try {
     const robot = await getRobotDB(robotId);
     const backtestParams = {
       ...robot,
+      userId,
+      dateFrom,
+      dateTo,
       ...overrideParams
     };
     const { taskId, status } = await BacktestRunner.start(backtestParams);

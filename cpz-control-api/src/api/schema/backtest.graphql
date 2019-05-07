@@ -1,9 +1,6 @@
 input BacktestParams {
-    backtesterId: ID
-    userId: ID!
-    dateFrom: Datetime!
-    dateTo: Datetime!
-    settings: BacktesterSettings
-    adviserSettings: AdviserSettings
-    traderSettings: TraderSettings
+  backtesterId: ID
+  settings: BacktesterSettings
+  adviserSettings: AdviserSettings
+  traderSettings: TraderSettings
 }

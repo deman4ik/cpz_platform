@@ -29,6 +29,9 @@ type Mutation {
   # Backtest
   startBacktest(
     robotId: Int!
+    userId: ID!
+    dateFrom: Datetime!
+    dateTo: Datetime!
     overrideParams: BacktestParams
   ): ServiceRunnerResponse!
   stopBacktest(taskId: ID!): ServiceRunnerResponse!
