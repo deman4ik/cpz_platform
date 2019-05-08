@@ -208,10 +208,6 @@ class Trader {
     this._status = STATUS_PAUSED;
   }
 
-  resume() {
-    this._status = STATUS_STARTED;
-  }
-
   _baseOrder(order) {
     return {
       ...order,

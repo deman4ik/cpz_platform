@@ -138,10 +138,6 @@ class Adviser {
     this._status = STATUS_PAUSED;
   }
 
-  resume() {
-    this._status = STATUS_STARTED;
-  }
-
   setError(err) {
     try {
       let critical;

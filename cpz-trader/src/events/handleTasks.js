@@ -11,7 +11,7 @@ import {
   STATUS_ERROR,
   STATUS_PAUSED
 } from "cpz/config/state";
-import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
+import { STOP, UPDATE, TASK, PAUSE } from "../config";
 import Trader from "../state/trader";
 import {
   loadAction,
@@ -324,15 +324,8 @@ async function handleResume(eventData) {
       return;
     }
 
-    // Сохраняем новое действие
-    await saveTraderAction({
-      PartitionKey: taskId,
-      RowKey: TASK,
-      id: uuid(),
-      type: RESUME,
-      actionTime: dayjs.utc().valueOf(),
-      data: eventData
-    });
+    state.status = STATUS_STARTED;
+    await saveState(state);
   } catch (e) {
     throw new ServiceError(
       {

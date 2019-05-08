@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Trader from "../state/trader";
-import { STOP, UPDATE, SIGNAL, PAUSE, RESUME, PRICE, CHECK } from "../config";
+import { STOP, UPDATE, SIGNAL, PAUSE, PRICE, CHECK } from "../config";
 import executeOrder from "./executeOrder";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
@@ -24,8 +24,6 @@ async function execute(traderState, nextAction) {
       trader.requestStop();
     } else if (type === PAUSE) {
       trader.pause();
-    } else if (type === RESUME) {
-      trader.resume();
     } else {
       Log.error("Unknown trader action '%s'", type);
       return trader.state;

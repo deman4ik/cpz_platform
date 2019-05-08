@@ -10,7 +10,7 @@ import {
 } from "cpz/config/state";
 import { saveAdviserAction } from "cpz/tableStorage-client/control/adviserActions";
 import { getAdviserById } from "cpz/tableStorage-client/control/advisers";
-import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
+import { STOP, UPDATE, TASK, PAUSE } from "../config";
 import Adviser from "../state/adviser";
 import {
   loadAction,
@@ -316,15 +316,8 @@ async function handleResume(eventData) {
       return;
     }
 
-    // Сохраняем новое действие
-    await saveAdviserAction({
-      PartitionKey: taskId,
-      RowKey: TASK,
-      id: uuid(),
-      type: RESUME,
-      actionTime: dayjs.utc().valueOf(),
-      data: eventData
-    });
+    state.status = STATUS_STARTED;
+    await saveState(state);
   } catch (e) {
     throw new ServiceError(
       {

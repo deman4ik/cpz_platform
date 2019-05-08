@@ -6,7 +6,6 @@ const START = "start";
 const STOP = "stop";
 const UPDATE = "update";
 const PAUSE = "pause";
-const RESUME = "resume";
 const TASK = "TASK";
 const SIGNAL = "handleSignal";
 const PRICE = "checkPrice";
@@ -19,7 +18,6 @@ export {
   STOP,
   UPDATE,
   PAUSE,
-  RESUME,
   TASK,
   SIGNAL,
   PRICE,
