@@ -1,13 +1,17 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
+import dayjs from "cpz/utils/dayjs";
+import { createMinutesList } from "cpz/utils/candlesUtils";
+import { durationMinutes } from "cpz/utils/helpers";
 import Candlebatcher from "../state/candlebatcher";
-import { STOP, UPDATE, RUN, PAUSE, RESUME } from "../config";
-import loadCandle from "./loadCandle";
+import { STOP, UPDATE, RUN, PAUSE } from "../config";
+import loadCandles from "./loadCandles";
 import createCandle from "./createCandle";
 import createTimeframeCandles from "./createTimeframeCandles";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
-import saveCandlesToCache from "./saveCandles";
+import saveCandlesToCache from "./saveCandlesToStorage";
+import saveCandleToDb from "./saveCandleToDb";
 import cleanCachedCandles from "./cleanCachedCandles";
 import clearTicks from "./clearTicks";
 
@@ -17,45 +21,85 @@ async function execute(candlebatcherState, nextAction) {
     const { type, data } = nextAction;
     Log.debug(`Executing - ${type} action`);
     if (type === RUN) {
-      let candle = await loadCandle(candlebatcher.state);
-      Log.debug("Loaded candle", candle);
-      if (!candle) {
-        candle = await createCandle(candlebatcher.state);
-        Log.debug("Created candle", candle);
+      const currentCandleTime = dayjs
+        .utc()
+        .startOf("minute")
+        .add(-1, "minute")
+        .toISOString();
+      let loadFrom;
+      const { lastCandle } = candlebatcher;
+      if (lastCandle && lastCandle.time) {
+        loadFrom = dayjs
+          .utc(lastCandle.time)
+          .add(1, "minute")
+          .toISOString();
+      } else {
+        loadFrom = dayjs
+          .utc()
+          .startOf("minute")
+          .add(-2, "minute")
+          .toISOString();
       }
-      if (!candle) {
-        candle = candlebatcher.createPrevCandle();
-        Log.debug("Candle from previous", candle);
-      }
+      const candles = await loadCandles(candlebatcher.state, loadFrom);
+      const duration = durationMinutes(loadFrom, currentCandleTime) + 1;
+      const minutes = createMinutesList(loadFrom, currentCandleTime, duration);
 
-      if (!candle) {
-        throw Error("Failed to load or create candle");
+      /* eslint-disable no-restricted-syntax, no-await-in-loop */
+      for (const minute of minutes) {
+        let candle = candles.find(c => c.time === dayjs.utc(minute).valueOf());
+        Log.debug("Loaded candle", candle);
+        if (!candle) {
+          candle = await createCandle(candlebatcher.state, minute);
+          Log.debug("Created candle", candle);
+        }
+        if (!candle) {
+          candle = candlebatcher.createPrevCandle(minute);
+          Log.debug("Candle from previous", candle);
+        }
+
+        if (candle) {
+          const candleHandled = candlebatcher.handleCandle(candle);
+          if (candleHandled) {
+            const candlesObject = await createTimeframeCandles(
+              candlebatcher.state,
+              candle
+            );
+            await saveCandleToDb(candlebatcher.props, candlesObject);
+            await saveCandlesToCache(
+              candlebatcher.props,
+              Object.values(candlesObject)
+            );
+            const clearTasks = [
+              clearTicks(candlebatcher.state, minute),
+              cleanCachedCandles(candlebatcher.state, minute)
+            ];
+            try {
+              await Promise.all(clearTasks);
+            } catch (e) {
+              Log.error(e);
+            }
+            candlebatcher.createCandleEvents(candlesObject);
+          }
+        } else {
+          const error = new ServiceError(
+            {
+              name: ServiceError.types.CANDLEBATCHER_EXECUTE_ERROR,
+              info: { ...candlebatcher.props }
+            },
+            "Failed to load or create candle Candlebatcher '%s'",
+            candlebatcher.taskId
+          );
+
+          candlebatcher.setError(error);
+        }
       }
-      const candleHandled = candlebatcher.handleCandle(candle);
-      Log.debug("candleHandled", candleHandled);
-      if (candleHandled) {
-        const candlesObject = await createTimeframeCandles(
-          candlebatcher.state,
-          candle
-        );
-        Log.debug("candlesObject", candlesObject);
-        // TODO: save candle to db
-        await saveCandlesToCache(
-          candlebatcher.state,
-          Object.values(candlesObject)
-        );
-        await clearTicks(candlebatcher.state);
-        await cleanCachedCandles(candlebatcher.state);
-        candlebatcher.createCandleEvents(candlesObject);
-      }
+      /*  no-restricted-syntax, no-await-in-loop */
     } else if (type === UPDATE) {
       candlebatcher.update(data);
     } else if (type === STOP) {
       candlebatcher.stop();
     } else if (type === PAUSE) {
       candlebatcher.pause();
-    } else if (type === RESUME) {
-      candlebatcher.resume();
     } else {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;

@@ -5,7 +5,6 @@ import {
   CANDLE_PREVIOUS,
   createCachedCandleSlug,
   createCandlebatcherSlug,
-  createImporterSlug,
   createNewCandleSubject,
   STATUS_STARTED,
   STATUS_PENDING,
@@ -20,10 +19,8 @@ import {
   TASKS_CANDLEBATCHER_STOPPED_EVENT,
   TASKS_CANDLEBATCHER_UPDATED_EVENT
 } from "cpz/events/types/tasks/candlebatcher";
-import { TASKS_IMPORTER_START_EVENT } from "cpz/events/types/tasks/importer";
 import { ERROR_CANDLEBATCHER_ERROR_EVENT } from "cpz/events/types/error";
 import { combineCandlebatcherSettings } from "cpz/utils/settings";
-import { getPreviousMinuteRange } from "cpz/utils/helpers";
 import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types";
 
@@ -64,9 +61,6 @@ class Candlebatcher {
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
 
-    const { dateFrom, dateTo } = getPreviousMinuteRange();
-    this._dateFrom = dateFrom;
-    this._dateTo = dateTo;
     this._currentDate = dayjs
       .utc()
       .startOf("minute")
@@ -88,6 +82,7 @@ class Candlebatcher {
     this._startedAt = dayjs.utc().toISOString();
     this._stoppedAt = null;
     this._error = null;
+    this._lastCandle = null;
     this._eventsToSend.Start = {
       eventType: TASKS_CANDLEBATCHER_STARTED_EVENT,
       eventData: {
@@ -130,10 +125,6 @@ class Candlebatcher {
     this._status = STATUS_PAUSED;
   }
 
-  resume() {
-    this._status = STATUS_STARTED;
-  }
-
   get status() {
     return this._status;
   }
@@ -142,16 +133,17 @@ class Candlebatcher {
     this._status = status;
   }
 
-  get dateFrom() {
-    return this._dateFrom;
+  get lastCandle() {
+    return this._lastCandle;
   }
 
-  get dateTo() {
-    return this._dateTo;
-  }
-
-  createPrevCandle() {
+  createPrevCandle(time) {
     if (this._lastCandle) {
+      const dateFrom = dayjs
+        .utc(time)
+        .startOf("minute")
+        .toISOString();
+
       /* Формируем новую минутную свечу по данным из предыдущей */
       return {
         PartitionKey: createCachedCandleSlug({
@@ -160,15 +152,15 @@ class Candlebatcher {
           currency: this._currency,
           timeframe: 1
         }),
-        RowKey: generateCandleRowKey(dayjs.utc(this._dateFrom).valueOf()),
+        RowKey: generateCandleRowKey(dayjs.utc(dateFrom).valueOf()),
         id: uuid(),
         taskId: this._taskId,
         exchange: this._exchange,
         asset: this._asset,
         currency: this._currency,
         timeframe: 1,
-        time: dayjs.utc(this._dateFrom).valueOf(), // время в милисекундах
-        timestamp: dayjs.utc(this._dateFrom).toISOString(), // время в ISO UTC
+        time: dayjs.utc(dateFrom).valueOf(), // время в милисекундах
+        timestamp: dayjs.utc(dateFrom).toISOString(), // время в ISO UTC
         open: this._lastCandle.close, // цена открытия = цене закрытия предыдущей
         high: this._lastCandle.close, // максимальная цена = цене закрытия предыдущей
         low: this._lastCandle.close, // минимальная цена = цене закрытия предыдущей
@@ -186,31 +178,6 @@ class Candlebatcher {
       if (time && time >= candle.time) {
         return false;
       }
-
-      if (dayjs.utc(candle.time).diff(dayjs.utc(time), "minute") > 1) {
-        this._eventsToSend.import = {
-          eventType: TASKS_IMPORTER_START_EVENT,
-          eventData: {
-            subject: createImporterSlug({
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency
-            }),
-            data: {
-              taskId: uuid(),
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              saveToCache: true,
-              dateFrom: dayjs
-                .utc()
-                .startOf("day")
-                .toISOString(),
-              dateTo: dayjs.utc().toISOString()
-            }
-          }
-        };
-      }
     }
     this._lastCandle = candle;
     return true;
@@ -223,7 +190,7 @@ class Candlebatcher {
 
       /* Если подписаны на данный таймфрейм */
       if (this._timeframes.includes(+timeframe)) {
-        this._eventsToSend[`C_${candle.id}`] = {
+        this._eventsToSend[`C_${timeframe}`] = {
           eventType: CANDLES_NEWCANDLE_EVENT,
           eventData: {
             subject: createNewCandleSubject({
@@ -310,8 +277,6 @@ class Candlebatcher {
       error: this._error,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,
-      dateFrom: this._dateFrom,
-      dateTo: this._dateTo,
       currentDate: this._currentDate
     };
   }

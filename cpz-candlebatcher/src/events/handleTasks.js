@@ -10,7 +10,7 @@ import {
 } from "cpz/config/state";
 import { saveCandlebatcherAction } from "cpz/tableStorage-client/control/candlebatcherActions";
 import { getCandlebatcherById } from "cpz/tableStorage-client/control/candlebatchers";
-import { STOP, UPDATE, TASK, PAUSE, RESUME } from "../config";
+import { STOP, UPDATE, TASK, PAUSE } from "../config";
 import Candlebatcher from "../state/candlebatcher";
 import {
   loadAction,
@@ -320,15 +320,8 @@ async function handleResume(eventData) {
       return;
     }
 
-    // Сохраняем новое действие
-    await saveCandlebatcherAction({
-      PartitionKey: taskId,
-      RowKey: TASK,
-      id: uuid(),
-      type: RESUME,
-      actionTime: dayjs.utc().valueOf(),
-      data: eventData
-    });
+    state.status = STATUS_STARTED;
+    await saveState(state);
   } catch (e) {
     throw new ServiceError(
       {

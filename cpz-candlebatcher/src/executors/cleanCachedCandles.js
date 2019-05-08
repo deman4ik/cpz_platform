@@ -6,7 +6,7 @@ import { cleanCachedCandles } from "cpz/tableStorage-client/market/candles";
 import { timeframeToTimeUnit } from "cpz/utils/candlesUtils";
 import { candlebatcherStateToCommonProps } from "../utils/helpers";
 
-async function cleanCandles(state) {
+async function cleanCandles(state, time) {
   try {
     const { exchange, asset, currency, timeframes, settings } = state;
 
@@ -19,7 +19,7 @@ async function cleanCandles(state) {
             timeframe
           );
           dateTo = dayjs
-            .utc()
+            .utc(time)
             .add(-number + 1, unit)
             .startOf("minute")
             .toISOString();
@@ -29,7 +29,7 @@ async function cleanCandles(state) {
             timeframe
           );
           dateTo = dayjs
-            .utc()
+            .utc(time)
             .add(-number + 1, unit)
             .startOf("day")
             .toISOString();
@@ -39,7 +39,7 @@ async function cleanCandles(state) {
             timeframe
           );
           dateTo = dayjs
-            .utc()
+            .utc(time)
             .add(-number + 1, unit)
             .startOf("minute")
             .toISOString();

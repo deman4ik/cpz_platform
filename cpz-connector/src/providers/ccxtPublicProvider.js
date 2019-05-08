@@ -103,7 +103,10 @@ class CCXTPublicProvider extends BasePublicProvider {
       if (date) {
         dateStart = date;
       } else {
-        dateStart = dayjs.utc().add(-2, "minute");
+        dateStart = dayjs
+          .utc()
+          .startOf("minute")
+          .add(-1, "minute");
       }
       const call = async bail => {
         try {
@@ -146,21 +149,34 @@ class CCXTPublicProvider extends BasePublicProvider {
   }
 
   async loadMinuteCandles({
-    date = dayjs.utc().add(-1, "hour"),
+    date = dayjs
+      .utc()
+      .add(-1, "hour")
+      .startOf("minute"),
     limit = 60,
     asset,
     currency
   }) {
     try {
-      Log.debug("loadMinuteCandles()", dayjs.utc(date).toISOString());
+      Log.debug("loadMinuteCandles() date", dayjs.utc(date).toISOString());
       if (!this.ccxt) {
         await this.init();
       }
       const dateToLoad =
-        dayjs.utc(date).valueOf() < dayjs.utc().add(-2, "minute")
+        dayjs.utc(date).valueOf() <
+        dayjs
+          .utc()
+          .add(-1, "minute")
+          .startOf("minute")
           ? date
-          : dayjs.utc().add(-2, "minute");
-
+          : dayjs
+              .utc()
+              .add(-1, "minute")
+              .startOf("minute");
+      Log.debug(
+        "loadMinuteCandles() dateToLoad",
+        dayjs.utc(dateToLoad).toISOString()
+      );
       const call = async bail => {
         try {
           return await this.ccxt.fetchOHLCV(
@@ -202,7 +218,7 @@ class CCXTPublicProvider extends BasePublicProvider {
             candle.time <=
             dayjs
               .utc()
-              .add(-2, "minute")
+              .add(-1, "minute")
               .valueOf()
         );
       return {

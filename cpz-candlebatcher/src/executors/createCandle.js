@@ -12,9 +12,17 @@ import { generateCandleRowKey } from "cpz/utils/candlesUtils";
 import { sortAsc } from "cpz/utils/helpers";
 import { candlebatcherStateToCommonProps } from "../utils/helpers";
 
-async function createCandle(state) {
+async function createCandle(state, time) {
   try {
-    const { exchange, asset, currency, taskId, dateFrom, dateTo } = state;
+    const { exchange, asset, currency, taskId } = state;
+    const dateFrom = dayjs
+      .utc(time)
+      .startOf("minute")
+      .toISOString();
+    const dateTo = dayjs
+      .utc(time)
+      .endOf("minute")
+      .toISOString();
 
     /* Считывание тиков за предыдущую минуту */
     let ticks = await getPrevCachedTicks({

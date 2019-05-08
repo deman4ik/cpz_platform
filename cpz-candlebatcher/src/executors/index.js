@@ -6,7 +6,8 @@ import execute from "./execute";
 import loadAction from "./loadAction";
 import loadCandle from "./loadCandle";
 import publishEvents from "./publishEvents";
-import saveCandles from "./saveCandles";
+import saveCandlesToStorage from "./saveCandlesToStorage";
+import saveCandlesToDb from "./saveCandleToDb";
 import saveState from "./saveState";
 
 export * from "./lock";
@@ -19,6 +20,7 @@ export {
   loadAction,
   loadCandle,
   publishEvents,
-  saveCandles,
+  saveCandlesToStorage,
+  saveCandlesToDb,
   saveState
 };

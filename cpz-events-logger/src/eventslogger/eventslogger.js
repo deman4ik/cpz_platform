@@ -13,7 +13,6 @@ import {
 import Log from "cpz/log";
 import { ERROR_TOPIC } from "cpz/events/topics";
 import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
-import { saveCandlesDB } from "cpz/db-client/candles";
 import { saveSignalsDB } from "cpz/db-client/signals";
 import { savePositionsDB } from "cpz/db-client/positions";
 import { saveOrdersDB } from "cpz/db-client/orders";
@@ -61,11 +60,6 @@ class EventsLogger {
             });
           }
         }
-        if (this.logToPostgre)
-          await saveCandlesDB({
-            timeframe: event.data.timeframe,
-            candles: [event.data]
-          });
         return;
       }
       const baseEventData = {

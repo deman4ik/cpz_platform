@@ -35,6 +35,7 @@ import { TASKS_IMPORTER_START_EVENT_SCHEMA } from "cpz/events/schemas/tasks/impo
 import { ERROR_CANDLEBATCHER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_CANDLEBATCHER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
 import { CANDLES_NEWCANDLE_EVENT_SCHEMA } from "cpz/events/schemas/candles";
+import DB from "cpz/db-client";
 import MarketStorageClient from "cpz/tableStorage-client/market";
 import candleTables from "cpz/tableStorage-client/market/candles";
 import tickTables from "cpz/tableStorage-client/market/ticks";
@@ -94,6 +95,7 @@ class TaskEvents extends BaseService {
       CANDLES_TOPIC
     ]);
     EventGrid.config(EGConfig);
+    DB.init(process.env.DB_API_ENDPOINT, process.env.DB_API_ACCESS_KEY);
     MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, [
       ...candleTables,
       ...tickTables

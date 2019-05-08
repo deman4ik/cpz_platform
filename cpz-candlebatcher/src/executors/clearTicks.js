@@ -1,19 +1,23 @@
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
+import dayjs from "cpz/utils/dayjs";
 import { createCachedTickSlug } from "cpz/config/state";
 import { deletePrevCachedTicks } from "cpz/tableStorage-client/market/ticks";
 import { candlebatcherStateToCommonProps } from "../utils/helpers";
 
-async function clearTicks(state) {
+async function clearTicks(state, time) {
   try {
-    const { exchange, asset, currency, dateTo } = state;
+    const { exchange, asset, currency } = state;
     await deletePrevCachedTicks({
       slug: createCachedTickSlug({
         exchange,
         asset,
         currency
       }),
-      dateTo
+      dateTo: dayjs
+        .utc(time)
+        .endOf("minute")
+        .toISOString()
     });
     return true;
   } catch (e) {
