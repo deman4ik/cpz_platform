@@ -136,7 +136,7 @@ async function getCandlesDB({
     return candles.map(candle => ({
       ...candle,
       timeframe,
-      time: parseInt(candle.time, 10)
+      time: +candle.time
     }));
   } catch (error) {
     throw new ServiceError(

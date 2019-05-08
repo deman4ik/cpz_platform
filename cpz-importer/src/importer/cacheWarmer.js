@@ -78,7 +78,7 @@ class CacheWarmer {
         this._timeframes.map(async timeframe => {
           let barsToCache;
           ({ barsToCache } = this._settings);
-          if (timeframe === 1) barsToCache = Math.max(this._timeframes);
+          if (timeframe === 1) barsToCache = Math.max(...this._timeframes);
 
           const candlesFromDb = await getCandlesDB({
             exchange: this._exchange,
@@ -89,6 +89,7 @@ class CacheWarmer {
             orderBy: "{ timestamp: desc }",
             limit: barsToCache
           });
+
           const candles = candlesFromDb
             .map(candle => ({
               ...candle,
@@ -101,6 +102,7 @@ class CacheWarmer {
               RowKey: generateCandleRowKey(candle.time)
             }))
             .reverse();
+
           await saveCandlesArrayToCache(candles);
         })
       );
