@@ -442,18 +442,22 @@ class Backtester {
         }
 
         logsToSaveCSV = [...logsToSaveCSV, ...logsToSave];
-        if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
-        if (traceToSave.length > 0) await saveBacktesterItems(traceToSave);
-        if (signalsToSave.length > 0)
-          await saveBacktesterSignals(signalsToSave);
-        if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
-        if (positionsToSave.length > 0)
-          await saveBacktesterPositions(positionsToSave);
-        if (signalsToSaveDB.length > 0) await saveSignalsDB(signalsToSaveDB);
-        if (Object.keys(positionsToSaveDB).length > 0)
-          await savePositionsDB(Object.values(positionsToSaveDB));
-        if (Object.keys(ordersToSaveDB).length > 0)
-          await saveOrdersDB(Object.values(ordersToSaveDB));
+        if (this._settings.saveToStorage) {
+          if (logsToSave.length > 0) await saveBacktesterStratLogs(logsToSave);
+          if (traceToSave.length > 0) await saveBacktesterItems(traceToSave);
+          if (signalsToSave.length > 0)
+            await saveBacktesterSignals(signalsToSave);
+          if (ordersToSave.length > 0) await saveBacktesterOrders(ordersToSave);
+          if (positionsToSave.length > 0)
+            await saveBacktesterPositions(positionsToSave);
+        }
+        if (this._settings.saveToDB) {
+          if (signalsToSaveDB.length > 0) await saveSignalsDB(signalsToSaveDB);
+          if (Object.keys(positionsToSaveDB).length > 0)
+            await savePositionsDB(Object.values(positionsToSaveDB));
+          if (Object.keys(ordersToSaveDB).length > 0)
+            await saveOrdersDB(Object.values(ordersToSaveDB));
+        }
         if (errorsToSave.length > 0) await saveBacktesterErrors(errorsToSave);
         // Сохраняем состояние пачки
         await this.save();
