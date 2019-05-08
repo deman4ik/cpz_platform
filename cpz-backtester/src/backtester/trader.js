@@ -88,6 +88,7 @@ class TraderBacktester extends Trader {
       );
       this.checkPrice({
         price,
+        time: candle.time,
         timestamp: candle.timestamp,
         candleId: candle.id,
         tickId: null
