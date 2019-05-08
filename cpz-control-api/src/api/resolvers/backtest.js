@@ -50,21 +50,19 @@ async function startBacktest(
 async function stopBacktest(_, { taskId }) {
   try {
     const state = await BacktestRunner.getState(taskId);
-    let result = { success: true };
+    const result = { success: true };
     if (
       state &&
       (state.status === STATUS_STOPPED || state.status === STATUS_STOPPING)
     ) {
-      result = {
-        success: true,
-        status: state.status
-      };
+      result.status = state.status;
     } else {
       await EventHub.send(taskId, {
         taskId,
         type: "stop",
         service: BACKTEST_SERVICE
       });
+      result.status = STATUS_STOPPING;
     }
     Log.clearContext();
     return result;

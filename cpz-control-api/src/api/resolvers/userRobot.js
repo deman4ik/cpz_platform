@@ -54,22 +54,19 @@ async function startUserRobot(_, { userRobotId, overrideParams }) {
 async function stopUserRobot(_, { userRobotId }) {
   try {
     const state = await UserRobotRunner.getState(userRobotId);
-    let result = { success: true, taskId: userRobotId };
+    const result = { success: true, taskId: userRobotId };
     if (
       state &&
       (state.status === STATUS_STOPPED || state.status === STATUS_STOPPING)
     ) {
-      result = {
-        success: true,
-        taskId: userRobotId,
-        status: state.status
-      };
+      result.status = state.status;
     } else {
       await EventHub.send(userRobotId, {
         taskId: userRobotId,
         type: "stop",
         service: USERROBOT_SERVICE
       });
+      result.status = STATUS_STOPPING;
     }
     Log.clearContext();
     return result;
