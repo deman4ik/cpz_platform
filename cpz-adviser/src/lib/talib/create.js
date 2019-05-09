@@ -26,7 +26,6 @@ function execute(params) {
         );
         return;
       }
-      Log.debug("result", result);
       const results = {};
       if (result.result) {
         Object.keys(result.result).forEach(resultName => {

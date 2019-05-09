@@ -14,7 +14,6 @@ function execute(params) {
       ...params.options
     });
     const results = {};
-    Log.debug("result", result);
     if (result && Array.isArray(result) && result.length > 0) {
       params.results.forEach(resultName => {
         results[resultName] = result[result.length - 1][resultName];
@@ -92,5 +91,7 @@ methods.adx = {
       });
   }
 };
+
+// TODO: Add other indicators to methods
 
 export default methods;
