@@ -30,7 +30,7 @@ export * from "./robots";
 export * from "./tableStorage";
 export * from "./task";
 export * from "./trader";
-export * from "./tulip";
+export * from "./indicators";
 export * from "./blobStorage";
 
 export {

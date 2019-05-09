@@ -1,0 +1,20 @@
+const TULIP_EXECUTION_ERROR = "TulipExecutionError";
+const TULIP_VALIDATION_ERROR = "TulipValidationError";
+const TULIP_ERROR = "TulipError";
+const TECHIND_EXECUTION_ERROR = "TechIndExecutionError";
+const TECHIND_VALIDATION_ERROR = "TechIndValidationError";
+const TECHIND_ERROR = "TechIndError";
+const TALIB_EXECUTION_ERROR = "TalibExecutionError";
+const TALIB_VALIDATION_ERROR = "TalibValidationError";
+const TALIB_ERROR = "TalibError";
+export {
+  TULIP_ERROR,
+  TULIP_VALIDATION_ERROR,
+  TULIP_EXECUTION_ERROR,
+  TECHIND_EXECUTION_ERROR,
+  TECHIND_VALIDATION_ERROR,
+  TECHIND_ERROR,
+  TALIB_EXECUTION_ERROR,
+  TALIB_VALIDATION_ERROR,
+  TALIB_ERROR
+};

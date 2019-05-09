@@ -2,6 +2,8 @@ import Log from "cpz/log";
 import { chunkArrayIncrEnd } from "cpz/utils/helpers";
 import { createLogEvent } from "../utils/helpers";
 import createTulip from "../lib/tulip/create";
+import createTalib from "../lib/talib/create";
+import createTech from "../lib/techind/create";
 
 class BaseIndicator {
   constructor(state) {
@@ -25,6 +27,11 @@ class BaseIndicator {
       volume: []
     };
     this._eventsToSend = {};
+    this._indicators = {
+      tulip: {},
+      tech: {},
+      talib: {}
+    };
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -85,11 +92,11 @@ class BaseIndicator {
   }
 
   addTulip(name, options) {
-    this._tulipIndicators[name] = createTulip[name].create(options);
+    this._indicators.tulip[name] = createTulip[name].create(options);
   }
 
   get tulip() {
-    return this._tulipIndicators;
+    return this._indicators.tulip;
   }
 
   async calcTulip(name, options, candlesProps) {
@@ -105,6 +112,69 @@ class BaseIndicator {
     candlesChunksQuantity
   ) {
     const calculate = createTulip[name].create(options);
+    const candlesPropsChunks = this.candlesPropsChunks(
+      candlesChunkSize,
+      candlesChunksQuantity
+    );
+    const results = await Promise.all(
+      candlesPropsChunks.map(async candlesProps => {
+        const result = await calculate(candlesProps);
+        return result.result ? result.result : result;
+      })
+    );
+    return results;
+  }
+
+  addTalib(name, options) {
+    this._indicators.talib[name] = createTalib[name].create(options);
+  }
+
+  get talib() {
+    return this._indicators.talib;
+  }
+
+  async calcTalib(name, options, candlesProps) {
+    const calculate = createTalib[name].create(options);
+    const result = await calculate(candlesProps);
+    return result.result ? result.result : result;
+  }
+
+  async calcTalibSeries(
+    name,
+    options,
+    candlesChunkSize,
+    candlesChunksQuantity
+  ) {
+    const calculate = createTalib[name].create(options);
+    const candlesPropsChunks = this.candlesPropsChunks(
+      candlesChunkSize,
+      candlesChunksQuantity
+    );
+    const results = await Promise.all(
+      candlesPropsChunks.map(async candlesProps => {
+        const result = await calculate(candlesProps);
+        return result.result ? result.result : result;
+      })
+    );
+    return results;
+  }
+
+  addTech(name, options) {
+    this._indicators.tech[name] = createTech[name].create(options);
+  }
+
+  get tech() {
+    return this._indicators.tech;
+  }
+
+  async calcTech(name, options, candlesProps) {
+    const calculate = createTech[name].create(options);
+    const result = await calculate(candlesProps);
+    return result.result ? result.result : result;
+  }
+
+  async calcTechSeries(name, options, candlesChunkSize, candlesChunksQuantity) {
+    const calculate = createTech[name].create(options);
     const candlesPropsChunks = this.candlesPropsChunks(
       candlesChunkSize,
       candlesChunksQuantity

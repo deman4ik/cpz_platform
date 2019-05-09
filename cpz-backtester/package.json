@@ -38,6 +38,8 @@
     "graphql-request": "1.8.2",
     "helmet": "^3.18.0",
     "json-2-csv": "^3.5.3",
+    "talib": "^1.0.6",
+    "technicalindicators": "^2.0.8",
     "tulind": "^0.8.15",
     "uuid": "3.3.2",
     "verror": "1.10.0"

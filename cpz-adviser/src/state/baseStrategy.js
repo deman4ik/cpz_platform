@@ -3,6 +3,8 @@ import dayjs from "cpz/utils/dayjs";
 import {
   INDICATORS_BASE,
   INDICATORS_TULIP,
+  INDICATORS_TALIB,
+  INDICATORS_TECH,
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_LONG,
   TRADE_ACTION_SHORT,
@@ -180,6 +182,24 @@ class BaseStrategy {
 
   get addTulipIndicator() {
     return this._addTulipIndicator;
+  }
+
+  _addTalibIndicator(name, indicatorName, options) {
+    this._addIndicator(name, indicatorName, options);
+    this._indicators[name].type = INDICATORS_TALIB;
+  }
+
+  get addTalibIndicator() {
+    return this._addTalibIndicator;
+  }
+
+  _addTechIndicator(name, indicatorName, options) {
+    this._addIndicator(name, indicatorName, options);
+    this._indicators[name].type = INDICATORS_TECH;
+  }
+
+  get addTechIndicator() {
+    return this._addTechIndicator;
   }
 
   get initialized() {

@@ -8,4 +8,14 @@ const INDICATORS_BASE = "base";
  */
 const INDICATORS_TULIP = "tulip";
 
-export { INDICATORS_BASE, INDICATORS_TULIP };
+/**
+ * Индикатор из библиотеки Talib
+ */
+const INDICATORS_TALIB = "talib";
+
+/**
+ * Индикатор из библиотеки technicalindicators
+ */
+const INDICATORS_TECH = "techind";
+
+export { INDICATORS_BASE, INDICATORS_TULIP, INDICATORS_TALIB, INDICATORS_TECH };

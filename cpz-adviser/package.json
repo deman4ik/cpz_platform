@@ -31,6 +31,8 @@
     "dayjs": "^1.8.13",
     "fastest-validator": "^0.6.17",
     "ms-rest-azure": "2.6.0",
+    "talib": "^1.0.6",
+    "technicalindicators": "^2.0.8",
     "tulind": "^0.8.15",
     "uuid": "3.3.2",
     "verror": "1.10.0"

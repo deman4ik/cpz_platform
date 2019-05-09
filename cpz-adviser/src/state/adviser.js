@@ -5,6 +5,8 @@ import {
   createAdviserSlug,
   INDICATORS_BASE,
   INDICATORS_TULIP,
+  INDICATORS_TALIB,
+  INDICATORS_TECH,
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -22,6 +24,8 @@ import { combineAdviserSettings } from "cpz/utils/settings";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
+import TalibIndicatorClass from "../lib/talib/talibIndicators";
+import TechInicatatorClass from "../lib/techind/techIndicators";
 
 /**
  * Класс советника
@@ -310,6 +314,40 @@ class Adviser {
 
             // Создаем новый инстанc индикатора Tulip
             this[`_ind${key}Instance`] = new TulipIndicatorClass({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: this._timeframe,
+              adviserSettings: this._settings,
+              robotId: this._robotId,
+              options: indicator.options,
+              ...indicator // стейт индикатора
+            });
+
+            break;
+          }
+          case INDICATORS_TALIB: {
+            // Если внешний индикатор Talib
+
+            // Создаем новый инстанc индикатора Talib
+            this[`_ind${key}Instance`] = new TalibIndicatorClass({
+              exchange: this._exchange,
+              asset: this._asset,
+              currency: this._currency,
+              timeframe: this._timeframe,
+              adviserSettings: this._settings,
+              robotId: this._robotId,
+              options: indicator.options,
+              ...indicator // стейт индикатора
+            });
+
+            break;
+          }
+          case INDICATORS_TECH: {
+            // Если внешний индикатор Tech
+
+            // Создаем новый инстанc индикатора Tech
+            this[`_ind${key}Instance`] = new TechInicatatorClass({
               exchange: this._exchange,
               asset: this._asset,
               currency: this._currency,
