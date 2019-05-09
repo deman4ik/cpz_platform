@@ -22,7 +22,7 @@ async function execute(adviserState, nextAction) {
       const { lastCandle } = adviser;
       if (lastCandle && data.id === lastCandle.id) {
         Log.warn(`Candle ${data.id} already processed`);
-        return;
+        return adviser.state;
       }
       // Loading strategy
       const strategyCode = await loadStrategyCode(adviser.props);

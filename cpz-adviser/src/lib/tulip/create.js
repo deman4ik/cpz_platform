@@ -15,11 +15,13 @@ async function execute(params) {
     );
     const results = {};
     for (let i = 0; i < params.results.length; i += 1) {
-      if (Array.isArray(result[i])) {
-        const arr = result[i];
+      const arr = result[i];
+      if (arr && Array.isArray(arr) && arr.length > 0) {
         results[params.results[i]] = arr[arr.length - 1];
+      } else if (arr && !Array.isArray(arr)) {
+        results[params.results[i]] = arr;
       } else {
-        results[params.results[i]] = result[i];
+        results[params.results[i]] = null;
       }
     }
     return results;

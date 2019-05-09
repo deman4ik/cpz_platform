@@ -28,14 +28,20 @@ function execute(params) {
       }
       Log.debug("result", result);
       const results = {};
-      Object.keys(result.result).forEach(resultName => {
-        if (Array.isArray(result.result[resultName])) {
+      if (result.result) {
+        Object.keys(result.result).forEach(resultName => {
           const arr = result.result[resultName];
-          results[resultName] = arr[arr.length - 1];
-        } else {
-          results[resultName] = result.result[resultName];
-        }
-      });
+          if (arr && Array.isArray(arr) && arr.length > 0) {
+            results[resultName] = arr[arr.length - 1];
+          } else if (arr && !Array.isArray(arr)) {
+            results[resultName] = result.result[resultName];
+          } else {
+            results[resultName] = null;
+          }
+        });
+      } else {
+        results.result = null;
+      }
 
       resolve(results);
     });

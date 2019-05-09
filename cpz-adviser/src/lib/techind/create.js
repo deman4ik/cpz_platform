@@ -15,7 +15,7 @@ function execute(params) {
     });
     const results = {};
     Log.debug("result", result);
-    if (result && Array.isArray(result)) {
+    if (result && Array.isArray(result) && result.length > 0) {
       params.results.forEach(resultName => {
         results[resultName] = result[result.length - 1][resultName];
       });
@@ -38,7 +38,7 @@ function execute(params) {
         }
       },
       'Failed to execute tech indicator "%s"',
-      params.indicator
+      params.name
     );
   }
 }
@@ -84,6 +84,7 @@ methods.adx = {
 
     return data =>
       execute({
+        name: "adx",
         indicator: techind.ADX,
         inputs: { high: data.high, low: data.low, close: data.close },
         options: { period: params.period },

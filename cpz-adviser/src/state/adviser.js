@@ -540,8 +540,12 @@ class Adviser {
   }
 
   handleCandle(candle) {
-    Log.debug(`Adviser ${this.taskId} - new candle`, candle);
-    Log.debug(`Adviser ${this.taskId} - last candle`, this._lastCandle);
+    Log.debug(
+      `Adviser ${this.taskId} - last candle `,
+      JSON.stringify(this._lastCandle),
+      " - new candle",
+      JSON.stringify(candle)
+    );
     if (candle.id === this._lastCandle.id) return;
     if (this._candles.filter(({ id }) => id === candle.id).length === 0) {
       this._candles = [...new Set([...this._candles, candle])];
