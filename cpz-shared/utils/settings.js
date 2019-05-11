@@ -136,6 +136,10 @@ const combineBacktesterSettings = (settings = {}) => ({
     settings.trace === undefined || settings.trace === null
       ? BACKTESTER_SETTINGS_DEFAULTS.trace
       : settings.trace,
+  saveCandlesCSV:
+    settings.saveCandlesCSV === undefined || settings.saveCandlesCSV === null
+      ? BACKTESTER_SETTINGS_DEFAULTS.saveCandlesCSV
+      : settings.saveCandlesCSV,
   saveToStorage:
     settings.saveToStorage === undefined || settings.saveToStorage === null
       ? BACKTESTER_SETTINGS_DEFAULTS.saveToStorage

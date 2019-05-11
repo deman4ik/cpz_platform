@@ -50,6 +50,7 @@ const BACKTESTER_SETTINGS_DEFAULTS = {
   debug: process.env.DEBUG || false,
   local: false,
   trace: false,
+  saveCandlesCSV: false,
   saveToStorage: false,
   saveToDB: true
 };

@@ -215,6 +215,11 @@ const BACKTESTER_SETTINGS = {
     type: "boolean",
     optional: true
   },
+  saveCandlesCSV: {
+    description: "Save candles csv to blob storage",
+    type: "boolean",
+    optional: true
+  },
   saveToStorage: {
     description: "Save output to Table Storage.",
     type: "boolean",

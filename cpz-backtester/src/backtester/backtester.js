@@ -173,6 +173,7 @@ class Backtester {
       }
 
       await this._adviserBacktester.bInit(this._settings.local);
+      let candlesToCSV = [];
       this.log(`Starting ${this._taskId}...`);
 
       // Если необходим прогрев
@@ -229,6 +230,11 @@ class Backtester {
         }
 
         this._adviserBacktester.bSetCachedCandles(requiredHistoryCandles);
+        if (this._settings.saveCandlesCSV) {
+          candlesToCSV = [
+            ...new Set([...candlesToCSV, ...requiredHistoryCandles])
+          ];
+        }
       }
       // Сохраняем начальное состояние
       await this.save();
@@ -274,6 +280,10 @@ class Backtester {
           offset: this._prevIteration
         });
         this._prevIteration = iteration;
+
+        if (this._settings.saveCandlesCSV) {
+          candlesToCSV = [...new Set([...candlesToCSV, ...historyCandles])];
+        }
 
         for (const candle of historyCandles) {
           await this._adviserBacktester.bExecute(candle);
@@ -471,6 +481,25 @@ class Backtester {
         `${this._taskId}_logEvents.csv`,
         logsCSV
       );
+
+      if (this._settings.saveCandlesCSV) {
+        this.log("Saving candles to csv");
+        const candlesToSave = candlesToCSV.map(candle => ({
+          date: dayjs.utc(candle.timestamp).format("DD.MM.YYYY"),
+          time: dayjs.utc(candle.timestamp).format("HH:mm:ss"),
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          volume: candle.volume
+        }));
+        const candlesCSV = await json2csvAsync(candlesToSave);
+        await BlobStorageClient.upload(
+          BACKTESTER_LOGS,
+          `${this._taskId}_candles.csv`,
+          candlesCSV
+        );
+      }
       // Закончили обработку
       this._status = STATUS_FINISHED;
       this._endedAt = dayjs.utc().toISOString();
