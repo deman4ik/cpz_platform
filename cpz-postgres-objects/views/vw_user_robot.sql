@@ -28,34 +28,38 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.linked_user_robot_id as uidLINKED_USER_ROBOT_ID,
        (select
           json_agg ( row_to_json(p) )
-        from (
-          select pf.dDATE, pf.nprofit_c as nPROFIT
-          from vw_user_robot_performance pf
-          where
-                pf.ddate >= (current_date - 20)
-            and ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
-                 (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
-          order by dDATE asc
-        ) p) as jPERF_ARRAY, -- performance mini-chart
-        (select row_to_json(tt)
+          from (
+            select pf.dDATE, pf.nprofit_c as nPROFIT
+            from vw_user_robot_performance_d pf
+            where
+                  pf.ddate >= (current_date - 20)
+              and ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
+                   (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
+            order by dDATE asc
+          ) p
+       ) as jPERF_ARRAY, -- performance mini-chart
+       (select
+          row_to_json(tt)
           from (
           select ddate, round(nMDD/ncurrate,8), nMDD as nMDD_C
             from (
               select ddate, nprofit,
                      lag(nprofit) over (order by ddate) as nprev,
                      (lag(nprofit) over (order by ddate))-nprofit as nMDD
-              from vw_user_robot_performance pf
+              from vw_user_robot_performance_d pf
               where
                 ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
                  (pf.nrobot_id = u.linked_robot_id and pf.uiduser_id = u.linked_user_id))
             ) t order by nMDD asc
-          ) tt  limit  1)  as  jMDD,
-       (select json_build_object('date',candle_timestamp, 'price',price,'action', action,'note', order_type)
-         from signal s
-         where s.robot_id = u.robot_id
-           and s.backtest_id is null
-           and s.candle_timestamp in (select max(candle_timestamp) from signal where robot_id = u.robot_id)
-           limit 1
+          ) tt  limit  1
+       )  as  jMDD,
+       (select
+          json_build_object('date',candle_timestamp, 'price',price,'action', action,'note', order_type)
+          from signal s
+          where s.robot_id = u.robot_id
+            and s.backtest_id is null
+            and s.candle_timestamp in (select max(candle_timestamp) from signal where robot_id = u.robot_id)
+            limit 1
        ) as jLAST_SIGNAL
 FROM
   (select
