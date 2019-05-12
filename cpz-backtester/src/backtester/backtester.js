@@ -35,7 +35,7 @@ import {
 import {
   deleteBacktestDB,
   isBacktestExistsDB,
-  saveBacktestsDB
+  saveBacktestDB
 } from "cpz/db-client/backtests";
 import { countCandlesDB, getCandlesDB } from "cpz/db-client/candles";
 import { saveSignalsDB } from "cpz/db-client/signals";
@@ -131,7 +131,7 @@ class Backtester {
     try {
       // Сохраняем состояние в локальном хранилище
       if (this._settings.saveToStorage) await saveBacktesterState(this.state);
-      if (this._settings.saveToDB) await saveBacktestsDB(this.state);
+      if (this._settings.saveToDB) await saveBacktestDB(this.state);
     } catch (error) {
       throw new ServiceError(
         {

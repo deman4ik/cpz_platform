@@ -7,7 +7,8 @@ const TABLES = {
   STORAGE_BACKTESTERSIGNALS_TABLE: "BacktesterSignals",
   STORAGE_BACKTESTERORDERS_TABLE: "BacktesterOrders",
   STORAGE_BACKTESTERPOSITIONS_TABLE: "BacktesterPositions",
-  STORAGE_BACKTESTERERRORS_TABLE: "BacktesterErrors"
+  STORAGE_BACKTESTERERRORS_TABLE: "BacktesterErrors",
+  STORAGE_BACKTESTWLLOG_TABLE: "BacktestWLLogs"
 };
 /**
  * Query Backtester State by uniq Task ID
@@ -17,6 +18,12 @@ const TABLES = {
  */
 const getBacktesterById = async taskId =>
   client.getEntityByRowKey(TABLES.STORAGE_BACKTESTERS_TABLE, taskId);
+
+const getBacktestWLLogs = async backtestId =>
+  client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_BACKTESTWLLOG_TABLE,
+    backtestId
+  );
 
 /**
  * Creates new or update current Backtester State
@@ -75,6 +82,14 @@ const saveBacktesterErrors = async items =>
   client.insertOrMergeArray(TABLES.STORAGE_BACKTESTERERRORS_TABLE, items);
 
 /**
+ * Saves backtest WL logs
+ *
+ * @param {[Object]} items
+ */
+const saveBacktestWLLogs = async items =>
+  client.insertOrMergeArray(TABLES.STORAGE_BACKTESTWLLOG_TABLE, items);
+
+/**
  * Delete Backtester state and all Backtester Items
  *
  * @param {Object} input
@@ -124,8 +139,23 @@ const deleteBacktesterState = async ({ RowKey, PartitionKey, metadata }) => {
     metadata
   });
 };
+
+/**
+ * Delete Backtest WL state and all Items
+ *
+ * @param {string} backtestId
+ */
+const deleteBacktestWLState = async backtestId => {
+  const logs = await client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_BACKTESTWLLOG_TABLE,
+    backtestId
+  );
+  await client.deleteArray(TABLES.STORAGE_BACKTESTWLLOG_TABLE, logs);
+};
+
 export {
   getBacktesterById,
+  getBacktestWLLogs,
   saveBacktesterState,
   saveBacktesterItems,
   saveBacktesterStratLogs,
@@ -133,6 +163,8 @@ export {
   saveBacktesterOrders,
   saveBacktesterPositions,
   saveBacktesterErrors,
-  deleteBacktesterState
+  saveBacktestWLLogs,
+  deleteBacktesterState,
+  deleteBacktestWLState
 };
 export default Object.values(TABLES);

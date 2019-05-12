@@ -5,6 +5,7 @@ import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import backtesterEnv from "cpz/config/environment/backtester";
 import handleTaskEvents from "./routes/taskEvents";
+import handleWLBacktest from "./routes/wlBacktest";
 import { validateEvents, handlingEventsByType, checkAuth } from "./middleware";
 import init from "./init";
 
@@ -24,6 +25,7 @@ server.post(
   validateEvents,
   handleTaskEvents
 );
+server.post("/api/wlBacktest", checkAuth, handleWLBacktest);
 
 const PORT = process.env.NODE_PORT || process.env.PORT || 8108;
 server.listen(PORT, err => {
