@@ -2,8 +2,15 @@ drop view vw_user_robot_performance;
 
 create or replace view vw_user_robot_performance as
 select
-p.user_id as uiduser_id, u.id as uiduser_robot_id, p.robot_id as nrobot_id, exchange as sexchange, asset as sasset, currency as scurrency, exit_date::date as dDATE,
-round(sum(p.profit/r.nCURRATE),8) as nprofit, sum(p.profit) as nprofit_c
+   p.user_id as uiduser_id,
+   u.id as uiduser_robot_id,
+   p.robot_id as nrobot_id,
+   exchange as sexchange,
+   asset as sasset,
+   currency as scurrency,
+   date_trunc('hour',exit_date) as dDATE,
+   round(sum(p.profit/r.nCURRATE),8) as nprofit,
+   sum(p.profit) as nprofit_c
 from positions p, user_robot u, user_robot uu,
      (select 5143 as nCURRATE, '$' as sCURCODE) r
 where (u.robot_id = p.robot_id and u.user_id = p.user_id or
@@ -11,7 +18,7 @@ where (u.robot_id = p.robot_id and u.user_id = p.user_id or
   and p.profit is not null
   --and p.backtest_id is null
   and p.run_mode != 'backtest'
-group by u.id, p.user_id, p.robot_id, p.exchange, p.asset, p.currency, exit_date::date;
+group by u.id, p.user_id, p.robot_id, p.exchange, p.asset, p.currency, date_trunc('hour',exit_date);
 
 alter table vw_user_robot_performance
   owner to cpz;
