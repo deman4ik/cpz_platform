@@ -122,7 +122,9 @@ class TraderBacktester extends Trader {
               // Считаем, что ордер исполнен
               orderResult.status = ORDER_STATUS_CLOSED;
               // Полностью - т.е. по заданному объему
-              orderResult.executed = order.volume;
+              orderResult.executed = orderResult.volume;
+              orderResult.remaining = 0;
+              orderResult.exLastTrade = this._lastPrice.timestamp;
 
               // Если задача - выставить лимитный или рыночный ордер
             } else if (
@@ -130,25 +132,28 @@ class TraderBacktester extends Trader {
               order.task === ORDER_TASK_OPEN_MARKET
             ) {
               // Устанавливаем объем из параметров
-              const orderToExecute = { ...order };
-              if (order.task === ORDER_TASK_OPEN_MARKET) {
-                orderToExecute.price = this._lastPrice.price;
-              }
-              if (order.orderType === ORDER_TYPE_LIMIT) {
+              if (order.task === ORDER_TASK_OPEN_LIMIT) {
                 // Если режим - эмуляция или бэктест
                 // Если тип ордера - лимитный
                 // Считаем, что ордер успешно выставлен на биржу
                 orderResult.status = ORDER_STATUS_OPEN;
+                orderResult.exId = orderResult.orderId;
+                orderResult.exTimestamp = this._lastPrice.timestamp;
                 orderResult.exLastTrade = this._lastPrice.timestamp;
                 orderResult.average = this._lastPrice.price;
-              } else if (order.orderType === ORDER_TYPE_MARKET) {
+                orderResult.remaining = orderResult.volume;
+              } else if (order.task === ORDER_TASK_OPEN_MARKET) {
                 // Если режим - эмуляция или бэктест
                 // Если тип ордера - по рынку
                 // Считаем, что ордер исполнен
                 orderResult.status = ORDER_STATUS_CLOSED;
+                orderResult.exId = orderResult.orderId;
+                orderResult.exTimestamp = this._lastPrice.timestamp;
                 // Полностью - т.е. по заданному объему
-                orderResult.executed = orderToExecute.volume;
+                orderResult.executed = orderResult.volume;
+                orderResult.remaining = 0;
                 orderResult.exLastTrade = this._lastPrice.timestamp;
+                orderResult.price = this._lastPrice.price;
                 orderResult.average = orderResult.price;
               }
             }
@@ -156,6 +161,7 @@ class TraderBacktester extends Trader {
             return orderResult;
           }
         );
+        this._ordersToExecute = {};
         this.handleOrders(executedOrders);
       }
     } catch (error) {

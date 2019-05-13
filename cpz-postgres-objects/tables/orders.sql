@@ -64,7 +64,7 @@ alter table orders
             
 alter table orders
   add constraint c_orders_status_chk
-    check (status in ('none','open','closed','canceled'));
+    check (status in ('new','open','closed','canceled'));
                 
 create index i_orders_userlist_fk
   on orders (user_id);
