@@ -24,8 +24,8 @@ import { combineAdviserSettings } from "cpz/utils/settings";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
-import TalibIndicatorClass from "../lib/talib/talibIndicators";
-import TechInicatatorClass from "../lib/techind/techIndicators";
+//import TalibIndicatorClass from "../lib/talib/talibIndicators";
+//import TechInicatatorClass from "../lib/techind/techIndicators";
 
 /**
  * Класс советника
@@ -326,7 +326,7 @@ class Adviser {
 
             break;
           }
-          case INDICATORS_TALIB: {
+          /* case INDICATORS_TALIB: {
             // Если внешний индикатор Talib
 
             // Создаем новый инстанc индикатора Talib
@@ -359,7 +359,7 @@ class Adviser {
             });
 
             break;
-          }
+          } */
           default:
             // Неизвестный тип индикатора - ошибка
             throw new Error(`Unknown indicator type ${indicator.type}`);

@@ -124,7 +124,7 @@ class BaseIndicator {
     );
     return results;
   }
-
+  /*
   addTalib(name, options) {
     this._indicators.talib[name] = createTalib[name].create(options);
   }
@@ -187,6 +187,7 @@ class BaseIndicator {
     );
     return results;
   }
+  */
 
   _log(...args) {
     Log.debug(`${this._robotId}`, ...args);
