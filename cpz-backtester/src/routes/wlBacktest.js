@@ -46,7 +46,22 @@ async function handleWLBacktest(req, res) {
         }));
         await saveBacktestWLLogs(logs);
 
-        const allLogs = await getBacktestWLLogs(backtestId);
+        const allLogsData = await getBacktestWLLogs(backtestId);
+        const allLogs = allLogsData.map(log => {
+          const logData = log;
+
+          delete logData.RowKey;
+          delete logData.PartitionKey;
+          delete logData.Timestamp;
+          delete logData.metadata;
+          delete logData[".metadata"];
+          Object.keys(logData).forEach(key => {
+            if (key.toLowerCase().includes("timestamp")) {
+              logData[key] = logData[key].toISOString();
+            }
+          });
+          return logData;
+        });
         const logsCSV = await json2csvAsync(allLogs);
         await BlobStorageClient.upload(
           BACKTESTER_LOGS,
