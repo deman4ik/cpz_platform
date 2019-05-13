@@ -206,12 +206,7 @@ class Backtester {
         // Сортируем загруженные свечи в порядке возрастания и отсекаем лишнее
         const requiredHistoryCandles = getRequiredHistoryResult
           .sort((a, b) => sortAsc(a.time, b.time))
-          .slice(
-            Math.max(
-              getRequiredHistoryResult.length - this._requiredHistoryMaxBars,
-              0
-            )
-          );
+          .slice(-this._requiredHistoryMaxBars);
         // Если загрузили меньше свечей чем запросили
         if (requiredHistoryCandles.length < this._requiredHistoryMaxBars) {
           // Генерируем ошибку
