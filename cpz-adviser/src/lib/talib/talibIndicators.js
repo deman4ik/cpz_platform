@@ -1,4 +1,4 @@
-import BaseIndicator from "../../state/baseIndicator";
+/*import BaseIndicator from "../../state/baseIndicator";
 import talib from "./create";
 
 class Talib extends BaseIndicator {
@@ -25,3 +25,4 @@ class Talib extends BaseIndicator {
 }
 
 export default Talib;
+*/

@@ -1,4 +1,4 @@
-import BaseIndicator from "../../state/baseIndicator";
+/*import BaseIndicator from "../../state/baseIndicator";
 import techind from "./create";
 
 class Tech extends BaseIndicator {
@@ -25,3 +25,4 @@ class Tech extends BaseIndicator {
 }
 
 export default Tech;
+*/
