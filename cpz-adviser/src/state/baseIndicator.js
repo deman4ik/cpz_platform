@@ -89,6 +89,22 @@ class BaseIndicator {
     return candlesPropsArr;
   }
 
+  candlePropsLatestChunks(chunkQuantity) {
+    let candlesArr = [];
+    for (let i = 0; i < chunkQuantity; i += 1) {
+      const end = i + 1;
+      const arr = this._candles.slice(0, -end);
+      candlesArr.push(arr);
+    }
+
+    candlesArr = candlesArr.reverse();
+
+    const candlesPropsArr = candlesArr.map(candles =>
+      this.prepareCandles(candles)
+    );
+    return candlesPropsArr;
+  }
+
   addTulip(name, options) {
     this._indicators.tulip[name] = createTulip[name].create(options);
   }
@@ -103,15 +119,9 @@ class BaseIndicator {
     return result.result ? result.result : result;
   }
 
-  async calcTulipSeries(
-    name,
-    options,
-    candlesChunkSize,
-    candlesChunksQuantity
-  ) {
+  async calcTulipSeries(name, options, candlesChunksQuantity) {
     const calculate = createTulip[name].create(options);
-    const candlesPropsChunks = this.candlesPropsChunks(
-      candlesChunkSize,
+    const candlesPropsChunks = this.candlePropsLatestChunks(
       candlesChunksQuantity
     );
     const results = await Promise.all(
