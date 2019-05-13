@@ -1,4 +1,4 @@
-/*import talib from "talib";
+import talib from "talib";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 
@@ -2451,4 +2451,3 @@ methods.wma = {
 };
 
 export default methods;
-*/

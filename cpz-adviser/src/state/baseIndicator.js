@@ -2,8 +2,6 @@ import Log from "cpz/log";
 import { chunkArrayIncrEnd } from "cpz/utils/helpers";
 import { createLogEvent } from "../utils/helpers";
 import createTulip from "../lib/tulip/create";
-import createTalib from "../lib/talib/create";
-import createTech from "../lib/techind/create";
 
 class BaseIndicator {
   constructor(state) {

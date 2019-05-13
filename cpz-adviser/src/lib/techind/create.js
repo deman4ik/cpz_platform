@@ -1,4 +1,4 @@
-/*import * as techind from "technicalindicators";
+import * as techind from "technicalindicators";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 
@@ -95,4 +95,3 @@ methods.adx = {
 // TODO: Add other indicators to methods
 
 export default methods;
-*/
