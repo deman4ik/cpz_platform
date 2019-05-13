@@ -76,6 +76,20 @@ class BaseIndicator {
     return candlesProps;
   }
 
+  highest(prop, size) {
+    if (!["open", "high", "low", "close", "volume"].includes(prop))
+      throw new Error("Invalid candle prop %s", prop);
+    const arr = this._candlesProps[prop].slice(-size);
+    return Math.max(...arr);
+  }
+
+  lowest(prop, size) {
+    if (!["open", "high", "low", "close", "volume"].includes(prop))
+      throw new Error("Invalid candle prop %s", prop);
+    const arr = this._candlesProps[prop].slice(-size);
+    return Math.min(...arr);
+  }
+
   candlesChunks(chunkSize, chunkQuantity) {
     const candlesArr = chunkArrayIncrEnd(this._candles, chunkSize);
     return candlesArr.splice(-chunkQuantity);
