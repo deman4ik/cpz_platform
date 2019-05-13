@@ -93,6 +93,12 @@ class Trader {
     }
   }
 
+  log(...args) {
+    if (this._settings.debug) {
+      Log.debug(`Trader ${this._taskId}`, ...args);
+    }
+  }
+
   get taskId() {
     return this._taskId;
   }
@@ -132,7 +138,10 @@ class Trader {
   set positionInstances(positions) {
     if (positions && Array.isArray(positions) && positions.length > 0)
       positions.forEach(position => {
-        this._positions[position.id] = new Position(position);
+        this._positions[position.id] = new Position({
+          ...position,
+          log: this.log.bind(this)
+        });
       });
   }
 
@@ -323,14 +332,15 @@ class Trader {
    * @memberof Trader
    */
   _createPosition({ positionId, action, settings: { positionCode } }) {
-    Log.debug("Creating new Position", positionCode, positionId);
+    this.log("Creating new Position", positionCode, positionId);
     this._positions[positionId] = new Position({
       id: positionId,
       code: positionCode,
       direction:
         action === TRADE_ACTION_LONG
           ? ORDER_DIRECTION_BUY
-          : ORDER_DIRECTION_SELL
+          : ORDER_DIRECTION_SELL,
+      log: this.log.bind(this)
     });
   }
 
@@ -343,19 +353,19 @@ class Trader {
   handleSignal(signal) {
     try {
       if (!signal) throw new Error("No signal data");
-      Log.debug(
+      this.log(
         `handleSignal() position: ${signal.settings.positionCode}, ${
           signal.action
         }, ${signal.price}, from ${signal.priceSource}`
       );
       // Если сигнал уже обрабатывалась - выходим
       if (signal.signalId === this._lastSignal.signalId) {
-        Log.warn("Signal '%s' already handled.", signal.signalId);
+        this.log("Signal '%s' already handled.", signal.signalId);
         return;
       }
       // Если сигнал от другого робота
       if (signal.robotId !== this._robotId) {
-        Log.warn("Wrong signal '%s'", signal.signalId);
+        this.log("Wrong signal '%s'", signal.signalId);
         return;
       }
 
@@ -617,7 +627,7 @@ class Trader {
 
   handleOrders(orders) {
     try {
-      Log.debug(orders, "handleOrders");
+      this.log("handleOrders", orders);
       if (!Array.isArray(orders)) throw new Error("Orders are not array");
 
       orders.forEach(order => {
@@ -655,7 +665,7 @@ class Trader {
         }
       });
 
-      Log.debug(this._ordersToExecute, "handleOrders ordersToExecute");
+      this.log("handleOrders ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
         {

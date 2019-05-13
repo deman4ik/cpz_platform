@@ -68,6 +68,7 @@ class Position {
     /* Ордера закрытия */
     this._exitOrders = state.exitOrders || {};
     this._executed = state.executed;
+    this.log = state.log || this.log;
   }
 
   /**
@@ -164,7 +165,7 @@ class Position {
    * @memberof Position
    */
   _createOrder(signal, positionDirection, settings) {
-    Log.debug("Creating new order...", signal);
+    this.log("Creating new order...", signal);
     const {
       signalId,
       orderType,
@@ -279,12 +280,12 @@ class Position {
    * @memberof Position
    */
   getOrdersToClosePosition(settings) {
-    Log.debug("position getOrdersToClosePosition");
+    this.log("position getOrdersToClosePosition");
     // Необходимые ордера для закрытия позиции
     let requiredOrders = [];
 
     if (this._entry.status === ORDER_STATUS_NEW) {
-      Log.debug("entry new");
+      this.log("entry new");
       // Если ордер на открытие не выставлен на биржу
       // помечаем что позиция отменена
       this._entry.status = ORDER_STATUS_CANCELED;
@@ -294,18 +295,18 @@ class Position {
       });
       this.setStatus();
     } else if (this._entry.status === ORDER_STATUS_OPEN) {
-      Log.debug("entry open");
+      this.log("entry open");
       // Если ордер на открытие не выставл
       // Если ордер на открытие выставлен на биржу
       // Если ордер на открытие еще не исполнен
       if (!this._entry.executed || this._entry.executed === 0) {
-        Log.debug("entry not executed");
+        this.log("entry not executed");
         // Отменяем ордера на открытие
         requiredOrders = Object.values(this._entryOrders)
           .filter(order => order.status === ORDER_STATUS_OPEN)
           .map(order => ({ ...order, task: ORDER_TASK_CANCEL }));
       } else {
-        Log.debug("entry executed", this._entry.executed);
+        this.log("entry executed", this._entry.executed);
         // Если ордер на открытие частично исполнен
         // Создаем новый ордер на принудительное закрытие позиции
         this._createCloseOrder(this._entry.executed, settings);
@@ -316,14 +317,14 @@ class Position {
       }
       // Если ордер на открытие позиции отменен
     } else if (this._entry.status === ORDER_STATUS_CANCELED) {
-      Log.debug("entry canceled");
+      this.log("entry canceled");
       // Если ордер на открытие еще не исполнен
       if (!this._entry.executed || this._entry.executed === 0) {
-        Log.debug("entry not executed");
+        this.log("entry not executed");
         // Больше ничего не надо делать, выходим
         return requiredOrders;
       }
-      Log.debug("entry executed", this._entry.executed);
+      this.log("entry executed", this._entry.executed);
       // Если ордер на открытие частично исполнен
       // Создаем новый ордер на принудительное закрытие позиции
       this._createCloseOrder(this._entry.executed, settings);
@@ -335,7 +336,7 @@ class Position {
       this._entry.status === ORDER_STATUS_CLOSED &&
       (!this._exit.status || this._exit.status === ORDER_STATUS_NEW)
     ) {
-      Log.debug("entry closed - exit none/new");
+      this.log("entry closed - exit none/new");
       // Если ордер на открытие позиции исполнен и
       // ордер на закрытие позиции не выставлен на биржу
       // или есть созданные ордера на закрытие помечаем их как отмененные
@@ -349,7 +350,7 @@ class Position {
         order => order.task
       );
     } else if (this._exit.status === ORDER_STATUS_OPEN) {
-      Log.debug("exit open");
+      this.log("exit open");
       // Если ордер на закрытие позиции выставлен на биржу
       // Отменяем выставленные ордера на закрытие
       // при условии что это не принудительный ордер на закрытие
@@ -362,7 +363,7 @@ class Position {
         .map(order => ({ ...order, task: ORDER_TASK_CANCEL }));
       return requiredOrders;
     } else if (this._exit.status === ORDER_STATUS_CANCELED) {
-      Log.debug("exit canceled");
+      this.log("exit canceled");
       // Если ордер на закрытие позиции отменен
       // По умолчанию объем закрытия = объему открытия позиции
       let volume = this._entry.executed;
@@ -393,7 +394,7 @@ class Position {
    * @memberof Position
    */
   _checkOrder(order, price, settings) {
-    Log.debug(
+    this.log(
       `position checkOrder ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
@@ -408,7 +409,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_BUY) {
           if (price <= order.price) {
             // Нужно выставить лимитный ордер
-            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price + settings.slippageStep,
@@ -420,7 +421,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_SELL) {
           if (price >= order.price) {
             // Нужно выставить лимитный ордер
-            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price - settings.slippageStep,
@@ -453,7 +454,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_BUY) {
           if (price >= order.price) {
             // Нужно выставить лимитный ордер
-            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price + settings.slippageStep,
@@ -465,7 +466,7 @@ class Position {
         if (order.direction === ORDER_DIRECTION_SELL) {
           if (price <= order.price) {
             // Нужно выставить лимитный ордер
-            Log.debug(ORDER_TASK_OPEN_LIMIT);
+            this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price - settings.slippageStep,
@@ -487,7 +488,7 @@ class Position {
         dayjs.utc().diff(dayjs.utc(order.lastCheck), "minute") > 1
       ) {
         // Нужно проверить ордер на бирже
-        Log.debug(ORDER_TASK_CHECK);
+        this.log(ORDER_TASK_CHECK);
         return { ...order, task: ORDER_TASK_CHECK };
       }
       // Если не в режиме бэктеста
@@ -500,7 +501,7 @@ class Position {
           settings.openOrderTimeout
       ) {
         // Отменяем ордер
-        Log.debug(ORDER_TASK_CANCEL);
+        this.log(ORDER_TASK_CANCEL);
         this._reason = `${order.positionDirection}_timeout`;
         return { ...order, task: ORDER_TASK_CANCEL };
       }
@@ -518,7 +519,7 @@ class Position {
    * @memberof Position
    */
   getOrdersToExecuteByPrice(price, settings) {
-    Log.debug(
+    this.log(
       `position getOrdersToExecuteByPrice position: ${this._code}, entry: ${
         this._entry.status
       }, exit: ${this._exit.status}, price: ${price}`
@@ -529,7 +530,7 @@ class Position {
       this._entry.status === ORDER_STATUS_NEW ||
       this._entry.status === ORDER_STATUS_OPEN
     ) {
-      Log.debug("entry new/open");
+      this.log("entry new/open");
       // Если ордера на открытие позиции ожидают обработки
       // Проверяем все ордера на открытие позиции ожидающие обработки
       requiredOrders = Object.values(this._entryOrders)
@@ -540,7 +541,7 @@ class Position {
       (this._exit.status === ORDER_STATUS_NEW ||
         this._exit.status === ORDER_STATUS_OPEN)
     ) {
-      Log.debug("entry closed - exit new/open");
+      this.log("entry closed - exit new/open");
       // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       requiredOrders = Object.values(this._exitOrders)
@@ -548,7 +549,7 @@ class Position {
         .filter(order => !!order);
     }
     if (requiredOrders.length > 0) {
-      Log.debug(
+      this.log(
         `${requiredOrders.length} order required position ${
           this._code
         }, price: ${price}`
@@ -565,7 +566,7 @@ class Position {
    * @memberof Position
    */
   getOrdersToExecute(settings) {
-    Log.debug("postition getOrdersToExecute");
+    this.log("postition getOrdersToExecute");
     let requiredOrders = [];
 
     if (this._entry.status === ORDER_STATUS_OPEN) {
@@ -609,7 +610,7 @@ class Position {
    * @memberof Position
    */
   handleOrder(order) {
-    Log.debug(
+    this.log(
       `postiion Executed ${order.orderId}, position: ${this._code}, status: ${
         order.status
       }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${

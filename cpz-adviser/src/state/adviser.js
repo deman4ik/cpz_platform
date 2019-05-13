@@ -85,6 +85,12 @@ class Adviser {
     Log.debug(`Adviser ${this.taskId} instance created`);
   }
 
+  log(...args) {
+    if (this._settings.debug) {
+      Log.debug(`Adviser ${this._taskId}`, ...args);
+    }
+  }
+
   get taskId() {
     return this._taskId;
   }
@@ -94,7 +100,7 @@ class Adviser {
   }
 
   start() {
-    Log.debug(`Adviser ${this.taskId} - ${STATUS_STARTED}`);
+    this.log(STATUS_STARTED);
     this._status = STATUS_STARTED;
     this._startedAt = dayjs.utc().toISOString();
     this._eventsToSend.Start = {
@@ -109,7 +115,7 @@ class Adviser {
   }
 
   stop() {
-    Log.debug(`Adviser ${this.taskId} - ${STATUS_STOPPED}`);
+    this.log(STATUS_STOPPED);
     this._status = STATUS_STOPPED;
     this._stoppedAt = dayjs.utc().toISOString();
     this._error = null;
@@ -125,7 +131,7 @@ class Adviser {
   }
 
   update(settings) {
-    Log.debug(`Adviser ${this.taskId} - updated`);
+    this.log("updated");
     this._settings = combineAdviserSettings(settings);
     this._eventsToSend.Update = {
       eventType: TASKS_ADVISER_UPDATED_EVENT,
@@ -218,14 +224,12 @@ class Adviser {
   }
 
   setBaseIndicatorsCode(baseIndicators) {
-    Log.debug(`Adviser ${this.taskId} - setBaseIndicatorsCode()`);
     baseIndicators.forEach(({ fileName, code }) => {
       this._baseIndicatorsCode[fileName] = code;
     });
   }
 
   setStrategy(strategyCode, strategyState = this._strategy) {
-    Log.debug(`Adviser ${this.taskId} - setStrategy()`);
     try {
       const strategyFunctions = {};
       Object.getOwnPropertyNames(strategyCode)
@@ -272,7 +276,6 @@ class Adviser {
    * @memberof Adviser
    */
   setIndicators() {
-    Log.debug(`Adviser ${this.taskId} - setIndicators()`);
     try {
       // Идем по всем свойствам в объекте индикаторов
       Object.keys(this._indicators).forEach(key => {
@@ -387,7 +390,6 @@ class Adviser {
    * @memberof Adviser
    */
   initStrategy() {
-    Log.debug(`Adviser ${this.taskId} - initStrategy()`);
     try {
       // Если стратегия еще не проинициализирована
       if (!this._strategyInstance.initialized) {
@@ -419,7 +421,6 @@ class Adviser {
    * @memberof Adviser
    */
   initIndicators() {
-    Log.debug(`Adviser ${this.taskId} - initIndicators()`);
     try {
       Object.keys(this._indicators).forEach(key => {
         if (!this[`_ind${key}Instance`].initialized) {
@@ -449,7 +450,6 @@ class Adviser {
    * @memberof Adviser
    */
   async calcIndicators() {
-    Log.debug(`Adviser ${this.taskId} - calcIndicators()`);
     try {
       await Promise.all(
         Object.keys(this._indicators).map(async key => {
@@ -484,7 +484,6 @@ class Adviser {
    * @memberof Adviser
    */
   runStrategy() {
-    Log.debug(`Adviser ${this.taskId} - runStrategy()`);
     try {
       this._strategyInstance._eventsToSend = {};
       // Передать свечу и значения индикаторов в инстанс стратегии
@@ -513,7 +512,6 @@ class Adviser {
   }
 
   handleCachedCandles(candles) {
-    Log.debug(`Adviser ${this.taskId} - handleCachedCandles()`);
     this._candles = [...new Set([...candles])];
   }
 
@@ -540,12 +538,7 @@ class Adviser {
   }
 
   handleCandle(candle) {
-    Log.debug(
-      `Adviser ${this.taskId} - last candle `,
-      JSON.stringify(this._lastCandle),
-      " - new candle",
-      JSON.stringify(candle)
-    );
+    this.log("new candle", JSON.stringify(candle));
     if (candle.id === this._lastCandle.id) return;
     if (this._candles.filter(({ id }) => id === candle.id).length === 0) {
       this._candles = [...new Set([...this._candles, candle])];
@@ -555,7 +548,6 @@ class Adviser {
   }
 
   finalize() {
-    Log.debug(`Adviser ${this.taskId} - finalize()`);
     this._lastCandle = this._candle;
     // TODO: Send Candles.Handled Event
   }
@@ -566,7 +558,6 @@ class Adviser {
    * @memberof Adviser
    */
   getIndicatorsState() {
-    Log.debug(`Adviser ${this.taskId} - getIndicatorsState()`);
     try {
       Object.keys(this._indicators).forEach(ind => {
         this._eventsToSend = {
@@ -608,7 +599,6 @@ class Adviser {
    * @memberof Adviser
    */
   getStrategyState() {
-    Log.debug(`Adviser ${this.taskId} - getStrategyState()`);
     try {
       this._eventsToSend = {
         ...this._eventsToSend,

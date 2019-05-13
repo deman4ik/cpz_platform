@@ -1,10 +1,7 @@
-import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import {
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
-  ORDER_TYPE_LIMIT,
-  ORDER_TYPE_MARKET,
   ORDER_TASK_OPEN_MARKET,
   ORDER_TASK_OPEN_LIMIT,
   ORDER_TASK_CHECK,
@@ -79,7 +76,7 @@ class TraderBacktester extends Trader {
         // берем нужное поле
         price = candle[priceSource];
       }
-      Log.debug(
+      this.log(
         "Trader handleCandle()",
         `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
           candle.low
