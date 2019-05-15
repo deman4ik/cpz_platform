@@ -5,8 +5,6 @@ import {
   createAdviserSlug,
   INDICATORS_BASE,
   INDICATORS_TULIP,
-  INDICATORS_TALIB,
-  INDICATORS_TECH,
   STATUS_PENDING,
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -24,8 +22,6 @@ import { combineAdviserSettings } from "cpz/utils/settings";
 import BaseStrategy from "./baseStrategy";
 import BaseIndicator from "./baseIndicator";
 import TulipIndicatorClass from "../lib/tulip/tulipIndicators";
-//import TalibIndicatorClass from "../lib/talib/talibIndicators";
-//import TechInicatatorClass from "../lib/techind/techIndicators";
 
 /**
  * Класс советника
@@ -48,7 +44,7 @@ class Adviser {
     this._timeframe = state.timeframe;
     /* Имя файла стратегии */
     this._strategyName = state.strategyName;
-    this._strategyParameters = state.strategyParameters;
+
     this._PartitionKey =
       state.PartitionKey ||
       createAdviserSlug({
@@ -241,7 +237,7 @@ class Adviser {
       this._strategyInstance = new BaseStrategy({
         initialized: strategyState.initialized,
         positions: strategyState.positions,
-        parameters: this._strategyParameters,
+        parameters: this._settings.strategyParameters,
         adviserSettings: this._settings,
         exchange: this._exchange,
         asset: this._asset,
@@ -639,7 +635,6 @@ class Adviser {
       currency: this._currency,
       timeframe: this._timeframe,
       strategyName: this._strategyName,
-      strategyParameters: this._strategyParameters,
       settings: this._settings,
       lastCandle: this._lastCandle,
       status: this._status,
