@@ -4,7 +4,7 @@ import dayjs from "../../utils/dayjs";
 const CANDLEBATCHER_SETTINGS_DEFAULTS = {
   debug: process.env.DEBUG || false,
   proxy: process.env.PROXY_ENDPOINT,
-  requiredHistoryMaxBars: 60
+  requiredHistoryMaxBars: 500
 };
 
 const IMPORTER_SETTINGS_DEFAULT = {
