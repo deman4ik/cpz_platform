@@ -7,7 +7,8 @@ import {
 } from "cpz/config/state";
 import {
   getUserRobotById,
-  saveUserRobotState
+  saveUserRobotState,
+  deleteUserRobotState
 } from "cpz/tableStorage-client/control/userRobots";
 import {
   USER_ROBOT_START,
@@ -49,6 +50,7 @@ class UserRobotRunner extends BaseRunner {
             status: userRobotState.status
           };
         }
+        await deleteUserRobotState(userRobotState);
         params = {
           ...userRobotState,
           strategyName: robotParams.strategyName,

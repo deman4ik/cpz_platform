@@ -11,7 +11,8 @@ import {
 } from "cpz/config/state";
 import {
   getExWatcherById,
-  saveExWatcherState
+  saveExWatcherState,
+  deleteExWatcherState
 } from "cpz/tableStorage-client/control/exwatchers";
 import Log from "cpz/log";
 import {
@@ -67,6 +68,7 @@ class ExWatcherRunner extends BaseRunner {
             status: exWatcherState.status
           };
         }
+        await deleteExWatcherState(exWatcherState);
       }
 
       return await ExWatcherRunner.start(params);
