@@ -21,7 +21,7 @@ begin
      nSTATUS := 20;
    end if;
     
-   update user_robot set
+   update cpz.user_robot set
      robot_status = nSTATUS,
      last_started = (case when dDATE is not null then dDATE else last_started end)
      --run_mode = :new.run_mode -- could change on update
