@@ -13,6 +13,7 @@ import {
   ORDER_TYPE_MARKET,
   ORDER_TYPE_STOP
 } from "../../config/state/types";
+import { VALID_TIMEFRAMES } from "../../config/state/timeframes";
 
 const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
   [SIGNALS_NEWSIGNAL_EVENT]: {
@@ -22,11 +23,13 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
+      type: "number",
+      integer: true,
       empty: false
     },
     timestamp: {

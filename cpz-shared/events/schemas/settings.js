@@ -50,7 +50,7 @@ const IMPORTER_SETTINGS = {
     props: {
       barsToCache: {
         description: "Required number of bars in cache.",
-        type: "int",
+        type: "number",
         integer: true,
         optional: true
       }
@@ -72,7 +72,7 @@ const CANDLEBATCHER_SETTINGS = {
   },
   requiredHistoryMaxBars: {
     description: "Load history data from cache.",
-    type: "int",
+    type: "number",
     integer: true,
     optional: true
   }
@@ -97,7 +97,7 @@ const ADVISER_SETTINGS = {
   },
   requiredHistoryMaxBars: {
     description: "Load history data from cache.",
-    type: "int",
+    type: "number",
     integer: true,
     optional: true
   }

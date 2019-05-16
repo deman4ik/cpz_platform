@@ -11,6 +11,7 @@ import {
   TASKS_BACKTESTER_STOPPED_EVENT,
   TASKS_BACKTESTER_FINISHED_EVENT
 } from "../../types/tasks/backtester";
+import { VALID_TIMEFRAMES } from "../../../config/state/timeframes";
 
 const TASKS_BACKTESTER_START_EVENT_SCHEMA = {
   [TASKS_BACKTESTER_START_EVENT]: {
@@ -21,13 +22,12 @@ const TASKS_BACKTESTER_START_EVENT_SCHEMA = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
-      empty: false
+      type: "number",
+      integer: true
     },
     userId: {
       description: "User uniq Id.",
-      type: "uuid",
-      empty: false
+      type: "uuid"
     },
     strategyName: {
       description: "Strategy file name.",
@@ -39,7 +39,8 @@ const TASKS_BACKTESTER_START_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     dateFrom: {
       description: "Backtest start date.",

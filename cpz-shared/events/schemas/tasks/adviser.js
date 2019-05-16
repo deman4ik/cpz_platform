@@ -11,6 +11,7 @@ import {
   TASKS_ADVISER_PAUSE_EVENT,
   TASKS_ADVISER_RESUME_EVENT
 } from "../../types/tasks/adviser";
+import { VALID_TIMEFRAMES } from "../../../config/state/timeframes";
 
 const TASKS_ADVISER_START_EVENT_SCHEMA = {
   [TASKS_ADVISER_START_EVENT]: {
@@ -21,7 +22,8 @@ const TASKS_ADVISER_START_EVENT_SCHEMA = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
+      type: "number",
+      integer: true,
       empty: false
     },
     exchange: { description: "Exchange code.", type: "exchange" },
@@ -29,7 +31,8 @@ const TASKS_ADVISER_START_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     strategyName: {
       description: "Strategy file name.",

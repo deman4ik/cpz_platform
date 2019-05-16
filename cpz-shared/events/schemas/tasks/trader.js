@@ -11,6 +11,7 @@ import {
   TASKS_TRADER_PAUSE_EVENT,
   TASKS_TRADER_RESUME_EVENT
 } from "../../types/tasks/trader";
+import { VALID_TIMEFRAMES } from "../../../config/state/timeframes";
 
 const TASKS_TRADER_START_EVENT_SCHEMA = {
   [TASKS_TRADER_START_EVENT]: {
@@ -21,20 +22,20 @@ const TASKS_TRADER_START_EVENT_SCHEMA = {
     },
     robotId: {
       description: "Robot uniq Id. - 'AdvisorName'",
-      type: "int",
-      empty: false
+      type: "number",
+      integer: true
     },
     userId: {
       description: "User uniq Id.",
-      type: "uuid",
-      empty: false
+      type: "uuid"
     },
     exchange: { description: "Exchange code.", type: "exchange" },
     asset: { description: "Base currency.", type: "currency" },
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     settings: {
       description: "Trader settings.",

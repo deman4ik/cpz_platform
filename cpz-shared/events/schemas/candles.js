@@ -4,6 +4,7 @@ import {
   CANDLES_HANDLED_EVENT
 } from "../types/candles";
 import { ADVISER_SERVICE } from "../../config/services";
+import { VALID_TIMEFRAMES } from "../../config/state/timeframes";
 
 const CANDLES_NEWCANDLE_EVENT_SCHEMA = {
   [CANDLES_NEWCANDLE_EVENT]: {
@@ -13,7 +14,8 @@ const CANDLES_NEWCANDLE_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     time: { description: "Candle time in seconds.", type: "number" },
     timestamp: {

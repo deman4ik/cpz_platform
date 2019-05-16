@@ -24,6 +24,7 @@ import {
   ORDER_STATUS_ERROR
 } from "../../config/state/status";
 import { TRADES_ORDER_EVENT, TRADES_POSITION_EVENT } from "../types/trades";
+import { VALID_TIMEFRAMES } from "../../config/state/timeframes";
 
 const _positionStep = {
   status: {
@@ -70,8 +71,8 @@ const TRADES_ORDER_EVENT_SCHEMA = {
     traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
-      empty: false
+      type: "number",
+      integer: true
     },
     userId: {
       description: "User uniq Id.",
@@ -100,7 +101,8 @@ const TRADES_ORDER_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     createdAt: {
       description: "Order created timestamp in UTC.",
@@ -190,8 +192,8 @@ const TRADES_POSITION_EVENT_SCHEMA = {
     traderId: { description: "Uniq Trader Id.", type: "string", empty: false },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
-      empty: false
+      type: "number",
+      integer: true
     },
     userId: {
       description: "User uniq Id.",
@@ -203,7 +205,8 @@ const TRADES_POSITION_EVENT_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     status: {
       description: "Position status.",

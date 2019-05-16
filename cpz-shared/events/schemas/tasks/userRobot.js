@@ -10,6 +10,7 @@ import {
   USER_ROBOT_UPDATE,
   TASKS_USERROBOT_HIST_EVENT
 } from "../../types/tasks/userRobot";
+import { VALID_TIMEFRAMES } from "../../../config/state/timeframes";
 
 /**
  * Событие - Робот запущен
@@ -23,8 +24,8 @@ const USER_ROBOT_START_SCHEMA = {
     },
     robotId: {
       description: "Robot uniq Id.",
-      type: "int",
-      empty: false
+      type: "number",
+      integer: true
     },
     userId: {
       description: "User uniq Id.",
@@ -36,7 +37,8 @@ const USER_ROBOT_START_SCHEMA = {
     currency: { description: "Quote currency.", type: "currency" },
     timeframe: {
       description: "Timeframe in minutes.",
-      type: "int"
+      type: "enum",
+      values: VALID_TIMEFRAMES
     },
     strategyName: {
       description: "Strategy file name.",
