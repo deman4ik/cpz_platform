@@ -19,10 +19,6 @@ const validator = new FValidator({
       "The '{field}' field must contain only letters, numbers or '_'. Actual: {actual}",
     currencyError:
       "The '{field}' field must be uppercase string. Actual: {actual}",
-    NaN: "The '{field}' field must be a number",
-    // Not an Integer
-    NaI: "The '{field}' field must be an integer",
-    posInt: "The '{field}' field must be positive",
     incorrectValue: "The '{field}' can be only {expected}. Actual {actual}"
   }
 });
@@ -39,16 +35,6 @@ validator.add("exchange", value => {
 validator.add("currency", value => {
   if (typeof value !== "string" || !/^[A-Z]+$/.test(value))
     return validator.makeError("currencyError", null, value);
-
-  return true;
-});
-
-// расширение валидатора новым типом данных int
-validator.add("int", value => {
-  /* eslint-disable no-restricted-globals */
-  if (typeof value !== "number" || isNaN(value))
-    return validator.makeError("NaN");
-  if (value !== Math.floor(value)) return validator.makeError("NaI");
 
   return true;
 });
@@ -83,16 +69,6 @@ validator.add("tradeMode", (value, { values, requiredProps }, _, parent) => {
     if (!hasQueryByPath(parent, path))
       return validator.makeError("requiredByField", path);
   }
-
-  return true;
-});
-
-validator.add("posInt", value => {
-  /* eslint-disable no-restricted-globals */
-  if (typeof value !== "number" || isNaN(value))
-    return validator.makeError("NaN");
-  if (value !== Math.floor(value)) return validator.makeError("NaI");
-  if (value < 0) return validator.makeError("posInt", null, value);
 
   return true;
 });

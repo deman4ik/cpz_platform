@@ -2,7 +2,7 @@ import ServiceError from "../error";
 import validator from "./validator";
 
 /**
- * Validator Service
+ * Validator
  * @class
  * Validate data by schema
  */
@@ -11,6 +11,11 @@ class ServiceValidator {
     this._validators = {};
   }
 
+  /**
+   * Add new schema
+   * @method
+   * @param {Object} schema - schema
+   * */
   add(schemas) {
     Object.keys(schemas).forEach(key => {
       try {
@@ -23,7 +28,7 @@ class ServiceValidator {
   }
 
   /**
-   * Check data by schema
+   * Check data by schema name
    * @method
    * @param {Object} schemaName - needed schema
    * @param {Object} data - data to validate
@@ -32,6 +37,27 @@ class ServiceValidator {
     if (!Object.prototype.hasOwnProperty.call(this._validators, schemaName))
       throw new Error(`Validation schema "${schemaName}" doesn't exist`);
     const validationErrors = this._validators[schemaName](data);
+    if (Array.isArray(validationErrors)) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.VALIDATION_ERROR,
+          info: {
+            validationErrors
+          }
+        },
+        `${validationErrors.map(err => err.message).join(" ")}`
+      );
+    }
+  }
+
+  /**
+   * Check data by schema
+   * @method
+   * @param {Object} schema - needed schema
+   * @param {Object} data - data to validate
+   * */
+  simpleCheck(schema, data) {
+    const validationErrors = validator.validate(data, schema);
     if (Array.isArray(validationErrors)) {
       throw new ServiceError(
         {
