@@ -542,7 +542,9 @@ class Backtester {
       // Публикуем событие - ошибка
       await EventGrid.publish(ERROR_BACKTESTER_ERROR_EVENT, {
         subject: this._taskId,
-        error: error.json
+        data: {
+          error: error.main
+        }
       });
     }
   }
