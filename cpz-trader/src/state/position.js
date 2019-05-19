@@ -40,6 +40,7 @@ class Position {
   constructor(state) {
     /* Уникальный идентификатор позиции */
     this._id = state.id;
+    this._prefix = state.prefix;
     this._code = state.code;
     this._direction = state.direction;
     /* Текущий статус ["new","open","closed","closedAuto","canceled","error"] */
@@ -166,13 +167,9 @@ class Position {
    */
   _createOrder(signal, positionDirection, settings) {
     this.log("Creating new order...", signal);
-    const {
-      signalId,
-      orderType,
-      price,
-      action,
-      settings: { volume: signalVolume }
-    } = signal;
+    const { signalId, orderType, price, action } = signal;
+    const volume =
+      (signal.settings && signal.settings.volume) || settings.volume;
     this._currentOrder = {
       orderId: uuid(), // Уникальный идентификатор ордера
       signalId, // Идентификатор сигнала
@@ -180,9 +177,8 @@ class Position {
       orderType, // Тип ордера
       price, // Цена ордера
       volume:
-        signalVolume ||
         (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
-        settings.volume,
+        volume,
       createdAt: dayjs.utc().toISOString(), // Дата и время создания
       lastCheck: dayjs.utc().toISOString(),
       status: ORDER_STATUS_NEW, // Статус ордера
@@ -660,6 +656,7 @@ class Position {
   get state() {
     return {
       id: this._id,
+      prefix: this._prefix,
       code: this._code,
       status: this._status,
       closeRequested: this._closeRequested,

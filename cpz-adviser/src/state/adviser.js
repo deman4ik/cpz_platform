@@ -63,6 +63,8 @@ class Adviser {
       positions: {},
       initialized: false
     };
+    /* Действия для проверки */
+    this._hasActions = state.hasActions || false;
     /* Состояние индикаторов */
     this._indicators = state.indicators || {};
     this._baseIndicatorsCode = {};
@@ -225,14 +227,18 @@ class Adviser {
     });
   }
 
-  setStrategy(strategyCode, strategyState = this._strategy) {
+  setStrategy(strategyCode = {}, strategyState = this._strategy) {
     try {
+      // Функции стратегии
       const strategyFunctions = {};
       Object.getOwnPropertyNames(strategyCode)
         .filter(key => typeof strategyCode[key] === "function")
         .forEach(key => {
           strategyFunctions[key] = strategyCode[key];
         });
+      // Схема параметров
+      const { parametersSchema } = strategyCode;
+
       // Создаем новый инстанс класса стратегии
       this._strategyInstance = new BaseStrategy({
         initialized: strategyState.initialized,
@@ -244,6 +250,7 @@ class Adviser {
         currency: this._currency,
         timeframe: this._timeframe,
         robotId: this._robotId,
+        parametersSchema,
         strategyFunctions, // функции стратегии
         ...strategyState // предыдущий стейт стратегии
       });
@@ -284,16 +291,19 @@ class Adviser {
 
             // Считываем объект индикатора
 
-            const indicatorObject = this._baseIndicatorsCode[
+            const indicatorCode = this._baseIndicatorsCode[
               `${indicator.fileName}`
             ];
             // Берем все функции индикатора
             const indicatorFunctions = {};
-            Object.getOwnPropertyNames(indicatorObject)
-              .filter(ownProp => typeof indicatorObject[ownProp] === "function")
+            Object.getOwnPropertyNames(indicatorCode)
+              .filter(ownProp => typeof indicatorCode[ownProp] === "function")
               .forEach(ownProp => {
-                indicatorFunctions[ownProp] = indicatorObject[ownProp];
+                indicatorFunctions[ownProp] = indicatorCode[ownProp];
               });
+
+            // Схема параметров
+            const { parametersSchema } = indicatorCode;
             // Создаем новый инстанc базового индикатора
             this[`_ind${key}Instance`] = new BaseIndicator({
               exchange: this._exchange,
@@ -302,6 +312,7 @@ class Adviser {
               timeframe: this._timeframe,
               adviserSettings: this._settings,
               robotId: this._robotId,
+              parametersSchema,
               indicatorFunctions, // функции индикатора
               ...indicator // стейт индикатора
             });
@@ -319,7 +330,7 @@ class Adviser {
               timeframe: this._timeframe,
               adviserSettings: this._settings,
               robotId: this._robotId,
-              options: indicator.options,
+              parameters: indicator.parameters,
               ...indicator // стейт индикатора
             });
 
@@ -336,7 +347,7 @@ class Adviser {
               timeframe: this._timeframe,
               adviserSettings: this._settings,
               robotId: this._robotId,
-              options: indicator.options,
+              parameters: indicator.parameters,
               ...indicator // стейт индикатора
             });
 
@@ -353,7 +364,7 @@ class Adviser {
               timeframe: this._timeframe,
               adviserSettings: this._settings,
               robotId: this._robotId,
-              options: indicator.options,
+              parameters: indicator.parameters,
               ...indicator // стейт индикатора
             });
 
@@ -390,6 +401,7 @@ class Adviser {
       // Если стратегия еще не проинициализирована
       if (!this._strategyInstance.initialized) {
         // Инициализируем
+        this._strategyInstance._checkParameters();
         this._strategyInstance.init();
         this._strategyInstance.initialized = true;
         // Считываем настройки индикаторов
@@ -420,6 +432,7 @@ class Adviser {
     try {
       Object.keys(this._indicators).forEach(key => {
         if (!this[`_ind${key}Instance`].initialized) {
+          this[`_ind${key}Instance`]._checkParameters();
           this[`_ind${key}Instance`].init();
           this[`_ind${key}Instance`].initialized = true;
         }
@@ -480,17 +493,21 @@ class Adviser {
    * @memberof Adviser
    */
   runStrategy() {
+    Log.debug("Adviser.runStrategy");
     try {
       this._strategyInstance._eventsToSend = {};
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
+        this._lastCandle,
         this._candle,
         this._candles,
         this._candlesProps
       );
       this._strategyInstance.handleIndicators(this._indicators);
+      Log.debug("Positions pre CHECK", this._strategyInstance.positions);
       // Запустить проверку стратегии
       this._strategyInstance.check();
+      Log.debug("Positions post CHECK", this._strategyInstance.positions);
       this.getStrategyState();
     } catch (error) {
       throw new ServiceError(
@@ -502,6 +519,37 @@ class Adviser {
           }
         },
         'Failed to run strategy "%s"',
+        this._strategyName
+      );
+    }
+  }
+
+  runActions() {
+    Log.debug("Adviser.runActions");
+    try {
+      this._strategyInstance._eventsToSend = {};
+      // Передать свечу и значения индикаторов в инстанс стратегии
+      this._strategyInstance.handleCandles(
+        this._lastCandle,
+        this._candle,
+        this._candles,
+        this._candlesProps
+      );
+      // Запустить проверку стратегии
+      Log.debug("Positions pre RUNACTIONS", this._strategyInstance.positions);
+      this._strategyInstance._runActions();
+      Log.debug("Positions post RUNACTIONS", this._strategyInstance.positions);
+      this.getStrategyState();
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.ADVISER_ACTIONS_ERROR,
+          cause: error,
+          info: {
+            ...this.props
+          }
+        },
+        'Failed to run strategy actions "%s"',
         this._strategyName
       );
     }
@@ -540,7 +588,17 @@ class Adviser {
       this._candles = [...new Set([...this._candles, candle])];
     }
     this._candle = candle;
+    if (!this._lastCandle.id && this._candles.length > 1)
+      this._lastCandle = this._candles[this._candles.length - 2];
     this._prepareCandles();
+  }
+
+  handleTick(tick) {
+    const { price, volume } = tick;
+    this._candle.high = Math.max(this._candle.high, price);
+    this._candle.low = Math.min(this._candle.low, price);
+    this._candle.close = price;
+    this._candle.volume += volume;
   }
 
   finalize() {
@@ -596,12 +654,14 @@ class Adviser {
    */
   getStrategyState() {
     try {
+      this.log("Strategy events", this._strategyInstance._events);
       this._eventsToSend = {
         ...this._eventsToSend,
         ...this._strategyInstance._events
       };
       this._strategy.initialized = this._strategyInstance.initialized;
-      this._strategy.positions = this._strategyInstance.positions;
+      this._strategy.positions = this._strategyInstance.activePositions;
+      this._hasActions = this._strategyInstance.hasActions;
       // Все свойства инстанса стратегии
       Object.keys(this._strategyInstance)
         .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
@@ -637,6 +697,7 @@ class Adviser {
       strategyName: this._strategyName,
       settings: this._settings,
       lastCandle: this._lastCandle,
+      hasActions: this._hasActions,
       status: this._status,
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt

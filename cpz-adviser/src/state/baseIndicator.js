@@ -1,4 +1,5 @@
 import Log from "cpz/log";
+import ServiceValidator from "cpz/validator";
 import { chunkArrayIncrEnd } from "cpz/utils/helpers";
 import { createLogEvent } from "../utils/helpers";
 import createTulip from "../lib/tulip/create";
@@ -14,7 +15,7 @@ class BaseIndicator {
     this._timeframe = state.timeframe;
     this._adviserSettings = state.adviserSettings;
     this._robotId = state.robotId;
-    this._options = state.options;
+    this._parameters = state.parameters || {};
     this._candle = null; // {}
     this._candles = []; // [{}]
     this._candlesProps = {
@@ -40,11 +41,18 @@ class BaseIndicator {
         this[key] = state.indicatorFunctions[key];
       });
     }
+    this._parametersSchema = state.parametersSchema;
   }
 
   init() {}
 
   calc() {}
+
+  _checkParameters() {
+    if (this._parametersSchema && Object.keys(this._parametersSchema > 0)) {
+      ServiceValidator.simpleCheck(this._parametersSchema, this._parameters);
+    }
+  }
 
   get _events() {
     return this._eventsToSend;
@@ -248,8 +256,8 @@ class BaseIndicator {
     this._initialized = value;
   }
 
-  get options() {
-    return this._options;
+  get parameters() {
+    return this._parameters;
   }
 
   get exchange() {

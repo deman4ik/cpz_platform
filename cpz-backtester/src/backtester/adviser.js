@@ -84,7 +84,18 @@ class AdviserBacktester extends Adviser {
     this._eventsToSend = {};
   }
 
-  async bExecute(candle) {
+  async bRunActions(candle) {
+    this.bClearEvents();
+    this.handleCandle(candle);
+
+    // running actions
+    this.runActions();
+
+    this.finalize();
+  }
+
+  async bRunStrategy(candle) {
+    this.bClearEvents();
     this.handleCandle(candle);
 
     this._candles = this._candles.slice(

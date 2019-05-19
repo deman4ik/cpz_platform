@@ -1,10 +1,10 @@
 import { v4 as uuid } from "uuid";
+import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/dayjs";
+import ServiceValidator from "cpz/validator";
 import {
   INDICATORS_BASE,
   INDICATORS_TULIP,
-  INDICATORS_TALIB,
-  INDICATORS_TECH,
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_LONG,
   TRADE_ACTION_SHORT,
@@ -12,24 +12,26 @@ import {
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
   ORDER_TYPE_STOP,
-  ORDER_DIRECTION_BUY,
-  ORDER_DIRECTION_SELL
+  POS_STATUS_NEW
 } from "cpz/config/state";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import Log from "cpz/log";
 import { createLogEvent } from "../utils/helpers";
+import Position from "./position";
 
 class BaseStrategy {
   constructor(state) {
     this._initialized = state.initialized || false; // стратегия инициализирована
-    this._parameters = state.parameters;
+    this._parameters = state.parameters || {};
     this._adviserSettings = state.adviserSettings;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
     this._timeframe = state.timeframe;
     this._robotId = state.robotId;
-    this._positions = state.positions || {};
+    this._posLastNumb = state.posLastNumb || {};
+    this._positions = {};
+    this.positions = state.positions;
     this._candle = null;
     this._candles = []; // [{}]
     this._candlesProps = {
@@ -41,15 +43,13 @@ class BaseStrategy {
     };
     this._indicators = state.indicators || {};
     this._consts = {
-      TRADE_ACTION_LONG,
-      TRADE_ACTION_CLOSE_LONG,
-      TRADE_ACTION_SHORT,
-      TRADE_ACTION_CLOSE_SHORT,
-      ORDER_TYPE_LIMIT,
-      ORDER_TYPE_MARKET,
-      ORDER_TYPE_STOP,
-      ORDER_DIRECTION_BUY,
-      ORDER_DIRECTION_SELL
+      LONG: TRADE_ACTION_LONG,
+      CLOSE_LONG: TRADE_ACTION_CLOSE_LONG,
+      SHORT: TRADE_ACTION_SHORT,
+      CLOSE_SHORT: TRADE_ACTION_CLOSE_SHORT,
+      LIMIT: ORDER_TYPE_LIMIT,
+      MARKET: ORDER_TYPE_MARKET,
+      STOP: ORDER_TYPE_STOP
     };
     this._eventsToSend = {};
     if (state.variables) {
@@ -62,11 +62,18 @@ class BaseStrategy {
         this[key] = state.strategyFunctions[key];
       });
     }
+    this._parametersSchema = state.parametersSchema;
   }
 
   init() {}
 
   check() {}
+
+  _checkParameters() {
+    if (this._parametersSchema && Object.keys(this._parametersSchema > 0)) {
+      ServiceValidator.simpleCheck(this._parametersSchema, this._parameters);
+    }
+  }
 
   get _events() {
     return this._eventsToSend;
@@ -95,6 +102,26 @@ class BaseStrategy {
     return this._logEvent;
   }
 
+  get hasActions() {
+    let hasActions = false;
+    Object.values(this._positions).forEach(position => {
+      if (position.hasActions) {
+        hasActions = true;
+      }
+    });
+    return hasActions;
+  }
+
+  _createAdvices() {
+    Log.debug("baseStrategy._createAdvices");
+    Object.values(this._positions).forEach(position => {
+      if (position.signal) {
+        this._advice(position.signal);
+        position._clearSignal();
+      }
+    });
+  }
+
   _advice(signal) {
     Log.debug(`Advice from ${this._robotId}`, signal);
     this._eventsToSend[`${this._nextEventIndex}_str`] = {
@@ -121,20 +148,101 @@ class BaseStrategy {
     return this._advice;
   }
 
-  _createPosition(positionState) {
-    const positionId = uuid();
-    const positionCode =
-      positionState.code || positionState.positionCode || positionId;
-    this._positions[positionCode] = {
-      ...positionState,
-      positionId
-    };
+  /** POSITIONS */
+
+  _positionsHandleCandle(candle) {
+    Log.debug("baseStrategy._positionsHandleCandle");
+    if (Object.keys(this._positions).length > 0) {
+      Object.values(this._positions).forEach(position => {
+        position._handleCandle(candle);
+      });
+    }
+  }
+
+  _getNextPositionCode(prefix = "p") {
+    if (Object.prototype.hasOwnProperty.call(this._posLastNumb, prefix)) {
+      this._posLastNumb[prefix] += 1;
+    } else {
+      this._posLastNumb[prefix] = 1;
+    }
+    return `${prefix}_${this._posLastNumb[prefix]}`;
+  }
+
+  _createPosition(prefix = "p") {
+    Log.debug("baseStrategy._createPosition");
+    if (
+      this._positions[prefix] &&
+      this._positions[prefix].status === POS_STATUS_NEW
+    )
+      return this._positions[prefix];
+    const code = this._getNextPositionCode(prefix);
+    this._positions[prefix] = new Position({
+      prefix,
+      code
+    });
+    this._positions[prefix]._handleCandle(this._candle);
+    return this._positions[prefix];
   }
 
   get createPosition() {
     return this._createPosition;
   }
 
+  get hasActivePositions() {
+    return (
+      Object.values(this._positions).filter(position => position.isActive)
+        .length > 0
+    );
+  }
+
+  _hasActivePosition(prefix = "p") {
+    return this._positions[prefix] && this._positions[prefix].isActive;
+  }
+
+  get hasActivePosition() {
+    return this._hasActivePosition;
+  }
+
+  _getPosition(prefix = "p") {
+    return this._positions[prefix];
+  }
+
+  get getPosition() {
+    return this._getPosition;
+  }
+
+  get positions() {
+    return Object.values(this._positions).map(pos => pos.state);
+  }
+
+  set positions(positions) {
+    if (positions && Array.isArray(positions) && positions.length > 0) {
+      positions.forEach(position => {
+        this._positions[position.prefix] = new Position(...position);
+      });
+    }
+  }
+
+  get activePositions() {
+    return Object.values(this._positions)
+      .filter(position => position.isActive)
+      .map(pos => pos.state);
+  }
+
+  _runActions() {
+    Log.debug("baseStrategy._runActions");
+    Object.values(this._positions).forEach(position => {
+      if (position.hasActions) {
+        position._runActions();
+        if (position.signal) {
+          this._advice(position.signal);
+          position._clearSignal();
+        }
+      }
+    });
+  }
+
+  /** INDICATORS */
   _handleIndicators(indicators) {
     this._indicators = indicators;
     Object.keys(this._indicators).forEach(key => {
@@ -152,22 +260,36 @@ class BaseStrategy {
   }
 
   _handleCandles(candle, candles, candlesProps) {
-    this._candle = candle;
-    this._candles = candles;
-    this._candlesProps = candlesProps;
+    try {
+      this._candle = candle;
+      this._candles = candles;
+      this._candlesProps = candlesProps;
+      this._positionsHandleCandle(candle);
+    } catch (error) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.ADVISER_STRATEGY_ERROR,
+          cause: error,
+          info: {
+            ...this.props
+          }
+        },
+        "Failed to handle candles in strategy instance"
+      );
+    }
   }
 
   get handleCandles() {
     return this._handleCandles;
   }
 
-  _addIndicator(name, indicatorName, options) {
+  _addIndicator(name, indicatorName, parameters) {
     this._indicators[name] = {};
     this._indicators[name].name = name;
     this._indicators[name].indicatorName = indicatorName;
     this._indicators[name].fileName = indicatorName;
     this._indicators[name].type = INDICATORS_BASE;
-    this._indicators[name].options = options;
+    this._indicators[name].parameters = parameters;
     this._indicators[name].variables = {};
   }
 
@@ -175,8 +297,8 @@ class BaseStrategy {
     return this._addIndicator;
   }
 
-  _addTulipIndicator(name, indicatorName, options) {
-    this._addIndicator(name, indicatorName, options);
+  _addTulipIndicator(name, indicatorName, parameters) {
+    this._addIndicator(name, indicatorName, parameters);
     this._indicators[name].type = INDICATORS_TULIP;
   }
 
@@ -184,8 +306,9 @@ class BaseStrategy {
     return this._addTulipIndicator;
   }
 
-  _addTalibIndicator(name, indicatorName, options) {
-    this._addIndicator(name, indicatorName, options);
+  /*
+  _addTalibIndicator(name, indicatorName, parameters) {
+    this._addIndicator(name, indicatorName, parameters);
     this._indicators[name].type = INDICATORS_TALIB;
   }
 
@@ -193,15 +316,17 @@ class BaseStrategy {
     return this._addTalibIndicator;
   }
 
-  _addTechIndicator(name, indicatorName, options) {
-    this._addIndicator(name, indicatorName, options);
+  _addTechIndicator(name, indicatorName, parameters) {
+    this._addIndicator(name, indicatorName, parameters);
     this._indicators[name].type = INDICATORS_TECH;
   }
 
   get addTechIndicator() {
     return this._addTechIndicator;
   }
+*/
 
+  /** GETTERS  */
   get initialized() {
     return this._initialized;
   }
@@ -240,10 +365,6 @@ class BaseStrategy {
 
   get indicators() {
     return this._indicators;
-  }
-
-  get positions() {
-    return this._positions;
   }
 
   get CONSTS() {

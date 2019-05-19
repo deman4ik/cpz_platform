@@ -6,18 +6,18 @@ import BaseService from "cpz/services/baseService";
 import EventGrid from "cpz/events";
 import { LOG_TOPIC, ERROR_TOPIC } from "cpz/events/topics";
 import ServiceValidator from "cpz/validator";
-import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
+import { TICKS_NEWTICK_EVENT } from "cpz/events/types/ticks";
 import { ERROR_ADVISER_ERROR_EVENT } from "cpz/events/types/error";
-import { CANDLES_NEWCANDLE_EVENT_SCHEMA } from "cpz/events/schemas/candles";
+import { TICKS_NEWTICK_EVENT_SCHEMA } from "cpz/events/schemas/ticks";
 import { ERROR_ADVISER_ERROR_EVENT_SCHEMA } from "cpz/events/schemas/error";
 import { LOG_ADVISER_LOG_EVENT_SCHEMA } from "cpz/events/schemas/log";
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import adviserTables from "cpz/tableStorage-client/control/advisers";
 import adviserActionTables from "cpz/tableStorage-client/control/adviserActions";
-import handleCandle from "../events/handleCandles";
+import handleTick from "../events/handleTicks";
 import { SERVICE_NAME } from "../config";
 
-class CandleEvents extends BaseService {
+class TickEvents extends BaseService {
   constructor() {
     super();
     this.init();
@@ -32,7 +32,7 @@ class CandleEvents extends BaseService {
     });
     // Configure Validator
     const schemas = super.ValidatorConfig([
-      CANDLES_NEWCANDLE_EVENT_SCHEMA,
+      TICKS_NEWTICK_EVENT_SCHEMA,
       ERROR_ADVISER_ERROR_EVENT_SCHEMA,
       LOG_ADVISER_LOG_EVENT_SCHEMA
     ]);
@@ -59,14 +59,14 @@ class CandleEvents extends BaseService {
     if (super.checkAuth(context, req)) {
       // Handling events by target type
       const event = super.handlingEventsByTypes(context, req, [
-        CANDLES_NEWCANDLE_EVENT
+        TICKS_NEWTICK_EVENT
       ]);
 
       if (event) {
         const { eventType, subject, data } = event;
         try {
-          ServiceValidator.check(CANDLES_NEWCANDLE_EVENT, data);
-          await handleCandle(data);
+          ServiceValidator.check(TICKS_NEWTICK_EVENT, data);
+          await handleTick(data);
         } catch (e) {
           let error;
           if (e instanceof ServiceError) {
@@ -74,11 +74,11 @@ class CandleEvents extends BaseService {
           } else {
             error = new ServiceError(
               {
-                name: ServiceError.types.ADVISER_CANDLES_EVENTS_ERROR,
+                name: ServiceError.types.ADVISER_TICKS_EVENTS_ERROR,
                 cause: e,
                 info: { subject, eventType, ...data }
               },
-              "Failed to handle Candle Event"
+              "Failed to handle Tick Event"
             );
           }
           Log.error(error);
@@ -94,5 +94,5 @@ class CandleEvents extends BaseService {
   }
 }
 
-const func = new CandleEvents();
+const func = new TickEvents();
 export default func;

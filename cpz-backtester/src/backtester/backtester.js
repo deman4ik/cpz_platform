@@ -249,7 +249,7 @@ class Backtester {
         dateTo: this._dateTo
       });
 
-      this._iterations = chunkNumberToArray(this._totalBars, 1440);
+      this._iterations = chunkNumberToArray(this._totalBars, 1000000);
       this._prevIteration = 0;
       let logsToSaveCSV = [];
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
@@ -263,7 +263,7 @@ class Backtester {
         const positionsToSave = [];
         const positionsToSaveDB = {};
         const errorsToSave = [];
-
+        Log.debug("Loading", iteration, "candles from DB...");
         const historyCandles = await getCandlesDB({
           exchange: this._exchange,
           asset: this._asset,
@@ -274,16 +274,30 @@ class Backtester {
           limit: iteration,
           offset: this._prevIteration
         });
-        this._prevIteration = iteration;
+        Log.debug(
+          "Processing iteration from:",
+          historyCandles[0].timestamp,
+          "to:",
+          historyCandles[historyCandles.length - 1].timestamp
+        );
+        this._prevIteration += iteration;
 
         if (this._settings.saveCandlesCSV) {
           candlesToCSV = [...new Set([...candlesToCSV, ...historyCandles])];
         }
 
         for (const candle of historyCandles) {
-          await this._adviserBacktester.bExecute(candle);
+          let signals = [];
+          await this._adviserBacktester.bRunActions(candle);
+          signals = this._adviserBacktester.bSignalsEvents;
           this._traderBacktester.bHandleCandle(candle);
           this._traderBacktester.bExecuteOrders();
+          for (const signal of this._adviserBacktester.bSignalsEvents) {
+            this._traderBacktester.handleSignal(signal);
+            this._traderBacktester.bExecuteOrders();
+          }
+          await this._adviserBacktester.bRunStrategy(candle);
+          signals = [...signals, ...this._adviserBacktester.bSignalsEvents];
           for (const signal of this._adviserBacktester.bSignalsEvents) {
             this._traderBacktester.handleSignal(signal);
             this._traderBacktester.bExecuteOrders();
@@ -304,8 +318,9 @@ class Backtester {
             });
           }
 
-          if (this._adviserBacktester.bSignalsEvents.length > 0) {
-            this._adviserBacktester.bSignalsEvents.forEach(signalEvent => {
+          if (signals.length > 0) {
+            this.log(`${signals.length} signals to send`);
+            signals.forEach(signalEvent => {
               if (this._settings.saveToDB)
                 signalsToSaveDB.push({
                   ...signalEvent,
@@ -325,6 +340,9 @@ class Backtester {
             this._settings.debug &&
             this._adviserBacktester.bLogEvents.length > 0
           ) {
+            this.log(
+              `${this._adviserBacktester.bLogEvents.length} logs to send`
+            );
             this._adviserBacktester.bLogEvents.forEach(logEvent => {
               logsToSave.push({
                 ...logEvent,
@@ -354,6 +372,11 @@ class Backtester {
             });
           }
           if (Object.keys(this._traderBacktester.bPositionEvents).length > 0) {
+            this.log(
+              `${
+                Object.keys(this._traderBacktester.bPositionEvents).length
+              } positions to send`
+            );
             Object.keys(this._traderBacktester.bPositionEvents).forEach(key => {
               const positionEvent = this._traderBacktester.bPositionEvents[key];
 

@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import Adviser from "../state/adviser";
-import { STOP, UPDATE, PAUSE, CANDLE } from "../config";
+import { STOP, UPDATE, PAUSE, CANDLE, TICK } from "../config";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 import loadCandles from "./loadCandles";
@@ -58,6 +58,13 @@ async function execute(adviserState, nextAction) {
 
       await saveIndicatorsState(adviser.props, adviser.indicators);
       await saveStrategyState(adviser.props, adviser.strategy);
+    } else if (type === TICK) {
+      const strategyState = await loadStrategyState(adviser.props);
+      adviser.setStrategy(null, strategyState);
+
+      adviser.handleTick(data);
+
+      adviser.runActions();
     } else if (type === UPDATE) {
       adviser.update(data);
     } else if (type === STOP) {

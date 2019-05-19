@@ -29,8 +29,8 @@ async function saveSignalsDB(data) {
                 order_type: signal.orderType,
                 price_source: signal.priceSource,
                 candle: signal.candle,
-                params: signal.settings,
-                position_id: signal.positionId,
+                params: signal.position,
+                position_id: signal.position.id,
                 candle_id: signal.candleId,
                 candle_timestamp: signal.candleTimestamp
               }))

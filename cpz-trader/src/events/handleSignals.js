@@ -15,7 +15,7 @@ async function handleSignal(eventData) {
       currency,
       robotId,
       timestamp,
-      positionPrefix,
+      position: { prefix },
       action
     } = eventData;
     const traders = await getTradersReadyForSignals({
@@ -27,7 +27,7 @@ async function handleSignal(eventData) {
       robotId
     });
     if (traders && traders.length > 0) {
-      const actionKey = positionPrefix ? `${positionPrefix}_${action}` : action;
+      const actionKey = `${prefix}_${action}`;
       await Promise.all(
         traders.map(async ({ taskId }) => {
           try {

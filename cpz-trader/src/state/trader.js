@@ -331,11 +331,13 @@ class Trader {
    * @param {object} signal
    * @memberof Trader
    */
-  _createPosition({ positionId, action, settings: { positionCode } }) {
-    this.log("Creating new Position", positionCode, positionId);
-    this._positions[positionId] = new Position({
-      id: positionId,
-      code: positionCode,
+  _createPosition({ position, action }) {
+    const { id, prefix, code } = position;
+    this.log("Creating new Position", code, id);
+    this._positions[id] = new Position({
+      id,
+      prefix,
+      code,
       direction:
         action === TRADE_ACTION_LONG
           ? ORDER_DIRECTION_BUY
@@ -354,9 +356,9 @@ class Trader {
     try {
       if (!signal) throw new Error("No signal data");
       this.log(
-        `handleSignal() position: ${signal.settings.positionCode}, ${
-          signal.action
-        }, ${signal.price}, from ${signal.priceSource}`
+        `handleSignal() position: ${signal.position.code}, ${signal.action}, ${
+          signal.price
+        }, from ${signal.priceSource}`
       );
       // Если сигнал уже обрабатывалась - выходим
       if (signal.signalId === this._lastSignal.signalId) {
@@ -384,7 +386,7 @@ class Trader {
         // Создаем новую позицию
         this._createPosition(signal);
         // Создаем ордер на открытие позиции
-        this._positions[signal.positionId].createEntryOrder(
+        this._positions[signal.position.id].createEntryOrder(
           signal,
           this._settings
         );
@@ -393,32 +395,32 @@ class Trader {
         if (
           !Object.prototype.hasOwnProperty.call(
             this._positions,
-            signal.positionId
+            signal.position.id
           )
         ) {
           // TODO: Проверить другие активные позиции
           // и если сигнал на закрытие подходит по направлению
           // закрыть эту позицию
-          Log.warn("Position '%s' not found!", signal.positionId);
+          Log.warn("Position '%s' not found!", signal.position.id);
           return;
         }
         // Создаем ордер на закрытие позиции
-        this._positions[signal.positionId].createExitOrder(
+        this._positions[signal.position.id].createExitOrder(
           signal,
           this._settings
         );
         // Если текущая позиция еще не открыта
-        if (this._positions[signal.positionId].status === POS_STATUS_NEW) {
+        if (this._positions[signal.position.id].status === POS_STATUS_NEW) {
           // Отменяем позицию
-          this._positions[signal.positionId].status = POS_STATUS_CANCELED;
-          this._positions[signal.positionId].reason = "exit_signal";
+          this._positions[signal.position.id].status = POS_STATUS_CANCELED;
+          this._positions[signal.position.id].reason = "exit_signal";
           // Если вход в текущую позицию все еще открыт
         } else if (
-          this._positions[signal.positionId].entryStatus === ORDER_STATUS_OPEN
+          this._positions[signal.position.id].entryStatus === ORDER_STATUS_OPEN
         ) {
           // Проверяем ордер на открытие
           const ordersToExecute = this._positions[
-            signal.positionId
+            signal.position.id
           ].getOrdersToExecute();
 
           ordersToExecute.forEach(order => {

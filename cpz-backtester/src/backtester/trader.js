@@ -66,16 +66,16 @@ class TraderBacktester extends Trader {
   bHandleCandle(candle) {
     try {
       // По умолчанию берем цену закрытия свечи
-      let price = candle.close;
+      const price = candle.close;
       // Если в последнем сигнале указан источник цены
-      const { priceSource } = this._lastSignal;
+      /* const { priceSource } = this._lastSignal;
       if (
         priceSource &&
         ["open", "close", "high", "low"].includes(priceSource)
       ) {
         // берем нужное поле
         price = candle[priceSource];
-      }
+      } */
       this.log(
         "Trader handleCandle()",
         `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${

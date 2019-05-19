@@ -4,11 +4,32 @@ import talib from "./create";
 class Talib extends BaseIndicator {
   constructor(state) {
     super(state);
-    this.calculate = talib[state.indicatorName].create(state.options);
+
+    this._parametersSchema = {
+      candlesLength: {
+        description: "Candles window length",
+        type: "number",
+        integer: "true",
+        positive: "true",
+        min: 1,
+        max: this._adviserSettings.requiredHistoryMaxBars || 1,
+        optional: true
+      }
+    };
+    talib[this._indicatorName].requires.forEach(param => {
+      this._parametersSchema[param] = {
+        description: param,
+        type: "number"
+      };
+    });
+  }
+
+  init() {
+    this.calculate = talib[this._indicatorName].create(this.parameters);
   }
 
   async calc() {
-    const { candlesLength } = this.options;
+    const { candlesLength } = this.parameters;
     const candlesProps = this.prepareCandles(
       this.candles.slice(-candlesLength)
     );

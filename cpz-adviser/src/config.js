@@ -8,5 +8,16 @@ const PAUSE = "pause";
 
 const TASK = "TASK";
 const CANDLE = "CANDLE";
+const TICK = "TICK";
 const LOCK_PERIOD = 50;
-export { SERVICE_NAME, START, STOP, UPDATE, PAUSE, TASK, CANDLE, LOCK_PERIOD };
+export {
+  SERVICE_NAME,
+  START,
+  STOP,
+  UPDATE,
+  PAUSE,
+  TASK,
+  CANDLE,
+  TICK,
+  LOCK_PERIOD
+};

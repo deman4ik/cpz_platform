@@ -72,26 +72,31 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
       type: "string",
       optional: true
     },
-    positionId: {
-      description: "Uniq position Id",
-      type: "string"
-    },
-    positionPrefix: {
-      description: "Position prefix",
-      type: "string",
-      optional: true
+    position: {
+      description: "Position.",
+      type: "object",
+      props: {
+        id: {
+          description: "Uniq position Id",
+          type: "string"
+        },
+        prefix: {
+          description: "Position prefix",
+          type: "string",
+          empty: false
+        },
+        code: {
+          description: "Position code.",
+          type: "string",
+          empty: false
+        }
+      }
     },
     settings: {
       description: "Trader parameters.",
       type: "object",
       props: {
-        volume: TRADER_SETTINGS.volume,
-        positionCode: {
-          description: "Position code.",
-          type: "string",
-          optional: true,
-          empty: false
-        }
+        volume: TRADER_SETTINGS.volume
       },
       optional: true
     }

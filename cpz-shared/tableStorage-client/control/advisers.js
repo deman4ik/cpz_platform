@@ -129,7 +129,73 @@ const getStartedAdvisers = async () => {
     );
   }
 };
-// TODO: getAdvisersWithActions
+
+/**
+ * Query Started Advisers with Actions
+ *
+ * @returns {Object[]}
+ */
+const getStartedAdvisersWithActions = async ({ exchange, asset, currency }) => {
+  try {
+    const exchangeStatusFilter = TableQuery.stringFilter(
+      "exchange",
+      TableUtilities.QueryComparisons.EQUAL,
+      exchange
+    );
+    const assetStatusFilter = TableQuery.stringFilter(
+      "asset",
+      TableUtilities.QueryComparisons.EQUAL,
+      asset
+    );
+    const currencyStatusFilter = TableQuery.stringFilter(
+      "currency",
+      TableUtilities.QueryComparisons.EQUAL,
+      currency
+    );
+    const combineCurFilter = TableQuery.combineFilters(
+      assetStatusFilter,
+      TableUtilities.TableOperators.AND,
+      currencyStatusFilter
+    );
+    const combinedMarketFilter = TableQuery.combineFilters(
+      exchangeStatusFilter,
+      TableUtilities.TableOperators.AND,
+      combineCurFilter
+    );
+    const startedStatusFilter = TableQuery.stringFilter(
+      "status",
+      TableUtilities.QueryComparisons.EQUAL,
+      STATUS_STARTED
+    );
+    const hasActions = TableQuery.booleanFilter(
+      "hasActions",
+      TableUtilities.QueryComparisons.EQUAL,
+      true
+    );
+    const statusFilter = TableQuery.combineFilters(
+      startedStatusFilter,
+      TableUtilities.TableOperators.AND,
+      hasActions
+    );
+    const query = new TableQuery().where(
+      TableQuery.combineFilters(
+        statusFilter,
+        TableUtilities.TableOperators.AND,
+        combinedMarketFilter
+      )
+    );
+    return await client.queryEntities(TABLES.STORAGE_ADVISERS_TABLE, query);
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.TABLE_STORAGE_ERROR,
+        cause: error,
+        info: {}
+      },
+      "Failed to read started advisers"
+    );
+  }
+};
 
 /**
  * Query Paused Advisers
@@ -193,6 +259,7 @@ export {
   getActiveAdvisersBySlug,
   getActiveAdvisers,
   getStartedAdvisers,
+  getStartedAdvisersWithActions,
   getPausedAdvisers,
   saveAdviserState,
   updateAdviserState,

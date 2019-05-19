@@ -1,5 +1,5 @@
 import { ADVISER_SERVICE } from "../../config/services";
-import { TASKS_TOPIC, CANDLES_TOPIC } from "../topics";
+import { TASKS_TOPIC, CANDLES_TOPIC, TICKS_TOPIC } from "../topics";
 import {
   TASKS_ADVISER_START_EVENT,
   TASKS_ADVISER_STOP_EVENT,
@@ -9,6 +9,7 @@ import {
   TASKS_ADVISER_RESUME_EVENT
 } from "../types/tasks/adviser";
 import { CANDLES_NEWCANDLE_EVENT } from "../types/candles";
+import { TICKS_NEWTICK_EVENT } from "../types/ticks";
 
 export default {
   [ADVISER_SERVICE]: [
@@ -32,6 +33,13 @@ export default {
       url: "/api/candleEvents",
       localPort: 8104,
       types: [CANDLES_NEWCANDLE_EVENT]
+    },
+    {
+      name: `${ADVISER_SERVICE}-${TICKS_TOPIC}`,
+      topic: TICKS_TOPIC,
+      url: "/api/tickEvents",
+      localPort: 8104,
+      types: [TICKS_NEWTICK_EVENT]
     }
   ]
 };

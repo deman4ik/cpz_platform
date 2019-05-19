@@ -23,9 +23,9 @@ const CANDLES_NEWCANDLE_EVENT_SCHEMA = {
       type: "datetime"
     },
     open: { description: "Candle Open Price.", type: "number" },
-    close: { description: "Candle Close Price.", type: "number" },
     high: { description: "Candle Highest Price.", type: "number" },
     low: { description: "Trade Lowest Price.", type: "number" },
+    close: { description: "Candle Close Price.", type: "number" },
     volume: { description: "Candle Volume.", type: "number" }
   }
 };
