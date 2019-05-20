@@ -80,16 +80,19 @@ function getCurrentSince(number, timeframe) {
       .startOf("hour")
       .valueOf();
   }
-  if (number === 1)
+  if (timeframe >= 1440) {
+    if (timeframe === 1440 && number === 1)
+      return dayjs
+        .utc()
+        .startOf("day")
+        .valueOf();
     return dayjs
       .utc()
+      .add(-dayjs.utc().day() % (number * (timeframe / 1440)), "day")
       .startOf("day")
       .valueOf();
-  return dayjs
-    .utc()
-    .add(-dayjs.utc().day() % (number * (timeframe / 1440)), "day")
-    .startOf("day")
-    .valueOf();
+  }
+  throw new Error("Invalid timeframe");
 }
 
 function hasTimeframe(timeframes, timeframeStr) {
