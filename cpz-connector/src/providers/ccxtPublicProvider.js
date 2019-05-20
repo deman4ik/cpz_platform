@@ -4,6 +4,7 @@ import retry from "async-retry";
 import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";
 import BasePublicProvider from "./basePublicProvider";
+import { stringToTimeframe, getCurrentCandleParams } from "../utils/helpers";
 
 class CCXTPublicProvider extends BasePublicProvider {
   constructor(input) {
@@ -13,7 +14,8 @@ class CCXTPublicProvider extends BasePublicProvider {
     this.ccxt = null;
     this._retryOptions = {
       retries: 100,
-      minTimeout: 100,
+      minTimeout: 0,
+      maxTimeout: 0,
       onRetry: (err, i) => {
         Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
       }
@@ -83,6 +85,96 @@ class CCXTPublicProvider extends BasePublicProvider {
           pricePrecision: response.precision.price,
           amountPrecision: response.precision.amount
         }
+      };
+    } catch (error) {
+      Log.error(error);
+      return {
+        success: false,
+        error: { name: error.constructor.name, message: error.message }
+      };
+    }
+  }
+
+  async getTimeframes() {
+    try {
+      if (!this.ccxt) {
+        await this.init();
+      }
+      const timeframes = {};
+
+      Object.keys(this.ccxt.timeframes).forEach(key => {
+        timeframes[key] = stringToTimeframe(key);
+      });
+      return {
+        success: true,
+        timeframes
+      };
+    } catch (error) {
+      Log.error(error);
+      return {
+        success: false,
+        error: { name: error.constructor.name, message: error.message }
+      };
+    }
+  }
+
+  async loadCurrentCandle({ asset, currency, timeframe }) {
+    try {
+      Log.debug("loadCurrentCandle()");
+      if (!this.ccxt) {
+        await this.init();
+      }
+      const params = getCurrentCandleParams(this.ccxt.timeframes, timeframe);
+      const call = async bail => {
+        try {
+          return await this.ccxt.fetchOHLCV(
+            this.getSymbol(asset, currency),
+            params.timeframeStr,
+            params.since,
+            params.limit
+          );
+        } catch (e) {
+          if (e instanceof ccxt.ExchangeError) bail(e);
+          throw e;
+        }
+      };
+      const response = await retry(call, this._retryOptions);
+      let candles = [];
+      candles = response.map(candle => ({
+        exchange: this._exchangeName,
+        asset,
+        currency,
+        timeframe: params.timeframe,
+        time: +candle[0],
+        timestamp: dayjs.utc(+candle[0]).toISOString(),
+        open: +candle[1],
+        high: +candle[2],
+        low: +candle[3],
+        close: +candle[4],
+        volume: +candle[5]
+      }));
+
+      if (params.batch) {
+        candles = [
+          {
+            exchange: this._exchangeName,
+            asset,
+            currency,
+            timeframe,
+            time: candles[candles.length - 1].time,
+            timestamp: candles[candles.length - 1].timestamp,
+            open: +candles[0].open,
+            high: Math.max(...candles.map(t => +t.high)),
+            low: Math.min(...candles.map(t => +t.low)),
+            close: +candles[candles.length - 1].close,
+            volume: +candles.map(t => t.volume).reduce((a, b) => a + b)
+          }
+        ];
+      }
+
+      return {
+        success: true,
+        candle: candles[candles.length - 1]
       };
     } catch (error) {
       Log.error(error);

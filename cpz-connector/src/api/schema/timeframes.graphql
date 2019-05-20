@@ -1,0 +1,5 @@
+type TimeframesResponse {
+  success: Boolean!
+  error: Error
+  timeframes: JSON
+}

@@ -1,6 +1,7 @@
 # import { APIPairKeysInput } from "src/api/schema/apikeys.graphql"
 # import { OrderFindInput, OrderInput, Order, OrderResponse } from "src/api/schema/orders.graphql"
 # import { MarketResponse } from "src/api/schema/market.graphql"
+# import { TimeframesResponse } from "src/api/schema/timeframes.graphql"
 # import { CandleResponse, CandlesResponse} from "src/api/schema/candles.graphql"
 # import { TradesResponse } from "src/api/schema/trades.graphql"
 
@@ -8,64 +9,87 @@ scalar DateTime
 scalar JSON
 
 type Query {
-    balance(connectorInput: PrivateConnectorInput, checkConnectorInput: CheckConnectorInput): BalanceResponse!
-    order(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse!
-    market(connectorInput: PublicConnectorInput!, asset: String!, currency: String!): MarketResponse!
-    lastMinuteCandle(
-        connectorInput: PublicConnectorInput!
-        date: DateTime
-        asset: String!
-        currency: String!
-    ): CandleResponse!
-    minuteCandles(
-        connectorInput: PublicConnectorInput!
-        date: DateTime
-        limit: Int
-        asset: String!
-        currency: String!
-    ): CandlesResponse!
-    trades(
-        connectorInput: PublicConnectorInput!
-        date: DateTime
-        limit: Int
-        asset: String!
-        currency: String!
-    ): TradesResponse!
+  balance(
+    connectorInput: PrivateConnectorInput
+    checkConnectorInput: CheckConnectorInput
+  ): BalanceResponse!
+  order(
+    connectorInput: PrivateConnectorInput!
+    order: OrderFindInput!
+  ): OrderResponse!
+  market(
+    connectorInput: PublicConnectorInput!
+    asset: String!
+    currency: String!
+  ): MarketResponse!
+  timeframes(connectorInput: PublicConnectorInput!): TimeframesResponse!
+  currentCandle(
+    connectorInput: PublicConnectorInput!
+    asset: String!
+    currency: String!
+    timeframe: Int!
+  ): CandleResponse!
+  lastMinuteCandle(
+    connectorInput: PublicConnectorInput!
+    date: DateTime
+    asset: String!
+    currency: String!
+  ): CandleResponse!
+  minuteCandles(
+    connectorInput: PublicConnectorInput!
+    date: DateTime
+    limit: Int
+    asset: String!
+    currency: String!
+  ): CandlesResponse!
+  trades(
+    connectorInput: PublicConnectorInput!
+    date: DateTime
+    limit: Int
+    asset: String!
+    currency: String!
+  ): TradesResponse!
 }
 
 type Mutation {
-    createOrder(connectorInput: PrivateConnectorInput!, order: OrderInput!): OrderResponse!
-    cancelOrder(connectorInput: PrivateConnectorInput!, order: OrderFindInput!): OrderResponse!
+  createOrder(
+    connectorInput: PrivateConnectorInput!
+    order: OrderInput!
+  ): OrderResponse!
+  cancelOrder(
+    connectorInput: PrivateConnectorInput!
+    order: OrderFindInput!
+  ): OrderResponse!
 }
 
 input PublicConnectorInput {
-    exchange: String!
-    proxy: String
+  exchange: String!
+  proxy: String
 }
 
 input PrivateConnectorInput {
-    userId: ID!
-    exchange: String!
-    keys: APIPairKeysInput!
-    proxy: String
+  userId: ID!
+  exchange: String!
+  keys: APIPairKeysInput!
+  proxy: String
 }
 
 input CheckConnectorInput {
-    userId: ID!
-    exchange: String!
-    APIKeyValue: String!
-    APISecretValue: String!
-    proxy: String
+  userId: ID!
+  exchange: String!
+  APIKeyValue: String!
+  APISecretValue: String!
+  proxy: String
 }
 
 type Error {
-    name: String!
-    message: String!
-    info: JSON
+  name: String!
+  message: String!
+  info: JSON
 }
 
 type BalanceResponse {
-    success: Boolean!
-    error: Error
-    balance: JSON
+  success: Boolean!
+  error: Error
+  balance: JSON
 }
