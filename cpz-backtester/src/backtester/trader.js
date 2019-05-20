@@ -137,7 +137,7 @@ class TraderBacktester extends Trader {
                 orderResult.exId = orderResult.orderId;
                 orderResult.exTimestamp = this._lastPrice.timestamp;
                 orderResult.exLastTrade = this._lastPrice.timestamp;
-                orderResult.average = this._lastPrice.price;
+                orderResult.average = orderResult.price;
                 orderResult.remaining = orderResult.volume;
               } else if (order.task === ORDER_TASK_OPEN_MARKET) {
                 // Если режим - эмуляция или бэктест
@@ -150,7 +150,7 @@ class TraderBacktester extends Trader {
                 orderResult.executed = orderResult.volume;
                 orderResult.remaining = 0;
                 orderResult.exLastTrade = this._lastPrice.timestamp;
-                orderResult.price = this._lastPrice.price;
+                orderResult.price = orderResult.price;
                 orderResult.average = orderResult.price;
               }
             }
