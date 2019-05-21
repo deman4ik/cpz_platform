@@ -288,15 +288,16 @@ class Backtester {
 
         for (const candle of historyCandles) {
           let signals = [];
-          await this._adviserBacktester.bRunActions(candle);
+
+          this._traderBacktester.bHandleCandle(candle);
+          this._traderBacktester.bExecuteOrders();
+          await this._adviserBacktester.bRunStrategy(candle);
           signals = this._adviserBacktester.bSignalsEvents;
           for (const signal of this._adviserBacktester.bSignalsEvents) {
             this._traderBacktester.handleSignal(signal);
             this._traderBacktester.bExecuteOrders();
           }
-          this._traderBacktester.bHandleCandle(candle);
-          this._traderBacktester.bExecuteOrders();
-          await this._adviserBacktester.bRunStrategy(candle);
+          await this._adviserBacktester.bRunActions(candle);
           signals = [...signals, ...this._adviserBacktester.bSignalsEvents];
           for (const signal of this._adviserBacktester.bSignalsEvents) {
             this._traderBacktester.handleSignal(signal);
