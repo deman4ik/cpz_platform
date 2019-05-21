@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
-import { createCurrentPriceSlug } from "cpz/config/state";
 import {
   saveTasksEvent,
   saveSignalsEvent,
@@ -12,12 +11,10 @@ import {
 } from "cpz/tableStorage-client/events/events";
 import Log from "cpz/log";
 import { ERROR_TOPIC } from "cpz/events/topics";
-import { saveCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
 import { saveSignalsDB } from "cpz/db-client/signals";
 import { savePositionsDB } from "cpz/db-client/positions";
 import { saveOrdersDB } from "cpz/db-client/orders";
 import { saveUserRobotHistDB } from "cpz/db-client/userRobotHist";
-import { CANDLES_NEWCANDLE_EVENT } from "cpz/events/types/candles";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
 import {
   TRADES_ORDER_EVENT,
@@ -35,33 +32,6 @@ class EventsLogger {
   async save(event) {
     try {
       const type = event.eventType;
-      if (type === CANDLES_NEWCANDLE_EVENT) {
-        if (this.logToStorage) {
-          const {
-            id,
-            time,
-            timestamp,
-            close,
-            exchange,
-            asset,
-            currency,
-            timeframe
-          } = event.data;
-          if (timeframe === 1) {
-            const slug = createCurrentPriceSlug({ exchange, asset, currency });
-            await saveCurrentPrice({
-              PartitionKey: slug,
-              RowKey: "candle",
-              time,
-              timestamp,
-              price: close,
-              candleId: id,
-              tickId: null
-            });
-          }
-        }
-        return;
-      }
       const baseEventData = {
         RowKey: event.id,
         PartitionKey: type

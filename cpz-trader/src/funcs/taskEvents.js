@@ -45,7 +45,7 @@ import MarketStorageClient from "cpz/tableStorage-client/market";
 import EventsStorageClient from "cpz/tableStorage-client/events";
 import ControlStorageClient from "cpz/tableStorage-client/control";
 import traderActionTables from "cpz/tableStorage-client/control/traderActions";
-import marketTables from "cpz/tableStorage-client/market/currentPrices";
+import marketTables from "cpz/tableStorage-client/market/candles";
 import eventTables from "cpz/tableStorage-client/events/events";
 import BlobStorageClient from "cpz/blobStorage";
 import { TRADER_LOCK } from "cpz/blobStorage/containers";

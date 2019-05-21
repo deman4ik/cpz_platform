@@ -11,5 +11,7 @@ export default [
   "EG_ERROR_KEY",
   "EG_TICKS_ENDPOINT",
   "EG_TICKS_KEY",
+  "CONNECTOR_API_ENDPOINT",
+  "CONNECTOR_API_KEY",
   "DEBUG"
 ];

@@ -48,10 +48,6 @@ function createWatcherSlug({ exchange, asset, currency }) {
   return `${exchange}.${asset}.${currency}`;
 }
 
-function createCurrentPriceSlug({ exchange, asset, currency }) {
-  return `${exchange}.${asset}.${currency}`;
-}
-
 export {
   createAdviserSlug,
   createBacktesterSlug,
@@ -63,6 +59,5 @@ export {
   createTraderSlug,
   createPositionSlug,
   createRobotSlug,
-  createWatcherSlug,
-  createCurrentPriceSlug
+  createWatcherSlug
 };

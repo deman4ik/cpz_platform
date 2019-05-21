@@ -23,7 +23,8 @@ import ControlStorageClient from "cpz/tableStorage-client/control";
 import marketwatcherTables from "cpz/tableStorage-client/control/marketwatchers";
 import MarketStorageClient from "cpz/tableStorage-client/market";
 import tickTables from "cpz/tableStorage-client/market/ticks";
-import currentPriceTables from "cpz/tableStorage-client/market/currentPrices";
+import candlesTables from "cpz/tableStorage-client/market/candles";
+import ConnectorClient from "cpz/connector-client";
 import { EGConfig, ValidatorConfig } from "cpz/utils/helpers";
 import { SERVICE_NAME } from "./config";
 
@@ -55,8 +56,12 @@ function init() {
   );
   MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, [
     ...tickTables,
-    ...currentPriceTables
+    ...candlesTables
   ]);
+  ConnectorClient.init(
+    process.env.CONNECTOR_API_ENDPOINT,
+    process.env.CONNECTOR_API_KEY
+  );
 }
 
 export default init;

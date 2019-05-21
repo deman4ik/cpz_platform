@@ -8,7 +8,8 @@ const { TableQuery, TableUtilities } = azure;
 
 const TABLES = {
   STORAGE_CANDLESTEMP_TABLE: "CandlesTemp",
-  STORAGE_CANDLESCACHED_TABLE: "CandlesCached"
+  STORAGE_CANDLESCACHED_TABLE: "CandlesCached",
+  STORAGE_CANDLESCURRENT_TABLE: "CandlesCurrent"
 };
 
 /**
@@ -307,6 +308,35 @@ const clearTempCandles = async taskId => {
     );
   }
 };
+
+/**
+ * Get current candle by slug
+ *
+ * @param {string} slug
+ */
+const getCurrentCandle = slug =>
+  client.getEntityByPartitionKey(TABLES.STORAGE_CANDLESCURRENT_TABLE, slug);
+
+/**
+ * Save current candle
+ *
+ * @param {Object} candle
+ */
+const saveCurrentCandle = candle =>
+  client.insertOrMergeEntity(TABLES.STORAGE_CANDLESCURRENT_TABLE, candle);
+
+/**
+ * Delete current candle
+ *
+ * @param {Object} candle
+ */
+const deleteCurrentCandle = ({ PartitionKey, RowKey, metadata }) =>
+  client.deleteEntity(TABLES.STORAGE_CANDLESCURRENT_TABLE, {
+    PartitionKey,
+    RowKey,
+    metadata
+  });
+
 export {
   getCachedCandles,
   countCachedCandles,
@@ -318,6 +348,9 @@ export {
   getTempCandles,
   saveCandlesArrayToTemp,
   deleteTempCandlesArray,
-  clearTempCandles
+  clearTempCandles,
+  getCurrentCandle,
+  saveCurrentCandle,
+  deleteCurrentCandle
 };
 export default Object.values(TABLES);

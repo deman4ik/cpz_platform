@@ -12,8 +12,6 @@ import { BASE_EVENT_SCHEMA } from "cpz/events/schemas/base";
 import eventsloggerEnv from "cpz/config/environment/eventslogger";
 import EventsStorageClient from "cpz/tableStorage-client/events";
 import eventsTables from "cpz/tableStorage-client/events/events";
-import MarketStorageClient from "cpz/tableStorage-client/market";
-import marketTables from "cpz/tableStorage-client/market/currentPrices";
 import DB from "cpz/db-client";
 import { SERVICE_NAME } from "../config";
 import EventsLogger from "../eventslogger/eventslogger";
@@ -38,7 +36,6 @@ class FuncEvents extends BaseService {
     const schemas = super.ValidatorConfig([BASE_EVENT_SCHEMA]);
     ServiceValidator.add(schemas);
     EventsStorageClient.init(process.env.AZ_STORAGE_EVENT_CS, eventsTables);
-    MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, marketTables);
     DB.init(process.env.DB_API_ENDPOINT, process.env.DB_API_ACCESS_KEY);
     this.eventslogger = new EventsLogger();
     if (

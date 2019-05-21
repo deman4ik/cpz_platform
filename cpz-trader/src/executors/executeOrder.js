@@ -11,14 +11,14 @@ import {
   ORDER_TASK_OPEN_LIMIT,
   ORDER_TASK_CHECK,
   ORDER_TASK_CANCEL,
-  createCurrentPriceSlug
+  createCachedCandleSlug
 } from "cpz/config/state";
 import {
   createOrderEX,
   cancelOrderEX,
   checkOrderEX
 } from "cpz/connector-client/orders";
-import { getCurrentPrice } from "cpz/tableStorage-client/market/currentPrices";
+import { getCurrentCandle } from "cpz/tableStorage-client/market/candles";
 import { traderStateToCommonProps } from "../utils/helpers";
 
 async function executeOrder(state, order) {
@@ -73,9 +73,20 @@ async function executeOrder(state, order) {
       if (settings.mode === REALTIME_MODE || settings.mode === EMULATOR_MODE) {
         if (order.task === ORDER_TASK_OPEN_MARKET) {
           try {
-            const marketPrice = await getCurrentPrice(
-              createCurrentPriceSlug({ exchange, asset, currency })
+            const currentCandle = await getCurrentCandle(
+              createCachedCandleSlug({
+                exchange,
+                asset,
+                currency,
+                timeframe: 1
+              })
             );
+            const marketPrice = {
+              time: dayjs.utc(currentCandle.Timestamp).valueOf(),
+              timestamp: dayjs.utc(currentCandle.Timestamp).toISOString(),
+              price: currentCandle.close,
+              candleId: currentCandle.id
+            };
             if (marketPrice && marketPrice.price) {
               currentPrice = marketPrice;
               orderToExecute.price = marketPrice.price;

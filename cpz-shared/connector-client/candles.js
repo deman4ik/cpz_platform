@@ -1,6 +1,63 @@
 import ServiceError from "../error";
 import Connector from "./index";
 
+async function currentCandleEX({
+  exchange,
+  proxy,
+  asset,
+  currency,
+  timeframe
+}) {
+  try {
+    const query = `query currentCandle(
+      $connectorInput: PublicConnectorInput!
+      $asset: String!
+      $currency: String!
+      $timeframe: Int!
+    ) {
+      currentCandle(
+        connectorInput: $connectorInput
+        asset: $asset
+        currency: $currency
+        timeframe: $timeframe
+      ) {
+        success
+        error {
+          name
+          message
+          info
+        }
+        candle
+      }
+    }`;
+    const variables = {
+      connectorInput: {
+        exchange,
+        proxy
+      },
+      asset,
+      currency,
+      timeframe
+    };
+
+    const { currentCandle } = await Connector.client.request(query, variables);
+    if (!currentCandle.success) {
+      const { name, info, message } = currentCandle.error;
+      throw new ServiceError({ name, info }, message);
+    }
+    return currentCandle.candle;
+  } catch (error) {
+    throw new ServiceError(
+      {
+        name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
+        info: { exchange, asset, currency, timeframe },
+        cause: error
+      },
+      "Failed to load current candle."
+    );
+  }
+}
+
 async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
   try {
     const query = `query lastMinuteCandle(
@@ -47,6 +104,7 @@ async function lastMinuteCandleEX({ exchange, proxy, asset, currency, date }) {
     throw new ServiceError(
       {
         name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
+        info: { exchange, asset, currency, date },
         cause: error
       },
       "Failed to load last minute candle."
@@ -108,6 +166,7 @@ async function minuteCandlesEX({
     throw new ServiceError(
       {
         name: ServiceError.types.CONNECTOR_CLIENT_ERROR,
+        info: { exchange, asset, currency, date, limit },
         cause: error
       },
       "Failed to load minute candles."
@@ -115,4 +174,4 @@ async function minuteCandlesEX({
   }
 }
 
-export { lastMinuteCandleEX, minuteCandlesEX };
+export { currentCandleEX, lastMinuteCandleEX, minuteCandlesEX };

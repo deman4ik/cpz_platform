@@ -1,16 +1,17 @@
 import ServiceError from "cpz/error";
 import io from "socket.io-client";
 import { v4 as uuid } from "uuid";
-import { capitalize } from "cpz/utils/helpers";
-import EventGrid from "cpz/events";
-import { ERROR_MARKETWATCHER_ERROR_EVENT } from "cpz/events/types/error";
-import Log from "cpz/log";
 import {
+  VALID_TIMEFRAMES,
   createCachedTickSlug,
   STATUS_ERROR,
   STATUS_STARTED,
   STATUS_STOPPED
 } from "cpz/config/state";
+import { capitalize, sleep } from "cpz/utils/helpers";
+import EventGrid from "cpz/events";
+import { ERROR_MARKETWATCHER_ERROR_EVENT } from "cpz/events/types/error";
+import Log from "cpz/log";
 import BaseProvider from "./baseProvider";
 import init from "../init";
 
@@ -24,6 +25,7 @@ class CryptocompareProvider extends BaseProvider {
     this._socket = io("https://streamer.cryptocompare.com/", {
       transports: ["websocket"]
     });
+    this._loadComplete = false;
     this._subscribeToSocketEvents();
   }
 
@@ -48,6 +50,7 @@ class CryptocompareProvider extends BaseProvider {
     const valuesArray = value.split("~");
 
     const type = valuesArray[0];
+
     if (type === "2") {
       // {Type}~{ExchangeName}~{FromCurrency}~{ToCurrency}~{Flag}~{Price}~{LastUpdate}~{LastVolume}~{LastVolumeTo}~{LastTradeId}~{Volume24h}~{Volume24hTo}~{MaskInt}
 
@@ -100,11 +103,15 @@ class CryptocompareProvider extends BaseProvider {
         price: parseFloat(valuesArray[8])
       };
     }
+    if (type === "3") {
+      if (valuesArray[1] === "LOADCOMPLETE") this._loadComplete = true;
+    }
     return null;
   }
 
   async _handleError(e = "unknown connection error") {
     if (this._status !== STATUS_STOPPED) {
+      this._cronTask.stop();
       this._socketStatus = "error";
       this._status = STATUS_ERROR;
 
@@ -141,13 +148,17 @@ class CryptocompareProvider extends BaseProvider {
     // При получении нового сообщения
     this._socket.on("m", async message => {
       const currentPrice = this._currentToObject(message);
-      if (currentPrice) {
-        this.log(
-          `${currentPrice.asset}/${currentPrice.currency} ${
-            currentPrice.type
-          } ${currentPrice.price}`
+
+      if (this._loadComplete && currentPrice) {
+        console.log(
+          `${currentPrice.timestamp} ${currentPrice.asset}/${
+            currentPrice.currency
+          } ${currentPrice.type} ${currentPrice.price} `
         );
-        await this._saveTrade(currentPrice);
+        if (currentPrice.type === "trade") {
+          this._saveTrade(currentPrice);
+          await this._saveTradeToCache(currentPrice);
+        }
         if (currentPrice.type === "tick") await this._publishTick(currentPrice);
       }
     });
@@ -174,27 +185,48 @@ class CryptocompareProvider extends BaseProvider {
       const activeTickSubs = this._subscriptions.map(
         sub => `2~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
+
+      this._subscriptions.forEach(sub => {
+        this._trades[`${sub.asset}/${sub.currency}`] = [];
+        this._candles[`${sub.asset}/${sub.currency}`] = {};
+        VALID_TIMEFRAMES.forEach(timeframe => {
+          this._candles[`${sub.asset}/${sub.currency}`][timeframe] = {};
+        });
+      });
+
       // Если сокет не подключен
       if (this._socketStatus !== "connect") {
         // Ждем секунду
-        setTimeout(() => {
-          // И проверяем повторно
-          if (this._socketStatus !== "connect") {
-            // Если все еще не подключен - генерируем ошибку
-            throw new Error(
-              'Can\'t open connection to Cryptocompare - task "%s"',
-              this._taskId
-            );
-          }
-        }, 1000);
+        await sleep(1000);
+
+        // И проверяем повторно
+        if (this._socketStatus !== "connect") {
+          // Если все еще не подключен - генерируем ошибку
+          throw new Error(
+            'Can\'t open connection to Cryptocompare - task "%s"',
+            this._taskId
+          );
+        }
       }
 
+      await this._loadCurrentCandles(this._subscriptions);
       this._socket.emit("SubAdd", {
         subs: [...activeTradeSubs, ...activeTickSubs]
       });
+      this._cronTask.start();
       this._status = STATUS_STARTED;
       await this._save();
-      this.log(`Marketwatcher ${this._exchange} started!`);
+
+      await Promise.all(
+        Object.keys(this._candles).map(async key => {
+          await Promise.all(
+            Object.keys(this._candles[key]).map(async timeframe => {
+              await this._saveCandleToCache(this._candles[key][timeframe]);
+            })
+          );
+        })
+      );
+      this.log(`Started!`);
     } catch (e) {
       const error = new ServiceError(
         {
@@ -224,7 +256,9 @@ class CryptocompareProvider extends BaseProvider {
   async stop() {
     this._status = STATUS_STOPPED;
     await this._save();
+    this._cronTask.stop();
     this._socket.close();
+    this.log("Stopped!");
     process.exit(0);
   }
 
@@ -237,6 +271,14 @@ class CryptocompareProvider extends BaseProvider {
       const newTickSubs = subscriptions.map(
         sub => `2~${capitalize(this._exchange)}~${sub.asset}~${sub.currency}`
       );
+      subscriptions.forEach(sub => {
+        this._trades[`${sub.asset}/${sub.currency}`] = [];
+        this._candles[`${sub.asset}/${sub.currency}`] = {};
+        VALID_TIMEFRAMES.forEach(timeframe => {
+          this._candles[`${sub.asset}/${sub.currency}`][timeframe] = {};
+        });
+      });
+      await this._loadCurrentCandles(subscriptions);
       this._socket.emit("SubAdd", {
         subs: [...newTradeSubs, ...newTickSubs]
       });
@@ -282,6 +324,10 @@ class CryptocompareProvider extends BaseProvider {
       );
       this._socket.emit("SubRemove", {
         subs: [...delTradeSubs, ...delTickSubs]
+      });
+      subscriptions.forEach(sub => {
+        delete this._trades[`${sub.asset}/${sub.currency}`];
+        delete this._candles[`${sub.asset}/${sub.currency}`];
       });
       await this._save();
     } catch (e) {

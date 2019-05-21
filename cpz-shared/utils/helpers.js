@@ -164,6 +164,67 @@ function getPreviousMinuteRange(inputDate) {
 }
 
 /**
+ * Возвращает начало и конец предыдущей секунды
+ *
+ * @param {Date} inputDate
+ */
+function getPreviousSecondRange(inputDate) {
+  const date = dayjs.utc(inputDate);
+  const prev = date.add(-1, "second");
+  return {
+    dateFrom: prev.startOf("second").toISOString(),
+    dateTo: prev.endOf("second").toISOString()
+  };
+}
+
+function getCurrentSince(number, timeframe) {
+  if (timeframe === 1) {
+    if (number === 1)
+      return dayjs
+        .utc()
+        .startOf("minute")
+        .valueOf();
+    return dayjs
+      .utc()
+      .add(-number, "minute")
+      .startOf("minute")
+      .valueOf();
+  }
+  if (timeframe < 60) {
+    return dayjs
+      .utc()
+      .add(-dayjs.utc().minute() % (number * timeframe), "minute")
+      .startOf("minute")
+      .valueOf();
+  }
+  if (timeframe < 1440) {
+    if (timeframe === 60 && number === 1)
+      return dayjs
+        .utc()
+        .startOf("hour")
+        .valueOf();
+    return dayjs
+      .utc()
+      .add(-dayjs.utc().hour() % (number * (timeframe / 60)), "hour")
+      .startOf("hour")
+      .valueOf();
+  }
+  if (timeframe >= 1440) {
+    if (timeframe === 1440 && number === 1)
+      return dayjs
+        .utc()
+        .startOf("day")
+        .valueOf();
+    return dayjs
+      .utc()
+      .add(-dayjs.utc().day() % (number * (timeframe / 1440)), "day")
+      .startOf("day")
+      .valueOf();
+  }
+  throw new Error("Invalid timeframe");
+}
+
+/**
  * Разделение указанного периода по дням
  * в том числе учитывая не законченные дни
  *
@@ -411,6 +472,8 @@ export {
   durationInTimeframe,
   completedPercent,
   getPreviousMinuteRange,
+  getPreviousSecondRange,
+  getCurrentSince,
   divideDateByDays,
   arraysDiff,
   chunkArray,
