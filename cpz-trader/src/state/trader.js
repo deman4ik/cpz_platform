@@ -358,11 +358,11 @@ class Trader {
       this.log(
         `handleSignal() position: ${signal.position.code}, ${signal.action}, ${
           signal.price
-        }, from ${signal.priceSource}`
+        }`
       );
       // Если сигнал уже обрабатывалась - выходим
       if (signal.signalId === this._lastSignal.signalId) {
-        this.log("Signal '%s' already handled.", signal.signalId);
+        this.log(`Signal ${signal.signalId} already handled.`);
         return;
       }
       // Если сигнал от другого робота
@@ -385,6 +385,7 @@ class Trader {
 
         // Создаем новую позицию
         this._createPosition(signal);
+
         // Создаем ордер на открытие позиции
         this._positions[signal.position.id].createEntryOrder(
           signal,
@@ -429,12 +430,25 @@ class Trader {
         }
       }
 
+      let checkPrice = false;
+
+      if (this._settings.mode !== BACKTEST_MODE) {
+        // Если время сигнала меньше чем минута назад, то сначала проверяем цену
+        checkPrice =
+          signal.time <
+          dayjs
+            .utc()
+            .add(-1, "minute")
+            .valueOf();
+      }
+
       if (this._lastPrice && this._lastPrice.price) {
         const ordersToExecute = flatten(
           this.activePositionInstances.map(position =>
             position.getOrdersToExecuteByPrice(
               this._lastPrice.price,
-              this._settings
+              this._settings,
+              checkPrice
             )
           )
         );

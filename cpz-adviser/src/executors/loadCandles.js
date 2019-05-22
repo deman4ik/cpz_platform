@@ -14,7 +14,6 @@ async function loadCandles(state) {
       timeframe,
       settings: { requiredHistoryMaxBars }
     } = state;
-    // Вызов функции коннектора
     const result = await getCachedCandlesByKey(
       createCachedCandleSlug({
         exchange,

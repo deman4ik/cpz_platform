@@ -80,24 +80,8 @@ class AdviserBacktester extends Adviser {
     this._loadedHistoryCacheBars = this._candles.length;
   }
 
-  bClearEvents() {
-    this._eventsToSend = {};
-  }
-
-  async bRunActions(candle) {
-    this.bClearEvents();
+  bHandleCandle(candle) {
     this.handleCandle(candle);
-
-    // running actions
-    this.runActions();
-
-    this.finalize();
-  }
-
-  async bRunStrategy(candle) {
-    this.bClearEvents();
-    this.handleCandle(candle);
-
     this._candles = this._candles.slice(
       Math.max(
         this._candles.length -
@@ -107,6 +91,23 @@ class AdviserBacktester extends Adviser {
         0
       )
     );
+  }
+
+  bClearEvents() {
+    this._eventsToSend = {};
+    this._strategyInstance._eventsToSend = {};
+  }
+
+  async bRunActions() {
+    this.bClearEvents();
+
+    // running actions
+    this.runActions();
+  }
+
+  async bRunStrategy() {
+    this.bClearEvents();
+
     // Calculation indicators
     await this.calcIndicators();
     // Run strategy

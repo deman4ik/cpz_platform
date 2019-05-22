@@ -115,7 +115,6 @@ class TraderBacktester extends Trader {
             const orderResult = { ...order };
             // Если задача - проверить исполнения объема
             if (order.task === ORDER_TASK_CHECK) {
-              // Если режим - эмуляция или бэктест
               // Считаем, что ордер исполнен
               orderResult.status = ORDER_STATUS_CLOSED;
               // Полностью - т.е. по заданному объему
@@ -129,30 +128,18 @@ class TraderBacktester extends Trader {
               order.task === ORDER_TASK_OPEN_MARKET
             ) {
               // Устанавливаем объем из параметров
-              if (order.task === ORDER_TASK_OPEN_LIMIT) {
-                // Если режим - эмуляция или бэктест
-                // Если тип ордера - лимитный
-                // Считаем, что ордер успешно выставлен на биржу
-                orderResult.status = ORDER_STATUS_OPEN;
-                orderResult.exId = orderResult.orderId;
-                orderResult.exTimestamp = this._lastPrice.timestamp;
-                orderResult.exLastTrade = this._lastPrice.timestamp;
-                orderResult.average = orderResult.price;
-                orderResult.remaining = orderResult.volume;
-              } else if (order.task === ORDER_TASK_OPEN_MARKET) {
-                // Если режим - эмуляция или бэктест
-                // Если тип ордера - по рынку
-                // Считаем, что ордер исполнен
-                orderResult.status = ORDER_STATUS_CLOSED;
-                orderResult.exId = orderResult.orderId;
-                orderResult.exTimestamp = this._lastPrice.timestamp;
-                // Полностью - т.е. по заданному объему
-                orderResult.executed = orderResult.volume;
-                orderResult.remaining = 0;
-                orderResult.exLastTrade = this._lastPrice.timestamp;
-                orderResult.price = orderResult.price;
-                orderResult.average = orderResult.price;
-              }
+
+              // Если тип ордера - по рынку
+              // Считаем, что ордер исполнен
+              orderResult.status = ORDER_STATUS_CLOSED;
+              orderResult.exId = orderResult.orderId;
+              orderResult.exTimestamp = this._lastPrice.timestamp;
+              // Полностью - т.е. по заданному объему
+              orderResult.executed = orderResult.volume;
+              orderResult.remaining = 0;
+              orderResult.exLastTrade = this._lastPrice.timestamp;
+              orderResult.price = orderResult.price;
+              orderResult.average = orderResult.price;
             }
             orderResult.task = null;
             return orderResult;

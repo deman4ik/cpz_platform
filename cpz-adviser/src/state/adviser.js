@@ -209,6 +209,10 @@ class Adviser {
     return this._settings;
   }
 
+  get hasActions() {
+    return this._hasActions;
+  }
+
   get hasBaseIndicators() {
     return Object.values(this._indicators).filter(
       ({ type }) => type === INDICATORS_BASE
@@ -495,10 +499,8 @@ class Adviser {
   runStrategy() {
     Log.debug("Adviser.runStrategy");
     try {
-      this._strategyInstance._eventsToSend = {};
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
-        this._lastCandle,
         this._candle,
         this._candles,
         this._candlesProps
@@ -527,10 +529,8 @@ class Adviser {
   runActions() {
     Log.debug("Adviser.runActions");
     try {
-      this._strategyInstance._eventsToSend = {};
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
-        this._lastCandle,
         this._candle,
         this._candles,
         this._candlesProps
@@ -593,12 +593,8 @@ class Adviser {
     this._prepareCandles();
   }
 
-  handleTick(tick) {
-    const { price, volume } = tick;
-    this._candle.high = Math.max(this._candle.high, price);
-    this._candle.low = Math.min(this._candle.low, price);
-    this._candle.close = price;
-    this._candle.volume += volume;
+  handleCurrentCandle(candle) {
+    this._candle = candle;
   }
 
   finalize() {
@@ -654,7 +650,6 @@ class Adviser {
    */
   getStrategyState() {
     try {
-      this.log("Strategy events", this._strategyInstance._events);
       this._eventsToSend = {
         ...this._eventsToSend,
         ...this._strategyInstance._events

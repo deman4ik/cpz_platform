@@ -5,6 +5,7 @@ import { STOP, UPDATE, PAUSE, CANDLE, TICK } from "../config";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 import loadCandles from "./loadCandles";
+import loadCurrentCandle from "./loadCurrentCandle";
 import loadStrategyCode from "./loadStrategyCode";
 import loadStrategyState from "./loadStrategyState";
 import loadBaseIndicatorsCode from "./loadBaseIndicatorsCode";
@@ -55,16 +56,22 @@ async function execute(adviserState, nextAction) {
       adviser.runStrategy();
 
       adviser.finalize();
-
+      if (adviser.hasActions) {
+        const currentCandle = await loadCurrentCandle(adviser.props);
+        adviser.handleCurrentCandle(currentCandle);
+        adviser.runActions();
+      }
       await saveIndicatorsState(adviser.props, adviser.indicators);
       await saveStrategyState(adviser.props, adviser.strategy);
     } else if (type === TICK) {
-      const strategyState = await loadStrategyState(adviser.props);
-      adviser.setStrategy(null, strategyState);
-
-      adviser.handleTick(data);
-
-      adviser.runActions();
+      if (adviser.hasActions) {
+        const strategyState = await loadStrategyState(adviser.props);
+        adviser.setStrategy(null, strategyState);
+        const currentCandle = await loadCurrentCandle(adviser.props);
+        adviser.handleCurrentCandle(currentCandle);
+        adviser.runActions();
+        await saveStrategyState(adviser.props, adviser.strategy);
+      }
     } else if (type === UPDATE) {
       adviser.update(data);
     } else if (type === STOP) {

@@ -2,6 +2,7 @@ import execute from "./execute";
 import loadAction from "./loadAction";
 import loadBaseIndicatorsCode from "./loadBaseIndicatorsCode";
 import loadCandles from "./loadCandles";
+import loadCurrentCandle from "./loadCurrentCandle";
 import loadIndicatorsState from "./loadIndicatorsState";
 import loadStrategyCode from "./loadStrategyCode";
 import loadStrategyState from "./loadStrategyState";
@@ -16,6 +17,7 @@ export {
   loadAction,
   loadBaseIndicatorsCode,
   loadCandles,
+  loadCurrentCandle,
   loadIndicatorsState,
   loadStrategyCode,
   loadStrategyState,

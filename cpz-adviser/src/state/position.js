@@ -118,7 +118,7 @@ class Position {
   }
 
   _handleCandle(candle) {
-    Log.debug(`position ${this._code}._handleCandle`);
+    Log.debug(`position ${this._code}._handleCandle ${candle.timestamp}`);
     this._candle = candle;
   }
 
@@ -150,7 +150,7 @@ class Position {
   _createSignal({ action, price, orderType }) {
     this._signal = {
       action,
-      orderType: ORDER_TYPE_MARKET, // !!! временно, до правок в Trader
+      orderType,
       price,
       position: {
         id: this._id,

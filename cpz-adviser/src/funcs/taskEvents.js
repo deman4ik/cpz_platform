@@ -44,6 +44,7 @@ import adviserActionTables from "cpz/tableStorage-client/control/adviserActions"
 import EventsStorageClient from "cpz/tableStorage-client/events";
 import eventTables from "cpz/tableStorage-client/events/events";
 import BlobStorageClient from "cpz/blobStorage";
+import ConnectorClient from "cpz/connector-client";
 import {
   STRATEGY_CODE,
   STRATEGY_STATE,
@@ -116,6 +117,10 @@ class TaskEvents extends BaseService {
         INDICATORS_STATE,
         ADVISER_LOCK
       ]
+    );
+    ConnectorClient.init(
+      process.env.CONNECTOR_API_ENDPOINT,
+      process.env.CONNECTOR_API_KEY
     );
   }
 

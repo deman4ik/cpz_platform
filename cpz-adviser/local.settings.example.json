@@ -20,6 +20,8 @@
     "EG_SIGNALS_KEY": "test",
     "EG_CANDLES_ENDPOINT": "https://localhost:443",
     "EG_CANDLES_KEY": "test",
+    "CONNECTOR_API_ENDPOINT": "",
+    "CONNECTOR_API_KEY": "test",
     "DEBUG": true
   }
 }

@@ -386,10 +386,11 @@ class Position {
    * @param {object} order
    * @param {number} price
    * @param {object} settings Trader settings
+   * @param {boolean} checkPrice if false disable price check
    *
    * @memberof Position
    */
-  _checkOrder(order, price, settings) {
+  _checkOrder(order, price, settings, checkPrice = true) {
     this.log(
       `position checkOrder ${order.orderId}, position: ${this._code}, status: ${
         order.status
@@ -403,7 +404,7 @@ class Position {
       if (order.orderType === ORDER_TYPE_LIMIT) {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
-          if (price <= order.price) {
+          if (!checkPrice || (checkPrice && price <= order.price)) {
             // Нужно выставить лимитный ордер
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
@@ -415,7 +416,7 @@ class Position {
         }
         // Если продаем
         if (order.direction === ORDER_DIRECTION_SELL) {
-          if (price >= order.price) {
+          if (!checkPrice || (checkPrice && price >= order.price)) {
             // Нужно выставить лимитный ордер
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
@@ -427,8 +428,28 @@ class Position {
         }
       } else if (
         // Тип ордера маркет (выставляется как лимит)
-        order.orderType === ORDER_TYPE_MARKET ||
-        // Тип ордера настоящий маркет
+        order.orderType === ORDER_TYPE_MARKET
+      ) {
+        if (order.direction === ORDER_DIRECTION_BUY) {
+          if (!checkPrice || (checkPrice && price <= order.price)) {
+            return {
+              ...order,
+              price: order.price + settings.slippageStep,
+              task: ORDER_TASK_OPEN_MARKET
+            };
+          }
+        }
+        if (order.direction === ORDER_DIRECTION_SELL) {
+          if (!checkPrice || (checkPrice && price >= order.price)) {
+            return {
+              ...order,
+              price: order.price - settings.slippageStep,
+              task: ORDER_TASK_OPEN_MARKET
+            };
+          }
+        }
+      } else if (
+        // Тип ордера принудительный маркет
         order.orderType === ORDER_TYPE_MARKET_FORCE
       ) {
         if (order.direction === ORDER_DIRECTION_BUY) {
@@ -448,25 +469,25 @@ class Position {
       } else if (order.orderType === ORDER_TYPE_STOP) {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
-          if (price >= order.price) {
+          if (!checkPrice || (checkPrice && price >= order.price)) {
             // Нужно выставить лимитный ордер
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price + settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT
+              task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
             };
           }
         }
         // Если продаем
         if (order.direction === ORDER_DIRECTION_SELL) {
-          if (price <= order.price) {
+          if (!checkPrice || (checkPrice && price <= order.price)) {
             // Нужно выставить лимитный ордер
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
               price: order.price - settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT
+              task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
             };
           }
         }
@@ -477,11 +498,13 @@ class Position {
       // ИЛИ
       // Если продаем и текущая цена выше цены сигнала
       // ИЛИ
-      // Если последний раз проверяли больше чем минуту назад
+      // Если последний раз проверяли больше чем 30 секунд назад
       if (
-        (order.direction === ORDER_DIRECTION_BUY && price <= order.price) ||
-        (order.direction === ORDER_DIRECTION_SELL && price >= order.price) ||
-        dayjs.utc().diff(dayjs.utc(order.lastCheck), "minute") > 1
+        (order.direction === ORDER_DIRECTION_BUY &&
+          (!checkPrice || (checkPrice && price <= order.price))) ||
+        (order.direction === ORDER_DIRECTION_SELL &&
+          (!checkPrice || (checkPrice && price >= order.price))) ||
+        dayjs.utc().diff(dayjs.utc(order.lastCheck), "second") > 30
       ) {
         // Нужно проверить ордер на бирже
         this.log(ORDER_TASK_CHECK);
@@ -491,7 +514,7 @@ class Position {
       // проверяли недавно и таймаут открытого ордера истек
       if (
         settings.mode !== BACKTEST_MODE &&
-        dayjs.utc().diff(dayjs.utc(order.lastCheck), "minute") <= 1 &&
+        dayjs.utc().diff(dayjs.utc(order.lastCheck), "second") <= 30 &&
         order.exTimestamp &&
         dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
           settings.openOrderTimeout
@@ -511,10 +534,10 @@ class Position {
    *
    * @param {number} price
    * @param {object} settings Trader settings
-   *
+   * @param {boolean} checkPrice if false disable price check
    * @memberof Position
    */
-  getOrdersToExecuteByPrice(price, settings) {
+  getOrdersToExecuteByPrice(price, settings, checkPrice = true) {
     this.log(
       `position getOrdersToExecuteByPrice position: ${this._code}, entry: ${
         this._entry.status
@@ -530,7 +553,7 @@ class Position {
       // Если ордера на открытие позиции ожидают обработки
       // Проверяем все ордера на открытие позиции ожидающие обработки
       requiredOrders = Object.values(this._entryOrders)
-        .map(order => this._checkOrder(order, price, settings))
+        .map(order => this._checkOrder(order, price, settings, checkPrice))
         .filter(order => !!order);
     } else if (
       this._entry.status === ORDER_STATUS_CLOSED &&
@@ -541,7 +564,7 @@ class Position {
       // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       requiredOrders = Object.values(this._exitOrders)
-        .map(order => this._checkOrder(order, price, settings))
+        .map(order => this._checkOrder(order, price, settings, checkPrice))
         .filter(order => !!order);
     }
     if (requiredOrders.length > 0) {

@@ -287,18 +287,35 @@ class Backtester {
         }
 
         for (const candle of historyCandles) {
+          // Adviser Events
           let signals = [];
+          let adviserLogs = [];
 
+          // Push new candle to Trader
           this._traderBacktester.bHandleCandle(candle);
+          // Execute required orders in Trader
           this._traderBacktester.bExecuteOrders();
-          await this._adviserBacktester.bRunStrategy(candle);
+          // Push new candle to Adviser
+          this._adviserBacktester.bHandleCandle(candle);
+
+          //  Execute required Actions
+          await this._adviserBacktester.bRunActions();
+
+          // Accumulate adviser events
           signals = this._adviserBacktester.bSignalsEvents;
+          adviserLogs = this._adviserBacktester.bLogEvents;
+          // Push new signals to Trader and execute required orders for new signal
           for (const signal of this._adviserBacktester.bSignalsEvents) {
             this._traderBacktester.handleSignal(signal);
             this._traderBacktester.bExecuteOrders();
           }
-          await this._adviserBacktester.bRunActions(candle);
+
+          // Execute Strategy code
+          await this._adviserBacktester.bRunStrategy();
+          // Accumulate adviser events
           signals = [...signals, ...this._adviserBacktester.bSignalsEvents];
+          adviserLogs = [...adviserLogs, ...this._adviserBacktester.bLogEvents];
+          // Push new signals to Trader and execute required orders for new signal
           for (const signal of this._adviserBacktester.bSignalsEvents) {
             this._traderBacktester.handleSignal(signal);
             this._traderBacktester.bExecuteOrders();
@@ -337,14 +354,9 @@ class Backtester {
             });
           }
 
-          if (
-            this._settings.debug &&
-            this._adviserBacktester.bLogEvents.length > 0
-          ) {
-            this.log(
-              `${this._adviserBacktester.bLogEvents.length} logs to send`
-            );
-            this._adviserBacktester.bLogEvents.forEach(logEvent => {
+          if (this._settings.debug && adviserLogs.length > 0) {
+            this.log(`${adviserLogs.length} logs to send`);
+            adviserLogs.forEach(logEvent => {
               logsToSave.push({
                 ...logEvent,
                 backtesterId: this._taskId,

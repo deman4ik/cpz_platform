@@ -153,8 +153,8 @@ class BaseStrategy {
   _positionsHandleCandle(candle) {
     Log.debug("baseStrategy._positionsHandleCandle");
     if (Object.keys(this._positions).length > 0) {
-      Object.values(this._positions).forEach(position => {
-        position._handleCandle(candle);
+      Object.keys(this._positions).forEach(key => {
+        this._positions[key]._handleCandle(candle);
       });
     }
   }
@@ -231,12 +231,12 @@ class BaseStrategy {
 
   _runActions() {
     Log.debug("baseStrategy._runActions");
-    Object.values(this._positions).forEach(position => {
-      if (position.hasActions) {
-        position._runActions();
-        if (position.signal) {
-          this._advice(position.signal);
-          position._clearSignal();
+    Object.keys(this._positions).forEach(key => {
+      if (this._positions[key].hasActions) {
+        this._positions[key]._runActions();
+        if (this._positions[key].signal) {
+          this._advice(this._positions[key].signal);
+          this._positions[key]._clearSignal();
         }
       }
     });
