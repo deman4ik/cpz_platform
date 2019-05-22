@@ -1,6 +1,8 @@
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
+import EventGrid from "cpz/events";
+import { TASKS_TRADER_RUN_EVENT } from "cpz/events/types/tasks/trader";
 import { CANDLE_PREVIOUS, createTraderSlug } from "cpz/config/state";
 import { getActiveTradersBySlug } from "cpz/tableStorage-client/control/traders";
 import {
@@ -8,6 +10,7 @@ import {
   saveTraderAction
 } from "cpz/tableStorage-client/control/traderActions";
 import { PRICE } from "../config";
+import { isUnlocked } from "../executors";
 
 async function handlePrice(currentPrice) {
   try {
@@ -52,6 +55,13 @@ async function handlePrice(currentPrice) {
                   source: currentPrice.source
                 }
               });
+              const unlocked = await isUnlocked(taskId);
+              if (unlocked) {
+                await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
+                  subject: taskId,
+                  data: { taskId }
+                });
+              }
             }
           } catch (e) {
             const error = new ServiceError(

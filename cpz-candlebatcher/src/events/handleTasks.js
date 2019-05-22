@@ -2,6 +2,8 @@ import { v4 as uuid } from "uuid";
 import dayjs from "cpz/utils/dayjs";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
+import EventGrid from "cpz/events";
+import { TASKS_CANDLEBATCHER_RUN_EVENT } from "cpz/events/types/tasks/candlebatcher";
 import {
   STATUS_STARTED,
   STATUS_STOPPED,
@@ -20,7 +22,8 @@ import {
   createLockBlob,
   lock,
   unlock,
-  renewLock
+  renewLock,
+  isUnlocked
 } from "../executors";
 
 async function handleRun(eventData) {
@@ -182,6 +185,12 @@ async function handleStop(eventData) {
       actionTime: dayjs.utc().valueOf(),
       data: eventData
     });
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked)
+      await EventGrid.publish(TASKS_CANDLEBATCHER_RUN_EVENT, {
+        subject: taskId,
+        data: { taskId }
+      });
   } catch (e) {
     throw new ServiceError(
       {
@@ -230,6 +239,12 @@ async function handleUpdate(eventData) {
       actionTime: dayjs.utc().valueOf(),
       data: eventData
     });
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked)
+      await EventGrid.publish(TASKS_CANDLEBATCHER_RUN_EVENT, {
+        subject: taskId,
+        data: { taskId }
+      });
   } catch (e) {
     throw new ServiceError(
       {

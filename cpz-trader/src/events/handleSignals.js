@@ -1,11 +1,14 @@
 import { v4 as uuid } from "uuid";
 import Log from "cpz/log";
 import ServiceError from "cpz/error";
+import EventGrid from "cpz/events";
+import { TASKS_TRADER_RUN_EVENT } from "cpz/events/types/tasks/trader";
 import { createTraderSlug } from "cpz/config/state";
 import dayjs from "cpz/utils/dayjs";
 import { getTradersReadyForSignals } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { SIGNAL } from "../config";
+import { isUnlocked } from "../executors";
 
 async function handleSignal(eventData) {
   try {
@@ -39,6 +42,13 @@ async function handleSignal(eventData) {
               actionTime: dayjs.utc(timestamp).valueOf(),
               data: eventData
             });
+            const unlocked = await isUnlocked(taskId);
+            if (unlocked) {
+              await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
+                subject: taskId,
+                data: { taskId }
+              });
+            }
           } catch (e) {
             const error = new ServiceError(
               {
