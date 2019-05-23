@@ -506,10 +506,16 @@ class Adviser {
         this._candlesProps
       );
       this._strategyInstance.handleIndicators(this._indicators);
-      Log.debug("Positions pre CHECK", this._strategyInstance.positions);
+      Log.debug(
+        "Positions pre CHECK",
+        JSON.stringify(this._strategyInstance.positions)
+      );
       // Запустить проверку стратегии
       this._strategyInstance.check();
-      Log.debug("Positions post CHECK", this._strategyInstance.positions);
+      Log.debug(
+        "Positions post CHECK",
+        JSON.stringify(this._strategyInstance.positions)
+      );
       this.getStrategyState();
     } catch (error) {
       throw new ServiceError(
@@ -536,9 +542,15 @@ class Adviser {
         this._candlesProps
       );
       // Запустить проверку стратегии
-      Log.debug("Positions pre RUNACTIONS", this._strategyInstance.positions);
+      Log.debug(
+        "Positions pre RUNACTIONS",
+        JSON.stringify(this._strategyInstance.positions)
+      );
       this._strategyInstance._runActions();
-      Log.debug("Positions post RUNACTIONS", this._strategyInstance.positions);
+      Log.debug(
+        "Positions post RUNACTIONS",
+        JSON.stringify(this._strategyInstance.positions)
+      );
       this.getStrategyState();
     } catch (error) {
       throw new ServiceError(

@@ -215,6 +215,10 @@ class Log {
     if (props instanceof ServiceError) {
       properties = props.main;
       messages = [props.toString(true), ...args];
+    } else if (props instanceof Error) {
+      const err = new ServiceError(props.constructor.name, { cause: props });
+      properties = err.main;
+      messages = [err.toString(true), ...args];
     } else {
       properties = props;
       messages = args;

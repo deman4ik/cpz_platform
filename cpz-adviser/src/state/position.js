@@ -8,8 +8,6 @@ import {
   ORDER_TYPE_STOP,
   ORDER_TYPE_MARKET,
   ORDER_STATUS_CLOSED,
-  ORDER_DIRECTION_BUY,
-  ORDER_DIRECTION_SELL,
   TRADE_ACTION_LONG,
   TRADE_ACTION_SHORT,
   TRADE_ACTION_CLOSE_LONG,
@@ -22,6 +20,7 @@ class Position {
     this._id = state.id || uuid();
     this._prefix = state.prefix;
     this._code = state.code;
+    this._parentId = state.parentId;
     this._direction = state.direction;
     this._entry = state.entry || {
       status: null,
@@ -57,6 +56,10 @@ class Position {
 
   get code() {
     return this._code;
+  }
+
+  get parentId() {
+    return this._parentId;
   }
 
   get direction() {
@@ -96,6 +99,7 @@ class Position {
       id: this._id,
       prefix: this._prefix,
       code: this._code,
+      parentId: this._parentId,
       direction: this._direction,
       entry: this._entry,
       exit: this._exit,
@@ -118,19 +122,16 @@ class Position {
   }
 
   _handleCandle(candle) {
-    Log.debug(`position ${this._code}._handleCandle ${candle.timestamp}`);
     this._candle = candle;
   }
 
   _checkOpen() {
-    Log.debug(`position ${this._code}._checkOpen`);
     if (this._entry.status === ORDER_STATUS_CLOSED) {
       throw new Error(`Position ${this._code} is already open`);
     }
   }
 
   _checkClose() {
-    Log.debug(`position ${this._code}._checkClose`);
     if (this._entry.status !== ORDER_STATUS_CLOSED) {
       throw new Error(`Position ${this._code} is not open`);
     }
@@ -155,7 +156,8 @@ class Position {
       position: {
         id: this._id,
         prefix: this._prefix,
-        code: this._code
+        code: this._code,
+        parentId: this._parentId
       }
     };
   }
@@ -201,7 +203,6 @@ class Position {
   }
 
   _runActions() {
-    Log.debug(`position ${this._code}._runActions`);
     /* eslint-disable no-restricted-syntax */
     for (const key of Object.keys(this._actions).sort((a, b) =>
       sortAsc(a, b)
@@ -220,12 +221,6 @@ class Position {
   }
 
   _executeAction({ action, price, orderType }) {
-    Log.debug(
-      `position ${this._code}._executeAction`,
-      action,
-      price,
-      orderType
-    );
     let nextPrice = null;
     switch (orderType) {
       case ORDER_TYPE_STOP: {

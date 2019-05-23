@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import Log from "cpz/log";
 import ServiceError from "cpz/error";
 import dayjs from "cpz/utils/dayjs";
 import ServiceValidator from "cpz/validator";
@@ -12,10 +13,10 @@ import {
   ORDER_TYPE_LIMIT,
   ORDER_TYPE_MARKET,
   ORDER_TYPE_STOP,
-  POS_STATUS_NEW
+  POS_STATUS_CLOSED
 } from "cpz/config/state";
 import { SIGNALS_NEWSIGNAL_EVENT } from "cpz/events/types/signals";
-import Log from "cpz/log";
+import { sortAsc } from "cpz/utils/helpers";
 import { createLogEvent } from "../utils/helpers";
 import Position from "./position";
 
@@ -113,7 +114,6 @@ class BaseStrategy {
   }
 
   _createAdvices() {
-    Log.debug("baseStrategy._createAdvices");
     Object.values(this._positions).forEach(position => {
       if (position.signal) {
         this._advice(position.signal);
@@ -151,7 +151,6 @@ class BaseStrategy {
   /** POSITIONS */
 
   _positionsHandleCandle(candle) {
-    Log.debug("baseStrategy._positionsHandleCandle");
     if (Object.keys(this._positions).length > 0) {
       Object.keys(this._positions).forEach(key => {
         this._positions[key]._handleCandle(candle);
@@ -168,20 +167,21 @@ class BaseStrategy {
     return `${prefix}_${this._posLastNumb[prefix]}`;
   }
 
-  _createPosition(prefix = "p") {
-    Log.debug("baseStrategy._createPosition");
-    if (
-      this._positions[prefix] &&
-      this._positions[prefix].status === POS_STATUS_NEW
-    )
-      return this._positions[prefix];
+  _createPosition(props = {}) {
+    const { prefix = "p", parentId } = props;
+
+    const position = this._getPosition(prefix, parentId);
+    if (position) return position;
+
     const code = this._getNextPositionCode(prefix);
-    this._positions[prefix] = new Position({
+    this._positions[code] = new Position({
       prefix,
-      code
+      code,
+      parentId
     });
-    this._positions[prefix]._handleCandle(this._candle);
-    return this._positions[prefix];
+
+    this._positions[code]._handleCandle(this._candle);
+    return this._positions[code];
   }
 
   get createPosition() {
@@ -196,15 +196,25 @@ class BaseStrategy {
   }
 
   _hasActivePosition(prefix = "p") {
-    return this._positions[prefix] && this._positions[prefix].isActive;
+    return !!this._getPosition(prefix);
   }
 
   get hasActivePosition() {
     return this._hasActivePosition;
   }
 
-  _getPosition(prefix = "p") {
-    return this._positions[prefix];
+  _getPosition(prefix = "p", parentId) {
+    const positions = Object.values(this._positions)
+      .filter(
+        pos =>
+          pos.prefix === prefix &&
+          ((!parentId && pos.isActive) || pos.parentId === parentId)
+      )
+      .sort((a, b) => sortAsc(a.code, b.code));
+    if (positions.length > 0) {
+      return positions[0];
+    }
+    return null;
   }
 
   get getPosition() {
@@ -218,7 +228,7 @@ class BaseStrategy {
   set positions(positions) {
     if (positions && Array.isArray(positions) && positions.length > 0) {
       positions.forEach(position => {
-        this._positions[position.prefix] = new Position(...position);
+        this._positions[position.code] = new Position(...position);
       });
     }
   }
@@ -230,13 +240,15 @@ class BaseStrategy {
   }
 
   _runActions() {
-    Log.debug("baseStrategy._runActions");
     Object.keys(this._positions).forEach(key => {
       if (this._positions[key].hasActions) {
         this._positions[key]._runActions();
         if (this._positions[key].signal) {
           this._advice(this._positions[key].signal);
           this._positions[key]._clearSignal();
+        }
+        if (this._positions[key].status === POS_STATUS_CLOSED) {
+          delete this._positions[key];
         }
       }
     });

@@ -87,6 +87,8 @@ class Trader {
       this._eventsToSend = {};
       /* Ордера для обработки */
       this._ordersToExecute = {};
+      /* Отложенные сигналы */
+      this._deferredSignals = [];
     } catch (e) {
       Log.error(e);
       throw e;
@@ -159,6 +161,14 @@ class Trader {
 
   get hasActivePositions() {
     return this.activePositions.length > 0;
+  }
+
+  isPositionActive(positionId) {
+    const { activePositions } = this;
+    if (!activePositions || activePositions.length === 0) return false;
+    const position = activePositions.filter(({ id }) => id === positionId);
+    if (position.length === 1) return true;
+    return false;
   }
 
   set lastAction(action) {
@@ -380,6 +390,22 @@ class Trader {
         signal.action === TRADE_ACTION_LONG ||
         signal.action === TRADE_ACTION_SHORT
       ) {
+        Log.warn("parentId", signal.position.parentId);
+        if (signal.position.parentId) {
+          const isParentPositionActive = this.isPositionActive(
+            signal.position.parentId
+          );
+          Log.warn(
+            "isParentPositionActive",
+            isParentPositionActive,
+            this.activePositions
+          );
+          if (isParentPositionActive) {
+            this._deferredSignals.push(signal);
+            return;
+          }
+          Log.debug("deferredSignals", this._deferredSignals);
+        }
         // Проверка единичной позиции
         this._checkPositions();
 
@@ -478,6 +504,14 @@ class Trader {
         success: false,
         error: error.json
       });
+    }
+  }
+
+  handleDeferredSignals() {
+    if (this._deferredSignals.length > 0) {
+      const signals = this._deferredSignals;
+      this._deferredSignals = [];
+      signals.forEach(signal => this.handleSignal(signal));
     }
   }
 
@@ -680,7 +714,7 @@ class Trader {
           );
         }
       });
-
+      this.handleDeferredSignals();
       this.log("handleOrders ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
@@ -752,7 +786,8 @@ class Trader {
       lastPrice: this._lastPrice,
       lastAction: this._lastAction,
       activePositions: this.activePositions,
-      hasActivePositions: this.hasActivePositions
+      hasActivePositions: this.hasActivePositions,
+      deferredSignals: this._deferredSignals
     };
   }
 

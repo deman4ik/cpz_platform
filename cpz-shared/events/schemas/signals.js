@@ -89,6 +89,10 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
           description: "Position code.",
           type: "string",
           empty: false
+        },
+        parentId: {
+          description: "Parent position Id",
+          type: "string"
         }
       }
     },
