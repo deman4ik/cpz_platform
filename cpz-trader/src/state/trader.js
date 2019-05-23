@@ -167,7 +167,10 @@ class Trader {
     const { activePositions } = this;
     if (!activePositions || activePositions.length === 0) return false;
     const position = activePositions.filter(({ id }) => id === positionId);
-    if (position.length === 1) return true;
+    if (position.length === 1) {
+      if (position.exit.status === ORDER_STATUS_OPEN) return false;
+      return true;
+    }
     return false;
   }
 
