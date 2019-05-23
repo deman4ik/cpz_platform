@@ -13,7 +13,7 @@ class CCXTPublicProvider extends BasePublicProvider {
 
     this.ccxt = null;
     this._retryOptions = {
-      retries: 100,
+      retries: 1000,
       minTimeout: 0,
       maxTimeout: 0,
       onRetry: (err, i) => {
