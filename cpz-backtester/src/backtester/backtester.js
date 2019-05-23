@@ -185,13 +185,8 @@ class Backtester {
           asset: this._asset,
           currency: this._currency,
           timeframe: this._timeframe,
-          dateFrom: dayjs
-            .utc(this._dateFrom)
-            .add(
-              (-this._requiredHistoryMaxBars * 2) / this._timeframe,
-              "minute"
-            )
-            .toISOString(),
+          orderBy: "{ timestamp: desc }",
+          limit: this._requiredHistoryMaxBars,
           dateTo: dayjs
             .utc(this._dateFrom)
             .add(-1, "minute")
