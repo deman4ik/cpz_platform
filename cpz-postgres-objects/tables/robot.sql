@@ -29,11 +29,12 @@ create table robot
 
 alter table robot
   add constraint c_robot_enabled_chk
-    check (enabled in (0,10,20));
+    check (enabled in (0,5,10,20));
     
 comment on column robot.enabled is '
 0 - disabled
-10 - admin only
+5 - admin only
+10 - signals
 20 - public';
 
 create index i_robot_currency_fk on robot (currency);

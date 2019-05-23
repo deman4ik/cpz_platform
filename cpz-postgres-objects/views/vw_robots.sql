@@ -25,6 +25,7 @@ SELECT u.id           as uidUSER_ROBOT_ID,
        u.dt_to        as dTO,
        date_part('day',(CURRENT_DATE-u.last_started)) as nDAYS_ACTIVE,
        u.robot_status as nSTATUS,
+       u.enabled      as nENABLED,
        u.linked_user_robot_id as uidLINKED_USER_ROBOT_ID,
        (select
           json_agg ( row_to_json(p) )
@@ -61,7 +62,7 @@ SELECT u.id           as uidUSER_ROBOT_ID,
 FROM
   (select
      uu.*,
-     r.name, r.asset, r.currency, r.exchange, r.timeframe,
+     r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled,
      (select sum(profit)
          from positions
          where
@@ -73,8 +74,9 @@ FROM
      robot r
    where
          uu.robot_id = r.id
-     and r.enabled >= 10 -- public or enabled for subscription
-     and uu.linked_user_robot_id is null
+     and r.enabled >= 10 -- 10 - for signals only or 20 - enabled for subscription
+     and uu.linked_user_robot_id is null -- public only
+     and uu.robot_status >= 0 -- not deleted
   ) u,
   (select 5143 as nCURRATE, '$' as sCURCODE) r
 ;
