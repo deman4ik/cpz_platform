@@ -10,8 +10,6 @@ class CCXTPublicProvider extends BasePublicProvider {
   constructor(input) {
     super(input);
     this._exchangeName = this._exchange.toLowerCase();
-
-    this.ccxt = null;
     this._retryOptions = {
       retries: 1000,
       minTimeout: 0,
@@ -20,6 +18,10 @@ class CCXTPublicProvider extends BasePublicProvider {
         Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
       }
     };
+    if (this._exchangeName === "bitfinex") {
+      this._retryOptions.retries = 10000;
+    }
+    this.ccxt = null;
   }
 
   async init() {
