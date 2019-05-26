@@ -1,6 +1,6 @@
 drop view vw_positions;
 
-create view vw_positions as
+create or replace view vw_positions as
 SELECT p.id,
        p.user_id,
        p.robot_id,
@@ -21,7 +21,8 @@ SELECT p.id,
        p.exit_balance, 
        p.profit,
        p.code as note,
-       ur.robot_status
+       ur.robot_status,
+       p.quantity
 FROM positions p, user_robot ur
 where p.run_mode != 'backtest'
   and p.robot_id = ur.robot_id
