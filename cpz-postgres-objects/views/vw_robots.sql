@@ -77,6 +77,7 @@ FROM
      and r.enabled >= 10 -- 10 - for signals only or 20 - enabled for subscription
      and uu.linked_user_robot_id is null -- public only
      and uu.robot_status >= 0 -- not deleted
+     and exists (select null from userroles ur where ur.user_id = uu.user_id and ur.role_id = 'public_robot')
   ) u,
   (select 5143 as nCURRATE, '$' as sCURCODE) r
 ;
