@@ -393,15 +393,9 @@ class Trader {
         signal.action === TRADE_ACTION_LONG ||
         signal.action === TRADE_ACTION_SHORT
       ) {
-        Log.warn("parentId", signal.position.parentId);
         if (signal.position.parentId) {
           const isParentPositionActive = this.isPositionActive(
             signal.position.parentId
-          );
-          Log.warn(
-            "isParentPositionActive",
-            isParentPositionActive,
-            this.activePositions
           );
           if (isParentPositionActive) {
             this._deferredSignals.push(signal);
