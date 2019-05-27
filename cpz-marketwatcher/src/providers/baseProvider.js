@@ -91,21 +91,25 @@ class BaseProvider {
                   const currentTrades = trades.filter(
                     ({ time }) => time >= dateFrom
                   );
-                  this._candles[key][timeframe].high = Math.max(
-                    this._candles[key][timeframe].high,
-                    ...currentTrades.map(t => +t.price)
-                  );
-                  this._candles[key][timeframe].low = Math.min(
-                    this._candles[key][timeframe].low,
-                    ...currentTrades.map(t => +t.price)
-                  );
-                  this._candles[key][timeframe].close = +currentTrades[
-                    currentTrades.length - 1
-                  ].price;
-                  this._candles[key][timeframe].volume += +currentTrades
-                    .map(t => t.volume)
-                    .reduce((a, b) => a + b);
-                  await this._saveCandleToCache(this._candles[key][timeframe]);
+                  if (currentTrades.length > 0) {
+                    this._candles[key][timeframe].high = Math.max(
+                      this._candles[key][timeframe].high,
+                      ...currentTrades.map(t => +t.price)
+                    );
+                    this._candles[key][timeframe].low = Math.min(
+                      this._candles[key][timeframe].low,
+                      ...currentTrades.map(t => +t.price)
+                    );
+                    this._candles[key][timeframe].close = +currentTrades[
+                      currentTrades.length - 1
+                    ].price;
+                    this._candles[key][timeframe].volume += +currentTrades
+                      .map(t => t.volume)
+                      .reduce((a, b) => a + b);
+                    await this._saveCandleToCache(
+                      this._candles[key][timeframe]
+                    );
+                  }
                 })
               );
             }
