@@ -80,10 +80,11 @@ class UserRobot {
         }
       };
     } else if (
-      this._status === STATUS_STOPPING &&
-      (this._traderStatus === STATUS_STOPPED ||
-        this._traderStatus === STATUS_PENDING ||
-        this._traderStatus === STATUS_ERROR)
+      this._traderStatus === STATUS_STOPPED ||
+      (this._status === STATUS_STOPPING &&
+        (this._traderStatus === STATUS_STOPPED ||
+          this._traderStatus === STATUS_PENDING ||
+          this._traderStatus === STATUS_ERROR))
     ) {
       this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_STOPPED;
