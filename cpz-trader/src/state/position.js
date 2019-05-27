@@ -692,6 +692,21 @@ class Position {
       executed: this._executed
     };
   }
+
+  get props() {
+    return {
+      id: this._id,
+      prefix: this._prefix,
+      code: this._code,
+      status: this._status,
+      closeRequested: this._closeRequested,
+      direction: this._direction,
+      entry: this._entry,
+      exit: this._exit,
+      reason: this._reason,
+      executed: this._executed
+    };
+  }
 }
 
 export default Position;

@@ -713,7 +713,7 @@ class Trader {
           this._eventsToSend[
             `P-${order.positionId}`
           ] = this._createPositionEvent(
-            this._positions[order.positionId].state
+            this._positions[order.positionId].props
           );
         }
       });

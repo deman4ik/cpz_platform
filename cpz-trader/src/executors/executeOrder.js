@@ -55,14 +55,6 @@ async function executeOrder(state, order) {
         });
 
         orderResult = { ...orderResult, ...currentOrder };
-      } else {
-        // Если режим - эмуляция или бэктест
-        // Считаем, что ордер исполнен
-        orderResult.status = ORDER_STATUS_CLOSED;
-        // Полностью - т.е. по заданному объему
-        orderResult.executed = order.volume;
-        orderResult.remaining = 0;
-        orderResult.exLastTrade = currentPrice.timestamp;
       }
       // Если задача - выставить лимитный или рыночный ордер
     } else if (
@@ -124,30 +116,17 @@ async function executeOrder(state, order) {
             .toISOString()
         };
       } else {
-        if (order.task === ORDER_TASK_OPEN_LIMIT) {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - лимитный
-          // Считаем, что ордер успешно выставлен на биржу
-          orderResult.status = ORDER_STATUS_OPEN;
-          orderResult.exId = order.orderId;
-          orderResult.exTimestamp = currentPrice.timestamp;
-          orderResult.average = currentPrice.price;
-          orderResult.remaining = order.volume;
-        }
-        if (order.task === ORDER_TASK_OPEN_MARKET) {
-          // Если режим - эмуляция или бэктест
-          // Если тип ордера - по рынку
-          // Считаем, что ордер исполнен
-          orderResult.status = ORDER_STATUS_CLOSED;
-          orderResult.exId = order.orderId;
-          orderResult.exTimestamp = currentPrice.timestamp;
-          // Полностью - т.е. по заданному объему
-          orderResult.executed = orderToExecute.volume;
-          orderResult.remaining = 0;
-          orderResult.exLastTrade = currentPrice.timestamp;
-          orderResult.price = currentPrice.price;
-          orderResult.average = currentPrice.price;
-        }
+        // Если режим - эмуляция
+        // Считаем, что ордер исполнен
+        orderResult.status = ORDER_STATUS_CLOSED;
+        orderResult.exId = order.orderId;
+        orderResult.exTimestamp = currentPrice.timestamp;
+        // Полностью - т.е. по заданному объему
+        orderResult.executed = orderToExecute.volume;
+        orderResult.remaining = 0;
+        orderResult.exLastTrade = currentPrice.timestamp;
+        orderResult.price = orderToExecute.price;
+        orderResult.average = orderToExecute.price;
       }
     } else if (order.task === ORDER_TASK_CANCEL) {
       if (settings.mode === REALTIME_MODE) {
