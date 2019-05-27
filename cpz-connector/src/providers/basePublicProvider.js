@@ -1,11 +1,10 @@
 import ServiceError from "cpz/error";
-import HttpsProxyAgent from "https-proxy-agent";
+import createFetchMethod from "../utils/fetch";
 
 class BasePublicProvider {
   constructor(input) {
     this._exchange = input.exchange;
-    this._proxy = input.proxy || process.env.PROXY_ENDPOINT;
-    if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
+    this._fetch = createFetchMethod(input.proxy || process.env.PROXY_ENDPOINT);
   }
 
   async getMarket() {

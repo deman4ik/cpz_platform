@@ -14,11 +14,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     this.ccxt = null;
     this._retryOptions = {
       retries: 10,
-      minTimeout: 100,
-      maxTimeout: 500,
-      onRetry: (err, i) => {
-        Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
-      }
+      minTimeout: 0,
+      maxTimeout: 0
     };
   }
 
@@ -28,7 +25,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         await this._loadKeys(keyType);
 
       this.ccxt = new ccxt[this._exchangeName]({
-        agent: this._proxyAgent,
+        fetchImplementation: this._fetch,
         apiKey: this._keys[keyType].APIKey.value,
         secret: this._keys[keyType].APISecret.value,
         enableRateLimit: true

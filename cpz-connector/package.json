@@ -39,7 +39,10 @@
     "graphql-tools": "4.0.4",
     "graphql-type-json": "^0.3.0",
     "https-proxy-agent": "2.2.1",
+    "node-fetch": "^2.6.0",
     "opencollective": "1.0.3",
+    "path": "^0.12.7",
+    "url": "^0.11.0",
     "uuid": "3.3.2",
     "verror": "1.10.0"
   },

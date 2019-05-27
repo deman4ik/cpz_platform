@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
-import HttpsProxyAgent from "https-proxy-agent";
 import { getSecret, decrypt } from "cpz/keyVault";
+import createFetchMethod from "../utils/fetch";
 
 const {
   KEY_VAULT_URL,
@@ -54,8 +54,7 @@ class BasePrivateProvider {
     this._setKeys(input.keys);
     this._exchange = input.exchange;
     this._currentKeyType = "main";
-    this._proxy = input.proxy || process.env.PROXY_ENDPOINT;
-    if (this._proxy) this._proxyAgent = new HttpsProxyAgent(this._proxy);
+    this._fetch = createFetchMethod(input.proxy || process.env.PROXY_ENDPOINT);
   }
 
   _setKeys(keys) {

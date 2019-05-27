@@ -11,24 +11,22 @@ class CCXTPublicProvider extends BasePublicProvider {
     super(input);
     this._exchangeName = this._exchange.toLowerCase();
     this._retryOptions = {
-      retries: 1000,
+      retries: 100,
       minTimeout: 0,
       maxTimeout: 0,
       onRetry: (err, i) => {
         Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
       }
     };
-    if (this._exchangeName === "bitfinex") {
-      this._retryOptions.retries = 10000;
-    }
     this.ccxt = null;
   }
 
   async init() {
     try {
       this.ccxt = new ccxt[this._exchangeName]({
-        agent: this._proxyAgent
+        fetchImplementation: this._fetch
       });
+
       const call = async () => {
         await this.ccxt.loadMarkets();
       };
