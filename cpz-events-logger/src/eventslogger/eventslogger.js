@@ -52,6 +52,7 @@ class EventsLogger {
       };
 
       if (type.includes("CPZ.Tasks")) {
+        if (type.includes(".Run")) return;
         if (this.logToStorage)
           await saveTasksEvent({
             ...baseEventData,
