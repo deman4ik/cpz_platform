@@ -56,19 +56,29 @@ const findExWatchersByServiceId = async ({ taskId, serviceName }) => {
  */
 const findExWatchersByImporterId = async ({ taskId }) => {
   try {
+    const warmupFilter = TableQuery.stringFilter(
+      `warmupCacheId`,
+      TableUtilities.QueryComparisons.EQUAL,
+      taskId
+    );
+    const importersFileter = TableQuery.combineFilters(
+      TableQuery.stringFilter(
+        `importerHistoryId`,
+        TableUtilities.QueryComparisons.EQUAL,
+        taskId
+      ),
+      TableUtilities.TableOperators.OR,
+      TableQuery.stringFilter(
+        `importerCurrentId`,
+        TableUtilities.QueryComparisons.EQUAL,
+        taskId
+      )
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        TableQuery.stringFilter(
-          `importerHistoryId`,
-          TableUtilities.QueryComparisons.EQUAL,
-          taskId
-        ),
+        importersFileter,
         TableUtilities.TableOperators.OR,
-        TableQuery.stringFilter(
-          `importerCurrentId`,
-          TableUtilities.QueryComparisons.EQUAL,
-          taskId
-        )
+        warmupFilter
       )
     );
     return await client.queryEntities(TABLES.STORAGE_EXWATCHERS_TABLE, query);
