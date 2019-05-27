@@ -12,7 +12,6 @@ import { isUnlocked } from "../executors";
 async function handleTick(eventData) {
   try {
     const { exchange, asset, currency, timestamp } = eventData;
-
     const advisers = await getStartedAdvisersWithActions({
       exchange,
       asset,

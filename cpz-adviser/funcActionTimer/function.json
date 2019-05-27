@@ -6,7 +6,7 @@
       "name": "ActionTimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "*/5 * * * * *"
+      "schedule": "*/15 * * * * *"
     }
   ]
 }

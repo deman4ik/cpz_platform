@@ -1,5 +1,4 @@
 import ServiceError from "cpz/error";
-import Log from "cpz/log";
 import {
   saveAdviserState,
   updateAdviserState
@@ -7,7 +6,6 @@ import {
 import { adviserStateToCommonProps } from "../utils/helpers";
 
 async function saveState(state, update = false) {
-  Log.debug(`saveState`);
   try {
     if (update) {
       return await updateAdviserState(state);

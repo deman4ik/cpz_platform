@@ -6,7 +6,6 @@ import {
 } from "cpz/tableStorage-client/control/adviserActions";
 
 async function loadAction(taskId, lastAction) {
-  Log.debug(`loadAction`);
   try {
     let nextAction;
     let loaded = false;

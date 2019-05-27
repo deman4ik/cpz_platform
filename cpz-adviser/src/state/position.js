@@ -90,6 +90,10 @@ class Position {
     this._signal = null;
   }
 
+  _clearActions() {
+    this._actions = {};
+  }
+
   get hasActions() {
     return Object.keys(this._actions).length > 0;
   }
@@ -208,13 +212,10 @@ class Position {
       sortAsc(a, b)
     )) {
       const action = this._actions[key];
-      Log.debug("Action", key, action);
       const success = this._executeAction(action);
       if (success) {
         this._actions = {};
         break;
-      } else {
-        delete this._actions[key];
       }
     }
     /* no-restricted-syntax */
@@ -254,9 +255,12 @@ class Position {
       `position ${this._code}._checkMarket`,
       action,
       price,
+      " # ",
       `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
         this._candle.low
-      }, c: ${this._candle.close}, time: ${this._candle.timestamp}`
+      }, c: ${this._candle.close}`,
+      "time:",
+      this._candle.timestamp
     );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       return Math.max(this._candle.open, price);
@@ -272,9 +276,12 @@ class Position {
       `position ${this._code}._checkStop`,
       action,
       price,
+      " # ",
       `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
         this._candle.low
-      }, c: ${this._candle.close}, time: ${this._candle.timestamp}`
+      }, c: ${this._candle.close}`,
+      "time:",
+      this._candle.timestamp
     );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       if (this._candle.high >= price) return Math.max(this._candle.open, price);
@@ -294,9 +301,12 @@ class Position {
       `position ${this._code}._checkLimit`,
       action,
       price,
+      " # ",
       `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
         this._candle.low
-      }, c: ${this._candle.close}, time: ${this._candle.timestamp}`
+      }, c: ${this._candle.close}`,
+      "time:",
+      this._candle.timestamp
     );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       if (this._candle.high <= price) return Math.min(this._candle.open, price);

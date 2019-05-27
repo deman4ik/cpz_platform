@@ -38,7 +38,6 @@ async function publishEvent(state, data) {
 }
 
 async function publishEvents(state, events) {
-  Log.debug(`publishEvents`);
   try {
     if (events && Array.isArray(events) && events.length > 0) {
       await Promise.all(events.map(async event => publishEvent(state, event)));

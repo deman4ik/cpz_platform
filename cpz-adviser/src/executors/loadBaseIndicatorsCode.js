@@ -1,5 +1,4 @@
 import ServiceError from "cpz/error";
-import Log from "cpz/log";
 import BlobStorageClient from "cpz/blobStorage";
 import { INDICATORS_CODE } from "cpz/blobStorage/containers";
 import requireFromString from "cpz/require";
@@ -31,7 +30,6 @@ async function loadBaseIndicatorCode(state, fileName) {
 }
 
 async function loadBaseIndicatorsCode(state, indicators) {
-  Log.debug(`loadBaseIndicatorsCode`);
   try {
     const result = await Promise.all(
       indicators.map(fileName => loadBaseIndicatorCode(state, fileName))

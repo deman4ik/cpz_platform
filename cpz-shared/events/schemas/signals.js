@@ -65,11 +65,12 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
     candleId: {
       description: "Candle uniq Id.",
       type: "string",
+      empty: false,
       optional: true
     },
     candleTimestamp: {
       description: "Candle timestamp.",
-      type: "string",
+      type: "datetime",
       optional: true
     },
     position: {
@@ -78,7 +79,8 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
       props: {
         id: {
           description: "Uniq position Id",
-          type: "string"
+          type: "string",
+          empty: false
         },
         prefix: {
           description: "Position prefix",
@@ -92,7 +94,9 @@ const SIGNALS_NEWSIGNAL_EVENT_SCHEMA = {
         },
         parentId: {
           description: "Parent position Id",
-          type: "string"
+          type: "string",
+          empty: "false",
+          optional: true
         }
       }
     },

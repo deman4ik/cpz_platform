@@ -32,7 +32,8 @@ class BaseStrategy {
     this._robotId = state.robotId;
     this._posLastNumb = state.posLastNumb || {};
     this._positions = {};
-    this.positions = state.positions;
+    this._setPositions(state.positions);
+    this._parametersSchema = state.parametersSchema;
     this._candle = null;
     this._candles = []; // [{}]
     this._candlesProps = {
@@ -63,7 +64,6 @@ class BaseStrategy {
         this[key] = state.strategyFunctions[key];
       });
     }
-    this._parametersSchema = state.parametersSchema;
   }
 
   init() {}
@@ -85,7 +85,7 @@ class BaseStrategy {
   }
 
   _log(...args) {
-    Log.debug(`${this._robotId}`, ...args);
+    Log.debug(`Adviser ${this._robotId}`, ...args);
   }
 
   get log() {
@@ -123,23 +123,24 @@ class BaseStrategy {
   }
 
   _advice(signal) {
-    Log.debug(`Advice from ${this._robotId}`, signal);
+    const data = {
+      ...signal,
+      signalId: uuid(),
+      robotId: this._robotId,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      candleId: this._candle.id,
+      candleTimestamp: this._candle.timestamp,
+      timestamp: dayjs.utc().toISOString()
+    };
+    this.log("new signal!!!", data);
     this._eventsToSend[`${this._nextEventIndex}_str`] = {
       eventType: SIGNALS_NEWSIGNAL_EVENT,
       eventData: {
         subject: this._robotId.toString(),
-        data: {
-          ...signal,
-          signalId: uuid(),
-          robotId: this._robotId,
-          exchange: this._exchange,
-          asset: this._asset,
-          currency: this._currency,
-          timeframe: this._timeframe,
-          candleId: this._candle.id,
-          candleTimestamp: this._candle.timestamp,
-          timestamp: dayjs.utc().toISOString()
-        }
+        data
       }
     };
   }
@@ -225,17 +226,17 @@ class BaseStrategy {
     return Object.values(this._positions).map(pos => pos.state);
   }
 
-  set positions(positions) {
+  _setPositions(positions) {
     if (positions && Array.isArray(positions) && positions.length > 0) {
       positions.forEach(position => {
-        this._positions[position.code] = new Position(...position);
+        this._positions[position.code] = new Position(position);
       });
     }
   }
 
-  get activePositions() {
+  get validPositions() {
     return Object.values(this._positions)
-      .filter(position => position.isActive)
+      .filter(position => position.status !== POS_STATUS_CLOSED)
       .map(pos => pos.state);
   }
 
@@ -250,6 +251,14 @@ class BaseStrategy {
         if (this._positions[key].status === POS_STATUS_CLOSED) {
           delete this._positions[key];
         }
+      }
+    });
+  }
+
+  _clearActions() {
+    Object.keys(this._positions).forEach(key => {
+      if (this._positions[key].hasActions) {
+        this._positions[key]._clearActions();
       }
     });
   }
@@ -381,6 +390,10 @@ class BaseStrategy {
 
   get CONSTS() {
     return this._consts;
+  }
+
+  get posLastNumb() {
+    return this._posLastNumb;
   }
 }
 

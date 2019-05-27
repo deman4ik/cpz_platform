@@ -5,7 +5,6 @@ import { getCachedCandlesByKey } from "cpz/tableStorage-client/market/candles";
 import { adviserStateToCommonProps } from "../utils/helpers";
 
 async function loadCandles(state) {
-  Log.debug(`loadCandles`);
   try {
     const {
       exchange,

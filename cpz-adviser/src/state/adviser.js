@@ -80,12 +80,12 @@ class Adviser {
     this._stoppedAt = state.stoppedAt;
 
     this._eventsToSend = {};
-    Log.debug(`Adviser ${this.taskId} instance created`);
+    this.log("instance created");
   }
 
   log(...args) {
     if (this._settings.debug) {
-      Log.debug(`Adviser ${this._taskId}`, ...args);
+      Log.debug(`Adviser ${this._robotId}`, ...args);
     }
   }
 
@@ -231,8 +231,10 @@ class Adviser {
     });
   }
 
-  setStrategy(strategyCode = {}, strategyState = this._strategy) {
+  setStrategy(strategyCodeProp, strategyStateProp) {
     try {
+      const strategyCode = strategyCodeProp || {};
+      const strategyState = strategyStateProp || this._strategy;
       // Функции стратегии
       const strategyFunctions = {};
       Object.getOwnPropertyNames(strategyCode)
@@ -246,7 +248,6 @@ class Adviser {
       // Создаем новый инстанс класса стратегии
       this._strategyInstance = new BaseStrategy({
         initialized: strategyState.initialized,
-        positions: strategyState.positions,
         parameters: this._settings.strategyParameters,
         adviserSettings: this._settings,
         exchange: this._exchange,
@@ -254,6 +255,8 @@ class Adviser {
         currency: this._currency,
         timeframe: this._timeframe,
         robotId: this._robotId,
+        posLastNumb: strategyState.posLastNumb,
+        positions: strategyState.positions,
         parametersSchema,
         strategyFunctions, // функции стратегии
         ...strategyState // предыдущий стейт стратегии
@@ -497,7 +500,6 @@ class Adviser {
    * @memberof Adviser
    */
   runStrategy() {
-    Log.debug("Adviser.runStrategy");
     try {
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
@@ -506,16 +508,10 @@ class Adviser {
         this._candlesProps
       );
       this._strategyInstance.handleIndicators(this._indicators);
-      Log.debug(
-        "Positions pre CHECK",
-        JSON.stringify(this._strategyInstance.positions)
-      );
+      // Очищаем предыдущие  задачи у позиций
+      this._strategyInstance._clearActions();
       // Запустить проверку стратегии
       this._strategyInstance.check();
-      Log.debug(
-        "Positions post CHECK",
-        JSON.stringify(this._strategyInstance.positions)
-      );
       this.getStrategyState();
     } catch (error) {
       throw new ServiceError(
@@ -533,7 +529,6 @@ class Adviser {
   }
 
   runActions() {
-    Log.debug("Adviser.runActions");
     try {
       // Передать свечу и значения индикаторов в инстанс стратегии
       this._strategyInstance.handleCandles(
@@ -542,15 +537,7 @@ class Adviser {
         this._candlesProps
       );
       // Запустить проверку стратегии
-      Log.debug(
-        "Positions pre RUNACTIONS",
-        JSON.stringify(this._strategyInstance.positions)
-      );
       this._strategyInstance._runActions();
-      Log.debug(
-        "Positions post RUNACTIONS",
-        JSON.stringify(this._strategyInstance.positions)
-      );
       this.getStrategyState();
     } catch (error) {
       throw new ServiceError(
@@ -667,7 +654,8 @@ class Adviser {
         ...this._strategyInstance._events
       };
       this._strategy.initialized = this._strategyInstance.initialized;
-      this._strategy.positions = this._strategyInstance.activePositions;
+      this._strategy.positions = this._strategyInstance.validPositions;
+      this._strategy.posLastNumb = this._strategyInstance.posLastNumb;
       this._hasActions = this._strategyInstance.hasActions;
       // Все свойства инстанса стратегии
       Object.keys(this._strategyInstance)

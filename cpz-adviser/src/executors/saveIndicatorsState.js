@@ -1,11 +1,9 @@
 import ServiceError from "cpz/error";
-import Log from "cpz/log";
 import BlobStorageClient from "cpz/blobStorage";
 import { INDICATORS_STATE } from "cpz/blobStorage/containers";
 import { adviserStateToCommonProps } from "../utils/helpers";
 
 async function saveIndicatorsState(state, indicatorsState) {
-  Log.debug(`saveIndicatorsState`);
   try {
     const { robotId } = state;
     await BlobStorageClient.upload(

@@ -6,7 +6,6 @@ import { getCurrentCandle } from "cpz/tableStorage-client/market/candles";
 import { currentCandleEX } from "cpz/connector-client/candles";
 
 async function loadCurrentCandle(state) {
-  Log.debug(`loadCandles`);
   try {
     const { exchange, asset, currency, timeframe } = state;
     let result = await getCurrentCandle(
@@ -42,7 +41,7 @@ async function loadCurrentCandle(state) {
       `Failed to load cached candles`
     );
     Log.error(error);
-    return [];
+    return null;
   }
 }
 

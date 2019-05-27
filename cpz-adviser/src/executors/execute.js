@@ -68,9 +68,11 @@ async function execute(adviserState, nextAction) {
         const strategyState = await loadStrategyState(adviser.props);
         adviser.setStrategy(null, strategyState);
         const currentCandle = await loadCurrentCandle(adviser.props);
-        adviser.handleCurrentCandle(currentCandle);
-        adviser.runActions();
-        await saveStrategyState(adviser.props, adviser.strategy);
+        if (currentCandle) {
+          adviser.handleCurrentCandle(currentCandle);
+          adviser.runActions();
+          await saveStrategyState(adviser.props, adviser.strategy);
+        }
       }
     } else if (type === UPDATE) {
       adviser.update(data);
