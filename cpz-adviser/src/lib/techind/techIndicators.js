@@ -22,9 +22,6 @@ class Tech extends BaseIndicator {
         type: "number"
       };
     });
-  }
-
-  init() {
     this.calculate = techind[this._indicatorName].create(this.parameters);
   }
 

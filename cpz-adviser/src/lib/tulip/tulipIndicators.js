@@ -21,9 +21,6 @@ class Tulip extends BaseIndicator {
         type: "number"
       };
     });
-  }
-
-  init() {
     this.calculate = tulip[this._indicatorName].create(this.parameters);
   }
 

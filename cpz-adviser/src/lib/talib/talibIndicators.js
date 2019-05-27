@@ -22,9 +22,6 @@ class Talib extends BaseIndicator {
         type: "number"
       };
     });
-  }
-
-  init() {
     this.calculate = talib[this._indicatorName].create(this.parameters);
   }
 
