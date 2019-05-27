@@ -394,7 +394,11 @@ class ExWatcherRunner extends BaseRunner {
         if (event) events.push(event);
       }
 
-      if (exWatcher.importerCurrentStatus === STATUS_FINISHED) {
+      if (
+        exWatcher.importerCurrentStatus === STATUS_FINISHED &&
+        exWatcher.warmupCacheStatus !== STATUS_STARTED &&
+        exWatcher.warmupCacheStatus !== STATUS_FINISHED
+      ) {
         const warmupCacheParams = {
           exchange: exWatcher.exchange,
           asset: exWatcher.asset,

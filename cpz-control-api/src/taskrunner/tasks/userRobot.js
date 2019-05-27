@@ -81,10 +81,12 @@ class UserRobot {
       };
     } else if (
       this._status === STATUS_STOPPING &&
-      this._traderStatus === STATUS_STOPPED
+      (this._traderStatus === STATUS_STOPPED ||
+        this._traderStatus === STATUS_PENDING)
     ) {
       this._stoppedAt = dayjs.utc().toISOString();
       this._status = STATUS_STOPPED;
+      this._traderStatus = STATUS_STOPPED;
       this._events.stopped = {
         eventType: TASKS_USERROBOT_HIST_EVENT,
         eventData: {
