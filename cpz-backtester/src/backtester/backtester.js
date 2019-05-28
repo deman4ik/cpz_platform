@@ -103,14 +103,6 @@ class Backtester {
     }
   }
 
-  logInfo(...args) {
-    Log.info(`Backtester ${this._taskId}:`, ...args);
-  }
-
-  logError(...args) {
-    Log.error(`Backtester ${this._taskId}:`, ...args);
-  }
-
   get state() {
     return {
       ...this._initialState,
@@ -258,7 +250,7 @@ class Backtester {
         const positionsToSave = [];
         const positionsToSaveDB = {};
         const errorsToSave = [];
-        Log.debug("Loading", iteration, "candles from DB...");
+        this.log("Loading", iteration, "candles from DB...");
         const historyCandles = await getCandlesDB({
           exchange: this._exchange,
           asset: this._asset,
@@ -269,7 +261,7 @@ class Backtester {
           limit: iteration,
           offset: this._prevIteration
         });
-        Log.debug(
+        this.log(
           "Processing iteration from:",
           historyCandles[0].timestamp,
           "to:",
@@ -332,7 +324,6 @@ class Backtester {
           }
 
           if (signals.length > 0) {
-            this.log(`${signals.length} signals to send`);
             signals.forEach(signalEvent => {
               if (this._settings.saveToDB)
                 signalsToSaveDB.push({
@@ -350,7 +341,6 @@ class Backtester {
           }
 
           if (this._settings.debug && adviserLogs.length > 0) {
-            this.log(`${adviserLogs.length} logs to send`);
             adviserLogs.forEach(logEvent => {
               logsToSave.push({
                 ...logEvent,
@@ -380,11 +370,6 @@ class Backtester {
             });
           }
           if (Object.keys(this._traderBacktester.bPositionEvents).length > 0) {
-            this.log(
-              `${
-                Object.keys(this._traderBacktester.bPositionEvents).length
-              } positions to send`
-            );
             Object.keys(this._traderBacktester.bPositionEvents).forEach(key => {
               const positionEvent = this._traderBacktester.bPositionEvents[key];
 

@@ -1,9 +1,6 @@
 import { fork } from "child_process";
-import { tryParseJSON } from "cpz/utils/helpers";
 import { getMarketwatcherById } from "cpz/tableStorage-client/control/marketwatchers";
 import { STATUS_STOPPED } from "cpz/config/state";
-import dayjs from "cpz/utils/dayjs";
-import Log from "cpz/log";
 
 const marketwatcherProcesses = {};
 
@@ -16,7 +13,6 @@ function isProcessExists(taskId) {
 
 function createNewProcess(taskId, provider) {
   const providerName = provider || "cryptocompare";
-  Log.info("Creating new process ", taskId, providerName);
   marketwatcherProcesses[taskId] = fork(`./dist/${providerName}.js`);
   marketwatcherProcesses[taskId].on("exit", async () => {
     delete marketwatcherProcesses[taskId];

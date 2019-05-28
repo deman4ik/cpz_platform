@@ -103,7 +103,6 @@ class UserRobotRunner extends BaseRunner {
 
   static async handleAction(action) {
     try {
-      Log.debug("UserRobotRunner handleAction", action);
       const { type, taskId, data } = action;
       const state = await UserRobotRunner.getState(taskId);
 
@@ -165,7 +164,6 @@ class UserRobotRunner extends BaseRunner {
       }
 
       await saveUserRobotState(userRobot.state);
-      Log.warn("userRobot.events", userRobot.events);
       await publishEvents(userRobot.events);
 
       if (userRobot.status === STATUS_STARTING) {

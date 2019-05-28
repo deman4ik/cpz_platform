@@ -251,17 +251,6 @@ class Position {
   }
 
   _checkMarket({ action, price }) {
-    Log.debug(
-      `position ${this._code}._checkMarket`,
-      action,
-      price,
-      " # ",
-      `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
-        this._candle.low
-      }, c: ${this._candle.close}`,
-      "time:",
-      this._candle.timestamp
-    );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       return Math.max(this._candle.open, price);
     }
@@ -272,17 +261,6 @@ class Position {
   }
 
   _checkStop({ action, price }) {
-    Log.debug(
-      `position ${this._code}._checkStop`,
-      action,
-      price,
-      " # ",
-      `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
-        this._candle.low
-      }, c: ${this._candle.close}`,
-      "time:",
-      this._candle.timestamp
-    );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       if (this._candle.high >= price) return Math.max(this._candle.open, price);
     } else if (
@@ -297,17 +275,6 @@ class Position {
   }
 
   _checkLimit({ action, price }) {
-    Log.debug(
-      `position ${this._code}._checkLimit`,
-      action,
-      price,
-      " # ",
-      `o: ${this._candle.open}, h: ${this._candle.high}, l: ${
-        this._candle.low
-      }, c: ${this._candle.close}`,
-      "time:",
-      this._candle.timestamp
-    );
     if (action === TRADE_ACTION_LONG || action === TRADE_ACTION_CLOSE_SHORT) {
       if (this._candle.high <= price) return Math.min(this._candle.open, price);
     } else if (
@@ -322,73 +289,61 @@ class Position {
   }
 
   buyAtMarket(price = this._candle.close) {
-    Log.debug(`position ${this._code}.buyAtMarket`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_LONG, price, ORDER_TYPE_MARKET);
   }
 
   sellAtMarket(price = this._candle.close) {
-    Log.debug(`position ${this._code}.sellAtMarket`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_LONG, price, ORDER_TYPE_MARKET);
   }
 
   shortAtMarket(price = this._candle.close) {
-    Log.debug(`position ${this._code}.shortAtMarket`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_SHORT, price, ORDER_TYPE_MARKET);
   }
 
   coverAtMarket(price = this._candle.close) {
-    Log.debug(`position ${this._code}.coverAtMarket`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_SHORT, price, ORDER_TYPE_MARKET);
   }
 
   buyAtStop(price = this._candle.close) {
-    Log.debug(`position ${this._code}.buyAtStop`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_LONG, price, ORDER_TYPE_STOP);
   }
 
   sellAtStop(price = this._candle.close) {
-    Log.debug(`position ${this._code}.sellAtStop`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_LONG, price, ORDER_TYPE_STOP);
   }
 
   shortAtStop(price = this._candle.close) {
-    Log.debug(`position ${this._code}.shortAtStop`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_SHORT, price, ORDER_TYPE_STOP);
   }
 
   coverAtStop(price = this._candle.close) {
-    Log.debug(`position ${this._code}.coverAtStop`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_SHORT, price, ORDER_TYPE_STOP);
   }
 
   buyAtLimit(price = this._candle.close) {
-    Log.debug(`position ${this._code}.buyAtLimit`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_LONG, price, ORDER_TYPE_LIMIT);
   }
 
   sellAtLimit(price = this._candle.close) {
-    Log.debug(`position ${this._code}.sellAtLimit`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_LONG, price, ORDER_TYPE_LIMIT);
   }
 
   shortAtLimit(price = this._candle.close) {
-    Log.debug(`position ${this._code}.shortAtLimit`, price);
     this._checkOpen();
     this._addAction(TRADE_ACTION_SHORT, price, ORDER_TYPE_LIMIT);
   }
 
   coverAtLimit(price = this._candle.close) {
-    Log.debug(`position ${this._code}.coverAtLimit`, price);
     this._checkClose();
     this._addAction(TRADE_ACTION_CLOSE_SHORT, price, ORDER_TYPE_LIMIT);
   }

@@ -230,7 +230,6 @@ class ExWatcherRunner extends BaseRunner {
   static async start(state) {
     const exWatcher = new ExWatcher(state);
     try {
-      Log.debug("Start exwatcher", state);
       if (state.status === STATUS_STARTED)
         return {
           taskId: state.taskId,
@@ -275,11 +274,6 @@ class ExWatcherRunner extends BaseRunner {
           exWatcher.candlebatcherSettings.requiredHistoryMaxBars
         ) {
           if (candles.length > 0) {
-            Log.warn(dateFrom, dateTo);
-            Log.warn(
-              candles[0].timestamp,
-              candles[candles.length - 1].timestamp
-            );
             const lastCandle = candles[candles.length - 1];
             dateFrom = lastCandle.timestamp;
           }

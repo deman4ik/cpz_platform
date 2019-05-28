@@ -33,13 +33,11 @@ class Log {
     if (this._appInstightsKey) {
       appInsights
         .setup()
-        .setAutoDependencyCorrelation(true)
-        .setAutoCollectRequests(true)
-        .setAutoCollectPerformance(true)
+        .setAutoCollectRequests(false)
+        .setAutoCollectPerformance(false)
         .setAutoCollectExceptions(true)
         .setAutoCollectDependencies(true)
-        .setAutoCollectConsole(false)
-        .setUseDiskRetryCaching(true);
+        .setAutoCollectConsole(false);
 
       appInsights.start();
       if (serviceName) {

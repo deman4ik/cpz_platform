@@ -64,10 +64,6 @@ class ActionTimer extends BaseService {
     Log.addContext(context);
     const timestamp = new Date().toISOString();
     try {
-      if (timer.isPastDue) {
-        Log.warn("Timer trigger is running late!");
-      }
-      Log.debug("Timer trigger function ran!", timestamp);
       await handleActionTimer();
     } catch (e) {
       let error;

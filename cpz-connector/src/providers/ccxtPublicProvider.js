@@ -13,10 +13,7 @@ class CCXTPublicProvider extends BasePublicProvider {
     this._retryOptions = {
       retries: 100,
       minTimeout: 0,
-      maxTimeout: 0,
-      onRetry: (err, i) => {
-        Log.warn(`CCXTPublicProvider retry ${i} - error: ${err}`);
-      }
+      maxTimeout: 0
     };
     this.ccxt = null;
   }
@@ -120,7 +117,6 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async loadCurrentCandle({ asset, currency, timeframe }) {
     try {
-      Log.debug("loadCurrentCandle()");
       if (!this.ccxt) {
         await this.init();
       }
@@ -187,7 +183,6 @@ class CCXTPublicProvider extends BasePublicProvider {
 
   async loadLastMinuteCandle({ date, asset, currency }) {
     try {
-      Log.debug("loadLastMinuteCandle()");
       if (!this.ccxt) {
         await this.init();
       }
@@ -250,7 +245,6 @@ class CCXTPublicProvider extends BasePublicProvider {
     currency
   }) {
     try {
-      Log.debug("loadMinuteCandles() date", dayjs.utc(date).toISOString());
       if (!this.ccxt) {
         await this.init();
       }
@@ -265,10 +259,6 @@ class CCXTPublicProvider extends BasePublicProvider {
               .utc()
               .add(-1, "minute")
               .startOf("minute");
-      Log.debug(
-        "loadMinuteCandles() dateToLoad",
-        dayjs.utc(dateToLoad).toISOString()
-      );
       const call = async bail => {
         try {
           return await this.ccxt.fetchOHLCV(
@@ -333,7 +323,6 @@ class CCXTPublicProvider extends BasePublicProvider {
     currency
   }) {
     try {
-      Log.debug("loadTrades()", dayjs.utc(date).toISOString());
       if (!this.ccxt) {
         await this.init();
       }

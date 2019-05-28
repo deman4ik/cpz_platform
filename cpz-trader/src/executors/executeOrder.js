@@ -147,7 +147,6 @@ async function executeOrder(state, order) {
     orderResult.task = null;
     orderResult.error = null;
     orderResult.lastCheck = dayjs.utc().toISOString();
-    Log.debug(orderResult, "order execution result");
 
     return orderResult;
   } catch (e) {

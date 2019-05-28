@@ -11,7 +11,6 @@ import {
   createRobotSlug
 } from "cpz/config/state";
 import { TASKS_USERROBOT_HIST_EVENT } from "cpz/events/types/tasks/userRobot";
-import Log from "cpz/log";
 import {
   combineCandlebatcherSettings,
   combineAdviserSettings,

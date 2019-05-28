@@ -19,7 +19,6 @@ async function execute(candlebatcherState, nextAction) {
   const candlebatcher = new Candlebatcher(candlebatcherState);
   try {
     const { type, data } = nextAction;
-    Log.debug(`Executing - ${type} action`);
     if (type === RUN) {
       const currentCandleTime = dayjs
         .utc()
@@ -47,14 +46,11 @@ async function execute(candlebatcherState, nextAction) {
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const minute of minutes) {
         let candle = candles.find(c => c.time === dayjs.utc(minute).valueOf());
-        Log.debug("Loaded candle", candle);
         if (!candle) {
           candle = await createCandle(candlebatcher.state, minute);
-          Log.debug("Created candle", candle);
         }
         if (!candle) {
           candle = candlebatcher.createPrevCandle(minute);
-          Log.debug("Candle from previous", candle);
         }
 
         if (candle) {
@@ -104,7 +100,6 @@ async function execute(candlebatcherState, nextAction) {
       Log.error("Unknown candlebatcher action '%s'", type);
       return candlebatcher.state;
     }
-    Log.debug("Candlebatcher events", candlebatcher.events);
 
     // Отправялвем события
     await publishEvents(candlebatcher.props, candlebatcher.events);

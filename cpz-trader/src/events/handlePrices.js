@@ -14,7 +14,6 @@ import { isUnlocked } from "../executors";
 
 async function handlePrice(currentPrice) {
   try {
-    Log.debug("handlePrice", currentPrice);
     const { exchange, asset, currency } = currentPrice;
     const traders = await getActiveTradersBySlug(
       createTraderSlug({

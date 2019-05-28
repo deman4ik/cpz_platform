@@ -18,7 +18,6 @@ import BaseRunner from "../baseRunner";
 class ImporterRunner extends BaseRunner {
   static async start(props) {
     try {
-      Log.debug("ImporterRunner start", props);
       const taskId = props.taskId || uuid();
 
       ServiceValidator.check(TASKS_IMPORTER_START_EVENT, { ...props, taskId });
@@ -49,7 +48,6 @@ class ImporterRunner extends BaseRunner {
 
   static async stop(props) {
     try {
-      Log.debug("ImporterRunner stop", props);
       ServiceValidator.check(TASKS_IMPORTER_STOP_EVENT, props);
       const { taskId } = props;
       const importer = await getImporterById(taskId);

@@ -142,10 +142,6 @@ class BaseProvider {
     }
   }
 
-  logInfo(...args) {
-    Log.info(`${this._PartitionKey}:`, ...args);
-  }
-
   /* eslint-disable */
   async start() {}
 
@@ -265,7 +261,6 @@ class BaseProvider {
   }
 
   async _save() {
-    this.log(`save()`);
     try {
       // Сохраняем состояние в локальном хранилище
       await saveMarketwatcherState(this.state);

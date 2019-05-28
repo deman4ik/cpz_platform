@@ -79,7 +79,6 @@ class BasePrivateProvider {
 
   async _loadAndDecrypt(keyType, keyName) {
     try {
-      Log.debug("loadAndDecrypt()");
       const encryptedData = await getSecret({
         uri: KEY_VAULT_URL,
         clientId: KEY_VAULT_READ_CLIENT_ID,
@@ -112,8 +111,6 @@ class BasePrivateProvider {
 
   async _loadKeys(keyType) {
     try {
-      Log.debug("loadKeys()");
-
       const loaders = [
         this._loadAndDecrypt(keyType, "APIKey"),
         this._loadAndDecrypt(keyType, "APISecret")

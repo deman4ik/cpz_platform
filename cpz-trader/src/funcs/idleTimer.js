@@ -54,10 +54,6 @@ class IdleTimer extends BaseService {
     Log.addContext(context);
     const timestamp = new Date().toISOString();
     try {
-      if (timer.isPastDue) {
-        Log.warn("Idle Timer trigger is running late!");
-      }
-      Log.debug("Idle Timer trigger function ran!", timestamp);
       await handleIdleTimer();
     } catch (e) {
       let error;

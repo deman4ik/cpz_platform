@@ -15,14 +15,12 @@ import saveStrategyState from "./saveStrategyState";
 
 async function execute(adviserState, nextAction) {
   const adviser = new Adviser(adviserState);
-  Log.debug(`Adviser ${adviser.taskId} - execute()`);
   try {
     const { type, data } = nextAction;
 
     if (type === CANDLE) {
       const { lastCandle } = adviser;
       if (lastCandle && data.id === lastCandle.id) {
-        Log.warn(`Candle ${data.id} already processed`);
         return adviser.state;
       }
       // Loading strategy

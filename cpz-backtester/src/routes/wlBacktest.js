@@ -23,7 +23,6 @@ async function handleWLBacktest(req, res) {
         const { backtestId } = data;
         const exists = await isBacktestWLExistsDB(backtestId);
         if (exists) {
-          Log.debug("Found previous backtest WL state, deleting...");
           await deleteBacktestWLDB(backtestId);
           await deleteBacktestWLState(backtestId);
         }

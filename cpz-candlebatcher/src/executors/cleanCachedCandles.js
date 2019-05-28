@@ -44,17 +44,6 @@ async function cleanCandles(state, time) {
             .startOf("minute")
             .toISOString();
         }
-        Log.debug(
-          "Cleaning cached candles",
-          createCachedCandleSlug({
-            exchange,
-            asset,
-            currency,
-            timeframe
-          }),
-          "to",
-          dateTo
-        );
         await cleanCachedCandles({
           slug: createCachedCandleSlug({
             exchange,

@@ -118,7 +118,6 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async getBalance(keys) {
     try {
-      Log.debug("getBalance()");
       await this._checkKeysVersion(keys);
       if (!this.ccxt) {
         await this.init();
@@ -196,7 +195,6 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
       // TODO: Params
-      Log.debug("createOrder()");
       await this._checkKeysVersion(keys);
       const {
         direction,
@@ -298,7 +296,6 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async checkOrder(keys, { exId, asset, currency }) {
     try {
-      Log.debug("checkOrder()");
       await this._checkKeysVersion(keys);
       if (!this.ccxt) {
         await this.init();
@@ -373,7 +370,6 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async cancelOrder(keys, { exId, asset, currency }) {
     try {
-      Log.debug("cancelOrder()");
       await this._checkKeysVersion(keys);
       if (!this.ccxt) {
         await this.init();

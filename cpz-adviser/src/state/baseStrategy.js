@@ -135,7 +135,7 @@ class BaseStrategy {
       candleTimestamp: this._candle.timestamp,
       timestamp: dayjs.utc().toISOString()
     };
-    this.log("new signal!!!", data);
+    this.log("Signal", data);
     this._eventsToSend[`${this._nextEventIndex}_str`] = {
       eventType: SIGNALS_NEWSIGNAL_EVENT,
       eventData: {

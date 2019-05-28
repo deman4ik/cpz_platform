@@ -349,7 +349,6 @@ class Trader {
    */
   _createPosition({ position, action }) {
     const { id, prefix, code } = position;
-    this.log("Creating new Position", code, id);
     this._positions[id] = new Position({
       id,
       prefix,
@@ -378,12 +377,12 @@ class Trader {
       );
       // Если сигнал уже обрабатывалась - выходим
       if (signal.signalId === this._lastSignal.signalId) {
-        this.log(`Signal ${signal.signalId} already handled.`);
+        Log.warn(`Signal ${signal.signalId} already handled.`);
         return;
       }
       // Если сигнал от другого робота
       if (signal.robotId !== this._robotId) {
-        this.log("Wrong signal '%s'", signal.signalId);
+        Log.warn("Wrong signal '%s'", signal.signalId);
         return;
       }
 
@@ -400,7 +399,6 @@ class Trader {
             this._deferredSignals.push(signal);
             return;
           }
-          Log.debug("deferredSignals", this._deferredSignals);
         }
         // Проверка единичной позиции
         this._checkPositions();
@@ -677,7 +675,6 @@ class Trader {
 
   handleOrders(orders) {
     try {
-      this.log("handleOrders", orders);
       if (!Array.isArray(orders)) throw new Error("Orders are not array");
 
       orders.forEach(order => {
@@ -714,7 +711,6 @@ class Trader {
         }
       });
       this.handleDeferredSignals();
-      this.log("handleOrders ordersToExecute", this._ordersToExecute);
     } catch (e) {
       throw new ServiceError(
         {

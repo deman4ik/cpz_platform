@@ -80,7 +80,6 @@ class Adviser {
     this._stoppedAt = state.stoppedAt;
 
     this._eventsToSend = {};
-    this.log("instance created");
   }
 
   log(...args) {

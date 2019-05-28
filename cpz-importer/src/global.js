@@ -10,7 +10,6 @@ function isProcessExists(taskId) {
   return false;
 }
 function createNewProcess(taskId) {
-  Log.info("Creating new process ", taskId);
   importerProcesses[taskId] = fork(`./dist/importerProcess.js`);
   importerProcesses[taskId].on("exit", () => {
     delete importerProcesses[taskId];

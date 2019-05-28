@@ -51,7 +51,6 @@ process.on("message", async m => {
     }
     process.exit(0);
   } else if (type === "stop") {
-    Log.info(`${eventData.taskId} stopped!`);
     process.exit(0);
   } else {
     Log.error("Unknown child process event type");

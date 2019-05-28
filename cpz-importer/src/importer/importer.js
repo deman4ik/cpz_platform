@@ -265,10 +265,6 @@ class Importer {
     }
   }
 
-  logInfo(...args) {
-    Log.info(`Importer ${this._PartitionKey}:`, ...args);
-  }
-
   getLimit() {
     switch (this._exchange) {
       case "bitfinex":
