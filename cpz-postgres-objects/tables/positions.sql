@@ -1,8 +1,6 @@
 create table positions
 (
-  id                            uuid
-    constraint c_positions_pk
-    primary key                 not null,
+  id            uuid            not null,
   user_id       uuid
     constraint c_positions_userlist_fk
     references userlist         not null,    
@@ -52,6 +50,10 @@ alter table positions
     unique ( user_id, robot_id, entry_date, entry_price, trader_id, backtest_id);
 
 alter table positions
+  add constraint c_positions_uk2
+    unique ( user_id, robot_id, id);
+
+alter table positions
   add constraint c_positions_status_chk
     check (status in ('none','new','open','closed','closedAuto','canceled','error'));
 
@@ -82,7 +84,8 @@ create index i_positions_currency_fk
   on positions (currency);
 create index i_positions_backtest_fk
   on positions (backtest_id);
-  
+
+comment on column positions.id is 'positopn id from adviser, not unique!';
 comment on column positions.action is 'short | closeShort | long | closeLong';
 comment on column positions.bars_held is '= duration / candle size';
 comment on column positions.entry_balance is '= entry_price * quantity';
