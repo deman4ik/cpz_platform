@@ -32,6 +32,9 @@ import {
   getTraderById,
   deleteTraderState
 } from "cpz/tableStorage-client/control/traders";
+import { deleteCandlebatcherActions } from "cpz/tableStorage-client/control/candlebatcherActions";
+import { deleteAdviserActions } from "cpz/tableStorage-client/control/adviserActions";
+import { deleteTraderActions } from "cpz/tableStorage-client/control/traderActions";
 import EventHub from "cpz/eventhub-client";
 import {
   TASKS_EXWATCHER_STARTED_EVENT,
@@ -78,7 +81,6 @@ import {
 
 async function handleServiceEvent(event) {
   try {
-    Log.debug(event, "handleServiceEvent");
     const {
       eventType,
       data: { taskId }
@@ -244,7 +246,6 @@ async function handleServiceEvent(event) {
         taskId,
         serviceName
       });
-      Log.warn(userRobots);
       await Promise.all(
         userRobots.map(async userRobotState => {
           const message = {
@@ -329,18 +330,24 @@ async function deleteState(taskId, eventType) {
       if (marketwatcher) await deleteMarketwatcherState(marketwatcher);
     } else if (eventType === TASKS_CANDLEBATCHER_STOPPED_EVENT) {
       const candlebatcher = await getCandlebatcherById(taskId);
-      if (candlebatcher) await deleteCandlebatcherState(candlebatcher);
+      if (candlebatcher) {
+        await deleteCandlebatcherState(candlebatcher);
+        await deleteCandlebatcherActions(taskId);
+      }
     } else if (eventType === TASKS_EXWATCHER_STOPPED_EVENT) {
       const exWatcher = await getExWatcherById(taskId);
       if (exWatcher) await deleteExWatcherState(exWatcher);
     } else if (eventType === TASKS_ADVISER_STOPPED_EVENT) {
       const adviser = await getAdviserById(taskId);
-      if (adviser) await deleteAdviserState(adviser);
+      if (adviser) {
+        await deleteAdviserState(adviser);
+        await deleteAdviserActions(taskId);
+      }
     } else if (eventType === TASKS_TRADER_STOPPED_EVENT) {
       const trader = await getTraderById(taskId);
       if (trader) {
-        Log.warn("deleteState", trader.PartitionKey, trader.RowKey);
         await deleteTraderState(trader);
+        await deleteTraderActions(taskId);
       }
     } else if (eventType === TASKS_IMPORTER_STOPPED_EVENT) {
       const importer = await getImporterById(taskId);

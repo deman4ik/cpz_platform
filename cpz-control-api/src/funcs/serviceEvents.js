@@ -46,6 +46,21 @@ import {
   ERROR_CONTROL_ERROR_EVENT_SCHEMA
 } from "cpz/events/schemas/error";
 import EventHub from "cpz/eventhub-client";
+import ControlStorageClient from "cpz/tableStorage-client/control";
+import adviserTables from "cpz/tableStorage-client/control/advisers";
+import backtestTables from "cpz/tableStorage-client/control/backtests";
+import candlebatcherTables from "cpz/tableStorage-client/control/candlebatchers";
+import exwatcherTables from "cpz/tableStorage-client/control/exwatchers";
+import importerTables from "cpz/tableStorage-client/control/importers";
+import marketwatcherTables from "cpz/tableStorage-client/control/marketwatchers";
+import traderTables from "cpz/tableStorage-client/control/traders";
+import userRobotTables from "cpz/tableStorage-client/control/userRobots";
+import adviserActionsTables from "cpz/tableStorage-client/control/adviserActions";
+import candlebatcherActionsTables from "cpz/tableStorage-client/control/candlebatcherActions";
+import traderActionsTables from "cpz/tableStorage-client/control/traderActions";
+import BacktesterStorageClient from "cpz/tableStorage-client/backtest";
+import backtesterTables from "cpz/tableStorage-client/backtest/backtesters";
+
 import { SERVICE_NAME } from "../config";
 import handleServiceEvent from "../taskrunner/handleServiceEvents";
 
@@ -108,6 +123,23 @@ class ServiceEvents extends BaseService {
     EventHub.init(
       process.env.TASKRUNNER_EVENTHUB,
       process.env.TASKRUNNER_EVENTHUB_NAME
+    );
+    ControlStorageClient.init(process.env.AZ_STORAGE_CONTROL_CS, [
+      ...adviserTables,
+      ...backtestTables,
+      ...candlebatcherTables,
+      ...exwatcherTables,
+      ...importerTables,
+      ...marketwatcherTables,
+      ...traderTables,
+      ...userRobotTables,
+      ...adviserActionsTables,
+      ...candlebatcherActionsTables,
+      ...traderActionsTables
+    ]);
+    BacktesterStorageClient.init(
+      process.env.AZ_STORAGE_BACKTESTER_CS,
+      backtesterTables
     );
   }
 

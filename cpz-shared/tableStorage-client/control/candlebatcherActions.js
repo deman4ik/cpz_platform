@@ -89,11 +89,25 @@ const deleteCandlebatcherAction = async ({ PartitionKey, RowKey }) =>
     RowKey
   });
 
+const deleteCandlebatcherActions = async taskId => {
+  const actions = client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_CANDLEBATCHER_ACTIONS_TABLE,
+    taskId
+  );
+
+  if (actions && Array.isArray(actions) && actions.length > 0) {
+    await Promise.all(
+      actions.map(async action => deleteCandlebatcherAction(action))
+    );
+  }
+};
+
 export {
   getCandlebatcherActionByKeys,
   getNextCandlebatcherAction,
   candlebatcherHasActions,
   saveCandlebatcherAction,
-  deleteCandlebatcherAction
+  deleteCandlebatcherAction,
+  deleteCandlebatcherActions
 };
 export default Object.values(TABLES);

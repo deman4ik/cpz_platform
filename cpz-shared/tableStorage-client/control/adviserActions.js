@@ -86,11 +86,23 @@ const deleteAdviserAction = async ({ PartitionKey, RowKey }) =>
     RowKey
   });
 
+const deleteAdviserActions = async taskId => {
+  const actions = client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_ADVISER_ACTIONS_TABLE,
+    taskId
+  );
+
+  if (actions && Array.isArray(actions) && actions.length > 0) {
+    await Promise.all(actions.map(async action => deleteAdviserAction(action)));
+  }
+};
+
 export {
   getAdviserActionByKeys,
   getNextAdviserAction,
   adviserHasActions,
   saveAdviserAction,
-  deleteAdviserAction
+  deleteAdviserAction,
+  deleteAdviserActions
 };
 export default Object.values(TABLES);

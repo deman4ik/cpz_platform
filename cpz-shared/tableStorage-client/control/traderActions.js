@@ -86,11 +86,22 @@ const deleteTraderAction = async ({ PartitionKey, RowKey }) =>
     RowKey
   });
 
+const deleteTraderActions = async taskId => {
+  const actions = client.getEntitiesByPartitionKey(
+    TABLES.STORAGE_TRADER_ACTIONS_TABLE,
+    taskId
+  );
+
+  if (actions && Array.isArray(actions) && actions.length > 0) {
+    await Promise.all(actions.map(async action => deleteTraderAction(action)));
+  }
+};
 export {
   getTraderActionByKeys,
   getNextTraderAction,
   traderHasActions,
   saveTraderAction,
-  deleteTraderAction
+  deleteTraderAction,
+  deleteTraderActions
 };
 export default Object.values(TABLES);
