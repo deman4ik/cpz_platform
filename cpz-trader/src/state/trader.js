@@ -399,9 +399,10 @@ class Trader {
             this._deferredSignals.push(signal);
             return;
           }
+        } else {
+          // Проверка единичной позиции
+          this._checkPositions();
         }
-        // Проверка единичной позиции
-        this._checkPositions();
 
         // Создаем новую позицию
         this._createPosition(signal);
