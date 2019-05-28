@@ -3,7 +3,8 @@ import {
   STATUS_STARTING,
   STATUS_STARTED,
   STATUS_STOPPING,
-  STATUS_STOPPED
+  STATUS_STOPPED,
+  STATUS_ERROR
 } from "cpz/config/state";
 import {
   getUserRobotById,
@@ -283,10 +284,10 @@ class UserRobotRunner extends BaseRunner {
   static async stop(state) {
     const userRobot = new UserRobot(state);
     try {
-      if (state.status === STATUS_STOPPED)
+      if (state.status === STATUS_STOPPED || state.status === STATUS_ERROR)
         return {
           id: state.id,
-          status: STATUS_STOPPED
+          status: state.status
         };
 
       userRobot.setStopping();
@@ -295,7 +296,8 @@ class UserRobotRunner extends BaseRunner {
       if (
         userRobot.traderId &&
         (userRobot.traderStatus !== STATUS_STOPPED ||
-          userRobot.traderStatus !== STATUS_STOPPING)
+          userRobot.traderStatus !== STATUS_STOPPING ||
+          userRobot.traderStatus !== STATUS_ERROR)
       ) {
         const { status, event } = await TraderRunner.stop({
           taskId: userRobot.traderId
@@ -307,7 +309,8 @@ class UserRobotRunner extends BaseRunner {
       if (
         userRobot.adviserId &&
         (userRobot.adviserStatus !== STATUS_STOPPED ||
-          userRobot.adviserStatus !== STATUS_STOPPING)
+          userRobot.adviserStatus !== STATUS_STOPPING ||
+          userRobot.adviserStatus !== STATUS_ERROR)
       ) {
         const { status, event } = await AdviserRunner.stop({
           taskId: userRobot.adviserId,
