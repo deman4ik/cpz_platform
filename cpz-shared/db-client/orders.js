@@ -27,7 +27,8 @@ function mapForDB(order) {
     signal_id: order.signalId,
     backtest_id: order.backtesterId,
     trader_id: order.traderId,
-    candle_timestamp: order.candleTimestamp
+    candle_timestamp: order.candleTimestamp,
+    run_mode: order.mode
   };
 }
 async function saveOrdersDB(data) {
