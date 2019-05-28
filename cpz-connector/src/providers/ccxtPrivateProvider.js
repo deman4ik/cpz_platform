@@ -165,7 +165,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   getOrderParams() {
     if (this._exchange === "kraken") {
       return {
-        leverage: 5
+        leverage: 2
       };
     }
     if (this._exchange === "bitfinex") {
