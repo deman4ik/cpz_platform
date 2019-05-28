@@ -12,6 +12,8 @@ import {
   POS_STATUS_CANCELED,
   POS_STATUS_OPEN,
   ORDER_STATUS_OPEN,
+  ORDER_STATUS_CLOSED,
+  ORDER_STATUS_CANCELED,
   ORDER_DIRECTION_BUY,
   ORDER_DIRECTION_SELL,
   STATUS_PENDING,
@@ -166,8 +168,9 @@ class Trader {
   isPositionActive(positionId) {
     const { activePositions } = this;
     if (!activePositions || activePositions.length === 0) return false;
-    const position = activePositions.filter(({ id }) => id === positionId);
-    if (position.length === 1) {
+    const positions = activePositions.filter(({ id }) => id === positionId);
+    if (positions.length === 1) {
+      const position = positions[0];
       if (position.exit.status === ORDER_STATUS_OPEN) return false;
       return true;
     }
@@ -384,10 +387,6 @@ class Trader {
         return;
       }
 
-      this._eventsToSend[
-        `S-${signal.signalId}`
-      ] = this._createSignalHandledEvent({ signalId: signal.signalId });
-
       // Если сигнал на открытие позиции
       if (
         signal.action === TRADE_ACTION_LONG ||
@@ -481,6 +480,10 @@ class Trader {
       }
       // Последний обработанный сигнал
       this._lastSignal = signal;
+
+      this._eventsToSend[
+        `S-${signal.signalId}`
+      ] = this._createSignalHandledEvent({ signalId: signal.signalId });
     } catch (e) {
       const error = new ServiceError(
         {
@@ -693,12 +696,11 @@ class Trader {
               order.error.message
             )
           );
-        } else {
-          // Если ордер в статусе закрыт или отменен
-          /*  if (
+        } else if (
           order.status === ORDER_STATUS_CLOSED ||
           order.status === ORDER_STATUS_CANCELED
-        ) { */
+        ) {
+          // Если ордер в статусе закрыт или отменен
           // генерируем событие ордер
           this._eventsToSend[`O-${order.orderId}`] = this._createOrderEvent(
             order
@@ -707,7 +709,7 @@ class Trader {
           this._eventsToSend[
             `P-${order.positionId}`
           ] = this._createPositionEvent(
-            this._positions[order.positionId].props
+            this._positions[order.positionId].state
           );
         }
       });

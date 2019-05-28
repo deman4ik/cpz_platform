@@ -1,5 +1,4 @@
 import { v4 as uuid } from "uuid";
-import Log from "cpz/log";
 import {
   TRADE_ACTION_LONG,
   TRADE_ACTION_CLOSE_SHORT,
