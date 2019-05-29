@@ -7,6 +7,7 @@ SELECT u.id,
        (select max(action_date) from user_robothist h where h.user_robot_id = u.id) as last_hist_date,
        (select max(action) OVER (order by action_date desc)
         from user_robothist h where h.user_robot_id = u.id limit 1) as last_hist_action,
+       u.run_mode,
        u.volume,
        u.timeframe,
        u.asset,
