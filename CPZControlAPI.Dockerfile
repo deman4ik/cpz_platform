@@ -1,3 +1,9 @@
+FROM microsoft/dotnet:2.1-sdk AS buildNet
+COPY /cpz-control-api /src/cpz-control-api
+WORKDIR /src/cpz-control-api
+RUN dotnet restore &&  \
+    dotnet build -c Release
+
 FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS buildNode
 COPY /cpz-control-api /src/cpz-control-api
 COPY /cpz-shared /src/cpz-shared    
@@ -10,5 +16,6 @@ RUN npm run webpack &&  \
 FROM mcr.microsoft.com/azure-functions/node:2.0 AS runtime
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot
 ENV NODE_ENV=production
+COPY --from=buildNet ["/src/cpz-control-api","/home/site/wwwroot"]
 COPY --from=buildNode ["/src/cpz-control-api","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
