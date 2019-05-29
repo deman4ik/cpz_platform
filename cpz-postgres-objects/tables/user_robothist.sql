@@ -5,7 +5,7 @@ create table user_robothist
     primary key,
 	user_robot_id    uuid not null
 			constraint c_user_robothist_user_robot_fk
-			references user_robot,	
+			references user_robot on delete cascade,
 	action_date		   timestamp not null default CURRENT_DATE,
 	action			     varchar(20) not null,
 	run_mode      	 varchar(10), -- included in tradersettings.mode

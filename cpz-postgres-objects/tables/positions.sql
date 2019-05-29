@@ -6,7 +6,7 @@ create table positions
     references userlist         not null,    
   robot_id      numeric(17)     not null
     constraint c_positions_robot_fk
-    references robot,
+    references robot on delete cascade,
   exchange      varchar(30)     not null
     constraint c_positions_exchange_fk
     references exchange,

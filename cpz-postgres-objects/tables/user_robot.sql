@@ -19,8 +19,8 @@ create table user_robot
 	volume		      numeric,              -- goes to tradersettings
 	user_params			jsonb,	 -- goes to tradersettings, additional params for a particular exchange or user_robot
 	linked_user_robot_id     uuid
-			constraint c_user_robothist_linked_user_robot_fk
-			references user_robot -- for subscribed user robots
+			constraint c_user_robot_linked_user_robot_fk
+			references user_robot on delete set null-- for subscribed user robots
 );
 
 alter table user_robot

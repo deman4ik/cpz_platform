@@ -1,25 +1,27 @@
 drop view v_robots;
 
 create or replace view v_robots as
-SELECT u.id,
-       u.robot_id,
-       u.name,
+SELECT
+       u.rid as robot_id,
+       u.email as user_email,
+       u.id as user_robot_id,
+       u.name as user_robot_name,
+       u.timeframe,
+       u.run_mode,
+       u.robot_status,       
        (select max(action_date) from user_robothist h where h.user_robot_id = u.id) as last_hist_date,
        (select max(action) OVER (order by action_date desc)
         from user_robothist h where h.user_robot_id = u.id limit 1) as last_hist_action,
-       u.run_mode,
+       (select max(action_date) OVER (order by action_date desc)
+        from user_robothist h where h.user_robot_id = u.id and action = 'started' limit 1) as last_hist_started,
        u.volume,
-       u.timeframe,
        u.asset,
        u.currency,
        u.exchange,
-       u.robot_status,
        u.enabled,
        u.strat_id,
        u.filename,
        u.last_started,
-       (select max(action_date) OVER (order by action_date desc)
-        from user_robothist h where h.user_robot_id = u.id and action = 'started' limit 1) as last_hist_started,
        u.dt_from,
        u.dt_to,
        date_part('day',(CURRENT_DATE-u.last_started)) as DAYS_ACTIVE,
@@ -28,15 +30,13 @@ SELECT u.id,
 FROM
   (select
      uu.*,
-     r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled,
-     s.id as strat_id, s.filename
+     r.id as rid, r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled,
+     s.id as strat_id, s.filename, ul.email
    from
-     user_robot uu,
-     robot r,
-     strat s
-   where
-         uu.robot_id = r.id
-     and r.strat = s.id
-     and r.enabled > 0
+     robot r
+        join strat s on r.strat = s.id
+   left join user_robot uu on uu.robot_id = r.id
+   left join userlist ul on uu.user_id = ul.id
+   where r.enabled > 0
   ) u
 ;

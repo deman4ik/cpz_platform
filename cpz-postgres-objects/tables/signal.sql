@@ -3,7 +3,7 @@ create table signal
     id          uuid constraint c_signal_pk primary key not null, 
     robot_id   numeric(17) not null
         constraint c_signal_robot_fk
-        references robot,
+        references robot on delete cascade,
     alert_time timestamp,        
     action     varchar(10) not null,
     price      numeric     not null,

@@ -12,7 +12,7 @@ create table orders
         references userlist not null,
     robot_id      numeric(17)     not null
         constraint c_orders_robot_fk
-        references robot,
+        references robot on delete cascade,
     exchange      varchar(30)     not null
         constraint c_orders_exchange_fk
         references exchange,
