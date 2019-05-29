@@ -48,6 +48,7 @@ class MarketwatcherRunner extends BaseRunner {
           if (notSubscribed.length > 0) {
             event = await this.subscribe({
               taskId,
+              exchange,
               subscriptions: notSubscribed
             });
           }
@@ -158,6 +159,7 @@ class MarketwatcherRunner extends BaseRunner {
             subject: marketwatcher.exchange,
             data: {
               taskId,
+              exchange: marketwatcher.exchange,
               subscriptions
             }
           }
@@ -195,6 +197,7 @@ class MarketwatcherRunner extends BaseRunner {
           subject: marketwatcher.exchange,
           data: {
             taskId,
+            exchange: marketwatcher.exchange,
             subscriptions
           }
         }
