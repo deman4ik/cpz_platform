@@ -149,7 +149,7 @@ class MarketwatcherRunner extends BaseRunner {
             sub.asset === subscription.asset &&
             sub.currency === subscription.currency
         );
-        if (doubles.length === 0) newSubsciptions.add(subscription);
+        if (!doubles) newSubsciptions.add(subscription);
       });
       let event = null;
       if (newSubsciptions.length > 0) {
@@ -210,7 +210,7 @@ class MarketwatcherRunner extends BaseRunner {
           cause: error,
           info: props
         },
-        "Failed to add subscriptions to marketwatcher"
+        "Failed to remove subscriptions from marketwatcher"
       );
     }
   }
