@@ -282,7 +282,7 @@ class UserRobotRunner extends BaseRunner {
   static async stop(state) {
     const userRobot = new UserRobot(state);
     try {
-      if (state.status === STATUS_STOPPED || state.status === STATUS_ERROR)
+      if (state.status === STATUS_STOPPED)
         return {
           id: state.id,
           status: state.status

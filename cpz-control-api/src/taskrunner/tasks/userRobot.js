@@ -188,7 +188,7 @@ class UserRobot {
       this._exwatcherStatus = STATUS_ERROR;
       this._status = STATUS_ERROR;
     }
-    this._createErrorEvent(this._exwatcherError);
+    //this._createErrorEvent(this._exwatcherError);
   }
 
   get adviserId() {
