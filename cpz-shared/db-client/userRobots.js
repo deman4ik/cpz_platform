@@ -45,7 +45,6 @@ async function getUserRobotDB(userRobotId) {
         adviserSettings: robotByrobotId.advisersettings,
         traderSettings: {
           ...robotByrobotId.tradersettings,
-          exchangeParams: response.cpz_user_robot_by_pk.user_params,
           volume: response.cpz_user_robot_by_pk.volume,
           mode: response.cpz_user_robot_by_pk.run_mode
         }

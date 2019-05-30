@@ -43,7 +43,8 @@ const TRADER_SETTINGS_DEFAULTS = {
   slippageStep: 0,
   deviation: 0,
   volume: 0.002,
-  multiPosition: false
+  multiPosition: false,
+  defaultLeverage: 2
 };
 
 const BACKTESTER_SETTINGS_DEFAULTS = {

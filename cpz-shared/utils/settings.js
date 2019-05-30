@@ -128,8 +128,9 @@ const combineTraderSettings = props => {
       settings.multiPosition === undefined || settings.multiPosition === null
         ? TRADER_SETTINGS_DEFAULTS.multiPosition
         : settings.multiPosition,
-    /* Пользовательские дополнительные параметры для биржи */
-    exchangeParams: settings.exchangeParams,
+    /* Плечо  */
+    defaultLeverage:
+      settings.defaultLeverage || TRADER_SETTINGS_DEFAULTS.defaultLeverage,
     /* Информация о API ключах */
     keys: settings.keys
   };

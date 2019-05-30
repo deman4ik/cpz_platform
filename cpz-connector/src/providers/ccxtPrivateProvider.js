@@ -161,10 +161,12 @@ class CCXTPrivateProvider extends BasePrivateProvider {
     }
   }
 
-  getOrderParams() {
+  getOrderParams(params) {
+    const orderParams = params || {};
     if (this._exchange === "kraken") {
+      const { defaultLeverage } = orderParams;
       return {
-        leverage: 2
+        leverage: defaultLeverage || 2
       };
     }
     if (this._exchange === "bitfinex") {
@@ -228,7 +230,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         market.limits.amount.min,
         market.limits.amount.max
       );
-      const orderParams = { ...this.getOrderParams(), ...params };
+      const orderParams = this.getOrderParams(params);
       this.clearOrderCache();
       const call = async bail => {
         try {

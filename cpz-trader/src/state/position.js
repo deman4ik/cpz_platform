@@ -187,6 +187,9 @@ class Position {
           : ORDER_DIRECTION_SELL, // Направление торговли ордера
       positionDirection, // Место ордера в позиции
       action, // Торговое действие
+      params: {
+        defaultLeverage: settings.defaultLeverage
+      },
       task:
         orderType === ORDER_TYPE_MARKET || orderType === ORDER_TYPE_MARKET_FORCE
           ? ORDER_TASK_OPEN_MARKET

@@ -152,9 +152,12 @@ const TRADER_SETTINGS = {
     type: "boolean",
     optional: true
   },
-  exchangeParams: {
-    description: "User specific exchange parameters",
-    type: "object",
+  defaultLeverage: {
+    description: "Default margin leverage (for supported exchanges)",
+    type: "number",
+    integer: true,
+    min: 2,
+    max: 5,
     optional: true
   },
   keys: {

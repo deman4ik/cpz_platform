@@ -36,6 +36,7 @@ input TraderSettings {
   deviation: Float
   volume: Float
   multiPosition: Boolean
+  defaultLeverage: Float
   keys: APIPairKeysInput
 }
 
