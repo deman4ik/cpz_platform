@@ -7,7 +7,7 @@ BEGIN
   begin
     select max(h.rate) OVER (partition by h.asset, h.currency order by h.date_on desc) as last_rate
     into nRATE
-    from currate h
+    from cpz.currate h
     where h.currency = sCUR and h.asset = sASSET limit 1;
   exception when NO_DATA_FOUND then
     if nFLAG_EX = 1 then
