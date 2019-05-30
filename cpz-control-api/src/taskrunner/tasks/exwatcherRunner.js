@@ -328,7 +328,7 @@ class ExWatcherRunner extends BaseRunner {
         const { taskId, status, event } = await MarketwatcherRunner.start(
           marketwatcherParams
         );
-
+        Log.warn(taskId, status, event);
         exWatcher.marketwatcherId = taskId;
         exWatcher.marketwatcherStatus = status;
         if (event) events.push(event);

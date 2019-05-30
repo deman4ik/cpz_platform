@@ -106,6 +106,25 @@ class ExWatcher {
           }
         }
       };
+    } else if (
+      this._status !== STATUS_STOPPING &&
+      (this._candlebatcherStatus === STATUS_STOPPED ||
+        this._marketwatcherStatus === STATUS_STOPPED)
+    ) {
+      this._status = STATUS_STOPPED;
+      this._events.stopped = {
+        eventType: TASKS_EXWATCHER_STOPPED_EVENT,
+        eventData: {
+          subject: createExWatcherTaskSubject({
+            exchange: this._exchange,
+            asset: this._asset,
+            currency: this._currency
+          }),
+          data: {
+            taskId: this._taskId
+          }
+        }
+      };
     }
   }
 

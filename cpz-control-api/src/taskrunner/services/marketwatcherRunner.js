@@ -24,6 +24,7 @@ import BaseRunner from "../baseRunner";
 class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
+      Log.debug("MarketwatcherRunner start", props);
       let taskId = uuid();
       ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, {
         ...props,
@@ -131,6 +132,7 @@ class MarketwatcherRunner extends BaseRunner {
 
   static async subscribe(props) {
     try {
+      Log.debug("MarketwatcherRunner subscribe", props);
       ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, props);
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
@@ -142,17 +144,16 @@ class MarketwatcherRunner extends BaseRunner {
           },
           "Failed to find marketwatcher"
         );
-      const newSubsciptions = [];
-      subscriptions.forEach(subscription => {
-        const doubles = marketwatcher.subscriptions.find(
-          sub =>
-            sub.asset === subscription.asset &&
-            sub.currency === subscription.currency
-        );
-        if (!doubles) newSubsciptions.add(subscription);
-      });
+
+      const notSubscribed = subscriptions.filter(
+        sub =>
+          !marketwatcher.subscriptions.find(
+            del => del.asset === sub.asset && del.currency === sub.currency
+          )
+      );
+
       let event = null;
-      if (newSubsciptions.length > 0) {
+      if (notSubscribed.length > 0) {
         event = {
           eventType: TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
           eventData: {
@@ -160,7 +161,7 @@ class MarketwatcherRunner extends BaseRunner {
             data: {
               taskId,
               exchange: marketwatcher.exchange,
-              subscriptions
+              subscriptions: notSubscribed
             }
           }
         };
