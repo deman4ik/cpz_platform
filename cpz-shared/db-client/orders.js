@@ -53,36 +53,20 @@ async function saveOrdersDB(data) {
         affected_rows
       }
     }`;
-    const errors = [];
     if (data && data.length > 0) {
       const chunks = chunkArray(data, 100);
 
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const chunk of chunks) {
         if (chunk.length > 0) {
-          try {
-            const variables = {
-              objects: chunk.map(order => mapForDB(order))
-            };
+          const variables = {
+            objects: chunk.map(order => mapForDB(order))
+          };
 
-            await DB.client.request(query, variables);
-          } catch (error) {
-            errors.push(error);
-          }
+          await DB.client.request(query, variables);
         }
       }
     }
-    if (errors.length > 0)
-      throw new ServiceError(
-        {
-          name: ServiceError.types.DB_ERROR,
-          cause: errors[0],
-          info: {
-            errors
-          }
-        },
-        "Failed to save orders to DB"
-      );
   } catch (error) {
     if (error instanceof ServiceError) throw error;
     throw new ServiceError(

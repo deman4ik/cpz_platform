@@ -66,15 +66,11 @@ async function savePositionsDB(data) {
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const chunk of chunks) {
         if (chunk.length > 0) {
-          try {
-            const variables = {
-              objects: chunk.map(position => mapPositionsDataForDB(position))
-            };
+          const variables = {
+            objects: chunk.map(position => mapPositionsDataForDB(position))
+          };
 
-            await DB.client.request(query, variables);
-          } catch (error) {
-            throw error;
-          }
+          await DB.client.request(query, variables);
         }
       }
     }

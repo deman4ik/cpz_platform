@@ -16,50 +16,34 @@ async function saveCandlesDB({ timeframe, candles }) {
         }
       }
       `;
-    const errors = [];
     if (candles && candles.length > 0) {
       const chunks = chunkArray(candles, 100);
 
       /* eslint-disable no-restricted-syntax, no-await-in-loop */
       for (const chunk of chunks) {
         if (chunk.length > 0) {
-          try {
-            const variables = {
-              objects: chunk.map(candle => ({
-                id: candle.id,
-                exchange: candle.exchange,
-                asset: candle.asset,
-                currency: candle.currency,
-                open: candle.open,
-                high: candle.high,
-                low: candle.low,
-                close: candle.close,
-                volume: candle.volume,
-                time: candle.time,
-                timestamp: candle.timestamp,
-                type: candle.type
-              }))
-            };
+          const variables = {
+            objects: chunk.map(candle => ({
+              id: candle.id,
+              exchange: candle.exchange,
+              asset: candle.asset,
+              currency: candle.currency,
+              open: candle.open,
+              high: candle.high,
+              low: candle.low,
+              close: candle.close,
+              volume: candle.volume,
+              time: candle.time,
+              timestamp: candle.timestamp,
+              type: candle.type
+            }))
+          };
 
-            await DB.client.request(query, variables);
-          } catch (error) {
-            errors.push(error);
-          }
+          await DB.client.request(query, variables);
         }
       }
       /* no-restricted-syntax, no-await-in-loop */
     }
-    if (errors.length > 0)
-      throw new ServiceError(
-        {
-          name: ServiceError.types.DB_ERROR,
-          cause: errors[0],
-          info: {
-            errors
-          }
-        },
-        "Failed to save candles to DB"
-      );
   } catch (error) {
     if (error instanceof ServiceError) throw error;
     throw new ServiceError(
