@@ -2,7 +2,9 @@ import Log from "cpz/log";
 import ServiceValidator from "cpz/validator";
 import {
   TASKS_MARKETWATCHER_START_EVENT,
-  TASKS_MARKETWATCHER_STOP_EVENT
+  TASKS_MARKETWATCHER_STOP_EVENT,
+  TASKS_MARKETWATCHER_SUBSCRIBE_EVENT,
+  TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT
 } from "cpz/events/types/tasks/marketwatcher";
 
 /**
@@ -16,15 +18,26 @@ import {
  * */
 export default (req, res, next) => {
   const [event] = req.body;
+  const { eventType, data } = event;
   try {
-    if (event.eventType === TASKS_MARKETWATCHER_START_EVENT) {
-      ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, event.data);
+    if (eventType === TASKS_MARKETWATCHER_START_EVENT) {
+      ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, data);
       req.body = event;
       next();
-    } else if (event.eventType === TASKS_MARKETWATCHER_STOP_EVENT) {
-      ServiceValidator.check(TASKS_MARKETWATCHER_STOP_EVENT, event.data);
+    } else if (eventType === TASKS_MARKETWATCHER_STOP_EVENT) {
+      ServiceValidator.check(TASKS_MARKETWATCHER_STOP_EVENT, data);
       req.body = event;
       next();
+    } else if (eventType === TASKS_MARKETWATCHER_SUBSCRIBE_EVENT) {
+      ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, data);
+      req.body = event;
+      next();
+    } else if (eventType === TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT) {
+      ServiceValidator.check(TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT, data);
+      req.body = event;
+      next();
+    } else {
+      throw new Error(`Unknown event type ${eventType}`);
     }
   } catch (e) {
     Log.warn("Invalid event format", e);

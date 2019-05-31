@@ -14,7 +14,6 @@ import {
 
 async function eventHandler(req, res) {
   const { data, eventType } = req.body;
-
   try {
     if (eventType === TASKS_MARKETWATCHER_START_EVENT) {
       await handleStart(data);
