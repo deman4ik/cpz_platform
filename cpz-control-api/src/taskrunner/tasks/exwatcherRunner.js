@@ -325,7 +325,7 @@ class ExWatcherRunner extends BaseRunner {
           ]
         };
 
-        const { taskId, status, event } = await MarketwatcherRunner.start(
+        const { taskId, status, event } = await MarketwatcherRunner.subscribe(
           marketwatcherParams
         );
         Log.warn(taskId, status, event);
@@ -501,9 +501,19 @@ class ExWatcherRunner extends BaseRunner {
         (exWatcher.marketwatcherStatus !== STATUS_STOPPED ||
           exWatcher.marketwatcherStatus !== STATUS_STOPPING)
       ) {
-        const { status, event } = await MarketwatcherRunner.stop({
-          taskId: exWatcher.marketwatcherId
-        });
+        const marketwatcherParams = {
+          taskId: exWatcher.marketwatcherId,
+          exchange: exWatcher.exchange,
+          subscriptions: [
+            {
+              asset: exWatcher.asset,
+              currency: exWatcher.currency
+            }
+          ]
+        };
+        const { status, event } = await MarketwatcherRunner.unsubscribe(
+          marketwatcherParams
+        );
 
         exWatcher.marketwatcherStatus = status;
         if (event) events.push(event);

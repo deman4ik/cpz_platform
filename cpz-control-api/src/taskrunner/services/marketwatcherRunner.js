@@ -24,7 +24,6 @@ import BaseRunner from "../baseRunner";
 class MarketwatcherRunner extends BaseRunner {
   static async start(props) {
     try {
-      Log.debug("MarketwatcherRunner start", props);
       let taskId = uuid();
       ServiceValidator.check(TASKS_MARKETWATCHER_START_EVENT, {
         ...props,
@@ -39,24 +38,10 @@ class MarketwatcherRunner extends BaseRunner {
           marketwatcher.status === STATUS_STARTED ||
           marketwatcher.status === STATUS_PENDING
         ) {
-          const notSubscribed = subscriptions.filter(
-            sub =>
-              !marketwatcher.subscriptions.find(
-                del => del.asset === sub.asset && del.currency === sub.currency
-              )
-          );
-          let event = null;
-          if (notSubscribed.length > 0) {
-            event = await this.subscribe({
-              taskId,
-              exchange,
-              subscriptions: notSubscribed
-            });
-          }
           return {
             taskId,
             status: STATUS_STARTED,
-            event
+            event: null
           };
         }
       }
@@ -132,19 +117,15 @@ class MarketwatcherRunner extends BaseRunner {
 
   static async subscribe(props) {
     try {
-      Log.debug("MarketwatcherRunner subscribe", props);
-      ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, props);
-      const { taskId, subscriptions } = props;
-      const marketwatcher = await getMarketwatcherById(taskId);
-      if (!marketwatcher)
-        throw new ServiceError(
-          {
-            name: ServiceError.types.MARKETWATCHER_NOT_FOUND_ERROR,
-            info: { taskId }
-          },
-          "Failed to find marketwatcher"
-        );
-
+      let taskId = uuid();
+      ServiceValidator.check(TASKS_MARKETWATCHER_SUBSCRIBE_EVENT, {
+        ...props,
+        taskId
+      });
+      const { exchange, subscriptions } = props;
+      const marketwatcher = await findMarketwatcherByExchange(exchange);
+      if (!marketwatcher) return await this.start(props);
+      ({ taskId } = marketwatcher);
       const notSubscribed = subscriptions.filter(
         sub =>
           !marketwatcher.subscriptions.find(
@@ -159,14 +140,18 @@ class MarketwatcherRunner extends BaseRunner {
           eventData: {
             subject: marketwatcher.exchange,
             data: {
-              taskId,
+              taskId: marketwatcher.taskId,
               exchange: marketwatcher.exchange,
               subscriptions: notSubscribed
             }
           }
         };
       }
-      return { event };
+      return {
+        taskId: marketwatcher.taskId,
+        status: marketwatcher.status,
+        event
+      };
     } catch (error) {
       throw new ServiceError(
         {
@@ -179,31 +164,42 @@ class MarketwatcherRunner extends BaseRunner {
     }
   }
 
-  static async unsubscribe(context, props) {
+  static async unsubscribe(props) {
     try {
       ServiceValidator.check(TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT, props);
       const { taskId, subscriptions } = props;
       const marketwatcher = await getMarketwatcherById(taskId);
-      if (!marketwatcher)
-        throw new ServiceError(
-          {
-            name: ServiceError.types.MARKETWATCHER_NOT_FOUND_ERROR,
-            info: { taskId }
-          },
-          "Failed to find marketwatcher"
-        );
-      const event = {
-        eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
-        eventData: {
-          subject: marketwatcher.exchange,
-          data: {
-            taskId,
-            exchange: marketwatcher.exchange,
-            subscriptions
+      if (!marketwatcher) return { taskId, status: STATUS_STOPPED };
+      const subscribed = subscriptions.filter(sub =>
+        marketwatcher.subscriptions.find(
+          del => del.asset === sub.asset && del.currency === sub.currency
+        )
+      );
+      if (subscribed.length > 0) {
+        if (marketwatcher.subscriptions.length === 1)
+          return await this.stop(props);
+        const event = {
+          eventType: TASKS_MARKETWATCHER_UNSUBSCRIBE_EVENT,
+          eventData: {
+            subject: marketwatcher.exchange,
+            data: {
+              taskId: marketwatcher.taskId,
+              exchange: marketwatcher.exchange,
+              subscriptions: subscribed
+            }
           }
-        }
+        };
+        return {
+          taskId: marketwatcher.taskId,
+          statys: marketwatcher.status,
+          event
+        };
+      }
+      return {
+        taskId: marketwatcher.taskId,
+        statys: marketwatcher.status,
+        event: null
       };
-      return { event };
     } catch (error) {
       throw new ServiceError(
         {
