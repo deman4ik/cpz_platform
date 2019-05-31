@@ -3,7 +3,6 @@ import {
   TASKS_TOPIC,
   CANDLES_TOPIC,
   SIGNALS_TOPIC,
-  TICKS_TOPIC,
   TRADES_TOPIC,
   LOG_TOPIC,
   ERROR_TOPIC
@@ -79,7 +78,6 @@ import {
   SIGNALS_NEWSIGNAL_EVENT,
   SIGNALS_HANDLED_EVENT
 } from "../types/signals";
-import { TICKS_NEWTICK_EVENT, TICKS_HANDLED_EVENT } from "../types/ticks";
 import { TRADES_POSITION_EVENT, TRADES_ORDER_EVENT } from "../types/trades";
 import {
   LOG_ADVISER_LOG_EVENT,
@@ -173,12 +171,6 @@ export default {
       topic: SIGNALS_TOPIC,
       url: "/api/events",
       types: [SIGNALS_NEWSIGNAL_EVENT, SIGNALS_HANDLED_EVENT]
-    },
-    {
-      name: `${EVENTS_LOGGER_SERVICE}-${TICKS_TOPIC}`,
-      topic: TICKS_TOPIC,
-      url: "/api/events",
-      types: [TICKS_NEWTICK_EVENT, TICKS_HANDLED_EVENT]
     },
     {
       name: `${EVENTS_LOGGER_SERVICE}-${TRADES_TOPIC}`,

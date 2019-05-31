@@ -1,5 +1,4 @@
-import { BASE_ERROR } from "./base";
-import { TICKS_NEWTICK_EVENT, TICKS_HANDLED_EVENT } from "../types/ticks";
+import { TICKS_NEWTICK_EVENT } from "../types/ticks";
 
 const TICKS_NEWTICK_EVENT_SCHEMA = {
   [TICKS_NEWTICK_EVENT]: {
