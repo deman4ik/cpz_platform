@@ -4,6 +4,7 @@ create or replace view v_robots as
 SELECT
        u.rid as robot_id,
        u.email as user_email,
+       u.first_name as user_name,
        u.id as user_robot_id,
        u.name as user_robot_name,
        u.timeframe,
@@ -26,12 +27,13 @@ SELECT
        u.dt_to,
        date_part('day',(CURRENT_DATE-u.last_started)) as DAYS_ACTIVE,
        u.user_id,
-       u.linked_user_robot_id
+       u.linked_user_robot_id,
+       u.advisersettings
 FROM
   (select
      uu.*,
-     r.id as rid, r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled,
-     s.id as strat_id, s.filename, ul.email
+     r.id as rid, r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled, r.advisersettings,
+     s.id as strat_id, s.filename, ul.email, ul.first_name
    from
      robot r
         join strat s on r.strat = s.id
