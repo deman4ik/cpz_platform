@@ -6,17 +6,17 @@ select
 union all
 (select
   /*to change dataset name and timeframe !!*/
-  'KRAKEN.BTC-USD', 30::varchar,
+  'KRAKEN.BTC-ETH', 240::varchar,
   
   to_char(t.timestamp, 'YYYYMMDD'), to_char(t.timestamp, 'HH24MISS'), open::varchar, high::varchar, low::varchar, close::varchar, volume::varchar
   /*to change timeframe table*/
-  from candles30 t
+  from candles60 t
   where 
    /*to change parameters for export*/
-   asset = 'BTC' 
+   asset = 'BTC'
    and currency = 'USD' 
    and exchange = 'kraken'
-   and t.timestamp >= '2019-02-15 18:00:00.000000'
-   and t.timestamp <  '2019-05-01 23:00:00.000000'
+   and t.timestamp >= '2019-04-03 12:00:00.000000'
+   and t.timestamp <  '2019-06-01 12:00:00.000000'
   ORDER by t.timestamp asc
 );

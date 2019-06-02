@@ -4,6 +4,7 @@ create or replace view v_positions_w_orders as
 SELECT p.id,
        p.user_id,
        p.robot_id,
+       rr.code as robot_code,
        uu.id as user_robot_id,
        p.asset,
        p.currency,
@@ -57,6 +58,7 @@ left join backtest b on (p.backtest_id = b.id)
 left join orders oo on oo.id = p.order_open_id
 left join orders oc on oc.id = p.order_close_id
 join user_robot uu on uu.user_id = p.user_id and uu.robot_id = p.robot_id
+join robot rr on uu.robot_id = rr.id
 ;
 
 alter table v_positions_w_orders

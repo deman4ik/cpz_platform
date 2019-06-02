@@ -7,19 +7,20 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        u.name         AS sROBOT_NAME,
        u.asset        AS sASSET,
        u.currency     AS sCURRENCY,
+       r.currate      as nCURRATE,
        u.exchange     AS sEXCHANGE,
        u.timeframe    AS nTIMEFRAME,
        u.volume                    as nVOLUME,   -- volume in coins
-       round(u.volume*ncurrate,2)  as nVOLUME_C, -- volume in currency
-       round(u.profit/ncurrate,8)  as nPROFIT,   -- performance in coins
+       round(u.volume*r.currate,2)  as nVOLUME_C, -- volume in currency
+       round(u.profit/r.currate,8)  as nPROFIT,   -- performance in coins
        u.profit                    as nPROFIT_C, -- performance in currency
        round( u.profit/(u.balance_init+u.profit)*100,2 )   as nPROFIT_PCN, -- performance %
        round( u.profit/(u.balance_init+u.profit)*100,2 )   as nPROFIT_PCN_C, -- performance in currency %
-       round(u.balance_init/ncurrate,8)     as nBALANCE_INIT, -- "Initial capital" in coins
+       round(u.balance_init/r.currate,8)     as nBALANCE_INIT, -- "Initial capital" in coins
        u.balance_init                       as nBALANCE_INIT_C, -- "Initial capital" in currency
-       round((u.balance_init+u.profit)/ncurrate,8)  as nBALANCE_CURRENT, -- "Robot balance" in coins !!2DO
+       round((u.balance_init+u.profit)/r.currate,8)  as nBALANCE_CURRENT, -- "Robot balance" in coins !!2DO
        (u.balance_init+u.profit)                    as nBALANCE_CURRENT_C, -- "Robot balance" in currency
-       r.sCURCODE     as sCURCODE,
+       r.currency     as sCURCODE, -- todo change to symbol
        u.last_started AS dSTARTED,
        u.dt_from      AS dFROM,
        u.dt_to        AS dTO,
@@ -41,11 +42,11 @@ SELECT u.id           AS uidUSER_ROBOT_ID,
        (select
           row_to_json(tt)
           from (
-          select ddate, round(nMDD/ncurrate,8), nMDD as nMDD_C
+          select ddate, round(nMDD/r.currate,8), nMDD as nMDD_C
             from (
-              select ddate, nprofit,
-                     lag(nprofit) over (order by ddate) as nprev,
-                     (lag(nprofit) over (order by ddate))-nprofit as nMDD
+              select ddate, pf.nprofit_c,
+                     lag(nprofit_c) over (order by ddate) as nprev,
+                     (lag(pf.nprofit_c) over (order by ddate))-pf.nprofit_c as nMDD
               from vw_user_robot_performance_d pf
               where
                 ((pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id) or
@@ -78,5 +79,7 @@ FROM
     join      robot r on (uu.robot_id = r.id)
     left join user_robot p on (uu.linked_user_robot_id = p.id)
   ) u,
-  (select 5143 as nCURRATE, '$' as sCURCODE) r
+  v_currate_c r
+WHERE
+  u.exchange = r.exchange and u.currency = r.currency and u.asset = r.asset
 ;

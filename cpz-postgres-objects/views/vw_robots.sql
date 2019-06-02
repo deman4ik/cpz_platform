@@ -7,19 +7,20 @@ SELECT u.id           as uidUSER_ROBOT_ID,
        u.name         as sROBOT_NAME,
        u.asset        as sASSET,
        u.currency     as sCURRENCY,
+       r.currate      as nCURRATE,
        u.exchange     as sEXCHANGE,
        u.timeframe    as nTIMEFRAME,
-       u.volume                    as nVOLUME,   -- volume in coins
-       round(u.volume*ncurrate,2)  as nVOLUME_C, -- volume in currency
-       round(u.profit/ncurrate,8)  as nPROFIT,   -- performance in coins
-       u.profit                    as nPROFIT_C, -- performance in currency
+       u.volume                     as nVOLUME,   -- volume in coins
+       round(u.volume*r.currate,2)  as nVOLUME_C, -- volume in currency
+       round(u.profit/r.currate,8)  as nPROFIT,   -- performance in coins
+       u.profit                     as nPROFIT_C, -- performance in currency
        round( u.profit/(u.balance_init+u.profit)*100,2 )   as nPROFIT_PCN, -- performance %
        round( u.profit/(u.balance_init+u.profit)*100,2 )   as nPROFIT_PCN_C, -- performance in currency %
-       round(u.balance_init/ncurrate,8)     as nBALANCE_INIT, -- "Initial capital" in coins
+       round(u.balance_init/r.currate,8)    as nBALANCE_INIT, -- "Initial capital" in coins
        u.balance_init                       as nBALANCE_INIT_C, -- "Initial capital" in currency
-       round((u.balance_init+u.profit)/ncurrate,8)  as nBALANCE_CURRENT, -- "Robot balance" in coins !!2DO
-       (u.balance_init+u.profit)                    as nBALANCE_CURRENT_C, -- "Robot balance" in currency
-       r.sCURCODE     as sCURCODE,
+       round((u.balance_init+u.profit)/r.currate,8)  as nBALANCE_CURRENT, -- "Robot balance" in coins !!2DO
+       (u.balance_init+u.profit)                     as nBALANCE_CURRENT_C, -- "Robot balance" in currency
+       r.currency     as sCURCODE, -- todo change to symbol
        u.last_started as dSTARTED,
        u.dt_from      as dFROM,
        u.dt_to        as dTO,
@@ -33,21 +34,20 @@ SELECT u.id           as uidUSER_ROBOT_ID,
             select pf.dDATE, pf.nprofit_c as nPROFIT
             from vw_user_robot_performance_d pf
             where
-                  pf.ddate >= (current_date - 20)
-              and pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id
-            order by dDATE asc
+               pf.uiduser_robot_id = u.id
+            --order by pf.dDATE asc
           ) p
        ) as jPERF_ARRAY, -- performance mini-chart
        (select
           row_to_json(tt)
           from (
-          select ddate, round(nMDD/ncurrate,8), nMDD as nMDD_C
+          select ddate, round(nMDD/r.currate,8), nMDD as nMDD_C
             from (
-              select ddate, nprofit,
-                     (lag(nprofit) over (order by ddate))-nprofit as nMDD
+              select pf.ddate, pf.nprofit_c,
+                     (lag(pf.nprofit_c) over (order by ddate))-pf.nprofit_c as nMDD
               from vw_user_robot_performance_d pf
               where
-                pf.nrobot_id = u.robot_id and pf.uiduser_id = u.user_id
+                pf.uiduser_robot_id = u.id
             ) t order by nMDD asc
           ) tt  limit  1
        )  as  jMDD,
@@ -79,5 +79,7 @@ FROM
      and uu.robot_status >= 0 -- not deleted
      and exists (select null from userroles ur where ur.user_id = uu.user_id and ur.role_id = 'public_robot')
   ) u,
-  (select 5143 as nCURRATE, '$' as sCURCODE) r
+  v_currate_c r
+WHERE
+  u.exchange = r.exchange and u.currency = r.currency and u.asset = r.asset
 ;
