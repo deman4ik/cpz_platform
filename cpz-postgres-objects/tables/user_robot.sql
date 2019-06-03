@@ -20,7 +20,8 @@ create table user_robot
 	user_params			jsonb,	 -- goes to tradersettings, additional params for a particular exchange or user_robot
 	linked_user_robot_id     uuid
 			constraint c_user_robot_linked_user_robot_fk
-			references user_robot on delete set null-- for subscribed user robots
+			references user_robot on delete set null, -- for subscribed user robots
+	user_exchacc   uuid		
 );
 
 alter table user_robot
