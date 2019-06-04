@@ -18,14 +18,18 @@ create table signal
         ON DELETE CASCADE,
     position_id uuid not null,
     candle_timestamp timestamp,
-    candle_id uuid          
-     
+    candle_id uuid,
+    signal_type varchar(10) 
 )
 with OIDS;
 
 alter table signal
   add constraint c_signal_action_chk
     check (action in ('long','closeLong','short','closeShort'));
+
+alter table signal
+  add constraint c_signal_type_chk
+    check (signal_type in ('alert','trade'));
     
 alter table signal
   add constraint c_signal_order_type_chk
