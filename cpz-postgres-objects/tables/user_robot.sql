@@ -21,7 +21,9 @@ create table user_robot
 	linked_user_robot_id     uuid
 			constraint c_user_robot_linked_user_robot_fk
 			references user_robot on delete set null, -- for subscribed user robots
-	user_exchacc   uuid		
+	user_exchacc   uuid	
+		  constraint user_robot_user_exchacc_fkey
+      references user_exchacc,
 );
 
 alter table user_robot

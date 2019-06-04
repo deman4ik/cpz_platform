@@ -1,5 +1,5 @@
-import VError from "verror";
 import KeyVault from "azure-keyvault";
+import ServiceError from "../error";
 import getClient from "./client";
 
 /**
@@ -31,8 +31,8 @@ async function createKey({ uri, clientId, appSecret, keyName }) {
     const keyId = KeyVault.parseKeyIdentifier(result.key.kid);
     return keyId;
   } catch (error) {
-    throw new VError(
-      { name: "KeyVaultError", cause: error },
+    throw new ServiceError(
+      { name: ServiceError.types.KEY_VAULT_ERROR, cause: error },
       "Failed to create new key"
     );
   }

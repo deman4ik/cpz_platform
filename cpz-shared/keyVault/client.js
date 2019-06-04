@@ -1,6 +1,6 @@
-import VError from "verror";
 import KeyVault from "azure-keyvault";
 import { AuthenticationContext } from "adal-node";
+import ServiceError from "../error";
 
 /**
  * Клиент к службе Azure KeyVault
@@ -40,8 +40,8 @@ function getClient(clientId, secret) {
 
     return keyVaultClient;
   } catch (error) {
-    throw new VError(
-      { name: "KeyVaultError", cause: error },
+    throw new ServiceError(
+      { name: ServiceError.types.KEY_VAULT_ERROR, cause: error },
       "Failed to create KeyVault client"
     );
   }

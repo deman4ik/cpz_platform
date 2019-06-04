@@ -1,4 +1,4 @@
-import VError from "verror";
+import ServiceError from "../error";
 import getClient from "./client";
 
 /**
@@ -33,8 +33,8 @@ async function encrypt({
 
     return JSON.stringify(result.result);
   } catch (error) {
-    throw new VError(
-      { name: "KeyVaultError", cause: error },
+    throw new ServiceError(
+      { name: ServiceError.types.KEY_VAULT_ERROR, cause: error },
       "Failed to encrypt value"
     );
   }

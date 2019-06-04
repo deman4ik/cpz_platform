@@ -1,0 +1,60 @@
+{
+  "name": "cpz-platform-api",
+  "version": "1.0.0",
+  "description": "Cryptuoso - Platform API",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "jest --ci",
+    "dev": "func start --port 8110",
+    "extensions": "func extensions install",
+    "webpack": "webpack",
+    "webpack:watch": "webpack --watch",
+    "build": "func extensions install && webpack"
+  },
+  "keywords": [
+    "cryptuoso",
+    "cpz",
+    "cryptocurrency",
+    "bitcoin",
+    "trading",
+    "azure functions"
+  ],
+  "author": "CPZ Team - Dmitry Shatalov (@deman4ik)",
+  "license": "ISC",
+  "dependencies": {
+    "adal-node": "^0.1.28",
+    "apollo-datasource": "^0.4.0",
+    "apollo-server-azure-functions": "^2.5.0",
+    "applicationinsights": "^1.3.1",
+    "azure-keyvault": "^3.0.4",
+    "azure-storage": "^2.10.3",
+    "dayjs": "^1.8.14",
+    "fastest-validator": "^0.6.17",
+    "graphql": "^14.3.1",
+    "graphql-import-loader": "0.2.1",
+    "graphql-iso-date": "3.6.1",
+    "graphql-request": "1.8.2",
+    "graphql-tools": "4.0.4",
+    "graphql-type-json": "^0.3.0",
+    "uuid": "3.3.2",
+    "verror": "1.10.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^2.0.2",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-import-resolver-webpack": "^0.11.1",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
+    "jest": "^24.8.0",
+    "jest-junit": "^6.4.0",
+    "prettier": "^1.17.1",
+    "source-map-support": "^0.5.12",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-node-externals": "1.7.2"
+  }
+}

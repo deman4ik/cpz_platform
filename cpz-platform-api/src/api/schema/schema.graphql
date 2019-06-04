@@ -1,0 +1,26 @@
+# import { ExchangeAccountInput, ExchangeAccountUpdateInput } from "src/api/schema/exchangeAccount.graphql"
+
+scalar Datetime
+scalar JSON
+
+type Query {
+  ping: String
+}
+
+type Mutation {
+  insertExchangeAccount(params: ExchangeAccountInput!): Response!
+  updateExchangeAccount(params: ExchangeAccountUpdateInput!): Response!
+  deleteExchangeAccount(exchangeAccounId: ID!): Response!
+}
+
+type Error {
+  name: String!
+  message: String!
+  info: JSON
+  stack: JSON
+}
+
+type Response {
+  success: Boolean!
+  error: Error
+}

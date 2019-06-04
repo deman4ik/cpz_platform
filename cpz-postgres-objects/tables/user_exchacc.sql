@@ -8,9 +8,7 @@ create table user_exchacc
 			references userlist,
 	balance_init    numeric      default 0,
 	balance_current numeric      default 0,
-  asset      		  varchar(10)  
-    constraint c_user_exchacc_asset_fk
-    references asset,
+  name      		  varchar(30),
 	exchange   			varchar(30)  not null
     constraint c_user_exchacc_exchange_fk
     references exchange,

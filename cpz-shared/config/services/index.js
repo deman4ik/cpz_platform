@@ -11,6 +11,7 @@ const BACKTESTER_SERVICE = "backtester";
 const EVENTS_LOGGER_SERVICE = "eventslogger";
 const CONNECTOR_SERVICE = "connector";
 const AUTH_SERVICE = "auth";
+const API_SERVICE = "api";
 
 export {
   CONTROL_SERVICE,
@@ -25,5 +26,6 @@ export {
   BACKTESTER_SERVICE,
   EVENTS_LOGGER_SERVICE,
   CONNECTOR_SERVICE,
-  AUTH_SERVICE
+  AUTH_SERVICE,
+  API_SERVICE
 };

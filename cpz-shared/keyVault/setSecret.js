@@ -1,5 +1,5 @@
-import VError from "verror";
 import KeyVault from "azure-keyvault";
+import ServiceError from "../error";
 import getClient from "./client";
 
 /**
@@ -25,8 +25,8 @@ async function setSecret({
     const secretId = KeyVault.parseSecretIdentifier(result.id);
     return secretId;
   } catch (error) {
-    throw new VError(
-      { name: "KeyVaultError", cause: error },
+    throw new ServiceError(
+      { name: ServiceError.types.KEY_VAULT_ERROR, cause: error },
       "Failed to set secret"
     );
   }

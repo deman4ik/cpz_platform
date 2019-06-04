@@ -24,6 +24,9 @@ async function getUserRobotDB(userRobotId) {
       advisersettings
       tradersettings
     }
+    userExchaccByUserExchacc {
+      keys
+    }
   }
 }`;
     const variables = {
@@ -31,7 +34,10 @@ async function getUserRobotDB(userRobotId) {
     };
     const response = await DB.client.request(query, variables);
     if (response.cpz_user_robot_by_pk) {
-      const { robotByrobotId } = response.cpz_user_robot_by_pk;
+      const {
+        robotByrobotId,
+        userExchaccByUserExchacc
+      } = response.cpz_user_robot_by_pk;
       return {
         id: response.cpz_user_robot_by_pk.id,
         userId: response.cpz_user_robot_by_pk.user_id,
@@ -46,7 +52,8 @@ async function getUserRobotDB(userRobotId) {
         traderSettings: {
           ...robotByrobotId.tradersettings,
           volume: response.cpz_user_robot_by_pk.volume,
-          mode: response.cpz_user_robot_by_pk.run_mode
+          mode: response.cpz_user_robot_by_pk.run_mode,
+          keys: userExchaccByUserExchacc && userExchaccByUserExchacc.keys
         }
       };
     }

@@ -1,0 +1,23 @@
+input ExchangeAccountInput {
+  userId: ID!
+  name: String
+  exchange: String!
+  keys: APIPairKeysInput!
+}
+
+input ExchangeAccountUpdateInput {
+  id: ID!
+  userId: ID!
+  name: String
+  keys: APIPairKeysInput
+}
+
+input APIPairKeysInput {
+  main: APIKeyInput!
+  spare: APIKeyInput
+}
+
+input APIKeyInput {
+  APIKey: String!
+  APISecret: String!
+}

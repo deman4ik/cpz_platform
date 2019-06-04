@@ -2,8 +2,6 @@ const NOT_IMPLEMENTED_ERROR = "NotImplementedError";
 
 const KEY_VAULT_ERROR = "KeyVaultError";
 
-const NETWOKR_ERROR = "NetworkError";
-
 const UNKNOWN_ERROR = "UnknownError";
 
 const RETRY_ERROR = "RetryError";
@@ -17,6 +15,7 @@ const LOG_ERROR = "LogError";
 const MAILER_ERROR = "MailerError";
 
 export * from "./adviser";
+export * from "./api";
 export * from "./auth";
 export * from "./backtester";
 export * from "./candlebatcher";
@@ -37,7 +36,6 @@ export {
   KEY_VAULT_ERROR,
   NOT_IMPLEMENTED_ERROR,
   UNKNOWN_ERROR,
-  NETWOKR_ERROR,
   RETRY_ERROR,
   DB_ERROR,
   VALIDATION_ERROR,
