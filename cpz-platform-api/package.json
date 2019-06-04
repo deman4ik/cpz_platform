@@ -7,10 +7,9 @@
     "lint": "eslint .",
     "test": "jest --ci",
     "dev": "func start --port 8110",
-    "extensions": "func extensions install",
     "webpack": "webpack",
     "webpack:watch": "webpack --watch",
-    "build": "func extensions install && webpack"
+    "build": "webpack"
   },
   "keywords": [
     "cryptuoso",
