@@ -1,4 +1,4 @@
-FROM cpzhost.azurecr.io/cpzbuildnode:latest as build
+FROM cpzhub.azurecr.io/cpzbuildnode:latest as build
 COPY /cpz-adviser /src/cpz-adviser
 COPY /cpz-trader /src/cpz-trader
 COPY /cpz-backtester /src/cpz-backtester

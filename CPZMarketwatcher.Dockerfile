@@ -1,4 +1,4 @@
-FROM cpzhost.azurecr.io/cpzbuildnode:latest AS build
+FROM cpzhub.azurecr.io/cpzbuildnode:latest AS build
 COPY /cpz-marketwatcher /src/cpz-marketwatcher
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-marketwatcher

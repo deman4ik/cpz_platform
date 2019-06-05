@@ -1,4 +1,4 @@
-FROM cpzhost.azurecr.io/cpzbuildfuncnode:latest AS buildNode
+FROM cpzhub.azurecr.io/cpzbuildfuncnode:latest AS buildNode
 COPY /cpz-trader /src/cpz-trader
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-trader
