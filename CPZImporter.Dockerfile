@@ -12,4 +12,5 @@ ENV AzureWebJobsScriptRoot=/home/site/wwwroot
 ENV NODE_ENV=production
 COPY --from=build ["/src/cpz-importer","/home/site/wwwroot"]
 WORKDIR /home/site/wwwroot
+EXPOSE 80
 CMD [ "npm", "start" ]
