@@ -1,4 +1,4 @@
-FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS build
+FROM cpzhost.azurecr.io/cpzbuildfuncnode:latest AS build
 COPY /cpz-adviser /src/cpz-adviser
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-adviser

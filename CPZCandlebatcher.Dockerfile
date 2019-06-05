@@ -4,7 +4,7 @@ WORKDIR /src/cpz-candlebatcher
 RUN dotnet restore &&  \
     dotnet build -c Release
 
-FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS buildNode
+FROM cpzhost.azurecr.io/cpzbuildfuncnode:latest AS buildNode
 COPY /cpz-candlebatcher /src/cpz-candlebatcher
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-candlebatcher

@@ -1,4 +1,4 @@
-FROM cpzdev.azurecr.io/cpzbuildnode:latest AS build
+FROM cpzhost.azurecr.io/cpzbuildnode:latest AS build
 COPY /cpz-importer /src/cpz-importer
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-importer

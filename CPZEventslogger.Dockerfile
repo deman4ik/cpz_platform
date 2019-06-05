@@ -1,4 +1,4 @@
-FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS build
+FROM cpzhost.azurecr.io/cpzbuildfuncnode:latest AS build
 COPY /cpz-events-logger /src/cpz-events-logger
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-events-logger

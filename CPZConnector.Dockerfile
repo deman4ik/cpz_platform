@@ -1,4 +1,4 @@
-FROM cpzdev.azurecr.io/cpzbuildfuncnode:latest AS buildNode
+FROM cpzhost.azurecr.io/cpzbuildfuncnode:latest AS buildNode
 COPY /cpz-connector /src/cpz-connector
 COPY /cpz-shared /src/cpz-shared    
 WORKDIR /src/cpz-connector
