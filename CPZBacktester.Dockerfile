@@ -1,4 +1,9 @@
 FROM cpzhub.azurecr.io/cpzbuildnode:latest as build
+RUN mkdir /src &&  \
+    mkdir /src/cpz-adviser &&  \
+    mkdir /src/cpz-trader &&  \
+    mkdir /src/cpz-backtester &&  \
+    mkdir /src/cpz-shared
 COPY /cpz-adviser /src/cpz-adviser
 COPY /cpz-trader /src/cpz-trader
 COPY /cpz-backtester /src/cpz-backtester
@@ -11,9 +16,10 @@ RUN npm run webpack &&  \
     npm uninstall -D
 
 FROM node:10 AS runtime
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot
+RUN mkdir /app
+ENV AzureWebJobsScriptRoot=/app
 ENV NODE_ENV=production
-COPY --from=build ["/src/cpz-backtester","/home/site/wwwroot"]
-WORKDIR /home/site/wwwroot
+COPY --from=build ["/src/cpz-backtester","/app"]
+WORKDIR /app
 EXPOSE 80
 CMD [ "npm", "start" ]
