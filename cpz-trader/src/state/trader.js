@@ -144,6 +144,7 @@ class Trader {
       positions.forEach(position => {
         this._positions[position.id] = new Position({
           ...position,
+          settings: this._settings,
           log: this.log.bind(this)
         });
       });
@@ -265,7 +266,7 @@ class Trader {
       this._positions[positionId].reason = reason;
       const ordersToExecute = this._positions[
         positionId
-      ].getOrdersToClosePosition(this._settings);
+      ].getOrdersToClosePosition();
       ordersToExecute.forEach(order => {
         this._ordersToExecute[order.orderId] = this._baseOrder(order);
       });
@@ -357,6 +358,7 @@ class Trader {
         action === TRADE_ACTION_LONG
           ? ORDER_DIRECTION_BUY
           : ORDER_DIRECTION_SELL,
+      settings: this._settings,    
       log: this.log.bind(this)
     });
   }
@@ -409,8 +411,7 @@ class Trader {
 
         // Создаем ордер на открытие позиции
         this._positions[signal.position.id].createEntryOrder(
-          signal,
-          this._settings
+          signal
         );
       } else {
         // Если сигнал на закрытие позиции
@@ -428,8 +429,7 @@ class Trader {
         }
         // Создаем ордер на закрытие позиции
         this._positions[signal.position.id].createExitOrder(
-          signal,
-          this._settings
+          signal
         );
         // Если текущая позиция еще не открыта
         if (this._positions[signal.position.id].status === POS_STATUS_NEW) {
@@ -443,7 +443,7 @@ class Trader {
           // Проверяем ордер на открытие
           const ordersToExecute = this._positions[
             signal.position.id
-          ].getOrdersToExecute(this._settings);
+          ].getOrdersToExecute();
 
           ordersToExecute.forEach(order => {
             this._ordersToExecute[order.orderId] = this._baseOrder(order);
@@ -468,7 +468,7 @@ class Trader {
           this.activePositionInstances.map(position =>
             position.getOrdersToExecuteByPrice(
               this._lastPrice.price,
-              this._settings,
+            
               checkPrice
             )
           )
@@ -518,7 +518,7 @@ class Trader {
     try {
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position =>
-          position.getOrdersToExecute(this._settings)
+          position.getOrdersToExecute()
         )
       );
       ordersToExecute.forEach(order => {
@@ -565,8 +565,7 @@ class Trader {
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position =>
           position.getOrdersToExecuteByPrice(
-            this._lastPrice.price,
-            this._settings
+            this._lastPrice.price
           )
         )
       );

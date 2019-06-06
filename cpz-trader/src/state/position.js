@@ -68,6 +68,7 @@ class Position {
     /* Ордера закрытия */
     this._exitOrders = state.exitOrders || {};
     this._executed = state.executed;
+    this._settings = state.settings;
     this.log = state.log || this.log;
   }
 
@@ -160,15 +161,14 @@ class Position {
    *
    * @param {object} signal
    * @param {string} positionDirection entry/exit
-   * @param {object} settings Trader Settings
    *
    * @memberof Position
    */
-  _createOrder(signal, positionDirection, settings) {
+  _createOrder(signal, positionDirection) {
     this.log("Creating new order...", signal);
     const { signalId, orderType, price, action } = signal;
     const volume =
-      (signal.settings && signal.settings.volume) || settings.volume;
+      (signal.settings && signal.settings.volume) || this._settings.volume;
     this._currentOrder = {
       orderId: uuid(), // Уникальный идентификатор ордера
       signalId, // Идентификатор сигнала
@@ -188,7 +188,7 @@ class Position {
       positionDirection, // Место ордера в позиции
       action, // Торговое действие
       params: {
-        defaultLeverage: settings.defaultLeverage
+        defaultLeverage: this._settings.defaultLeverage
       },
       task:
         orderType === ORDER_TYPE_MARKET || orderType === ORDER_TYPE_MARKET_FORCE
@@ -202,13 +202,12 @@ class Position {
    * Создать ордер на вход в позицию
    *
    * @param {object} signal
-   * @param {object} settings Trader settings
    *
    * @memberof Position
    */
-  createEntryOrder(signal, settings) {
+  createEntryOrder(signal) {
     // Создаем ордер на открытие позиции
-    this._createOrder(signal, ORDER_POS_DIR_ENTRY, settings);
+    this._createOrder(signal, ORDER_POS_DIR_ENTRY);
     // Сохраняем созданный ордер в списке ордеров на открытие позиции
     this._entryOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус открытия позиции
@@ -225,13 +224,12 @@ class Position {
    * Создать ордер на выход из позиции
    *
    * @param {object} signal
-   * @param {object} settings Trader settings
    *
    * @memberof Position
    */
-  createExitOrder(signal, settings) {
+  createExitOrder(signal) {
     // Создаем ордер на закрытие позиции
-    this._createOrder(signal, ORDER_POS_DIR_EXIT, settings);
+    this._createOrder(signal, ORDER_POS_DIR_EXIT);
     // Сохраняем созданный ордер в списке ордеров на закрытие позиции
     this._exitOrders[this._currentOrder.orderId] = this._currentOrder;
     // Изменяем статус закрытия позиции
@@ -248,10 +246,9 @@ class Position {
    * Создать ордер на принудительный выход из позиции
    *
    * @param {number} volume объем выхода
-   * @param {Object} settings настройки трейдера
    * @memberof Position
    */
-  _createCloseOrder(volume, settings) {
+  _createCloseOrder(volume) {
     this.createExitOrder(
       {
         signalId: uuid(),
@@ -266,8 +263,7 @@ class Position {
         settings: {
           volume
         }
-      },
-      settings
+      }
     );
   }
 
@@ -277,7 +273,7 @@ class Position {
    * @returns {[Object]}
    * @memberof Position
    */
-  getOrdersToClosePosition(settings) {
+  getOrdersToClosePosition() {
     this.log("position getOrdersToClosePosition");
     // Необходимые ордера для закрытия позиции
     let requiredOrders = [];
@@ -307,7 +303,7 @@ class Position {
         this.log("entry executed", this._entry.executed);
         // Если ордер на открытие частично исполнен
         // Создаем новый ордер на принудительное закрытие позиции
-        this._createCloseOrder(this._entry.executed, settings);
+        this._createCloseOrder(this._entry.executed);
 
         requiredOrders = Object.values(this._exitOrders).filter(
           order => order.task
@@ -325,7 +321,7 @@ class Position {
       this.log("entry executed", this._entry.executed);
       // Если ордер на открытие частично исполнен
       // Создаем новый ордер на принудительное закрытие позиции
-      this._createCloseOrder(this._entry.executed, settings);
+      this._createCloseOrder(this._entry.executed);
 
       requiredOrders = Object.values(this._exitOrders).filter(
         order => order.task
@@ -343,7 +339,7 @@ class Position {
           this._exitOrders[key].status = ORDER_STATUS_CANCELED;
       });
       // Создаем новый ордер на принудительное закрытие позиции
-      this._createCloseOrder(this._entry.executed, settings);
+      this._createCloseOrder(this._entry.executed);
       requiredOrders = Object.values(this._exitOrders).filter(
         order => order.task
       );
@@ -372,7 +368,7 @@ class Position {
       // Если все еще нужно что-то закрывать
       if (volume > 0) {
         // Создаем новый ордер на принудительное закрытие позиции
-        this._createCloseOrder(volume, settings);
+        this._createCloseOrder(volume);
         requiredOrders = Object.values(this._exitOrders).filter(
           order => order.task
         );
@@ -387,12 +383,11 @@ class Position {
    *
    * @param {object} order
    * @param {number} price
-   * @param {object} settings Trader settings
    * @param {boolean} checkPrice if false disable price check
    *
    * @memberof Position
    */
-  _checkOrder(order, price, settings, checkPrice = true) {
+  _checkOrder(order, price, checkPrice = true) {
     this.log(
       `position checkOrder ${order.orderId}, position: ${this._code}, status: ${
         order.status
@@ -411,7 +406,7 @@ class Position {
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
-              price: order.price + settings.slippageStep,
+              price: order.price + this._settings.slippageStep,
               task: ORDER_TASK_OPEN_LIMIT
             };
           }
@@ -423,7 +418,7 @@ class Position {
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
-              price: order.price - settings.slippageStep,
+              price: order.price - this._settings.slippageStep,
               task: ORDER_TASK_OPEN_LIMIT
             };
           }
@@ -436,7 +431,7 @@ class Position {
           if (!checkPrice || (checkPrice && price <= order.price)) {
             return {
               ...order,
-              price: order.price + settings.slippageStep,
+              price: order.price + this._settings.slippageStep,
               task: ORDER_TASK_OPEN_MARKET
             };
           }
@@ -445,7 +440,7 @@ class Position {
           if (!checkPrice || (checkPrice && price >= order.price)) {
             return {
               ...order,
-              price: order.price - settings.slippageStep,
+              price: order.price - this._settings.slippageStep,
               task: ORDER_TASK_OPEN_MARKET
             };
           }
@@ -457,14 +452,14 @@ class Position {
         if (order.direction === ORDER_DIRECTION_BUY) {
           return {
             ...order,
-            price: order.price + settings.slippageStep,
+            price: order.price + this._settings.slippageStep,
             task: ORDER_TASK_OPEN_MARKET
           };
         }
         if (order.direction === ORDER_DIRECTION_SELL) {
           return {
             ...order,
-            price: order.price - settings.slippageStep,
+            price: order.price - this._settings.slippageStep,
             task: ORDER_TASK_OPEN_MARKET
           };
         }
@@ -476,7 +471,7 @@ class Position {
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
-              price: order.price + settings.slippageStep,
+              price: order.price + this._settings.slippageStep,
               task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
             };
           }
@@ -488,7 +483,7 @@ class Position {
             this.log(ORDER_TASK_OPEN_LIMIT);
             return {
               ...order,
-              price: order.price - settings.slippageStep,
+              price: order.price - this._settings.slippageStep,
               task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
             };
           }
@@ -515,11 +510,11 @@ class Position {
       // Если не в режиме бэктеста
       // проверяли недавно и таймаут открытого ордера истек
       if (
-        settings.mode !== BACKTEST_MODE &&
+        this._settings.mode !== BACKTEST_MODE &&
         dayjs.utc().diff(dayjs.utc(order.lastCheck), "second") <= 30 &&
         order.exTimestamp &&
         dayjs.utc().diff(dayjs.utc(order.exTimestamp), "minute") >
-          settings.openOrderTimeout
+          this._settings.openOrderTimeout
       ) {
         // Отменяем ордер
         this.log(ORDER_TASK_CANCEL);
@@ -535,11 +530,10 @@ class Position {
    * Выборка всех ордеров необходимых для обработки
    *
    * @param {number} price
-   * @param {object} settings Trader settings
    * @param {boolean} checkPrice if false disable price check
    * @memberof Position
    */
-  getOrdersToExecuteByPrice(price, settings, checkPrice = true) {
+  getOrdersToExecuteByPrice(price, checkPrice = true) {
     this.log(
       `position getOrdersToExecuteByPrice position: ${this._code}, entry: ${
         this._entry.status
@@ -555,7 +549,7 @@ class Position {
       // Если ордера на открытие позиции ожидают обработки
       // Проверяем все ордера на открытие позиции ожидающие обработки
       requiredOrders = Object.values(this._entryOrders)
-        .map(order => this._checkOrder(order, price, settings, checkPrice))
+        .map(order => this._checkOrder(order, price, checkPrice))
         .filter(order => !!order);
     } else if (
       this._entry.status === ORDER_STATUS_CLOSED &&
@@ -566,7 +560,7 @@ class Position {
       // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
       // Проверяем все ордера на закрытие позиции ожидающие обработки
       requiredOrders = Object.values(this._exitOrders)
-        .map(order => this._checkOrder(order, price, settings, checkPrice))
+        .map(order => this._checkOrder(order, price, checkPrice))
         .filter(order => !!order);
     }
     if (requiredOrders.length > 0) {
@@ -586,7 +580,7 @@ class Position {
    * @returns
    * @memberof Position
    */
-  getOrdersToExecute(settings) {
+  getOrdersToExecute() {
     this.log("postition getOrdersToExecute");
     let requiredOrders = [];
 
@@ -613,7 +607,7 @@ class Position {
       // Если все еще нужно что-то закрывать
       if (volume > 0) {
         // Создаем новый ордер на принудительное закрытие позиции
-        this._createCloseOrder(volume, settings);
+        this._createCloseOrder(volume);
         requiredOrders = Object.values(this._exitOrders).filter(
           order => order.task
         );
