@@ -44,7 +44,7 @@ async function handleRun(eventData) {
       return;
     }
     // Блокируем
-    const leaseId = await lock(taskId);
+    let leaseId = await lock(taskId);
     if (!leaseId) {
       Log.warn(`Got Adviser.Run event but Adviser ${taskId} is busy =(`);
       // Выходим
@@ -56,10 +56,10 @@ async function handleRun(eventData) {
     // Загружаем следующее действие из очереди
     nextAction = await loadAction(state.taskId, state.lastAction);
     // Если есть действие
-    if (nextAction) {
+    if (nextAction ) {
       // Пока есть действия
       /* eslint-disable no-await-in-loop */
-      while (nextAction) {
+      while (nextAction && leaseId) {
         Log.debug(`Adviser ${taskId} - processing ${nextAction.type} action.`);
         // Исполняем  - получаем обновленный стейт
         state = await execute(state, nextAction);
@@ -69,7 +69,7 @@ async function handleRun(eventData) {
           // Если есть следующее действие
           if (nextAction) {
             // Обновляем время блокировки
-            await renewLock(taskId, leaseId);
+            leaseId = await renewLock(taskId, leaseId);
           }
         } else {
           nextAction = null;

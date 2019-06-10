@@ -75,6 +75,8 @@ async function lock(taskId) {
 
 async function unlock(taskId, leaseId) {
   try {
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked) return;
     await BlobStorageClient.releaseLease(
       TRADER_LOCK,
       `${taskId}.json`,
@@ -92,13 +94,15 @@ async function unlock(taskId, leaseId) {
       `Failed to unlock trader`
     );
     Log.error(error);
-    throw error;
   }
 }
 
 async function renewLock(taskId, leaseId) {
   try {
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked) return await lock(taskId);
     await BlobStorageClient.renewLease(TRADER_LOCK, `${taskId}.json`, leaseId);
+    return leaseId;
   } catch (e) {
     const error = new ServiceError(
       {
@@ -111,7 +115,8 @@ async function renewLock(taskId, leaseId) {
       `Failed to unlock trader`
     );
     Log.error(error);
-    throw error;
+    const newLeaseId = await lock(taskId);
+    return newLeaseId;
   }
 }
 

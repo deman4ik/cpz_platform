@@ -75,6 +75,8 @@ async function lock(taskId) {
 
 async function unlock(taskId, leaseId) {
   try {
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked) return;
     await BlobStorageClient.releaseLease(
       CANDLEBATCHER_LOCK,
       `${taskId}.json`,
@@ -92,12 +94,13 @@ async function unlock(taskId, leaseId) {
       `Failed to unlock candlebatcher`
     );
     Log.error(error);
-    throw error;
   }
 }
 
 async function renewLock(taskId, leaseId) {
   try {
+    const unlocked = await isUnlocked(taskId);
+    if (unlocked) return await lock(taskId);
     await BlobStorageClient.renewLease(
       CANDLEBATCHER_LOCK,
       `${taskId}.json`,
@@ -115,7 +118,8 @@ async function renewLock(taskId, leaseId) {
       `Failed to unlock candlebatcher`
     );
     Log.error(error);
-    throw error;
+    const newLeaseId = await lock(taskId);
+    return newLeaseId;
   }
 }
 
