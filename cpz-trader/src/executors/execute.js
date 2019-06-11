@@ -3,6 +3,7 @@ import Log from "cpz/log";
 import Trader from "../state/trader";
 import { STOP, UPDATE, SIGNAL, PAUSE, PRICE, CHECK } from "../config";
 import executeOrder from "./executeOrder";
+import loadCurrentPrice from "./loadCurrentPrice";
 import publishEvents from "./publishEvents";
 import saveState from "./saveState";
 
@@ -11,12 +12,12 @@ async function execute(traderState, nextAction) {
   try {
     const { id, type, data } = nextAction;
 
-    if (
-      type === PRICE ||
-      type === CHECK ||
-      type === SIGNAL ||
-      type === UPDATE
-    ) {
+    if (type === PRICE || type === CHECK || type === SIGNAL) {
+      const currentPrice = await loadCurrentPrice(trader.props);
+      trader.handleCurrentPrice(currentPrice);
+      trader.action = { actionId: id, actionType: type, actionData: data };
+      trader[type](data);
+    } else if (type === UPDATE) {
       trader.action = { actionId: id, actionType: type, actionData: data };
       trader[type](data);
     } else if (type === STOP) {

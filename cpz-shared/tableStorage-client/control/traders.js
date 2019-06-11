@@ -105,9 +105,19 @@ const getActiveTradersBySlug = async slug => {
       TableUtilities.TableOperators.OR,
       pausedStatusFilter
     );
+    const hasActiveOrdersFilter = TableQuery.booleanFilter(
+      "hasActiveOrders",
+      TableUtilities.QueryComparisons.EQUAL,
+      true
+    );
+    const combinedFilter = TableQuery.combineFilters(
+      partitionKeyFilter,
+      TableUtilities.TableOperators.OR,
+      hasActiveOrdersFilter
+    );
     const query = new TableQuery().where(
       TableQuery.combineFilters(
-        partitionKeyFilter,
+        combinedFilter,
         TableUtilities.TableOperators.AND,
         statusFilter
       )
@@ -250,11 +260,11 @@ const getPausedTraders = async () => {
   }
 };
 /**
- * Query active Traders with active positions
+ * Query active Traders with active ordera
  *
  * @returns {Object[]}
  */
-const getIdledTradersWithActivePositions = async (seconds = 30) => {
+const getIdledTradersWithActiveOrders = async (seconds = 30) => {
   const idleTimestamp = dayjs
     .utc()
     .add(-seconds, "second")
@@ -265,8 +275,8 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
       TableUtilities.QueryComparisons.LESS_THAN,
       idleTimestamp
     );
-    const hasActivePositionsFilter = TableQuery.booleanFilter(
-      "hasActivePositions",
+    const hasActiveOrdersFilter = TableQuery.booleanFilter(
+      "hasActiveOrders",
       TableUtilities.QueryComparisons.EQUAL,
       true
     );
@@ -276,7 +286,7 @@ const getIdledTradersWithActivePositions = async (seconds = 30) => {
       STATUS_STARTED
     );
     const combinedFilter = TableQuery.combineFilters(
-      hasActivePositionsFilter,
+      hasActiveOrdersFilter,
       TableUtilities.TableOperators.AND,
       idleFilter
     );
@@ -338,7 +348,7 @@ export {
   getTradersReadyForSignals,
   getStartedTraders,
   getPausedTraders,
-  getIdledTradersWithActivePositions,
+  getIdledTradersWithActiveOrders,
   saveTraderState,
   updateTraderState,
   deleteTraderState

@@ -4,16 +4,14 @@ import Log from "cpz/log";
 import dayjs from "cpz/utils/dayjs";
 import EventGrid from "cpz/events";
 import { TASKS_TRADER_RUN_EVENT } from "cpz/events/types/tasks/trader";
-import { getIdledTradersWithActivePositions } from "cpz/tableStorage-client/control/traders";
+import { getIdledTradersWithActiveOrders } from "cpz/tableStorage-client/control/traders";
 import { saveTraderAction } from "cpz/tableStorage-client/control/traderActions";
 import { CHECK, TRADER_IDLE_SECONDS } from "../config";
 import { isUnlocked } from "../executors";
 
 async function handleIdleTimer() {
   try {
-    const traders = await getIdledTradersWithActivePositions(
-      TRADER_IDLE_SECONDS
-    );
+    const traders = await getIdledTradersWithActiveOrders(TRADER_IDLE_SECONDS);
 
     if (traders && traders.length > 0) {
       await Promise.all(
@@ -27,12 +25,12 @@ async function handleIdleTimer() {
               actionTime: dayjs.utc().valueOf()
             });
             const unlocked = await isUnlocked(taskId);
-              if (unlocked) {
-                await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
-                  subject: taskId,
-                  data: { taskId }
-                });
-              }
+            if (unlocked) {
+              await EventGrid.publish(TASKS_TRADER_RUN_EVENT, {
+                subject: taskId,
+                data: { taskId }
+              });
+            }
           } catch (e) {
             const error = new ServiceError(
               {

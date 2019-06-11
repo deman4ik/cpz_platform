@@ -11,6 +11,7 @@ import {
   POS_STATUS_NEW,
   POS_STATUS_CANCELED,
   POS_STATUS_OPEN,
+  ORDER_STATUS_NEW,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_CANCELED,
@@ -164,6 +165,19 @@ class Trader {
 
   get hasActivePositions() {
     return this.activePositions.length > 0;
+  }
+
+  get hasActiveOrders() {
+    return (
+      this.activePositions.filter(
+        position =>
+          position.entry.status === ORDER_STATUS_NEW ||
+          position.entry.status === ORDER_STATUS_OPEN ||
+          position.exit.status === ORDER_STATUS_NEW ||
+          position.exit.status === ORDER_STATUS_OPEN ||
+          position.exit.status === ORDER_STATUS_CANCELED
+      ).length > 0
+    );
   }
 
   isPositionActive(positionId) {
@@ -537,21 +551,22 @@ class Trader {
     }
   }
 
-  checkPrice(currentPrice) {
+  handleCurrentPrice(currentPrice) {
     try {
       if (!currentPrice || !currentPrice.price || !currentPrice.time) {
         Log.error("No current price!");
         return;
       }
       const { price, time, timestamp, candleId, tickId } = currentPrice;
-      if (this._lastPrice.time && this._lastPrice.time >= time) {
+
+      /* if (this._lastPrice.time && this._lastPrice.time >= time) {
         Log.warn(
           "Already checked same or newer price. Last checked price time '%s', current price time '%s'",
           this._lastPrice.timestamp,
           timestamp
         );
         return;
-      }
+      } */
 
       this._lastPrice = {
         price,
@@ -560,7 +575,23 @@ class Trader {
         candleId,
         tickId
       };
+    } catch (e) {
+      throw new ServiceError(
+        {
+          name: ServiceError.types.TRADER_HANDLE_CURRENT_PRICE_ERROR,
+          cause: e,
+          info: {
+            taskId: this._taskId,
+            currentPrice
+          }
+        },
+        "Failed to handle current price"
+      );
+    }
+  }
 
+  checkPrice(currentPrice) {
+    try {
       const ordersToExecute = flatten(
         this.activePositionInstances.map(position =>
           position.getOrdersToExecuteByPrice(this._lastPrice.price)
@@ -583,8 +614,6 @@ class Trader {
       );
     }
   }
-
-  // TODO: Log warn events if debug is on
 
   _createSignalHandledEvent({ signalId, success = true, error = null }) {
     return {
@@ -779,6 +808,7 @@ class Trader {
       lastAction: this._lastAction,
       activePositions: this.activePositions,
       hasActivePositions: this.hasActivePositions,
+      hasActiveOrders: this.hasActiveOrders,
       deferredSignals: this._deferredSignals
     };
   }

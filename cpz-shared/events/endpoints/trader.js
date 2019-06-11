@@ -1,10 +1,5 @@
 import { TRADER_SERVICE } from "../../config/services";
-import {
-  TASKS_TOPIC,
-  CANDLES_TOPIC,
-  SIGNALS_TOPIC,
-  TICKS_TOPIC
-} from "../topics";
+import { TASKS_TOPIC, SIGNALS_TOPIC, TICKS_TOPIC } from "../topics";
 import {
   TASKS_TRADER_START_EVENT,
   TASKS_TRADER_STOP_EVENT,
@@ -13,7 +8,6 @@ import {
   TASKS_TRADER_PAUSE_EVENT,
   TASKS_TRADER_RESUME_EVENT
 } from "../types/tasks/trader";
-import { CANDLES_NEWCANDLE_EVENT } from "../types/candles";
 import { TICKS_NEWTICK_EVENT } from "../types/ticks";
 import { SIGNALS_NEWSIGNAL_EVENT } from "../types/signals";
 
@@ -32,13 +26,6 @@ export default {
         TASKS_TRADER_PAUSE_EVENT,
         TASKS_TRADER_RESUME_EVENT
       ]
-    },
-    {
-      name: `${TRADER_SERVICE}-${CANDLES_TOPIC}`,
-      topic: CANDLES_TOPIC,
-      url: "/api/candleEvents",
-      localPort: 8106,
-      types: [CANDLES_NEWCANDLE_EVENT]
     },
     {
       name: `${TRADER_SERVICE}-${TICKS_TOPIC}`,

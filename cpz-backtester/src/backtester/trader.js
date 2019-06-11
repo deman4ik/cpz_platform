@@ -1,6 +1,5 @@
 import ServiceError from "cpz/error";
 import {
-  ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_TASK_OPEN_MARKET,
   ORDER_TASK_OPEN_LIMIT,
@@ -65,31 +64,20 @@ class TraderBacktester extends Trader {
   // Обработка новой свечи
   bHandleCandle(candle) {
     try {
-      // По умолчанию берем цену закрытия свечи
-      const price = candle.close;
-      // Если в последнем сигнале указан источник цены
-      /* const { priceSource } = this._lastSignal;
-      if (
-        priceSource &&
-        ["open", "close", "high", "low"].includes(priceSource)
-      ) {
-        // берем нужное поле
-        price = candle[priceSource];
-      } */
       this.log(
         "Trader handleCandle()",
         `t: ${candle.timestamp}, o: ${candle.open}, h: ${candle.high}, l: ${
           candle.low
-        }, c:${candle.close}`,
-        `price: ${price}`
+        }, c:${candle.close}`
       );
-      this.checkPrice({
-        price,
+      this.handleCurrentPrice({
+        price: candle.close,
         time: candle.time,
         timestamp: candle.timestamp,
         candleId: candle.id,
         tickId: null
       });
+      this.checkPrice();
     } catch (error) {
       throw new ServiceError(
         {
