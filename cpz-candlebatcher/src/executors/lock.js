@@ -106,6 +106,7 @@ async function renewLock(taskId, leaseId) {
       `${taskId}.json`,
       leaseId
     );
+    return leaseId;
   } catch (e) {
     const error = new ServiceError(
       {

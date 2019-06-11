@@ -102,6 +102,7 @@ async function renewLock(taskId, leaseId) {
     const unlocked = await isUnlocked(taskId);
     if (unlocked) return await lock(taskId);
     await BlobStorageClient.renewLease(ADVISER_LOCK, `${taskId}.json`, leaseId);
+    return leaseId;
   } catch (e) {
     const error = new ServiceError(
       {
