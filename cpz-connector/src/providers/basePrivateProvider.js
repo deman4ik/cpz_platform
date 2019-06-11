@@ -54,7 +54,9 @@ class BasePrivateProvider {
     this._setKeys(input.keys);
     this._exchange = input.exchange;
     this._currentKeyType = "main";
-    this._fetch = createFetchMethod(input.proxy || process.env.PROXY_ENDPOINT);
+    this._fetch = createFetchMethod(
+      input.proxy || process.env.PROXY_ENDPOINT_PRIVATE
+    );
   }
 
   _setKeys(keys) {

@@ -4,7 +4,9 @@ import createFetchMethod from "../utils/fetch";
 class BasePublicProvider {
   constructor(input) {
     this._exchange = input.exchange;
-    this._fetch = createFetchMethod(input.proxy || process.env.PROXY_ENDPOINT);
+    this._fetch = createFetchMethod(
+      input.proxy || process.env.PROXY_ENDPOINT_PUBLIC
+    );
   }
 
   async getMarket() {

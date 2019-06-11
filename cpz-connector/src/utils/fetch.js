@@ -11,7 +11,11 @@ function createFetchMethod(proxy) {
   proxyOptions.ca = cert;
   const agent = new HttpsProxyAgent(proxyOptions);
   return async function fetchInterface(url, options) {
-    return fetch(url, Object.assign({}, options, { agent }));
+    return fetch(url, {
+      ...options,
+      agent,
+      headers: { ...options.headers, Connection: "keep-alive" }
+    });
   };
 }
 

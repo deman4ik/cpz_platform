@@ -28,7 +28,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         fetchImplementation: this._fetch,
         apiKey: this._keys[keyType].APIKey.value,
         secret: this._keys[keyType].APISecret.value,
-        enableRateLimit: true
+        enableRateLimit: true,
+        timeout: 30000
       });
 
       this._keys[keyType].active = true;
@@ -82,6 +83,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   }
 
   async _handleExchangeError(e, bail) {
+    if (e instanceof ccxt.NetworkError) {
+      throw e;
+    }
     if (e instanceof ccxt.ExchangeError) {
       if (this._keys.main.active && this._keys.spare.specified) {
         await this.init("spare");
@@ -101,7 +105,19 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         )
       );
     }
-    throw e;
+    bail(
+      new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: {
+            critical: true,
+            userMessage: e.message
+          }
+        },
+        "Connector Error."
+      )
+    );
   }
 
   clearOrderCache() {
@@ -243,38 +259,19 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             orderParams
           );
         } catch (e) {
+          Log.error("createOrder Call Error", e);
           await this._handleExchangeError(e, bail);
           return null;
         }
       };
-      const response = await retry(call, this._retryOptions);
-      return {
-        success: true,
-        order: {
-          exId: response.id,
-          exTimestamp: response.datetime,
-          exLastTrade: this.getCloseOrderDate(response),
-          status: response.status,
-          price: +response.price,
-          average: +response.average,
-          volume: +response.amount,
-          remaining: +response.remaining,
-          executed: +response.filled || +response.amount - +response.remaining
-        }
-      };
-      /* 
-      {
-  "data": {
-    "createOrder": {
-      "success": true,
-      "error": null,
-      "order": {
-        "exId": "OEKMRS-3G2VL-OEUP2B",
-        "executed": null
-      }
-    }
-  }
-} */
+      const { id } = await retry(call, this._retryOptions);
+
+      const newOrder = await this.checkOrder(keys, {
+        exId: id,
+        asset,
+        currency
+      });
+      return newOrder;
     } catch (e) {
       let error;
       if (e instanceof ServiceError) {

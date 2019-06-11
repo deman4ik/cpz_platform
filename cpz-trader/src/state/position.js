@@ -69,7 +69,11 @@ class Position {
     this._exitOrders = state.exitOrders || {};
     this._executed = state.executed;
     this._settings = state.settings;
-    this.log = state.log || this.log;
+    this.logDebug = state.logDebug;
+  }
+
+  log(...args) {
+    this.logDebug(`pos ${this._code}`, ...args);
   }
 
   /**
@@ -249,22 +253,20 @@ class Position {
    * @memberof Position
    */
   _createCloseOrder(volume) {
-    this.createExitOrder(
-      {
-        signalId: uuid(),
-        price: null,
-        timestamp: dayjs.utc().toISOString(),
-        orderType: ORDER_TYPE_MARKET_FORCE,
-        positionId: this._id,
-        action:
-          this._direction === ORDER_DIRECTION_BUY
-            ? TRADE_ACTION_CLOSE_LONG
-            : TRADE_ACTION_CLOSE_SHORT,
-        settings: {
-          volume
-        }
+    this.createExitOrder({
+      signalId: uuid(),
+      price: null,
+      timestamp: dayjs.utc().toISOString(),
+      orderType: ORDER_TYPE_MARKET_FORCE,
+      positionId: this._id,
+      action:
+        this._direction === ORDER_DIRECTION_BUY
+          ? TRADE_ACTION_CLOSE_LONG
+          : TRADE_ACTION_CLOSE_SHORT,
+      settings: {
+        volume
       }
-    );
+    });
   }
 
   /**
@@ -274,7 +276,6 @@ class Position {
    * @memberof Position
    */
   getOrdersToClosePosition() {
-    this.log("position getOrdersToClosePosition");
     // Необходимые ордера для закрытия позиции
     let requiredOrders = [];
 
@@ -389,11 +390,11 @@ class Position {
    */
   _checkOrder(order, price, checkPrice = true) {
     this.log(
-      `position checkOrder ${order.orderId}, position: ${this._code}, status: ${
-        order.status
-      }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
-        order.task
-      }, order price: ${order.price}, current price: ${price}`
+      `checkOrder ${order.orderId}, status: ${order.status}, posDir: ${
+        order.positionDirection
+      }, dir: ${order.direction}, task: ${order.task}, order price: ${
+        order.price
+      }, current price: ${price}`
     );
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
@@ -472,7 +473,7 @@ class Position {
             return {
               ...order,
               price: order.price + this._settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
+              task: ORDER_TASK_OPEN_LIMIT
             };
           }
         }
@@ -484,7 +485,7 @@ class Position {
             return {
               ...order,
               price: order.price - this._settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT // TODO: OPEN STOP ?
+              task: ORDER_TASK_OPEN_LIMIT
             };
           }
         }
@@ -535,9 +536,9 @@ class Position {
    */
   getOrdersToExecuteByPrice(price, checkPrice = true) {
     this.log(
-      `position getOrdersToExecuteByPrice position: ${this._code}, entry: ${
-        this._entry.status
-      }, exit: ${this._exit.status}, price: ${price}`
+      `getOrdersToExecuteByPrice entry: ${this._entry.status}, exit: ${
+        this._exit.status
+      }, price: ${price}`
     );
     let requiredOrders = [];
 
@@ -581,7 +582,6 @@ class Position {
    * @memberof Position
    */
   getOrdersToExecute() {
-    this.log("postition getOrdersToExecute");
     let requiredOrders = [];
 
     if (this._entry.status === ORDER_STATUS_OPEN) {
@@ -626,13 +626,11 @@ class Position {
    */
   handleOrder(order) {
     this.log(
-      `postiion Executed ${order.orderId}, position: ${this._code}, status: ${
-        order.status
-      }, posDir: ${order.positionDirection}, dir: ${order.direction}, task: ${
-        order.task
-      }, order price: ${order.price}, average: ${order.average}, date: ${
-        order.exLastTrade
-      }`
+      `Executed ${order.orderId}, status: ${order.status}, posDir: ${
+        order.positionDirection
+      }, dir: ${order.direction}, task: ${order.task}, order price: ${
+        order.price
+      }, average: ${order.average}, date: ${order.exLastTrade}`
     );
     // Если ордер на открытие позиции
     if (order.positionDirection === ORDER_POS_DIR_ENTRY) {

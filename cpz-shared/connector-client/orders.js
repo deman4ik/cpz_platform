@@ -33,6 +33,7 @@ async function createOrderEX({
         direction: order.direction,
         volume: order.volume,
         price: order.price,
+        orderType: order.orderType,
         asset,
         currency
       }

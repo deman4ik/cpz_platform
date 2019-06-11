@@ -101,7 +101,8 @@ async function executeOrder(state, order) {
             direction: orderToExecute.direction,
             volume: orderToExecute.volume,
             price: orderToExecute.price,
-            params: {} // TODO
+            orderType: orderToExecute.orderType,
+            params: orderToExecute.params
           }
         });
 
@@ -147,7 +148,6 @@ async function executeOrder(state, order) {
     orderResult.task = null;
     orderResult.error = null;
     orderResult.lastCheck = dayjs.utc().toISOString();
-
     return orderResult;
   } catch (e) {
     const error = new ServiceError(

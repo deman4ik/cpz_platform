@@ -44,7 +44,7 @@ class Graphql {
       resolvers,
       formatError: error => {
         const err = new ServiceError(
-          { name: ServiceError.types.CONTROL_API_ERROR, cause: error },
+          { name: ServiceError.types.CONNECTOR_API_ERROR, cause: error },
           "Failed to process request"
         );
         Log.exception(err);

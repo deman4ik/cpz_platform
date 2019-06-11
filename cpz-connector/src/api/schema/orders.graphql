@@ -1,20 +1,21 @@
 input OrderFindInput {
-    exId: ID!
-    asset: String!
-    currency: String!
+  exId: ID!
+  asset: String!
+  currency: String!
 }
 
 input OrderInput {
-    direction: String!
-    volume: Float!
-    price: Float!
-    asset: String!
-    currency: String!
-    params: JSON
+  direction: String!
+  volume: Float!
+  price: Float!
+  asset: String!
+  currency: String!
+  orderType: String!
+  params: JSON
 }
 
 type OrderResponse {
-    success: Boolean!
-    error: Error
-    order: JSON
+  success: Boolean!
+  error: Error
+  order: JSON
 }
