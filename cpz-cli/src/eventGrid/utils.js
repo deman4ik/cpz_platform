@@ -41,11 +41,6 @@ async function createOrUpdateSub(
 ) {
   const scope = `/subscriptions/${SUBSRIPTION_ID}/resourceGroups/${RESOURSE_GROUP}/providers/Microsoft.EventGrid/topics/${topicName}`;
   const properties = {
-    deadLetterDestination: {
-      endpointType: "StorageBlob",
-      blobContainerName: `eg-${topic}-dead`,
-      resourceId: `/subscriptions/${SUBSRIPTION_ID}/resourceGroups/${RESOURSE_GROUP}/providers/microsoft.Storage/storageAccounts/${STORAGE}`
-    },
     destination: {
       endpointType: "WebHook",
       endpointUrl
@@ -110,8 +105,11 @@ async function listSubs(EGMClient, topicName) {
  * @param {string} apikey
  * @returns {string}
  */
-const createEndpointUrl = (serviceName, environment, postfix, apikey) =>
-  `https://cpz-${serviceName}-${environment}.azurewebsites.net${postfix}?api-key=${apikey}`;
+const createEndpointUrl = (serviceName, environment, postfix, apikey) => {
+  if (environment === "prod")
+    return `https://cpz-${serviceName}.azurewebsites.net${postfix}?api-key=${apikey}`;
+  return `https://cpz-${serviceName}-${environment}.azurewebsites.net${postfix}?api-key=${apikey}`;
+};
 
 /**
  * Create Event Grid Topic Name
