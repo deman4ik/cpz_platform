@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION p_robot_statistics_calc(
-  nROBOT_ID in bigint,
+  nROBOT_ID in numeric,
+  uidUSER_ROBOT_ID in uuid,
   nFLAG_RECREATE in integer
 )
 RETURNS integer
@@ -34,9 +35,20 @@ DECLARE
   dMAX_DRAWDOWN_DT timestamp;
   nMAX_CONS_WIN    int;
   nCNT_WIN         int;
+  uidUSER_ID       uuid;
 BEGIN
+
+  if uidUSER_ROBOT_ID is not null then
+    select t.user_id into uidUSER_ID from user_robot t where t.id = uidUSER_ROBOT_ID;
+  end if;
+
   if nFLAG_RECREATE = 1 then
-    delete from robot_statistics where robot_id = nROBOT_ID;
+    if uidUSER_ROBOT_ID is not null then
+      delete from robot_statistics t WHERE t.user_robot_id = uidUSER_ROBOT_ID;
+    else
+      delete from robot_statistics t WHERE t.robot_id = nROBOT_ID;
+    end if;
+
   end if;
 
   rSTAT.robot_id := nROBOT_ID;
@@ -48,18 +60,18 @@ BEGIN
   rSTAT.sort_order := 1;
   rSTAT.stat_name := 'Net Profit'||sUMEAS;
   SELECT
-    round( sum(t.profit$) ::numeric,2),
-    round( sum(case when t.action = 'sell' then t.profit$ else 0 end) ::numeric,2),
-    round( sum(case when t.action = 'buy' then t.profit$ else 0 end) ::numeric,2)
+    round( sum(t.profit),2),
+    round( sum(case when t.direction = 'sell' then t.profit else 0 end),2),
+    round( sum(case when t.direction = 'buy' then t.profit else 0 end),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null;
   nNET_PROFIT_ALL   := rSTAT.all_trades;
   nNET_PROFIT_LONG  := rSTAT.long_trades;
   nNET_PROFIT_SHORT := rSTAT.short_trades;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
   --on conflict do nothing; -- both for uk and pk
 
@@ -68,15 +80,15 @@ BEGIN
   rSTAT2.stat_name := 'Number of Trades';
   SELECT
     count(id),
-    sum(case when t.action = 'sell' then 1 else 0 end),
-    sum(case when t.action = 'buy' then 1 else 0 end)
+    sum(case when t.direction = 'sell' then 1 else 0 end),
+    sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT2.all_trades, rSTAT2.short_trades, rSTAT2.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null ;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null ;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT2.stat_name, rSTAT2.sort_order, rSTAT2.robot_id, rSTAT2.all_trades, rSTAT2.long_trades, rSTAT2.short_trades
+    rSTAT2.stat_name, rSTAT2.sort_order, rSTAT2.robot_id, uidUSER_ROBOT_ID, rSTAT2.all_trades, rSTAT2.long_trades, rSTAT2.short_trades
   );
   if rSTAT2.all_trades = 0 then
     rSTAT2.all_trades := null;
@@ -97,9 +109,9 @@ BEGIN
   rSTAT.long_trades  := round( (rSTAT.long_trades / rSTAT2.long_trades) ,2);
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
@@ -107,15 +119,15 @@ BEGIN
   rSTAT.stat_name := 'Average Bars Held';
   SELECT
     round( sum(t.bars_held) / rSTAT2.all_trades ),
-    round( sum(case when t.action = 'sell' then t.bars_held else 0 end) / rSTAT2.short_trades ),
-    round( sum(case when t.action = 'buy' then t.bars_held else 0 end) / rSTAT2.long_trades )
+    round( sum(case when t.direction = 'sell' then t.bars_held else 0 end) / rSTAT2.short_trades ),
+    round( sum(case when t.direction = 'buy' then t.bars_held else 0 end) / rSTAT2.long_trades )
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null ;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null ;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------------------------------
@@ -124,10 +136,10 @@ BEGIN
   rSTAT.stat_name := 'Winning Trades Count';
   SELECT
     count(t.id),
-    sum(case when t.action = 'sell' then 1 else 0 end),
-    sum(case when t.action = 'buy' then 1 else 0 end)
+    sum(case when t.direction = 'sell' then 1 else 0 end),
+    sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
   nWIN_ALL   := rSTAT.all_trades;
   nWIN_SHORT := rSTAT.short_trades;
   nWIN_LONG  := rSTAT.long_trades;
@@ -142,41 +154,41 @@ BEGIN
   end if;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
   rSTAT.sort_order := 6;
   rSTAT.stat_name := 'Win Rate';
   -- Win trades / number of trades
-  rSTAT.all_trades   := round( (rSTAT.all_trades / rSTAT2.all_trades) ::numeric,2);
-  rSTAT.short_trades := round( (rSTAT.short_trades / rSTAT2.short_trades) ::numeric,2);
-  rSTAT.long_trades  := round( (rSTAT.long_trades / rSTAT2.long_trades) ::numeric,2);
+  rSTAT.all_trades   := round( (rSTAT.all_trades / rSTAT2.all_trades),2);
+  rSTAT.short_trades := round( (rSTAT.short_trades / rSTAT2.short_trades),2);
+  rSTAT.long_trades  := round( (rSTAT.long_trades / rSTAT2.long_trades),2);
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
   rSTAT.sort_order := 7;
   rSTAT.stat_name := 'Gross Profit'||sUMEAS;
   SELECT
-    round( sum(t.profit$) ::numeric,2),
-    round( sum(case when t.action = 'sell' then t.profit$ else 0 end) ::numeric,2),
-    round( sum(case when t.action = 'buy' then t.profit$ else 0 end) ::numeric,2)
+    round( sum(t.profit),2),
+    round( sum(case when t.direction = 'sell' then t.profit else 0 end),2),
+    round( sum(case when t.direction = 'buy' then t.profit else 0 end),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
   nGROSS_PROFIT_ALL := rSTAT.all_trades;
   nGROSS_PROFIT_SHORT := rSTAT.short_trades;
   nGROSS_PROFIT_LONG := rSTAT.long_trades;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
@@ -190,9 +202,9 @@ BEGIN
   nAVG_PROFIT_SHORT := rSTAT.short_trades;
   nAVG_PROFIT_LONG := rSTAT.long_trades;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
@@ -200,15 +212,15 @@ BEGIN
   rSTAT.stat_name := 'Average Win Bars Held';
   SELECT
     round( (sum(t.bars_held) / nWIN_ALL) ::numeric,0),
-    round( (sum(case when t.action = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ::numeric,0),
-    round( (sum(case when t.action = 'buy' then t.bars_held else 0 end) / nWIN_LONG) ::numeric,0)
+    round( (sum(case when t.direction = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ::numeric,0),
+    round( (sum(case when t.direction = 'buy' then t.bars_held else 0 end) / nWIN_LONG) ::numeric,0)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
 
@@ -218,10 +230,10 @@ BEGIN
   rSTAT.stat_name := 'Losing Trades Count';
   SELECT
     count(t.id),
-    sum(case when t.action = 'sell' then 1 else 0 end),
-    sum(case when t.action = 'buy' then 1 else 0 end)
+    sum(case when t.direction = 'sell' then 1 else 0 end),
+    sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
   nWIN_ALL   := rSTAT.all_trades;
   nWIN_SHORT := rSTAT.short_trades;
   nWIN_LONG  := rSTAT.long_trades;
@@ -236,41 +248,41 @@ BEGIN
   end if;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
   rSTAT.sort_order := 21;
   rSTAT.stat_name := 'Loss Rate';
   -- Losing trades / number of trades
-  rSTAT.all_trades   := round( (rSTAT.all_trades / rSTAT2.all_trades) ::numeric,2);
-  rSTAT.short_trades := round( (rSTAT.short_trades / rSTAT2.short_trades) ::numeric,2);
-  rSTAT.long_trades  := round( (rSTAT.long_trades / rSTAT2.long_trades) ::numeric,2);
+  rSTAT.all_trades   := round( (rSTAT.all_trades / rSTAT2.all_trades),2);
+  rSTAT.short_trades := round( (rSTAT.short_trades / rSTAT2.short_trades),2);
+  rSTAT.long_trades  := round( (rSTAT.long_trades / rSTAT2.long_trades),2);
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
   rSTAT.sort_order := 22;
   rSTAT.stat_name := 'Gross Loss'||sUMEAS;
   SELECT
-    round( (sum(t.profit$)) ::numeric,2),
-    round( (sum(case when t.action = 'sell' then t.profit$ else 0 end)) ::numeric,2),
-    round( (sum(case when t.action = 'buy' then t.profit$ else 0 end)) ::numeric,2)
+    round( (sum(t.profit)),2),
+    round( (sum(case when t.direction = 'sell' then t.profit else 0 end)),2),
+    round( (sum(case when t.direction = 'buy' then t.profit else 0 end)),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
   nGROSS_LOSS_ALL := rSTAT.all_trades;
   nGROSS_LOSS_SHORT := rSTAT.short_trades;
   nGROSS_LOSS_LONG := rSTAT.long_trades;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
@@ -284,9 +296,9 @@ BEGIN
   nAVG_LOSS_SHORT := rSTAT.short_trades;
   nAVG_LOSS_LONG := rSTAT.long_trades;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   --------
@@ -294,15 +306,15 @@ BEGIN
   rSTAT.stat_name := 'Average Losing Bars Held';
   SELECT
     round( (sum(t.bars_held) / nWIN_ALL) ),
-    round( (sum(case when t.action = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ),
-    round( (sum(case when t.action = 'buy' then t.bars_held else 0 end) / nWIN_LONG) )
+    round( (sum(case when t.direction = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ),
+    round( (sum(case when t.direction = 'buy' then t.bars_held else 0 end) / nWIN_LONG) )
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM trade_roundtrips t WHERE robot_id = nROBOT_ID and exit_date is not null and t.profit$ < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
 
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   -- drawdown and Consecutive win/lose
@@ -315,7 +327,7 @@ BEGIN
   dMAX_DRAWDOWN_DT := null;
   for rec in (
     select
-      tt.profit$,
+      tt.profit,
       tt.c_balance,
       tt.entry_date,
       max(tt.c_balance) over (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) as max_prepare
@@ -323,11 +335,11 @@ BEGIN
       (select
          t.*,
          round(
-             sum(profit$) over (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) :: numeric
+             sum(profit) over (ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) :: numeric
          ,2) as c_balance
         from
-        trade_roundtrips t
-        where robot_id = nROBOT_ID and exit_date is not null
+        positions t
+        WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null
         order by entry_date, exit_date, id
       ) tt
     order by tt.entry_date, tt.exit_date, tt.id
@@ -344,7 +356,7 @@ BEGIN
     end if;
 
     -- take series of loses
-    if rec.profit$ < 0 then
+    if rec.profit < 0 then
       nCNT_LOSE := nCNT_LOSE + 1;
     else
       if nCNT_LOSE > nMAX_CONS_LOSES then
@@ -354,7 +366,7 @@ BEGIN
     end if;
 
     -- take series of winners
-    if rec.profit$ > 0 then
+    if rec.profit > 0 then
       nCNT_WIN := nCNT_WIN + 1;
     else
       if nCNT_WIN > nMAX_CONS_WIN then
@@ -370,9 +382,9 @@ BEGIN
   rSTAT.long_trades := null;
   rSTAT.short_trades := null;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   rSTAT.sort_order := 25;
@@ -381,9 +393,9 @@ BEGIN
   rSTAT.long_trades := null;
   rSTAT.short_trades := null;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   rSTAT.sort_order := 30;
@@ -392,9 +404,9 @@ BEGIN
   rSTAT.long_trades := null;
   rSTAT.short_trades := null;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   rSTAT.sort_order := 31;
@@ -404,9 +416,9 @@ BEGIN
   rSTAT.short_trades := null;
   rSTAT.note         := to_char(dMAX_DRAWDOWN_DT, 'dd.mm.yyyy');
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades, note
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades, note
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades, rSTAT.note
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades, rSTAT.note
   );
 
   rSTAT.sort_order := 32;
@@ -428,9 +440,9 @@ BEGIN
   end if;
   rSTAT.note         := null;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
 
@@ -453,9 +465,9 @@ BEGIN
     rSTAT.short_trades := 0;
   end if;*/
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
   rSTAT.sort_order := 34;
@@ -476,9 +488,9 @@ BEGIN
     rSTAT.short_trades := 0;
   end if;
   insert into robot_statistics (
-    stat_name, sort_order, robot_id, all_trades, long_trades, short_trades
+    stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
   ) values (
-    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
+    rSTAT.stat_name, rSTAT.sort_order, rSTAT.robot_id, uidUSER_ROBOT_ID, rSTAT.all_trades, rSTAT.long_trades, rSTAT.short_trades
   );
 
 
