@@ -5,8 +5,9 @@ SELECT
        u.rid as robot_id,
        u.email as user_email,
        u.first_name as user_name,
-       u.id as user_robot_id,
-       u.name as user_robot_name,
+       u.id as robot_id,
+       u.code as robot_code,
+       u.name as robot_name,
        u.timeframe,
        u.run_mode,
        u.robot_status,       
@@ -28,11 +29,12 @@ SELECT
        date_part('day',(CURRENT_DATE-u.last_started)) as DAYS_ACTIVE,
        u.user_id,
        u.linked_user_robot_id,
-       u.advisersettings
+       u.advisersettings,
+       u.tradersettings
 FROM
   (select
      uu.*,
-     r.id as rid, r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled, r.advisersettings,
+     r.id as rid, r.code, r.name, r.asset, r.currency, r.exchange, r.timeframe, r.enabled, r.advisersettings,  r.tradersettings,
      s.id as strat_id, s.filename, ul.email, ul.first_name
    from
      robot r
