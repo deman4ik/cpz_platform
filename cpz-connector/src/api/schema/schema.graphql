@@ -86,6 +86,7 @@ type Error {
   name: String!
   message: String!
   info: JSON
+  stack: JSON
 }
 
 type BalanceResponse {

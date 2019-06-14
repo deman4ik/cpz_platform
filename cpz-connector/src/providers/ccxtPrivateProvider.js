@@ -50,7 +50,8 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           cause: e,
           info: {
             exchange: this._exchangeName,
-            userId: this._userId
+            userId: this._userId,
+            critical: true
           }
         },
         "Failed to init private provider."
