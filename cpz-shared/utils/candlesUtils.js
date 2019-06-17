@@ -251,13 +251,12 @@ function getMaxTimeframe(timeframes) {
  * Получение даты отсчета максимального таймфрейма
  * в зависимости от количества баров
  *
- * @param {Object} timeframes массив таймфреймов в минутах
+ * @param {Number} timeframe таймфрейм в минутах
  * @param {number} maxBars количество баров
  * @returns {Date}
  */
-function getMaxTimeframeDateFrom(timeframes, maxBars) {
-  const maxTimeframe = getMaxTimeframe(timeframes);
-  const { number, unit } = timeframeToTimeUnit(maxBars, maxTimeframe);
+function getMaxTimeframeDateFrom(timeframe, maxBars) {
+  const { number, unit } = timeframeToTimeUnit(maxBars, timeframe);
   return dayjs
     .utc()
     .add(-number, unit)

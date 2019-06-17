@@ -243,12 +243,13 @@ class ExWatcherRunner extends BaseRunner {
         exWatcher.importerHistoryStatus !== STATUS_STARTED &&
         exWatcher.importerHistoryStatus !== STATUS_FINISHED
       ) {
-        const maxTimeframe = getMaxTimeframe(exWatcher.timeframes);
+        // !!! временно для запуска exwatcher считаем достаточным истории для 4х часовиков
+        const maxTimeframe = 240; // getMaxTimeframe(exWatcher.timeframes);
 
         let dateFrom = dayjs
           .utc(
             getMaxTimeframeDateFrom(
-              exWatcher.timeframes,
+              maxTimeframe,
               exWatcher.candlebatcherSettings.requiredHistoryMaxBars
             )
           )
