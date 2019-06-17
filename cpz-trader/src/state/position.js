@@ -398,8 +398,11 @@ class Position {
     );
     // Ордер ожидает обработки
     if (order.status === ORDER_STATUS_NEW) {
-      // Тип ордера - лимитный
-      if (order.orderType === ORDER_TYPE_LIMIT) {
+      // Тип ордера - лимитный или стоп
+      if (
+        order.orderType === ORDER_TYPE_LIMIT ||
+        order.orderType === ORDER_TYPE_STOP
+      ) {
         // Если покупаем
         if (order.direction === ORDER_DIRECTION_BUY) {
           if (!checkPrice || (checkPrice && price <= order.price)) {
@@ -463,31 +466,6 @@ class Position {
             price: order.price - this._settings.slippageStep,
             task: ORDER_TASK_OPEN_MARKET
           };
-        }
-      } else if (order.orderType === ORDER_TYPE_STOP) {
-        // Если покупаем
-        if (order.direction === ORDER_DIRECTION_BUY) {
-          if (!checkPrice || (checkPrice && price >= order.price)) {
-            // Нужно выставить лимитный ордер
-            this.log(ORDER_TASK_OPEN_LIMIT);
-            return {
-              ...order,
-              price: order.price + this._settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT
-            };
-          }
-        }
-        // Если продаем
-        if (order.direction === ORDER_DIRECTION_SELL) {
-          if (!checkPrice || (checkPrice && price <= order.price)) {
-            // Нужно выставить лимитный ордер
-            this.log(ORDER_TASK_OPEN_LIMIT);
-            return {
-              ...order,
-              price: order.price - this._settings.slippageStep,
-              task: ORDER_TASK_OPEN_LIMIT
-            };
-          }
         }
       }
       // Ордер уже выставлен
