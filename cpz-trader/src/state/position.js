@@ -612,6 +612,14 @@ class Position {
           order => order.task
         );
       }
+    } else if (this._entry.status === ORDER_STATUS_NEW) {
+      requiredOrders = Object.values(this._entryOrders).filter(
+        order => order.status === ORDER_STATUS_NEW
+      );
+    } else if (this._exit.status === ORDER_STATUS_NEW) {
+      requiredOrders = Object.values(this._exitOrders).filter(
+        order => order.status === ORDER_STATUS_NEW
+      );
     }
     // Возвращаем массив ордеров для дальнейшей обработки
     return requiredOrders;
