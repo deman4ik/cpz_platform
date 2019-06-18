@@ -51,6 +51,7 @@ class Position {
       status: null,
       price: null,
       date: null,
+      signalDate: null,
       executed: null,
       remaining: null
     };
@@ -60,6 +61,7 @@ class Position {
       status: null,
       price: null,
       date: null,
+      signalDate: null,
       executed: null,
       remaining: null
     };
@@ -218,6 +220,7 @@ class Position {
     this._entry.status = this._currentOrder.status;
     this._entry.price = this._currentOrder.price;
     this._entry.date = null;
+    this._entry.signalDate = signal.timestamp;
     this._entry.executed = null;
     this._entry.remaining = null;
     // Устанавливаем статус позиции
@@ -240,6 +243,7 @@ class Position {
     this._exit.status = this._currentOrder.status;
     this._exit.price = this._currentOrder.price;
     this._exit.date = null;
+    this._exit.signalDate = signal.timestamp;
     this._exit.executed = null;
     this._exit.remaining = null;
     // Устанавливаем статус позиции
@@ -536,11 +540,25 @@ class Position {
         this._exit.status === ORDER_STATUS_OPEN)
     ) {
       this.log("entry closed - exit new/open");
-      // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
-      // Проверяем все ордера на закрытие позиции ожидающие обработки
-      requiredOrders = Object.values(this._exitOrders)
-        .map(order => this._checkOrder(order, price, checkPrice))
-        .filter(order => !!order);
+      // Если ордер на закрытие позиции еще не исполнен
+      // Не в режиме бэктеста
+      // И прошло заданное время после сигнала на закрытие
+      if (
+        this._exit.status === ORDER_STATUS_NEW &&
+        this._settings.mode !== BACKTEST_MODE &&
+        this._exit.signalDate &&
+        dayjs.utc().diff(dayjs.utc(this._exit.signalDate), "minute") >
+          this._settings.openOrderTimeout
+      ) {
+        // Закрываем позицию
+        requiredOrders = this.getOrdersToClosePosition();
+      } else {
+        // Если ордера на открытие позиции исполнены и ордера на закрытие позиции ожидают обработки
+        // Проверяем все ордера на закрытие позиции ожидающие обработки
+        requiredOrders = Object.values(this._exitOrders)
+          .map(order => this._checkOrder(order, price, checkPrice))
+          .filter(order => !!order);
+      }
     }
     if (requiredOrders.length > 0) {
       this.log(
