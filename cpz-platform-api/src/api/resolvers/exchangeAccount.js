@@ -1,7 +1,7 @@
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import { checkAPIKeysEX } from "cpz/connector-client/balance";
-import { createKey, encrypt, setSecret } from "cpz/keyVault";
+import { keyExists, createKey, encrypt, setSecret } from "cpz/keyVault";
 import { saveUserExchaccDB } from "cpz/db-client/userExchacc";
 import { capitalize } from "cpz/utils/helpers";
 
@@ -70,7 +70,6 @@ async function insertExchangeAccount(_, { params }) {
     } = params;
 
     // Checking main API Key
-
     const mainValid = await checkAPIKeysEX({
       userId,
       exchange,
@@ -105,12 +104,20 @@ async function insertExchangeAccount(_, { params }) {
         };
     }
 
-    await createKey({
+    const keyExist = await keyExists({
       uri: KEY_VAULT_URL,
       clientId: KEY_VAULT_WRITE_CLIENT_ID,
       appSecret: KEY_VAULT_WRITE_APP_SECRET,
       keyName: userId
     });
+    if (!keyExist) {
+      await createKey({
+        uri: KEY_VAULT_URL,
+        clientId: KEY_VAULT_WRITE_CLIENT_ID,
+        appSecret: KEY_VAULT_WRITE_APP_SECRET,
+        keyName: userId
+      });
+    }
 
     const keysToSave = {};
     keysToSave.main = await saveKeys({
@@ -137,6 +144,7 @@ async function insertExchangeAccount(_, { params }) {
       userId,
       keys: keysToSave
     });
+
     Log.clearContext();
     return {
       success: true
