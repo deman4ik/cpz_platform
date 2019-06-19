@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION p_robot_statistics_calc(
   nROBOT_ID in numeric,
-  uidUSER_ROBOT_ID in uuid,
+  uidUSER_ID in uuid,
   nFLAG_RECREATE in integer
 )
 RETURNS integer
@@ -35,12 +35,10 @@ DECLARE
   dMAX_DRAWDOWN_DT timestamp;
   nMAX_CONS_WIN    int;
   nCNT_WIN         int;
-  uidUSER_ID       uuid;
+  uidUSER_ROBOT_ID       uuid;
 BEGIN
 
-  if uidUSER_ROBOT_ID is not null then
-    select t.user_id into uidUSER_ID from user_robot t where t.id = uidUSER_ROBOT_ID;
-  end if;
+  select t.id into uidUSER_ROBOT_ID from user_robot t where t.user_id = uidUSER_ID and t.robot_id = nROBOT_ID;
 
   if nFLAG_RECREATE = 1 then
     if uidUSER_ROBOT_ID is not null then
@@ -48,7 +46,6 @@ BEGIN
     else
       delete from robot_statistics t WHERE t.robot_id = nROBOT_ID;
     end if;
-
   end if;
 
   rSTAT.robot_id := nROBOT_ID;
@@ -64,7 +61,7 @@ BEGIN
     round( sum(case when t.direction = 'sell' then t.profit else 0 end),2),
     round( sum(case when t.direction = 'buy' then t.profit else 0 end),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto');
   nNET_PROFIT_ALL   := rSTAT.all_trades;
   nNET_PROFIT_LONG  := rSTAT.long_trades;
   nNET_PROFIT_SHORT := rSTAT.short_trades;
@@ -83,7 +80,7 @@ BEGIN
     sum(case when t.direction = 'sell' then 1 else 0 end),
     sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT2.all_trades, rSTAT2.short_trades, rSTAT2.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null ;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') ;
 
   insert into robot_statistics (
     stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
@@ -122,7 +119,7 @@ BEGIN
     round( sum(case when t.direction = 'sell' then t.bars_held else 0 end) / rSTAT2.short_trades ),
     round( sum(case when t.direction = 'buy' then t.bars_held else 0 end) / rSTAT2.long_trades )
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null ;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') ;
 
   insert into robot_statistics (
     stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
@@ -139,7 +136,7 @@ BEGIN
     sum(case when t.direction = 'sell' then 1 else 0 end),
     sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit > 0;
   nWIN_ALL   := rSTAT.all_trades;
   nWIN_SHORT := rSTAT.short_trades;
   nWIN_LONG  := rSTAT.long_trades;
@@ -181,7 +178,7 @@ BEGIN
     round( sum(case when t.direction = 'sell' then t.profit else 0 end),2),
     round( sum(case when t.direction = 'buy' then t.profit else 0 end),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit > 0;
   nGROSS_PROFIT_ALL := rSTAT.all_trades;
   nGROSS_PROFIT_SHORT := rSTAT.short_trades;
   nGROSS_PROFIT_LONG := rSTAT.long_trades;
@@ -215,7 +212,7 @@ BEGIN
     round( (sum(case when t.direction = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ::numeric,0),
     round( (sum(case when t.direction = 'buy' then t.bars_held else 0 end) / nWIN_LONG) ::numeric,0)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit > 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit > 0;
 
   insert into robot_statistics (
     stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
@@ -233,7 +230,7 @@ BEGIN
     sum(case when t.direction = 'sell' then 1 else 0 end),
     sum(case when t.direction = 'buy' then 1 else 0 end)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit < 0;
   nWIN_ALL   := rSTAT.all_trades;
   nWIN_SHORT := rSTAT.short_trades;
   nWIN_LONG  := rSTAT.long_trades;
@@ -275,7 +272,7 @@ BEGIN
     round( (sum(case when t.direction = 'sell' then t.profit else 0 end)),2),
     round( (sum(case when t.direction = 'buy' then t.profit else 0 end)),2)
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit < 0;
   nGROSS_LOSS_ALL := rSTAT.all_trades;
   nGROSS_LOSS_SHORT := rSTAT.short_trades;
   nGROSS_LOSS_LONG := rSTAT.long_trades;
@@ -309,7 +306,7 @@ BEGIN
     round( (sum(case when t.direction = 'sell' then t.bars_held else 0 end) / nWIN_SHORT) ),
     round( (sum(case when t.direction = 'buy' then t.bars_held else 0 end) / nWIN_LONG) )
   INTO STRICT rSTAT.all_trades, rSTAT.short_trades, rSTAT.long_trades
-  FROM positions t WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null and t.profit < 0;
+  FROM positions t WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto') and t.profit < 0;
 
   insert into robot_statistics (
     stat_name, sort_order, robot_id, user_robot_id, all_trades, long_trades, short_trades
@@ -339,7 +336,7 @@ BEGIN
          ,2) as c_balance
         from
         positions t
-        WHERE robot_id = nROBOT_ID and (uidUSER_ID is null or user_id = uidUSER_ID) and exit_date is not null
+        WHERE robot_id = nROBOT_ID and user_id = uidUSER_ID and status in ('closed','closedAuto')
         order by entry_date, exit_date, id
       ) tt
     order by tt.entry_date, tt.exit_date, tt.id

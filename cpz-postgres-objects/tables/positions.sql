@@ -73,6 +73,8 @@ create index i_positions_dates
   on positions (user_id, robot_id, entry_date, exit_date);
 create index i_positions_user_robot
   on positions (user_id, robot_id, run_mode);
+create index i_positions_user_robot_status
+  on positions (user_id, robot_id, status);  
 create index i_positions_userlist_fk
   on positions (user_id);
 create index i_positions_robot_fk
