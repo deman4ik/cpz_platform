@@ -35,6 +35,7 @@ alter table user_robot
     check (run_mode in ('emulator','realtime'));
         	
 create index i_user_robot_userlist_fk on user_robot (user_id);
+create index i_user_robot_linked_user_robot_fk on user_robot (linked_user_robot_id);
 
 alter table user_robot add constraint c_user_robot_status_chk check (robot_status in (-1, 0, 1, 5, 10, 15, 20));
 

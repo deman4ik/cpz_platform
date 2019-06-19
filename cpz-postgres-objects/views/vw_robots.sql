@@ -41,16 +41,13 @@ SELECT u.id           as uidUSER_ROBOT_ID,
        (select
           row_to_json(tt)
           from (
-          select ddate, round(nMDD/r.currate,8), nMDD as nMDD_C
-            from (
-              select pf.ddate, pf.nprofit_c,
-                     (lag(pf.nprofit_c) over (order by ddate))-pf.nprofit_c as nMDD
-              from vw_user_robot_performance_d pf
-              where
-                pf.uiduser_robot_id = u.id
-            ) t order by nMDD asc
+            select
+            (select to_date(s.note,'dd.mm.yyyy')::timestamp from robot_statistics s where s.user_robot_id = d.id and s.stat_name = 'Max Drawdown Date') as DDATE,
+            (select s.all_trades from robot_statistics s where s.user_robot_id = d.id and s.stat_name = 'Max Drawdown') as nMDD_C
+            from
+            user_robot d where id = u.id
           ) tt  limit  1
-       )  as  jMDD,
+       )  as  jMDD, -- max draw down
        (select
           json_build_object('date',candle_timestamp, 'price',price,'action', action,'note', order_type)
           from signal s
@@ -58,7 +55,7 @@ SELECT u.id           as uidUSER_ROBOT_ID,
             and s.backtest_id is null
             and s.candle_timestamp in (select max(candle_timestamp) from signal where robot_id = u.robot_id)
           limit 1
-       ) as jLAST_SIGNAL
+       ) as jLAST_SIGNAL -- last signal
 FROM
   (select
      uu.*,

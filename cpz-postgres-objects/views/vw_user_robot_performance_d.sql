@@ -9,7 +9,7 @@ select
     sasset,
     scurrency,
     ncurrate,
-    ddate,
+    ddate as ddate,
     round(
          sum(p.nprofit_c) over (
            partition by uiduser_robot_id
@@ -24,7 +24,7 @@ select
            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
          )
     ,2) as nprofit
-from vw_user_robot_profit_h p;
+from vw_user_robot_profit_d p;
 
 alter table vw_user_robot_performance_d
   owner to cpz;

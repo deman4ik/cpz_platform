@@ -70,8 +70,9 @@ alter table positions
     check (run_mode in ('emulator','realtime','backtest'));
         
 create index i_positions_dates
-  on positions (robot_id, entry_date, exit_date);
-
+  on positions (user_id, robot_id, entry_date, exit_date);
+create index i_positions_user_robot
+  on positions (user_id, robot_id, run_mode);
 create index i_positions_userlist_fk
   on positions (user_id);
 create index i_positions_robot_fk
@@ -84,7 +85,9 @@ create index i_positions_currency_fk
   on positions (currency);
 create index i_positions_backtest_fk
   on positions (backtest_id);
-
+create index i_positions_run_mode
+  on positions (run_mode);
+  
 comment on column positions.id is 'positopn id from adviser, not unique!';
 comment on column positions.action is 'short | closeShort | long | closeLong';
 comment on column positions.bars_held is '= duration / candle size';
