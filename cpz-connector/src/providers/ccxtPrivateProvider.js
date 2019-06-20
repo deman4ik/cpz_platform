@@ -39,10 +39,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         this._keys.main.active = false;
       }
 
-      const call = async () => {
-        await this.ccxt.loadMarkets();
-      };
-      await retry(call, this._retryOptions);
+      await this.loadMarkets(true);
     } catch (e) {
       throw new ServiceError(
         {
@@ -56,6 +53,15 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         },
         "Failed to init private provider."
       );
+    }
+  }
+
+  async loadMarkets(force = false) {
+    if (!this.ccxt.markets || force) {
+      const call = async () => {
+        await this.ccxt.loadMarkets();
+      };
+      await retry(call, this._retryOptions);
     }
   }
 
@@ -102,7 +108,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
               userMessage: e.message
             }
           },
-          "Exchange Error."
+          `Exchange Error. ${e.message}`
         )
       );
     }
@@ -167,7 +173,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             name: ServiceError.types.CONNECTOR_ERROR,
             cause: e
           },
-          "Failed to fetch balance."
+          `Failed to fetch balance. ${e.message}`
         );
       }
       Log.error("getBalance", error.json);
@@ -229,6 +235,9 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       if (!this.ccxt) {
         await this.init();
       }
+
+      await this.loadMarkets();
+
       /* Если тип ордера строго "маркет" и биржа поддерживает маркет ордера, 
         то выставляем маркет ордер во всех остальных случаях limit */
       const type =
@@ -283,7 +292,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             name: ServiceError.types.CONNECTOR_ERROR,
             cause: e
           },
-          "Failed to create new order."
+          `Failed to create new order. ${e.message}`
         );
       }
       Log.error("createOrder", error.json);
@@ -300,6 +309,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       if (!this.ccxt) {
         await this.init();
       }
+      await this.loadMarkets();
       const call = async bail => {
         try {
           return await this.ccxt.fetchOrder(
@@ -357,7 +367,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             name: ServiceError.types.CONNECTOR_ERROR,
             cause: e
           },
-          "Failed to check order."
+          `Failed to check order. ${e.message}`
         );
       }
       Log.error("checkOrder", error.json);
@@ -374,6 +384,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       if (!this.ccxt) {
         await this.init();
       }
+      await this.loadMarkets();
       const call = async bail => {
         try {
           await this.ccxt.cancelOrder(exId, this.getSymbol(asset, currency));
@@ -408,7 +419,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             name: ServiceError.types.CONNECTOR_ERROR,
             cause: e
           },
-          "Failed to cancel order."
+          `Failed to cancel order. ${e.message}`
         );
       }
       Log.error("cancelOrder", error.json);
