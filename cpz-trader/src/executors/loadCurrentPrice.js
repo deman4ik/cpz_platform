@@ -8,7 +8,9 @@ import { currentCandleEX } from "cpz/connector-client/candles";
 async function loadCurrentPrice(state) {
   try {
     const { exchange, asset, currency, timeframe } = state;
-    let result = await getCurrentCandle(
+    let storageCandle = null;
+    let exCandle = null;
+    storageCandle = await getCurrentCandle(
       createCachedCandleSlug({
         exchange,
         asset,
@@ -18,16 +20,19 @@ async function loadCurrentPrice(state) {
     );
 
     if (
-      !result ||
-      dayjs.utc(result.Timestamp).valueOf() < dayjs.utc().add(-1, "minute")
+      !storageCandle ||
+      dayjs.utc(storageCandle.Timestamp).valueOf() <
+        dayjs.utc().add(-1, "minute")
     ) {
-      result = await currentCandleEX({
+      exCandle = await currentCandleEX({
         exchange,
         asset,
         currency,
         timeframe
       });
     }
+    const result = exCandle || storageCandle;
+    if (!result) return null;
     const { time, timestamp, close, id } = result;
     const currentPrice = {
       exchange,

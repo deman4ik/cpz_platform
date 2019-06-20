@@ -56,7 +56,9 @@ async function execute(adviserState, nextAction) {
       adviser.finalize();
       if (adviser.hasActions) {
         const currentCandle = await loadCurrentCandle(adviser.props);
-        adviser.handleCurrentCandle(currentCandle);
+        if (currentCandle) {
+          adviser.handleCurrentCandle(currentCandle);
+        }
         adviser.runActions();
       }
       await saveIndicatorsState(adviser.props, adviser.indicators);
