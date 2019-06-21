@@ -164,18 +164,14 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
     } catch (e) {
-      let error;
-      if (e instanceof ServiceError) {
-        error = e;
-      } else {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.CONNECTOR_ERROR,
-            cause: e
-          },
-          `Failed to fetch balance. ${e.message}`
-        );
-      }
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e
+        },
+        `Failed to fetch balance. ${e.message}`
+      );
+
       Log.error("getBalance", error.json);
       return {
         success: false,
@@ -203,12 +199,15 @@ class CCXTPrivateProvider extends BasePrivateProvider {
   getCloseOrderDate(orderResponse) {
     if (this._exchange === "kraken") {
       return (
+        orderResponse &&
+        orderResponse.info &&
         orderResponse.info.closetm &&
         dayjs.utc(parseInt(orderResponse.info.closetm, 10) * 1000).toISOString()
       );
     }
 
     return (
+      orderResponse &&
       orderResponse.lastTradeTimestamp &&
       dayjs.utc(orderResponse.lastTradeTimestamp).toISOString()
     );
@@ -274,27 +273,62 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           return null;
         }
       };
-      const { id } = await retry(call, this._retryOptions);
-
-      const newOrder = await this.checkOrder(keys, {
+      const response = await retry(call, this._retryOptions);
+      const {
+        id,
+        datetime,
+        status,
+        price: orderPrice,
+        average,
+        amount,
+        remaining,
+        filled
+      } = response;
+      let newOrder = {
         exId: id,
+        exTimestamp: datetime,
+        exLastTrade: this.getCloseOrderDate(response),
+        status,
+        price: (orderPrice && +orderPrice) || price,
+        average: average && +average,
+        volume: amount && +amount,
+        remaining: remaining && +remaining,
+        executed:
+          (filled && +filled) || (amount && remaining && +amount - +remaining),
+        exchange: this._exchangeName,
         asset,
         currency
-      });
-      return newOrder;
-    } catch (e) {
-      let error;
-      if (e instanceof ServiceError) {
-        error = e;
-      } else {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.CONNECTOR_ERROR,
-            cause: e
-          },
-          `Failed to create new order. ${e.message}`
+      };
+      try {
+        const { order: checkedOrder } = await this.checkOrder(keys, {
+          exId: id,
+          asset,
+          currency
+        });
+        newOrder = { ...newOrder, ...checkedOrder };
+      } catch (error) {
+        Log.error(
+          `Failed to check order after creating. ${
+            error.message
+          } Order input: ${JSON.stringify(
+            order
+          )} Order response: ${JSON.stringify(newOrder)}`
         );
       }
+      return {
+        success: true,
+        order: newOrder
+      };
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: { order }
+        },
+        `Failed to create new order. ${e.message}`
+      );
+
       Log.error("createOrder", error.json);
       return {
         success: false,
@@ -322,19 +356,33 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         }
       };
       const response = await retry(call, this._retryOptions);
-
+      const {
+        id,
+        datetime,
+        status,
+        price,
+        average,
+        amount,
+        remaining,
+        filled
+      } = response;
       return {
         success: true,
         order: {
-          exId: response.id,
-          exTimestamp: response.datetime,
+          exId: id,
+          exTimestamp: datetime,
           exLastTrade: this.getCloseOrderDate(response),
-          status: response.status,
-          price: +response.price,
-          average: +response.average,
-          volume: +response.amount,
-          remaining: +response.remaining,
-          executed: +response.filled || +response.amount - +response.remaining
+          status,
+          price: price && +price,
+          average: average && +average,
+          volume: amount && +amount,
+          remaining: remaining && +remaining,
+          executed:
+            (filled && +filled) ||
+            (amount && remaining && +amount - +remaining),
+          exchange: this._exchangeName,
+          asset,
+          currency
         }
       };
       /*
@@ -358,18 +406,20 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 }
 */
     } catch (e) {
-      let error;
-      if (e instanceof ServiceError) {
-        error = e;
-      } else {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.CONNECTOR_ERROR,
-            cause: e
-          },
-          `Failed to check order. ${e.message}`
-        );
-      }
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: {
+            exId,
+            asset,
+            currency,
+            exchange: this._exchangeName
+          }
+        },
+        `Failed to check order. ${e.message}`
+      );
+
       Log.error("checkOrder", error.json);
       return {
         success: false,
@@ -410,18 +460,20 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         ...checkOrder
       };
     } catch (e) {
-      let error;
-      if (e instanceof ServiceError) {
-        error = e;
-      } else {
-        error = new ServiceError(
-          {
-            name: ServiceError.types.CONNECTOR_ERROR,
-            cause: e
-          },
-          `Failed to cancel order. ${e.message}`
-        );
-      }
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: {
+            exId,
+            asset,
+            currency,
+            exchange: this._exchangeName
+          }
+        },
+        `Failed to cancel order. ${e.message}`
+      );
+
       Log.error("cancelOrder", error.json);
       return {
         success: false,

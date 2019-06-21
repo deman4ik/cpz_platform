@@ -83,11 +83,20 @@ class CCXTPublicProvider extends BasePublicProvider {
           amountPrecision: response.precision.amount
         }
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: { exchange: this._exchangeName, asset, currency }
+        },
+        `Failed to get market. ${e.message}`
+      );
+
+      Log.error("getMarket", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -106,11 +115,20 @@ class CCXTPublicProvider extends BasePublicProvider {
         success: true,
         timeframes
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: { exchange: this._exchangeName }
+        },
+        `Failed to get timeframes. ${e.message}`
+      );
+
+      Log.error("getTimeframes", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -135,7 +153,21 @@ class CCXTPublicProvider extends BasePublicProvider {
         }
       };
       const response = await retry(call, this._retryOptions);
+      if (!response || !Array.isArray(response) || response.length === 0)
+        throw new ServiceError({
+          name: ServiceError.types.CONNECTOR_EMPTY_RESPONSE,
+          message: "Empty response.",
+          info: {
+            exchange: this._exchangeName,
+            asset,
+            currency,
+            timeframe,
+            since: params.since,
+            limit: params.limit
+          }
+        });
       let candles = [];
+
       candles = response.map(candle => ({
         exchange: this._exchangeName,
         asset,
@@ -150,7 +182,7 @@ class CCXTPublicProvider extends BasePublicProvider {
         volume: +candle[5]
       }));
 
-      if (params.batch) {
+      if (candles.length > 0 && params.batch) {
         candles = [
           {
             exchange: this._exchangeName,
@@ -172,11 +204,20 @@ class CCXTPublicProvider extends BasePublicProvider {
         success: true,
         candle: candles[candles.length - 1]
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: { exchange: this._exchangeName, asset, currency, timeframe }
+        },
+        `Failed to load current candle. ${e.message}`
+      );
+
+      Log.error("loadCurrentCandle", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -226,11 +267,20 @@ class CCXTPublicProvider extends BasePublicProvider {
           volume: +latestCandle[5]
         }
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: { exchange: this._exchangeName, asset, currency }
+        },
+        `Failed to load last minute candle. ${e.message}`
+      );
+
+      Log.error("loadLastMinuteCandle", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -307,11 +357,25 @@ class CCXTPublicProvider extends BasePublicProvider {
         success: true,
         candles
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: {
+            exchange: this._exchangeName,
+            asset,
+            currency,
+            date: date.toISOString()
+          }
+        },
+        `Failed to load minute candles. ${e.message}`
+      );
+
+      Log.error("loadMinuteCandles", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
@@ -366,11 +430,25 @@ class CCXTPublicProvider extends BasePublicProvider {
         success: true,
         trades
       };
-    } catch (error) {
-      Log.error(error);
+    } catch (e) {
+      const error = new ServiceError(
+        {
+          name: ServiceError.types.CONNECTOR_ERROR,
+          cause: e,
+          info: {
+            exchange: this._exchangeName,
+            asset,
+            currency,
+            date: date.toISOString()
+          }
+        },
+        `Failed to load trades. ${e.message}`
+      );
+
+      Log.error("loadTrades", error.json);
       return {
         success: false,
-        error: { name: error.constructor.name, message: error.message }
+        error: error.json
       };
     }
   }
