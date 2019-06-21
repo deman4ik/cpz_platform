@@ -188,21 +188,23 @@ class Candlebatcher {
     Object.keys(candlesObject).forEach(async timeframe => {
       const candle = candlesObject[timeframe];
 
-      /* Если подписаны на данный таймфрейм */
-      if (this._timeframes.includes(+timeframe)) {
-        this._eventsToSend[`C_${timeframe}`] = {
-          eventType: CANDLES_NEWCANDLE_EVENT,
-          eventData: {
-            subject: createNewCandleSubject({
-              exchange: this._exchange,
-              asset: this._asset,
-              currency: this._currency,
-              timeframe
-            }),
-            data: candle
-          }
-        };
-        this._lastSendedCandles.push(candle);
+      if (candle.type !== CANDLE_PREVIOUS) {
+        /* Если подписаны на данный таймфрейм */
+        if (this._timeframes.includes(+timeframe)) {
+          this._eventsToSend[`C_${timeframe}`] = {
+            eventType: CANDLES_NEWCANDLE_EVENT,
+            eventData: {
+              subject: createNewCandleSubject({
+                exchange: this._exchange,
+                asset: this._asset,
+                currency: this._currency,
+                timeframe
+              }),
+              data: candle
+            }
+          };
+          this._lastSendedCandles.push(candle);
+        }
       }
     });
   }
