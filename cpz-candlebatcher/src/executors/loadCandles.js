@@ -39,7 +39,8 @@ async function loadCandles(state, loadFrom) {
         name: ServiceError.types.CANDLEBATCHER_LOAD_CANDLES_ERROR,
         cause: e,
         info: {
-          ...candlebatcherStateToCommonProps(state)
+          ...candlebatcherStateToCommonProps(state),
+          loadFrom
         }
       },
       `Failed to load candles`

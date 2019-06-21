@@ -30,6 +30,7 @@ async function execute(candlebatcherState, nextAction) {
       if (lastCandle && lastCandle.time) {
         loadFrom = dayjs
           .utc(lastCandle.time)
+          .startOf("minute")
           .add(1, "minute")
           .toISOString();
       } else {
