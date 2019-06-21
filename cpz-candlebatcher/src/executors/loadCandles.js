@@ -18,7 +18,7 @@ async function loadCandles(state, loadFrom) {
       date: loadFrom
     });
 
-    if (candles.length === 0) throw new Error("No candles data.");
+    if (candles.length === 0) return [];
     // Сохраняем новую загруженную свечу
     return candles.map(candle => ({
       ...candle,
