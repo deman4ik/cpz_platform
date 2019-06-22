@@ -286,6 +286,12 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         );
         const orderParams = this.getOrderParams(params);
         this.clearOrderCache();
+        Log.debug("createOrder params", {
+          ...order,
+          correctedVolume,
+          correctedPrice,
+          orderParams
+        });
         const call = async bail => {
           try {
             return await this.ccxt.createOrder(
