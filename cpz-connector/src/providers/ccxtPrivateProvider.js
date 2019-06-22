@@ -263,11 +263,22 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             : "limit";
         const symbol = this.getSymbol(asset, currency);
         const market = this.ccxt.market(symbol);
-        const correctedPrice = correctWithLimit(
-          precision(price, market.precision.price),
+
+        let correctedPrice = price;
+        if (!correctedPrice || correctedPrice <= 0) {
+          const { close } = await this.ccxt.fetchTicker(
+            this.getSymbol(asset, currency)
+          );
+
+          correctedPrice = close;
+        }
+
+        correctedPrice = correctWithLimit(
+          precision(correctedPrice, market.precision.price),
           market.limits.price.min,
           market.limits.price.max
         );
+
         const correctedVolume = correctWithLimit(
           precision(volume, market.precision.amount),
           market.limits.amount.min,
