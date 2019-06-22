@@ -77,6 +77,10 @@ async function executeOrder(state, order) {
           } catch (e) {
             Log.exception(e);
           }
+
+          if (!orderToExecute.price) {
+            orderToExecute.price = state.lastPrice.price;
+          }
         }
       }
       // Если режим - в реальном времени
