@@ -226,7 +226,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       // TODO: Params
       await this._checkKeysVersion(keys);
       const {
-        id,
+        orderId,
         direction,
         volume,
         price,
@@ -250,7 +250,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           asset,
           currency
         }),
-        RowKey: id
+        RowKey: orderId
       });
 
       if (!existedOrder) {
@@ -303,7 +303,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           filled
         } = response;
         newOrder = {
-          id,
+          orderId,
           exId,
           exTimestamp: datetime,
           exLastTrade: this.getCloseOrderDate(response),
@@ -325,12 +325,12 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             asset,
             currency
           }),
-          RowKey: id,
+          RowKey: orderId,
           exId
         });
       } else {
         newOrder = {
-          id,
+          orderId,
           exId: existedOrder.exId,
           exTimestamp: null,
           exLastTrade: null,
