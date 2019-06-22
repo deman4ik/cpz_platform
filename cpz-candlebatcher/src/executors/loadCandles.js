@@ -46,7 +46,7 @@ async function loadCandles(state, loadFrom) {
       `Failed to load candles`
     );
     Log.error(error);
-    return null;
+    return [];
   }
 }
 
