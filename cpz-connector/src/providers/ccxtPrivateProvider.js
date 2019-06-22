@@ -3,8 +3,12 @@ import ServiceError from "cpz/error";
 import retry from "async-retry";
 import dayjs from "cpz/utils/dayjs";
 import Log from "cpz/log";
-import { ORDER_TYPE_MARKET_FORCE } from "cpz/config/state";
+import { ORDER_TYPE_MARKET_FORCE, createOrderSlug } from "cpz/config/state";
 import { correctWithLimit, precision } from "cpz/utils/helpers";
+import {
+  getExchangeOrder,
+  saveExchangeOrder
+} from "cpz/tableStorage-client/market/orders";
 import BasePrivateProvider from "./basePrivateProvider";
 
 class CCXTPrivateProvider extends BasePrivateProvider {
@@ -222,6 +226,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
       // TODO: Params
       await this._checkKeysVersion(keys);
       const {
+        id,
         direction,
         volume,
         price,
@@ -238,71 +243,111 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
       await this.loadMarkets();
 
-      /* Если тип ордера строго "маркет" и биржа поддерживает маркет ордера, 
+      let newOrder;
+      const existedOrder = await getExchangeOrder({
+        PartitionKey: createOrderSlug({
+          exchange: this._exchangeName,
+          asset,
+          currency
+        }),
+        RowKey: id
+      });
+
+      if (!existedOrder) {
+        /* Если тип ордера строго "маркет" и биржа поддерживает маркет ордера, 
         то выставляем маркет ордер во всех остальных случаях limit */
-      const type =
-        orderType === ORDER_TYPE_MARKET_FORCE && this.ccxt.has.createMarketOrder
-          ? "market"
-          : "limit";
-      const symbol = this.getSymbol(asset, currency);
-      const market = this.ccxt.market(symbol);
-      const correctedPrice = correctWithLimit(
-        precision(price, market.precision.price),
-        market.limits.price.min,
-        market.limits.price.max
-      );
-      const correctedVolume = correctWithLimit(
-        precision(volume, market.precision.amount),
-        market.limits.amount.min,
-        market.limits.amount.max
-      );
-      const orderParams = this.getOrderParams(params);
-      this.clearOrderCache();
-      const call = async bail => {
-        try {
-          return await this.ccxt.createOrder(
-            this.getSymbol(asset, currency),
-            type,
-            direction,
-            correctedVolume,
-            correctedPrice,
-            orderParams
-          );
-        } catch (e) {
-          Log.error("createOrder Call Error", e);
-          await this._handleExchangeError(e, bail);
-          return null;
-        }
-      };
-      const response = await retry(call, this._retryOptions);
-      const {
-        id,
-        datetime,
-        status,
-        price: orderPrice,
-        average,
-        amount,
-        remaining,
-        filled
-      } = response;
-      let newOrder = {
-        exId: id,
-        exTimestamp: datetime,
-        exLastTrade: this.getCloseOrderDate(response),
-        status,
-        price: (orderPrice && +orderPrice) || price,
-        average: average && +average,
-        volume: amount && +amount,
-        remaining: remaining && +remaining,
-        executed:
-          (filled && +filled) || (amount && remaining && +amount - +remaining),
-        exchange: this._exchangeName,
-        asset,
-        currency
-      };
+        const type =
+          orderType === ORDER_TYPE_MARKET_FORCE &&
+          this.ccxt.has.createMarketOrder
+            ? "market"
+            : "limit";
+        const symbol = this.getSymbol(asset, currency);
+        const market = this.ccxt.market(symbol);
+        const correctedPrice = correctWithLimit(
+          precision(price, market.precision.price),
+          market.limits.price.min,
+          market.limits.price.max
+        );
+        const correctedVolume = correctWithLimit(
+          precision(volume, market.precision.amount),
+          market.limits.amount.min,
+          market.limits.amount.max
+        );
+        const orderParams = this.getOrderParams(params);
+        this.clearOrderCache();
+        const call = async bail => {
+          try {
+            return await this.ccxt.createOrder(
+              this.getSymbol(asset, currency),
+              type,
+              direction,
+              correctedVolume,
+              correctedPrice,
+              orderParams
+            );
+          } catch (e) {
+            Log.error("createOrder Call Error", e);
+            await this._handleExchangeError(e, bail);
+            return null;
+          }
+        };
+        const response = await retry(call, this._retryOptions);
+        const {
+          id: exId,
+          datetime,
+          status,
+          price: orderPrice,
+          average,
+          amount,
+          remaining,
+          filled
+        } = response;
+        newOrder = {
+          id,
+          exId,
+          exTimestamp: datetime,
+          exLastTrade: this.getCloseOrderDate(response),
+          status,
+          price: (orderPrice && +orderPrice) || price,
+          average: average && +average,
+          volume: amount && +amount,
+          remaining: remaining && +remaining,
+          executed:
+            (filled && +filled) ||
+            (amount && remaining && +amount - +remaining),
+          exchange: this._exchangeName,
+          asset,
+          currency
+        };
+        await saveExchangeOrder({
+          PartitionKey: createOrderSlug({
+            exchange: this._exchangeName,
+            asset,
+            currency
+          }),
+          RowKey: id,
+          exId
+        });
+      } else {
+        newOrder = {
+          id,
+          exId: existedOrder.exId,
+          exTimestamp: null,
+          exLastTrade: null,
+          status: null,
+          price: null,
+          average: null,
+          volume: null,
+          remaining: null,
+          executed: null,
+          exchange: this._exchangeName,
+          asset,
+          currency
+        };
+      }
       try {
         const { order: checkedOrder } = await this.checkOrder(keys, {
-          exId: id,
+          exId: newOrder.exId,
           asset,
           currency
         });

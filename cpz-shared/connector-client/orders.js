@@ -30,6 +30,7 @@ async function createOrderEX({
         proxy
       },
       order: {
+        id: order.id,
         direction: order.direction,
         volume: order.volume,
         price: order.price,

@@ -89,6 +89,7 @@ async function executeOrder(state, order) {
           userId,
           keys: settings.keys,
           order: {
+            id: orderToExecute.id,
             direction: orderToExecute.direction,
             volume: orderToExecute.volume,
             price: orderToExecute.price,

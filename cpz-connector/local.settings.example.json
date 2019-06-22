@@ -4,6 +4,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "",
     "AzureWebJobsStorage": "",
+    "AZ_STORAGE_MARKET_CS": "",
     "API_KEY": "test",
     "PROXY_ENDPOINT_PUBLIC": "",
     "PROXY_ENDPOINT_PRIVATE": "",

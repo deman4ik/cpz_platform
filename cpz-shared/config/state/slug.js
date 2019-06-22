@@ -26,6 +26,10 @@ function createPositionSlug({ exchange, asset, currency, timeframe, robotId }) {
   return `${exchange}.${asset}.${currency}.${timeframe}.${robotId}`;
 }
 
+function createOrderSlug({ exchange, asset, currency }) {
+  return `${exchange}.${asset}.${currency}`;
+}
+
 function createBacktesterSlug({
   exchange,
   asset,
@@ -58,6 +62,7 @@ export {
   createImporterSlug,
   createTraderSlug,
   createPositionSlug,
+  createOrderSlug,
   createRobotSlug,
   createWatcherSlug
 };

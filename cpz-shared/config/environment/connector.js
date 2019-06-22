@@ -1,6 +1,7 @@
 export default [
   "FUNCTIONS_WORKER_RUNTIME",
   "AzureWebJobsStorage",
+  "AZ_STORAGE_MARKET_CS",
   "API_KEY",
   "PROXY_ENDPOINT_PUBLIC",
   "PROXY_ENDPOINT_PRIVATE",

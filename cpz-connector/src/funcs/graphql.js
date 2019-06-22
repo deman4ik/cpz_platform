@@ -8,6 +8,8 @@ import ServiceError from "cpz/error";
 import Log from "cpz/log";
 import { checkEnvVars } from "cpz/utils/environment";
 import connectorEnv from "cpz/config/environment/connector";
+import MarketStorageClient from "cpz/tableStorage-client/market";
+import orderTables from "cpz/tableStorage-client/market/orders";
 import typeDefs from "../api/schema/schema.graphql";
 import queries from "../api/resolvers/queries";
 import mutations from "../api/resolvers/mutations";
@@ -26,6 +28,7 @@ class Graphql {
       key: process.env.APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
+    MarketStorageClient.init(process.env.AZ_STORAGE_MARKET_CS, orderTables);
     this.run = this.graphqlServer();
   }
 

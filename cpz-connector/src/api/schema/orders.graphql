@@ -5,6 +5,7 @@ input OrderFindInput {
 }
 
 input OrderInput {
+  id: ID!
   direction: String!
   volume: Float!
   price: Float!
