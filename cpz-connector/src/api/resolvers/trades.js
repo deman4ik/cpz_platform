@@ -14,18 +14,13 @@ async function loadTrades(_, { connectorInput, date, limit, asset, currency }) {
     Log.clearContext();
     return result;
   } catch (e) {
-    let error;
-    if (e instanceof ServiceError) {
-      error = e;
-    } else {
-      error = new ServiceError(
-        {
-          name: ServiceError.types.CONNECTOR_API_ERROR,
-          cause: e
-        },
-        "Failed to process request"
-      );
-    }
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.CONNECTOR_API_ERROR,
+        cause: e
+      },
+      `Failed to process request. ${e.message}`
+    );
     Log.clearContext();
     return {
       success: false,

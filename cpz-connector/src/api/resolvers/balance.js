@@ -46,18 +46,13 @@ async function getBalance(_, { connectorInput, checkConnectorInput }) {
       }
     };
   } catch (e) {
-    let error;
-    if (e instanceof ServiceError) {
-      error = e;
-    } else {
-      error = new ServiceError(
-        {
-          name: ServiceError.types.CONNECTOR_API_ERROR,
-          cause: e
-        },
-        "Failed to process request"
-      );
-    }
+    const error = new ServiceError(
+      {
+        name: ServiceError.types.CONNECTOR_API_ERROR,
+        cause: e
+      },
+      `Failed to process request. ${e.message}`
+    );
     Log.clearContext();
     return {
       success: false,

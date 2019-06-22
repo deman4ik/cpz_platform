@@ -215,6 +215,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async createOrder(keys, order) {
     try {
+      Log.debug("createOrder", order);
       /* 
       KRAKEN: leverage: 3
       BITFINEX: type: "limit" */
@@ -315,6 +316,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           )} Order response: ${JSON.stringify(newOrder)}`
         );
       }
+      Log.debug("createOrder Result", newOrder);
       return {
         success: true,
         order: newOrder
