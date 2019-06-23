@@ -53,14 +53,16 @@ class EventsLogger {
 
       if (type.includes("CPZ.Tasks")) {
         if (type.includes(".Run")) return;
+        if (type === TASKS_USERROBOT_HIST_EVENT) {
+          if (this.logToPostgre) await saveUserRobotHistDB([fullEventData]);
+          return;
+        }
         if (this.logToStorage)
           await saveTasksEvent({
             ...baseEventData,
             data: event.data
           });
-        if (type === TASKS_USERROBOT_HIST_EVENT) {
-          if (this.logToPostgre) await saveUserRobotHistDB([fullEventData]);
-        }
+
         return;
       }
       if (type.includes("CPZ.Signals")) {
