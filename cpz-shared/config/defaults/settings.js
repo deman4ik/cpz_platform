@@ -39,8 +39,10 @@ const ADVISER_SETTINGS_DEFAULTS = {
 const TRADER_SETTINGS_DEFAULTS = {
   debug: process.env.DEBUG || false,
   mode: EMULATOR_MODE,
-  openOrderTimeout: 10, // minutes
-  slippageStep: 0,
+  openOrderTimeout: 2, // minutes
+  exitPositionTimeout: 10, // minutes
+  slippageStep: 0, // percent
+  slippageRetriesCount: 0,
   deviation: 0,
   volume: 0.002,
   multiPosition: false,

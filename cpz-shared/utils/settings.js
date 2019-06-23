@@ -113,9 +113,13 @@ const combineTraderSettings = props => {
         ? TRADER_SETTINGS_DEFAULTS.debug
         : settings.debug,
     mode: settings.mode || TRADER_SETTINGS_DEFAULTS.mode,
-    /* Шаг проскальзывания */
+    /* Шаг проскальзывания в процентах */
     slippageStep:
       settings.slippageStep || TRADER_SETTINGS_DEFAULTS.slippageStep,
+    /* Количество попыток выставления ордера с проскальзыванием */
+    slippageRetriesCount:
+      settings.slippageRetriesCount ||
+      TRADER_SETTINGS_DEFAULTS.slippageRetriesCount,
     /* Отклонение цены */
     deviation: settings.deviation || TRADER_SETTINGS_DEFAULTS.deviation,
     /* Объем */
@@ -123,6 +127,10 @@ const combineTraderSettings = props => {
     /* Order execution timeout */
     openOrderTimeout:
       settings.openOrderTimeout || TRADER_SETTINGS_DEFAULTS.openOrderTimeout,
+    exitPositionTimeout:
+      settings.exitPositionTimeout ||
+      TRADER_SETTINGS_DEFAULTS.exitPositionTimeout,
+
     /* Режима работы с несколькими активными позициями */
     multiPosition:
       settings.multiPosition === undefined || settings.multiPosition === null

@@ -133,7 +133,22 @@ const TRADER_SETTINGS = {
     optional: true
   },
   slippageStep: {
-    description: "Price Slippage Step.",
+    description: "Price slippage step.",
+    type: "number",
+    optional: true
+  },
+  slippageRetriesCount: {
+    description: "Price slippage restries count.",
+    type: "number",
+    optional: true
+  },
+  openOrderTimeout: {
+    description: "Timeout in minutes for open orders.",
+    type: "number",
+    optional: true
+  },
+  exitPositionTimeout: {
+    description: "Timeout in minutes for position exit.",
     type: "number",
     optional: true
   },

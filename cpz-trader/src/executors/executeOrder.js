@@ -4,6 +4,7 @@ import dayjs from "cpz/utils/dayjs";
 import {
   REALTIME_MODE,
   EMULATOR_MODE,
+  ORDER_DIRECTION_BUY,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_CLOSED,
   ORDER_STATUS_CANCELED,
@@ -17,6 +18,7 @@ import {
   cancelOrderEX,
   checkOrderEX
 } from "cpz/connector-client/orders";
+import { addPercent } from "cpz/utils/helpers";
 import loadCurrentPrice from "./loadCurrentPrice";
 import { traderStateToCommonProps } from "../utils/helpers";
 
@@ -77,9 +79,24 @@ async function executeOrder(state, order) {
           } catch (e) {
             Log.exception(e);
           }
+        }
 
-          if (!orderToExecute.price) {
-            orderToExecute.price = state.lastPrice.price;
+        if (!orderToExecute.price) {
+          orderToExecute.price =
+            state.lastPrice.price || orderToExecute.signalPrice;
+        }
+
+        if (order.slippageStep && order.slippageStep > 0) {
+          if (order.direction === ORDER_DIRECTION_BUY) {
+            orderToExecute.price = addPercent(
+              orderToExecute.price,
+              order.slippageStep
+            );
+          } else {
+            orderToExecute.price = addPercent(
+              orderToExecute.price,
+              -order.slippageStep
+            );
           }
         }
       }

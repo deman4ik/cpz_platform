@@ -35,8 +35,8 @@ class Log {
         .setup()
         .setAutoCollectRequests(false)
         .setAutoCollectPerformance(false)
-        .setAutoCollectExceptions(true)
-        .setAutoCollectDependencies(true)
+        .setAutoCollectExceptions(false)
+        .setAutoCollectDependencies(false)
         .setAutoCollectConsole(false);
 
       appInsights.start();
@@ -158,7 +158,11 @@ class Log {
       default:
         this._logInfo(message);
     }
-    if (this._appInstightsKey)
+    if (
+      (this._appInstightsKey && severity === SEVERITY_LEVEL.Error) ||
+      severity === SEVERITY_LEVEL.Critical ||
+      severity === SEVERITY_LEVEL.Warning
+    )
       appInsights.defaultClient.trackTrace({
         message,
         severity,

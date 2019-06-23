@@ -458,6 +458,12 @@ const ValidatorConfig = schemasList => {
   return schema;
 };
 
+const addPercent = (numb, perc) => {
+  const number = parseFloat(numb) || 0;
+  const percent = parseFloat(perc) || 0;
+  return number + (number / 100) * percent;
+};
+
 export {
   sortAsc,
   sortDesc,
@@ -488,5 +494,6 @@ export {
   maxArrOfObj,
   minArrOfObj,
   EGConfig,
-  ValidatorConfig
+  ValidatorConfig,
+  addPercent
 };
