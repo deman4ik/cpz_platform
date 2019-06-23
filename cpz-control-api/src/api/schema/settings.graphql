@@ -32,7 +32,10 @@ input AdviserSettings {
 input TraderSettings {
   mode: String
   debug: Boolean
+  openOrderTimeout: Float
+  exitPositionTimeout: Float
   slippageStep: Float
+  slippageRetriesCount: Float
   deviation: Float
   volume: Float
   multiPosition: Boolean
