@@ -297,7 +297,7 @@ class Position {
   }
 
   _createOpenOrder({ volume, orderType }) {
-    this.createOpenOrder({
+    this.createEntryOrder({
       signalId: uuid(),
       price: this._entry.signalPrice,
       timestamp: dayjs.utc().toISOString(),

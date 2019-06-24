@@ -121,13 +121,8 @@ async function executeOrder(state, order) {
 
         orderResult = {
           ...orderResult,
-          ...currentOrder,
           status: ORDER_STATUS_OPEN,
-          candleTimestamp: dayjs
-            .utc()
-            .add(-timeframe, "minute")
-            .startOf("minute")
-            .toISOString()
+          ...currentOrder
         };
       } else {
         // Если режим - эмуляция
