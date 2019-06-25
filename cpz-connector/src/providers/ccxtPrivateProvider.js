@@ -33,7 +33,10 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         apiKey: this._keys[keyType].APIKey.value,
         secret: this._keys[keyType].APISecret.value,
         enableRateLimit: true,
-        timeout: 30000
+        timeout: 30000,
+        nonce() {
+          return this.milliseconds();
+        }
       });
 
       this._keys[keyType].active = true;
