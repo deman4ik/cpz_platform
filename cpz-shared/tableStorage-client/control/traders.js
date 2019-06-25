@@ -42,7 +42,7 @@ const getTraderByKeys = async ({ RowKey, PartitionKey }) =>
  */
 const findTrader = async ({ robotId, userId }) => {
   try {
-    const robotIdFilter = TableQuery.stringFilter(
+    const robotIdFilter = TableQuery.doubleFilter(
       "robotId",
       TableUtilities.QueryComparisons.EQUAL,
       robotId
