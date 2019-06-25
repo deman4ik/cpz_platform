@@ -6,6 +6,7 @@ import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
 import ServiceError from "cpz/error";
 import Log from "cpz/log";
+import Mailer from "cpz/mailer";
 import BaseService from "cpz/services/baseService";
 import { checkEnvVars } from "cpz/utils/environment";
 import ApiEnv from "cpz/config/environment/api";
@@ -35,6 +36,10 @@ class Graphql extends BaseService {
       process.env.CONNECTOR_API_ENDPOINT,
       process.env.CONNECTOR_API_KEY
     );
+    Mailer.init({
+      apiKey: process.env.MAILGUN_API,
+      domain: process.env.MAILGUN_DOMAIN
+    });
     this.run = this.graphqlServer();
   }
 
@@ -49,6 +54,10 @@ class Graphql extends BaseService {
     };
 
     const server = new ApolloServer({
+      cors: {
+        origin: "*",
+        credentials: "same-origin"
+      },
       playground: true,
       introspection: true,
       typeDefs,
@@ -66,6 +75,7 @@ class Graphql extends BaseService {
         // return error;
       },
       context: req => {
+        req.context.log(req.request);
         Log.addContext(req.context);
         if (req.request.headers["api-key"] !== process.env.API_KEY)
           throw new AuthenticationError("Invalid API Key");

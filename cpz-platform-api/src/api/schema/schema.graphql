@@ -11,6 +11,7 @@ type Mutation {
   insertExchangeAccount(params: ExchangeAccountInput!): Response!
   updateExchangeAccount(params: ExchangeAccountUpdateInput!): Response!
   deleteExchangeAccount(exchangeAccounId: ID!): Response!
+  subscribeToBeta(email: String!): Response!
 }
 
 type Error {

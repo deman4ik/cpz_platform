@@ -3,11 +3,13 @@ import {
   updateExchangeAccount,
   deleteExchangeAccount
 } from "./exchangeAccount";
+import subscribeToBeta from "./betaSubscription";
 
 const mutations = {
   insertExchangeAccount,
   updateExchangeAccount,
-  deleteExchangeAccount
+  deleteExchangeAccount,
+  subscribeToBeta
 };
 
 export default mutations;

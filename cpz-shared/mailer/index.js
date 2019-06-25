@@ -3,7 +3,7 @@ import Log from "../log";
 import ServiceError from "../error";
 
 class Mailer {
-  constructor({ apiKey, domain }) {
+  init({ apiKey, domain }) {
     try {
       let config = {};
       if (apiKey && domain) {
@@ -14,6 +14,7 @@ class Mailer {
       }
 
       this.client = new Mailgun(config);
+      this.betaList = this.client.lists(process.env.MAILGUN_BETA_LIST);
     } catch (e) {
       const error = new ServiceError(
         { name: ServiceError.types.MAILER_ERROR, cause: e },
@@ -39,6 +40,18 @@ class Mailer {
       throw error;
     }
   }
-}
 
-export default Mailer;
+  async addToList(data) {
+    try {
+      return await this.betaList.members().create(data);
+    } catch (e) {
+      const error = new ServiceError(
+        { name: ServiceError.types.MAILER_ERROR, cause: e },
+        "Failed to add email to subscription list"
+      );
+      throw error;
+    }
+  }
+}
+const mailer = new Mailer();
+export default mailer;

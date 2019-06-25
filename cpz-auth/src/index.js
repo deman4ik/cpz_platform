@@ -54,7 +54,7 @@ class AuthService {
       key: APPINSIGHTS_INSTRUMENTATIONKEY,
       serviceName: SERVICE_NAME
     });
-    this.mailer = new Mailer({ apiKey: MAILGUN_API, domain: MAILGUN_DOMAIN });
+    Mailer.init({ apiKey: MAILGUN_API, domain: MAILGUN_DOMAIN });
     DB.init(DB_API_ENDPOINT, DB_API_ACCESS_KEY);
   }
 
@@ -115,7 +115,7 @@ class AuthService {
       if (user && user.status === 2) {
         await setCode(user.id, code);
         // Send email with code
-        await this.mailer.send({
+        await Mailer.send({
           to: email,
           subject: "🚀 Cryptuoso - Please verify your email!",
           text: `Greetings! Your confirmation code is ${code}.\n\nCryptuoso`
@@ -136,7 +136,7 @@ class AuthService {
       const newUser = await createUser(uuid(), email, passwordHash, code);
 
       // Send email with code
-      await this.mailer.send({
+      await Mailer.send({
         to: email,
         subject:
           "🚀 Your Cryptuoso account is created! Please verify your email!",
@@ -600,7 +600,7 @@ class AuthService {
       await setCode(user.id, code);
 
       // Send email with code
-      await this.mailer.send({
+      await Mailer.send({
         to: email,
         subject: "🚀 Cryptuoso - Reset password!",
         text: `Greetings! We received a request to reset your Cryptuoso account password. Your confirmation code is ${code}.\n
