@@ -54,10 +54,6 @@ class Graphql extends BaseService {
     };
 
     const server = new ApolloServer({
-      cors: {
-        origin: "*",
-        credentials: "same-origin"
-      },
       playground: true,
       introspection: true,
       typeDefs,
