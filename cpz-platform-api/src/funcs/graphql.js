@@ -71,7 +71,6 @@ class Graphql extends BaseService {
         // return error;
       },
       context: req => {
-        req.context.log(req.request);
         Log.addContext(req.context);
         if (req.request.headers["api-key"] !== process.env.API_KEY)
           throw new AuthenticationError("Invalid API Key");
