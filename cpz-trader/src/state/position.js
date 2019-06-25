@@ -55,6 +55,7 @@ class Position {
       date: null,
       signalPrice: null,
       signalDate: null,
+      volume: null,
       executed: null,
       remaining: null,
       slippageRetriesCount: 1
@@ -68,6 +69,7 @@ class Position {
       date: null,
       signalPrice: null,
       signalDate: null,
+      volume: null,
       executed: null,
       remaining: null,
       slippageRetriesCount: 1
@@ -251,12 +253,11 @@ class Position {
     this._entry.date = null;
     this._entry.signalPrice = this._entry.signalPrice || signal.price;
     this._entry.signalDate = this._entry.signalDate || signal.timestamp;
+    this._entry.volume = this._entry.volume || this._currentOrder.volume;
     this._entry.executed = this.entryOrders
       .filter(({ executed }) => !!executed)
       .reduce((pre, { executed }) => pre + executed, 0);
-    this._entry.remaining = this.entryOrders
-      .filter(({ remaining }) => !!remaining)
-      .reduce((pre, { remaining }) => pre + remaining, 0);
+    this._entry.remaining = this._entry.volume - this._executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -286,12 +287,11 @@ class Position {
     this._exit.date = null;
     this._exit.signalPrice = this._exit.signalPrice || signal.price;
     this._exit.signalDate = this._exit.signalDate || signal.timestamp;
+    this._exit.volume = this._exit.volume || this._currentOrder.volume;
     this._exit.executed = this.exitOrders
       .filter(({ executed }) => !!executed)
       .reduce((pre, { executed }) => pre + executed, 0);
-    this._exit.remaining = this.exitOrders
-      .filter(({ remaining }) => !!remaining)
-      .reduce((pre, { remaining }) => pre + remaining, 0);
+    this._exit.remaining = this._exit.volume - this._executed;
     // Устанавливаем статус позиции
     this.setStatus();
   }
@@ -615,7 +615,7 @@ class Position {
         this._entry.orderType === ORDER_TYPE_MARKET_FORCE
       ) {
         this._status = POS_STATUS_CANCELED;
-        return;
+        return requiredOrders;
       }
       if (
         this._entry.slippageRetriesCount <=
@@ -789,9 +789,7 @@ class Position {
       this._entry.executed = this.entryOrders
         .filter(({ executed }) => !!executed)
         .reduce((pre, { executed }) => pre + executed, 0);
-      this._entry.remaining = this.entryOrders
-        .filter(({ remaining }) => !!remaining)
-        .reduce((pre, { remaining }) => pre + remaining, 0);
+      this._entry.remaining = this._entry.volume - this._entry.executed;
     } else {
       // Если ордер на закрытие позиции
 
@@ -813,9 +811,7 @@ class Position {
       this._exit.executed = this.exitOrders
         .filter(({ executed }) => !!executed)
         .reduce((pre, { executed }) => pre + executed, 0);
-      this._exit.remaining = this.exitOrders
-        .filter(({ remaining }) => !!remaining)
-        .reduce((pre, { remaining }) => pre + remaining, 0);
+      this._exit.remaining = this._exit.volume - this._exit.executed;
     }
     // Устанавливаем статус позиции
     this.setStatus();
