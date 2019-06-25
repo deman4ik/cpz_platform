@@ -159,9 +159,10 @@ class Log {
         this._logInfo(message);
     }
     if (
-      (this._appInstightsKey && severity === SEVERITY_LEVEL.Error) ||
-      severity === SEVERITY_LEVEL.Critical ||
-      severity === SEVERITY_LEVEL.Warning
+      this._appInstightsKey &&
+      (severity === SEVERITY_LEVEL.Error ||
+        severity === SEVERITY_LEVEL.Critical ||
+        severity === SEVERITY_LEVEL.Warning)
     )
       appInsights.defaultClient.trackTrace({
         message,
