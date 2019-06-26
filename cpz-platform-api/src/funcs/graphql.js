@@ -1,6 +1,7 @@
 import {
   ApolloServer,
-  AuthenticationError
+  AuthenticationError,
+  gql
 } from "apollo-server-azure-functions";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
@@ -56,7 +57,7 @@ class Graphql extends BaseService {
     const server = new ApolloServer({
       playground: true,
       introspection: true,
-      typeDefs,
+      typeDefs: gql(typeDefs),
       resolvers,
       formatError: error => {
         const err = new ServiceError(
