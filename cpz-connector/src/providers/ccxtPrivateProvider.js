@@ -222,11 +222,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
 
   async createOrder(keys, order) {
     try {
-      Log.debug("createOrder", order);
-      /* 
-      KRAKEN: leverage: 3
-      BITFINEX: type: "limit" */
-      // TODO: Params
+      Log.warn("createOrder", order);
       await this._checkKeysVersion(keys);
       const {
         orderId,
@@ -238,7 +234,6 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         orderType,
         params
       } = order;
-      // TODO: 'подмена' ордера - проверить что предудущий ордер действительно отменен и только после этого выставлять новый
 
       if (!this.ccxt) {
         await this.init();
@@ -289,7 +284,7 @@ class CCXTPrivateProvider extends BasePrivateProvider {
         );
         const orderParams = this.getOrderParams(params);
         this.clearOrderCache();
-        Log.debug("createOrder params", {
+        Log.warn("createOrder params", {
           ...order,
           correctedVolume,
           correctedPrice,
@@ -339,15 +334,27 @@ class CCXTPrivateProvider extends BasePrivateProvider {
           asset,
           currency
         };
-        await saveExchangeOrder({
-          PartitionKey: createOrderSlug({
-            exchange: this._exchangeName,
-            asset,
-            currency
-          }),
-          RowKey: orderId,
-          exId
-        });
+        Log.warn("createOrder newOrder", newOrder);
+        try {
+          await saveExchangeOrder({
+            PartitionKey: createOrderSlug({
+              exchange: this._exchangeName,
+              asset,
+              currency
+            }),
+            RowKey: orderId,
+            exId
+          });
+        } catch (error) {
+          Log.error(
+            `Failed to save exchange order after creating. ${
+              error.message
+            } Order input: ${JSON.stringify(
+              order
+            )} Order response: ${JSON.stringify(newOrder)}`,
+            error
+          );
+        }
       } else {
         newOrder = {
           orderId,
@@ -378,10 +385,11 @@ class CCXTPrivateProvider extends BasePrivateProvider {
             error.message
           } Order input: ${JSON.stringify(
             order
-          )} Order response: ${JSON.stringify(newOrder)}`
+          )} Order response: ${JSON.stringify(newOrder)}`,
+          error
         );
       }
-      Log.debug("createOrder Result", newOrder);
+      Log.warn("createOrder Result", newOrder);
       return {
         success: true,
         order: newOrder
