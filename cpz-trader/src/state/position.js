@@ -187,10 +187,17 @@ class Position {
   _createOrder(signal, positionDirection) {
     this.log("Creating new order...", signal);
     const { signalId, orderType, price, action } = signal;
-    const volume =
-      (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
-      (signal.settings && signal.settings.volume) ||
-      this._settings.volume;
+    let { volume } = this._settings;
+
+    if (signal.settings && signal.settings.volume) {
+      if (signal.settings.volumeForce) {
+        ({ volume } = signal.settings);
+      } else {
+        volume =
+          (positionDirection === ORDER_POS_DIR_EXIT && this._entry.executed) ||
+          signal.settings.volume;
+      }
+    }
     const slippageRetriesCount =
       positionDirection === ORDER_POS_DIR_ENTRY
         ? this._entry.slippageRetriesCount
@@ -308,7 +315,8 @@ class Position {
           ? TRADE_ACTION_LONG
           : TRADE_ACTION_SHORT,
       settings: {
-        volume
+        volume,
+        volumeForce: true
       }
     });
   }
@@ -325,7 +333,8 @@ class Position {
           ? TRADE_ACTION_CLOSE_LONG
           : TRADE_ACTION_CLOSE_SHORT,
       settings: {
-        volume
+        volume,
+        volumeForce: true
       }
     });
   }
