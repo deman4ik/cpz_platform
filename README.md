@@ -1,7 +1,10 @@
 [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
-[![Cryptuoso](https://cryptuoso.com/static/image/logo_footer.svg =200x200)](https://cryptuoso.com)
 
+<a href="https://cryptuoso.com">
+ <img width="200" height="200" src="https://cryptuoso.com/static/image/logo_footer.svg">
+</a>
+  
 # Cryptuoso Platform
 
 ## NPM scripts
