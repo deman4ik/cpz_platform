@@ -35,7 +35,7 @@ const brokerConfig: BrokerOptions = {
   transporter: "TCP",
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
-  cacher: null,
+  cacher: "Redis",
 
   // Define a serializer.
   // Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".

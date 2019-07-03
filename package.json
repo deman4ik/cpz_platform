@@ -4,7 +4,7 @@
   "description": "Cryptuoso Cryptocurrency Trading Platform",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --config moleculer.config.ts services/**/*.service.ts",
+    "dev": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config moleculer.config.ts services/**/*.service.ts",
     "cli": "moleculer connect",
     "start": "moleculer-runner services",
     "ci": "jest --watch",
@@ -24,6 +24,8 @@
     "@types/bluebird": "^3.5.24",
     "@types/jest": "^23.1.1",
     "@types/node": "^10.12.12",
+    "@types/node-fetch": "^2.3.7",
+    "@types/socket.io-client": "^1.4.32",
     "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
     "moleculer-repl": "^0.5.3",
@@ -36,10 +38,16 @@
     "typescript": "^3.2.2"
   },
   "dependencies": {
+    "ccxt": "^1.18.865",
+    "dotenv": "^8.0.0",
+    "https-proxy-agent": "^2.2.1",
+    "ioredis": "^4.2.0",
+    "moleculer": "^0.13.0",
     "moleculer-web": "^0.8.0",
     "nats": "^1.0.1",
-    "ioredis": "^4.2.0",
-    "moleculer": "^0.13.0"
+    "node-fetch": "^2.6.0",
+    "redlock": "^4.0.0",
+    "socket.io-client": "^2.2.0"
   },
   "engines": {
     "node": ">= 10.x.x"
