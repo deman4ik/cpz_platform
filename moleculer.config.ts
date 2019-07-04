@@ -115,15 +115,11 @@ const brokerConfig: BrokerOptions = {
     maxQueueSize: 100
   },
 
-  // Enable parameters validation. More info: https://moleculer.services/docs/0.13/validating.html
-  validation: true,
   // Custom Validator class for validation.
-  validator: null,
+  validator: true,
 
   // Enable metrics function. More info: https://moleculer.services/docs/0.13/metrics.html
   metrics: false,
-  // Rate of metrics calls. 1 means to measure every request, 0 means to measure nothing.
-  metricsRate: 1,
 
   // Register internal services ("$node"). More info: https://moleculer.services/docs/0.13/services.html#Internal-services
   internalServices: true,
