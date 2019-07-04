@@ -17,7 +17,7 @@ import { BrokerOptions, Errors } from "moleculer";
  */
 const brokerConfig: BrokerOptions = {
   // Namespace of nodes to segment your nodes on the same network.
-  namespace: "",
+  namespace: "cpz-local",
   // Unique node identifier. Must be unique in a namespace.
   nodeID: null,
 
@@ -43,7 +43,7 @@ const brokerConfig: BrokerOptions = {
   serializer: "JSON",
 
   // Number of milliseconds to wait before reject a request with a RequestTimeout error. Disabled: 0
-  requestTimeout: 10 * 1000,
+  requestTimeout: 30 * 1000,
 
   // Retry policy settings. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Retry
   retryPolicy: {

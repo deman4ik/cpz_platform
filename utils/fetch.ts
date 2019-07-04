@@ -24,4 +24,4 @@ function createFetchMethod(proxy: string) {
   };
 }
 
-export default createFetchMethod;
+export { createFetchMethod };
