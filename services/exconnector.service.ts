@@ -3,12 +3,14 @@ import ccxt from "ccxt";
 import retry from "async-retry";
 import { cpz } from "../types/cpz";
 import dayjs from "../lib/dayjs";
-import { VALID_TIMEFRAMES } from "../config";
 import {
   createFetchMethod,
-  stringToTimeframe,
-  getCurrentCandleParams
+  getCurrentCandleParams,
+  getCandlesParams,
+  handleCandleGaps,
+  batchCandles
 } from "../utils";
+import Timeframe from "../utils/timeframe";
 
 const ExconnectorService: ServiceSchema = {
   name: "exconnector",
@@ -68,11 +70,28 @@ const ExconnectorService: ServiceSchema = {
         timeframe: {
           description: "Timeframe in minutes.",
           type: "enum",
-          values: VALID_TIMEFRAMES
+          values: Timeframe.validArray
         }
       },
       async handler(ctx): Promise<cpz.ExchangeCandle> {
         return this.getCurrentCandle(ctx.params);
+      }
+    },
+    getCandles: {
+      params: {
+        exchange: "string",
+        asset: "string",
+        currency: "string",
+        timeframe: {
+          description: "Timeframe in minutes.",
+          type: "enum",
+          values: Timeframe.validArray
+        },
+        dateFrom: "string",
+        limit: "number"
+      },
+      async handler(ctx): Promise<cpz.ExchangeCandle[]> {
+        return this.getCandles(ctx.params);
       }
     }
   },
@@ -161,7 +180,7 @@ const ExconnectorService: ServiceSchema = {
       const timeframes: cpz.ExchangeTimeframes = {};
 
       Object.keys(this.publicConnectors[exchange].timeframes).forEach(key => {
-        const timeframe = stringToTimeframe(key);
+        const timeframe = Timeframe.stringToTimeframe(key);
         if (timeframe) timeframes[key] = timeframe;
       });
       return timeframes;
@@ -216,7 +235,7 @@ const ExconnectorService: ServiceSchema = {
           return await this.publicConnectors[exchange].fetchOHLCV(
             this.getSymbol(asset, currency),
             params.timeframeStr,
-            params.since,
+            params.dateFrom,
             params.limit
           );
         } catch (e) {
@@ -248,9 +267,7 @@ const ExconnectorService: ServiceSchema = {
           type: cpz.CandleType.previous
         };
       }
-      let candles: cpz.ExchangeCandle[] = [];
-
-      candles = response.map(candle => ({
+      let candles: cpz.ExchangeCandle[] = response.map(candle => ({
         exchange,
         asset,
         currency,
@@ -285,6 +302,64 @@ const ExconnectorService: ServiceSchema = {
         ];
       }
       return candles[candles.length - 1];
+    },
+    /**
+     *
+     * @param param0
+     */
+    async getCandles({
+      exchange,
+      asset,
+      currency,
+      timeframe,
+      dateFrom,
+      limit
+    }: cpz.CandlesFetchParams): Promise<cpz.ExchangeCandle[]> {
+      await this.initConnector(exchange);
+      const params = getCandlesParams(
+        this.publicConnectors[exchange].timeframes,
+        timeframe,
+        dateFrom,
+        limit
+      );
+      const dateTo = dayjs.utc(params.dateTo).toISOString();
+      const call = async (bail: (e: Error) => void) => {
+        try {
+          return await this.publicConnectors[exchange].fetchOHLCV(
+            this.getSymbol(asset, currency),
+            params.timeframeStr,
+            params.dateFrom,
+            params.limit
+          );
+        } catch (e) {
+          if (e instanceof ccxt.NetworkError) throw e;
+          bail(e);
+        }
+      };
+      const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
+      if (!response || !Array.isArray(response) || response.length === 0)
+        return [];
+
+      let candles: cpz.ExchangeCandle[] = response.map(candle => ({
+        exchange,
+        asset,
+        currency,
+        timeframe: params.timeframe,
+        time: +candle[0],
+        timestamp: dayjs.utc(+candle[0]).toISOString(),
+        open: +candle[1],
+        high: +candle[2],
+        low: +candle[3],
+        close: +candle[4],
+        volume: +candle[5],
+        type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+      }));
+
+      candles = handleCandleGaps(dateFrom, dateTo, candles);
+
+      candles = batchCandles(dateFrom, dateTo, timeframe, candles);
+
+      return candles;
     }
   },
 
