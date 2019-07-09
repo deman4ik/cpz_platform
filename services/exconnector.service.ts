@@ -8,7 +8,9 @@ import {
   getCurrentCandleParams,
   getCandlesParams,
   handleCandleGaps,
-  batchCandles
+  batchCandles,
+  sortAsc,
+  createMinutesListWithRange
 } from "../utils";
 import Timeframe from "../utils/timeframe";
 
@@ -109,8 +111,9 @@ const ExconnectorService: ServiceSchema = {
      * Initialize public CCXT instance
      *
      * @param {cpz.ExchangeName} exchange
+     * @returns {Promise<void>}
      */
-    async initConnector(exchange: cpz.ExchangeName) {
+    async initConnector(exchange: cpz.ExchangeName): Promise<void> {
       if (!(exchange in this.publicConnectors)) {
         this.publicConnectors[exchange] = new ccxt[exchange]({
           fetchImplementation: this._fetch
@@ -126,21 +129,23 @@ const ExconnectorService: ServiceSchema = {
         await retry(call, this.retryOptions);
       }
     },
+
     /**
      * Form currency pair symbol
      *
      * @param {string} asset
      * @param {string} currency
-     *
      * @returns {string}
      */
     getSymbol(asset: string, currency: string): string {
       return `${asset}/${currency}`;
     },
+
     /**
      * Get currency market properties
      *
-     * @param {cpz.AssetCred} props
+     * @param {cpz.AssetCred} { exchange, asset, currency }
+     * @returns
      */
     async getMarket({ exchange, asset, currency }: cpz.AssetCred) {
       await this.initConnector(exchange);
@@ -167,6 +172,7 @@ const ExconnectorService: ServiceSchema = {
         amountPrecision: response.precision.amount
       };
     },
+
     /**
      * Get exchange timeframes
      *
@@ -213,10 +219,16 @@ const ExconnectorService: ServiceSchema = {
         price: response.close
       };
     },
+
     /**
      * Get current open candle
      *
-     * @param {cpz.CandleParams}
+     * @param {cpz.CandleParams} {
+     *       exchange,
+     *       asset,
+     *       currency,
+     *       timeframe
+     *     }
      * @returns {Promise<cpz.ExchangeCandle>}
      */
     async getCurrentCandle({
@@ -303,9 +315,19 @@ const ExconnectorService: ServiceSchema = {
       }
       return candles[candles.length - 1];
     },
+
     /**
+     * Load candles in timeframes
      *
-     * @param param0
+     * @param {cpz.CandlesFetchParams} {
+     *       exchange,
+     *       asset,
+     *       currency,
+     *       timeframe,
+     *       dateFrom,
+     *       limit
+     *     }
+     * @returns {Promise<cpz.ExchangeCandle[]>}
      */
     async getCandles({
       exchange,
@@ -322,42 +344,132 @@ const ExconnectorService: ServiceSchema = {
         dateFrom,
         limit
       );
-      const dateTo = dayjs.utc(params.dateTo).toISOString();
-      const call = async (bail: (e: Error) => void) => {
-        try {
-          return await this.publicConnectors[exchange].fetchOHLCV(
-            this.getSymbol(asset, currency),
-            params.timeframeStr,
-            params.dateFrom,
-            params.limit
-          );
-        } catch (e) {
-          if (e instanceof ccxt.NetworkError) throw e;
-          bail(e);
+      const dateTo = dayjs.utc(params.dateTo);
+      let candles: cpz.ExchangeCandle[] = [];
+      if (
+        (exchange === cpz.Exchange.kraken &&
+          (timeframe === cpz.Timeframe["1m"] &&
+            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.hour) >
+              10)) ||
+        (timeframe === cpz.Timeframe["5m"] &&
+          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) > 1) ||
+        (timeframe === cpz.Timeframe["15m"] &&
+          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) > 5)
+      ) {
+        let trades: ccxt.Trade[] = [];
+        let dateNext = dayjs.utc(params.dateFrom);
+        while (dateNext.valueOf() < dateTo.valueOf()) {
+          const call = async (bail: (e: Error) => void) => {
+            try {
+              return await this.publicConnectors[exchange].fetchTrades(
+                this.getSymbol(asset, currency),
+                null,
+                2000,
+                {
+                  since: dateNext.valueOf() * 1000000
+                }
+              );
+            } catch (e) {
+              if (e instanceof ccxt.NetworkError) throw e;
+              bail(e);
+            }
+          };
+          const response: ccxt.Trade[] = await retry(call, this.retryOptions);
+          dateNext = dateTo;
+          if (response && Array.isArray(response) && response.length > 0) {
+            trades = [
+              ...new Set(
+                [...trades, ...response].filter(
+                  trade =>
+                    trade.timestamp >= dayjs.utc(dateFrom).valueOf() &&
+                    trade.timestamp <= dayjs.utc(dateTo).valueOf()
+                )
+              )
+            ].sort((a, b) => sortAsc(a.timestamp, b.timestamp));
+            dateNext = dayjs.utc(response[response.length - 1].timestamp);
+          }
         }
-      };
-      const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
-      if (!response || !Array.isArray(response) || response.length === 0)
-        return [];
 
-      let candles: cpz.ExchangeCandle[] = response.map(candle => ({
-        exchange,
-        asset,
-        currency,
-        timeframe: params.timeframe,
-        time: +candle[0],
-        timestamp: dayjs.utc(+candle[0]).toISOString(),
-        open: +candle[1],
-        high: +candle[2],
-        low: +candle[3],
-        close: +candle[4],
-        volume: +candle[5],
-        type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
-      }));
+        const minutes = createMinutesListWithRange(
+          params.dateFrom,
+          params.dateTo
+        );
+        minutes.forEach(minute => {
+          const minuteTrades = [
+            ...new Set(
+              trades.filter(
+                trade =>
+                  trade.timestamp >= dayjs.utc(minute.dateFrom).valueOf() &&
+                  trade.timestamp <= dayjs.utc(minute.dateTo).valueOf()
+              )
+            )
+          ].sort((a, b) => sortAsc(a.timestamp, b.timestamp));
 
-      candles = handleCandleGaps(dateFrom, dateTo, candles);
+          if (minuteTrades && minuteTrades.length > 0) {
+            const volume = +minuteTrades
+              .map(t => t.amount)
+              .reduce((a, b) => a + b, 0);
+            candles.push({
+              exchange,
+              asset,
+              currency,
+              timeframe: 1,
+              time: +minute.dateFrom, // время в милисекундах
+              timestamp: dayjs.utc(minute.dateFrom).toISOString(), // время в ISO UTC
+              open: +minuteTrades[0].price, // цена открытия - цена первого тика
+              high: +Math.max(...minuteTrades.map(t => +t.price)), // максимальная цена тиков
+              low: +Math.min(...minuteTrades.map(t => +t.price)), // минимальная цена тиков
+              close: +minuteTrades[minuteTrades.length - 1].price, // цена закрытия - цена последнего тика
+              volume, // объем - сумма объема всех тиков
+              type:
+                volume === 0 ? cpz.CandleType.previous : cpz.CandleType.created // признак - свеча сформирована
+            });
+          }
+        });
+      } else {
+        const call = async (bail: (e: Error) => void) => {
+          try {
+            return await this.publicConnectors[exchange].fetchOHLCV(
+              this.getSymbol(asset, currency),
+              params.timeframeStr,
+              params.dateFrom,
+              params.limit
+            );
+          } catch (e) {
+            if (e instanceof ccxt.NetworkError) throw e;
+            bail(e);
+          }
+        };
+        const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
+        if (!response || !Array.isArray(response) || response.length === 0)
+          return candles;
 
-      candles = batchCandles(dateFrom, dateTo, timeframe, candles);
+        candles = response.map(candle => ({
+          exchange,
+          asset,
+          currency,
+          timeframe: params.timeframe,
+          time: +candle[0],
+          timestamp: dayjs.utc(+candle[0]).toISOString(),
+          open: +candle[1],
+          high: +candle[2],
+          low: +candle[3],
+          close: +candle[4],
+          volume: +candle[5],
+          type:
+            +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+        }));
+      }
+
+      candles = handleCandleGaps(dateFrom, dateTo.toISOString(), candles);
+
+      if (timeframe > cpz.Timeframe["1m"])
+        candles = batchCandles(
+          dateFrom,
+          dateTo.toISOString(),
+          timeframe,
+          candles
+        );
 
       return candles;
     }

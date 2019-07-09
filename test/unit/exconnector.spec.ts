@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import { ServiceBroker, Errors } from "moleculer";
 import dayjs from "../../lib/dayjs";
 import TestService from "../../services/exconnector.service";
-
+jest.setTimeout(60000);
 describe("Test 'exconnector' service", () => {
   dotenv.config();
   let broker = new ServiceBroker();
@@ -14,11 +14,11 @@ describe("Test 'exconnector' service", () => {
   describe("Test 'exconnector.getCandles' action", () => {
     it("should return array of candles", async () => {
       const result = await broker.call("exconnector.getCandles", {
-        exchange: "bitfinex",
+        exchange: "kraken",
         asset: "BCH",
         currency: "USD",
-        timeframe: 120,
-        dateFrom: dayjs.utc("2019-07-03 16:00:00").toISOString(),
+        timeframe: 240,
+        dateFrom: dayjs.utc("2019-04-01 00:00:00").toISOString(),
         limit: 10
       });
       console.log(result);
