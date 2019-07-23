@@ -1,0 +1,20 @@
+{
+  "timeframe": 60,
+  "candles": [
+    {
+      "id": "334fc614-7f2f-4b76-ad00-29c37b12bc4e",
+      "exchange": "bitfinex",
+      "asset": "BTC",
+      "currency": "USD",
+      "timeframe": 60,
+      "time": 1561939200000,
+      "timestamp": "2019-07-01T00:00:00.000Z",
+      "open": 10800,
+      "high": 11045,
+      "low": 10641,
+      "close": 11035.98971826,
+      "volume": 1098.105552502385,
+      "type": "loaded"
+    }
+  ]
+}

@@ -57,4 +57,6 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return results;
 }
 
-export { sortAsc, sortDesc, arraysDiff, chunkArray };
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export { sortAsc, sortDesc, arraysDiff, chunkArray, sleep };

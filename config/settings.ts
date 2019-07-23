@@ -1,0 +1,1 @@
+export const CANDLES_CURRENT_AMOUNT = 500;

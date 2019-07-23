@@ -1,7 +1,13 @@
-import { handleCandleGaps } from "../../utils/candles";
+import {
+  handleCandleGaps,
+  batchCandles,
+  createCandlesFromTrades
+} from "../../utils/candles";
 import dayjs from "../../lib/dayjs";
 import { cpz } from "../../types/cpz";
-import { candles1, candles60 } from "./gappedCandles";
+import { candles1, candles60 as gappedCandles60 } from "./gappedCandles";
+import { candles60 } from "./candles";
+import { trades } from "./trades";
 
 describe("Test 'candles' utils", () => {
   describe("Test 'handleGaps'", () => {
@@ -15,7 +21,9 @@ describe("Test 'candles' utils", () => {
       );
       expect(result[0].timestamp).toBe(dateFrom.toISOString());
       expect(result[0].type).toBe(cpz.CandleType.previous);
-      expect(result[result.length - 1].timestamp).toBe(dateTo.toISOString());
+      expect(result[result.length - 1].timestamp).toBe(
+        "2019-07-03T15:49:00.000Z"
+      );
     });
     it("Schould fill gaps in candles - timeframe 60", () => {
       const dateFrom = dayjs.utc("2019-07-03T15:00:00.000Z");
@@ -23,13 +31,76 @@ describe("Test 'candles' utils", () => {
       const result = handleCandleGaps(
         dateFrom.toISOString(),
         dateTo.toISOString(),
-        candles60
+        gappedCandles60
       );
       expect(result[0].timestamp).toBe(dateFrom.toISOString());
       expect(result[result.length - 1].timestamp).toBe(
         "2019-07-04T01:00:00.000Z"
       );
       expect(result[result.length - 1].type).toBe(cpz.CandleType.previous);
+    });
+  });
+  describe("Test 'batchCandles'", () => {
+    it("Should batch candles 60 -> 120", () => {
+      const dateFrom = candles60[0].timestamp;
+      const dateTo = candles60[candles60.length - 1].timestamp;
+      const result = batchCandles(dateFrom, dateTo, 120, candles60);
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0].timestamp).toBe(dateFrom);
+      expect(result[0].open).toBe(10800);
+      expect(result[0].high).toBe(11123);
+      expect(result[0].low).toBe(10641);
+      expect(result[0].close).toBe(10918);
+      expect(result[0].volume).toBe(1098.105552502385 + 584.163312387595);
+      expect(result[result.length - 1].timestamp).toBe(
+        "2019-07-05T00:00:00.000Z"
+      );
+    });
+    it("Should batch candles 60 -> 240", () => {
+      const dateFrom = candles60[0].timestamp;
+      const dateTo = candles60[candles60.length - 1].timestamp;
+      const result = batchCandles(dateFrom, dateTo, 240, candles60);
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0].timestamp).toBe(dateFrom);
+      expect(result[result.length - 1].timestamp).toBe(
+        "2019-07-04T20:00:00.000Z"
+      );
+    });
+    it("Should batch candles 60 -> 1440", () => {
+      const dateFrom = candles60[0].timestamp;
+      const dateTo = candles60[candles60.length - 1].timestamp;
+      const result = batchCandles(dateFrom, dateTo, 1440, candles60);
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0].timestamp).toBe(dateFrom);
+      expect(result[result.length - 1].timestamp).toBe(
+        "2019-07-04T00:00:00.000Z"
+      );
+    });
+  });
+  describe("Test 'createCandlesFromTrades'", () => {
+    it("Should create candles 1-60", () => {
+      const dateFrom = dayjs.utc("2019-07-01T00:00:00.000Z").toISOString();
+      const dateTo = dayjs.utc("2019-07-01T01:00:00.000Z").toISOString();
+      const result = createCandlesFromTrades(
+        dateFrom,
+        dateTo,
+        [1, 5, 15, 30, 60, 120, 240, 1440],
+        trades
+      );
+      expect(result[1].length).toBe(60);
+      expect(result[5].length).toBe(12);
+      expect(result[15].length).toBe(4);
+      expect(result[30].length).toBe(2);
+      expect(result[60].length).toBe(1);
+      expect(result[120].length).toBe(0);
+      expect(result[240].length).toBe(0);
+      expect(result[1440].length).toBe(0);
+      expect(result[1][0].timestamp).toBe(dateFrom);
+      expect(result[1][0].open).toBe(10749.4);
+      expect(result[1][0].close).toBe(10768.4);
+      expect(result[60][0].timestamp).toBe(dateFrom);
+      expect(result[60][0].open).toBe(10749.4);
+      expect(result[60][0].close).toBe(11014.3);
     });
   });
 });

@@ -1,8 +1,8 @@
-import { ServiceSchema } from "moleculer";
+import { ServiceSchema, Errors } from "moleculer";
 import ccxt from "ccxt";
 import retry from "async-retry";
-import { cpz } from "../types/cpz";
-import dayjs from "../lib/dayjs";
+import { cpz } from "../../types/cpz";
+import dayjs from "../../lib/dayjs";
 import {
   createFetchMethod,
   getCurrentCandleParams,
@@ -10,12 +10,12 @@ import {
   handleCandleGaps,
   batchCandles,
   sortAsc,
-  createMinutesListWithRange
-} from "../utils";
-import Timeframe from "../utils/timeframe";
+  createDatesListWithRange
+} from "../../utils";
+import Timeframe from "../../utils/timeframe";
 
-const ExconnectorService: ServiceSchema = {
-  name: "exconnector",
+const PublicConnectorService: ServiceSchema = {
+  name: "public-connector",
 
   /**
    * Service settings
@@ -95,6 +95,17 @@ const ExconnectorService: ServiceSchema = {
       async handler(ctx): Promise<cpz.ExchangeCandle[]> {
         return this.getCandles(ctx.params);
       }
+    },
+    getTrades: {
+      params: {
+        exchange: "string",
+        asset: "string",
+        currency: "string",
+        dateFrom: "string"
+      },
+      async handler(ctx): Promise<cpz.ExchangeTrade[]> {
+        return this.getTrades(ctx.params);
+      }
     }
   },
 
@@ -144,10 +155,10 @@ const ExconnectorService: ServiceSchema = {
     /**
      * Get currency market properties
      *
-     * @param {cpz.AssetCred} { exchange, asset, currency }
+     * @param {cpz.AssetSymbol} { exchange, asset, currency }
      * @returns
      */
-    async getMarket({ exchange, asset, currency }: cpz.AssetCred) {
+    async getMarket({ exchange, asset, currency }: cpz.AssetSymbol) {
       await this.initConnector(exchange);
       const response: ccxt.Market = await this.publicConnectors[
         exchange
@@ -195,7 +206,7 @@ const ExconnectorService: ServiceSchema = {
       exchange,
       asset,
       currency
-    }: cpz.AssetCred): Promise<cpz.ExchangePrice> {
+    }: cpz.AssetSymbol): Promise<cpz.ExchangePrice> {
       await this.initConnector(exchange);
       const call = async (bail: (e: Error) => void) => {
         try {
@@ -346,124 +357,59 @@ const ExconnectorService: ServiceSchema = {
       );
       const dateTo = dayjs.utc(params.dateTo);
       let candles: cpz.ExchangeCandle[] = [];
-      if (
-        (exchange === cpz.Exchange.kraken &&
-          (timeframe === cpz.Timeframe["1m"] &&
-            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.hour) >
-              10)) ||
-        (timeframe === cpz.Timeframe["5m"] &&
-          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) > 1) ||
-        (timeframe === cpz.Timeframe["15m"] &&
-          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) > 5)
-      ) {
-        let trades: ccxt.Trade[] = [];
-        let dateNext = dayjs.utc(params.dateFrom);
-        while (dateNext.valueOf() < dateTo.valueOf()) {
-          const call = async (bail: (e: Error) => void) => {
-            try {
-              return await this.publicConnectors[exchange].fetchTrades(
-                this.getSymbol(asset, currency),
-                null,
-                2000,
-                {
-                  since: dateNext.valueOf() * 1000000
-                }
-              );
-            } catch (e) {
-              if (e instanceof ccxt.NetworkError) throw e;
-              bail(e);
-            }
-          };
-          const response: ccxt.Trade[] = await retry(call, this.retryOptions);
-          dateNext = dateTo;
-          if (response && Array.isArray(response) && response.length > 0) {
-            trades = [
-              ...new Set(
-                [...trades, ...response].filter(
-                  trade =>
-                    trade.timestamp >= dayjs.utc(dateFrom).valueOf() &&
-                    trade.timestamp <= dayjs.utc(dateTo).valueOf()
-                )
-              )
-            ].sort((a, b) => sortAsc(a.timestamp, b.timestamp));
-            dateNext = dayjs.utc(response[response.length - 1].timestamp);
-          }
+      /*
+        exchange === "kraken" &&
+        ((timeframe === cpz.Timeframe["1m"] &&
+          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.hour) >
+            10) ||
+          (timeframe === cpz.Timeframe["5m"] &&
+            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
+              1) ||
+          (timeframe === cpz.Timeframe["15m"] &&
+            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
+              5) ||
+          (timeframe === cpz.Timeframe["30m"] &&
+            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
+              14) ||
+          ((timeframe === cpz.Timeframe["1h"] ||
+            timeframe === cpz.Timeframe["2h"]) &&
+            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
+              29))
+     */
+      const call = async (bail: (e: Error) => void) => {
+        try {
+          return await this.publicConnectors[exchange].fetchOHLCV(
+            this.getSymbol(asset, currency),
+            params.timeframeStr,
+            params.dateFrom,
+            params.limit
+          );
+        } catch (e) {
+          if (e instanceof ccxt.NetworkError) throw e;
+          bail(e);
         }
+      };
+      const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
+      if (!response || !Array.isArray(response) || response.length === 0)
+        return candles;
 
-        const minutes = createMinutesListWithRange(
-          params.dateFrom,
-          params.dateTo
-        );
-        minutes.forEach(minute => {
-          const minuteTrades = [
-            ...new Set(
-              trades.filter(
-                trade =>
-                  trade.timestamp >= dayjs.utc(minute.dateFrom).valueOf() &&
-                  trade.timestamp <= dayjs.utc(minute.dateTo).valueOf()
-              )
-            )
-          ].sort((a, b) => sortAsc(a.timestamp, b.timestamp));
-
-          if (minuteTrades && minuteTrades.length > 0) {
-            const volume = +minuteTrades
-              .map(t => t.amount)
-              .reduce((a, b) => a + b, 0);
-            candles.push({
-              exchange,
-              asset,
-              currency,
-              timeframe: 1,
-              time: +minute.dateFrom, // время в милисекундах
-              timestamp: dayjs.utc(minute.dateFrom).toISOString(), // время в ISO UTC
-              open: +minuteTrades[0].price, // цена открытия - цена первого тика
-              high: +Math.max(...minuteTrades.map(t => +t.price)), // максимальная цена тиков
-              low: +Math.min(...minuteTrades.map(t => +t.price)), // минимальная цена тиков
-              close: +minuteTrades[minuteTrades.length - 1].price, // цена закрытия - цена последнего тика
-              volume, // объем - сумма объема всех тиков
-              type:
-                volume === 0 ? cpz.CandleType.previous : cpz.CandleType.created // признак - свеча сформирована
-            });
-          }
-        });
-      } else {
-        const call = async (bail: (e: Error) => void) => {
-          try {
-            return await this.publicConnectors[exchange].fetchOHLCV(
-              this.getSymbol(asset, currency),
-              params.timeframeStr,
-              params.dateFrom,
-              params.limit
-            );
-          } catch (e) {
-            if (e instanceof ccxt.NetworkError) throw e;
-            bail(e);
-          }
-        };
-        const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
-        if (!response || !Array.isArray(response) || response.length === 0)
-          return candles;
-
-        candles = response.map(candle => ({
-          exchange,
-          asset,
-          currency,
-          timeframe: params.timeframe,
-          time: +candle[0],
-          timestamp: dayjs.utc(+candle[0]).toISOString(),
-          open: +candle[1],
-          high: +candle[2],
-          low: +candle[3],
-          close: +candle[4],
-          volume: +candle[5],
-          type:
-            +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
-        }));
-      }
+      candles = response.map(candle => ({
+        exchange,
+        asset,
+        currency,
+        timeframe: params.timeframe,
+        time: +candle[0],
+        timestamp: dayjs.utc(+candle[0]).toISOString(),
+        open: +candle[1],
+        high: +candle[2],
+        low: +candle[3],
+        close: +candle[4],
+        volume: +candle[5],
+        type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+      }));
 
       candles = handleCandleGaps(dateFrom, dateTo.toISOString(), candles);
-
-      if (timeframe > cpz.Timeframe["1m"])
+      if (params.batch && timeframe > cpz.Timeframe["1m"])
         candles = batchCandles(
           dateFrom,
           dateTo.toISOString(),
@@ -472,6 +418,75 @@ const ExconnectorService: ServiceSchema = {
         );
 
       return candles;
+    },
+
+    /**
+     * Load trades
+     *
+     * @param {cpz.TradesFetchParams} {
+     *       exchange,
+     *       asset,
+     *       currency,
+     *       dateFrom
+     *     }
+     * @returns {Promise<cpz.ExchangeTrade[]>}
+     */
+    async getTrades({
+      exchange,
+      asset,
+      currency,
+      dateFrom
+    }: cpz.TradesFetchParams): Promise<cpz.ExchangeTrade[]> {
+      try {
+        await this.initConnector(exchange);
+        const since = dayjs.utc(dateFrom).valueOf();
+        const params =
+          exchange === "kraken"
+            ? {
+                since: since * 1000000
+              }
+            : null;
+        const call = async (bail: (e: Error) => void) => {
+          try {
+            return await this.publicConnectors[exchange].fetchTrades(
+              this.getSymbol(asset, currency),
+              since,
+              2000,
+              params
+            );
+          } catch (e) {
+            if (e instanceof ccxt.NetworkError) throw e;
+            bail(e);
+          }
+        };
+        const response: ccxt.Trade[] = await retry(call, this.retryOptions);
+
+        if (!response || !Array.isArray(response))
+          throw new Errors.MoleculerRetryableError("Failed to fetch trades");
+
+        if (response.length === 0) return [];
+
+        const trades = response.map(trade => {
+          const time = dayjs.utc(trade.datetime);
+          return {
+            exchange,
+            asset,
+            currency,
+            time: time.valueOf(),
+            timestamp: time.toISOString(),
+            side: trade.side,
+            price: trade.price,
+            amount: trade.amount
+          };
+        });
+
+        return trades;
+      } catch (e) {
+        this.logger.error("Failed to load trades", e.message);
+        throw new Errors.MoleculerRetryableError(
+          `Failed to load trades. ${e.message}`
+        );
+      }
     }
   },
 
@@ -501,4 +516,4 @@ const ExconnectorService: ServiceSchema = {
   // },
 };
 
-export = ExconnectorService;
+export = PublicConnectorService;

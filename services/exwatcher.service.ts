@@ -18,9 +18,6 @@ const ExwatcherService: ServiceSchema = {
    * Actions
    */
   actions: {
-    stop() {
-      this.broker.destroyService("marketwatcher");
-    },
     /**
      * Connect
      *

@@ -1,7 +1,5 @@
-export namespace global {
-  interface AnyObject {
-    [key: string]: any;
-  }
+export interface AnyObject {
+  [key: string]: any;
 }
 
 export namespace cpz {
@@ -21,6 +19,7 @@ export namespace cpz {
     bitfinex = "bitfinex",
     kraken = "kraken"
   }
+  type ExchangeName = Exchange;
   const enum Timeframe {
     "1m" = 1,
     "5m" = 5,
@@ -31,17 +30,24 @@ export namespace cpz {
     "4h" = 240,
     "1d" = 1440
   }
-
-  type ExchangeName = Exchange;
   type ValidTimeframe = Timeframe;
+  const enum Queue {
+    importCandles = "importCandles"
+  }
+  type QueueName = Queue;
 
-  interface AssetCred {
+  const enum ImportSubQueue {
+    current = "current",
+    history = "history"
+  }
+
+  interface AssetSymbol {
     exchange: ExchangeName;
     asset: string;
     currency: string;
   }
 
-  interface CandleParams extends AssetCred {
+  interface CandleParams extends AssetSymbol {
     timeframe: ValidTimeframe;
   }
 
@@ -50,10 +56,11 @@ export namespace cpz {
     limit: number;
   }
 
-  interface ExchangeCandle {
-    exchange: ExchangeName;
-    asset: string;
-    currency: string;
+  interface TradesFetchParams extends AssetSymbol {
+    dateFrom: string;
+  }
+
+  interface ExchangeCandle extends AssetSymbol {
     timeframe: ValidTimeframe;
     time: number;
     timestamp: string;
@@ -65,13 +72,31 @@ export namespace cpz {
     type: CandleTypes;
   }
 
-  interface ExchangePrice {
-    exchange: ExchangeName;
-    asset: string;
-    currency: string;
+  interface ExchangeCandlesInTimeframes {
+    [key: number]: ExchangeCandle[];
+  }
+
+  interface DBCandle extends AssetSymbol {
+    id: string;
+    time: number;
+    timestamp: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+    type: CandleTypes;
+  }
+
+  interface ExchangePrice extends AssetSymbol {
     time: number;
     timestamp: string;
     price: number;
+  }
+
+  interface ExchangeTrade extends ExchangePrice {
+    amount: number;
+    side: string;
   }
 
   interface ExchangeTimeframes {

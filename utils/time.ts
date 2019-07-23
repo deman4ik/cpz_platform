@@ -4,43 +4,102 @@ import dayjs from "../lib/dayjs";
 function durationUnit(
   dateFrom: string | number,
   dateTo: string | number,
+  amountInUnit: number = 1,
   unit: cpz.TimeUnit
 ): number {
-  return dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), unit);
+  return dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), unit) / amountInUnit;
 }
 
 function createDatesList(
   dateFrom: string | number,
   dateTo: string | number,
   unit: cpz.TimeUnit,
-  duration: number = durationUnit(dateFrom, dateTo, unit)
+  amountInUnit: number = 1,
+  duration: number = durationUnit(dateFrom, dateTo, amountInUnit, unit)
 ): number[] {
   const list = [];
   for (let i = 0; i < duration; i += 1) {
     list.push(
       dayjs
         .utc(dateFrom)
-        .add(i, unit)
+        .add(i * amountInUnit, unit)
         .valueOf()
     );
   }
   return list;
 }
 
-function createMinutesListWithRange(
+function createDatesListWithRange(
   dateFrom: string | number,
   dateTo: string | number,
-  duration = durationUnit(dateFrom, dateTo, cpz.TimeUnit.minute)
+  unit: cpz.TimeUnit,
+  amountInUnit: number = 1,
+  duration: number = durationUnit(dateFrom, dateTo, amountInUnit, unit)
 ): { dateFrom: number; dateTo: number }[] {
   const list = [];
   for (let i = 0; i < duration; i += 1) {
-    const date = dayjs.utc(dateFrom).add(i, cpz.TimeUnit.minute);
+    const date = dayjs.utc(dateFrom).add(i * amountInUnit, unit);
     list.push({
       dateFrom: date.valueOf(),
-      dateTo: date.endOf(cpz.TimeUnit.minute).valueOf()
+      dateTo: date
+        .add(amountInUnit - 1, unit)
+        .endOf(unit)
+        .valueOf()
     });
   }
   return list;
 }
 
-export { durationUnit, createDatesList, createMinutesListWithRange };
+function chunkDates(
+  dateFrom: string | number,
+  dateTo: string | number,
+  unit: cpz.TimeUnit,
+  amountInUnit: number = 1,
+  chunkSize: number
+) {
+  const list = createDatesList(dateFrom, dateTo, unit, amountInUnit);
+  const arrayToChunk = [...list];
+  const chunks = [];
+  while (arrayToChunk.length) {
+    const chunk = arrayToChunk.splice(0, chunkSize);
+    chunks.push({
+      dateFrom: dayjs.utc(chunk[0]).toISOString(),
+      dateTo: dayjs.utc(chunk[chunk.length - 1]).toISOString(),
+      duration: chunk.length
+    });
+  }
+
+  return { chunks, total: list.length };
+}
+
+function getValidDate(
+  date: string | number,
+  unit: cpz.TimeUnit = cpz.TimeUnit.minute
+): string {
+  if (
+    dayjs
+      .utc(date)
+      .startOf(unit)
+      .valueOf() <
+    dayjs
+      .utc()
+      .startOf(unit)
+      .valueOf()
+  )
+    return dayjs
+      .utc(date)
+      .startOf(unit)
+      .toISOString();
+
+  return dayjs
+    .utc()
+    .startOf(unit)
+    .toISOString();
+}
+export {
+  durationUnit,
+  createDatesList,
+  createDatesListWithRange,
+  chunkDates,
+  getValidDate
+};
