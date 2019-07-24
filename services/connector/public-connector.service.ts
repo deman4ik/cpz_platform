@@ -1,6 +1,7 @@
 import { ServiceSchema, Errors } from "moleculer";
 import ccxt from "ccxt";
 import retry from "async-retry";
+import { PUBLIC_CONNECTOR } from "../../config";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
 import {
@@ -15,7 +16,7 @@ import {
 import Timeframe from "../../utils/timeframe";
 
 const PublicConnectorService: ServiceSchema = {
-  name: "public-connector",
+  name: PUBLIC_CONNECTOR,
 
   /**
    * Service settings

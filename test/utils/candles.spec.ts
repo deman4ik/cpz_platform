@@ -5,9 +5,12 @@ import {
 } from "../../utils/candles";
 import dayjs from "../../lib/dayjs";
 import { cpz } from "../../types/cpz";
-import { candles1, candles60 as gappedCandles60 } from "./gappedCandles";
-import { candles60 } from "./candles";
-import { trades } from "./trades";
+import {
+  candles1,
+  candles60 as gappedCandles60
+} from "../testData/gappedCandles";
+import { candles60 } from "../testData/candles";
+import { trades } from "../testData/trades";
 
 describe("Test 'candles' utils", () => {
   describe("Test 'handleGaps'", () => {

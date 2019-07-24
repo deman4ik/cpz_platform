@@ -12,13 +12,30 @@ import {
   createCandlesFromTrades,
   chunkArray
 } from "../../utils";
+import {
+  DB_IMPORTERS,
+  DB_CANDLES,
+  IMPORTER_WORKER,
+  PUBLIC_CONNECTOR
+} from "../../config";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
 
 const ImporterWorkerService: ServiceSchema = {
-  name: "importer-worker",
+  name: IMPORTER_WORKER,
   mixins: [QueueService()],
-
+  dependencies: [
+    PUBLIC_CONNECTOR,
+    DB_IMPORTERS,
+    `${DB_CANDLES}1`,
+    `${DB_CANDLES}5`,
+    `${DB_CANDLES}15`,
+    `${DB_CANDLES}30`,
+    `${DB_CANDLES}60`,
+    `${DB_CANDLES}120`,
+    `${DB_CANDLES}240`,
+    `${DB_CANDLES}1440`
+  ],
   queues: {
     [cpz.Queue.importCandles]: [
       {
@@ -219,7 +236,7 @@ const ImporterWorkerService: ServiceSchema = {
           await Promise.all(
             chunks.map(async ({ dateFrom }) => {
               const candles = await this.broker.call(
-                "public-connector.getCandles",
+                `${PUBLIC_CONNECTOR}.getCandles`,
                 {
                   exchange,
                   asset,
@@ -292,7 +309,7 @@ const ImporterWorkerService: ServiceSchema = {
         );
         try {
           const response = await this.broker.call(
-            "public-connector.getTrades",
+            `${PUBLIC_CONNECTOR}.getTrades`,
             {
               exchange,
               asset,
@@ -328,7 +345,6 @@ const ImporterWorkerService: ServiceSchema = {
     ): Promise<void> {
       await Promise.all(
         Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
-          //for (const timeframe of Object.keys(candlesInTimeframes)) {
           if (candlesInTimeframes[+timeframe].length > 0) {
             const { exchange, asset, currency } = candlesInTimeframes[
               +timeframe
@@ -337,11 +353,9 @@ const ImporterWorkerService: ServiceSchema = {
 
             await Promise.all(
               chunks.map(async chunk => {
-                //  for (const chunk of chunks) {
                 try {
-                  await this.broker.call("market-data.saveCandles", {
-                    timeframe: +timeframe,
-                    candles: chunk.map(candle => ({
+                  await this.broker.call(`${DB_CANDLES}${timeframe}.upsert`, {
+                    entities: chunk.map(candle => ({
                       id: uuid(),
                       ...candle
                     }))
@@ -350,13 +364,11 @@ const ImporterWorkerService: ServiceSchema = {
                   this.logger.error(e);
                   throw e;
                 }
-                //  }
               })
             );
             this.logger.info(
               `Saved ${exchange}.${asset}.${currency}.${timeframe} candles.`
             );
-            // }
           }
         })
       );

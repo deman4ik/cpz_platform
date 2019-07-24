@@ -1,13 +1,14 @@
 import { ServiceSchema } from "moleculer";
 import QueueService from "moleculer-bull";
-import { JobId, Job } from "bull";
+import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
+import { DB_IMPORTERS, IMPORTER_RUNNER, IMPORTER_WORKER } from "../../config";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_CURRENT_AMOUNT } from "../../config";
 
 const ImporterService: ServiceSchema = {
-  name: "importer",
+  name: IMPORTER_RUNNER,
   mixins: [QueueService()],
   /**
    * Service settings
@@ -17,13 +18,13 @@ const ImporterService: ServiceSchema = {
   /**
    * Service dependencies
    */
-  dependencies: [],
+  dependencies: [IMPORTER_WORKER, DB_IMPORTERS],
 
   /**
    * Actions
    */
   actions: {
-    current: {
+    startCurrent: {
       params: {
         exchange: {
           type: "string"
@@ -65,7 +66,7 @@ const ImporterService: ServiceSchema = {
         return { jobId, status };
       }
     },
-    history: {
+    startHistory: {
       params: {
         exchange: {
           type: "string"

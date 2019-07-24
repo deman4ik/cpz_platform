@@ -1,8 +1,9 @@
 import { ServiceSchema } from "moleculer";
 import socketio from "socket.io-client";
+import { EXWATCHER, PUBLIC_CONNECTOR, DB_CANDLES } from "../config";
 
 const ExwatcherService: ServiceSchema = {
-  name: "exwatcher",
+  name: EXWATCHER,
 
   /**
    * Service settings
@@ -12,7 +13,17 @@ const ExwatcherService: ServiceSchema = {
   /**
    * Service dependencies
    */
-  dependencies: [],
+  dependencies: [
+    PUBLIC_CONNECTOR,
+    `${DB_CANDLES}1`,
+    `${DB_CANDLES}5`,
+    `${DB_CANDLES}15`,
+    `${DB_CANDLES}30`,
+    `${DB_CANDLES}60`,
+    `${DB_CANDLES}120`,
+    `${DB_CANDLES}240`,
+    `${DB_CANDLES}1440`
+  ],
 
   /**
    * Actions

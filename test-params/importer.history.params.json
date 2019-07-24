@@ -1,5 +1,5 @@
 {
-  "exchange": "kraken",
+  "exchange": "bitfinex",
   "asset": "BTC",
   "currency": "USD",
   "dateFrom": "2019-07-01T00:00:00.000Z",
