@@ -3,6 +3,15 @@ export interface AnyObject {
 }
 
 export namespace cpz {
+  const enum Service {
+    DB_IMPORTERS = "db-importers",
+    DB_CANDLES = "db-candles",
+    EXWATCHER = "exwatcher",
+    IMPORTER_RUNNER = "importer-runner",
+    IMPORTER_WORKER = "importer-worker",
+    PUBLIC_CONNECTOR = "public-connector"
+  }
+
   const enum CandleType {
     loaded = "loaded",
     created = "created",

@@ -2,10 +2,10 @@ import { ServiceSchema } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
-import { DB_IMPORTERS } from "../../config";
+import { cpz } from "../../types/cpz";
 
 const ImportersService: ServiceSchema = {
-  name: DB_IMPORTERS,
+  name: cpz.Service.DB_IMPORTERS,
   mixins: [DbService],
   adapter: new SqlAdapter(
     process.env.PG_DBNAME,

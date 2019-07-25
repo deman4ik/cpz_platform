@@ -1,9 +1,9 @@
 import { ServiceSchema } from "moleculer";
 import socketio from "socket.io-client";
-import { EXWATCHER, PUBLIC_CONNECTOR, DB_CANDLES } from "../config";
+import { cpz } from "../types/cpz";
 
 const ExwatcherService: ServiceSchema = {
-  name: EXWATCHER,
+  name: cpz.Service.EXWATCHER,
 
   /**
    * Service settings
@@ -14,15 +14,15 @@ const ExwatcherService: ServiceSchema = {
    * Service dependencies
    */
   dependencies: [
-    PUBLIC_CONNECTOR,
-    `${DB_CANDLES}1`,
-    `${DB_CANDLES}5`,
-    `${DB_CANDLES}15`,
-    `${DB_CANDLES}30`,
-    `${DB_CANDLES}60`,
-    `${DB_CANDLES}120`,
-    `${DB_CANDLES}240`,
-    `${DB_CANDLES}1440`
+    cpz.Service.PUBLIC_CONNECTOR,
+    `${cpz.Service.DB_CANDLES}1`,
+    `${cpz.Service.DB_CANDLES}5`,
+    `${cpz.Service.DB_CANDLES}15`,
+    `${cpz.Service.DB_CANDLES}30`,
+    `${cpz.Service.DB_CANDLES}60`,
+    `${cpz.Service.DB_CANDLES}120`,
+    `${cpz.Service.DB_CANDLES}240`,
+    `${cpz.Service.DB_CANDLES}1440`
   ],
 
   /**

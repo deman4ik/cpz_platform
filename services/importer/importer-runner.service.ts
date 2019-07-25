@@ -3,12 +3,11 @@ import QueueService from "moleculer-bull";
 import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
-import { DB_IMPORTERS, IMPORTER_RUNNER, IMPORTER_WORKER } from "../../config";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_CURRENT_AMOUNT } from "../../config";
 
 const ImporterService: ServiceSchema = {
-  name: IMPORTER_RUNNER,
+  name: cpz.Service.IMPORTER_RUNNER,
   mixins: [QueueService()],
   /**
    * Service settings
@@ -18,7 +17,7 @@ const ImporterService: ServiceSchema = {
   /**
    * Service dependencies
    */
-  dependencies: [IMPORTER_WORKER, DB_IMPORTERS],
+  dependencies: [cpz.Service.IMPORTER_WORKER, cpz.Service.DB_IMPORTERS],
 
   /**
    * Actions

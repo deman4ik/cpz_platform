@@ -12,29 +12,23 @@ import {
   createCandlesFromTrades,
   chunkArray
 } from "../../utils";
-import {
-  DB_IMPORTERS,
-  DB_CANDLES,
-  IMPORTER_WORKER,
-  PUBLIC_CONNECTOR
-} from "../../config";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
 
 const ImporterWorkerService: ServiceSchema = {
-  name: IMPORTER_WORKER,
+  name: cpz.Service.IMPORTER_WORKER,
   mixins: [QueueService()],
   dependencies: [
-    PUBLIC_CONNECTOR,
-    DB_IMPORTERS,
-    `${DB_CANDLES}1`,
-    `${DB_CANDLES}5`,
-    `${DB_CANDLES}15`,
-    `${DB_CANDLES}30`,
-    `${DB_CANDLES}60`,
-    `${DB_CANDLES}120`,
-    `${DB_CANDLES}240`,
-    `${DB_CANDLES}1440`
+    cpz.Service.PUBLIC_CONNECTOR,
+    cpz.Service.DB_IMPORTERS,
+    `${cpz.Service.DB_CANDLES}1`,
+    `${cpz.Service.DB_CANDLES}5`,
+    `${cpz.Service.DB_CANDLES}15`,
+    `${cpz.Service.DB_CANDLES}30`,
+    `${cpz.Service.DB_CANDLES}60`,
+    `${cpz.Service.DB_CANDLES}120`,
+    `${cpz.Service.DB_CANDLES}240`,
+    `${cpz.Service.DB_CANDLES}1440`
   ],
   queues: {
     [cpz.Queue.importCandles]: [
@@ -236,7 +230,7 @@ const ImporterWorkerService: ServiceSchema = {
           await Promise.all(
             chunks.map(async ({ dateFrom }) => {
               const candles = await this.broker.call(
-                `${PUBLIC_CONNECTOR}.getCandles`,
+                `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
                 {
                   exchange,
                   asset,
@@ -309,7 +303,7 @@ const ImporterWorkerService: ServiceSchema = {
         );
         try {
           const response = await this.broker.call(
-            `${PUBLIC_CONNECTOR}.getTrades`,
+            `${cpz.Service.PUBLIC_CONNECTOR}.getTrades`,
             {
               exchange,
               asset,
@@ -354,12 +348,15 @@ const ImporterWorkerService: ServiceSchema = {
             await Promise.all(
               chunks.map(async chunk => {
                 try {
-                  await this.broker.call(`${DB_CANDLES}${timeframe}.upsert`, {
-                    entities: chunk.map(candle => ({
-                      id: uuid(),
-                      ...candle
-                    }))
-                  });
+                  await this.broker.call(
+                    `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
+                    {
+                      entities: chunk.map(candle => ({
+                        id: uuid(),
+                        ...candle
+                      }))
+                    }
+                  );
                 } catch (e) {
                   this.logger.error(e);
                   throw e;
