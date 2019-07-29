@@ -12,6 +12,16 @@ export namespace cpz {
     PUBLIC_CONNECTOR = "public-connector"
   }
 
+  const enum Status {
+    pending = "pending",
+    queued = "queued",
+    started = "started",
+    stopped = "stopped",
+    finished = "finished",
+    failed = "failed"
+  }
+  type Statuses = Status;
+
   const enum CandleType {
     loaded = "loaded",
     created = "created",
@@ -45,10 +55,7 @@ export namespace cpz {
   }
   type QueueName = Queue;
 
-  const enum ImportSubQueue {
-    current = "current",
-    history = "history"
-  }
+  type ImportType = "current" | "history";
 
   interface AssetSymbol {
     exchange: ExchangeName;
@@ -122,5 +129,18 @@ export namespace cpz {
 
   interface Timeframes {
     [key: number]: TimeframeProps;
+  }
+
+  interface Importer {
+    id: string;
+    exchange: cpz.ExchangeName;
+    asset: string;
+    currency: string;
+    type: cpz.ImportType;
+    params: any;
+    status: cpz.Statuses;
+    startedAt?: string;
+    endedAt?: string;
+    error?: any;
   }
 }

@@ -2,7 +2,7 @@ import { cpz } from "../types/cpz";
 import dayjs from "../lib/dayjs";
 import Timeframe from "./timeframe";
 import { createDatesList, createDatesListWithRange } from "./time";
-import { arraysDiff, sortAsc } from "./helpers";
+import { arraysDiff, sortAsc, uniqueElementsBy } from "./helpers";
 
 function handleCandleGaps(
   dateFrom: string,
@@ -19,9 +19,8 @@ function handleCandleGaps(
   const { exchange, asset, currency, timeframe } = inputCandles[0];
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
-  const fullDatesList = [
-    ...new Set(createDatesList(dateFrom, dateTo, unit, 1, duration))
-  ];
+  const fullDatesList = createDatesList(dateFrom, dateTo, unit, 1, duration);
+
   const loadedDatesList = [...new Set(candles.map(candle => candle.time))];
   // Ищем пропуски
   const diffs = arraysDiff(fullDatesList, loadedDatesList).sort(sortAsc);
@@ -62,7 +61,7 @@ function handleCandleGaps(
       }
     });
   }
-  candles = [...new Set(candles)].filter(
+  candles = uniqueElementsBy(candles, (a, b) => a.time === b.time).filter(
     c =>
       c.time >= dayjs.utc(dateFrom).valueOf() &&
       c.time < dayjs.utc(dateTo).valueOf()
@@ -87,11 +86,15 @@ function batchCandles(
   const { exchange, asset, currency } = inputCandles[0];
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
-  const fullDatesList = [
-    ...new Set(
-      createDatesList(dateFrom, dateTo, unit, amountInUnit, duration + 1)
-    ) // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
-  ];
+  const fullDatesList = createDatesList(
+    dateFrom,
+    dateTo,
+    unit,
+    amountInUnit,
+    duration + 1
+  );
+  // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
+
   fullDatesList.forEach(time => {
     const date = dayjs.utc(time);
     // Пропускаем самую первую свечу
@@ -123,9 +126,12 @@ function batchCandles(
     }
   });
   if (timeframeCandles.length > 0)
-    timeframeCandles.sort((a, b) => sortAsc(a.time, b.time));
+    timeframeCandles = uniqueElementsBy(
+      timeframeCandles,
+      (a, b) => a.time === b.time
+    ).sort((a, b) => sortAsc(a.time, b.time));
 
-  return [...new Set(timeframeCandles)];
+  return timeframeCandles;
 }
 
 function createCandlesFromTrades(
@@ -151,15 +157,16 @@ function createCandlesFromTrades(
           duration
         );
         dates.forEach(date => {
-          const dateTrades = [
-            ...new Set(
-              trades.filter(
-                trade =>
-                  trade.time >= dayjs.utc(date.dateFrom).valueOf() &&
-                  trade.time <= dayjs.utc(date.dateTo).valueOf()
-              )
+          const dateTrades = uniqueElementsBy(
+            trades,
+            (a, b) => a.time === b.time
+          )
+            .filter(
+              trade =>
+                trade.time >= dayjs.utc(date.dateFrom).valueOf() &&
+                trade.time <= dayjs.utc(date.dateTo).valueOf()
             )
-          ].sort((a, b) => sortAsc(a.time, b.time));
+            .sort((a, b) => sortAsc(a.time, b.time));
 
           if (dateTrades && dateTrades.length > 0) {
             const volume = +dateTrades
@@ -182,17 +189,16 @@ function createCandlesFromTrades(
             });
           }
         });
-        result[timeframe] = [
-          ...new Set(
-            result[timeframe]
-              .filter(
-                candle =>
-                  candle.time >= dayjs.utc(dateFrom).valueOf() &&
-                  candle.time <= dayjs.utc(dateTo).valueOf()
-              )
-              .sort((a, b) => sortAsc(a.time, b.time))
+        result[timeframe] = uniqueElementsBy(
+          result[timeframe],
+          (a, b) => a.time === b.time
+        )
+          .filter(
+            candle =>
+              candle.time >= dayjs.utc(dateFrom).valueOf() &&
+              candle.time <= dayjs.utc(dateTo).valueOf()
           )
-        ];
+          .sort((a, b) => sortAsc(a.time, b.time));
       }
     });
   }

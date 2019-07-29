@@ -172,6 +172,19 @@ describe("Test 'time' utils", () => {
       expect(chunks[0].dateTo).toBe("2019-07-05T02:05:00.000Z");
       expect(chunks[0].duration).toBe(2);
     });
+    it("Should return chunks for 240 timeframe", () => {
+      const dateFrom = dayjs.utc("2019-06-17T06:00:00.000Z").toISOString();
+      const dateTo = dayjs.utc("2019-07-28T22:00:00.000Z").toISOString();
+      const { chunks } = chunkDates(
+        dateFrom,
+        dateTo,
+        cpz.TimeUnit.hour,
+        4,
+        500 / 4
+      );
+      expect(Array.isArray(chunks)).toBe(true);
+      expect(chunks.length).toBe(2);
+    });
   });
   describe("Test 'getValidDate'", () => {
     it("Should return valid date", () => {

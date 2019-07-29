@@ -357,25 +357,7 @@ const PublicConnectorService: ServiceSchema = {
       );
       const dateTo = dayjs.utc(params.dateTo);
       let candles: cpz.ExchangeCandle[] = [];
-      /*
-        exchange === "kraken" &&
-        ((timeframe === cpz.Timeframe["1m"] &&
-          dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.hour) >
-            10) ||
-          (timeframe === cpz.Timeframe["5m"] &&
-            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
-              1) ||
-          (timeframe === cpz.Timeframe["15m"] &&
-            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
-              5) ||
-          (timeframe === cpz.Timeframe["30m"] &&
-            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
-              14) ||
-          ((timeframe === cpz.Timeframe["1h"] ||
-            timeframe === cpz.Timeframe["2h"]) &&
-            dayjs.utc().diff(dayjs.utc(params.dateFrom), cpz.TimeUnit.day) >
-              29))
-     */
+
       const call = async (bail: (e: Error) => void) => {
         try {
           return await this.publicConnectors[exchange].fetchOHLCV(

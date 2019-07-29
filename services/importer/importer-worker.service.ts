@@ -10,7 +10,8 @@ import {
   getValidDate,
   handleCandleGaps,
   createCandlesFromTrades,
-  chunkArray
+  chunkArray,
+  uniqueElementsBy
 } from "../../utils";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
@@ -33,123 +34,48 @@ const ImporterWorkerService: ServiceSchema = {
   queues: {
     [cpz.Queue.importCandles]: [
       {
-        name: cpz.ImportSubQueue.current,
         async process(job: Job) {
           try {
             this.logger.info(
               `Importing current candles jobId: ${job.id}`,
               job.data
             );
-            const startedAt = dayjs.utc();
-            const { exchange, asset, currency, timeframes, amount } = job.data;
-
-            await this.importCandles({
-              exchange,
-              asset,
-              currency,
-              timeframes,
-              amount
+            const state: cpz.Importer = {
+              ...job.data,
+              status: cpz.Status.started,
+              startedAt: dayjs.utc().toISOString(),
+              endedAt: null,
+              error: null
+            };
+            await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+              entity: state
             });
-            const endedAt = dayjs.utc();
+            if (state.type === "current") {
+              await this.importerCurrent(state);
+            } else if (state.type === "history") {
+              await this.importerHistory(state);
+            }
+            state.endedAt = dayjs.utc().toISOString();
+            state.status = cpz.Status.finished;
+            await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+              entity: state
+            });
             return {
               success: true,
-              jobId: job.id,
-              startedAt: startedAt.toISOString(),
-              endedAt: endedAt.toISOString(),
-              duration: endedAt.diff(startedAt, "second")
+              state
             };
           } catch (e) {
             if (e instanceof Errors.ValidationError) {
               return {
                 success: false,
-                jobId: job.id,
-                error: e
+                state: { id: job.id, error: e }
               };
             }
             throw new Errors.MoleculerError(
               `Failed to import current candles jobId: ${job.id}`,
               500,
               this.name,
-              { jobId: job.id, params: job.data }
-            );
-          }
-        }
-      },
-      {
-        name: cpz.ImportSubQueue.history,
-        async process(job: Job) {
-          try {
-            this.logger.info(
-              `Importing history candles jobId: ${job.id}`,
-              job.data
-            );
-            const startedAt = dayjs.utc();
-            const {
-              exchange,
-              asset,
-              currency,
-              timeframes,
-              dateFrom,
-              dateTo: paramsDateTo
-            } = job.data;
-            const dateTo = getValidDate(paramsDateTo);
-
-            let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
-            if (exchange === "kraken") {
-              const trades = await this.importTrades({
-                exchange,
-                asset,
-                currency,
-                dateFrom,
-                dateTo
-              });
-              this.logger.info(
-                `${job.id} creating candles from ${trades.length} trades`
-              );
-              candlesInTimeframes = createCandlesFromTrades(
-                dateFrom,
-                dateTo,
-                timeframes,
-                trades
-              );
-              this.logger.info(`${job.id} handling candle gaps`);
-              Object.keys(candlesInTimeframes).forEach((timeframe: string) => {
-                candlesInTimeframes[+timeframe] = handleCandleGaps(
-                  dateFrom,
-                  dateTo,
-                  candlesInTimeframes[+timeframe]
-                );
-              });
-            } else {
-              candlesInTimeframes = await this.importCandles({
-                exchange,
-                asset,
-                currency,
-                timeframes,
-                dateFrom,
-                dateTo
-              });
-            }
-
-            if (!candlesInTimeframes)
-              throw new Error("Failed to import candles");
-
-            await this.saveCandles(candlesInTimeframes);
-            const endedAt = dayjs.utc();
-            return {
-              success: true,
-              jobId: job.id,
-              startedAt: startedAt.toISOString(),
-              endedAt: endedAt.toISOString(),
-              duration: endedAt.diff(startedAt, "second")
-            };
-          } catch (e) {
-            this.logger.error(job.id, job.data, e);
-            throw new Errors.MoleculerError(
-              `Failed to import history candles jobId: ${job.id}`,
-              500,
-              this.name,
-              { jobId: job.id, params: job.data, error: e }
+              { ...job.data }
             );
           }
         }
@@ -157,6 +83,183 @@ const ImporterWorkerService: ServiceSchema = {
     ]
   },
   methods: {
+    async importerCurrent(state) {
+      try {
+        const {
+          id,
+          exchange,
+          asset,
+          currency,
+          params: { timeframes, amount }
+        } = state;
+        let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
+
+        if (exchange === "kraken") {
+          const currentDate = dayjs.utc();
+          const loadTimeframes: {
+            trades: { [key: number]: { dateFrom: string } };
+            candles: cpz.ValidTimeframe[];
+          } = {
+            trades: [],
+            candles: []
+          };
+          timeframes.forEach((timeframe: cpz.ValidTimeframe) => {
+            const { unit, amountInUnit } = Timeframe.get(timeframe);
+            const dateFrom = currentDate.add(-amount * amountInUnit, unit);
+            if (
+              (timeframe === cpz.Timeframe["1m"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.hour) > 10) ||
+              (timeframe === cpz.Timeframe["5m"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 1) ||
+              (timeframe === cpz.Timeframe["15m"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 6) ||
+              (timeframe === cpz.Timeframe["30m"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 13) ||
+              ((timeframe === cpz.Timeframe["1h"] ||
+                timeframe === cpz.Timeframe["2h"]) &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 28) ||
+              (timeframe === cpz.Timeframe["4h"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 110) ||
+              (timeframe === cpz.Timeframe["1d"] &&
+                currentDate.diff(dateFrom, cpz.TimeUnit.day) > 710)
+            ) {
+              loadTimeframes.trades[timeframe] = {
+                dateFrom: dateFrom.toISOString()
+              };
+            } else loadTimeframes.candles.push(timeframe);
+          });
+          if (loadTimeframes.candles.length > 0)
+            candlesInTimeframes = await this.importCandles({
+              exchange,
+              asset,
+              currency,
+              timeframes: loadTimeframes.candles,
+              amount
+            });
+
+          if (Object.keys(loadTimeframes.trades).length > 0) {
+            const tradesTimeframes = Object.keys(loadTimeframes.trades).map(
+              timeframe => +timeframe
+            );
+            const maxTimeframe = Math.max(...tradesTimeframes);
+            const {
+              unit: maxTimeframeUnit,
+              amountInUnit: maxTimeframeAmountInUnit
+            } = Timeframe.get(maxTimeframe);
+            const dateFrom = currentDate
+              .add(-((amount + 1) * maxTimeframeAmountInUnit), maxTimeframeUnit)
+              .toISOString();
+            const trades = await this.importTrades({
+              exchange,
+              asset,
+              currency,
+              dateFrom,
+              dateTo: currentDate.toISOString()
+            });
+
+            this.logger.info(
+              `${id} creating candles from ${trades.length} trades`
+            );
+            const candlesFromTradesInTimeframes = createCandlesFromTrades(
+              dateFrom,
+              currentDate.toISOString(),
+              tradesTimeframes,
+              trades
+            );
+            this.logger.info(`${id} handling candle gaps`);
+            Object.keys(candlesFromTradesInTimeframes).forEach(
+              (timeframe: string) => {
+                candlesInTimeframes[+timeframe] = handleCandleGaps(
+                  loadTimeframes.trades[+timeframe].dateFrom,
+                  currentDate.toISOString(),
+                  candlesInTimeframes[+timeframe]
+                );
+              }
+            );
+          }
+        } else {
+          candlesInTimeframes = await this.importCandles({
+            exchange,
+            asset,
+            currency,
+            timeframes,
+            amount
+          });
+        }
+
+        if (!candlesInTimeframes) throw new Error("Failed to import candles");
+
+        await this.saveCandles(candlesInTimeframes);
+      } catch (e) {
+        this.logger.error(e);
+        throw e;
+      }
+    },
+    async importerHistory(state) {
+      try {
+        const {
+          id,
+          exchange,
+          asset,
+          currency,
+          params: { timeframes, dateFrom: paramsDateFrom, dateTo: paramsDateTo }
+        } = state;
+        const dateTo = getValidDate(paramsDateTo);
+
+        let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
+        if (exchange === "kraken") {
+          const maxTimeframe = Math.max(...timeframes);
+          const {
+            unit: maxTimeframeUnit,
+            amountInUnit: maxTimeframeAmountInUnit
+          } = Timeframe.get(maxTimeframe);
+          const dateFrom = dayjs
+            .utc(paramsDateFrom)
+            .add(-maxTimeframeAmountInUnit, maxTimeframeUnit)
+            .toISOString();
+          const trades = await this.importTrades({
+            exchange,
+            asset,
+            currency,
+            dateFrom,
+            dateTo
+          });
+          this.logger.info(
+            `${id} creating candles from ${trades.length} trades`
+          );
+          candlesInTimeframes = createCandlesFromTrades(
+            dateFrom,
+            dateTo,
+            timeframes,
+            trades
+          );
+          this.logger.info(`${id} handling candle gaps`);
+          Object.keys(candlesInTimeframes).forEach((timeframe: string) => {
+            candlesInTimeframes[+timeframe] = handleCandleGaps(
+              paramsDateFrom,
+              dateTo,
+              candlesInTimeframes[+timeframe]
+            );
+          });
+        } else {
+          candlesInTimeframes = await this.importCandles({
+            exchange,
+            asset,
+            currency,
+            timeframes,
+            dateFrom: paramsDateFrom,
+            dateTo
+          });
+        }
+
+        if (!candlesInTimeframes) throw new Error("Failed to import candles");
+
+        await this.saveCandles(candlesInTimeframes);
+      } catch (e) {
+        this.logger.error(e);
+        throw e;
+      }
+    },
     /**
      * Import candles
      *
@@ -205,30 +308,34 @@ const ImporterWorkerService: ServiceSchema = {
           result[timeframe] = [];
           const slug = `${exchange}.${asset}.${currency}.${timeframe}`;
           const { unit, amountInUnit } = Timeframe.get(timeframe);
-          const limit = loadLimit(exchange);
+          const limit =
+            loadLimit(exchange) > amount ? amount : loadLimit(exchange);
 
-          dateTo = getValidDate(dateTo, unit);
+          let dateStart = dateFrom;
+          let dateStop = getValidDate(dateTo, unit);
 
-          if (!dateFrom && amount) {
-            dateFrom = dayjs
-              .utc(dateTo)
+          if (!dateStart && amount) {
+            dateStart = dayjs
+              .utc(dateStop)
               .add(-amountInUnit * amount, unit)
               .startOf(unit)
               .toISOString();
           }
 
           const { chunks, total } = chunkDates(
-            dateFrom,
-            dateTo,
+            dateStart,
+            dateStop,
             unit,
             amountInUnit,
-            limit
+            limit / amountInUnit
           );
           this.logger.info(
-            `Loading ${total} ${slug} candles by ${chunks.length} chunks`
+            `Loading ${total} ${slug} candles from ${dateStart} to ${dateStop} by ${
+              chunks.length
+            } chunks`
           );
-          await Promise.all(
-            chunks.map(async ({ dateFrom }) => {
+          const loadResults = await Promise.all(
+            chunks.map(async ({ dateFrom: loadFrom }) => {
               const candles = await this.broker.call(
                 `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
                 {
@@ -236,27 +343,32 @@ const ImporterWorkerService: ServiceSchema = {
                   asset,
                   currency,
                   timeframe,
-                  dateFrom,
+                  dateFrom: loadFrom,
                   limit
                 }
               );
+
               if (!candles || !Array.isArray(candles) || candles.length === 0)
-                this.logger.error(`${slug} ${dateFrom} empty response!`);
+                this.logger.error(`${slug} ${loadFrom} empty response!`);
               else {
-                result[timeframe] = [
-                  ...new Set(
-                    [...result[timeframe], ...candles].filter(
-                      candle =>
-                        candle.time >= dayjs.utc(dateFrom).valueOf() &&
-                        candle.time <= dayjs.utc(dateTo).valueOf()
-                    )
-                  )
-                ].sort((a, b) => sortAsc(a.time, b.time));
+                return candles;
               }
             })
           );
 
-          this.logger.info(`Loaded ${slug}`);
+          result[timeframe] = uniqueElementsBy(
+            [].concat(...loadResults),
+            (a, b) => a.time === b.time
+          )
+            .filter(
+              candle =>
+                candle.time >= dayjs.utc(dateStart).valueOf() &&
+                candle.time <= dayjs.utc(dateStop).valueOf()
+            )
+            .sort((a, b) => sortAsc(a.time, b.time));
+          this.logger.info(
+            `Loaded ${result[timeframe].length} ${slug} candles`
+          );
         })
       );
       return result;
@@ -316,15 +428,16 @@ const ImporterWorkerService: ServiceSchema = {
 
           dateNext = dayjs.utc(dateTo);
           if (response.length > 0) {
-            trades = [
-              ...new Set(
-                [...trades, ...response].filter(
-                  trade =>
-                    trade.time >= dayjs.utc(dateFrom).valueOf() &&
-                    trade.time <= dayjs.utc(dateTo).valueOf()
-                )
+            trades = uniqueElementsBy(
+              [...trades, ...response],
+              (a, b) => a.time === b.time
+            )
+              .filter(
+                trade =>
+                  trade.time >= dayjs.utc(dateFrom).valueOf() &&
+                  trade.time <= dayjs.utc(dateTo).valueOf()
               )
-            ].sort((a, b) => sortAsc(a.timestamp, b.timestamp));
+              .sort((a, b) => sortAsc(a.time, b.time));
             dateNext = dayjs.utc(response[response.length - 1].timestamp);
           }
         } catch (e) {
@@ -337,38 +450,50 @@ const ImporterWorkerService: ServiceSchema = {
     async saveCandles(
       candlesInTimeframes: cpz.ExchangeCandlesInTimeframes
     ): Promise<void> {
-      await Promise.all(
-        Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
-          if (candlesInTimeframes[+timeframe].length > 0) {
-            const { exchange, asset, currency } = candlesInTimeframes[
-              +timeframe
-            ][0];
-            const chunks = chunkArray(candlesInTimeframes[+timeframe], 1000);
-
-            await Promise.all(
-              chunks.map(async chunk => {
-                try {
-                  await this.broker.call(
-                    `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
-                    {
-                      entities: chunk.map(candle => ({
-                        id: uuid(),
-                        ...candle
-                      }))
+      try {
+        await Promise.all(
+          Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
+            try {
+              if (candlesInTimeframes[+timeframe].length > 0) {
+                const { exchange, asset, currency } = candlesInTimeframes[
+                  +timeframe
+                ][0];
+                const chunks = chunkArray(
+                  candlesInTimeframes[+timeframe],
+                  1000
+                );
+                await Promise.all(
+                  chunks.map(async chunk => {
+                    try {
+                      await this.broker.call(
+                        `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
+                        {
+                          entities: chunk.map(candle => ({
+                            id: uuid(),
+                            ...candle
+                          }))
+                        }
+                      );
+                    } catch (e) {
+                      this.logger.error(e);
+                      throw e;
                     }
-                  );
-                } catch (e) {
-                  this.logger.error(e);
-                  throw e;
-                }
-              })
-            );
-            this.logger.info(
-              `Saved ${exchange}.${asset}.${currency}.${timeframe} candles.`
-            );
-          }
-        })
-      );
+                  })
+                );
+                this.logger.info(
+                  `Saved ${exchange}.${asset}.${currency}.${timeframe} candles.`
+                );
+              }
+            } catch (e) {
+              this.logger.error(e);
+              throw e;
+            }
+          })
+        );
+      } catch (e) {
+        this.logger.error(e);
+        throw e;
+      }
     }
   }
 };

@@ -57,6 +57,24 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return results;
 }
 
+/**
+ * Returns all unique values of an array, based on a provided comparator function.
+ *
+ * @param arr
+ * @param fn
+ */
+function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
+  return arr.reduce((acc, v) => {
+    if (!acc.some(x => fn(v, x))) acc.push(v);
+    return acc;
+  }, []);
+}
+
+/**
+ * Sleep
+ *
+ * @param ms miliseconds
+ */
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export { sortAsc, sortDesc, arraysDiff, chunkArray, sleep };
+export { sortAsc, sortDesc, arraysDiff, chunkArray, uniqueElementsBy, sleep };

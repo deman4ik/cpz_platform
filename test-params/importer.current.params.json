@@ -1,6 +1,5 @@
 {
   "exchange": "kraken",
   "asset": "BTC",
-  "currency": "USD",
-  "timeframes": [120]
+  "currency": "USD"
 }

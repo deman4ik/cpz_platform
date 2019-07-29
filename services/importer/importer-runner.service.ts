@@ -17,7 +17,7 @@ const ImporterService: ServiceSchema = {
   /**
    * Service dependencies
    */
-  dependencies: [cpz.Service.IMPORTER_WORKER, cpz.Service.DB_IMPORTERS],
+  dependencies: [cpz.Service.DB_IMPORTERS],
 
   /**
    * Actions
@@ -48,21 +48,25 @@ const ImporterService: ServiceSchema = {
         }
       },
       async handler(ctx) {
-        const jobId = uuid();
-        await this.createJob(
-          cpz.Queue.importCandles,
-          cpz.ImportSubQueue.current,
-          {
-            ...ctx.params,
+        const id = uuid();
+        const state: cpz.Importer = {
+          id,
+          exchange: ctx.params.exchange,
+          asset: ctx.params.asset,
+          currency: ctx.params.currency,
+          type: "current",
+          params: {
             timeframes: ctx.params.timeframes || Timeframe.validArray,
             amount: ctx.params.amount || CANDLES_CURRENT_AMOUNT
           },
-          { jobId }
-        );
-        const job = await this.getQueue(cpz.Queue.importCandles).getJob(jobId);
-        const status = await job.getState();
+          status: cpz.Status.queued
+        };
+        await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+          entity: state
+        });
+        await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
 
-        return { jobId, status };
+        return { id, status: state.status };
       }
     },
     startHistory: {
@@ -90,20 +94,26 @@ const ImporterService: ServiceSchema = {
         }
       },
       async handler(ctx) {
-        const jobId = uuid();
-        await this.createJob(
-          cpz.Queue.importCandles,
-          cpz.ImportSubQueue.history,
-          {
-            ...ctx.params,
-            timeframes: ctx.params.timeframes || Timeframe.validArray
+        const id = uuid();
+        const state: cpz.Importer = {
+          id,
+          exchange: ctx.params.exchange,
+          asset: ctx.params.asset,
+          currency: ctx.params.currency,
+          type: "history",
+          params: {
+            timeframes: ctx.params.timeframes || Timeframe.validArray,
+            dateFrom: ctx.params.dateFrom,
+            dateTo: ctx.params.dateTo
           },
-          { jobId }
-        );
-        const job = await this.getQueue(cpz.Queue.importCandles).getJob(jobId);
-        const status = await job.getState();
+          status: cpz.Status.queued
+        };
+        await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+          entity: state
+        });
+        await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
 
-        return { jobId, status };
+        return { jobId: id, status: state.status };
       }
     },
     clean: {
@@ -128,6 +138,18 @@ const ImporterService: ServiceSchema = {
           ctx.params.period || 5000,
           ctx.params.status || "completed"
         );
+      }
+    },
+    getStatus: {
+      params: {
+        id: "string"
+      },
+      async handler(ctx) {
+        const job = await this.getQueue(cpz.Queue.importCandles).getJob(
+          ctx.params.id
+        );
+        const status = await job.getState();
+        return { id: ctx.params.id, status };
       }
     }
   },

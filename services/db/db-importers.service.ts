@@ -49,6 +49,7 @@ const ImportersService: ServiceSchema = {
             exchange: "string",
             asset: "string",
             currency: "string",
+            type: "string",
             params: "object",
             status: "string",
             startedAt: {
@@ -73,17 +74,19 @@ const ImportersService: ServiceSchema = {
             exchange,
             asset,
             currency,
+            type,
             params,
             status,
             startedAt,
             endedAt,
             error
-          } = ctx.params.entity;
+          }: cpz.Importer = ctx.params.entity;
           const value = Object.values({
             id,
             exchange,
             asset,
             currency,
+            type,
             params: JSON.stringify(params),
             status,
             started_at: startedAt,
@@ -91,7 +94,7 @@ const ImportersService: ServiceSchema = {
             error: JSON.stringify(error)
           });
           const query = `INSERT INTO importers 
-          (id, exchange, asset, currency, params, status, started_at, ended_at, error) 
+          (id, exchange, asset, currency, type, params, status, started_at, ended_at, error) 
           VALUES (?)
            ON CONFLICT ON CONSTRAINT importers_pkey 
            DO UPDATE SET status = excluded.status,
