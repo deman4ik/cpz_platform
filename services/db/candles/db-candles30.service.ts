@@ -1,4 +1,4 @@
-import { ServiceSchema } from "moleculer";
+import { ServiceSchema, Errors } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
@@ -18,7 +18,13 @@ const CandlesService: ServiceSchema = {
       dialectOptions: {
         ssl: true
       },
-      logging: false
+      logging: false,
+      pool: {
+        max: 50,
+        min: 1,
+        acquire: 20000,
+        idle: 20000
+      }
     }
   ),
   model: {
@@ -115,7 +121,12 @@ const CandlesService: ServiceSchema = {
           return true;
         } catch (e) {
           this.logger.error(e);
-          throw e;
+          throw new Errors.MoleculerRetryableError(
+            e.message,
+            500,
+            this.name,
+            e
+          );
         }
       }
     }

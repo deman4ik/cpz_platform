@@ -8,7 +8,16 @@ import { CANDLES_CURRENT_AMOUNT } from "../../config";
 
 const ImporterService: ServiceSchema = {
   name: cpz.Service.IMPORTER_RUNNER,
-  mixins: [QueueService()],
+  mixins: [
+    QueueService(process.env.REDIS_URL, {
+      settings: {
+        lockDuration: 120000,
+        lockRenewTime: 10000,
+        stalledInterval: 120000,
+        maxStalledCount: 1
+      }
+    })
+  ],
   /**
    * Service settings
    */
@@ -134,7 +143,7 @@ const ImporterService: ServiceSchema = {
         }
       },
       async handler(ctx) {
-        await this.getQueue("importCandles").clean(
+        return await this.getQueue("importCandles").clean(
           ctx.params.period || 5000,
           ctx.params.status || "completed"
         );

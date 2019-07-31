@@ -14,10 +14,10 @@ import { trades } from "../testData/trades";
 
 describe("Test 'candles' utils", () => {
   describe("Test 'handleGaps'", () => {
-    it("Schould fill gaps in candles - timeframe 1", () => {
+    it("Schould fill gaps in candles - timeframe 1", async () => {
       const dateFrom = dayjs.utc("2019-07-03T15:40:00.000Z");
       const dateTo = dayjs.utc("2019-07-03T15:50:00.000Z");
-      const result = handleCandleGaps(
+      const result = await handleCandleGaps(
         dateFrom.toISOString(),
         dateTo.toISOString(),
         candles1
@@ -28,10 +28,10 @@ describe("Test 'candles' utils", () => {
         "2019-07-03T15:49:00.000Z"
       );
     });
-    it("Schould fill gaps in candles - timeframe 60", () => {
+    it("Schould fill gaps in candles - timeframe 60", async () => {
       const dateFrom = dayjs.utc("2019-07-03T15:00:00.000Z");
       const dateTo = dayjs.utc("2019-07-04T02:00:00.000Z");
-      const result = handleCandleGaps(
+      const result = await handleCandleGaps(
         dateFrom.toISOString(),
         dateTo.toISOString(),
         gappedCandles60
@@ -44,10 +44,10 @@ describe("Test 'candles' utils", () => {
     });
   });
   describe("Test 'batchCandles'", () => {
-    it("Should batch candles 60 -> 120", () => {
+    it("Should batch candles 60 -> 120", async () => {
       const dateFrom = candles60[0].timestamp;
       const dateTo = candles60[candles60.length - 1].timestamp;
-      const result = batchCandles(dateFrom, dateTo, 120, candles60);
+      const result = await batchCandles(dateFrom, dateTo, 120, candles60);
       expect(Array.isArray(result)).toBe(true);
       expect(result[0].timestamp).toBe(dateFrom);
       expect(result[0].open).toBe(10800);
@@ -59,20 +59,20 @@ describe("Test 'candles' utils", () => {
         "2019-07-05T00:00:00.000Z"
       );
     });
-    it("Should batch candles 60 -> 240", () => {
+    it("Should batch candles 60 -> 240", async () => {
       const dateFrom = candles60[0].timestamp;
       const dateTo = candles60[candles60.length - 1].timestamp;
-      const result = batchCandles(dateFrom, dateTo, 240, candles60);
+      const result = await batchCandles(dateFrom, dateTo, 240, candles60);
       expect(Array.isArray(result)).toBe(true);
       expect(result[0].timestamp).toBe(dateFrom);
       expect(result[result.length - 1].timestamp).toBe(
         "2019-07-04T20:00:00.000Z"
       );
     });
-    it("Should batch candles 60 -> 1440", () => {
+    it("Should batch candles 60 -> 1440", async () => {
       const dateFrom = candles60[0].timestamp;
       const dateTo = candles60[candles60.length - 1].timestamp;
-      const result = batchCandles(dateFrom, dateTo, 1440, candles60);
+      const result = await batchCandles(dateFrom, dateTo, 1440, candles60);
       expect(Array.isArray(result)).toBe(true);
       expect(result[0].timestamp).toBe(dateFrom);
       expect(result[result.length - 1].timestamp).toBe(
@@ -81,10 +81,10 @@ describe("Test 'candles' utils", () => {
     });
   });
   describe("Test 'createCandlesFromTrades'", () => {
-    it("Should create candles 1-60", () => {
+    it("Should create candles 1-60", async () => {
       const dateFrom = dayjs.utc("2019-07-01T00:00:00.000Z").toISOString();
       const dateTo = dayjs.utc("2019-07-01T01:00:00.000Z").toISOString();
-      const result = createCandlesFromTrades(
+      const result = await createCandlesFromTrades(
         dateFrom,
         dateTo,
         [1, 5, 15, 30, 60, 120, 240, 1440],

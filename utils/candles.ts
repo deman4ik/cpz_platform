@@ -4,11 +4,11 @@ import Timeframe from "./timeframe";
 import { createDatesList, createDatesListWithRange } from "./time";
 import { arraysDiff, sortAsc, uniqueElementsBy } from "./helpers";
 
-function handleCandleGaps(
+async function handleCandleGaps(
   dateFrom: string,
   dateTo: string,
   inputCandles: cpz.ExchangeCandle[]
-): cpz.ExchangeCandle[] {
+): Promise<cpz.ExchangeCandle[]> {
   if (
     !inputCandles ||
     !Array.isArray(inputCandles) ||
@@ -21,24 +21,22 @@ function handleCandleGaps(
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
   const fullDatesList = createDatesList(dateFrom, dateTo, unit, 1, duration);
 
-  const loadedDatesList = [...new Set(candles.map(candle => candle.time))];
+  const loadedDatesList = candles.map(candle => candle.time);
   // Ищем пропуски
   const diffs = arraysDiff(fullDatesList, loadedDatesList).sort(sortAsc);
   // Если есть пропуски
   if (diffs.length > 0) {
     // Для каждой пропущенный свечи
-    diffs.forEach(diffTime => {
+    diffs.forEach(async diffTime => {
       // Время предыдущей свечи
       const previousTime = dayjs
         .utc(diffTime)
         .add(-amountInUnit, unit)
         .valueOf();
-      // Индекс предыдущей свечи
-      const previousCandleIndex = candles.findIndex(
+      // Предыдущая свеча
+      const previousCandle = candles.find(
         candle => candle.time === previousTime
       );
-      // Предыдущая свеча
-      const previousCandle = candles[previousCandleIndex];
       if (previousCandle) {
         // Заполняем пропуск
         const gappedCandle = {
@@ -55,13 +53,12 @@ function handleCandleGaps(
           volume: 0, // нулевой объем
           type: cpz.CandleType.previous // тип - предыдущая
         };
-
         candles.push(gappedCandle);
         candles = candles.sort((a, b) => sortAsc(a.time, b.time));
       }
     });
   }
-  candles = uniqueElementsBy(candles, (a, b) => a.time === b.time).filter(
+  candles = candles.filter(
     c =>
       c.time >= dayjs.utc(dateFrom).valueOf() &&
       c.time < dayjs.utc(dateTo).valueOf()
@@ -69,12 +66,12 @@ function handleCandleGaps(
   return candles;
 }
 
-function batchCandles(
+async function batchCandles(
   dateFrom: string,
   dateTo: string,
   timeframe: cpz.ValidTimeframe,
   inputCandles: cpz.ExchangeCandle[]
-): cpz.ExchangeCandle[] {
+): Promise<cpz.ExchangeCandle[]> {
   let timeframeCandles: cpz.ExchangeCandle[] = [];
   if (
     !inputCandles ||
@@ -95,7 +92,7 @@ function batchCandles(
   );
   // добавляем еще одну свечу чтобы сформировать прошедший таймфрейм
 
-  fullDatesList.forEach(time => {
+  fullDatesList.forEach(async time => {
     const date = dayjs.utc(time);
     // Пропускаем самую первую свечу
     if (dayjs.utc(dateFrom).valueOf() === date.valueOf()) return;
@@ -126,83 +123,86 @@ function batchCandles(
     }
   });
   if (timeframeCandles.length > 0)
-    timeframeCandles = uniqueElementsBy(
-      timeframeCandles,
-      (a, b) => a.time === b.time
-    ).sort((a, b) => sortAsc(a.time, b.time));
+    timeframeCandles = timeframeCandles.sort((a, b) => sortAsc(a.time, b.time));
 
   return timeframeCandles;
 }
 
-function createCandlesFromTrades(
+async function createCandlesFromTrades(
   dateFrom: string,
   dateTo: string,
   timeframes: cpz.ValidTimeframe[],
   trades: cpz.ExchangeTrade[]
-): cpz.ExchangeCandlesInTimeframes {
-  const result: cpz.ExchangeCandlesInTimeframes = {};
-  if (trades.length > 0) {
-    const { exchange, asset, currency } = trades[0];
+): Promise<cpz.ExchangeCandlesInTimeframes> {
+  try {
+    const result: cpz.ExchangeCandlesInTimeframes = {};
+    if (trades.length > 0) {
+      const { exchange, asset, currency } = trades[0];
 
-    timeframes.forEach(timeframe => {
-      result[timeframe] = [];
-      const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
-      if (duration > 0) {
-        const { unit, amountInUnit } = Timeframe.get(timeframe);
-        const dates = createDatesListWithRange(
-          dateFrom,
-          dateTo,
-          unit,
-          amountInUnit,
-          duration
-        );
-        dates.forEach(date => {
-          const dateTrades = uniqueElementsBy(
-            trades,
-            (a, b) => a.time === b.time
-          )
-            .filter(
-              trade =>
-                trade.time >= dayjs.utc(date.dateFrom).valueOf() &&
-                trade.time <= dayjs.utc(date.dateTo).valueOf()
-            )
-            .sort((a, b) => sortAsc(a.time, b.time));
+      await Promise.all(
+        timeframes.map(async timeframe => {
+          result[timeframe] = [];
+          let currentTrades = [...trades];
+          const duration = Timeframe.durationTimeframe(
+            dateFrom,
+            dateTo,
+            timeframe
+          );
+          if (duration > 0) {
+            const { unit, amountInUnit } = Timeframe.get(timeframe);
+            const dates = createDatesListWithRange(
+              dateFrom,
+              dateTo,
+              unit,
+              amountInUnit,
+              duration
+            );
 
-          if (dateTrades && dateTrades.length > 0) {
-            const volume = +dateTrades
-              .map(t => t.amount)
-              .reduce((a, b) => a + b, 0);
-            result[timeframe].push({
-              exchange,
-              asset,
-              currency,
-              timeframe: timeframe,
-              time: +date.dateFrom, // время в милисекундах
-              timestamp: dayjs.utc(date.dateFrom).toISOString(), // время в ISO UTC
-              open: +dateTrades[0].price, // цена открытия - цена первого тика
-              high: +Math.max(...dateTrades.map(t => +t.price)), // максимальная цена тиков
-              low: +Math.min(...dateTrades.map(t => +t.price)), // минимальная цена тиков
-              close: +dateTrades[dateTrades.length - 1].price, // цена закрытия - цена последнего тика
-              volume, // объем - сумма объема всех тиков
-              type:
-                volume === 0 ? cpz.CandleType.previous : cpz.CandleType.created // признак - свеча сформирована
-            });
+            await Promise.all(
+              dates.map(async date => {
+                const dateTrades = currentTrades.filter(
+                  trade =>
+                    trade.time >= date.dateFrom && trade.time <= date.dateTo
+                );
+
+                if (dateTrades && dateTrades.length > 0) {
+                  currentTrades = currentTrades.slice(dateTrades.length);
+                  const volume = +dateTrades
+                    .map(t => t.amount)
+                    .reduce((a, b) => a + b, 0);
+                  const prices = dateTrades.map(t => +t.price);
+                  result[timeframe].push({
+                    exchange,
+                    asset,
+                    currency,
+                    timeframe: timeframe,
+                    time: +date.dateFrom, // время в милисекундах
+                    timestamp: dayjs.utc(date.dateFrom).toISOString(), // время в ISO UTC
+                    open: +dateTrades[0].price, // цена открытия - цена первого тика
+                    high: +Math.max(...prices), // максимальная цена тиков
+                    low: +Math.min(...prices), // минимальная цена тиков
+                    close: +dateTrades[dateTrades.length - 1].price, // цена закрытия - цена последнего тика
+                    volume, // объем - сумма объема всех тиков
+                    type:
+                      volume === 0
+                        ? cpz.CandleType.previous
+                        : cpz.CandleType.created // признак - свеча сформирована
+                  });
+                }
+              })
+            );
+            result[timeframe] = result[timeframe].sort((a, b) =>
+              sortAsc(a.time, b.time)
+            );
           }
-        });
-        result[timeframe] = uniqueElementsBy(
-          result[timeframe],
-          (a, b) => a.time === b.time
-        )
-          .filter(
-            candle =>
-              candle.time >= dayjs.utc(dateFrom).valueOf() &&
-              candle.time <= dayjs.utc(dateTo).valueOf()
-          )
-          .sort((a, b) => sortAsc(a.time, b.time));
-      }
-    });
+        })
+      );
+    }
+    return result;
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
-  return result;
 }
 
 function getCurrentCandleParams(

@@ -4,7 +4,7 @@ const brokerConfig: BrokerOptions = {
   // Namespace of nodes to segment your nodes on the same network.
   namespace: "cpz-local",
   // Unique node identifier. Must be unique in a namespace.
-  nodeID: "importer",
+  nodeID: "importer-worker",
 
   // Enable/disable logging or use custom logger. More info: https://moleculer.services/docs/0.13/logging.html
   logger: true,
@@ -13,14 +13,14 @@ const brokerConfig: BrokerOptions = {
   transporter: "TCP",
   cacher: "Redis",
   serializer: "JSON",
-  requestTimeout: 30 * 1000,
+  requestTimeout: 60 * 1000,
 
   // Retry policy settings. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Retry
   retryPolicy: {
     // Enable feature
     enabled: true,
     // Count of retries
-    retries: 5,
+    retries: 10,
     // First delay in milliseconds.
     delay: 100,
     // Maximum delay in milliseconds.

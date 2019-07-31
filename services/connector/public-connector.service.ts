@@ -103,6 +103,12 @@ const PublicConnectorService: ServiceSchema = {
         currency: "string",
         dateFrom: "string"
       },
+      retryPolicy: {
+        enabled: true,
+        retries: 20,
+        delay: 0,
+        check: (err: Errors.MoleculerRetryableError) => err && !!err.retryable
+      },
       async handler(ctx): Promise<cpz.ExchangeTrade[]> {
         return this.getTrades(ctx.params);
       }
@@ -390,9 +396,9 @@ const PublicConnectorService: ServiceSchema = {
         type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
       }));
 
-      candles = handleCandleGaps(dateFrom, dateTo.toISOString(), candles);
+      candles = await handleCandleGaps(dateFrom, dateTo.toISOString(), candles);
       if (params.batch && timeframe > cpz.Timeframe["1m"])
-        candles = batchCandles(
+        candles = await batchCandles(
           dateFrom,
           dateTo.toISOString(),
           timeframe,

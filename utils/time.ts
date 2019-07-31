@@ -64,7 +64,10 @@ function chunkDates(
     const chunk = arrayToChunk.splice(0, chunkSize);
     chunks.push({
       dateFrom: dayjs.utc(chunk[0]).toISOString(),
-      dateTo: dayjs.utc(chunk[chunk.length - 1]).toISOString(),
+      dateTo: dayjs
+        .utc(chunk[chunk.length - 1])
+        .endOf(unit)
+        .toISOString(),
       duration: chunk.length
     });
   }

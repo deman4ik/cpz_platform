@@ -15,10 +15,20 @@ import {
 } from "../../utils";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
+import { stat } from "fs";
 
 const ImporterWorkerService: ServiceSchema = {
   name: cpz.Service.IMPORTER_WORKER,
-  mixins: [QueueService()],
+  mixins: [
+    QueueService(process.env.REDIS_URL, {
+      settings: {
+        lockDuration: 120000,
+        lockRenewTime: 10000,
+        stalledInterval: 120000,
+        maxStalledCount: 1
+      }
+    })
+  ],
   dependencies: [
     cpz.Service.PUBLIC_CONNECTOR,
     cpz.Service.DB_IMPORTERS,
@@ -36,10 +46,7 @@ const ImporterWorkerService: ServiceSchema = {
       {
         async process(job: Job) {
           try {
-            this.logger.info(
-              `Importing current candles jobId: ${job.id}`,
-              job.data
-            );
+            this.logger.info(`Importing candles id: ${job.id}`, job.data);
             const state: cpz.Importer = {
               ...job.data,
               status: cpz.Status.started,
@@ -47,24 +54,35 @@ const ImporterWorkerService: ServiceSchema = {
               endedAt: null,
               error: null
             };
+            const currentState = await this.broker.call(
+              `${cpz.Service.DB_IMPORTERS}.get`,
+              { id: state.id }
+            );
+            if (currentState.status === cpz.Status.finished)
+              return {
+                success: true,
+                state: currentState
+              };
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state
             });
             if (state.type === "current") {
-              await this.importerCurrent(state);
+              await this.importerCurrent(job, state);
             } else if (state.type === "history") {
-              await this.importerHistory(state);
+              await this.importerHistory(job, state);
             }
             state.endedAt = dayjs.utc().toISOString();
             state.status = cpz.Status.finished;
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state
             });
+            this.logger.info(`Finished importing candles id: ${job.id}`);
             return {
               success: true,
               state
             };
           } catch (e) {
+            this.logger.error(e);
             if (e instanceof Errors.ValidationError) {
               return {
                 success: false,
@@ -83,7 +101,7 @@ const ImporterWorkerService: ServiceSchema = {
     ]
   },
   methods: {
-    async importerCurrent(state) {
+    async importerCurrent(job, state) {
       try {
         const {
           id,
@@ -128,7 +146,7 @@ const ImporterWorkerService: ServiceSchema = {
               };
             } else loadTimeframes.candles.push(timeframe);
           });
-          if (loadTimeframes.candles.length > 0)
+          if (loadTimeframes.candles.length > 0) {
             candlesInTimeframes = await this.importCandles({
               exchange,
               asset,
@@ -136,6 +154,8 @@ const ImporterWorkerService: ServiceSchema = {
               timeframes: loadTimeframes.candles,
               amount
             });
+            this.logger.info(`Loaded and handled candles id: ${id}`);
+          }
 
           if (Object.keys(loadTimeframes.trades).length > 0) {
             const tradesTimeframes = Object.keys(loadTimeframes.trades).map(
@@ -156,26 +176,29 @@ const ImporterWorkerService: ServiceSchema = {
               dateFrom,
               dateTo: currentDate.toISOString()
             });
-
-            this.logger.info(
-              `${id} creating candles from ${trades.length} trades`
-            );
+            this.logger.info(`Loaded ${trades.length} id: ${id}`);
+            await job.progress(25);
             const candlesFromTradesInTimeframes = createCandlesFromTrades(
               dateFrom,
               currentDate.toISOString(),
               tradesTimeframes,
               trades
             );
-            this.logger.info(`${id} handling candle gaps`);
-            Object.keys(candlesFromTradesInTimeframes).forEach(
-              (timeframe: string) => {
-                candlesInTimeframes[+timeframe] = handleCandleGaps(
-                  loadTimeframes.trades[+timeframe].dateFrom,
-                  currentDate.toISOString(),
-                  candlesInTimeframes[+timeframe]
-                );
-              }
+            this.logger.info(`Created candles from trades id: ${id}`);
+            await job.progress(50);
+
+            await Promise.all(
+              Object.keys(candlesFromTradesInTimeframes).map(
+                async (timeframe: string) => {
+                  candlesInTimeframes[+timeframe] = await handleCandleGaps(
+                    loadTimeframes.trades[+timeframe].dateFrom,
+                    currentDate.toISOString(),
+                    candlesInTimeframes[+timeframe]
+                  );
+                }
+              )
             );
+            this.logger.info(`Handled candle gaps id: ${id}`);
           }
         } else {
           candlesInTimeframes = await this.importCandles({
@@ -185,17 +208,20 @@ const ImporterWorkerService: ServiceSchema = {
             timeframes,
             amount
           });
+          this.logger.info(`Loaded and handled candles id: ${id}`);
         }
-
+        await job.progress(75);
         if (!candlesInTimeframes) throw new Error("Failed to import candles");
 
         await this.saveCandles(candlesInTimeframes);
+        this.logger.info(`Saved candles to db id: ${id}`);
+        await job.progress(100);
       } catch (e) {
         this.logger.error(e);
         throw e;
       }
     },
-    async importerHistory(state) {
+    async importerHistory(job, state) {
       try {
         const {
           id,
@@ -224,23 +250,28 @@ const ImporterWorkerService: ServiceSchema = {
             dateFrom,
             dateTo
           });
-          this.logger.info(
-            `${id} creating candles from ${trades.length} trades`
-          );
-          candlesInTimeframes = createCandlesFromTrades(
+          this.logger.info(`Loaded ${trades.length} id: ${id}`);
+          await job.progress(25);
+
+          candlesInTimeframes = await createCandlesFromTrades(
             dateFrom,
             dateTo,
             timeframes,
             trades
           );
-          this.logger.info(`${id} handling candle gaps`);
-          Object.keys(candlesInTimeframes).forEach((timeframe: string) => {
-            candlesInTimeframes[+timeframe] = handleCandleGaps(
-              paramsDateFrom,
-              dateTo,
-              candlesInTimeframes[+timeframe]
-            );
-          });
+          this.logger.info(`Created candles from trades id: ${id}`);
+          await job.progress(50);
+
+          await Promise.all(
+            Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
+              candlesInTimeframes[+timeframe] = await handleCandleGaps(
+                paramsDateFrom,
+                dateTo,
+                candlesInTimeframes[+timeframe]
+              );
+            })
+          );
+          this.logger.info(`Handled candle gaps id: ${id}`);
         } else {
           candlesInTimeframes = await this.importCandles({
             exchange,
@@ -250,11 +281,15 @@ const ImporterWorkerService: ServiceSchema = {
             dateFrom: paramsDateFrom,
             dateTo
           });
+          this.logger.info(`Loaded and handled candles id: ${id}`);
         }
 
+        await job.progress(75);
         if (!candlesInTimeframes) throw new Error("Failed to import candles");
 
         await this.saveCandles(candlesInTimeframes);
+        this.logger.info(`Saved candles to db id: ${id}`);
+        await job.progress(100);
       } catch (e) {
         this.logger.error(e);
         throw e;
@@ -322,18 +357,14 @@ const ImporterWorkerService: ServiceSchema = {
               .toISOString();
           }
 
-          const { chunks, total } = chunkDates(
+          const { chunks } = chunkDates(
             dateStart,
             dateStop,
             unit,
             amountInUnit,
             limit / amountInUnit
           );
-          this.logger.info(
-            `Loading ${total} ${slug} candles from ${dateStart} to ${dateStop} by ${
-              chunks.length
-            } chunks`
-          );
+
           const loadResults = await Promise.all(
             chunks.map(async ({ dateFrom: loadFrom }) => {
               const candles = await this.broker.call(
@@ -348,9 +379,10 @@ const ImporterWorkerService: ServiceSchema = {
                 }
               );
 
-              if (!candles || !Array.isArray(candles) || candles.length === 0)
+              if (!candles || !Array.isArray(candles) || candles.length === 0) {
                 this.logger.error(`${slug} ${loadFrom} empty response!`);
-              else {
+                return [];
+              } else {
                 return candles;
               }
             })
@@ -366,9 +398,6 @@ const ImporterWorkerService: ServiceSchema = {
                 candle.time <= dayjs.utc(dateStop).valueOf()
             )
             .sort((a, b) => sortAsc(a.time, b.time));
-          this.logger.info(
-            `Loaded ${result[timeframe].length} ${slug} candles`
-          );
         })
       );
       return result;
@@ -405,46 +434,66 @@ const ImporterWorkerService: ServiceSchema = {
       dateFrom: string;
       dateTo: string;
     }): Promise<cpz.ExchangeTrade[]> {
-      let trades: cpz.ExchangeTrade[] = [];
-      let dateNext = dayjs.utc(dateFrom);
-      while (dateNext.valueOf() < dayjs.utc(dateTo).valueOf()) {
-        this.logger.info(
-          `Loading ${exchange}.${asset}.${currency} trades from ${dayjs
-            .utc(dateNext)
-            .toISOString()}`
-        );
-        try {
-          const response = await this.broker.call(
-            `${cpz.Service.PUBLIC_CONNECTOR}.getTrades`,
-            {
-              exchange,
-              asset,
-              currency,
-              dateFrom: dateNext.toISOString()
-            }
-          );
-          if (!response || !Array.isArray(response))
-            throw new Error("Wrong connector response");
+      const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 1, 1);
 
-          dateNext = dayjs.utc(dateTo);
-          if (response.length > 0) {
-            trades = uniqueElementsBy(
-              [...trades, ...response],
-              (a, b) => a.time === b.time
-            )
-              .filter(
-                trade =>
-                  trade.time >= dayjs.utc(dateFrom).valueOf() &&
-                  trade.time <= dayjs.utc(dateTo).valueOf()
-              )
-              .sort((a, b) => sortAsc(a.time, b.time));
-            dateNext = dayjs.utc(response[response.length - 1].timestamp);
+      const loadedChunks = await Promise.all(
+        chunks.map(async ({ dateFrom: loadDateFrom, dateTo: loadDateTo }) => {
+          let loadedTrades: cpz.ExchangeTrade[] = [];
+          let dateNext = dayjs.utc(loadDateFrom);
+          while (dateNext.valueOf() <= dayjs.utc(loadDateTo).valueOf()) {
+            try {
+              this.logger.info(
+                `Loading  ${exchange} ${asset} ${currency} trades ${dateNext.toISOString()}`
+              );
+              const response = await this.broker.call(
+                `${cpz.Service.PUBLIC_CONNECTOR}.getTrades`,
+                {
+                  exchange,
+                  asset,
+                  currency,
+                  dateFrom: dateNext.toISOString()
+                }
+              );
+              if (!response || !Array.isArray(response))
+                throw new Error("Wrong connector response");
+
+              this.logger.info(
+                `Loaded trades ${exchange} ${asset} ${currency} ${
+                  response.length
+                } trades${dateNext.toISOString()}`
+              );
+              dateNext = dayjs.utc(loadDateTo);
+              if (response.length > 0) {
+                loadedTrades = uniqueElementsBy(
+                  [...loadedTrades, ...response],
+                  (a, b) =>
+                    a.time === b.time &&
+                    a.price === b.price &&
+                    a.amount === b.amount &&
+                    a.side === b.side
+                )
+                  .filter(
+                    trade =>
+                      trade.time >= dayjs.utc(dateFrom).valueOf() &&
+                      trade.time <= dayjs.utc(dateTo).valueOf()
+                  )
+                  .sort((a, b) => sortAsc(a.time, b.time));
+
+                dateNext = dayjs.utc(response[response.length - 1].timestamp);
+              }
+            } catch (e) {
+              this.logger.error(e);
+              return [];
+            }
           }
-        } catch (e) {
-          this.logger.error(e);
-          throw e;
-        }
-      }
+          return loadedTrades;
+        })
+      );
+
+      const trades: cpz.ExchangeTrade[] = []
+        .concat(...loadedChunks)
+        .sort((a, b) => sortAsc(a.time, b.time));
+
       return trades;
     },
     async saveCandles(
@@ -458,31 +507,23 @@ const ImporterWorkerService: ServiceSchema = {
                 const { exchange, asset, currency } = candlesInTimeframes[
                   +timeframe
                 ][0];
-                const chunks = chunkArray(
-                  candlesInTimeframes[+timeframe],
-                  1000
-                );
-                await Promise.all(
-                  chunks.map(async chunk => {
-                    try {
-                      await this.broker.call(
-                        `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
-                        {
-                          entities: chunk.map(candle => ({
-                            id: uuid(),
-                            ...candle
-                          }))
-                        }
-                      );
-                    } catch (e) {
-                      this.logger.error(e);
-                      throw e;
-                    }
-                  })
-                );
-                this.logger.info(
-                  `Saved ${exchange}.${asset}.${currency}.${timeframe} candles.`
-                );
+                const chunks = chunkArray(candlesInTimeframes[+timeframe], 500);
+                for (const chunk of chunks) {
+                  try {
+                    await this.broker.call(
+                      `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
+                      {
+                        entities: chunk.map(candle => ({
+                          id: uuid(),
+                          ...candle
+                        }))
+                      }
+                    );
+                  } catch (e) {
+                    this.logger.error(e);
+                    throw e;
+                  }
+                }
               }
             } catch (e) {
               this.logger.error(e);
