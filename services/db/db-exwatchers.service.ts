@@ -4,21 +4,20 @@ import SqlAdapter from "../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../types/cpz";
 
-const ImportersService: ServiceSchema = {
-  name: cpz.Service.DB_IMPORTERS,
+const ExwatchersService: ServiceSchema = {
+  name: cpz.Service.DB_EXWATCHERS,
   mixins: [DbService],
   adapter: SqlAdapter,
   model: {
-    name: "importers",
+    name: "exwatchers",
     define: {
-      id: { type: Sequelize.UUID, primaryKey: true },
+      id: { type: Sequelize.STRING, primaryKey: true },
       exchange: Sequelize.STRING,
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,
-      params: Sequelize.JSONB,
       status: Sequelize.STRING,
-      startedAt: { type: Sequelize.DATE, allowNull: true, field: "started_at" },
-      endedAt: { type: Sequelize.DATE, allowNull: true, field: "ended_at" },
+      nodeId: { type: Sequelize.STRING },
+      importerId: { type: Sequelize.UUID, allowNull: true },
       error: { type: Sequelize.JSONB, allowNull: true }
     },
     options: {
@@ -36,17 +35,9 @@ const ImportersService: ServiceSchema = {
             exchange: "string",
             asset: "string",
             currency: "string",
-            type: "string",
-            params: "object",
             status: "string",
-            startedAt: {
-              type: "string",
-              optional: true
-            },
-            endedAt: {
-              type: "string",
-              optional: true
-            },
+            nodeId: "string",
+            importerId: "string",
             error: {
               type: "object",
               optional: true
@@ -61,32 +52,35 @@ const ImportersService: ServiceSchema = {
             exchange,
             asset,
             currency,
-            type,
-            params,
             status,
-            startedAt,
-            endedAt,
+            nodeId,
+            importerId,
             error
-          }: cpz.Importer = ctx.params.entity;
+          }: cpz.Exwatcher = ctx.params.entity;
           const value = Object.values({
             id,
             exchange,
             asset,
             currency,
-            type,
-            params: JSON.stringify(params),
             status,
-            started_at: startedAt,
-            ended_at: endedAt,
+            nodeId,
+            importerId,
             error: JSON.stringify(error)
           });
-          const query = `INSERT INTO importers 
-          (id, exchange, asset, currency, type, params, status, started_at, ended_at, error) 
+          const query = `INSERT INTO exwatchers 
+          ( id, 
+            exchange,
+            asset,
+            currency,
+            status,
+            nodeId,
+            importerId, 
+            error
+          ) 
           VALUES (?)
-           ON CONFLICT ON CONSTRAINT importers_pkey 
+           ON CONFLICT ON CONSTRAINT exwatchers_pkey 
            DO UPDATE SET status = excluded.status,
-           started_at = excluded.started_at,
-           ended_at = excluded.ended_at,
+           importerId = excluded.importerId,
            error = excluded.error;`;
 
           await this.adapter.db.query(query, {
@@ -108,4 +102,4 @@ const ImportersService: ServiceSchema = {
   }
 };
 
-export = ImportersService;
+export = ExwatchersService;

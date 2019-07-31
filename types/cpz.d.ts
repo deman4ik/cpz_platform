@@ -6,6 +6,8 @@ export namespace cpz {
   const enum Service {
     DB_IMPORTERS = "db-importers",
     DB_CANDLES = "db-candles",
+    DB_CANDLES_CURRENT = "db-candles-current",
+    DB_EXWATCHERS = "db-exwatchers",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -21,6 +23,13 @@ export namespace cpz {
     failed = "failed"
   }
   type Statuses = Status;
+
+  const enum ExwatcherStatus {
+    importing = "importing",
+    subscribed = "subscribed",
+    failed = "failed"
+  }
+  type ExwatcherStatuses = ExwatcherStatus;
 
   const enum CandleType {
     loaded = "loaded",
@@ -104,6 +113,10 @@ export namespace cpz {
     type: CandleTypes;
   }
 
+  interface Candle extends DBCandle {
+    timeframe: number;
+  }
+
   interface ExchangePrice extends AssetSymbol {
     time: number;
     timestamp: string;
@@ -141,6 +154,17 @@ export namespace cpz {
     status: cpz.Statuses;
     startedAt?: string;
     endedAt?: string;
+    error?: any;
+  }
+
+  interface Exwatcher {
+    id: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    status: cpz.ExwatcherStatuses;
+    nodeId: string;
+    importerId: string;
     error?: any;
   }
 }

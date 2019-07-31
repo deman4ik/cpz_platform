@@ -4,17 +4,18 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
 
-const CandlesService: ServiceSchema = {
-  name: `${cpz.Service.DB_CANDLES}240`,
+const CandlesCurrentService: ServiceSchema = {
+  name: cpz.Service.DB_CANDLES_CURRENT,
   mixins: [DbService],
   adapter: SqlAdapter,
   model: {
-    name: "candles240",
+    name: "candles_current",
     define: {
       id: { type: Sequelize.UUID, primaryKey: true },
       exchange: Sequelize.STRING,
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,
+      timeframe: Sequelize.INTEGER,
       time: Sequelize.BIGINT,
       timestamp: Sequelize.DATE,
       open: Sequelize.DOUBLE,
@@ -27,7 +28,6 @@ const CandlesService: ServiceSchema = {
     options: {
       freezeTableName: true,
       timestamps: false
-      // Options from http://docs.sequelizejs.com/manual/tutorial/models-definition.html
     }
   },
   actions: {
@@ -46,6 +46,7 @@ const CandlesService: ServiceSchema = {
               exchange: { type: "string" },
               asset: { type: "string" },
               currency: { type: "string" },
+              timeframe: { type: "number" },
               time: { type: "number" },
               timestamp: {
                 type: "string"
@@ -62,12 +63,13 @@ const CandlesService: ServiceSchema = {
       },
       async handler(ctx) {
         try {
-          const values = ctx.params.entities.map((candle: cpz.DBCandle) => {
+          const values = ctx.params.entities.map((candle: cpz.Candle) => {
             const val = {
               id: candle.id,
               exchange: candle.exchange,
               asset: candle.asset,
               currency: candle.currency,
+              timeframe: candle.timeframe,
               open: candle.open,
               high: candle.high,
               low: candle.low,
@@ -80,13 +82,13 @@ const CandlesService: ServiceSchema = {
             return Object.values(val);
           });
 
-          const query = `INSERT INTO candles240 (id, exchange, asset, currency, open, high, low, close, volume, time, timestamp, type) VALUES
+          const query = `INSERT INTO candles_current (id, exchange, asset, currency, timeframe, open, high, low, close, volume, time, timestamp, type) VALUES
           ${values
-            .map((_: cpz.DBCandle) => {
+            .map((_: cpz.Candle) => {
               return "(?)";
             })
             .join(",")} 
-           ON CONFLICT ON CONSTRAINT candles240_time_exchange_asset_currency_key 
+           ON CONFLICT ON CONSTRAINT candles_current_exchange_asset_currency_timeframe_key
            DO UPDATE SET open = excluded.open,
            high = excluded.high,
            low = excluded.low,
@@ -114,4 +116,4 @@ const CandlesService: ServiceSchema = {
   }
 };
 
-export = CandlesService;
+export = CandlesCurrentService;

@@ -1,32 +1,13 @@
 import { ServiceSchema, Errors } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "moleculer-db-adapter-sequelize";
+import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
 
 const CandlesService: ServiceSchema = {
   name: `${cpz.Service.DB_CANDLES}1440`,
   mixins: [DbService],
-  adapter: new SqlAdapter(
-    process.env.PG_DBNAME,
-    process.env.PG_USER,
-    process.env.PG_PWD,
-    {
-      dialect: "postgres",
-      host: process.env.PG_HOST,
-      port: process.env.PG_PORT,
-      dialectOptions: {
-        ssl: true
-      },
-      logging: false,
-      pool: {
-        max: 50,
-        min: 1,
-        acquire: 20000,
-        idle: 20000
-      }
-    }
-  ),
+  adapter: SqlAdapter,
   model: {
     name: "candles1440",
     define: {

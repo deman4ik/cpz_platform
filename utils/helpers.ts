@@ -33,6 +33,15 @@ function sortDesc(a: number, b: number): number {
 }
 
 /**
+ * Возвращает исходную строку с прописным первым символом
+ *
+ * @param {string} string исходная строка
+ */
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
  * Сравнение двух массивов
  *
  * @param {Array} full
@@ -77,4 +86,12 @@ function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
  */
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export { sortAsc, sortDesc, arraysDiff, chunkArray, uniqueElementsBy, sleep };
+export {
+  sortAsc,
+  sortDesc,
+  capitalize,
+  arraysDiff,
+  chunkArray,
+  uniqueElementsBy,
+  sleep
+};

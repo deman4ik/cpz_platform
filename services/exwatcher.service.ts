@@ -1,6 +1,7 @@
 import { ServiceSchema } from "moleculer";
 import socketio from "socket.io-client";
 import { cpz } from "../types/cpz";
+import { capitalize } from "../utils";
 
 const ExwatcherService: ServiceSchema = {
   name: cpz.Service.EXWATCHER,
@@ -15,6 +16,8 @@ const ExwatcherService: ServiceSchema = {
    */
   dependencies: [
     cpz.Service.PUBLIC_CONNECTOR,
+    cpz.Service.DB_EXWATCHERS,
+    cpz.Service.DB_CANDLES_CURRENT,
     `${cpz.Service.DB_CANDLES}1`,
     `${cpz.Service.DB_CANDLES}5`,
     `${cpz.Service.DB_CANDLES}15`,
@@ -52,35 +55,39 @@ const ExwatcherService: ServiceSchema = {
      * @param {String} currency - Currency
      */
     subscribe: {
+      params: {
+        exchange: "string",
+        asset: "string",
+        currency: "string"
+      },
       async handler(ctx) {
-        const subscribtions = [
-          `0~Bitfinex~BTC~USD`,
-          `0~Bitfinex~ETH~USD`,
-          `0~Bitfinex~XRP~USD`,
-          `0~Bitfinex~BCH~USD`,
-          `0~Kraken~BTC~USD`,
-          `0~Kraken~ETH~USD`,
-          `0~Kraken~XRP~USD`,
-          `0~Kraken~BCH~USD`
-        ];
-        // set values in cache
-        await this.broker.cacher.client
-          .pipeline()
-          .set(
-            `marketwatcher.${this.broker.nodeID}`,
-            JSON.stringify({
-              subscribtions
-            })
+        return await this.subscribe(
+          ctx.params.exchange,
+          ctx.params.asset,
+          ctx.params.currency
+        );
+      }
+    },
+    subscribeMany: {
+      params: {
+        subcriptions: {
+          type: "array",
+          items: {
+            type: "object",
+            props: {
+              exchange: "string",
+              asset: "string",
+              currency: "string"
+            }
+          }
+        }
+      },
+      async handler(ctx) {
+        return await Promise.all(
+          ctx.params.subcriptions.map(async (sub: cpz.AssetSymbol) =>
+            this.subscribe(sub.exchange, sub.asset, sub.currency)
           )
-          .exec();
-        /*
-       
-        if (this.socket.connected) {
-          this.socket.emit("SubAdd", {
-            subs: subscribtions
-          });
-        }*/
-        return { success: true };
+        );
       }
     },
     async unsubscribe() {
@@ -103,11 +110,83 @@ const ExwatcherService: ServiceSchema = {
    * Methods
    */
   methods: {
+    async subscribe(exchange, asset, currency) {
+      const id = `${exchange}.${asset}.${currency}`;
+
+      if (!this.subcriptions[id]) {
+        this.subcriptions[id] = {
+          id,
+          exchange,
+          asset,
+          currency,
+          status: cpz.ExwatcherStatus.importing,
+          nodeId: this.broker.nodeID,
+          importerId: null,
+          error: null
+        };
+
+        const importerId = await this.importCurrentCandles(
+          this.subcriptions[id]
+        );
+        this.subcriptions[id].importerId = importerId;
+        await this.saveSubscription(this.subcriptions[id]);
+      }
+      return this.subcriptions[id];
+    },
+    async saveSubscription(subcription: cpz.Exwatcher) {
+      await this.broker.call(`${cpz.Service.DB_EXWATCHERS}.upsert`, {
+        entity: subcription
+      });
+    },
+    async importCurrentCandles(subcription: cpz.Exwatcher) {
+      const { exchange, asset, currency } = subcription;
+      const { id } = await this.broker.call(
+        `${cpz.Service.IMPORTER_RUNNER}.startCurrent`,
+        {
+          exchange,
+          asset,
+          currency
+        }
+      );
+      return id;
+    },
+    async subscribeSocket(id) {
+      const { exchange, asset, currency } = this.subcriptions[id];
+      const capExchange = capitalize(exchange);
+      const tradesSub = `0~${capExchange}~${asset}~${currency}`;
+      const ticksSub = `2~${capExchange}~${asset}~${currency}`;
+      if (this.socket.connected) {
+        this.socket.emit("SubAdd", {
+          subs: [tradesSub, ticksSub]
+        });
+        this.subcriptions[id].status = cpz.ExwatcherStatus.subscribed;
+      } else {
+        this.subcriptions[id].status = cpz.ExwatcherStatus.failed;
+      }
+      await this.saveSubscription(id);
+    },
     socketOnConnect(): void {
       this.logger.info("Socket connect");
     },
-    socketOnMessage(message: string): void {
-      this.logger.info("New message", message);
+    async socketOnMessage(message: string): Promise<void> {
+      const data = this.processData(message);
+      if (this.preloadComplete && data) {
+        this.logger.info(
+          `${data.timestamp} ${data.exchange}.${data.asset}.${data.currency} ${
+            data.type
+          } ${data.price} `
+        );
+        if (data.type === "trade") {
+          this.saveTrade(data);
+        }
+        if (data.type === "tick") await this.publishTick(data);
+      }
+    },
+    saveTrade(trade) {
+      this._trades[`${trade.asset}/${trade.currency}`].push(trade);
+    },
+    async publishTick(tick) {
+      //TODO: Broadcast new tick event
     },
     socketOnDisconnect(e): void {
       this.logger.warn("Socket disconnect", e);
@@ -117,6 +196,66 @@ const ExwatcherService: ServiceSchema = {
     },
     socketOnReconnectFailed(e): void {
       this.logger.error("Socket reconnect failed", e);
+    },
+    getDirection(dir) {
+      switch (dir) {
+        case "1":
+          return "up";
+        case "2":
+          return "down";
+        case "4":
+          return "unchanged";
+        default:
+          return "unknown";
+      }
+    },
+    processData(value) {
+      const valuesArray = value.split("~");
+
+      const type = valuesArray[0];
+
+      if (type === "2") {
+        // {Type}~{ExchangeName}~{FromCurrency}~{ToCurrency}~{Flag}~{Price}~{LastUpdate}~{LastVolume}~{LastVolumeTo}~{LastTradeId}~{Volume24h}~{Volume24hTo}~{MaskInt}
+
+        const mask = valuesArray[valuesArray.length - 1].toString().slice(-1);
+        if (mask === "9") {
+          return {
+            type: "tick",
+            exchange: valuesArray[1].toLowerCase(),
+            asset: valuesArray[2],
+            currency: valuesArray[3],
+            direction: this.getDirection(valuesArray[4]),
+            price: parseFloat(valuesArray[5]),
+            time: parseInt(valuesArray[6], 10) * 1000,
+            timestamp: new Date(
+              parseInt(valuesArray[6], 10) * 1000
+            ).toISOString(),
+            amount: parseFloat(valuesArray[8]),
+            tradeId: valuesArray[9]
+          };
+        }
+      }
+      if (type === "0") {
+        // {SubscriptionId}~{ExchangeName}~{CurrencySymbol}~{CurrencySymbol}~{Flag}~{TradeId}~{TimeStamp}~{Quantity}~{Price}~{Total}
+        return {
+          type: "trade",
+          exchange: valuesArray[1].toLowerCase(),
+          asset: valuesArray[2],
+          currency: valuesArray[3],
+          direction: this.getDirection(valuesArray[4]),
+          tradeId: valuesArray[5],
+          time: parseInt(valuesArray[6], 10) * 1000,
+          timestamp: new Date(
+            parseInt(valuesArray[6], 10) * 1000
+          ).toISOString(),
+          amount: parseFloat(valuesArray[7]),
+          price: parseFloat(valuesArray[8])
+        };
+      }
+      if (type === "3") {
+        if (valuesArray[1] === "LOADCOMPLETE") this.preloadComplete = true;
+      }
+      return null;
     }
   },
 
@@ -124,6 +263,9 @@ const ExwatcherService: ServiceSchema = {
    * Service created lifecycle event handler
    */
   created() {
+    this.preloadComplete = false;
+    this.trades = {};
+    this.subcriptions = {};
     this.socket = socketio("https://streamer.cryptocompare.com/", {
       transports: ["websocket"]
     });
