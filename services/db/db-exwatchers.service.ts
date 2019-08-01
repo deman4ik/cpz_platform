@@ -16,8 +16,12 @@ const ExwatchersService: ServiceSchema = {
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,
       status: Sequelize.STRING,
-      nodeId: { type: Sequelize.STRING },
-      importerId: { type: Sequelize.UUID, allowNull: true },
+      nodeId: { type: Sequelize.STRING, field: "node_id" },
+      importerId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        field: "importer_id"
+      },
       error: { type: Sequelize.JSONB, allowNull: true }
     },
     options: {
@@ -73,14 +77,14 @@ const ExwatchersService: ServiceSchema = {
             asset,
             currency,
             status,
-            nodeId,
-            importerId, 
+            node_id,
+            importer_id, 
             error
           ) 
           VALUES (?)
            ON CONFLICT ON CONSTRAINT exwatchers_pkey 
            DO UPDATE SET status = excluded.status,
-           importerId = excluded.importerId,
+           importer_id = excluded.importer_id,
            error = excluded.error;`;
 
           await this.adapter.db.query(query, {

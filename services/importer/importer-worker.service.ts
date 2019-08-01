@@ -76,6 +76,7 @@ const ImporterWorkerService: ServiceSchema = {
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state
             });
+            this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
             this.logger.info(`Finished importing candles id: ${job.id}`);
             return {
               success: true,

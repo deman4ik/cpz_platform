@@ -14,6 +14,13 @@ export namespace cpz {
     PUBLIC_CONNECTOR = "public-connector"
   }
 
+  const enum Event {
+    IMPORTER_STARTED = "importer.started",
+    IMPORTER_FINISHED = "importer.finished",
+    CANDLE_NEW = "candle.new",
+    TICK_NEW = "tick.new"
+  }
+
   const enum Status {
     pending = "pending",
     queued = "queued",
@@ -27,6 +34,7 @@ export namespace cpz {
   const enum ExwatcherStatus {
     importing = "importing",
     subscribed = "subscribed",
+    unsubscribed = "unsubscribed",
     failed = "failed"
   }
   type ExwatcherStatuses = ExwatcherStatus;
@@ -126,6 +134,11 @@ export namespace cpz {
   interface ExchangeTrade extends ExchangePrice {
     amount: number;
     side: string;
+  }
+
+  interface ExwatcherTrade extends ExchangeTrade {
+    tradeId: string;
+    type: "trade" | "tick";
   }
 
   interface ExchangeTimeframes {
