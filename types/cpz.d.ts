@@ -29,33 +29,27 @@ export namespace cpz {
     finished = "finished",
     failed = "failed"
   }
-  type Statuses = Status;
 
   const enum ExwatcherStatus {
+    pending = "pending",
     importing = "importing",
     subscribed = "subscribed",
     unsubscribed = "unsubscribed",
     failed = "failed"
   }
-  type ExwatcherStatuses = ExwatcherStatus;
 
   const enum CandleType {
     loaded = "loaded",
     created = "created",
     previous = "previous"
   }
-  type CandleTypes = CandleType;
 
   const enum TimeUnit {
     minute = "minute",
     hour = "hour",
     day = "day"
   }
-  const enum Exchange {
-    bitfinex = "bitfinex",
-    kraken = "kraken"
-  }
-  type ExchangeName = Exchange;
+
   const enum Timeframe {
     "1m" = 1,
     "5m" = 5,
@@ -66,35 +60,18 @@ export namespace cpz {
     "4h" = 240,
     "1d" = 1440
   }
-  type ValidTimeframe = Timeframe;
+
   const enum Queue {
     importCandles = "importCandles"
   }
-  type QueueName = Queue;
 
-  type ImportType = "current" | "history";
+  type ImportType = "recent" | "history";
 
-  interface AssetSymbol {
-    exchange: ExchangeName;
+  interface ExchangeCandle {
+    exchange: string;
     asset: string;
     currency: string;
-  }
-
-  interface CandleParams extends AssetSymbol {
-    timeframe: ValidTimeframe;
-  }
-
-  interface CandlesFetchParams extends CandleParams {
-    dateFrom: string;
-    limit: number;
-  }
-
-  interface TradesFetchParams extends AssetSymbol {
-    dateFrom: string;
-  }
-
-  interface ExchangeCandle extends AssetSymbol {
-    timeframe: ValidTimeframe;
+    timeframe: Timeframe;
     time: number;
     timestamp: string;
     open: number;
@@ -102,14 +79,17 @@ export namespace cpz {
     low: number;
     close: number;
     volume: number;
-    type: CandleTypes;
+    type: CandleType;
   }
 
   interface ExchangeCandlesInTimeframes {
     [key: number]: ExchangeCandle[];
   }
 
-  interface DBCandle extends AssetSymbol {
+  interface DBCandle {
+    exchange: string;
+    asset: string;
+    currency: string;
     id: string;
     time: number;
     timestamp: string;
@@ -118,14 +98,17 @@ export namespace cpz {
     low: number;
     close: number;
     volume: number;
-    type: CandleTypes;
+    type: CandleType;
   }
 
   interface Candle extends DBCandle {
     timeframe: number;
   }
 
-  interface ExchangePrice extends AssetSymbol {
+  interface ExchangePrice {
+    exchange: string;
+    asset: string;
+    currency: string;
     time: number;
     timestamp: string;
     price: number;
@@ -142,13 +125,13 @@ export namespace cpz {
   }
 
   interface ExchangeTimeframes {
-    [key: string]: ValidTimeframe;
+    [key: string]: Timeframe;
   }
 
   interface TimeframeProps {
     str: string;
-    value: ValidTimeframe;
-    lower: ValidTimeframe;
+    value: Timeframe;
+    lower: Timeframe;
     unit: TimeUnit;
     amountInUnit: number;
   }
@@ -159,12 +142,12 @@ export namespace cpz {
 
   interface Importer {
     id: string;
-    exchange: cpz.ExchangeName;
+    exchange: string;
     asset: string;
     currency: string;
     type: cpz.ImportType;
     params: any;
-    status: cpz.Statuses;
+    status: cpz.Status;
     startedAt?: string;
     endedAt?: string;
     error?: any;
@@ -175,7 +158,7 @@ export namespace cpz {
     exchange: string;
     asset: string;
     currency: string;
-    status: cpz.ExwatcherStatuses;
+    status: cpz.ExwatcherStatus;
     nodeId: string;
     importerId: string;
     error?: any;

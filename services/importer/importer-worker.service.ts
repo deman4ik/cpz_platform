@@ -66,8 +66,8 @@ const ImporterWorkerService: ServiceSchema = {
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state
             });
-            if (state.type === "current") {
-              await this.importerCurrent(job, state);
+            if (state.type === "recent") {
+              await this.importerRecent(job, state);
             } else if (state.type === "history") {
               await this.importerHistory(job, state);
             }
@@ -91,7 +91,7 @@ const ImporterWorkerService: ServiceSchema = {
               };
             }
             throw new Errors.MoleculerError(
-              `Failed to import current candles jobId: ${job.id}`,
+              `Failed to import candles jobId: ${job.id}`,
               500,
               this.name,
               { ...job.data }
@@ -102,7 +102,7 @@ const ImporterWorkerService: ServiceSchema = {
     ]
   },
   methods: {
-    async importerCurrent(job, state) {
+    async importerRecent(job, state) {
       try {
         const {
           id,
@@ -117,12 +117,12 @@ const ImporterWorkerService: ServiceSchema = {
           const currentDate = dayjs.utc();
           const loadTimeframes: {
             trades: { [key: number]: { dateFrom: string } };
-            candles: cpz.ValidTimeframe[];
+            candles: cpz.Timeframe[];
           } = {
             trades: [],
             candles: []
           };
-          timeframes.forEach((timeframe: cpz.ValidTimeframe) => {
+          timeframes.forEach((timeframe: cpz.Timeframe) => {
             const { unit, amountInUnit } = Timeframe.get(timeframe);
             const dateFrom = currentDate.add(-amount * amountInUnit, unit);
             if (
@@ -300,10 +300,10 @@ const ImporterWorkerService: ServiceSchema = {
      * Import candles
      *
      * @param {{
-     *       exchange: cpz.ExchangeName;
+     *       exchange: string;
      *       asset: string;
      *       currency: string;
-     *       timeframes: cpz.ValidTimeframe[];
+     *       timeframes: cpz.Timeframe[];
      *       dateFrom?: string;
      *       dateTo?: string;
      *       amount?: number;
@@ -330,10 +330,10 @@ const ImporterWorkerService: ServiceSchema = {
         .toISOString(),
       amount
     }: {
-      exchange: cpz.ExchangeName;
+      exchange: string;
       asset: string;
       currency: string;
-      timeframes: cpz.ValidTimeframe[];
+      timeframes: cpz.Timeframe[];
       dateFrom?: string;
       dateTo: string;
       amount?: number;
@@ -345,7 +345,9 @@ const ImporterWorkerService: ServiceSchema = {
           const slug = `${exchange}.${asset}.${currency}.${timeframe}`;
           const { unit, amountInUnit } = Timeframe.get(timeframe);
           const limit =
-            loadLimit(exchange) > amount ? amount : loadLimit(exchange);
+            amount && loadLimit(exchange) > amount
+              ? amount
+              : loadLimit(exchange);
 
           let dateStart = dateFrom;
           let dateStop = getValidDate(dateTo, unit);
@@ -408,7 +410,7 @@ const ImporterWorkerService: ServiceSchema = {
      * Import Trades
      *
      * @param {{
-     *       exchange: cpz.ExchangeName;
+     *       exchange: string;
      *       asset: string;
      *       currency: string;
      *       dateFrom: string;
@@ -429,7 +431,7 @@ const ImporterWorkerService: ServiceSchema = {
       dateFrom,
       dateTo
     }: {
-      exchange: cpz.ExchangeName;
+      exchange: string;
       asset: string;
       currency: string;
       dateFrom: string;

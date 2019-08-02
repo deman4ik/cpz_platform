@@ -2,7 +2,7 @@ import { cpz } from "../../types/cpz";
 
 const candles1: cpz.ExchangeCandle[] = [
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -16,7 +16,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -30,7 +30,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -44,7 +44,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -58,7 +58,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -72,7 +72,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -86,7 +86,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -100,7 +100,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -114,7 +114,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -128,7 +128,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -142,7 +142,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -156,7 +156,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -170,7 +170,7 @@ const candles1: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 1,
@@ -187,7 +187,7 @@ const candles1: cpz.ExchangeCandle[] = [
 
 const candles60: cpz.ExchangeCandle[] = [
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -201,7 +201,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -215,7 +215,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -229,7 +229,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -243,7 +243,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -257,7 +257,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -271,7 +271,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -285,7 +285,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -299,7 +299,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -313,7 +313,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -327,7 +327,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,
@@ -341,7 +341,7 @@ const candles60: cpz.ExchangeCandle[] = [
     type: cpz.CandleType.loaded
   },
   {
-    exchange: cpz.Exchange.bitfinex,
+    exchange: "bitfinex",
     asset: "BCH",
     currency: "USD",
     timeframe: 60,

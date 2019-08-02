@@ -4,7 +4,7 @@ import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
-import { CANDLES_CURRENT_AMOUNT } from "../../config";
+import { CANDLES_RECENT_AMOUNT } from "../../config";
 
 const ImporterService: ServiceSchema = {
   name: cpz.Service.IMPORTER_RUNNER,
@@ -32,7 +32,7 @@ const ImporterService: ServiceSchema = {
    * Actions
    */
   actions: {
-    startCurrent: {
+    startRecent: {
       params: {
         exchange: {
           type: "string"
@@ -63,10 +63,10 @@ const ImporterService: ServiceSchema = {
           exchange: ctx.params.exchange,
           asset: ctx.params.asset,
           currency: ctx.params.currency,
-          type: "current",
+          type: "recent",
           params: {
             timeframes: ctx.params.timeframes || Timeframe.validArray,
-            amount: ctx.params.amount || CANDLES_CURRENT_AMOUNT
+            amount: ctx.params.amount || CANDLES_RECENT_AMOUNT
           },
           status: cpz.Status.queued
         };

@@ -69,7 +69,7 @@ async function handleCandleGaps(
 async function batchCandles(
   dateFrom: string,
   dateTo: string,
-  timeframe: cpz.ValidTimeframe,
+  timeframe: cpz.Timeframe,
   inputCandles: cpz.ExchangeCandle[]
 ): Promise<cpz.ExchangeCandle[]> {
   let timeframeCandles: cpz.ExchangeCandle[] = [];
@@ -131,7 +131,7 @@ async function batchCandles(
 async function createCandlesFromTrades(
   dateFrom: string,
   dateTo: string,
-  timeframes: cpz.ValidTimeframe[],
+  timeframes: cpz.Timeframe[],
   trades: cpz.ExchangeTrade[]
 ): Promise<cpz.ExchangeCandlesInTimeframes> {
   try {
@@ -207,7 +207,7 @@ async function createCandlesFromTrades(
 
 function getCurrentCandleParams(
   exchangeTimeframes: cpz.ExchangeTimeframes,
-  timeframe: cpz.ValidTimeframe
+  timeframe: cpz.Timeframe
 ) {
   const timeframeStr = Timeframe.toString(timeframe);
 
@@ -239,9 +239,9 @@ function getCurrentCandleParams(
 
 function getCandlesParams(
   exchangeTimeframes: cpz.ExchangeTimeframes,
-  timeframe: cpz.ValidTimeframe,
+  timeframe: cpz.Timeframe,
   dateFrom: string,
-  limit: number
+  limit: number = 100
 ) {
   let currentTimeframe = Timeframe.get(timeframe);
   const exchangeHasTimeframe = Timeframe.inList(
@@ -274,11 +274,11 @@ function getCandlesParams(
   };
 }
 
-function loadLimit(exchange: cpz.ExchangeName) {
+function loadLimit(exchange: string) {
   switch (exchange) {
-    case cpz.Exchange.bitfinex:
+    case "bitfinex":
       return 950;
-    case cpz.Exchange.kraken:
+    case "kraken":
       return 450;
     default:
       return 250;

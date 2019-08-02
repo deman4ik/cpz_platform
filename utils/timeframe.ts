@@ -66,16 +66,16 @@ class Timeframe {
     return this._timeframes;
   }
 
-  public static get(timeframe: cpz.ValidTimeframe): cpz.TimeframeProps {
+  public static get(timeframe: cpz.Timeframe): cpz.TimeframeProps {
     if (!this.exists(timeframe)) throw new Error("Invalid timeframe");
     return this.timeframes[timeframe];
   }
 
-  public static get validArray(): cpz.ValidTimeframe[] {
+  public static get validArray(): cpz.Timeframe[] {
     return Object.keys(this.timeframes).map(t => +t);
   }
 
-  static exists(timeframe: cpz.ValidTimeframe | string): boolean {
+  static exists(timeframe: cpz.Timeframe | string): boolean {
     if (typeof timeframe === "number") return !!this.timeframes[timeframe];
     return (
       Object.values(this.timeframes).filter(t => t.str === timeframe).length ===
@@ -83,12 +83,12 @@ class Timeframe {
     );
   }
 
-  static toString(timeframe: cpz.ValidTimeframe): string {
+  static toString(timeframe: cpz.Timeframe): string {
     const { str } = this.get(timeframe);
     return str;
   }
 
-  static stringToTimeframe(str: string): cpz.ValidTimeframe {
+  static stringToTimeframe(str: string): cpz.Timeframe {
     const timeframe = Object.values(this.timeframes).find(t => t.str === str);
     if (timeframe) return timeframe.value;
     return null;
@@ -100,7 +100,7 @@ class Timeframe {
 
   static timeframeAmountToTimeUnit(
     amount: number,
-    timeframe: cpz.ValidTimeframe
+    timeframe: cpz.Timeframe
   ): { amount: number; unit: cpz.TimeUnit } {
     const { amountInUnit, unit } = this.get(timeframe);
     return {
@@ -112,7 +112,7 @@ class Timeframe {
   static checkTimeframeByDate(
     hour: number,
     minute: number,
-    timeframe: cpz.ValidTimeframe
+    timeframe: cpz.Timeframe
   ): boolean {
     /* Если одна минута */
     if (timeframe === 1) {
@@ -130,9 +130,9 @@ class Timeframe {
     return false;
   }
 
-  static isValidTimeframeByDate(
+  static isTimeframeByDate(
     inputDate: string | number,
-    timeframe: cpz.ValidTimeframe
+    timeframe: cpz.Timeframe
   ): boolean {
     const date = dayjs.utc(inputDate);
     /* Количество часов 0-23 */
@@ -143,15 +143,15 @@ class Timeframe {
     return this.checkTimeframeByDate(hour, minute, timeframe);
   }
 
-  static timeframesByDate(inputDate: string): cpz.ValidTimeframe[] {
+  static timeframesByDate(inputDate: string): cpz.Timeframe[] {
     const date = dayjs.utc(inputDate);
     /* Количество часов 0-23 */
     const hour = date.hour();
     /* Количество минут 0-59 */
     const minute = date.minute();
     /* Проверяем все таймфреймы */
-    let currentTimeframes: cpz.ValidTimeframe[] = this.validArray.filter(
-      timeframe => this.checkTimeframeByDate(hour, minute, timeframe)
+    let currentTimeframes: cpz.Timeframe[] = this.validArray.filter(timeframe =>
+      this.checkTimeframeByDate(hour, minute, timeframe)
     );
     /* Если есть хотя бы один подходящий таймфрейм */
     if (currentTimeframes.length > 0)
@@ -164,17 +164,14 @@ class Timeframe {
   static durationTimeframe(
     dateFrom: string,
     dateTo: string,
-    timeframe: cpz.ValidTimeframe
+    timeframe: cpz.Timeframe
   ): number {
     const { amountInUnit, unit } = this.get(timeframe);
     const duration = dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), unit);
     return Math.floor(duration / amountInUnit);
   }
 
-  static getCurrentSince(
-    amount: number,
-    timeframe: cpz.ValidTimeframe
-  ): number {
+  static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {
     const currentDate = dayjs.utc();
     const { amountInUnit, unit } = this.get(timeframe);
 

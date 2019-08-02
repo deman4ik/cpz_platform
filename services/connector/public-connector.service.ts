@@ -1,5 +1,5 @@
 import { Service, ServiceBroker, Errors } from "moleculer";
-import ccxt, { Exchange } from "ccxt";
+import ccxt, { Exchange, bitfinex, kraken } from "ccxt";
 import retry from "async-retry";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
@@ -8,14 +8,27 @@ import {
   getCurrentCandleParams,
   getCandlesParams,
   handleCandleGaps,
-  batchCandles,
-  sortAsc,
-  createDatesListWithRange
+  batchCandles
 } from "../../utils";
 import Timeframe from "../../utils/timeframe";
-import fetch from "node-fetch";
 
+/**
+ * Available exchanges
+ */
+type ExchangeName = "kraken" | "bitfinex";
+
+/**
+ * Public Exchange Connector Service
+ *
+ * @class PublicConnectorService
+ * @extends {Service}
+ */
 class PublicConnectorService extends Service {
+  /**
+   *Creates an instance of PublicConnectorService.
+   * @param {ServiceBroker} broker
+   * @memberof PublicConnectorService
+   */
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
@@ -31,7 +44,11 @@ class PublicConnectorService extends Service {
             currency: "string"
           },
           async handler(ctx) {
-            return this.getMarket(ctx.params);
+            return this.getMarket(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.asset
+            );
           }
         },
         getTimeframes: {
@@ -49,7 +66,11 @@ class PublicConnectorService extends Service {
             currency: "string"
           },
           async handler(ctx): Promise<cpz.ExchangePrice> {
-            return this.getCurrentPrice(ctx.params);
+            return this.getCurrentPrice(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.currency
+            );
           }
         },
         getCurrentCandle: {
@@ -64,7 +85,12 @@ class PublicConnectorService extends Service {
             }
           },
           async handler(ctx): Promise<cpz.ExchangeCandle> {
-            return this.getCurrentCandle(ctx.params);
+            return this.getCurrentCandle(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.currency,
+              ctx.params.timeframe
+            );
           }
         },
         getCandles: {
@@ -81,7 +107,13 @@ class PublicConnectorService extends Service {
             limit: "number"
           },
           async handler(ctx): Promise<cpz.ExchangeCandle[]> {
-            return this.getCandles(ctx.params);
+            return this.getCandles(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.currency,
+              ctx.params.timeframe,
+              ctx.params.limit
+            );
           }
         },
         getTrades: {
@@ -106,8 +138,26 @@ class PublicConnectorService extends Service {
     });
   }
 
+  /**
+   * Custom fetch method with proxy agent
+   *
+   * @memberof PublicConnectorService
+   */
   _fetch = createFetchMethod(process.env.PROXY_ENDPOINT_PUBLIC);
+
+  /**
+   * List of ccxt instances
+   *
+   * @type {{ [key: string]: Exchange }}
+   * @memberof PublicConnectorService
+   */
   publicConnectors: { [key: string]: Exchange } = {};
+
+  /**
+   * Retry exchange requests options
+   *
+   * @memberof PublicConnectorService
+   */
   retryOptions = {
     retries: 100,
     minTimeout: 0,
@@ -117,10 +167,11 @@ class PublicConnectorService extends Service {
   /**
    * Initialize public CCXT instance
    *
-   * @param {cpz.ExchangeName} exchange
+   * @param {ExchangeName} exchange
    * @returns {Promise<void>}
+   * @memberof PublicConnectorService
    */
-  async initConnector(exchange: cpz.ExchangeName): Promise<void> {
+  async initConnector(exchange: ExchangeName): Promise<void> {
     if (!(exchange in this.publicConnectors)) {
       this.publicConnectors[exchange] = new ccxt[exchange]({
         fetchImplementation: this._fetch
@@ -138,11 +189,12 @@ class PublicConnectorService extends Service {
   }
 
   /**
-   * Form currency pair symbol
+   * Format currency pair symbol
    *
    * @param {string} asset
    * @param {string} currency
    * @returns {string}
+   * @memberof PublicConnectorService
    */
   getSymbol(asset: string, currency: string): string {
     return `${asset}/${currency}`;
@@ -151,10 +203,13 @@ class PublicConnectorService extends Service {
   /**
    * Get currency market properties
    *
-   * @param {cpz.AssetSymbol} { exchange, asset, currency }
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
    * @returns
+   * @memberof PublicConnectorService
    */
-  async getMarket({ exchange, asset, currency }: cpz.AssetSymbol) {
+  async getMarket(exchange: ExchangeName, asset: string, currency: string) {
     await this.initConnector(exchange);
     const response: ccxt.Market = await this.publicConnectors[exchange].market(
       this.getSymbol(asset, currency)
@@ -183,12 +238,11 @@ class PublicConnectorService extends Service {
   /**
    * Get exchange timeframes
    *
-   * @param {cpz.ExchangeName} exchange
+   * @param {ExchangeName} exchange
    * @returns {Promise<cpz.ExchangeTimeframes>}
+   * @memberof PublicConnectorService
    */
-  async getTimeframes(
-    exchange: cpz.ExchangeName
-  ): Promise<cpz.ExchangeTimeframes> {
+  async getTimeframes(exchange: ExchangeName): Promise<cpz.ExchangeTimeframes> {
     await this.initConnector(exchange);
     const timeframes: cpz.ExchangeTimeframes = {};
 
@@ -199,11 +253,20 @@ class PublicConnectorService extends Service {
     return timeframes;
   }
 
-  async getCurrentPrice({
-    exchange,
-    asset,
-    currency
-  }: cpz.AssetSymbol): Promise<cpz.ExchangePrice> {
+  /**
+   * Get Current Price
+   *
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @returns {Promise<cpz.ExchangePrice>}
+   * @memberof PublicConnectorService
+   */
+  async getCurrentPrice(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string
+  ): Promise<cpz.ExchangePrice> {
     await this.initConnector(exchange);
     const call = async (bail: (e: Error) => void) => {
       try {
@@ -231,20 +294,19 @@ class PublicConnectorService extends Service {
   /**
    * Get current open candle
    *
-   * @param {cpz.CandleParams} {
-   *       exchange,
-   *       asset,
-   *       currency,
-   *       timeframe
-   *     }
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @param {cpz.Timeframe} timeframe
    * @returns {Promise<cpz.ExchangeCandle>}
+   * @memberof PublicConnectorService
    */
-  async getCurrentCandle({
-    exchange,
-    asset,
-    currency,
-    timeframe
-  }: cpz.CandleParams): Promise<cpz.ExchangeCandle> {
+  async getCurrentCandle(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string,
+    timeframe: cpz.Timeframe
+  ): Promise<cpz.ExchangeCandle> {
     await this.initConnector(exchange);
     const params = getCurrentCandleParams(
       this.publicConnectors[exchange].timeframes,
@@ -265,11 +327,7 @@ class PublicConnectorService extends Service {
     };
     const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
     if (!response || !Array.isArray(response) || response.length === 0) {
-      const { price } = await this.getCurrentPrice({
-        exchange,
-        asset,
-        currency
-      });
+      const { price } = await this.getCurrentPrice(exchange, asset, currency);
       if (!price) return null;
       const time = dayjs.utc(params.time);
       return {
@@ -325,26 +383,25 @@ class PublicConnectorService extends Service {
   }
 
   /**
-   * Load candles in timeframes
+   * Get candles in timeframes
    *
-   * @param {cpz.CandlesFetchParams} {
-   *       exchange,
-   *       asset,
-   *       currency,
-   *       timeframe,
-   *       dateFrom,
-   *       limit
-   *     }
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @param {cpz.Timeframe} timeframe
+   * @param {string} dateFrom
+   * @param {number} limit
    * @returns {Promise<cpz.ExchangeCandle[]>}
+   * @memberof PublicConnectorService
    */
-  async getCandles({
-    exchange,
-    asset,
-    currency,
-    timeframe,
-    dateFrom,
-    limit
-  }: cpz.CandlesFetchParams): Promise<cpz.ExchangeCandle[]> {
+  async getCandles(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string,
+    timeframe: cpz.Timeframe,
+    dateFrom: string,
+    limit: number
+  ): Promise<cpz.ExchangeCandle[]> {
     await this.initConnector(exchange);
     const params = getCandlesParams(
       this.publicConnectors[exchange].timeframes,
@@ -352,7 +409,7 @@ class PublicConnectorService extends Service {
       dateFrom,
       limit
     );
-    const dateTo = dayjs.utc(params.dateTo);
+    const dateTo = dayjs.utc(params.dateTo).toISOString();
     let candles: cpz.ExchangeCandle[] = [];
 
     const call = async (bail: (e: Error) => void) => {
@@ -387,35 +444,29 @@ class PublicConnectorService extends Service {
       type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
     }));
 
-    candles = await handleCandleGaps(dateFrom, dateTo.toISOString(), candles);
+    candles = await handleCandleGaps(dateFrom, dateTo, candles);
     if (params.batch && timeframe > cpz.Timeframe["1m"])
-      candles = await batchCandles(
-        dateFrom,
-        dateTo.toISOString(),
-        timeframe,
-        candles
-      );
+      candles = await batchCandles(dateFrom, dateTo, timeframe, candles);
 
     return candles;
   }
 
   /**
-   * Load trades
+   * Get trades
    *
-   * @param {cpz.TradesFetchParams} {
-   *       exchange,
-   *       asset,
-   *       currency,
-   *       dateFrom
-   *     }
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @param {string} dateFrom
    * @returns {Promise<cpz.ExchangeTrade[]>}
+   * @memberof PublicConnectorService
    */
-  async getTrades({
-    exchange,
-    asset,
-    currency,
-    dateFrom
-  }: cpz.TradesFetchParams): Promise<cpz.ExchangeTrade[]> {
+  async getTrades(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string,
+    dateFrom: string
+  ): Promise<cpz.ExchangeTrade[]> {
     try {
       await this.initConnector(exchange);
       const since = dayjs.utc(dateFrom).valueOf();

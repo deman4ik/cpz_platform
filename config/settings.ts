@@ -1,1 +1,1 @@
-export const CANDLES_CURRENT_AMOUNT = 300;
+export const CANDLES_RECENT_AMOUNT = 300;

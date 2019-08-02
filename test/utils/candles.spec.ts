@@ -1,7 +1,8 @@
 import {
   handleCandleGaps,
   batchCandles,
-  createCandlesFromTrades
+  createCandlesFromTrades,
+  getCandlesParams
 } from "../../utils/candles";
 import dayjs from "../../lib/dayjs";
 import { cpz } from "../../types/cpz";

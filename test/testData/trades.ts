@@ -2,7 +2,7 @@ import { cpz } from "../../types/cpz";
 
 const trades: cpz.ExchangeTrade[] = [
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939203172,
@@ -12,7 +12,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205224,
@@ -22,7 +22,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03869709
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205430,
@@ -32,7 +32,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205433,
@@ -42,7 +42,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21611772
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205826,
@@ -52,7 +52,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0516
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205829,
@@ -62,7 +62,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02063
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205833,
@@ -72,7 +72,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02069
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205836,
@@ -82,7 +82,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02076
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205839,
@@ -92,7 +92,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939205842,
@@ -102,7 +102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02071
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939208000,
@@ -112,7 +112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08618798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939208012,
@@ -122,7 +122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0012688
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939210881,
@@ -132,7 +132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939212841,
@@ -142,7 +142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0412955
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939212847,
@@ -152,7 +152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.061
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939214912,
@@ -162,7 +162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08618798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939215308,
@@ -172,7 +172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220154,
@@ -182,7 +182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220182,
@@ -192,7 +192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.647
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220185,
@@ -202,7 +202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220189,
@@ -212,7 +212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.287
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220311,
@@ -222,7 +222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.053
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220317,
@@ -232,7 +232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220320,
@@ -242,7 +242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2345
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220521,
@@ -252,7 +252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.392
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220526,
@@ -262,7 +262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.608
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220738,
@@ -272,7 +272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.2375
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220741,
@@ -282,7 +282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939220977,
@@ -292,7 +292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.62197135
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939221054,
@@ -302,7 +302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00938243
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939222622,
@@ -312,7 +312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01884846
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939222994,
@@ -322,7 +322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.56986487
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939223036,
@@ -332,7 +332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02453474
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939223038,
@@ -342,7 +342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06460226
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939223878,
@@ -352,7 +352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939223946,
@@ -362,7 +362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.62218806
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939224526,
@@ -372,7 +372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939225470,
@@ -382,7 +382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00591817
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939225474,
@@ -392,7 +392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0141058
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939225477,
@@ -402,7 +402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05520603
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939225958,
@@ -412,7 +412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939226817,
@@ -422,7 +422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37338614
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939229576,
@@ -432,7 +432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939230587,
@@ -442,7 +442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04148831
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939231428,
@@ -452,7 +452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00682838
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939231861,
@@ -462,7 +462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03870894
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939232166,
@@ -472,7 +472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939232515,
@@ -482,7 +482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939232621,
@@ -492,7 +492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00856072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939232771,
@@ -502,7 +502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939233191,
@@ -512,7 +512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11143928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939233196,
@@ -522,7 +522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01959006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939233199,
@@ -532,7 +532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939233201,
@@ -542,7 +542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09447163
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939233204,
@@ -552,7 +552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3444161
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939234180,
@@ -562,7 +562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939234722,
@@ -572,7 +572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939235056,
@@ -582,7 +582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1406977
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939235790,
@@ -592,7 +592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01361288
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939238699,
@@ -602,7 +602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03190999
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239496,
@@ -612,7 +612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01884909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239500,
@@ -622,7 +622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03115091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239504,
@@ -632,7 +632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239509,
@@ -642,7 +642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239513,
@@ -652,7 +652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239517,
@@ -662,7 +662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239521,
@@ -672,7 +672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.46884909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239525,
@@ -682,7 +682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03115091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239528,
@@ -692,7 +692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239562,
@@ -702,7 +702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239566,
@@ -712,7 +712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239569,
@@ -722,7 +722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21884909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239573,
@@ -732,7 +732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.012
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239576,
@@ -742,7 +742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01915091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239580,
@@ -752,7 +752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24084909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239583,
@@ -762,7 +762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239588,
@@ -772,7 +772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45915091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239591,
@@ -782,7 +782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239595,
@@ -792,7 +792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239598,
@@ -802,7 +802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04084909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239601,
@@ -812,7 +812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45915091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239605,
@@ -822,7 +822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239608,
@@ -832,7 +832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239612,
@@ -842,7 +842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239624,
@@ -852,7 +852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04084909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239627,
@@ -862,7 +862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.95915091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239631,
@@ -872,7 +872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939239717,
@@ -882,7 +882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28240983
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939244045,
@@ -892,7 +892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939244351,
@@ -902,7 +902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0029333
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939250285,
@@ -912,7 +912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939250983,
@@ -922,7 +922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939252968,
@@ -932,7 +932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02009856
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939256376,
@@ -942,7 +942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05783201
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939256383,
@@ -952,7 +952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939256396,
@@ -962,7 +962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.39216799
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939256741,
@@ -972,7 +972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01447163
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939256748,
@@ -982,7 +982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02552837
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939262054,
@@ -992,7 +992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02453061
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939265212,
@@ -1002,7 +1002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.59583944
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939269329,
@@ -1012,7 +1012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01647744
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939269334,
@@ -1022,7 +1022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10786287
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271048,
@@ -1032,7 +1032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271052,
@@ -1042,7 +1042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.235
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271103,
@@ -1052,7 +1052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271121,
@@ -1062,7 +1062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07545666
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271124,
@@ -1072,7 +1072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06954334
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271127,
@@ -1082,7 +1082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.145
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939271130,
@@ -1092,7 +1092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939274202,
@@ -1102,7 +1102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02875003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939274216,
@@ -1112,7 +1112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004997
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939277728,
@@ -1122,7 +1122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939280586,
@@ -1132,7 +1132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939282134,
@@ -1142,7 +1142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939286377,
@@ -1152,7 +1152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939290317,
@@ -1162,7 +1162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939290344,
@@ -1172,7 +1172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 7.59844958
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939290347,
@@ -1182,7 +1182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939294479,
@@ -1192,7 +1192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939294486,
@@ -1202,7 +1202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939298815,
@@ -1212,7 +1212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14848959
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939303366,
@@ -1222,7 +1222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0464638
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939303434,
@@ -1232,7 +1232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939303581,
@@ -1242,7 +1242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12426019
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939309639,
@@ -1252,7 +1252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03379354
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317858,
@@ -1262,7 +1262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21224537
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317868,
@@ -1272,7 +1272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00025438
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317870,
@@ -1282,7 +1282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317873,
@@ -1292,7 +1292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.29010254
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317876,
@@ -1302,7 +1302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19231288
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939317879,
@@ -1312,7 +1312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.30508458
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324729,
@@ -1322,7 +1322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.119
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324751,
@@ -1332,7 +1332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324759,
@@ -1342,7 +1342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.241
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324778,
@@ -1352,7 +1352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324937,
@@ -1362,7 +1362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.280504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324942,
@@ -1372,7 +1372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.280504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324946,
@@ -1382,7 +1382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.197992
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324950,
@@ -1392,7 +1392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.082512
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324953,
@@ -1402,7 +1402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.280504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324956,
@@ -1412,7 +1412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.136984
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939324959,
@@ -1422,7 +1422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14352
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326262,
@@ -1432,7 +1432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326266,
@@ -1442,7 +1442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.548
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326270,
@@ -1452,7 +1452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12521411
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326272,
@@ -1462,7 +1462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326275,
@@ -1472,7 +1472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.54686534
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326277,
@@ -1482,7 +1482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939326279,
@@ -1492,7 +1492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17592055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939332873,
@@ -1502,7 +1502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939332889,
@@ -1512,7 +1512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939336809,
@@ -1522,7 +1522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.145
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939336830,
@@ -1532,7 +1532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.97901474
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939336846,
@@ -1542,7 +1542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.02098526
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939337896,
@@ -1552,7 +1552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04146281
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939339534,
@@ -1562,7 +1562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05146
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939339742,
@@ -1572,7 +1572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939340828,
@@ -1582,7 +1582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.081
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939341267,
@@ -1592,7 +1592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00007719
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939341273,
@@ -1602,7 +1602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.99992281
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939342810,
@@ -1612,7 +1612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.480297
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939342823,
@@ -1622,7 +1622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.334
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939342827,
@@ -1632,7 +1632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67865041
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939343429,
@@ -1642,7 +1642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.324
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939343433,
@@ -1652,7 +1652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939343435,
@@ -1662,7 +1662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1287176
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939343438,
@@ -1672,7 +1672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.48115154
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939343441,
@@ -1682,7 +1682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.81627666
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939346890,
@@ -1692,7 +1692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04653186
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939346902,
@@ -1702,7 +1702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.134
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939346906,
@@ -1712,7 +1712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28346814
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939350306,
@@ -1722,7 +1722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.134
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939350321,
@@ -1732,7 +1732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939350325,
@@ -1742,7 +1742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25889
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939350794,
@@ -1752,7 +1752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04652918
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939354880,
@@ -1762,7 +1762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939358859,
@@ -1772,7 +1772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939358884,
@@ -1782,7 +1782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04150296
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939359105,
@@ -1792,7 +1792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21432208
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939360522,
@@ -1802,7 +1802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11107945
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939360527,
@@ -1812,7 +1812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12469012
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939360530,
@@ -1822,7 +1822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16423043
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939365973,
@@ -1832,7 +1832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939365983,
@@ -1842,7 +1842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.067
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939367570,
@@ -1852,7 +1852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939367576,
@@ -1862,7 +1862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939370770,
@@ -1872,7 +1872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939373412,
@@ -1882,7 +1882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939373433,
@@ -1892,7 +1892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939375673,
@@ -1902,7 +1902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03617679
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939375681,
@@ -1912,7 +1912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02382321
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939377109,
@@ -1922,7 +1922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379664,
@@ -1932,7 +1932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379674,
@@ -1942,7 +1942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379678,
@@ -1952,7 +1952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02790697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379681,
@@ -1962,7 +1962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3159285
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379685,
@@ -1972,7 +1972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939379688,
@@ -1982,7 +1982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.95616453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939383574,
@@ -1992,7 +1992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939384905,
@@ -2002,7 +2002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939398619,
@@ -2012,7 +2012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939398671,
@@ -2022,7 +2022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04003508
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939401767,
@@ -2032,7 +2032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939402924,
@@ -2042,7 +2042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939402936,
@@ -2052,7 +2052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12885846
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939402939,
@@ -2062,7 +2062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.324
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939402941,
@@ -2072,7 +2072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.74714154
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939408517,
@@ -2082,7 +2082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939409377,
@@ -2092,7 +2092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.522
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939412140,
@@ -2102,7 +2102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939412148,
@@ -2112,7 +2112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 10
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417805,
@@ -2122,7 +2122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417808,
@@ -2132,7 +2132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417811,
@@ -2142,7 +2142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13427
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417830,
@@ -2152,7 +2152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417833,
@@ -2162,7 +2162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417836,
@@ -2172,7 +2172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939417839,
@@ -2182,7 +2182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.46927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939418120,
@@ -2192,7 +2192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939418265,
@@ -2202,7 +2202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.62573
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939418271,
@@ -2212,7 +2212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22528495
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939419381,
@@ -2222,7 +2222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939419841,
@@ -2232,7 +2232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420412,
@@ -2242,7 +2242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420580,
@@ -2252,7 +2252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02552837
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420586,
@@ -2262,7 +2262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420590,
@@ -2272,7 +2272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14848959
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420593,
@@ -2282,7 +2282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939420997,
@@ -2292,7 +2292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939421091,
@@ -2302,7 +2302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939422595,
@@ -2312,7 +2312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42573
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939422645,
@@ -2322,7 +2322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01615658
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939422649,
@@ -2332,7 +2332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0304062
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424080,
@@ -2342,7 +2342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424084,
@@ -2352,7 +2352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424087,
@@ -2362,7 +2362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424092,
@@ -2372,7 +2372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424096,
@@ -2382,7 +2382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424099,
@@ -2392,7 +2392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424103,
@@ -2402,7 +2402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424138,
@@ -2412,7 +2412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424177,
@@ -2422,7 +2422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424384,
@@ -2432,7 +2432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01766326
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424390,
@@ -2442,7 +2442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1003328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424393,
@@ -2452,7 +2452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02188053
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939424716,
@@ -2462,7 +2462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0235
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939425990,
@@ -2472,7 +2472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434037,
@@ -2482,7 +2482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.33980435
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434047,
@@ -2492,7 +2492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434050,
@@ -2502,7 +2502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.635
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434053,
@@ -2512,7 +2512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.132
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434056,
@@ -2522,7 +2522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434059,
@@ -2532,7 +2532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01707035
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434063,
@@ -2542,7 +2542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434067,
@@ -2552,7 +2552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434071,
@@ -2562,7 +2562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434074,
@@ -2572,7 +2572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434077,
@@ -2582,7 +2582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22280746
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434080,
@@ -2592,7 +2592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02719254
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434082,
@@ -2602,7 +2602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434085,
@@ -2612,7 +2612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434088,
@@ -2622,7 +2622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01649515
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434091,
@@ -2632,7 +2632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03015232
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434093,
@@ -2642,7 +2642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434095,
@@ -2652,7 +2652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.379779
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434098,
@@ -2662,7 +2662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.417649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434101,
@@ -2672,7 +2672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.34
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434103,
@@ -2682,7 +2682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.407024
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434106,
@@ -2692,7 +2692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.315
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434108,
@@ -2702,7 +2702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.077302
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434110,
@@ -2712,7 +2712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.39879023
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434113,
@@ -2722,7 +2722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1647856
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434115,
@@ -2732,7 +2732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3732123
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434117,
@@ -2742,7 +2742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939434120,
@@ -2752,7 +2752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.3879357
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939435595,
@@ -2762,7 +2762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02374247
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939442683,
@@ -2772,7 +2772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444327,
@@ -2782,7 +2782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.157
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444343,
@@ -2792,7 +2792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444346,
@@ -2802,7 +2802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01672739
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444349,
@@ -2812,7 +2812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02987408
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444351,
@@ -2822,7 +2822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24880746
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444354,
@@ -2832,7 +2832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00119254
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444356,
@@ -2842,7 +2842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01699126
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444358,
@@ -2852,7 +2852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02961021
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444361,
@@ -2862,7 +2862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21458575
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939444363,
@@ -2872,7 +2872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00041131
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445814,
@@ -2882,7 +2882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445820,
@@ -2892,7 +2892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445822,
@@ -2902,7 +2902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445844,
@@ -2912,7 +2912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.397
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445849,
@@ -2922,7 +2922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445852,
@@ -2932,7 +2932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04288685
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445856,
@@ -2942,7 +2942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5.6120643
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445859,
@@ -2952,7 +2952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445863,
@@ -2962,7 +2962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445866,
@@ -2972,7 +2972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445869,
@@ -2982,7 +2982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01725513
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445871,
@@ -2992,7 +2992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02936285
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445874,
@@ -3002,7 +3002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445877,
@@ -3012,7 +3012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445880,
@@ -3022,7 +3022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3755747
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445884,
@@ -3032,7 +3032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445887,
@@ -3042,7 +3042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0130662
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445890,
@@ -3052,7 +3052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01864537
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445893,
@@ -3062,7 +3062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445895,
@@ -3072,7 +3072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.38603091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445898,
@@ -3082,7 +3082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445901,
@@ -3092,7 +3092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03742702
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445905,
@@ -3102,7 +3102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.116
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445908,
@@ -3112,7 +3112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67168667
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445930,
@@ -3122,7 +3122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939445933,
@@ -3132,7 +3132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939449472,
@@ -3142,7 +3142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939451216,
@@ -3152,7 +3152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01247569
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939457475,
@@ -3162,7 +3162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939457492,
@@ -3172,7 +3172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939457497,
@@ -3182,7 +3182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.146
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939457500,
@@ -3192,7 +3192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939457503,
@@ -3202,7 +3202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939459849,
@@ -3212,7 +3212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939468499,
@@ -3222,7 +3222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00313154
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939474757,
@@ -3232,7 +3232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06277867
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939475671,
@@ -3242,7 +3242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09295062
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939476298,
@@ -3252,7 +3252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2585
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939476373,
@@ -3262,7 +3262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00002431
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939477750,
@@ -3272,7 +3272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01748534
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939477754,
@@ -3282,7 +3282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26951466
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939478143,
@@ -3292,7 +3292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01748534
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939478989,
@@ -3302,7 +3302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479473,
@@ -3312,7 +3312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479477,
@@ -3322,7 +3322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479480,
@@ -3332,7 +3332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479482,
@@ -3342,7 +3342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479485,
@@ -3352,7 +3352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.433708
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479487,
@@ -3362,7 +3362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479490,
@@ -3372,7 +3372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479493,
@@ -3382,7 +3382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.175
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479497,
@@ -3392,7 +3392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14348301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479499,
@@ -3402,7 +3402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37441229
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479502,
@@ -3412,7 +3412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02407945
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479518,
@@ -3422,7 +3422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939479521,
@@ -3432,7 +3432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02931725
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939481933,
@@ -3442,7 +3442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09295062
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939484579,
@@ -3452,7 +3452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01707036
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939484584,
@@ -3462,7 +3462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03472964
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939485996,
@@ -3472,7 +3472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939486529,
@@ -3482,7 +3482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0173
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939486674,
@@ -3492,7 +3492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006681
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487655,
@@ -3502,7 +3502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487736,
@@ -3512,7 +3512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487739,
@@ -3522,7 +3522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487744,
@@ -3532,7 +3532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.49
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487763,
@@ -3542,7 +3542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939487767,
@@ -3552,7 +3552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939488298,
@@ -3562,7 +3562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.247429
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939488302,
@@ -3572,7 +3572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.84
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939488306,
@@ -3582,7 +3582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490956,
@@ -3592,7 +3592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490970,
@@ -3602,7 +3602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.97164339
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490973,
@@ -3612,7 +3612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.93431961
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490976,
@@ -3622,7 +3622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490979,
@@ -3632,7 +3632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0173073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490981,
@@ -3642,7 +3642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02875003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490984,
@@ -3652,7 +3652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004997
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490986,
@@ -3662,7 +3662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00055051
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490989,
@@ -3672,7 +3672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490992,
@@ -3682,7 +3682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.27427036
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490996,
@@ -3692,7 +3692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.424634
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939490998,
@@ -3702,7 +3702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.658608
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491003,
@@ -3712,7 +3712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491006,
@@ -3722,7 +3722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04591329
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491009,
@@ -3732,7 +3732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00074452
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491012,
@@ -3742,7 +3742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491016,
@@ -3752,7 +3752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01866962
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491019,
@@ -3762,7 +3762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37441229
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491022,
@@ -3772,7 +3772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37388442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491024,
@@ -3782,7 +3782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491026,
@@ -3792,7 +3792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04578734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491029,
@@ -3802,7 +3802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00087047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491031,
@@ -3812,7 +3812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491033,
@@ -3822,7 +3822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491041,
@@ -3832,7 +3832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01867017
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939491045,
@@ -3842,7 +3842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.99091471
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939496427,
@@ -3852,7 +3852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939496817,
@@ -3862,7 +3862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939498465,
@@ -3872,7 +3872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939506166,
@@ -3882,7 +3882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02416506
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939506386,
@@ -3892,7 +3892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04643452
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508522,
@@ -3902,7 +3902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508558,
@@ -3912,7 +3912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508562,
@@ -3922,7 +3922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04565871
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508565,
@@ -3932,7 +3932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0010033
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508569,
@@ -3942,7 +3942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00758344
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508578,
@@ -3952,7 +3952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24241656
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508581,
@@ -3962,7 +3962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036684
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508585,
@@ -3972,7 +3972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.27653718
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508589,
@@ -3982,7 +3982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.48247585
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508593,
@@ -3992,7 +3992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508597,
@@ -4002,7 +4002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508601,
@@ -4012,7 +4012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508633,
@@ -4022,7 +4022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508637,
@@ -4032,7 +4032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508641,
@@ -4042,7 +4042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508644,
@@ -4052,7 +4052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508648,
@@ -4062,7 +4062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508652,
@@ -4072,7 +4072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508657,
@@ -4082,7 +4082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508661,
@@ -4092,7 +4092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508665,
@@ -4102,7 +4102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508669,
@@ -4112,7 +4112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508673,
@@ -4122,7 +4122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508677,
@@ -4132,7 +4132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508681,
@@ -4142,7 +4142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508690,
@@ -4152,7 +4152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508704,
@@ -4162,7 +4162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508708,
@@ -4172,7 +4172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939508712,
@@ -4182,7 +4182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939509530,
@@ -4192,7 +4192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08513
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939519706,
@@ -4202,7 +4202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08730669
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939520588,
@@ -4212,7 +4212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0518
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939527576,
@@ -4222,7 +4222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939528166,
@@ -4232,7 +4232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02004442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939528990,
@@ -4242,7 +4242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939529134,
@@ -4252,7 +4252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0164938
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939533108,
@@ -4262,7 +4262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939539687,
@@ -4272,7 +4272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01721858
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939540305,
@@ -4282,7 +4282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4034
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939540414,
@@ -4292,7 +4292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004142
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543238,
@@ -4302,7 +4302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08049601
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543244,
@@ -4312,7 +4312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.019504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543247,
@@ -4322,7 +4322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543251,
@@ -4332,7 +4332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03999999
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543256,
@@ -4342,7 +4342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06000001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939543261,
@@ -4352,7 +4352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09999999
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546639,
@@ -4362,7 +4362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.849
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546727,
@@ -4372,7 +4372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00008529
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546731,
@@ -4382,7 +4382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.286
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546734,
@@ -4392,7 +4392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546737,
@@ -4402,7 +4402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02341533
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546740,
@@ -4412,7 +4412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00003741
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939546742,
@@ -4422,7 +4422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548690,
@@ -4432,7 +4432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548748,
@@ -4442,7 +4442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03364462
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548751,
@@ -4452,7 +4452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.34
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548755,
@@ -4462,7 +4462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548892,
@@ -4472,7 +4472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939548896,
@@ -4482,7 +4482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550604,
@@ -4492,7 +4492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550610,
@@ -4502,7 +4502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00283839
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550614,
@@ -4512,7 +4512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.61722297
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550618,
@@ -4522,7 +4522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550621,
@@ -4532,7 +4532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550624,
@@ -4542,7 +4542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550628,
@@ -4552,7 +4552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550631,
@@ -4562,7 +4562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550634,
@@ -4572,7 +4572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04695
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550638,
@@ -4582,7 +4582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01198864
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550641,
@@ -4592,7 +4592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.53990066
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550644,
@@ -4602,7 +4602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550646,
@@ -4612,7 +4612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4081107
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550648,
@@ -4622,7 +4622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550652,
@@ -4632,7 +4632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.075
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550655,
@@ -4642,7 +4642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09389
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550658,
@@ -4652,7 +4652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.34309864
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550681,
@@ -4662,7 +4662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550685,
@@ -4672,7 +4672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00583378
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550689,
@@ -4682,7 +4682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939550692,
@@ -4692,7 +4692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17416622
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939551611,
@@ -4702,7 +4702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553099,
@@ -4712,7 +4712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0356
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553402,
@@ -4722,7 +4722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006905
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553407,
@@ -4732,7 +4732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553410,
@@ -4742,7 +4742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.93693095
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553597,
@@ -4752,7 +4752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939553991,
@@ -4762,7 +4762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.375178
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939554918,
@@ -4772,7 +4772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939555175,
@@ -4782,7 +4782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.77934825
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939555287,
@@ -4792,7 +4792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5.45262216
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939555497,
@@ -4802,7 +4802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03283702
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939555706,
@@ -4812,7 +4812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03283668
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556291,
@@ -4822,7 +4822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556308,
@@ -4832,7 +4832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0000748
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556312,
@@ -4842,7 +4842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02913448
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556316,
@@ -4852,7 +4852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07079072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556663,
@@ -4862,7 +4862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0291342
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556666,
@@ -4872,7 +4872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03120928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939556669,
@@ -4882,7 +4882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.60965652
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557171,
@@ -4892,7 +4892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04643452
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557193,
@@ -4902,7 +4902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01390896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557196,
@@ -4912,7 +4912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00849104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557213,
@@ -4922,7 +4922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01189012
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557216,
@@ -4932,7 +4932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001884
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557220,
@@ -4942,7 +4942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557225,
@@ -4952,7 +4952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557229,
@@ -4962,7 +4962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557233,
@@ -4972,7 +4972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00409104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557251,
@@ -4982,7 +4982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557258,
@@ -4992,7 +4992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557264,
@@ -5002,7 +5002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557270,
@@ -5012,7 +5012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15590896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557274,
@@ -5022,7 +5022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939557278,
@@ -5032,7 +5032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10867355
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939559647,
@@ -5042,7 +5042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560118,
@@ -5052,7 +5052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01799739
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560122,
@@ -5062,7 +5062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560126,
@@ -5072,7 +5072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.47200261
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560143,
@@ -5082,7 +5082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.52799739
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560147,
@@ -5092,7 +5092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.77198334
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560153,
@@ -5102,7 +5102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.20001927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560500,
@@ -5112,7 +5112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03509463
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560503,
@@ -5122,7 +5122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.96490537
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939560550,
@@ -5132,7 +5132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561250,
@@ -5142,7 +5142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561254,
@@ -5152,7 +5152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.57975248
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561258,
@@ -5162,7 +5162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00149752
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561526,
@@ -5172,7 +5172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03654788
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561530,
@@ -5182,7 +5182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.74423405
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561534,
@@ -5192,7 +5192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561539,
@@ -5202,7 +5202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01046253
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939561574,
@@ -5212,7 +5212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01012964
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939562382,
@@ -5222,7 +5222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.368
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563026,
@@ -5232,7 +5232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01219765
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563106,
@@ -5242,7 +5242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.5490158
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563110,
@@ -5252,7 +5252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563113,
@@ -5262,7 +5262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.17428655
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563401,
@@ -5272,7 +5272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19571345
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563712,
@@ -5282,7 +5282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939563720,
@@ -5292,7 +5292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.012
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564578,
@@ -5302,7 +5302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02437018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564582,
@@ -5312,7 +5312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00362982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564590,
@@ -5322,7 +5322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24637018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564595,
@@ -5332,7 +5332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00362982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564599,
@@ -5342,7 +5342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01637018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564605,
@@ -5352,7 +5352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0159
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564609,
@@ -5362,7 +5362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00772982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564613,
@@ -5372,7 +5372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564619,
@@ -5382,7 +5382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00227018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564623,
@@ -5392,7 +5392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.433708
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564626,
@@ -5402,7 +5402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564628,
@@ -5412,7 +5412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14200386
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564632,
@@ -5422,7 +5422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01397818
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564634,
@@ -5432,7 +5432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.247429
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564638,
@@ -5442,7 +5442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0171351
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564642,
@@ -5452,7 +5452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564646,
@@ -5462,7 +5462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564650,
@@ -5472,7 +5472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00237721
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564659,
@@ -5482,7 +5482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.011
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564664,
@@ -5492,7 +5492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564667,
@@ -5502,7 +5502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.049
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564671,
@@ -5512,7 +5512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564675,
@@ -5522,7 +5522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14658051
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564707,
@@ -5532,7 +5532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564713,
@@ -5542,7 +5542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18533377
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564716,
@@ -5552,7 +5552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.31466623
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564719,
@@ -5562,7 +5562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12350382
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564723,
@@ -5572,7 +5572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564730,
@@ -5582,7 +5582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06991567
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564737,
@@ -5592,7 +5592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75658051
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564743,
@@ -5602,7 +5602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29928178
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564745,
@@ -5612,7 +5612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00071656
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564747,
@@ -5622,7 +5622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000166
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564752,
@@ -5632,7 +5632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00969556
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564755,
@@ -5642,7 +5642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02030444
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564760,
@@ -5652,7 +5652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02969556
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564763,
@@ -5662,7 +5662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564766,
@@ -5672,7 +5672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01030444
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939564884,
@@ -5682,7 +5682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565716,
@@ -5692,7 +5692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01098051
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565744,
@@ -5702,7 +5702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565748,
@@ -5712,7 +5712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.36698847
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565751,
@@ -5722,7 +5722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00073153
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565903,
@@ -5732,7 +5732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.063924
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565913,
@@ -5742,7 +5742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32941949
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565916,
@@ -5752,7 +5752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565919,
@@ -5762,7 +5762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33665651
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565935,
@@ -5772,7 +5772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.278
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565940,
@@ -5782,7 +5782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01769428
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565945,
@@ -5792,7 +5792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.36764921
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565949,
@@ -5802,7 +5802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33665651
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565953,
@@ -5812,7 +5812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565957,
@@ -5822,7 +5822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565961,
@@ -5832,7 +5832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.66334349
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939565965,
@@ -5842,7 +5842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33665651
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939566524,
@@ -5852,7 +5852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939566549,
@@ -5862,7 +5862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01098294
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939566777,
@@ -5872,7 +5872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939568203,
@@ -5882,7 +5882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939568363,
@@ -5892,7 +5892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01229152
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939570376,
@@ -5902,7 +5902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03391781
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939571062,
@@ -5912,7 +5912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0075
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939571493,
@@ -5922,7 +5922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03396801
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939572375,
@@ -5932,7 +5932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939572383,
@@ -5942,7 +5942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939572413,
@@ -5952,7 +5952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1463672
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939572430,
@@ -5962,7 +5962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1536328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574110,
@@ -5972,7 +5972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574295,
@@ -5982,7 +5982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5963672
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574299,
@@ -5992,7 +5992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03661918
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574425,
@@ -6002,7 +6002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45934349
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574429,
@@ -6012,7 +6012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04717
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574433,
@@ -6022,7 +6022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574438,
@@ -6032,7 +6032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7735849
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574442,
@@ -6042,7 +6042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04143387
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574446,
@@ -6052,7 +6052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06072244
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574451,
@@ -6062,7 +6062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574455,
@@ -6072,7 +6072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4677453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574478,
@@ -6082,7 +6082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574484,
@@ -6092,7 +6092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574487,
@@ -6102,7 +6102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06883
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574490,
@@ -6112,7 +6112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18264
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574495,
@@ -6122,7 +6122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574501,
@@ -6132,7 +6132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574506,
@@ -6142,7 +6142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09999997
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574511,
@@ -6152,7 +6152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574520,
@@ -6162,7 +6162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574526,
@@ -6172,7 +6172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574534,
@@ -6182,7 +6182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29992101
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574539,
@@ -6192,7 +6192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10195808
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574544,
@@ -6202,7 +6202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00019392
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574558,
@@ -6212,7 +6212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12516376
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574564,
@@ -6222,7 +6222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.47276323
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574572,
@@ -6232,7 +6232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.89802435
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574575,
@@ -6242,7 +6242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00197131
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574577,
@@ -6252,7 +6252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000433
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574579,
@@ -6262,7 +6262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574734,
@@ -6272,7 +6272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19103199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574739,
@@ -6282,7 +6282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.52025652
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574742,
@@ -6292,7 +6292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00072734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574744,
@@ -6302,7 +6302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000102
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574747,
@@ -6312,7 +6312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574751,
@@ -6322,7 +6322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0010033
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574754,
@@ -6332,7 +6332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04609344
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574756,
@@ -6342,7 +6342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.108
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574759,
@@ -6352,7 +6352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.71698639
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939574905,
@@ -6362,7 +6362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01118077
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575211,
@@ -6372,7 +6372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10683284
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575297,
@@ -6382,7 +6382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01110929
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575301,
@@ -6392,7 +6392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.29405787
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575313,
@@ -6402,7 +6402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575523,
@@ -6412,7 +6412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00758344
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575530,
@@ -6422,7 +6422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04643452
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575533,
@@ -6432,7 +6432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575536,
@@ -6442,7 +6442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575538,
@@ -6452,7 +6452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575541,
@@ -6462,7 +6462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28463459
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575691,
@@ -6472,7 +6472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01371482
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575699,
@@ -6482,7 +6482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00777738
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575706,
@@ -6492,7 +6492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00789851
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575713,
@@ -6502,7 +6502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00412265
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939575719,
@@ -6512,7 +6512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00883813
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576114,
@@ -6522,7 +6522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576364,
@@ -6532,7 +6532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0153054
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576409,
@@ -6542,7 +6542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576413,
@@ -6552,7 +6552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0447484
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576601,
@@ -6562,7 +6562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0128765
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939576703,
@@ -6572,7 +6572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939577544,
@@ -6582,7 +6582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004994
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939577547,
@@ -6592,7 +6592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.100375
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939578204,
@@ -6602,7 +6602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.108
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939579289,
@@ -6612,7 +6612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04723839
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939579572,
@@ -6622,7 +6622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04994678
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939580065,
@@ -6632,7 +6632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939580591,
@@ -6642,7 +6642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08857235
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939580835,
@@ -6652,7 +6652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939581099,
@@ -6662,7 +6662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939581142,
@@ -6672,7 +6672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939581449,
@@ -6682,7 +6682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00933696
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939581489,
@@ -6692,7 +6692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07709069
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939582334,
@@ -6702,7 +6702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00518802
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939582389,
@@ -6712,7 +6712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04681
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939582835,
@@ -6722,7 +6722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05146
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939582839,
@@ -6732,7 +6732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939582842,
@@ -6742,7 +6742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583233,
@@ -6752,7 +6752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.68415431
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583236,
@@ -6762,7 +6762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37388442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583239,
@@ -6772,7 +6772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3759658
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583241,
@@ -6782,7 +6782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26881
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583244,
@@ -6792,7 +6792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583246,
@@ -6802,7 +6802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583249,
@@ -6812,7 +6812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.39988547
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583294,
@@ -6822,7 +6822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00011453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583798,
@@ -6832,7 +6832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01973922
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583844,
@@ -6842,7 +6842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939583848,
@@ -6852,7 +6852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584385,
@@ -6862,7 +6862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0022437
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584403,
@@ -6872,7 +6872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0094614
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584446,
@@ -6882,7 +6882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01436592
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584507,
@@ -6892,7 +6892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07595724
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584595,
@@ -6902,7 +6902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03812492
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939584740,
@@ -6912,7 +6912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.271749
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939585137,
@@ -6922,7 +6922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939586240,
@@ -6932,7 +6932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01229
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939586359,
@@ -6942,7 +6942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939586705,
@@ -6952,7 +6952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587500,
@@ -6962,7 +6962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.405
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587504,
@@ -6972,7 +6972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.04928577
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587506,
@@ -6982,7 +6982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.41307609
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587509,
@@ -6992,7 +6992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.96577341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587511,
@@ -7002,7 +7002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.06246586
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587562,
@@ -7012,7 +7012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 6.93753414
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587703,
@@ -7022,7 +7022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03219923
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939587879,
@@ -7032,7 +7032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02243418
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939588551,
@@ -7042,7 +7042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.394722
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939589782,
@@ -7052,7 +7052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939589816,
@@ -7062,7 +7062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939589921,
@@ -7072,7 +7072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939589923,
@@ -7082,7 +7082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939592082,
@@ -7092,7 +7092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.264
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939592232,
@@ -7102,7 +7102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939592709,
@@ -7112,7 +7112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.23343358
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593153,
@@ -7122,7 +7122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02034734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593158,
@@ -7132,7 +7132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09441266
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593540,
@@ -7142,7 +7142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593545,
@@ -7152,7 +7152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.96899
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593549,
@@ -7162,7 +7162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41718
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593553,
@@ -7172,7 +7172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26508
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593557,
@@ -7182,7 +7182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12897542
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593562,
@@ -7192,7 +7192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036702
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593567,
@@ -7202,7 +7202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18307258
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939593646,
@@ -7212,7 +7212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939594387,
@@ -7222,7 +7222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939594762,
@@ -7232,7 +7232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939596039,
@@ -7242,7 +7242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939596152,
@@ -7252,7 +7252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939608246,
@@ -7262,7 +7262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.19578939
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939609869,
@@ -7272,7 +7272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.70483962
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939610317,
@@ -7282,7 +7282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.849347
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939610320,
@@ -7292,7 +7292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00016979
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939610323,
@@ -7302,7 +7302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939610326,
@@ -7312,7 +7312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939612903,
@@ -7322,7 +7322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.499915
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939612906,
@@ -7332,7 +7332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939612908,
@@ -7342,7 +7342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.199085
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939614761,
@@ -7352,7 +7352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939623325,
@@ -7362,7 +7362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939624297,
@@ -7372,7 +7372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12282458
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939627310,
@@ -7382,7 +7382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939627317,
@@ -7392,7 +7392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.549
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939627320,
@@ -7402,7 +7402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.462105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629264,
@@ -7412,7 +7412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.312105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629268,
@@ -7422,7 +7422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629270,
@@ -7432,7 +7432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629273,
@@ -7442,7 +7442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.34
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629275,
@@ -7452,7 +7452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629278,
@@ -7462,7 +7462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3759658
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939629281,
@@ -7472,7 +7472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1719292
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631417,
@@ -7482,7 +7482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631421,
@@ -7492,7 +7492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631424,
@@ -7502,7 +7502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.426109
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631426,
@@ -7512,7 +7512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.462915
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631431,
@@ -7522,7 +7522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631435,
@@ -7532,7 +7532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 9.010976
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631588,
@@ -7542,7 +7542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06084686
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939631593,
@@ -7552,7 +7552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00015314
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939632644,
@@ -7562,7 +7562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939636630,
@@ -7572,7 +7572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.989024
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939636636,
@@ -7582,7 +7582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.120976
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939636663,
@@ -7592,7 +7592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.24802761
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939636665,
@@ -7602,7 +7602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00099639
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939637012,
@@ -7612,7 +7612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12239
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939637016,
@@ -7622,7 +7622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939637019,
@@ -7632,7 +7632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939637022,
@@ -7642,7 +7642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07661
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939641144,
@@ -7652,7 +7652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939641570,
@@ -7662,7 +7662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642508,
@@ -7672,7 +7672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.011
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642512,
@@ -7682,7 +7682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00890002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642515,
@@ -7692,7 +7692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.399
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642518,
@@ -7702,7 +7702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04669258
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642521,
@@ -7712,7 +7712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.1310074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642597,
@@ -7722,7 +7722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.563022
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642601,
@@ -7732,7 +7732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8589926
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642605,
@@ -7742,7 +7742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00115688
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642607,
@@ -7752,7 +7752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07500312
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642675,
@@ -7762,7 +7762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939642811,
@@ -7772,7 +7772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 9.90654206
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939643235,
@@ -7782,7 +7782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939643239,
@@ -7792,7 +7792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1247
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939645307,
@@ -7802,7 +7802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07251613
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939645827,
@@ -7812,7 +7812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.015
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939648613,
@@ -7822,7 +7822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04688982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649167,
@@ -7832,7 +7832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12825163
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649175,
@@ -7842,7 +7842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649180,
@@ -7852,7 +7852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01369885
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649184,
@@ -7862,7 +7862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1719292
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649188,
@@ -7872,7 +7872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37274716
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939649191,
@@ -7882,7 +7882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.01237316
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939652732,
@@ -7892,7 +7892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939652739,
@@ -7902,7 +7902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939652829,
@@ -7912,7 +7912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.425
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939652833,
@@ -7922,7 +7922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14405018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939652928,
@@ -7932,7 +7932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939653794,
@@ -7942,7 +7942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00094982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939653825,
@@ -7952,7 +7952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05062018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939653829,
@@ -7962,7 +7962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0518
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939654674,
@@ -7972,7 +7972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939658350,
@@ -7982,7 +7982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08383678
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939658501,
@@ -7992,7 +7992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00209823
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939658508,
@@ -8002,7 +8002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00471959
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939661329,
@@ -8012,7 +8012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01017367
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939663890,
@@ -8022,7 +8022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00737099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939664813,
@@ -8032,7 +8032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.55955616
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939665448,
@@ -8042,7 +8042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00337076
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939667652,
@@ -8052,7 +8052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2838104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939667659,
@@ -8062,7 +8062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3861896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939669368,
@@ -8072,7 +8072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13454171
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939669375,
@@ -8082,7 +8082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18345829
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939674372,
@@ -8092,7 +8092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939676223,
@@ -8102,7 +8102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939677306,
@@ -8112,7 +8112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05356186
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939677312,
@@ -8122,7 +8122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14643814
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939680843,
@@ -8132,7 +8132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00202757
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939682295,
@@ -8142,7 +8142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02778339
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939682313,
@@ -8152,7 +8152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01018904
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939684464,
@@ -8162,7 +8162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03394269
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685967,
@@ -8172,7 +8172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10702223
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685971,
@@ -8182,7 +8182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01625472
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685973,
@@ -8192,7 +8192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28605144
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685976,
@@ -8202,7 +8202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685978,
@@ -8212,7 +8212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04394856
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939685980,
@@ -8222,7 +8222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03624116
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939690149,
@@ -8232,7 +8232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939693978,
@@ -8242,7 +8242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939695062,
@@ -8252,7 +8252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02081515
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939695068,
@@ -8262,7 +8262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02918485
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939695643,
@@ -8272,7 +8272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939695674,
@@ -8282,7 +8282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939697389,
@@ -8292,7 +8292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.112
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939697401,
@@ -8302,7 +8302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.088
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939700337,
@@ -8312,7 +8312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08823
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939701063,
@@ -8322,7 +8322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00201191
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939701087,
@@ -8332,7 +8332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03645675
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939704556,
@@ -8342,7 +8342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01040758
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939704561,
@@ -8352,7 +8352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02382304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939714410,
@@ -8362,7 +8362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.455
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939714427,
@@ -8372,7 +8372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12836416
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939714431,
@@ -8382,7 +8382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41663584
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939715246,
@@ -8392,7 +8392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03771913
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939716661,
@@ -8402,7 +8402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01003644
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939717696,
@@ -8412,7 +8412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09295062
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939723252,
@@ -8422,7 +8422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12836802
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939723268,
@@ -8432,7 +8432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08688982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939723271,
@@ -8442,7 +8442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939723443,
@@ -8452,7 +8452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939727115,
@@ -8462,7 +8462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04661961
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939730481,
@@ -8472,7 +8472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5.13626211
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939732452,
@@ -8482,7 +8482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01799627
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939732458,
@@ -8492,7 +8492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05675277
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736028,
@@ -8502,7 +8502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10356186
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736034,
@@ -8512,7 +8512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736037,
@@ -8522,7 +8522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736041,
@@ -8532,7 +8532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00202757
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736044,
@@ -8542,7 +8542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01441057
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939736501,
@@ -8552,7 +8552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.9734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939737164,
@@ -8562,7 +8562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00008639
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939737174,
@@ -8572,7 +8572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.979894
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739595,
@@ -8582,7 +8582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12823937
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739598,
@@ -8592,7 +8592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04660833
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739601,
@@ -8602,7 +8602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.395
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739604,
@@ -8612,7 +8612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04056778
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739607,
@@ -8622,7 +8622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739611,
@@ -8632,7 +8632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739613,
@@ -8642,7 +8642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739615,
@@ -8652,7 +8652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739628,
@@ -8662,7 +8662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739631,
@@ -8672,7 +8672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739635,
@@ -8682,7 +8682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.85136473
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739639,
@@ -8692,7 +8692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739641,
@@ -8702,7 +8702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.314
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739644,
@@ -8712,7 +8712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04660833
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939739647,
@@ -8722,7 +8722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.63261146
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939741623,
@@ -8732,7 +8732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939745226,
@@ -8742,7 +8742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04656515
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939745242,
@@ -8752,7 +8752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08085643
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939752906,
@@ -8762,7 +8762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939753412,
@@ -8772,7 +8772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939753418,
@@ -8782,7 +8782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04652888
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939753421,
@@ -8792,7 +8792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14347112
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759258,
@@ -8802,7 +8802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04652286
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759263,
@@ -8812,7 +8812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.30999642
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759268,
@@ -8822,7 +8822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759272,
@@ -8832,7 +8832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759276,
@@ -8842,7 +8842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759280,
@@ -8852,7 +8852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939759285,
@@ -8862,7 +8862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02248072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939762913,
@@ -8872,7 +8872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01319018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939762918,
@@ -8882,7 +8882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08680982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939765710,
@@ -8892,7 +8892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00938443
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939767977,
@@ -8902,7 +8902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.99061557
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939767985,
@@ -8912,7 +8912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01311914
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939770147,
@@ -8922,7 +8922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939771643,
@@ -8932,7 +8932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08288
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939774068,
@@ -8942,7 +8942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 8.6e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939776622,
@@ -8952,7 +8952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939776640,
@@ -8962,7 +8962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 8.3839395
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939781653,
@@ -8972,7 +8972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01319101
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939782904,
@@ -8982,7 +8982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01319296
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939786936,
@@ -8992,7 +8992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939790167,
@@ -9002,7 +9002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939794796,
@@ -9012,7 +9012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939805417,
@@ -9022,7 +9022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939806483,
@@ -9032,7 +9032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939823902,
@@ -9042,7 +9042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939823912,
@@ -9052,7 +9052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939827680,
@@ -9062,7 +9062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.378817
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939827683,
@@ -9072,7 +9072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301183
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939827995,
@@ -9082,7 +9082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939828000,
@@ -9092,7 +9092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.098817
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939828004,
@@ -9102,7 +9102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.051183
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939828007,
@@ -9112,7 +9112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.014767
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939828010,
@@ -9122,7 +9122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.035233
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939828014,
@@ -9132,7 +9132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939835370,
@@ -9142,7 +9142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05173
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939835489,
@@ -9152,7 +9152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09974584
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939835493,
@@ -9162,7 +9162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00025416
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939838109,
@@ -9172,7 +9172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939838113,
@@ -9182,7 +9182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.459866
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939838115,
@@ -9192,7 +9192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.43233653
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939838120,
@@ -9202,7 +9202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04653477
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939838123,
@@ -9212,7 +9212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0612627
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939849693,
@@ -9222,7 +9222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09289
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939853000,
@@ -9232,7 +9232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939860959,
@@ -9242,7 +9242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023449
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939861809,
@@ -9252,7 +9252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939865196,
@@ -9262,7 +9262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0636716
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939879637,
@@ -9272,7 +9272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07878
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939881660,
@@ -9282,7 +9282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003686
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885236,
@@ -9292,7 +9292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885264,
@@ -9302,7 +9302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885268,
@@ -9312,7 +9312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.397
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885295,
@@ -9322,7 +9322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12827739
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885298,
@@ -9332,7 +9332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.435
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939885301,
@@ -9342,7 +9342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16272261
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939891868,
@@ -9352,7 +9352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939895734,
@@ -9362,7 +9362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00964507
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939896048,
@@ -9372,7 +9372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00822
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939898669,
@@ -9382,7 +9382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0122439
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939899866,
@@ -9392,7 +9392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03859683
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939899872,
@@ -9402,7 +9402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00010009
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939899874,
@@ -9412,7 +9412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.8e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939900719,
@@ -9422,7 +9422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10098
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939901415,
@@ -9432,7 +9432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939901806,
@@ -9442,7 +9442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939901925,
@@ -9452,7 +9452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15900437
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939910560,
@@ -9462,7 +9462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939910814,
@@ -9472,7 +9472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04797161
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939913338,
@@ -9482,7 +9482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939921285,
@@ -9492,7 +9492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0180167
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939925656,
@@ -9502,7 +9502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.009
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939928188,
@@ -9512,7 +9512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939931131,
@@ -9522,7 +9522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00336723
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939937258,
@@ -9532,7 +9532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939937266,
@@ -9542,7 +9542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.021
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939947496,
@@ -9552,7 +9552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939947505,
@@ -9562,7 +9562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939947510,
@@ -9572,7 +9572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.42260256
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939952149,
@@ -9582,7 +9582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0011
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939952154,
@@ -9592,7 +9592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03889914
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939952390,
@@ -9602,7 +9602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04000074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939952394,
@@ -9612,7 +9612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05999926
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939953302,
@@ -9622,7 +9622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.46110086
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956515,
@@ -9632,7 +9632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956531,
@@ -9642,7 +9642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956550,
@@ -9652,7 +9652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.121588
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956555,
@@ -9662,7 +9662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.02789856
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956558,
@@ -9672,7 +9672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 9e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956562,
@@ -9682,7 +9682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956566,
@@ -9692,7 +9692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956569,
@@ -9702,7 +9702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956572,
@@ -9712,7 +9712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956576,
@@ -9722,7 +9722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00851796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956579,
@@ -9732,7 +9732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03148204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956582,
@@ -9742,7 +9742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03945079
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956586,
@@ -9752,7 +9752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00596613
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956589,
@@ -9762,7 +9762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0003996
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956592,
@@ -9772,7 +9772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.35769683
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956596,
@@ -9782,7 +9782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05946147
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956599,
@@ -9792,7 +9792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956603,
@@ -9802,7 +9802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.84953853
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956608,
@@ -9812,7 +9812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10051661
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956611,
@@ -9822,7 +9822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02107139
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956614,
@@ -9832,7 +9832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07892861
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956618,
@@ -9842,7 +9842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01037139
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956622,
@@ -9852,7 +9852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04644272
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956624,
@@ -9862,7 +9862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14318589
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956627,
@@ -9872,7 +9872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.74651411
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956630,
@@ -9882,7 +9882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956634,
@@ -9892,7 +9892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956637,
@@ -9902,7 +9902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21596928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956641,
@@ -9912,7 +9912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.78403072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956644,
@@ -9922,7 +9922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.42796928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956648,
@@ -9932,7 +9932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956651,
@@ -9942,7 +9942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956654,
@@ -9952,7 +9952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956658,
@@ -9962,7 +9962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956661,
@@ -9972,7 +9972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.76703072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956664,
@@ -9982,7 +9982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42796928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956667,
@@ -9992,7 +9992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.57203072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956670,
@@ -10002,7 +10002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04641442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956670,
@@ -10012,7 +10012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04641442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956673,
@@ -10022,7 +10022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.52973168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956677,
@@ -10032,7 +10032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.0736799
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956680,
@@ -10042,7 +10042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.39658842
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939956683,
@@ -10052,7 +10052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957755,
@@ -10062,7 +10062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.015
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957811,
@@ -10072,7 +10072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19341158
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957814,
@@ -10082,7 +10082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29838853
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957818,
@@ -10092,7 +10092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00065097
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957821,
@@ -10102,7 +10102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02286
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957826,
@@ -10112,7 +10112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06193
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957830,
@@ -10122,7 +10122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00651255
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957833,
@@ -10132,7 +10132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957835,
@@ -10142,7 +10142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32998182
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957838,
@@ -10152,7 +10152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32350563
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957841,
@@ -10162,7 +10162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00442788
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957844,
@@ -10172,7 +10172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00331672
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957847,
@@ -10182,7 +10182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25834891
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957849,
@@ -10192,7 +10192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00165109
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957852,
@@ -10202,7 +10202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00561215
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957855,
@@ -10212,7 +10212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957858,
@@ -10222,7 +10222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02638785
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957861,
@@ -10232,7 +10232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15834891
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957864,
@@ -10242,7 +10242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10020086
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957866,
@@ -10252,7 +10252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.48801941
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957869,
@@ -10262,7 +10262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.56044514
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957871,
@@ -10272,7 +10272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.37088672
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957875,
@@ -10282,7 +10282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12911328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957877,
@@ -10292,7 +10292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.93955486
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957900,
@@ -10302,7 +10302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957906,
@@ -10312,7 +10312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0546875
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957912,
@@ -10322,7 +10322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.49575764
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957915,
@@ -10332,7 +10332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.70424236
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957921,
@@ -10342,7 +10342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957925,
@@ -10352,7 +10352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957928,
@@ -10362,7 +10362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957932,
@@ -10372,7 +10372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957947,
@@ -10382,7 +10382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939957953,
@@ -10392,7 +10392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939958206,
@@ -10402,7 +10402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0892
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939958211,
@@ -10412,7 +10412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2108
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939961239,
@@ -10422,7 +10422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04055076
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939961759,
@@ -10432,7 +10432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965427,
@@ -10442,7 +10442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00337282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965442,
@@ -10452,7 +10452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01018904
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965445,
@@ -10462,7 +10462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02643814
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965448,
@@ -10472,7 +10472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.249
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965451,
@@ -10482,7 +10482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965455,
@@ -10492,7 +10492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08692257
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965461,
@@ -10502,7 +10502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04630712
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965466,
@@ -10512,7 +10512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0892
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965472,
@@ -10522,7 +10522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965476,
@@ -10532,7 +10532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965481,
@@ -10542,7 +10542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 10
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965486,
@@ -10552,7 +10552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01847
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965508,
@@ -10562,7 +10562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965514,
@@ -10572,7 +10572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965590,
@@ -10582,7 +10582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965593,
@@ -10592,7 +10592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04630712
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965596,
@@ -10602,7 +10602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08385
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965599,
@@ -10612,7 +10612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06914288
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939965603,
@@ -10622,7 +10622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939966077,
@@ -10632,7 +10632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01358733
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939966916,
@@ -10642,7 +10642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04280141
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939966919,
@@ -10652,7 +10652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00008555
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967370,
@@ -10662,7 +10662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967376,
@@ -10672,7 +10672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04630712
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967379,
@@ -10682,7 +10682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967383,
@@ -10692,7 +10692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.79719288
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967406,
@@ -10702,7 +10702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.35
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967414,
@@ -10712,7 +10712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967421,
@@ -10722,7 +10722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967531,
@@ -10732,7 +10732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967544,
@@ -10742,7 +10742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02475715
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967717,
@@ -10752,7 +10752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01524285
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939967721,
@@ -10762,7 +10762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1938552
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939970786,
@@ -10772,7 +10772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0390625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939970792,
@@ -10782,7 +10782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.015625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939970953,
@@ -10792,7 +10792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.0444125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939972999,
@@ -10802,7 +10802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939973006,
@@ -10812,7 +10812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06611772
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939975128,
@@ -10822,7 +10822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977276,
@@ -10832,7 +10832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02428768
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977353,
@@ -10842,7 +10842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03587348
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977495,
@@ -10852,7 +10852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13483884
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977501,
@@ -10862,7 +10862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977507,
@@ -10872,7 +10872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02552073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977510,
@@ -10882,7 +10882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03964043
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977982,
@@ -10892,7 +10892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977989,
@@ -10902,7 +10902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.47417255
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977995,
@@ -10912,7 +10912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939977998,
@@ -10922,7 +10922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.40394517
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939979273,
@@ -10932,7 +10932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15911077
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939982513,
@@ -10942,7 +10942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939983615,
@@ -10952,7 +10952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01859415
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939983640,
@@ -10962,7 +10962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5.9
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939985124,
@@ -10972,7 +10972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3166894
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939985140,
@@ -10982,7 +10982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939985145,
@@ -10992,7 +10992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09389
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939986423,
@@ -11002,7 +11002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939986447,
@@ -11012,7 +11012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939986452,
@@ -11022,7 +11022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939987241,
@@ -11032,7 +11032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939989518,
@@ -11042,7 +11042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01884846
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939994759,
@@ -11052,7 +11052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0918371
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939995313,
@@ -11062,7 +11062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004949
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939995355,
@@ -11072,7 +11072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01276037
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996041,
@@ -11082,7 +11082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996049,
@@ -11092,7 +11092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21894517
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996053,
@@ -11102,7 +11102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.90183016
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996106,
@@ -11112,7 +11112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996155,
@@ -11122,7 +11122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04602647
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939996159,
@@ -11132,7 +11132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.27997353
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939997521,
@@ -11142,7 +11142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.78
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939998455,
@@ -11152,7 +11152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.86002647
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939998466,
@@ -11162,7 +11162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.383
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939998470,
@@ -11172,7 +11172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939998473,
@@ -11182,7 +11182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25697353
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939999972,
@@ -11192,7 +11192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00273481
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939999984,
@@ -11202,7 +11202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05896519
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561939999988,
@@ -11212,7 +11212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.63132473
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000112,
@@ -11222,7 +11222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.28867527
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000116,
@@ -11232,7 +11232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000118,
@@ -11242,7 +11242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000121,
@@ -11252,7 +11252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000124,
@@ -11262,7 +11262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000126,
@@ -11272,7 +11272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7644681
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000129,
@@ -11282,7 +11282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12702254
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000132,
@@ -11292,7 +11292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13356186
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000134,
@@ -11302,7 +11302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000136,
@@ -11312,7 +11312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 8.6e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000138,
@@ -11322,7 +11322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03999914
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000141,
@@ -11332,7 +11332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03643814
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000374,
@@ -11342,7 +11342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0035626
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000385,
@@ -11352,7 +11352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05999926
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000389,
@@ -11362,7 +11362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02475715
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000392,
@@ -11372,7 +11372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01524285
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000395,
@@ -11382,7 +11382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01859415
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000399,
@@ -11392,7 +11392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12784399
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000450,
@@ -11402,7 +11402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11859415
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940000612,
@@ -11412,7 +11412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001277,
@@ -11422,7 +11422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001331,
@@ -11432,7 +11432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15723994
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001406,
@@ -11442,7 +11442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023449
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001561,
@@ -11452,7 +11452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001565,
@@ -11462,7 +11462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02038303
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940001843,
@@ -11472,7 +11472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940002345,
@@ -11482,7 +11482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.009375
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940002351,
@@ -11492,7 +11492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940002356,
@@ -11502,7 +11502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940002360,
@@ -11512,7 +11512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940003724,
@@ -11522,7 +11522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4775236
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940003730,
@@ -11532,7 +11532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07169225
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940004255,
@@ -11542,7 +11542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01276037
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940005363,
@@ -11552,7 +11552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04652
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940006091,
@@ -11562,7 +11562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.053
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940006494,
@@ -11572,7 +11572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03400966
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940007233,
@@ -11582,7 +11582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940007330,
@@ -11592,7 +11592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940009965,
@@ -11602,7 +11602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01952
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940010010,
@@ -11612,7 +11612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0000018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940010124,
@@ -11622,7 +11622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04000074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940010127,
@@ -11632,7 +11632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05999926
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940010577,
@@ -11642,7 +11642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940010651,
@@ -11652,7 +11652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08716439
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940012041,
@@ -11662,7 +11662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02507155
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940012045,
@@ -11672,7 +11672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940012048,
@@ -11682,7 +11682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940012413,
@@ -11692,7 +11692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04618
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940018591,
@@ -11702,7 +11702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00407346
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940022429,
@@ -11712,7 +11712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940024712,
@@ -11722,7 +11722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940025578,
@@ -11732,7 +11732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026034,
@@ -11742,7 +11742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026042,
@@ -11752,7 +11752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03741901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026045,
@@ -11762,7 +11762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02758099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026049,
@@ -11772,7 +11772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026053,
@@ -11782,7 +11782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026058,
@@ -11792,7 +11792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940026063,
@@ -11802,7 +11802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940027947,
@@ -11812,7 +11812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940029469,
@@ -11822,7 +11822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.55427
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940029679,
@@ -11832,7 +11832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0000035
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940029706,
@@ -11842,7 +11842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0121
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940030092,
@@ -11852,7 +11852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000674
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940030112,
@@ -11862,7 +11862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940030403,
@@ -11872,7 +11872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940030628,
@@ -11882,7 +11882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.023757
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940030636,
@@ -11892,7 +11892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04611991
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032832,
@@ -11902,7 +11902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032842,
@@ -11912,7 +11912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032848,
@@ -11922,7 +11922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11787534
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032854,
@@ -11932,7 +11932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04618613
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032857,
@@ -11942,7 +11942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032860,
@@ -11952,7 +11952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032871,
@@ -11962,7 +11962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5846
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032876,
@@ -11972,7 +11972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.03133853
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940032891,
@@ -11982,7 +11982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940036026,
@@ -11992,7 +11992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940036800,
@@ -12002,7 +12002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940037854,
@@ -12012,7 +12012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.69608722
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940038832,
@@ -12022,7 +12022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01022436
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039121,
@@ -12032,7 +12032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.804
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039207,
@@ -12042,7 +12042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039212,
@@ -12052,7 +12052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039216,
@@ -12062,7 +12062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039219,
@@ -12072,7 +12072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039222,
@@ -12082,7 +12082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039624,
@@ -12092,7 +12092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.028
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940039674,
@@ -12102,7 +12102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.32834989
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940041975,
@@ -12112,7 +12112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940042093,
@@ -12122,7 +12122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940042099,
@@ -12132,7 +12132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940042108,
@@ -12142,7 +12142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11000894
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940042112,
@@ -12152,7 +12152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06499106
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940044185,
@@ -12162,7 +12162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12498558
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940044319,
@@ -12172,7 +12172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17901442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940044325,
@@ -12182,7 +12182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07098558
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940044342,
@@ -12192,7 +12192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940044350,
@@ -12202,7 +12202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045246,
@@ -12212,7 +12212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12758132
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045250,
@@ -12222,7 +12222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22901442
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045253,
@@ -12232,7 +12232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02390715
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045257,
@@ -12242,7 +12242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04597572
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045260,
@@ -12252,7 +12252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.376
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045264,
@@ -12262,7 +12262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00260148
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045268,
@@ -12272,7 +12272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.19491991
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045281,
@@ -12282,7 +12282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940045288,
@@ -12292,7 +12292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940048709,
@@ -12302,7 +12302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02751262
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940048716,
@@ -12312,7 +12312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22248738
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940048933,
@@ -12322,7 +12322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940049413,
@@ -12332,7 +12332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940049417,
@@ -12342,7 +12342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940051881,
@@ -12352,7 +12352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2947484
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940053710,
@@ -12362,7 +12362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02551283
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940053715,
@@ -12372,7 +12372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.49188942
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940053785,
@@ -12382,7 +12382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.65595489
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940053790,
@@ -12392,7 +12392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01618
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940053792,
@@ -12402,7 +12402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940054945,
@@ -12412,7 +12412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04597572
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055272,
@@ -12422,7 +12422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055276,
@@ -12432,7 +12432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055293,
@@ -12442,7 +12442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00938443
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055296,
@@ -12452,7 +12452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0373
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055299,
@@ -12462,7 +12462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04589737
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055303,
@@ -12472,7 +12472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00938243
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055306,
@@ -12482,7 +12482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09803577
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055376,
@@ -12492,7 +12492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055434,
@@ -12502,7 +12502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.40196423
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055439,
@@ -12512,7 +12512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.59803577
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940055549,
@@ -12522,7 +12522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023449
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940057114,
@@ -12532,7 +12532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940057479,
@@ -12542,7 +12542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00834877
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940057515,
@@ -12552,7 +12552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01715086
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940057598,
@@ -12562,7 +12562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.058
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940058316,
@@ -12572,7 +12572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.467
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060368,
@@ -12582,7 +12582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00445268
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060495,
@@ -12592,7 +12592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060498,
@@ -12602,7 +12602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060555,
@@ -12612,7 +12612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060572,
@@ -12622,7 +12622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060586,
@@ -12632,7 +12632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.9
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940060619,
@@ -12642,7 +12642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05016
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062193,
@@ -12652,7 +12652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062197,
@@ -12662,7 +12662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12711024
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062200,
@@ -12672,7 +12672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062203,
@@ -12682,7 +12682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.91629515
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062205,
@@ -12692,7 +12692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11918
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062208,
@@ -12702,7 +12702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062211,
@@ -12712,7 +12712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062214,
@@ -12722,7 +12722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062218,
@@ -12732,7 +12732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062220,
@@ -12742,7 +12742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.604
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062223,
@@ -12752,7 +12752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062226,
@@ -12762,7 +12762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00935523
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062230,
@@ -12772,7 +12772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.81
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062233,
@@ -12782,7 +12782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062235,
@@ -12792,7 +12792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06655
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062239,
@@ -12802,7 +12802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062243,
@@ -12812,7 +12812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062245,
@@ -12822,7 +12822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04567
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062249,
@@ -12832,7 +12832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00415
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062251,
@@ -12842,7 +12842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0479
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062254,
@@ -12852,7 +12852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062257,
@@ -12862,7 +12862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00568556
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062259,
@@ -12872,7 +12872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062262,
@@ -12882,7 +12882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062265,
@@ -12892,7 +12892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 7.93586388
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062268,
@@ -12902,7 +12902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.862
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062270,
@@ -12912,7 +12912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.18750273
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062273,
@@ -12922,7 +12922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.77560026
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062275,
@@ -12932,7 +12932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062277,
@@ -12942,7 +12942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.152
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062279,
@@ -12952,7 +12952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062281,
@@ -12962,7 +12962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.46207244
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062284,
@@ -12972,7 +12972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00119827
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062286,
@@ -12982,7 +12982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000309
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062288,
@@ -12992,7 +12992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67168667
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062290,
@@ -13002,7 +13002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0505942
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062322,
@@ -13012,7 +13012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062328,
@@ -13022,7 +13022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0594058
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062331,
@@ -13032,7 +13032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062333,
@@ -13042,7 +13042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06561066
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940062336,
@@ -13052,7 +13052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75498354
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940065911,
@@ -13062,7 +13062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12705513
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940065918,
@@ -13072,7 +13072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17294487
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067207,
@@ -13082,7 +13082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04578794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067210,
@@ -13092,7 +13092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.372
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067213,
@@ -13102,7 +13102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04578794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067216,
@@ -13112,7 +13112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067218,
@@ -13122,7 +13122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940067221,
@@ -13132,7 +13132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.25442412
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940068591,
@@ -13142,7 +13142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940069420,
@@ -13152,7 +13152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940069425,
@@ -13162,7 +13162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073474,
@@ -13172,7 +13172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073493,
@@ -13182,7 +13182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16611772
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073687,
@@ -13192,7 +13192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073701,
@@ -13202,7 +13202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073704,
@@ -13212,7 +13212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04578794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940073707,
@@ -13222,7 +13222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33832978
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940074664,
@@ -13232,7 +13232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940075908,
@@ -13242,7 +13242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00645611
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940076615,
@@ -13252,7 +13252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0224625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940076620,
@@ -13262,7 +13262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0175375
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940078354,
@@ -13272,7 +13272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02847113
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940079351,
@@ -13282,7 +13282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940079388,
@@ -13292,7 +13292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02036
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940079587,
@@ -13302,7 +13302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940079993,
@@ -13312,7 +13312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940080497,
@@ -13322,7 +13322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2147
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940080653,
@@ -13332,7 +13332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001276
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940080737,
@@ -13342,7 +13342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00803216
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940080740,
@@ -13352,7 +13352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00696784
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940082379,
@@ -13362,7 +13362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940082719,
@@ -13372,7 +13372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01544834
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940082724,
@@ -13382,7 +13382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940082794,
@@ -13392,7 +13392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940082798,
@@ -13402,7 +13402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.111772
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940085970,
@@ -13412,7 +13412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.688228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940085974,
@@ -13422,7 +13422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.419972
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940086121,
@@ -13432,7 +13432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.000028
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940086125,
@@ -13442,7 +13442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.289972
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940086461,
@@ -13452,7 +13452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940086494,
@@ -13462,7 +13462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13757982
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940086922,
@@ -13472,7 +13472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.97244818
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088089,
@@ -13482,7 +13482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00332504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088101,
@@ -13492,7 +13492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.10667496
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088191,
@@ -13502,7 +13502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088194,
@@ -13512,7 +13512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088197,
@@ -13522,7 +13522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088223,
@@ -13532,7 +13532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940088225,
@@ -13542,7 +13542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940090451,
@@ -13552,7 +13552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940090589,
@@ -13562,7 +13562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0411
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940090627,
@@ -13572,7 +13572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940090725,
@@ -13582,7 +13582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.013
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940090769,
@@ -13592,7 +13592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0589
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940091076,
@@ -13602,7 +13602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0612225
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940091187,
@@ -13612,7 +13612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.258
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940091199,
@@ -13622,7 +13622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.262
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940091485,
@@ -13632,7 +13632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940091491,
@@ -13642,7 +13642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092544,
@@ -13652,7 +13652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.7909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092566,
@@ -13662,7 +13662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.31907436
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092588,
@@ -13672,7 +13672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00002564
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092592,
@@ -13682,7 +13682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092595,
@@ -13692,7 +13692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092702,
@@ -13702,7 +13702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01830929
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940092706,
@@ -13712,7 +13712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940093131,
@@ -13722,7 +13722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940094501,
@@ -13732,7 +13732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006165
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940094997,
@@ -13742,7 +13742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06009003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940095001,
@@ -13752,7 +13752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03990996
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940095005,
@@ -13762,7 +13762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26958251
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940095009,
@@ -13772,7 +13772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096146,
@@ -13782,7 +13782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096197,
@@ -13792,7 +13792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096201,
@@ -13802,7 +13802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67891105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096272,
@@ -13812,7 +13812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096402,
@@ -13822,7 +13822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000367
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940096414,
@@ -13832,7 +13832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0666
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940097166,
@@ -13842,7 +13842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940097993,
@@ -13852,7 +13852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940098128,
@@ -13862,7 +13862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.295
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940098654,
@@ -13872,7 +13872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940099069,
@@ -13882,7 +13882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01505
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940099315,
@@ -13892,7 +13892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000975
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940099319,
@@ -13902,7 +13902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29499025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940100667,
@@ -13912,7 +13912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000975
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940100672,
@@ -13922,7 +13922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04591739
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940100682,
@@ -13932,7 +13932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0995
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940103351,
@@ -13942,7 +13942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5501
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940103506,
@@ -13952,7 +13952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0000059
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940104960,
@@ -13962,7 +13962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17257243
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105177,
@@ -13972,7 +13972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105181,
@@ -13982,7 +13982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105183,
@@ -13992,7 +13992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01940375
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105186,
@@ -14002,7 +14002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03059625
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105188,
@@ -14012,7 +14012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940105190,
@@ -14022,7 +14022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940106142,
@@ -14032,7 +14032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10855666
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940106155,
@@ -14042,7 +14042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19144334
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940110467,
@@ -14052,7 +14052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940110477,
@@ -14062,7 +14062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05664023
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940110480,
@@ -14072,7 +14072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.65112909
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940113764,
@@ -14082,7 +14082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023449
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940114230,
@@ -14092,7 +14092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940119216,
@@ -14102,7 +14102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123232,
@@ -14112,7 +14112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05229453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123415,
@@ -14122,7 +14122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123470,
@@ -14132,7 +14132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123553,
@@ -14142,7 +14142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.162
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123772,
@@ -14152,7 +14152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45605126
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123781,
@@ -14162,7 +14162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123785,
@@ -14172,7 +14172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01165421
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123788,
@@ -14182,7 +14182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.544
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123791,
@@ -14192,7 +14192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22434579
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123794,
@@ -14202,7 +14202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10265421
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940123797,
@@ -14212,7 +14212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03451966
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940125872,
@@ -14222,7 +14222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940126171,
@@ -14232,7 +14232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940127282,
@@ -14242,7 +14242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00916494
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940128482,
@@ -14252,7 +14252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.31998
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940128492,
@@ -14262,7 +14262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04579876
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940128496,
@@ -14272,7 +14272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940128499,
@@ -14282,7 +14282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13422124
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940128669,
@@ -14292,7 +14292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940130375,
@@ -14302,7 +14302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12708647
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940130379,
@@ -14312,7 +14312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03452457
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940130383,
@@ -14322,7 +14322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.83838896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940139525,
@@ -14332,7 +14332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940139531,
@@ -14342,7 +14342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00057351
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940144086,
@@ -14352,7 +14352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146422,
@@ -14362,7 +14362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.155
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146427,
@@ -14372,7 +14372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.16719612
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146430,
@@ -14382,7 +14382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146433,
@@ -14392,7 +14392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146436,
@@ -14402,7 +14402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08779
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940146438,
@@ -14412,7 +14412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.63593388
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940154546,
@@ -14422,7 +14422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940154836,
@@ -14432,7 +14432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0141918
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940160890,
@@ -14442,7 +14442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04893
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940161856,
@@ -14452,7 +14452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05107
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940165955,
@@ -14462,7 +14462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01618874
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940165986,
@@ -14472,7 +14472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02648753
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940167007,
@@ -14482,7 +14482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01937736
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940173190,
@@ -14492,7 +14492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12715374
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940173214,
@@ -14502,7 +14502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04581165
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940173219,
@@ -14512,7 +14512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02703461
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940176408,
@@ -14522,7 +14522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940176412,
@@ -14532,7 +14532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.71
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940180739,
@@ -14542,7 +14542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12700524
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940180772,
@@ -14552,7 +14552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940180776,
@@ -14562,7 +14562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04575966
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940180779,
@@ -14572,7 +14572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0872351
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940182582,
@@ -14582,7 +14582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940186096,
@@ -14592,7 +14592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.198
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940186110,
@@ -14602,7 +14602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.29
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940186114,
@@ -14612,7 +14612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04575566
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940186117,
@@ -14622,7 +14622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24549365
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940189699,
@@ -14632,7 +14632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940191861,
@@ -14642,7 +14642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940196223,
@@ -14652,7 +14652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940196230,
@@ -14662,7 +14662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940207346,
@@ -14672,7 +14672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001695
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940207987,
@@ -14682,7 +14682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0020568
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940208541,
@@ -14692,7 +14692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06880734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213057,
@@ -14702,7 +14702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01780761
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213072,
@@ -14712,7 +14712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03709239
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213199,
@@ -14722,7 +14722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0178
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213439,
@@ -14732,7 +14732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001761
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213449,
@@ -14742,7 +14742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04575256
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940213599,
@@ -14752,7 +14752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.43424744
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940214052,
@@ -14762,7 +14762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04575256
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940214059,
@@ -14772,7 +14772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940214062,
@@ -14782,7 +14782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940214064,
@@ -14792,7 +14792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25424744
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940215506,
@@ -14802,7 +14802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.4051131
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940215551,
@@ -14812,7 +14812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940215740,
@@ -14822,7 +14822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216549,
@@ -14832,7 +14832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216555,
@@ -14842,7 +14842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.3371
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216749,
@@ -14852,7 +14852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0184
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216774,
@@ -14862,7 +14862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0457
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216837,
@@ -14872,7 +14872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.1489
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216861,
@@ -14882,7 +14882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.44480135
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216965,
@@ -14892,7 +14892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.26809865
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216969,
@@ -14902,7 +14902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4269
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216972,
@@ -14912,7 +14912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02630955
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216975,
@@ -14922,7 +14922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01945011
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940216978,
@@ -14932,7 +14932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.14739699
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940217880,
@@ -14942,7 +14942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04655602
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940218812,
@@ -14952,7 +14952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940218994,
@@ -14962,7 +14962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0178
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219022,
@@ -14972,7 +14972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13564398
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219211,
@@ -14982,7 +14982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03563776
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219244,
@@ -14992,7 +14992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0271695
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219247,
@@ -15002,7 +15002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0185305
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219392,
@@ -15012,7 +15012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001153
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940219395,
@@ -15022,7 +15022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02498847
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940220607,
@@ -15032,7 +15032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940221537,
@@ -15042,7 +15042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940223767,
@@ -15052,7 +15052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940225046,
@@ -15062,7 +15062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00899
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940225610,
@@ -15072,7 +15072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940226873,
@@ -15082,7 +15082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01699818
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940226883,
@@ -15092,7 +15092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04591185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940226891,
@@ -15102,7 +15102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03708997
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940226895,
@@ -15112,7 +15112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940226898,
@@ -15122,7 +15122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940229006,
@@ -15132,7 +15132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940229277,
@@ -15142,7 +15142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940229869,
@@ -15152,7 +15152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04591185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940229873,
@@ -15162,7 +15162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940229876,
@@ -15172,7 +15172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.81
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940231156,
@@ -15182,7 +15182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940231690,
@@ -15192,7 +15192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33365655
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940231692,
@@ -15202,7 +15202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00073243
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940231694,
@@ -15212,7 +15212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000152
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940238096,
@@ -15222,7 +15222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0238979
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940238099,
@@ -15232,7 +15232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0238979
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940238102,
@@ -15242,7 +15242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0522042
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940244108,
@@ -15252,7 +15252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02989497
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940246682,
@@ -15262,7 +15262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04647136
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940246715,
@@ -15272,7 +15272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0422
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940246798,
@@ -15282,7 +15282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.000041
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940252996,
@@ -15292,7 +15292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940254619,
@@ -15302,7 +15302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.176
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940254647,
@@ -15312,7 +15312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940254658,
@@ -15322,7 +15322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.329
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940254664,
@@ -15332,7 +15332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28108895
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940254667,
@@ -15342,7 +15342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.26391105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259822,
@@ -15352,7 +15352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04597046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259828,
@@ -15362,7 +15362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259830,
@@ -15372,7 +15372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259833,
@@ -15382,7 +15382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.377
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259836,
@@ -15392,7 +15392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259839,
@@ -15402,7 +15402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259842,
@@ -15412,7 +15412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259845,
@@ -15422,7 +15422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.43870879
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259848,
@@ -15432,7 +15432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259851,
@@ -15442,7 +15442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04594697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259854,
@@ -15452,7 +15452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.284
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259856,
@@ -15462,7 +15462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259941,
@@ -15472,7 +15472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940259958,
@@ -15482,7 +15482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260011,
@@ -15492,7 +15492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260156,
@@ -15502,7 +15502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260207,
@@ -15512,7 +15512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.5265
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260264,
@@ -15522,7 +15522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.66933067
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260267,
@@ -15532,7 +15532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00066867
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260269,
@@ -15542,7 +15542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 6.6e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260328,
@@ -15552,7 +15552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.58
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260504,
@@ -15562,7 +15562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940260529,
@@ -15572,7 +15572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18215537
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940262174,
@@ -15582,7 +15582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09396039
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940262850,
@@ -15592,7 +15592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00863093
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940264701,
@@ -15602,7 +15602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940267084,
@@ -15612,7 +15612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.33170981
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940267087,
@@ -15622,7 +15622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00079019
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940274218,
@@ -15632,7 +15632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04600121
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940274221,
@@ -15642,7 +15642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04745673
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940279549,
@@ -15652,7 +15652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.019
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940283095,
@@ -15662,7 +15662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.68
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940283100,
@@ -15672,7 +15672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32679
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940284378,
@@ -15682,7 +15682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.019
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940284385,
@@ -15692,7 +15692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02257978
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940288748,
@@ -15702,7 +15702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003935
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295116,
@@ -15712,7 +15712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04600622
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295261,
@@ -15722,7 +15722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295265,
@@ -15732,7 +15732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01973922
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295268,
@@ -15742,7 +15742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0022437
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295270,
@@ -15752,7 +15752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01436592
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295273,
@@ -15762,7 +15762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07595724
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295275,
@@ -15772,7 +15772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03812492
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295277,
@@ -15782,7 +15782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.271749
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295281,
@@ -15792,7 +15792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295283,
@@ -15802,7 +15802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295287,
@@ -15812,7 +15812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.161
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940295290,
@@ -15822,7 +15822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.51274
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940297169,
@@ -15832,7 +15832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.51274
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940297598,
@@ -15842,7 +15842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01832294
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940297604,
@@ -15852,7 +15852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.075135
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940297931,
@@ -15862,7 +15862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.434
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940298630,
@@ -15872,7 +15872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03415936
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940298839,
@@ -15882,7 +15882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940298844,
@@ -15892,7 +15892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940298848,
@@ -15902,7 +15902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940301257,
@@ -15912,7 +15912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940304376,
@@ -15922,7 +15922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00818994
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940304738,
@@ -15932,7 +15932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940305308,
@@ -15942,7 +15942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940306408,
@@ -15952,7 +15952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.35
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940311974,
@@ -15962,7 +15962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.015
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940311982,
@@ -15972,7 +15972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.015
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940312895,
@@ -15982,7 +15982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940312953,
@@ -15992,7 +15992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04464376
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313269,
@@ -16002,7 +16002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313445,
@@ -16012,7 +16012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313489,
@@ -16022,7 +16022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313833,
@@ -16032,7 +16032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45535624
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313838,
@@ -16042,7 +16042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0459952
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313841,
@@ -16052,7 +16052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940313845,
@@ -16062,7 +16062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940315670,
@@ -16072,7 +16072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940315818,
@@ -16082,7 +16082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0684
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940316981,
@@ -16092,7 +16092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940317481,
@@ -16102,7 +16102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.095
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940319384,
@@ -16112,7 +16112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940319400,
@@ -16122,7 +16122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.328
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940320240,
@@ -16132,7 +16132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940320268,
@@ -16142,7 +16142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00594841
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940320474,
@@ -16152,7 +16152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940324722,
@@ -16162,7 +16162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940324738,
@@ -16172,7 +16172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940327572,
@@ -16182,7 +16182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940329074,
@@ -16192,7 +16192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940331572,
@@ -16202,7 +16202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940331646,
@@ -16212,7 +16212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2475
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940331649,
@@ -16222,7 +16222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3225
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940332194,
@@ -16232,7 +16232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0085
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940332200,
@@ -16242,7 +16242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0280663
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940332203,
@@ -16252,7 +16252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01780981
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940332206,
@@ -16262,7 +16262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04562389
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334919,
@@ -16272,7 +16272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334923,
@@ -16282,7 +16282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02248901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334925,
@@ -16292,7 +16292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09389
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334928,
@@ -16302,7 +16302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04590426
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334931,
@@ -16312,7 +16312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.88
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334934,
@@ -16322,7 +16322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940334937,
@@ -16332,7 +16332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45771673
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940341245,
@@ -16342,7 +16342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940344713,
@@ -16352,7 +16352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06801281
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940348677,
@@ -16362,7 +16362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940353034,
@@ -16372,7 +16372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00131683
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940353055,
@@ -16382,7 +16382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00664641
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940353058,
@@ -16392,7 +16392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07330489
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940353062,
@@ -16402,7 +16402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0025842
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940361710,
@@ -16412,7 +16412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00784399
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940361717,
@@ -16422,7 +16422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00215601
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940362735,
@@ -16432,7 +16432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940362738,
@@ -16442,7 +16442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.374
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940362742,
@@ -16452,7 +16452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01614767
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940362745,
@@ -16462,7 +16462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.453508
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940362749,
@@ -16472,7 +16472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02226433
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940365833,
@@ -16482,7 +16482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940367573,
@@ -16492,7 +16492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940370175,
@@ -16502,7 +16502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590149
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940370194,
@@ -16512,7 +16512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04589204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940370198,
@@ -16522,7 +16522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0201621
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940376113,
@@ -16532,7 +16532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295124
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940376119,
@@ -16542,7 +16542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295124
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940378590,
@@ -16552,7 +16552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940379414,
@@ -16562,7 +16562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.52
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940379418,
@@ -16572,7 +16572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.406
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940379422,
@@ -16582,7 +16582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.178
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940382759,
@@ -16592,7 +16592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590198
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940382764,
@@ -16602,7 +16602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01768537
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940389448,
@@ -16612,7 +16612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940391923,
@@ -16622,7 +16622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940391929,
@@ -16632,7 +16632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03704901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940392357,
@@ -16642,7 +16642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08767181
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940393950,
@@ -16652,7 +16652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11232819
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940393959,
@@ -16662,7 +16662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01867181
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940393963,
@@ -16672,7 +16672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.017
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940395833,
@@ -16682,7 +16682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940395839,
@@ -16692,7 +16692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00954901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940397117,
@@ -16702,7 +16702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940401698,
@@ -16712,7 +16712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.285
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940401950,
@@ -16722,7 +16722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04592591
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940401958,
@@ -16732,7 +16732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17407409
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940408426,
@@ -16742,7 +16742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940411358,
@@ -16752,7 +16752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940411368,
@@ -16762,7 +16762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940414926,
@@ -16772,7 +16772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02790952
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940417066,
@@ -16782,7 +16782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.2728
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940417466,
@@ -16792,7 +16792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940418064,
@@ -16802,7 +16802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0458
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940418430,
@@ -16812,7 +16812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940429297,
@@ -16822,7 +16822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940430775,
@@ -16832,7 +16832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940430802,
@@ -16842,7 +16842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004206
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940431096,
@@ -16852,7 +16852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.53246797
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940431200,
@@ -16862,7 +16862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940431204,
@@ -16872,7 +16872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0457
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940436127,
@@ -16882,7 +16882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940437667,
@@ -16892,7 +16892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940437679,
@@ -16902,7 +16902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04232448
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446237,
@@ -16912,7 +16912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10767552
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446246,
@@ -16922,7 +16922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09990013
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446249,
@@ -16932,7 +16932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0000998
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446251,
@@ -16942,7 +16942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 7e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446254,
@@ -16952,7 +16952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.019
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940446257,
@@ -16962,7 +16962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17332448
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940452628,
@@ -16972,7 +16972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940452810,
@@ -16982,7 +16982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940458794,
@@ -16992,7 +16992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940458800,
@@ -17002,7 +17002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.014
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940469566,
@@ -17012,7 +17012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940472641,
@@ -17022,7 +17022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00816733
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940489991,
@@ -17032,7 +17032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940490020,
@@ -17042,7 +17042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940493159,
@@ -17052,7 +17052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503875,
@@ -17062,7 +17062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.181
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503880,
@@ -17072,7 +17072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.373
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503884,
@@ -17082,7 +17082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.446
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503909,
@@ -17092,7 +17092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0883
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503912,
@@ -17102,7 +17102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.135
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503915,
@@ -17112,7 +17112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503918,
@@ -17122,7 +17122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503921,
@@ -17132,7 +17132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940503924,
@@ -17142,7 +17142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.2087
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940517610,
@@ -17152,7 +17152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00418233
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940521708,
@@ -17162,7 +17162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01404425
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940523511,
@@ -17172,7 +17172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00749255
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940524090,
@@ -17182,7 +17182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0918792
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940525604,
@@ -17192,7 +17192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940542838,
@@ -17202,7 +17202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04592737
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940543177,
@@ -17212,7 +17212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940543697,
@@ -17222,7 +17222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590198
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940546422,
@@ -17232,7 +17232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01605602
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940547836,
@@ -17242,7 +17242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08839398
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940547841,
@@ -17252,7 +17252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00506396
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940548490,
@@ -17262,7 +17262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940549148,
@@ -17272,7 +17272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940550654,
@@ -17282,7 +17282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554926,
@@ -17292,7 +17292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554949,
@@ -17302,7 +17302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554954,
@@ -17312,7 +17312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0035
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554957,
@@ -17322,7 +17322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554960,
@@ -17332,7 +17332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.30354901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940554978,
@@ -17342,7 +17342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558516,
@@ -17352,7 +17352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558577,
@@ -17362,7 +17362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558603,
@@ -17372,7 +17372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558606,
@@ -17382,7 +17382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.68645099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558611,
@@ -17392,7 +17392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558613,
@@ -17402,7 +17402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940558943,
@@ -17412,7 +17412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09354901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940578029,
@@ -17422,7 +17422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940583719,
@@ -17432,7 +17432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04194395
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940587862,
@@ -17442,7 +17442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940587875,
@@ -17452,7 +17452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.052
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940587878,
@@ -17462,7 +17462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02031662
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940611913,
@@ -17472,7 +17472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00971324
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617632,
@@ -17482,7 +17482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02104536
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617642,
@@ -17492,7 +17492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617646,
@@ -17502,7 +17502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.037
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617650,
@@ -17512,7 +17512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617653,
@@ -17522,7 +17522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.297
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617656,
@@ -17532,7 +17532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617670,
@@ -17542,7 +17542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02879852
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617673,
@@ -17552,7 +17552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01712182
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617676,
@@ -17562,7 +17562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.92
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617679,
@@ -17572,7 +17572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4790343
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940617997,
@@ -17582,7 +17582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00821344
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940618006,
@@ -17592,7 +17592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06210786
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940619804,
@@ -17602,7 +17602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.039
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940619812,
@@ -17612,7 +17612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05445794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940621114,
@@ -17622,7 +17622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940622831,
@@ -17632,7 +17632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940623837,
@@ -17642,7 +17642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940627195,
@@ -17652,7 +17652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03709239
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940627201,
@@ -17662,7 +17662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00290761
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940627204,
@@ -17672,7 +17672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01489239
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940627208,
@@ -17682,7 +17682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00001761
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940627211,
@@ -17692,7 +17692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940630575,
@@ -17702,7 +17702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.029
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940630582,
@@ -17712,7 +17712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940630890,
@@ -17722,7 +17722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0143793
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940630896,
@@ -17732,7 +17732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0406207
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940632598,
@@ -17742,7 +17742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00455
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940638906,
@@ -17752,7 +17752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0053
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940638918,
@@ -17762,7 +17762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.022
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940650853,
@@ -17772,7 +17772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01537931
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940650858,
@@ -17782,7 +17782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.022
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940650861,
@@ -17792,7 +17792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.041
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940650864,
@@ -17802,7 +17802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18587238
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940651356,
@@ -17812,7 +17812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940652751,
@@ -17822,7 +17822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00727663
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940655898,
@@ -17832,7 +17832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667427,
@@ -17842,7 +17842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667431,
@@ -17852,7 +17852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667434,
@@ -17862,7 +17862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00704103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667439,
@@ -17872,7 +17872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04579897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667442,
@@ -17882,7 +17882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667445,
@@ -17892,7 +17892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.275
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667448,
@@ -17902,7 +17902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12949731
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667451,
@@ -17912,7 +17912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667454,
@@ -17922,7 +17922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00538403
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667456,
@@ -17932,7 +17932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.014767
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667459,
@@ -17942,7 +17942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04858897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667461,
@@ -17952,7 +17952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02944333
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667464,
@@ -17962,7 +17962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01644741
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940667467,
@@ -17972,7 +17972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.30459202
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940668975,
@@ -17982,7 +17982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940676526,
@@ -17992,7 +17992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07639608
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940676568,
@@ -18002,7 +18002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940676572,
@@ -18012,7 +18012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940676575,
@@ -18022,7 +18022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04356186
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940680413,
@@ -18032,7 +18032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940680427,
@@ -18042,7 +18042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940684848,
@@ -18052,7 +18052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940687702,
@@ -18062,7 +18062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940687709,
@@ -18072,7 +18072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688495,
@@ -18082,7 +18082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688709,
@@ -18092,7 +18092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04593986
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688713,
@@ -18102,7 +18102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.313
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688716,
@@ -18112,7 +18112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04587152
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688719,
@@ -18122,7 +18122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688721,
@@ -18132,7 +18132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688724,
@@ -18142,7 +18142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04589074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940688728,
@@ -18152,7 +18152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12929788
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940696901,
@@ -18162,7 +18162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940706370,
@@ -18172,7 +18172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940706375,
@@ -18182,7 +18182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01243054
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940708916,
@@ -18192,7 +18192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940708934,
@@ -18202,7 +18202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08704901
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940709080,
@@ -18212,7 +18212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.72194131
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940710729,
@@ -18222,7 +18222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940711097,
@@ -18232,7 +18232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940723545,
@@ -18242,7 +18242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940723553,
@@ -18252,7 +18252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940725991,
@@ -18262,7 +18262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940726271,
@@ -18272,7 +18272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940730817,
@@ -18282,7 +18282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01563
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940738170,
@@ -18292,7 +18292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41279
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940738180,
@@ -18302,7 +18302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07158
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940741402,
@@ -18312,7 +18312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01291428
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940762199,
@@ -18322,7 +18322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00728676
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940763527,
@@ -18332,7 +18332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940763532,
@@ -18342,7 +18342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07403145
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940764186,
@@ -18352,7 +18352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940764894,
@@ -18362,7 +18362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940766315,
@@ -18372,7 +18372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13451229
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940766434,
@@ -18382,7 +18382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.86548771
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940766438,
@@ -18392,7 +18392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01213973
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940766441,
@@ -18402,7 +18402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12237256
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940773260,
@@ -18412,7 +18412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13717387
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940773268,
@@ -18422,7 +18422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.64991185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940774349,
@@ -18432,7 +18432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777337,
@@ -18442,7 +18442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.32733
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777629,
@@ -18452,7 +18452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777633,
@@ -18462,7 +18462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1317
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777636,
@@ -18472,7 +18472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05569801
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777836,
@@ -18482,7 +18482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.61430199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777843,
@@ -18492,7 +18492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777932,
@@ -18502,7 +18502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.94
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940777941,
@@ -18512,7 +18512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.293
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940779893,
@@ -18522,7 +18522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01349461
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940783508,
@@ -18532,7 +18532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940783897,
@@ -18542,7 +18542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940787520,
@@ -18552,7 +18552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.305
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793145,
@@ -18562,7 +18562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793158,
@@ -18572,7 +18572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793161,
@@ -18582,7 +18582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03526103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793163,
@@ -18592,7 +18592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03267897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793167,
@@ -18602,7 +18602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793169,
@@ -18612,7 +18612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793172,
@@ -18622,7 +18622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793175,
@@ -18632,7 +18632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03008147
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793177,
@@ -18642,7 +18642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01588709
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793180,
@@ -18652,7 +18652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03387103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793182,
@@ -18662,7 +18662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04092897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940793184,
@@ -18672,7 +18672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01129144
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940794675,
@@ -18682,7 +18682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004873
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940796906,
@@ -18692,7 +18692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940798642,
@@ -18702,7 +18702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5523841
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940802785,
@@ -18712,7 +18712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940803353,
@@ -18722,7 +18722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940803358,
@@ -18732,7 +18732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.049427
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940804757,
@@ -18742,7 +18742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01549
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811312,
@@ -18752,7 +18752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811438,
@@ -18762,7 +18762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.8036567
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811507,
@@ -18772,7 +18772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811544,
@@ -18782,7 +18782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811643,
@@ -18792,7 +18792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940811680,
@@ -18802,7 +18802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.71339231
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814270,
@@ -18812,7 +18812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03063577
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814280,
@@ -18822,7 +18822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01534073
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814282,
@@ -18832,7 +18832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00697103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814284,
@@ -18842,7 +18842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05624897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814287,
@@ -18852,7 +18852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.38339231
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940814289,
@@ -18862,7 +18862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.50741119
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940824926,
@@ -18872,7 +18872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 6
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940824937,
@@ -18882,7 +18882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37539196
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940824940,
@@ -18892,7 +18892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940824944,
@@ -18902,7 +18902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940824947,
@@ -18912,7 +18912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.62460804
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940826912,
@@ -18922,7 +18922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00920866
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940830624,
@@ -18932,7 +18932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940833579,
@@ -18942,7 +18942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940833664,
@@ -18952,7 +18952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00106697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940833667,
@@ -18962,7 +18962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03500503
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940833671,
@@ -18972,7 +18972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940833674,
@@ -18982,7 +18982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.032144
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940834033,
@@ -18992,7 +18992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.115
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940836845,
@@ -19002,7 +19002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940837266,
@@ -19012,7 +19012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940837356,
@@ -19022,7 +19022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.61164734
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940837391,
@@ -19032,7 +19032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940838681,
@@ -19042,7 +19042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 16.5802
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940838996,
@@ -19052,7 +19052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940840103,
@@ -19062,7 +19062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940843118,
@@ -19072,7 +19072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12971062
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940843122,
@@ -19082,7 +19082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07027938
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940846187,
@@ -19092,7 +19092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19999
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858039,
@@ -19102,7 +19102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01618874
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858053,
@@ -19112,7 +19112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.74581126
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858708,
@@ -19122,7 +19122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00106697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858714,
@@ -19132,7 +19132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03893303
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858717,
@@ -19142,7 +19142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05418874
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940858719,
@@ -19152,7 +19152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.51581126
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940859255,
@@ -19162,7 +19162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940859259,
@@ -19172,7 +19172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940859262,
@@ -19182,7 +19182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.59
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940867586,
@@ -19192,7 +19192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02846223
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940868576,
@@ -19202,7 +19202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940872518,
@@ -19212,7 +19212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940875977,
@@ -19222,7 +19222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940877959,
@@ -19232,7 +19232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940878235,
@@ -19242,7 +19242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12753489
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940879741,
@@ -19252,7 +19252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.92051365
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940879748,
@@ -19262,7 +19262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07948635
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940880084,
@@ -19272,7 +19272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940880090,
@@ -19282,7 +19282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940880093,
@@ -19292,7 +19292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940884363,
@@ -19302,7 +19302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10500265
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940897682,
@@ -19312,7 +19312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0053
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940897725,
@@ -19322,7 +19322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940897749,
@@ -19332,7 +19332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940910996,
@@ -19342,7 +19342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940912490,
@@ -19352,7 +19352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04599342
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940914523,
@@ -19362,7 +19362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940915469,
@@ -19372,7 +19372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940915476,
@@ -19382,7 +19382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03430213
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940927277,
@@ -19392,7 +19392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.46
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940927918,
@@ -19402,7 +19402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00569787
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940927924,
@@ -19412,7 +19412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940927927,
@@ -19422,7 +19422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.46003332
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940931208,
@@ -19432,7 +19432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940931218,
@@ -19442,7 +19442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940932407,
@@ -19452,7 +19452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940939634,
@@ -19462,7 +19462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.003
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940946286,
@@ -19472,7 +19472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00106697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940946294,
@@ -19482,7 +19482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03893303
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940946298,
@@ -19492,7 +19492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.39342
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940946320,
@@ -19502,7 +19502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940946334,
@@ -19512,7 +19512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08368
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940948444,
@@ -19522,7 +19522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940948610,
@@ -19532,7 +19532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03998543
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940948684,
@@ -19542,7 +19542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22004789
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940949248,
@@ -19552,7 +19552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01318875
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940949255,
@@ -19562,7 +19562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00973195
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940955725,
@@ -19572,7 +19572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00106697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940955729,
@@ -19582,7 +19582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03893303
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940972914,
@@ -19592,7 +19592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940976033,
@@ -19602,7 +19602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03954927
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940978531,
@@ -19612,7 +19612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940978592,
@@ -19622,7 +19622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.53699279
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940978597,
@@ -19632,7 +19632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37926156
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980751,
@@ -19642,7 +19642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00106697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980756,
@@ -19652,7 +19652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980760,
@@ -19662,7 +19662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980763,
@@ -19672,7 +19672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980767,
@@ -19682,7 +19682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980771,
@@ -19692,7 +19692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940980774,
@@ -19702,7 +19702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940982455,
@@ -19712,7 +19712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940982461,
@@ -19722,7 +19722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940982463,
@@ -19732,7 +19732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940982466,
@@ -19742,7 +19742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.232
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940984640,
@@ -19752,7 +19752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940984646,
@@ -19762,7 +19762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940986883,
@@ -19772,7 +19772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0883
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940986886,
@@ -19782,7 +19782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03450542
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940986946,
@@ -19792,7 +19792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03237706
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940987147,
@@ -19802,7 +19802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09923524
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940987149,
@@ -19812,7 +19812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03388228
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940996965,
@@ -19822,7 +19822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940996989,
@@ -19832,7 +19832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997560,
@@ -19842,7 +19842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.91497168
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997568,
@@ -19852,7 +19852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997571,
@@ -19862,7 +19862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997574,
@@ -19872,7 +19872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997577,
@@ -19882,7 +19882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997581,
@@ -19892,7 +19892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03154103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997583,
@@ -19902,7 +19902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02440897
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997587,
@@ -19912,7 +19912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28907832
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940997847,
@@ -19922,7 +19922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561940998500,
@@ -19932,7 +19932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07537664
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941006479,
@@ -19942,7 +19942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06638873
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941010722,
@@ -19952,7 +19952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02506542
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941011991,
@@ -19962,7 +19962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941037916,
@@ -19972,7 +19972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941045321,
@@ -19982,7 +19982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1065701
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941045327,
@@ -19992,7 +19992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049533,
@@ -20002,7 +20002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049683,
@@ -20012,7 +20012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049687,
@@ -20022,7 +20022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.74995659
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049690,
@@ -20032,7 +20032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049694,
@@ -20042,7 +20042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049698,
@@ -20052,7 +20052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049701,
@@ -20062,7 +20062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11165659
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049705,
@@ -20072,7 +20072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.38834341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049709,
@@ -20082,7 +20082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22165659
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049715,
@@ -20092,7 +20092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.17834341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049718,
@@ -20102,7 +20102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07165659
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941049720,
@@ -20112,7 +20112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22834341
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941054671,
@@ -20122,7 +20122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941056254,
@@ -20132,7 +20132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03119404
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941056257,
@@ -20142,7 +20142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01449122
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941056259,
@@ -20152,7 +20152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.95431474
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941065568,
@@ -20162,7 +20162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10756566
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941070575,
@@ -20172,7 +20172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941070588,
@@ -20182,7 +20182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941072317,
@@ -20192,7 +20192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941075587,
@@ -20202,7 +20202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.37745624
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941075591,
@@ -20212,7 +20212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.62254376
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941078106,
@@ -20222,7 +20222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00640733
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941078121,
@@ -20232,7 +20232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03946421
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941078346,
@@ -20242,7 +20242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.23
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941078351,
@@ -20252,7 +20252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.27
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941078639,
@@ -20262,7 +20262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08594798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080011,
@@ -20272,7 +20272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080236,
@@ -20282,7 +20282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00053579
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080241,
@@ -20292,7 +20292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080244,
@@ -20302,7 +20302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01359267
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080246,
@@ -20312,7 +20312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080248,
@@ -20322,7 +20322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080251,
@@ -20332,7 +20332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941080253,
@@ -20342,7 +20342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941081740,
@@ -20352,7 +20352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04587154
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941081749,
@@ -20362,7 +20362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0475864
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941084033,
@@ -20372,7 +20372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.381
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941085110,
@@ -20382,7 +20382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0319515
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941085117,
@@ -20392,7 +20392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0080485
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941086408,
@@ -20402,7 +20402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01674976
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941095674,
@@ -20412,7 +20412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941097653,
@@ -20422,7 +20422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941097665,
@@ -20432,7 +20432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01401796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941098337,
@@ -20442,7 +20442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.024
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941109261,
@@ -20452,7 +20452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941109274,
@@ -20462,7 +20462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941110362,
@@ -20472,7 +20472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18146842
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941111012,
@@ -20482,7 +20482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.617
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941113340,
@@ -20492,7 +20492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01727875
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941118264,
@@ -20502,7 +20502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02598204
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941118293,
@@ -20512,7 +20512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00781796
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941118296,
@@ -20522,7 +20522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941118299,
@@ -20532,7 +20532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01621194
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941120603,
@@ -20542,7 +20542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04914628
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941122591,
@@ -20552,7 +20552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941124614,
@@ -20562,7 +20562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941126141,
@@ -20572,7 +20572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941126633,
@@ -20582,7 +20582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941134275,
@@ -20592,7 +20592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045207
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941134504,
@@ -20602,7 +20602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1972
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941134525,
@@ -20612,7 +20612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006805
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941134532,
@@ -20622,7 +20622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.99993195
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941135541,
@@ -20632,7 +20632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006805
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941138333,
@@ -20642,7 +20642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941138348,
@@ -20652,7 +20652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941138709,
@@ -20662,7 +20662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941149269,
@@ -20672,7 +20672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07619747
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941164778,
@@ -20682,7 +20682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941184873,
@@ -20692,7 +20692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05591562
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941185261,
@@ -20702,7 +20702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.585
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941185266,
@@ -20712,7 +20712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.415
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941186813,
@@ -20722,7 +20722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04010346
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941188846,
@@ -20732,7 +20732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941191059,
@@ -20742,7 +20742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00062329
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941191072,
@@ -20752,7 +20752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06267454
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941191075,
@@ -20762,7 +20762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03016011
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941228131,
@@ -20772,7 +20772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.034
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941228157,
@@ -20782,7 +20782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941235866,
@@ -20792,7 +20792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.136
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941245132,
@@ -20802,7 +20802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.98497965
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941248025,
@@ -20812,7 +20812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941258298,
@@ -20822,7 +20822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01393784
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941258307,
@@ -20832,7 +20832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07436453
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941258955,
@@ -20842,7 +20842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941269721,
@@ -20852,7 +20852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.31502035
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941269731,
@@ -20862,7 +20862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.34663302
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941269735,
@@ -20872,7 +20872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00034629
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941269738,
@@ -20882,7 +20882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.5e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941270372,
@@ -20892,7 +20892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00275
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941273787,
@@ -20902,7 +20902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15302034
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941273792,
@@ -20912,7 +20912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941273795,
@@ -20922,7 +20922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.81697966
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941273805,
@@ -20932,7 +20932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941281073,
@@ -20942,7 +20942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0259
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941281464,
@@ -20952,7 +20952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941281606,
@@ -20962,7 +20962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.329
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941339280,
@@ -20972,7 +20972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.0081
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941339321,
@@ -20982,7 +20982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00099189
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941339325,
@@ -20992,7 +20992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 7.9e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941347667,
@@ -21002,7 +21002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32634583
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941347703,
@@ -21012,7 +21012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.36394409
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941367230,
@@ -21022,7 +21022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941367240,
@@ -21032,7 +21032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0077741
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941368114,
@@ -21042,7 +21042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941369779,
@@ -21052,7 +21052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941384211,
@@ -21062,7 +21062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388180,
@@ -21072,7 +21072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00410218
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388186,
@@ -21082,7 +21082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13947525
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388482,
@@ -21092,7 +21092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.85642257
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388489,
@@ -21102,7 +21102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01475189
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388493,
@@ -21112,7 +21112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.48524811
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941388496,
@@ -21122,7 +21122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941394043,
@@ -21132,7 +21132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0043934
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941397374,
@@ -21142,7 +21142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941398736,
@@ -21152,7 +21152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00426707
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941401164,
@@ -21162,7 +21162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025961
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941401168,
@@ -21172,7 +21172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0628857
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402354,
@@ -21182,7 +21182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3635805
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402360,
@@ -21192,7 +21192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00036322
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402362,
@@ -21202,7 +21202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3.6e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402617,
@@ -21212,7 +21212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402642,
@@ -21222,7 +21222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941402671,
@@ -21232,7 +21232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15795
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941403782,
@@ -21242,7 +21242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00480046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941403794,
@@ -21252,7 +21252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941403941,
@@ -21262,7 +21262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.46464499
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941403944,
@@ -21272,7 +21272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.47383884
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941403969,
@@ -21282,7 +21282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.82616116
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941431828,
@@ -21292,7 +21292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941435054,
@@ -21302,7 +21302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941440193,
@@ -21312,7 +21312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12894851
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941440201,
@@ -21322,7 +21322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.37105149
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444082,
@@ -21332,7 +21332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.117
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444088,
@@ -21342,7 +21342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.128
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444095,
@@ -21352,7 +21352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444146,
@@ -21362,7 +21362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444149,
@@ -21372,7 +21372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444151,
@@ -21382,7 +21382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444153,
@@ -21392,7 +21392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444155,
@@ -21402,7 +21402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.48
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444518,
@@ -21412,7 +21412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444523,
@@ -21422,7 +21422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03836592
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444525,
@@ -21432,7 +21432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00753889
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444528,
@@ -21442,7 +21442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0568
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941444531,
@@ -21452,7 +21452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.87799519
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941446000,
@@ -21462,7 +21462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.128
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941452563,
@@ -21472,7 +21472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03718195
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941452568,
@@ -21482,7 +21482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13098074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941452571,
@@ -21492,7 +21492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.81787132
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941453093,
@@ -21502,7 +21502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01396599
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941461301,
@@ -21512,7 +21512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941463902,
@@ -21522,7 +21522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941464246,
@@ -21532,7 +21532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941467604,
@@ -21542,7 +21542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941468018,
@@ -21552,7 +21552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941468022,
@@ -21562,7 +21562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.23058272
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941468389,
@@ -21572,7 +21572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941469312,
@@ -21582,7 +21582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.093
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941485839,
@@ -21592,7 +21592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.107
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941522261,
@@ -21602,7 +21602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06366967
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941522436,
@@ -21612,7 +21612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0461
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941537614,
@@ -21622,7 +21622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2039
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941537883,
@@ -21632,7 +21632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941538858,
@@ -21642,7 +21642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05461
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941540247,
@@ -21652,7 +21652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05403564
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941543543,
@@ -21662,7 +21662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15168128
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941552703,
@@ -21672,7 +21672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941557608,
@@ -21682,7 +21682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941565451,
@@ -21692,7 +21692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941567080,
@@ -21702,7 +21702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.153
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941568918,
@@ -21712,7 +21712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.74539
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941569369,
@@ -21722,7 +21722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941569493,
@@ -21732,7 +21732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.91987858
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941569570,
@@ -21742,7 +21742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08173142
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941571206,
@@ -21752,7 +21752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.036072
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941571211,
@@ -21762,7 +21762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.007928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941571215,
@@ -21772,7 +21772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.028144
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941577912,
@@ -21782,7 +21782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941579408,
@@ -21792,7 +21792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941579416,
@@ -21802,7 +21802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941581745,
@@ -21812,7 +21812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941583480,
@@ -21822,7 +21822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941583926,
@@ -21832,7 +21832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941585121,
@@ -21842,7 +21842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941586414,
@@ -21852,7 +21852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941587254,
@@ -21862,7 +21862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008331
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941587583,
@@ -21872,7 +21872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02665836
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941587586,
@@ -21882,7 +21882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941587588,
@@ -21892,7 +21892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00099268
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941587590,
@@ -21902,7 +21902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0258069
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941588333,
@@ -21912,7 +21912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0211931
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941588339,
@@ -21922,7 +21922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07226484
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941589245,
@@ -21932,7 +21932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941589843,
@@ -21942,7 +21942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941589849,
@@ -21952,7 +21952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941591272,
@@ -21962,7 +21962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941592865,
@@ -21972,7 +21972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941592935,
@@ -21982,7 +21982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941593976,
@@ -21992,7 +21992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941596580,
@@ -22002,7 +22002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941596591,
@@ -22012,7 +22012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941596768,
@@ -22022,7 +22022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941598438,
@@ -22032,7 +22032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941600141,
@@ -22042,7 +22042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941601731,
@@ -22052,7 +22052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941602046,
@@ -22062,7 +22062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01618874
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941603320,
@@ -22072,7 +22072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941605173,
@@ -22082,7 +22082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941606524,
@@ -22092,7 +22092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941608153,
@@ -22102,7 +22102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941610395,
@@ -22112,7 +22112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941611742,
@@ -22122,7 +22122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941613507,
@@ -22132,7 +22132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1e-7
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941614062,
@@ -22142,7 +22142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0369999
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941614065,
@@ -22152,7 +22152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05645804
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941614743,
@@ -22162,7 +22162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941617653,
@@ -22172,7 +22172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0092766
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941653391,
@@ -22182,7 +22182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941660314,
@@ -22192,7 +22192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941663689,
@@ -22202,7 +22202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16787408
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941688335,
@@ -22212,7 +22212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0169604
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941692771,
@@ -22222,7 +22222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941692782,
@@ -22232,7 +22232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941692786,
@@ -22242,7 +22242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941692790,
@@ -22252,7 +22252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941697970,
@@ -22262,7 +22262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08691588
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941719881,
@@ -22272,7 +22272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.49
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941719916,
@@ -22282,7 +22282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.13031002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941719919,
@@ -22292,7 +22292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941719922,
@@ -22302,7 +22302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.95968998
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941720322,
@@ -22312,7 +22312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11466
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941737322,
@@ -22322,7 +22322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00924933
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941747608,
@@ -22332,7 +22332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01618875
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941748792,
@@ -22342,7 +22342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.095
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941748800,
@@ -22352,7 +22352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.103
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941760747,
@@ -22362,7 +22362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0054
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941763962,
@@ -22372,7 +22372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07148583
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941763970,
@@ -22382,7 +22382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941763973,
@@ -22392,7 +22392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02851417
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941782202,
@@ -22402,7 +22402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941786165,
@@ -22412,7 +22412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941786179,
@@ -22422,7 +22422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07086
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941786659,
@@ -22432,7 +22432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04098782
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941839274,
@@ -22442,7 +22442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03075067
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941839295,
@@ -22452,7 +22452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00574933
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941839318,
@@ -22462,7 +22462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941839322,
@@ -22472,7 +22472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941847084,
@@ -22482,7 +22482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.096
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941847354,
@@ -22492,7 +22492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.162
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941848035,
@@ -22502,7 +22502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.096
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941849091,
@@ -22512,7 +22512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941849095,
@@ -22522,7 +22522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.957307
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941865950,
@@ -22532,7 +22532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941865984,
@@ -22542,7 +22542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0003829
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941865995,
@@ -22552,7 +22552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941865998,
@@ -22562,7 +22562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941866000,
@@ -22572,7 +22572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.276
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941866003,
@@ -22582,7 +22582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14771511
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941867362,
@@ -22592,7 +22592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06955381
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941868145,
@@ -22602,7 +22602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941869322,
@@ -22612,7 +22612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941869332,
@@ -22622,7 +22622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941869334,
@@ -22632,7 +22632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941869971,
@@ -22642,7 +22642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941878229,
@@ -22652,7 +22652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.048
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941908651,
@@ -22662,7 +22662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0056
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941908655,
@@ -22672,7 +22672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941918476,
@@ -22682,7 +22682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941924201,
@@ -22692,7 +22692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16840922
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941924213,
@@ -22702,7 +22702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.20659078
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941928578,
@@ -22712,7 +22712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941929355,
@@ -22722,7 +22722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941939794,
@@ -22732,7 +22732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.149337
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941945476,
@@ -22742,7 +22742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941946042,
@@ -22752,7 +22752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941946547,
@@ -22762,7 +22762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00006
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941946553,
@@ -22772,7 +22772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.39234
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941947078,
@@ -22782,7 +22782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00009434
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941951444,
@@ -22792,7 +22792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.043
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941963886,
@@ -22802,7 +22802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941964077,
@@ -22812,7 +22812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.031
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941965506,
@@ -22822,7 +22822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.031
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941968952,
@@ -22832,7 +22832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941968981,
@@ -22842,7 +22842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02840922
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941968985,
@@ -22852,7 +22852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941968989,
@@ -22862,7 +22862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04959078
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941968992,
@@ -22872,7 +22872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.391
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941975425,
@@ -22882,7 +22882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941975459,
@@ -22892,7 +22892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941975465,
@@ -22902,7 +22902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941975472,
@@ -22912,7 +22912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941975476,
@@ -22922,7 +22922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978322,
@@ -22932,7 +22932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01295099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978325,
@@ -22942,7 +22942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978330,
@@ -22952,7 +22952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8595327
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978348,
@@ -22962,7 +22962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978355,
@@ -22972,7 +22972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.153
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978359,
@@ -22982,7 +22982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.14139719
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978362,
@@ -22992,7 +22992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978365,
@@ -23002,7 +23002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.30399281
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978371,
@@ -23012,7 +23012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978375,
@@ -23022,7 +23022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.91987858
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978378,
@@ -23032,7 +23032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04312861
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941978384,
@@ -23042,7 +23042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03860281
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941984142,
@@ -23052,7 +23052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18602956
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941984458,
@@ -23062,7 +23062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.77536763
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941988842,
@@ -23072,7 +23072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941994424,
@@ -23082,7 +23082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01942649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941994431,
@@ -23092,7 +23092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.096
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561941995292,
@@ -23102,7 +23102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.089
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942005800,
@@ -23112,7 +23112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0161
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942009078,
@@ -23122,7 +23122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.81
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942010691,
@@ -23132,7 +23132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942010697,
@@ -23142,7 +23142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.033
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942010700,
@@ -23152,7 +23152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.017
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942010703,
@@ -23162,7 +23162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942015773,
@@ -23172,7 +23172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.011377
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942016583,
@@ -23182,7 +23182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01627749
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942016589,
@@ -23192,7 +23192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07718045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942019062,
@@ -23202,7 +23202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942024464,
@@ -23212,7 +23212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07593091
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942024686,
@@ -23222,7 +23222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00296337
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942024689,
@@ -23232,7 +23232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000663
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942046984,
@@ -23242,7 +23242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942065334,
@@ -23252,7 +23252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.609
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942065344,
@@ -23262,7 +23262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942065347,
@@ -23272,7 +23272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942065351,
@@ -23282,7 +23282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942067698,
@@ -23292,7 +23292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942076880,
@@ -23302,7 +23302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0020531
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942076923,
@@ -23312,7 +23312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00843882
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942087809,
@@ -23322,7 +23322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.24552
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942088185,
@@ -23332,7 +23332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000803
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942095653,
@@ -23342,7 +23342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04216118
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942095680,
@@ -23352,7 +23352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02284088
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942096705,
@@ -23362,7 +23362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03499794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942100331,
@@ -23372,7 +23372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.385
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942100337,
@@ -23382,7 +23382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.59500206
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942100340,
@@ -23392,7 +23392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.43
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942100819,
@@ -23402,7 +23402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.294
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942108890,
@@ -23412,7 +23412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01715912
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942108926,
@@ -23422,7 +23422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109246,
@@ -23432,7 +23432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.475
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109254,
@@ -23442,7 +23442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.525
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109257,
@@ -23452,7 +23452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.28768594
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109261,
@@ -23462,7 +23462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.71231406
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109709,
@@ -23472,7 +23472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.09908185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942109943,
@@ -23482,7 +23482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130680,
@@ -23492,7 +23492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02390199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130689,
@@ -23502,7 +23502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.305
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130701,
@@ -23512,7 +23512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.095
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130705,
@@ -23522,7 +23522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06366
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130708,
@@ -23532,7 +23532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130711,
@@ -23542,7 +23542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0881
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130713,
@@ -23552,7 +23552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.42
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130717,
@@ -23562,7 +23562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130720,
@@ -23572,7 +23572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130722,
@@ -23582,7 +23582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10844209
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130725,
@@ -23592,7 +23592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.462105
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130727,
@@ -23602,7 +23602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.426109
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130729,
@@ -23612,7 +23612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130731,
@@ -23622,7 +23622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00201191
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130733,
@@ -23632,7 +23632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03645675
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130735,
@@ -23642,7 +23642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.378817
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130739,
@@ -23652,7 +23652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03676823
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130741,
@@ -23662,7 +23662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00892494
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130743,
@@ -23672,7 +23672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37274716
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130746,
@@ -23682,7 +23682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.36554257
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130749,
@@ -23692,7 +23692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.19991185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130752,
@@ -23702,7 +23702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05008815
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130755,
@@ -23712,7 +23712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.305
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942130758,
@@ -23722,7 +23722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.89141336
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942184367,
@@ -23732,7 +23732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942196618,
@@ -23742,7 +23742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.37
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942196622,
@@ -23752,7 +23752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942196625,
@@ -23762,7 +23762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.365
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942203698,
@@ -23772,7 +23772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942205891,
@@ -23782,7 +23782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942205907,
@@ -23792,7 +23792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942206424,
@@ -23802,7 +23802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.02593203
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942206496,
@@ -23812,7 +23812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.68406797
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942219946,
@@ -23822,7 +23822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.055
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942224445,
@@ -23832,7 +23832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04000074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942224450,
@@ -23842,7 +23842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04599926
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942229854,
@@ -23852,7 +23852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942232129,
@@ -23862,7 +23862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942232140,
@@ -23872,7 +23872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.176
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942234304,
@@ -23882,7 +23882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942234825,
@@ -23892,7 +23892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.013
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942242670,
@@ -23902,7 +23902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.047
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942245430,
@@ -23912,7 +23912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942247943,
@@ -23922,7 +23922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.077
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942250462,
@@ -23932,7 +23932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942268115,
@@ -23942,7 +23942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04795396
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942272330,
@@ -23952,7 +23952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.048
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942280950,
@@ -23962,7 +23962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942280956,
@@ -23972,7 +23972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.009
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942285360,
@@ -23982,7 +23982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942293253,
@@ -23992,7 +23992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.039
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942293266,
@@ -24002,7 +24002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942293269,
@@ -24012,7 +24012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942293272,
@@ -24022,7 +24022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.161
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942296162,
@@ -24032,7 +24032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.031
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942300044,
@@ -24042,7 +24042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942304438,
@@ -24052,7 +24052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942307039,
@@ -24062,7 +24062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.018
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942309682,
@@ -24072,7 +24072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942314345,
@@ -24082,7 +24082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942321499,
@@ -24092,7 +24092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.097
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942328543,
@@ -24102,7 +24102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942328586,
@@ -24112,7 +24112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.72142432
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942328590,
@@ -24122,7 +24122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02398637
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942328593,
@@ -24132,7 +24132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942328597,
@@ -24142,7 +24142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10858931
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942339350,
@@ -24152,7 +24152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942361036,
@@ -24162,7 +24162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01490199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942361043,
@@ -24172,7 +24172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11509801
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367309,
@@ -24182,7 +24182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.046
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367327,
@@ -24192,7 +24192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.054
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367419,
@@ -24202,7 +24202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367422,
@@ -24212,7 +24212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01165104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367425,
@@ -24222,7 +24222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01845099
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367429,
@@ -24232,7 +24232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367433,
@@ -24242,7 +24242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367437,
@@ -24252,7 +24252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02590199
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367445,
@@ -24262,7 +24262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367449,
@@ -24272,7 +24272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367451,
@@ -24282,7 +24282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12164702
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367455,
@@ -24292,7 +24292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67835298
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367458,
@@ -24302,7 +24302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03738218
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367460,
@@ -24312,7 +24312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00832356
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367466,
@@ -24322,7 +24322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0882
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367469,
@@ -24332,7 +24332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0882
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942367472,
@@ -24342,7 +24342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.09954128
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942391046,
@@ -24352,7 +24352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.088
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942394059,
@@ -24362,7 +24362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09152
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942394081,
@@ -24372,7 +24372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.10848
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942398660,
@@ -24382,7 +24382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07803192
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942400665,
@@ -24392,7 +24392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942400690,
@@ -24402,7 +24402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942413857,
@@ -24412,7 +24412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942424230,
@@ -24422,7 +24422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.083
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942424237,
@@ -24432,7 +24432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.022
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942424240,
@@ -24442,7 +24442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942424243,
@@ -24452,7 +24452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.417
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942425347,
@@ -24462,7 +24462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.083
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942425726,
@@ -24472,7 +24472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03798356
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942425731,
@@ -24482,7 +24482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00771644
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942426067,
@@ -24492,7 +24492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00005677
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942434558,
@@ -24502,7 +24502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02217649
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942437607,
@@ -24512,7 +24512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455177,
@@ -24522,7 +24522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00834896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455184,
@@ -24532,7 +24532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455186,
@@ -24542,7 +24542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455189,
@@ -24552,7 +24552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455192,
@@ -24562,7 +24562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455195,
@@ -24572,7 +24572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01481374
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455197,
@@ -24582,7 +24582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.7209991
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455199,
@@ -24592,7 +24592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00143912
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455201,
@@ -24602,7 +24602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00000287
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942455204,
@@ -24612,7 +24612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1e-8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942496137,
@@ -24622,7 +24622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.079
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942496146,
@@ -24632,7 +24632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.051
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942496550,
@@ -24642,7 +24642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.004
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942504583,
@@ -24652,7 +24652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0513868
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508628,
@@ -24662,7 +24662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508637,
@@ -24672,7 +24672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0286132
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508640,
@@ -24682,7 +24682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508643,
@@ -24692,7 +24692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.079
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508647,
@@ -24702,7 +24702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508649,
@@ -24712,7 +24712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508654,
@@ -24722,7 +24722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.223
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508660,
@@ -24732,7 +24732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8393868
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942508684,
@@ -24742,7 +24742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942542692,
@@ -24752,7 +24752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942557773,
@@ -24762,7 +24762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942567741,
@@ -24772,7 +24772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942608837,
@@ -24782,7 +24782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01849511
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942613364,
@@ -24792,7 +24792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942622447,
@@ -24802,7 +24802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942622453,
@@ -24812,7 +24812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.094
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626072,
@@ -24822,7 +24822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626322,
@@ -24832,7 +24832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.058
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626326,
@@ -24842,7 +24842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626329,
@@ -24852,7 +24852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.369
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626332,
@@ -24862,7 +24862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12895071
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942626334,
@@ -24872,7 +24872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.431
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942628070,
@@ -24882,7 +24882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1289499
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942628081,
@@ -24892,7 +24892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0710501
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942629382,
@@ -24902,7 +24902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.703622
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630078,
@@ -24912,7 +24912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04191185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630081,
@@ -24922,7 +24922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.61
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630085,
@@ -24932,7 +24932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.51341605
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630544,
@@ -24942,7 +24942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630549,
@@ -24952,7 +24952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942630711,
@@ -24962,7 +24962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.304
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942631126,
@@ -24972,7 +24972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.002
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942650687,
@@ -24982,7 +24982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942653939,
@@ -24992,7 +24992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01044298
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942653950,
@@ -25002,7 +25002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0568
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942653953,
@@ -25012,7 +25012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00363702
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942653955,
@@ -25022,7 +25022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12912
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942658885,
@@ -25032,7 +25032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942667111,
@@ -25042,7 +25042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670519,
@@ -25052,7 +25052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.014
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670536,
@@ -25062,7 +25062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670540,
@@ -25072,7 +25072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0001
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670543,
@@ -25082,7 +25082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.32915
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670546,
@@ -25092,7 +25092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41585
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670550,
@@ -25102,7 +25102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.18218577
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670553,
@@ -25112,7 +25112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00023449
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670556,
@@ -25122,7 +25122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.16
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670560,
@@ -25132,7 +25132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.15757974
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670567,
@@ -25142,7 +25142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.27
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670570,
@@ -25152,7 +25152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0513868
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670572,
@@ -25162,7 +25162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0286132
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670575,
@@ -25172,7 +25172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670578,
@@ -25182,7 +25182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670581,
@@ -25192,7 +25192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.45242026
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670584,
@@ -25202,7 +25202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.9
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670588,
@@ -25212,7 +25212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01257974
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670592,
@@ -25222,7 +25222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04559386
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670595,
@@ -25232,7 +25232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0328534
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670598,
@@ -25242,7 +25242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.596
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670601,
@@ -25252,7 +25252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.22926815
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670617,
@@ -25262,7 +25262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.27073185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670620,
@@ -25272,7 +25272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670623,
@@ -25282,7 +25282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670626,
@@ -25292,7 +25292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670631,
@@ -25302,7 +25302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04546
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670634,
@@ -25312,7 +25312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670637,
@@ -25322,7 +25322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670640,
@@ -25332,7 +25332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00508
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670643,
@@ -25342,7 +25342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04559932
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670645,
@@ -25352,7 +25352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670648,
@@ -25362,7 +25362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.38842
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670651,
@@ -25372,7 +25372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670654,
@@ -25382,7 +25382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.36554257
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670656,
@@ -25392,7 +25392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3639773
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670660,
@@ -25402,7 +25402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00237721
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670663,
@@ -25412,7 +25412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.088
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670666,
@@ -25422,7 +25422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01685936
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670670,
@@ -25432,7 +25432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00206619
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670673,
@@ -25442,7 +25442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670676,
@@ -25452,7 +25452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.8
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670679,
@@ -25462,7 +25462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04555282
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670682,
@@ -25472,7 +25472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670685,
@@ -25482,7 +25482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670687,
@@ -25492,7 +25492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.78033338
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670695,
@@ -25502,7 +25502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21966662
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670699,
@@ -25512,7 +25512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.46033338
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670713,
@@ -25522,7 +25522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670720,
@@ -25532,7 +25532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670727,
@@ -25542,7 +25542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0495
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670730,
@@ -25552,7 +25552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.2005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670733,
@@ -25562,7 +25562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.25
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670738,
@@ -25572,7 +25572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670742,
@@ -25582,7 +25582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670744,
@@ -25592,7 +25592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670748,
@@ -25602,7 +25602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670751,
@@ -25612,7 +25612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670757,
@@ -25622,7 +25622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670763,
@@ -25632,7 +25632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670767,
@@ -25642,7 +25642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942670772,
@@ -25652,7 +25652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942671620,
@@ -25662,7 +25662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.028125
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942686642,
@@ -25672,7 +25672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942686650,
@@ -25682,7 +25682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942686652,
@@ -25692,7 +25692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03218961
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942687287,
@@ -25702,7 +25702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942688669,
@@ -25712,7 +25712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01665443
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942688672,
@@ -25722,7 +25722,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01665443
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942691973,
@@ -25732,7 +25732,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942691981,
@@ -25742,7 +25742,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.301
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942691984,
@@ -25752,7 +25752,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00924756
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942691987,
@@ -25762,7 +25762,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942691990,
@@ -25772,7 +25772,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.82
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942692479,
@@ -25782,7 +25782,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 4.5697
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942693322,
@@ -25792,7 +25792,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00005244
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702412,
@@ -25802,7 +25802,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03218961
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702415,
@@ -25812,7 +25812,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702418,
@@ -25822,7 +25822,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702420,
@@ -25832,7 +25832,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07015935
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702459,
@@ -25842,7 +25842,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02765104
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702549,
@@ -25852,7 +25852,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01234896
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702554,
@@ -25862,7 +25862,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12256
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702706,
@@ -25872,7 +25872,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.24244
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942702711,
@@ -25882,7 +25882,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.75756
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942703040,
@@ -25892,7 +25892,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00684065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942710119,
@@ -25902,7 +25902,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942711980,
@@ -25912,7 +25912,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0455928
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942713036,
@@ -25922,7 +25922,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942719180,
@@ -25932,7 +25932,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04870411
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942720537,
@@ -25942,7 +25942,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942720569,
@@ -25952,7 +25952,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08081
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942733166,
@@ -25962,7 +25962,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00924756
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942744977,
@@ -25972,7 +25972,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00233129
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942744983,
@@ -25982,7 +25982,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.07493413
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942749315,
@@ -25992,7 +25992,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.005
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765679,
@@ -26002,7 +26002,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.052
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765688,
@@ -26012,7 +26012,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.363
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765692,
@@ -26022,7 +26022,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.323
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765695,
@@ -26032,7 +26032,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.262
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765883,
@@ -26042,7 +26042,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765889,
@@ -26052,7 +26052,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.408
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765892,
@@ -26062,7 +26062,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765895,
@@ -26072,7 +26072,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05525944
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765898,
@@ -26082,7 +26082,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765901,
@@ -26092,7 +26092,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.428
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765905,
@@ -26102,7 +26102,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765908,
@@ -26112,7 +26112,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765911,
@@ -26122,7 +26122,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2.5
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765917,
@@ -26132,7 +26132,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765921,
@@ -26142,7 +26142,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.427809
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765925,
@@ -26152,7 +26152,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0879
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942765928,
@@ -26162,7 +26162,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.59303156
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774105,
@@ -26172,7 +26172,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.41594587
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774134,
@@ -26182,7 +26182,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.052
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774138,
@@ -26192,7 +26192,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12838728
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774141,
@@ -26202,7 +26202,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0084008
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774145,
@@ -26212,7 +26212,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.358661
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942774148,
@@ -26222,7 +26222,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.03660505
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942780667,
@@ -26232,7 +26232,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.323
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781206,
@@ -26242,7 +26242,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 2
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781211,
@@ -26252,7 +26252,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.05
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781216,
@@ -26262,7 +26262,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.008009
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781219,
@@ -26272,7 +26272,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.070771
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781222,
@@ -26282,7 +26282,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.87122
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781238,
@@ -26292,7 +26292,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.045
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781272,
@@ -26302,7 +26302,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09622138
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781277,
@@ -26312,7 +26312,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.373154
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781280,
@@ -26322,7 +26322,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11313
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781283,
@@ -26332,7 +26332,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0879
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781287,
@@ -26342,7 +26342,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781289,
@@ -26352,7 +26352,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781293,
@@ -26362,7 +26362,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.20959462
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781296,
@@ -26372,7 +26372,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.06704737
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781299,
@@ -26382,7 +26382,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.12335801
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781302,
@@ -26392,7 +26392,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0092766
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781305,
@@ -26402,7 +26402,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.30031802
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781312,
@@ -26412,7 +26412,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.21611772
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781316,
@@ -26422,7 +26422,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0516
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781320,
@@ -26432,7 +26432,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02063
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781324,
@@ -26442,7 +26442,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02069
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781329,
@@ -26452,7 +26452,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02076
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781332,
@@ -26462,7 +26462,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02074
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781336,
@@ -26472,7 +26472,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.02071
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781340,
@@ -26482,7 +26482,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.08618798
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781343,
@@ -26492,7 +26492,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0012688
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781346,
@@ -26502,7 +26502,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0412955
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781349,
@@ -26512,7 +26512,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.082512
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781368,
@@ -26522,7 +26522,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.280504
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781377,
@@ -26532,7 +26532,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.136984
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781380,
@@ -26542,7 +26542,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.09345794
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781383,
@@ -26552,7 +26552,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.4065
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781387,
@@ -26562,7 +26562,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.00004206
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781402,
@@ -26572,7 +26572,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.57
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781424,
@@ -26582,7 +26582,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.0710501
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781429,
@@ -26592,7 +26592,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.703622
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781433,
@@ -26602,7 +26602,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04191185
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781438,
@@ -26612,7 +26612,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.61
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942781443,
@@ -26622,7 +26622,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.51341605
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942785700,
@@ -26632,7 +26632,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.3
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790289,
@@ -26642,7 +26642,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.6817
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790370,
@@ -26652,7 +26652,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.1183
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790406,
@@ -26662,7 +26662,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.04
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790448,
@@ -26672,7 +26672,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 1.0698
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790666,
@@ -26682,7 +26682,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.01179975
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790669,
@@ -26692,7 +26692,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.67
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790672,
@@ -26702,7 +26702,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.38842
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942790678,
@@ -26712,7 +26712,7 @@ const trades: cpz.ExchangeTrade[] = [
     amount: 0.11908025
   },
   {
-    exchange: cpz.Exchange.kraken,
+    exchange: "kraken",
     asset: "BTC",
     currency: "USD",
     time: 1561942791213,
