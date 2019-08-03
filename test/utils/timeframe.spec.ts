@@ -135,4 +135,19 @@ describe("Test 'Timeframe' class", () => {
       expect(Timeframe.getCurrentSince(1, 1440)).toBe(validSince);
     });
   });
+
+  describe("Test 'timeframesByDate", () => {
+    it("should return array with 1 minute timeframe", () => {
+      const currentTimeframes = Timeframe.timeframesByDate(
+        "2019-08-03T21:13:00.006Z"
+      );
+      expect(currentTimeframes).toStrictEqual([1]);
+    });
+    it("should return array with 1, 5, 15 minute timeframes", () => {
+      const currentTimeframes = Timeframe.timeframesByDate(
+        "2019-08-03T21:15:00.006Z"
+      );
+      expect(currentTimeframes).toStrictEqual([1, 5, 15]);
+    });
+  });
 });

@@ -11,7 +11,7 @@ const CandlesCurrentService: ServiceSchema = {
   model: {
     name: "candles_current",
     define: {
-      id: { type: Sequelize.UUID, primaryKey: true },
+      id: { type: Sequelize.STRING, primaryKey: true },
       exchange: Sequelize.STRING,
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,

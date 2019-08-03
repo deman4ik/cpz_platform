@@ -1,6 +1,6 @@
 import dayjs from "../lib/dayjs";
 import { cpz } from "../types/cpz";
-import { sortDesc } from "./helpers";
+import { sortDesc, sortAsc } from "./helpers";
 
 class Timeframe {
   private static _timeframes: cpz.Timeframes = {
@@ -116,8 +116,8 @@ class Timeframe {
   ): boolean {
     /* Если одна минута */
     if (timeframe === 1) {
-      /* Минимально возможный таймфрейм - пропускаем */
-      return false;
+      /* Минимально возможный таймфрейм */
+      return true;
     }
     /* Если меньше часа */
     if (timeframe < 60) {
@@ -135,20 +135,24 @@ class Timeframe {
     timeframe: cpz.Timeframe
   ): boolean {
     const date = dayjs.utc(inputDate);
+    if (date.second() !== 0) return false;
     /* Количество часов 0-23 */
     const hour = date.hour();
     /* Количество минут 0-59 */
     const minute = date.minute();
-
     return this.checkTimeframeByDate(hour, minute, timeframe);
   }
 
   static timeframesByDate(inputDate: string): cpz.Timeframe[] {
     const date = dayjs.utc(inputDate);
+
+    if (date.second() !== 0) return [];
+
     /* Количество часов 0-23 */
     const hour = date.hour();
     /* Количество минут 0-59 */
     const minute = date.minute();
+
     /* Проверяем все таймфреймы */
     let currentTimeframes: cpz.Timeframe[] = this.validArray.filter(timeframe =>
       this.checkTimeframeByDate(hour, minute, timeframe)
@@ -156,7 +160,7 @@ class Timeframe {
     /* Если есть хотя бы один подходящий таймфрейм */
     if (currentTimeframes.length > 0)
       /* Сортируем в порядке убывания */
-      currentTimeframes = currentTimeframes.sort(sortDesc);
+      currentTimeframes = currentTimeframes.sort(sortAsc);
     /* Возвращаем массив доступных таймфреймов */
     return currentTimeframes;
   }

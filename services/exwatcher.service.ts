@@ -1,10 +1,24 @@
-import { Service, ServiceBroker } from "moleculer";
+import { Service, ServiceBroker, Context } from "moleculer";
 import socketio from "socket.io-client";
+import cron from "node-cron";
+import { v4 as uuid } from "uuid";
 import { cpz } from "../types/cpz";
-import { capitalize } from "../utils";
+import dayjs from "../lib/dayjs";
+import { capitalize, chunkArray, uniqueElementsBy } from "../utils";
 import Timeframe from "../utils/timeframe";
 
+/**
+ * Watching streaming market data and creating candles
+ *
+ * @class ExwatcherService
+ * @extends {Service}
+ */
 class ExwatcherService extends Service {
+  /**
+   *Creates an instance of ExwatcherService.
+   * @param {ServiceBroker} broker
+   * @memberof ExwatcherService
+   */
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
@@ -137,28 +151,8 @@ class ExwatcherService extends Service {
        * Events
        */
       events: {
-        async [cpz.Event.IMPORTER_FINISHED](ctx) {
-          const { id: importerId } = ctx.params;
-          this.logger.info(`Importer ${importerId} finished!`);
-          const subscription = Object.values(this.subscriptions).find(
-            (sub: cpz.Exwatcher) => sub.importer_id === importerId
-          );
-          await this.subscribe(subscription);
-        },
-        async [cpz.Event.IMPORTER_FAILED](ctx) {
-          const { id: importerId, error } = ctx.params;
-          this.logger.warn(`Importer ${importerId} failed!`, error);
-          const { id } = <cpz.Exwatcher>(
-            Object.values(this.subscriptions).find(
-              (sub: cpz.Exwatcher) => sub.importer_id === importerId
-            )
-          );
-          if (id) {
-            this.subscriptions[id].status = cpz.ExwatcherStatus.failed;
-            this.subscriptions[id].error = error;
-            await this.saveSubscription(this.subscriptions[id]);
-          }
-        }
+        [cpz.Event.IMPORTER_FINISHED]: this.handleImporterFinishedEvent,
+        [cpz.Event.IMPORTER_FAILED]: this.handleImporterFailedEvent
       },
       started: this.startedService,
       stopped: this.stoppedService
@@ -170,7 +164,20 @@ class ExwatcherService extends Service {
   subscriptions: { [key: string]: cpz.Exwatcher } = {};
   candlesCurrent: { [key: string]: { [key: string]: cpz.Candle } } = {};
   socket: SocketIOClient.Socket = undefined;
+  cronCandlecreator: cron.ScheduledTask = cron.schedule(
+    "* * * * * *",
+    this.candlecreator.bind(this)
+  );
+  cronCheck: cron.ScheduledTask = cron.schedule(
+    "*/30 * * * * *",
+    this.check.bind(this)
+  );
 
+  get activeSubscriptions() {
+    return Object.values(this.subscriptions).filter(
+      ({ status }) => status === cpz.ExwatcherStatus.subscribed
+    );
+  }
   /**
    * Service started lifecycle event handler
    */
@@ -183,19 +190,66 @@ class ExwatcherService extends Service {
     this.socket.on("disconnect", this.socketOnDisconnect.bind(this));
     this.socket.on("error", this.socketOnError.bind(this));
     this.socket.on("reconnect_failed", this.socketOnReconnectFailed.bind(this));
+    this.cronCandlecreator.start();
+    this.cronCheck.start();
   }
 
   /**
    * Service stopped lifecycle event handler
    */
   async stoppedService() {
+    this.cronCandlecreator.stop();
+    this.cronCheck.stop();
     await this.unsubscribeAll();
     this.socket.close();
   }
 
+  /**
+   * importer.finished event handler
+   *
+   * @param {Context} ctx
+   * @memberof ExwatcherService
+   */
+  async handleImporterFinishedEvent(ctx: Context) {
+    const { id: importerId } = ctx.params;
+    this.logger.info(`Importer ${importerId} finished!`);
+    const subscription = Object.values(this.subscriptions).find(
+      (sub: cpz.Exwatcher) => sub.importer_id === importerId
+    );
+    await this.subscribe(subscription);
+  }
+
+  /**
+   * importer.failed event handler
+   *
+   * @param {Context} ctx
+   * @memberof ExwatcherService
+   */
+  async handleImporterFailedEvent(ctx: Context) {
+    const { id: importerId, error } = ctx.params;
+    this.logger.warn(`Importer ${importerId} failed!`, error);
+    const { id } = <cpz.Exwatcher>(
+      Object.values(this.subscriptions).find(
+        (sub: cpz.Exwatcher) => sub.importer_id === importerId
+      )
+    );
+    if (id) {
+      this.subscriptions[id].status = cpz.ExwatcherStatus.failed;
+      this.subscriptions[id].error = error;
+      await this.saveSubscription(this.subscriptions[id]);
+    }
+  }
+
+  /**
+   * Check socket connection and pending subscriptions
+   *
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
   async check(): Promise<void> {
     try {
       if (!this.socket.connected) {
+        this.logger.warn("Socket not connected. Reconnecting...");
         this.socket.connect();
         return;
       }
@@ -207,17 +261,23 @@ class ExwatcherService extends Service {
             cpz.ExwatcherStatus.failed
           ].includes(status)
       );
-      await Promise.all(
-        pendingSubscriptions.map(
-          async ({ exchange, asset, currency }: cpz.Exwatcher) =>
-            this.addSubscription(exchange, asset, currency)
-        )
-      );
+      if (pendingSubscriptions.length > 0)
+        await Promise.all(
+          pendingSubscriptions.map(
+            async ({ exchange, asset, currency }: cpz.Exwatcher) =>
+              this.addSubscription(exchange, asset, currency)
+          )
+        );
     } catch (e) {
       this.logger.error(e);
     }
   }
 
+  /**
+   * Resubscribe
+   *
+   * @memberof ExwatcherService
+   */
   async resubscribe() {
     try {
       const subscriptions: cpz.Exwatcher[] = await this.broker.call(
@@ -228,7 +288,6 @@ class ExwatcherService extends Service {
           }
         }
       );
-      this.logger.info(this.broker.nodeID, subscriptions);
       if (
         subscriptions &&
         Array.isArray(subscriptions) &&
@@ -239,9 +298,11 @@ class ExwatcherService extends Service {
             async ({ id, exchange, asset, currency }: cpz.Exwatcher) => {
               if (
                 !this.subscriptions[id] ||
-                this.subscriptions[id].status !==
-                  cpz.ExwatcherStatus.subscribed ||
-                this.subscriptions[id].status !== cpz.ExwatcherStatus.importing
+                (this.subscriptions[id] &&
+                  (this.subscriptions[id].status !==
+                    cpz.ExwatcherStatus.subscribed ||
+                    this.subscriptions[id].status !==
+                      cpz.ExwatcherStatus.importing))
               ) {
                 await this.addSubscription(exchange, asset, currency);
               }
@@ -254,6 +315,11 @@ class ExwatcherService extends Service {
     }
   }
 
+  /**
+   * Unsubscribe all
+   *
+   * @memberof ExwatcherService
+   */
   async unsubscribeAll() {
     try {
       await Promise.all(
@@ -270,13 +336,19 @@ class ExwatcherService extends Service {
   /**
    * Add new market data subscription
    *
-   * @param exchange
-   * @param asset
-   * @param currency
+   * @param {string} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @returns {Promise<{ success: boolean; subscription?: cpz.Exwatcher; error?: any }>}
+   * @memberof ExwatcherService
    */
-  async addSubscription(exchange: string, asset: string, currency: string) {
+  async addSubscription(
+    exchange: string,
+    asset: string,
+    currency: string
+  ): Promise<{ success: boolean; subscription?: cpz.Exwatcher; error?: any }> {
     const id = `${exchange}.${asset}.${currency}`;
-
+    this.logger.info(`Adding ${id} subscription...`);
     try {
       if (
         !this.subscriptions[id] ||
@@ -325,18 +397,38 @@ class ExwatcherService extends Service {
    * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
-   * @returns
+   * @returns {Promise<{
+   *     success: boolean;
+   *     id: string;
+   *     status: string;
+   *     error?: any;
+   *   }>}
    * @memberof ExwatcherService
    */
-  async removeSubscription(exchange: string, asset: string, currency: string) {
+  async removeSubscription(
+    exchange: string,
+    asset: string,
+    currency: string
+  ): Promise<{
+    success: boolean;
+    id: string;
+    status: string;
+    error?: any;
+  }> {
     const id = `${exchange}.${asset}.${currency}`;
     try {
       if (this.subscriptions[id]) {
         await this.unsubscribeSocket(id);
         await this.deleteSubscription(id);
         delete this.subscriptions[id];
+        delete this.candlesCurrent[id];
+        delete this.trades[id];
       }
-
+      this.logger.info(
+        Object.keys(this.subscriptions),
+        Object.keys(this.candlesCurrent),
+        Object.keys(this.trades)
+      );
       return {
         success: true,
         id,
@@ -352,10 +444,12 @@ class ExwatcherService extends Service {
       };
     }
   }
+
   /**
    * Subscribe to market data
    *
-   * @param subscription
+   * @param {cpz.Exwatcher} subscription
+   * @memberof ExwatcherService
    */
   async subscribe(subscription: cpz.Exwatcher) {
     if (subscription) {
@@ -368,7 +462,7 @@ class ExwatcherService extends Service {
           if (subscribed) {
             await this.loadCurrentCandles(this.subscriptions[id]);
             this.subscriptions[id].status = cpz.ExwatcherStatus.subscribed;
-            this.logger.info(`${id} subscribed`);
+            this.logger.info(`Subscribed ${id}`);
           } else {
             this.subscriptions[id].status = cpz.ExwatcherStatus.failed;
           }
@@ -381,7 +475,15 @@ class ExwatcherService extends Service {
       }
     }
   }
-  async subscribeSocket(id: string) {
+
+  /**
+   * Add subscription to socket
+   *
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   * @memberof ExwatcherService
+   */
+  async subscribeSocket(id: string): Promise<boolean> {
     const { exchange, asset, currency } = this.subscriptions[id];
     const capExchange = capitalize(exchange);
     const tradesSub = `0~${capExchange}~${asset}~${currency}`;
@@ -398,7 +500,15 @@ class ExwatcherService extends Service {
     );
     return false;
   }
-  async unsubscribeSocket(id: string) {
+
+  /**
+   * Remove subscription from socket
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
+  async unsubscribeSocket(id: string): Promise<void> {
     const { exchange, asset, currency } = this.subscriptions[id];
     const capExchange = capitalize(exchange);
     const tradesSub = `0~${capExchange}~${asset}~${currency}`;
@@ -415,10 +525,10 @@ class ExwatcherService extends Service {
    * Starts Import required amount if recent candles from exchange
    *
    * @param {cpz.Exwatcher} subscription
-   * @returns
+   * @returns {Promise<string>}
    * @memberof ExwatcherService
    */
-  async importRecentCandles(subscription: cpz.Exwatcher) {
+  async importRecentCandles(subscription: cpz.Exwatcher): Promise<string> {
     const { exchange, asset, currency } = subscription;
     const { id } = await this.broker.call(
       `${cpz.Service.IMPORTER_RUNNER}.startRecent`,
@@ -435,16 +545,17 @@ class ExwatcherService extends Service {
    * Loads current candles from exchange in all available timeframes
    *
    * @param {cpz.Exwatcher} subscription
+   * @returns {Promise<void>}
    * @memberof ExwatcherService
    */
-  async loadCurrentCandles(subscription: cpz.Exwatcher) {
+  async loadCurrentCandles(subscription: cpz.Exwatcher): Promise<void> {
     const { id, exchange, asset, currency } = subscription;
     this.logger.info(`Loading current candles ${id}`);
     if (!Object.prototype.hasOwnProperty.call(this.candlesCurrent, id))
       this.candlesCurrent[id] = {};
     await Promise.all(
       Timeframe.validArray.map(async timeframe => {
-        this.candlesCurrent[id][timeframe] = await this.broker.call(
+        const candle = await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentCandle`,
           {
             exchange,
@@ -453,13 +564,21 @@ class ExwatcherService extends Service {
             timeframe
           }
         );
+        this.candlesCurrent[id][timeframe] = {
+          ...candle,
+          id: `${candle.exchange}.${candle.asset}.${candle.currency}.${
+            candle.timeframe
+          }`
+        };
       })
     );
-    this.logger.info("Current candles", id, this.candlesCurrent[id]);
   }
 
   /**
    * Handle Socket Connect Event
+   *
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
    */
   async socketOnConnect(): Promise<void> {
     this.logger.info("Socket connect");
@@ -491,56 +610,98 @@ class ExwatcherService extends Service {
       }
     }
   }
+
   /**
    * Save trade to local array
    *
    * @param {cpz.ExwatcherTrade} trade
+   * @memberof ExwatcherService
    */
-  saveTrade(trade: cpz.ExwatcherTrade) {
+  saveTrade(trade: cpz.ExwatcherTrade): void {
     this.trades[`${trade.exchange}.${trade.asset}.${trade.currency}`].push(
       trade
     );
   }
+
   /**
    * Publish tick.new event
    *
    * @param {cpz.ExwatcherTrade} tick
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
    */
-  async publishTick(tick: cpz.ExwatcherTrade) {
+  async publishTick(tick: cpz.ExwatcherTrade): Promise<void> {
     await this.broker.emit(cpz.Event.TICK_NEW, tick);
   }
+
   /**
    * Save subscription state to DB
    *
    * @param {cpz.Exwatcher} subscription
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
    */
-  async saveSubscription(subscription: cpz.Exwatcher) {
+  async saveSubscription(subscription: cpz.Exwatcher): Promise<void> {
     await this.broker.call(`${cpz.Service.DB_EXWATCHERS}.upsert`, {
       entity: subscription
     });
   }
+
   /**
    * Delete subscription state in DB
    *
-   * @param {cpz.Exwatcher} subscription
+   * @param {string} id
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
    */
-  async deleteSubscription(id: string) {
+  async deleteSubscription(id: string): Promise<void> {
     await this.broker.call(`${cpz.Service.DB_EXWATCHERS}.remove`, {
       id
     });
   }
+
+  /**
+   * Handle Socket Disconnect Event
+   *
+   * @param {string} e
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
   async socketOnDisconnect(e: string): Promise<void> {
     this.logger.warn("Socket disconnect", e);
     await this.unsubscribeAll();
   }
+
+  /**
+   * Handle Socket Error Event
+   *
+   * @param {string} e
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
   async socketOnError(e: string): Promise<void> {
     this.logger.error("Socker error", e);
     await this.unsubscribeAll();
   }
+
+  /**
+   * Handle Socket ReconnectFailed Event
+   *
+   * @param {string} e
+   * @memberof ExwatcherService
+   */
   socketOnReconnectFailed(e: string): void {
     this.logger.error("Socket reconnect failed", e);
   }
-  getDirection(dir: string) {
+
+  /**
+   * Parse trade direction
+   *
+   * @param {string} dir
+   * @returns {string}
+   * @memberof ExwatcherService
+   */
+  getDirection(dir: string): string {
     switch (dir) {
       case "1":
         return "up";
@@ -552,6 +713,14 @@ class ExwatcherService extends Service {
         return "unknown";
     }
   }
+
+  /**
+   * Parse incoming market data
+   *
+   * @param {string} value
+   * @returns {cpz.ExwatcherTrade}
+   * @memberof ExwatcherService
+   */
   processData(value: string): cpz.ExwatcherTrade {
     const valuesArray = value.split("~");
 
@@ -597,6 +766,192 @@ class ExwatcherService extends Service {
       if (valuesArray[1] === "LOADCOMPLETE") this.preloadComplete = true;
     }
     return null;
+  }
+
+  /**
+   * Creating candles from trades
+   *
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
+  async candlecreator(): Promise<void> {
+    try {
+      // Текущие дата и время - минус одна секунда
+      const date = dayjs.utc().add(-1, "second");
+      // Есть ли подходящие по времени таймфреймы
+      const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
+
+      let closedCandles: { [key: string]: cpz.Candle[] } = {};
+
+      if (currentTimeframes.length > 0) {
+        // Сброс текущих свечей
+        currentTimeframes.forEach(timeframe => {
+          closedCandles[timeframe] = [];
+          this.activeSubscriptions.forEach(({ id }: cpz.Exwatcher) => {
+            if (this.candlesCurrent[id] && this.candlesCurrent[id][timeframe]) {
+              closedCandles[timeframe].push({
+                ...this.candlesCurrent[id][timeframe],
+                id: uuid()
+              });
+              const { close } = this.candlesCurrent[id][timeframe];
+              this.candlesCurrent[id][timeframe].time = date
+                .startOf("minute")
+                .valueOf();
+              this.candlesCurrent[id][timeframe].timestamp = date
+                .startOf("minute")
+                .toISOString();
+              this.candlesCurrent[id][timeframe].high = close;
+              this.candlesCurrent[id][timeframe].low = close;
+              this.candlesCurrent[id][timeframe].open = close;
+              this.candlesCurrent[id][timeframe].volume = 0;
+              this.candlesCurrent[id][timeframe].type = cpz.CandleType.previous;
+            }
+          });
+        });
+      }
+
+      await Promise.all(
+        this.activeSubscriptions.map(async ({ id }: cpz.Exwatcher) => {
+          if (this.trades[id]) {
+            // Запрашиваем все прошедшие трейды
+            const trades = this.trades[id].filter(
+              ({ time }: cpz.ExwatcherTrade) => time <= date.valueOf()
+            );
+
+            // Если были трейды
+            if (trades.length > 0) {
+              // Оставляем остальные трейды
+              this.trades[id] = this.trades[id].filter(
+                ({ time }: cpz.ExchangeTrade) => time > date.valueOf()
+              );
+
+              const currentCandles: cpz.Candle[] = [];
+              Timeframe.validArray.forEach(async timeframe => {
+                const dateFrom = Timeframe.getCurrentSince(1, timeframe);
+
+                const currentTrades = trades.filter(
+                  ({ time }: cpz.ExwatcherTrade) => time >= dateFrom
+                );
+
+                if (currentTrades.length > 0) {
+                  const prices = currentTrades.map(t => +t.price);
+                  if (this.candlesCurrent[id][timeframe].volume === 0)
+                    this.candlesCurrent[id][timeframe].open = +currentTrades[0]
+                      .price;
+                  this.candlesCurrent[id][timeframe].high = Math.max(
+                    this.candlesCurrent[id][timeframe].high,
+                    ...prices
+                  );
+                  this.candlesCurrent[id][timeframe].low = Math.min(
+                    this.candlesCurrent[id][timeframe].low,
+                    ...prices
+                  );
+                  this.candlesCurrent[id][timeframe].close = +currentTrades[
+                    currentTrades.length - 1
+                  ].price;
+                  this.candlesCurrent[id][
+                    timeframe
+                  ].volume += +currentTrades
+                    .map(t => t.amount)
+                    .reduce((a, b) => a + b, 0);
+                  this.candlesCurrent[id][timeframe].type =
+                    this.candlesCurrent[id][timeframe].volume === 0
+                      ? cpz.CandleType.previous
+                      : cpz.CandleType.created;
+                  currentCandles.push(this.candlesCurrent[id][timeframe]);
+                }
+              });
+
+              if (currentCandles.length > 0) {
+                await this.saveCurrentCandles(currentCandles);
+              }
+            }
+          }
+        })
+      );
+
+      if (Object.keys(closedCandles).length > 0) {
+        await Promise.all(
+          Object.keys(closedCandles).map(async timeframe => {
+            const candles = closedCandles[timeframe];
+            if (candles && Array.isArray(candles) && candles.length > 0) {
+              this.logger.info(
+                `New ${uniqueElementsBy(
+                  candles,
+                  (a, b) =>
+                    a.exchange === b.exchange &&
+                    a.asset === b.asset &&
+                    a.currency === b.currency
+                ).map(
+                  ({ exchange, asset, currency }) =>
+                    `${exchange}.${asset}.${currency}.${timeframe}`
+                )} candles`
+              );
+              await this.saveCandles(candles);
+              await Promise.all(
+                candles.map(async candle => {
+                  await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
+                })
+              );
+            }
+          })
+        );
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  /**
+   * Save current candles
+   *
+   * @param {cpz.Candle[]} candles
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
+  async saveCurrentCandles(candles: cpz.Candle[]): Promise<void> {
+    try {
+      const chunks = chunkArray(candles, 500);
+      for (const chunk of chunks) {
+        try {
+          await this.broker.call(`${cpz.Service.DB_CANDLES_CURRENT}.upsert`, {
+            entities: chunk
+          });
+        } catch (e) {
+          this.logger.error(e);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  /**
+   * Save closed candles
+   *
+   * @param {cpz.Candle[]} candles
+   * @returns {Promise<void>}
+   * @memberof ExwatcherService
+   */
+  async saveCandles(candles: cpz.Candle[]): Promise<void> {
+    try {
+      const { timeframe } = candles[0];
+      const chunks = chunkArray(candles, 500);
+      for (const chunk of chunks) {
+        try {
+          await this.broker.call(
+            `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
+            {
+              entities: chunk
+            }
+          );
+        } catch (e) {
+          this.logger.error(e);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
 
