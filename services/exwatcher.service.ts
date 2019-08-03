@@ -27,20 +27,6 @@ class ExwatcherService extends Service {
        */
       actions: {
         /**
-         * Connect
-         *
-         * @returns
-         */
-        connect() {
-          if (!this.socket.connected) {
-            this.socket.connect();
-          }
-        },
-
-        disconnect() {
-          this.socket.close();
-        },
-        /**
          * Subscribe
          *
          * @param {String} exchange - Exchange
@@ -155,9 +141,23 @@ class ExwatcherService extends Service {
           const { id: importerId } = ctx.params;
           this.logger.info(`Importer ${importerId} finished!`);
           const subscription = Object.values(this.subscriptions).find(
-            (sub: cpz.Exwatcher) => sub.importerId === importerId
+            (sub: cpz.Exwatcher) => sub.importer_id === importerId
           );
           await this.subscribe(subscription);
+        },
+        async [cpz.Event.IMPORTER_FAILED](ctx) {
+          const { id: importerId, error } = ctx.params;
+          this.logger.warn(`Importer ${importerId} failed!`, error);
+          const { id } = <cpz.Exwatcher>(
+            Object.values(this.subscriptions).find(
+              (sub: cpz.Exwatcher) => sub.importer_id === importerId
+            )
+          );
+          if (id) {
+            this.subscriptions[id].status = cpz.ExwatcherStatus.failed;
+            this.subscriptions[id].error = error;
+            await this.saveSubscription(this.subscriptions[id]);
+          }
         }
       },
       started: this.startedService,
@@ -169,14 +169,15 @@ class ExwatcherService extends Service {
   trades: { [key: string]: cpz.ExwatcherTrade[] } = {};
   subscriptions: { [key: string]: cpz.Exwatcher } = {};
   candlesCurrent: { [key: string]: { [key: string]: cpz.Candle } } = {};
-  socket = socketio("https://streamer.cryptocompare.com/", {
-    transports: ["websocket"]
-  });
+  socket: SocketIOClient.Socket = undefined;
 
   /**
    * Service started lifecycle event handler
    */
   async startedService() {
+    this.socket = socketio("https://streamer.cryptocompare.com/", {
+      transports: ["websocket"]
+    });
     this.socket.on("connect", this.socketOnConnect.bind(this));
     this.socket.on("m", this.socketOnMessage.bind(this));
     this.socket.on("disconnect", this.socketOnDisconnect.bind(this));
@@ -188,7 +189,82 @@ class ExwatcherService extends Service {
    * Service stopped lifecycle event handler
    */
   async stoppedService() {
+    await this.unsubscribeAll();
     this.socket.close();
+  }
+
+  async check(): Promise<void> {
+    try {
+      if (!this.socket.connected) {
+        this.socket.connect();
+        return;
+      }
+      const pendingSubscriptions = Object.values(this.subscriptions).filter(
+        ({ status }) =>
+          [
+            cpz.ExwatcherStatus.pending,
+            cpz.ExwatcherStatus.unsubscribed,
+            cpz.ExwatcherStatus.failed
+          ].includes(status)
+      );
+      await Promise.all(
+        pendingSubscriptions.map(
+          async ({ exchange, asset, currency }: cpz.Exwatcher) =>
+            this.addSubscription(exchange, asset, currency)
+        )
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async resubscribe() {
+    try {
+      const subscriptions: cpz.Exwatcher[] = await this.broker.call(
+        `${cpz.Service.DB_EXWATCHERS}.find`,
+        {
+          query: {
+            node_id: this.broker.nodeID
+          }
+        }
+      );
+      this.logger.info(this.broker.nodeID, subscriptions);
+      if (
+        subscriptions &&
+        Array.isArray(subscriptions) &&
+        subscriptions.length > 0
+      ) {
+        await Promise.all(
+          subscriptions.map(
+            async ({ id, exchange, asset, currency }: cpz.Exwatcher) => {
+              if (
+                !this.subscriptions[id] ||
+                this.subscriptions[id].status !==
+                  cpz.ExwatcherStatus.subscribed ||
+                this.subscriptions[id].status !== cpz.ExwatcherStatus.importing
+              ) {
+                await this.addSubscription(exchange, asset, currency);
+              }
+            }
+          )
+        );
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async unsubscribeAll() {
+    try {
+      await Promise.all(
+        Object.keys(this.subscriptions).map(async id => {
+          this.subscriptions[id].status = cpz.ExwatcherStatus.unsubscribed;
+          await this.saveSubscription(this.subscriptions[id]);
+        })
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   /**
@@ -202,15 +278,22 @@ class ExwatcherService extends Service {
     const id = `${exchange}.${asset}.${currency}`;
 
     try {
-      if (!this.subscriptions[id]) {
+      if (
+        !this.subscriptions[id] ||
+        [
+          cpz.ExwatcherStatus.pending,
+          cpz.ExwatcherStatus.unsubscribed,
+          cpz.ExwatcherStatus.failed
+        ].includes(this.subscriptions[id].status)
+      ) {
         this.subscriptions[id] = {
           id,
           exchange,
           asset,
           currency,
           status: cpz.ExwatcherStatus.pending,
-          nodeId: this.broker.nodeID,
-          importerId: null,
+          node_id: this.broker.nodeID,
+          importer_id: null,
           error: null
         };
 
@@ -219,7 +302,7 @@ class ExwatcherService extends Service {
         );
         if (importerId) {
           this.subscriptions[id].status = cpz.ExwatcherStatus.importing;
-          this.subscriptions[id].importerId = importerId;
+          this.subscriptions[id].importer_id = importerId;
           await this.saveSubscription(this.subscriptions[id]);
         }
       }
@@ -378,8 +461,9 @@ class ExwatcherService extends Service {
   /**
    * Handle Socket Connect Event
    */
-  socketOnConnect(): void {
+  async socketOnConnect(): Promise<void> {
     this.logger.info("Socket connect");
+    await this.resubscribe();
   }
 
   /**
@@ -445,11 +529,13 @@ class ExwatcherService extends Service {
       id
     });
   }
-  socketOnDisconnect(e: string): void {
+  async socketOnDisconnect(e: string): Promise<void> {
     this.logger.warn("Socket disconnect", e);
+    await this.unsubscribeAll();
   }
-  socketOnError(e: string): void {
+  async socketOnError(e: string): Promise<void> {
     this.logger.error("Socker error", e);
+    await this.unsubscribeAll();
   }
   socketOnReconnectFailed(e: string): void {
     this.logger.error("Socket reconnect failed", e);

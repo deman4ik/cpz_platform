@@ -16,11 +16,10 @@ const ExwatchersService: ServiceSchema = {
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,
       status: Sequelize.STRING,
-      nodeId: { type: Sequelize.STRING, field: "node_id" },
-      importerId: {
+      node_id: { type: Sequelize.STRING },
+      importer_id: {
         type: Sequelize.UUID,
-        allowNull: true,
-        field: "importer_id"
+        allowNull: true
       },
       error: { type: Sequelize.JSONB, allowNull: true }
     },
@@ -40,8 +39,8 @@ const ExwatchersService: ServiceSchema = {
             asset: "string",
             currency: "string",
             status: "string",
-            nodeId: "string",
-            importerId: "string",
+            node_id: "string",
+            importer_id: { type: "string", optional: true },
             error: {
               type: "object",
               optional: true
@@ -57,8 +56,8 @@ const ExwatchersService: ServiceSchema = {
             asset,
             currency,
             status,
-            nodeId,
-            importerId,
+            node_id,
+            importer_id,
             error
           }: cpz.Exwatcher = ctx.params.entity;
           const value = Object.values({
@@ -67,8 +66,8 @@ const ExwatchersService: ServiceSchema = {
             asset,
             currency,
             status,
-            nodeId,
-            importerId,
+            node_id,
+            importer_id,
             error: JSON.stringify(error)
           });
           const query = `INSERT INTO exwatchers 

@@ -17,8 +17,8 @@ const ImportersService: ServiceSchema = {
       currency: Sequelize.STRING,
       params: Sequelize.JSONB,
       status: Sequelize.STRING,
-      startedAt: { type: Sequelize.DATE, allowNull: true, field: "started_at" },
-      endedAt: { type: Sequelize.DATE, allowNull: true, field: "ended_at" },
+      started_at: { type: Sequelize.DATE, allowNull: true },
+      ended_at: { type: Sequelize.DATE, allowNull: true },
       error: { type: Sequelize.JSONB, allowNull: true }
     },
     options: {
@@ -39,11 +39,11 @@ const ImportersService: ServiceSchema = {
             type: "string",
             params: "object",
             status: "string",
-            startedAt: {
+            started_at: {
               type: "string",
               optional: true
             },
-            endedAt: {
+            ended_at: {
               type: "string",
               optional: true
             },
@@ -64,8 +64,8 @@ const ImportersService: ServiceSchema = {
             type,
             params,
             status,
-            startedAt,
-            endedAt,
+            started_at,
+            ended_at,
             error
           }: cpz.Importer = ctx.params.entity;
           const value = Object.values({
@@ -76,8 +76,8 @@ const ImportersService: ServiceSchema = {
             type,
             params: JSON.stringify(params),
             status,
-            started_at: startedAt,
-            ended_at: endedAt,
+            started_at,
+            ended_at,
             error: JSON.stringify(error)
           });
           const query = `INSERT INTO importers 

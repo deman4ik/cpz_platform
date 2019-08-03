@@ -15,7 +15,7 @@ import {
 } from "../../utils";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
-import { stat } from "fs";
+import { CANDLES_RECENT_AMOUNT } from "../../config";
 
 const ImporterWorkerService: ServiceSchema = {
   name: cpz.Service.IMPORTER_WORKER,
@@ -50,8 +50,8 @@ const ImporterWorkerService: ServiceSchema = {
             const state: cpz.Importer = {
               ...job.data,
               status: cpz.Status.started,
-              startedAt: dayjs.utc().toISOString(),
-              endedAt: null,
+              started_at: dayjs.utc().toISOString(),
+              ended_at: null,
               error: null
             };
             const currentState = await this.broker.call(
@@ -71,7 +71,7 @@ const ImporterWorkerService: ServiceSchema = {
             } else if (state.type === "history") {
               await this.importerHistory(job, state);
             }
-            state.endedAt = dayjs.utc().toISOString();
+            state.ended_at = dayjs.utc().toISOString();
             state.status = cpz.Status.finished;
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state
@@ -84,6 +84,10 @@ const ImporterWorkerService: ServiceSchema = {
             };
           } catch (e) {
             this.logger.error(e);
+            this.broker.emit(cpz.Event.IMPORTER_FAILED, {
+              id: job.id,
+              error: e.message
+            });
             if (e instanceof Errors.ValidationError) {
               return {
                 success: false,
@@ -109,7 +113,10 @@ const ImporterWorkerService: ServiceSchema = {
           exchange,
           asset,
           currency,
-          params: { timeframes, amount }
+          params: {
+            timeframes = Timeframe.validArray,
+            amount = CANDLES_RECENT_AMOUNT
+          }
         } = state;
         let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
 
@@ -229,7 +236,11 @@ const ImporterWorkerService: ServiceSchema = {
           exchange,
           asset,
           currency,
-          params: { timeframes, dateFrom: paramsDateFrom, dateTo: paramsDateTo }
+          params: {
+            timeframes = Timeframe.validArray,
+            dateFrom: paramsDateFrom,
+            dateTo: paramsDateTo
+          }
         } = state;
         const dateTo = getValidDate(paramsDateTo);
 

@@ -17,6 +17,7 @@ export namespace cpz {
   const enum Event {
     IMPORTER_STARTED = "importer.started",
     IMPORTER_FINISHED = "importer.finished",
+    IMPORTER_FAILED = "importer.failed",
     CANDLE_NEW = "candle.new",
     TICK_NEW = "tick.new"
   }
@@ -148,8 +149,8 @@ export namespace cpz {
     type: cpz.ImportType;
     params: any;
     status: cpz.Status;
-    startedAt?: string;
-    endedAt?: string;
+    started_at?: string;
+    ended_at?: string;
     error?: any;
   }
 
@@ -159,8 +160,8 @@ export namespace cpz {
     asset: string;
     currency: string;
     status: cpz.ExwatcherStatus;
-    nodeId: string;
-    importerId: string;
+    node_id: string;
+    importer_id: string;
     error?: any;
   }
 }

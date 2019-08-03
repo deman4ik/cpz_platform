@@ -112,6 +112,7 @@ class PublicConnectorService extends Service {
               ctx.params.asset,
               ctx.params.currency,
               ctx.params.timeframe,
+              ctx.params.dateFrom,
               ctx.params.limit
             );
           }
@@ -400,7 +401,7 @@ class PublicConnectorService extends Service {
     currency: string,
     timeframe: cpz.Timeframe,
     dateFrom: string,
-    limit: number
+    limit: number = 100
   ): Promise<cpz.ExchangeCandle[]> {
     await this.initConnector(exchange);
     const params = getCandlesParams(
