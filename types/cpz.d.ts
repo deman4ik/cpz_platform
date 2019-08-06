@@ -11,7 +11,13 @@ export namespace cpz {
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
-    PUBLIC_CONNECTOR = "public-connector"
+    PUBLIC_CONNECTOR = "public-connector",
+    ROBOT_RUNNER = "robot-runner",
+    ROBOT_WORKER = "robot-worker",
+    BACKTESTER_RUNNER = "backtester-runner",
+    BACKTESTER_WORKET = "backtester-worker",
+    TRADER_RUNNER = "trader-runner",
+    TRADER_WORKER = "trader-worker"
   }
 
   const enum Event {
