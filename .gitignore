@@ -62,5 +62,6 @@ typings/
 
 package-lock.json
 
+dist
 strategies
 indicators
