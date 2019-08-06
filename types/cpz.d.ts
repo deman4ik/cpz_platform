@@ -45,6 +45,36 @@ export namespace cpz {
     failed = "failed"
   }
 
+  const enum RobotPositionDirection {
+    buy = "buy",
+    sell = "sell"
+  }
+
+  const enum RobotPositionStatus {
+    new = "new",
+    open = "open",
+    closed = "closed"
+  }
+
+  const enum RobotTradeStatus {
+    new = "new",
+    open = "open",
+    closed = "closed"
+  }
+
+  const enum TradeAction {
+    long = "long",
+    short = "short",
+    closeLong = "closeLong",
+    closeShort = "closeShort"
+  }
+
+  const enum OrderType {
+    stop = "stop",
+    limit = "limit",
+    market = "market"
+  }
+
   const enum CandleType {
     loaded = "loaded",
     created = "created",
