@@ -8,8 +8,9 @@ signal в tradeSignal
 объявить тип для класса после рефакторинга
 */
 
-class Position {
-  constructor(state) {
+class Position extends cpz.RobotPosition {
+  constructor(state: any) {
+    super();
     this._id = state.id || uuid();
     this._prefix = state.prefix;
     this._code = state.code;
@@ -56,7 +57,11 @@ class Position {
   };
   _status: string;
   _actions: {
-    [key: string]: { action: string; price: number; orderType: string };
+    [key: string]: {
+      action: cpz.TradeAction;
+      price: number;
+      orderType: cpz.OrderType;
+    };
   };
   _signal: any;
   _candle: cpz.Candle;
@@ -140,7 +145,7 @@ class Position {
     }
   }
 
-  _handleCandle(candle) {
+  _handleCandle(candle: cpz.Candle) {
     this._candle = candle;
   }
 
@@ -159,7 +164,7 @@ class Position {
     }
   }
 
-  _addAction(action, price, orderType) {
+  _addAction(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
     this._actions[this._nextActionNumb] = {
       action,
       price,
@@ -167,7 +172,15 @@ class Position {
     };
   }
 
-  _createSignal({ action, price, orderType }) {
+  _createSignal({
+    action,
+    price,
+    orderType
+  }: {
+    action: cpz.TradeAction;
+    price: number;
+    orderType: cpz.OrderType;
+  }) {
     this._signal = {
       action,
       orderType,
@@ -181,7 +194,15 @@ class Position {
     };
   }
 
-  open({ action, price = this._candle.close, orderType }) {
+  open({
+    action,
+    price = this._candle.close,
+    orderType
+  }: {
+    action: cpz.TradeAction;
+    price: number;
+    orderType: cpz.OrderType;
+  }) {
     this._checkOpen();
     this._entry = {
       status: cpz.RobotTradeStatus.closed,
@@ -196,7 +217,13 @@ class Position {
     this._createSignal({ action, price, orderType });
   }
 
-  close({ price = this._candle.close, orderType }) {
+  close({
+    price = this._candle.close,
+    orderType
+  }: {
+    price: number;
+    orderType: cpz.OrderType;
+  }) {
     this._checkClose();
     const action =
       this._direction === cpz.TradeAction.long
@@ -232,7 +259,15 @@ class Position {
     }
   }
 
-  _executeAction({ action, price, orderType }) {
+  _executeAction({
+    action,
+    price,
+    orderType
+  }: {
+    action: cpz.TradeAction;
+    price: number;
+    orderType: cpz.OrderType;
+  }) {
     let nextPrice = null;
     switch (orderType) {
       case cpz.OrderType.stop: {
@@ -261,7 +296,7 @@ class Position {
     return false;
   }
 
-  _checkMarket({ action, price }) {
+  _checkMarket({ action, price }: { action: cpz.TradeAction; price: number }) {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -277,7 +312,7 @@ class Position {
     throw new Error(`Unknown action ${action}`);
   }
 
-  _checkStop({ action, price }) {
+  _checkStop({ action, price }: { action: cpz.TradeAction; price: number }) {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -291,10 +326,16 @@ class Position {
     } else {
       throw new Error(`Unknown action ${action}`);
     }
-    return false;
+    return null;
   }
 
-  _checkLimit({ action, price }) {
+  _checkLimit({
+    action,
+    price
+  }: {
+    action: cpz.TradeAction;
+    price: number;
+  }): number {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -308,7 +349,7 @@ class Position {
     } else {
       throw new Error(`Unknown action ${action}`);
     }
-    return false;
+    return null;
   }
 
   buyAtMarket(price = this._candle.close) {

@@ -67,6 +67,26 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
 }
 
 /**
+ * Разделение массива по пачкам инкрементально с конца
+ * @example chunkArrayIncrEnd([1,2,3,4,5,6],2) -> [[1,2],[2,3],[3,4],[4,5],[5,6]]
+ *
+ * @param {Array} array
+ * @param {number} chunkSize размер пачкм
+ */
+function chunkArrayIncrEnd<T>(array: T[], chunkSize: number): T[][] {
+  const arrayToChunk = [...array];
+  const results = [];
+  let start = arrayToChunk.length - chunkSize;
+  let end = arrayToChunk.length;
+  while (start >= 0) {
+    results.push(arrayToChunk.slice(start, end));
+    start -= 1;
+    end -= 1;
+  }
+  return results.reverse();
+}
+
+/**
  * Returns all unique values of an array, based on a provided comparator function.
  *
  * @param arr
@@ -92,6 +112,7 @@ export {
   capitalize,
   arraysDiff,
   chunkArray,
+  chunkArrayIncrEnd,
   uniqueElementsBy,
   sleep
 };

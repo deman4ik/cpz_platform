@@ -142,6 +142,14 @@ export namespace cpz {
     timeframe: number;
   }
 
+  interface CandleProps {
+    open: number[];
+    high: number[];
+    low: number[];
+    close: number[];
+    volume: number[];
+  }
+
   interface ExchangePrice {
     exchange: string;
     asset: string;
@@ -199,5 +207,20 @@ export namespace cpz {
     node_id: string;
     importer_id: string;
     error?: any;
+  }
+
+  // TODO
+  class Indicator {
+    [key: string]: any;
+  }
+
+  // TODO
+  class Strategy {
+    [key: string]: any;
+  }
+
+  // TODO
+  class RobotPosition {
+    [key: string]: any;
   }
 }
