@@ -521,4 +521,4 @@ class PublicConnectorService extends Service {
   }
 }
 
-export default PublicConnectorService;
+export = PublicConnectorService;

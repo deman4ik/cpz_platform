@@ -955,4 +955,4 @@ class ExwatcherService extends Service {
   }
 }
 
-export default ExwatcherService;
+export = ExwatcherService;
