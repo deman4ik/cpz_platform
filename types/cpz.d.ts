@@ -21,11 +21,14 @@ export namespace cpz {
   }
 
   const enum Event {
+    LOG = "log",
     IMPORTER_STARTED = "importer.started",
     IMPORTER_FINISHED = "importer.finished",
     IMPORTER_FAILED = "importer.failed",
     CANDLE_NEW = "candle.new",
-    TICK_NEW = "tick.new"
+    TICK_NEW = "tick.new",
+    SIGNAL_NEW = "signal.new",
+    TRADE_SIGNAL_NEW = "tradesignal.new"
   }
 
   const enum Status {
@@ -73,6 +76,13 @@ export namespace cpz {
     stop = "stop",
     limit = "limit",
     market = "market"
+  }
+
+  const enum IndicatorType {
+    base = "base",
+    tulip = "tulip"
+    /*talib = "talib",
+    techind = "techind"*/
   }
 
   const enum CandleType {
@@ -183,6 +193,35 @@ export namespace cpz {
 
   interface Timeframes {
     [key: number]: TimeframeProps;
+  }
+
+  interface Events {
+    type: cpz.Event;
+    data: any;
+  }
+
+  interface SignalInfo {
+    action: TradeAction;
+    orderType: OrderType;
+    price: number;
+    position: {
+      id: string;
+      prefix: string;
+      code: string;
+      parentId: string;
+    };
+  }
+
+  interface SignalEvent extends SignalInfo {
+    signalId: string;
+    robotId: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: Timeframe;
+    candleId: string;
+    candleTimestamp: string;
+    timestamp: string;
   }
 
   interface Importer {

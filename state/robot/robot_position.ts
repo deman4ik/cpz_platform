@@ -2,8 +2,8 @@ import { v4 as uuid } from "uuid";
 import { sortAsc } from "../../utils";
 import { cpz } from "../../types/cpz";
 
-/** TODO: actions переименовать в signals
-signal в tradeSignal
+/** TODO: signals переименовать в tradesignals
+tradesignal в tradetradesignal
 
 объявить тип для класса после рефакторинга
 */
@@ -31,8 +31,8 @@ class Position extends cpz.RobotPosition {
       action: null
     };
     this._status = state.status || cpz.RobotPositionStatus.new;
-    this._actions = state.actions || {};
-    this._signal = null;
+    this._signals = state.signals || {};
+    this._tradeSignal = null;
     this._candle = null;
   }
 
@@ -56,14 +56,14 @@ class Position extends cpz.RobotPosition {
     action: string;
   };
   _status: string;
-  _actions: {
+  _signals: {
     [key: string]: {
       action: cpz.TradeAction;
       price: number;
       orderType: cpz.OrderType;
     };
   };
-  _signal: any;
+  _tradeSignal: cpz.SignalInfo;
   _candle: cpz.Candle;
 
   get id() {
@@ -102,20 +102,20 @@ class Position extends cpz.RobotPosition {
     return this._status === cpz.RobotPositionStatus.open;
   }
 
-  get signal() {
-    return this._signal;
+  get tradeSignal() {
+    return this._tradeSignal;
   }
 
-  _clearSignal() {
-    this._signal = null;
+  _clearTradeSignal() {
+    this._tradeSignal = null;
   }
 
-  _clearActions() {
-    this._actions = {};
+  _clearSignals() {
+    this._signals = {};
   }
 
-  get hasActions() {
-    return Object.keys(this._actions).length > 0;
+  get hassignals() {
+    return Object.keys(this._signals).length > 0;
   }
 
   get state() {
@@ -128,7 +128,7 @@ class Position extends cpz.RobotPosition {
       entry: this._entry,
       exit: this._exit,
       status: this._status,
-      actions: this._actions
+      signals: this._signals
     };
   }
 
@@ -165,14 +165,14 @@ class Position extends cpz.RobotPosition {
   }
 
   _addAction(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
-    this._actions[this._nextActionNumb] = {
+    this._signals[this._nextActionNumb] = {
       action,
       price,
       orderType
     };
   }
 
-  _createSignal({
+  _createtradesignal({
     action,
     price,
     orderType
@@ -181,7 +181,7 @@ class Position extends cpz.RobotPosition {
     price: number;
     orderType: cpz.OrderType;
   }) {
-    this._signal = {
+    this._tradeSignal = {
       action,
       orderType,
       price,
@@ -214,7 +214,7 @@ class Position extends cpz.RobotPosition {
     this._direction = action;
     this.setStatus();
 
-    this._createSignal({ action, price, orderType });
+    this._createtradesignal({ action, price, orderType });
   }
 
   close({
@@ -239,21 +239,21 @@ class Position extends cpz.RobotPosition {
 
     this.setStatus();
 
-    this._createSignal({ action, price, orderType });
+    this._createtradesignal({ action, price, orderType });
   }
 
   get _nextActionNumb() {
-    return Object.keys(this._actions).length + 1;
+    return Object.keys(this._signals).length + 1;
   }
 
-  _runActions() {
-    for (const key of Object.keys(this._actions).sort((a, b) =>
+  _runsignals() {
+    for (const key of Object.keys(this._signals).sort((a, b) =>
       sortAsc(+a, +b)
     )) {
-      const action = this._actions[key];
+      const action = this._signals[key];
       const success = this._executeAction(action);
       if (success) {
-        this._actions = {};
+        this._signals = {};
         break;
       }
     }
