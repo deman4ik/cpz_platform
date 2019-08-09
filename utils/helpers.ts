@@ -1,11 +1,11 @@
 /**
  * Сортировка по возрастанию
  *
- * @param {Number} a
- * @param {Number} b
+ * @param {T} a
+ * @param {T} b
  * @returns {Number}
  */
-function sortAsc(a: number, b: number): number {
+function sortAsc<T>(a: T, b: T): number {
   if (a > b) {
     return 1;
   }
@@ -18,11 +18,11 @@ function sortAsc(a: number, b: number): number {
 /**
  * Сортировка по убыванию
  *
- * @param {Number} a
- * @param {Number} b
+ * @param {T} a
+ * @param {T} b
  * @returns {Number}
  */
-function sortDesc(a: number, b: number): number {
+function sortDesc<T>(a: T, b: T): number {
   if (a > b) {
     return -1;
   }

@@ -1,147 +1,162 @@
-import { v4 as uuid } from "uuid";
 import { sortAsc } from "../../utils";
 import { cpz } from "../../types/cpz";
 
-/** TODO: signals переименовать в tradesignals
-tradesignal в tradetradesignal
+/**
+ * Robot position
+ *
+ * @class Position
+ */
+class Position implements cpz.RobotPosition {
+  private _id: string;
+  private _robotId: string;
+  private _prefix: string;
+  private _code: string;
+  private _parentId?: string;
+  private _direction?: cpz.PositionDirection;
+  private _status: cpz.RobotPositionStatus;
+  private _entryStatus?: cpz.RobotTradeStatus;
+  private _entryPrice?: number;
+  private _entryDate?: string;
+  private _entryOrderType?: cpz.OrderType;
+  private _entryAction?: cpz.TradeAction;
+  private _exitStatus?: cpz.RobotTradeStatus;
+  private _exitPrice?: number;
+  private _exitDate?: string;
+  private _exitOrderType?: cpz.OrderType;
+  private _exitAction?: cpz.TradeAction;
+  private _alerts?: { [key: string]: cpz.AlertInfo };
+  private _profit: number;
+  private _candle?: cpz.Candle;
+  private _alertsToPublish: cpz.SignalInfo[];
+  private _tradeToPublish: cpz.SignalInfo;
 
-объявить тип для класса после рефакторинга
-*/
-
-class Position extends cpz.RobotPosition {
-  constructor(state: any) {
-    super();
-    this._id = state.id || uuid();
+  constructor(state: cpz.RobotPositionState) {
+    this._id = state.id;
+    this._robotId = state.robot_id;
     this._prefix = state.prefix;
     this._code = state.code;
-    this._parentId = state.parentId;
+    this._parentId = state.parent_id;
     this._direction = state.direction;
-    this._entry = state.entry || {
-      status: null,
-      price: null,
-      date: null,
-      orderType: null,
-      action: null
-    };
-    this._exit = state.exit || {
-      status: null,
-      price: null,
-      date: null,
-      orderType: null,
-      action: null
-    };
     this._status = state.status || cpz.RobotPositionStatus.new;
-    this._signals = state.signals || {};
-    this._tradeSignal = null;
+    this._entryStatus = state.entry_status;
+    this._entryPrice = state.entry_price;
+    this._entryDate = state.entry_date;
+    this._entryOrderType = state.entry_order_type;
+    this._entryAction = state.entry_action;
+    this._exitStatus = state.exit_status;
+    this._exitPrice = state.exit_price;
+    this._exitDate = state.exit_date;
+    this._exitOrderType = state.exit_order_type;
+    this._exitAction = state.exit_action;
+    this._alerts = state.alerts || {};
+    this._profit = state.profit || 0;
+    this._alertsToPublish = [];
+    this._tradeToPublish = null;
     this._candle = null;
   }
 
-  _id: string;
-  _prefix: string;
-  _code: string;
-  _parentId: string;
-  _direction: string;
-  _entry: {
-    status: string;
-    price: number;
-    date: string;
-    orderType: string;
-    action: string;
-  };
-  _exit: {
-    status: string;
-    price: number;
-    date: string;
-    orderType: string;
-    action: string;
-  };
-  _status: string;
-  _signals: {
-    [key: string]: {
-      action: cpz.TradeAction;
-      price: number;
-      orderType: cpz.OrderType;
-    };
-  };
-  _tradeSignal: cpz.SignalInfo;
-  _candle: cpz.Candle;
-
-  get id() {
+  public get id() {
     return this._id;
   }
 
-  get prefix() {
+  public get prefix() {
     return this._prefix;
   }
 
-  get code() {
+  public get code() {
     return this._code;
   }
 
-  get parentId() {
+  public get parentId() {
     return this._parentId;
   }
 
-  get direction() {
+  public get direction() {
     return this._direction;
   }
 
-  get entry() {
-    return this._entry;
+  public get entryStatus() {
+    return this._entryStatus;
   }
 
-  get exit() {
-    return this._exit;
+  public get exitStatus() {
+    return this._exitStatus;
   }
 
-  get status() {
+  public get status() {
     return this._status;
   }
 
-  get isActive() {
+  public get isActive() {
     return this._status === cpz.RobotPositionStatus.open;
   }
 
-  get tradeSignal() {
-    return this._tradeSignal;
+  public get hasAlerts() {
+    return Object.keys(this._alerts).length > 0;
   }
 
-  _clearTradeSignal() {
-    this._tradeSignal = null;
+  public get hasAlertsToPublish() {
+    return this._alertsToPublish.length > 0;
   }
 
-  _clearSignals() {
-    this._signals = {};
+  public get hasTradeToPublish() {
+    return !!this._tradeToPublish;
   }
 
-  get hassignals() {
-    return Object.keys(this._signals).length > 0;
+  public get alertsToPublish() {
+    return this._alertsToPublish;
   }
 
-  get state() {
+  public get tradeToPublish() {
+    return this._tradeToPublish;
+  }
+
+  public get state() {
     return {
       id: this._id,
+      robot_id: this._robotId,
       prefix: this._prefix,
       code: this._code,
       parentId: this._parentId,
       direction: this._direction,
-      entry: this._entry,
-      exit: this._exit,
       status: this._status,
-      signals: this._signals
+      entry_status: this._entryStatus,
+      entry_price: this._entryPrice,
+      entry_date: this._entryDate,
+      entry_order_type: this._entryOrderType,
+      entry_action: this._entryAction,
+      exit_status: this._exitStatus,
+      exit_price: this._exitPrice,
+      exit_date: this._exitDate,
+      exit_order_type: this._exitOrderType,
+      exit_action: this._exitAction,
+      alerts: this._alerts,
+      profit: this._profit
     };
   }
 
-  setStatus() {
-    if (
-      this._entry.status === cpz.RobotTradeStatus.closed &&
-      this._exit.status === cpz.RobotTradeStatus.closed
-    ) {
-      this._status = cpz.RobotPositionStatus.closed;
-    } else if (this._entry.status === cpz.RobotTradeStatus.closed) {
-      this._status = cpz.RobotPositionStatus.open;
+  _clearAlertsToPublish() {
+    this._alertsToPublish = [];
+  }
+
+  _clearTradeToPublish() {
+    this._tradeToPublish = null;
+  }
+
+  /**
+   * Clear alerts
+   *
+   * @memberof Position
+   */
+  _clearAlerts() {
+    this._alerts = {};
+  }
+
+  _calcProfit() {
+    if (this._direction === cpz.PositionDirection.long) {
+      this._profit = this._exitPrice - this._entryPrice;
     } else {
-      this._status = cpz.RobotPositionStatus.new;
+      this._profit = this._entryPrice - this._exitPrice;
     }
   }
 
@@ -150,38 +165,47 @@ class Position extends cpz.RobotPosition {
   }
 
   _checkOpen() {
-    if (this._entry.status === cpz.RobotTradeStatus.closed) {
+    if (this._entryStatus === cpz.RobotTradeStatus.closed) {
       throw new Error(`Position ${this._code} is already open`);
     }
   }
 
   _checkClose() {
-    if (this._entry.status !== cpz.RobotTradeStatus.closed) {
+    if (this._entryStatus !== cpz.RobotTradeStatus.closed) {
       throw new Error(`Position ${this._code} is not open`);
     }
-    if (this._exit.status === cpz.RobotTradeStatus.closed) {
+    if (this._exitStatus === cpz.RobotTradeStatus.closed) {
       throw new Error(`Position ${this._code} is already closed`);
     }
   }
 
-  _addAction(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
-    this._signals[this._nextActionNumb] = {
+  _addAlert(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
+    const alert = {
       action,
       price,
       orderType
     };
+    this._alerts[this._nextAlertNumb] = alert;
+    this._alertsToPublish.push({
+      ...alert,
+      type: cpz.SignalType.alert,
+      position: {
+        id: this._id,
+        prefix: this._prefix,
+        code: this._code,
+        parentId: this._parentId
+      }
+    });
   }
 
-  _createtradesignal({
-    action,
-    price,
-    orderType
-  }: {
-    action: cpz.TradeAction;
-    price: number;
-    orderType: cpz.OrderType;
-  }) {
-    this._tradeSignal = {
+  _createTradeSignal(
+    action: cpz.TradeAction,
+    price: number,
+    orderType: cpz.OrderType
+  ) {
+    this._alertsToPublish = [];
+    this._tradeToPublish = {
+      type: cpz.SignalType.trade,
       action,
       orderType,
       price,
@@ -194,92 +218,75 @@ class Position extends cpz.RobotPosition {
     };
   }
 
-  open({
-    action,
-    price = this._candle.close,
-    orderType
-  }: {
-    action: cpz.TradeAction;
-    price: number;
-    orderType: cpz.OrderType;
-  }) {
+  _open(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
     this._checkOpen();
-    this._entry = {
-      status: cpz.RobotTradeStatus.closed,
-      price,
-      date: this._candle.timestamp,
-      orderType,
-      action
-    };
-    this._direction = action;
-    this.setStatus();
-
-    this._createtradesignal({ action, price, orderType });
+    this._status = cpz.RobotPositionStatus.open;
+    this._entryStatus = cpz.RobotTradeStatus.closed;
+    this._entryPrice = price;
+    this._entryDate = this._candle.timestamp;
+    this._entryOrderType = orderType;
+    this._entryAction = action;
+    this._direction =
+      action === cpz.TradeAction.long || action === cpz.TradeAction.short
+        ? cpz.PositionDirection.long
+        : cpz.PositionDirection.short;
+    this._createTradeSignal(action, price, orderType);
   }
 
-  close({
-    price = this._candle.close,
-    orderType
-  }: {
-    price: number;
-    orderType: cpz.OrderType;
-  }) {
+  _close(price: number, orderType: cpz.OrderType) {
     this._checkClose();
+    this._status = cpz.RobotPositionStatus.closed;
     const action =
-      this._direction === cpz.TradeAction.long
+      this._direction === cpz.PositionDirection.long
         ? cpz.TradeAction.closeLong
         : cpz.TradeAction.closeShort;
-    this._exit = {
-      status: cpz.RobotTradeStatus.closed,
-      price,
-      date: this._candle.timestamp,
-      orderType,
-      action
-    };
-
-    this.setStatus();
-
-    this._createtradesignal({ action, price, orderType });
+    this._exitStatus = cpz.RobotTradeStatus.closed;
+    this._exitPrice = price;
+    this._exitDate = this._candle.timestamp;
+    this._exitOrderType = orderType;
+    this._exitAction = action;
+    this._calcProfit();
+    this._createTradeSignal(action, price, orderType);
   }
 
-  get _nextActionNumb() {
-    return Object.keys(this._signals).length + 1;
+  get _nextAlertNumb() {
+    return Object.keys(this._alerts).length + 1;
   }
 
-  _runsignals() {
-    for (const key of Object.keys(this._signals).sort((a, b) =>
+  _checkAlerts() {
+    for (const key of Object.keys(this._alerts).sort((a, b) =>
       sortAsc(+a, +b)
     )) {
-      const action = this._signals[key];
-      const success = this._executeAction(action);
+      const alert = this._alerts[key];
+      const success = this._checkAlert(
+        alert.action,
+        alert.price,
+        alert.orderType
+      );
       if (success) {
-        this._signals = {};
+        this._alerts = {};
         break;
       }
     }
   }
 
-  _executeAction({
-    action,
-    price,
-    orderType
-  }: {
-    action: cpz.TradeAction;
-    price: number;
-    orderType: cpz.OrderType;
-  }) {
+  _checkAlert(
+    action: cpz.TradeAction,
+    price: number,
+    orderType: cpz.OrderType
+  ) {
     let nextPrice = null;
     switch (orderType) {
       case cpz.OrderType.stop: {
-        nextPrice = this._checkStop({ action, price });
+        nextPrice = this._checkStop(action, price);
         break;
       }
       case cpz.OrderType.limit: {
-        nextPrice = this._checkLimit({ action, price });
+        nextPrice = this._checkLimit(action, price);
         break;
       }
       case cpz.OrderType.market: {
-        nextPrice = this._checkMarket({ action, price });
+        nextPrice = this._checkMarket(action, price);
         break;
       }
       default:
@@ -287,16 +294,16 @@ class Position extends cpz.RobotPosition {
     }
     if (nextPrice) {
       if (action === cpz.TradeAction.long || action === cpz.TradeAction.short) {
-        this.open({ action, price: nextPrice, orderType });
+        this._open(action, nextPrice, orderType);
         return true;
       }
-      this.close({ price: nextPrice, orderType });
+      this._close(nextPrice, orderType);
       return true;
     }
     return false;
   }
 
-  _checkMarket({ action, price }: { action: cpz.TradeAction; price: number }) {
+  _checkMarket(action: cpz.TradeAction, price: number) {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -312,7 +319,7 @@ class Position extends cpz.RobotPosition {
     throw new Error(`Unknown action ${action}`);
   }
 
-  _checkStop({ action, price }: { action: cpz.TradeAction; price: number }) {
+  _checkStop(action: cpz.TradeAction, price: number) {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -329,13 +336,7 @@ class Position extends cpz.RobotPosition {
     return null;
   }
 
-  _checkLimit({
-    action,
-    price
-  }: {
-    action: cpz.TradeAction;
-    price: number;
-  }): number {
+  _checkLimit(action: cpz.TradeAction, price: number): number {
     if (
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
@@ -352,64 +353,64 @@ class Position extends cpz.RobotPosition {
     return null;
   }
 
-  buyAtMarket(price = this._candle.close) {
+  public buyAtMarket(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.long, price, cpz.OrderType.market);
+    this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.market);
   }
 
-  sellAtMarket(price = this._candle.close) {
+  public sellAtMarket(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeLong, price, cpz.OrderType.market);
+    this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.market);
   }
 
-  shortAtMarket(price = this._candle.close) {
+  public shortAtMarket(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.short, price, cpz.OrderType.market);
+    this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.market);
   }
 
-  coverAtMarket(price = this._candle.close) {
+  public coverAtMarket(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeShort, price, cpz.OrderType.market);
+    this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.market);
   }
 
-  buyAtStop(price = this._candle.close) {
+  public buyAtStop(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.long, price, cpz.OrderType.stop);
+    this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.stop);
   }
 
-  sellAtStop(price = this._candle.close) {
+  public sellAtStop(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeLong, price, cpz.OrderType.stop);
+    this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.stop);
   }
 
-  shortAtStop(price = this._candle.close) {
+  public shortAtStop(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.short, price, cpz.OrderType.stop);
+    this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.stop);
   }
 
-  coverAtStop(price = this._candle.close) {
+  public coverAtStop(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeShort, price, cpz.OrderType.stop);
+    this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.stop);
   }
 
-  buyAtLimit(price = this._candle.close) {
+  public buyAtLimit(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.long, price, cpz.OrderType.limit);
+    this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.limit);
   }
 
-  sellAtLimit(price = this._candle.close) {
+  public sellAtLimit(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeLong, price, cpz.OrderType.limit);
+    this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.limit);
   }
 
-  shortAtLimit(price = this._candle.close) {
+  public shortAtLimit(price = this._candle.close) {
     this._checkOpen();
-    this._addAction(cpz.TradeAction.short, price, cpz.OrderType.limit);
+    this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.limit);
   }
 
-  coverAtLimit(price = this._candle.close) {
+  public coverAtLimit(price = this._candle.close) {
     this._checkClose();
-    this._addAction(cpz.TradeAction.closeShort, price, cpz.OrderType.limit);
+    this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.limit);
   }
 }
 

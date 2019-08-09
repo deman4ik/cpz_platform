@@ -7,10 +7,11 @@ import Position from "./robot_position";
 
 // TODO: объявить тип для класса
 
-class BaseStrategy extends cpz.Strategy {
+class BaseStrategy implements cpz.Strategy {
+  [key: string]: any;
   _initialized: boolean;
   _parameters: { [key: string]: number | string };
-  _adviserSettings: { [key: string]: number | string };
+  _robotSettings: { [key: string]: number | string };
   _exchange: string;
   _asset: string;
   _currency: string;
@@ -23,25 +24,16 @@ class BaseStrategy extends cpz.Strategy {
   _candles: cpz.Candle[];
   _candlesProps: cpz.CandleProps;
   _indicators: {
-    [key: string]: {
-      [key: string]: any;
-      name: string;
-      indicatorName: string;
-      fileName: string;
-      type: string;
-      parameters: { [key: string]: any };
-      variables: { [key: string]: any };
-    };
+    [key: string]: cpz.IndicatorState;
   };
   _consts: { [key: string]: string };
-  _eventsToSend: { [key: string]: cpz.Events };
+  _eventsToSend: cpz.Events[];
   _log: (...args: any) => void;
 
-  constructor(state: any) {
-    super();
+  constructor(state: cpz.StrategyState) {
     this._initialized = state.initialized || false; // стратегия инициализирована
     this._parameters = state.parameters || {};
-    this._adviserSettings = state.adviserSettings;
+    this._robotSettings = state.robotSettings;
     this._exchange = state.exchange;
     this._asset = state.asset;
     this._currency = state.currency;
@@ -70,7 +62,7 @@ class BaseStrategy extends cpz.Strategy {
       MARKET: cpz.OrderType.market,
       STOP: cpz.OrderType.stop
     };
-    this._eventsToSend = {};
+    this._eventsToSend = [];
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -101,71 +93,64 @@ class BaseStrategy extends cpz.Strategy {
     return this._eventsToSend;
   }
 
-  get _nextEventIndex() {
-    return Object.keys(this._eventsToSend).length;
-  }
-
   get log() {
     return this._log;
   }
 
   _logEvent(data: any) {
-    this._eventsToSend[`${this._nextEventIndex}_str`] = {
+    this._eventsToSend.push({
       type: cpz.Event.LOG,
-      data: {
-        ...data,
-        robotId: this._robotId
-      }
-    };
+      data: data
+    });
   }
 
   get logEvent() {
     return this._logEvent;
   }
 
-  get hasActions() {
-    let hasActions = false;
+  get hasAlerts() {
+    let hasAlerts = false;
     Object.values(this._positions).forEach(position => {
-      if (position.hasActions) {
-        hasActions = true;
+      if (position.hasAlerts) {
+        hasAlerts = true;
       }
     });
-    return hasActions;
+    return hasAlerts;
   }
 
-  _createAdvices() {
+  _createAlertEvents() {
     Object.values(this._positions).forEach(position => {
-      if (position.tradeSignal) {
-        this._advice(position.tradeSignal);
-        position._clearTradeSignal();
+      if (position.hasAlertsToPublish) {
+        position.alertsToPublish.forEach(signal =>
+          this._createSignalEvent(signal)
+        );
+        position._clearAlertsToPublish();
       }
     });
   }
 
-  _advice(tradeSignal: cpz.SignalInfo) {
-    const data: cpz.SignalEvent = {
-      ...tradeSignal,
-      signalId: uuid(),
-      robotId: this._robotId,
-      exchange: this._exchange,
-      asset: this._asset,
-      currency: this._currency,
-      timeframe: this._timeframe,
-      candleId: this._candle.id,
-      candleTimestamp: this._candle.timestamp,
-      timestamp: dayjs.utc().toISOString()
-    };
-    this.log("Trade Signal", data);
-    this._eventsToSend[`${this._nextEventIndex}_str`] = {
-      type: cpz.Event.TRADE_SIGNAL_NEW,
-      data
-    };
+  _createAlertEvent(signal: cpz.SignalInfo) {
+    this._eventsToSend.push({
+      type: cpz.Event.SIGNAL_ALERT,
+      data: signal
+    });
   }
 
-  get advice() {
-    return this._advice;
+  _createTradeEvents() {
+    Object.values(this._positions).forEach(position => {
+      if (position.hasTradeToPublish) {
+        this._createSignalEvent(position.tradeToPublish);
+        position._clearTradeToPublish();
+      }
+    });
   }
 
+  _createTadeEvent(signal: cpz.SignalInfo) {
+    this._eventsToSend.push({
+      type: cpz.Event.SIGNAL_TRADE,
+      data: signal
+    });
+  }
   /** POSITIONS */
 
   _positionsHandleCandle(candle: cpz.Candle) {
@@ -193,9 +178,11 @@ class BaseStrategy extends cpz.Strategy {
 
     const code = this._getNextPositionCode(prefix);
     this._positions[code] = new Position({
+      id: uuid(),
+      robot_id: this._robotId,
       prefix,
       code,
-      parentId
+      parent_id: parentId
     });
 
     this._positions[code]._handleCandle(this._candle);
@@ -257,40 +244,28 @@ class BaseStrategy extends cpz.Strategy {
       .map(pos => pos.state);
   }
 
-  _runActions() {
+  _checkAlerts() {
     Object.keys(this._positions).forEach(key => {
-      if (this._positions[key].hasActions) {
-        this._positions[key]._runActions();
-        if (this._positions[key].tradeSignal) {
-          this._advice(this._positions[key].tradeSignal);
-          this._positions[key]._clearTradeSignal();
-        }
-        if (this._positions[key].status === cpz.RobotPositionStatus.closed) {
-          delete this._positions[key];
+      if (this._positions[key].hasAlerts) {
+        this._positions[key]._checkAlerts();
+        if (this._positions[key].hasTradeToPublish) {
+          this._createTadeEvent(this._positions[key].tradeToPublish);
+          this._positions[key]._clearTradeToPublish();
         }
       }
     });
   }
 
-  _clearActions() {
+  _clearAlerts() {
     Object.keys(this._positions).forEach(key => {
-      if (this._positions[key].hasActions) {
-        this._positions[key]._clearActions();
+      if (this._positions[key].hasAlerts) {
+        this._positions[key]._clearAlerts();
       }
     });
   }
 
   /** INDICATORS */
-  _handleIndicators(indicators: {
-    [key: string]: {
-      name: string;
-      indicatorName: string;
-      fileName: string;
-      type: string;
-      parameters: { [key: string]: any };
-      variables: { [key: string]: any };
-    };
-  }) {
+  _handleIndicators(indicators: { [key: string]: cpz.IndicatorState }) {
     this._indicators = indicators;
     Object.keys(this._indicators).forEach(key => {
       if (this._indicators[key].variables)
@@ -300,10 +275,6 @@ class BaseStrategy extends cpz.Strategy {
           ];
         });
     });
-  }
-
-  get handleIndicators() {
-    return this._handleIndicators;
   }
 
   _handleCandles(
@@ -321,10 +292,6 @@ class BaseStrategy extends cpz.Strategy {
     }
   }
 
-  get handleCandles() {
-    return this._handleCandles;
-  }
-
   _addIndicator(
     name: string,
     indicatorName: string,
@@ -339,11 +306,6 @@ class BaseStrategy extends cpz.Strategy {
       variables: {}
     };
   }
-
-  get addIndicator() {
-    return this._addIndicator;
-  }
-
   _addTulipIndicator(
     name: string,
     indicatorName: string,
@@ -353,18 +315,10 @@ class BaseStrategy extends cpz.Strategy {
     this._indicators[name].type = cpz.IndicatorType.tulip;
   }
 
-  get addTulipIndicator() {
-    return this._addTulipIndicator;
-  }
-
   /*
     _addTalibIndicator(name, indicatorName, parameters) {
       this._addIndicator(name, indicatorName, parameters);
       this._indicators[name].type = INDICATORS_TALIB;
-    }
-  
-    get addTalibIndicator() {
-      return this._addTalibIndicator;
     }
   
     _addTechIndicator(name, indicatorName, parameters) {
@@ -372,9 +326,6 @@ class BaseStrategy extends cpz.Strategy {
       this._indicators[name].type = INDICATORS_TECH;
     }
   
-    get addTechIndicator() {
-      return this._addTechIndicator;
-    }
   */
 
   /** GETTERS  */
@@ -390,8 +341,8 @@ class BaseStrategy extends cpz.Strategy {
     return this._parameters;
   }
 
-  get adviserSettings() {
-    return this._adviserSettings;
+  get robotSettings() {
+    return this._robotSettings;
   }
 
   get exchange() {

@@ -3,13 +3,13 @@ import { chunkArrayIncrEnd, validate } from "../../utils";
 import { ValidationSchema } from "fastest-validator";
 import createTulip from "../../lib/tulip/create";
 
-// TODO: объявить тип для класса
-class BaseIndicator extends cpz.Indicator {
+class BaseIndicator implements cpz.Indicator {
+  [key: string]: any;
   _name: string;
   _indicatorName: string;
   _initialized: boolean;
   _parameters: {
-    [key: string]: any;
+    [key: string]: number;
   };
   _robotSettings: {
     [key: string]: any;
@@ -21,10 +21,11 @@ class BaseIndicator extends cpz.Indicator {
     [key: string]: any;
   };
   _parametersSchema: ValidationSchema;
+  _eventsToSend: cpz.Events[];
   result: number | number[];
+  _log: (...args: any) => void;
 
-  constructor(state: any) {
-    super();
+  constructor(state: cpz.IndicatorState) {
     this._name = state.name;
     this._indicatorName = state.indicatorName;
     this._initialized = state.initialized || false; // индикатор инициализирован
@@ -55,11 +56,27 @@ class BaseIndicator extends cpz.Indicator {
       });
     }
     this._parametersSchema = state.parametersSchema;
+    this._log = state.log || console.log;
   }
 
   init() {}
 
   calc() {}
+
+  get log() {
+    return this._log;
+  }
+
+  _logEvent(data: any) {
+    this._eventsToSend.push({
+      type: cpz.Event.LOG,
+      data: { ...data, name: this._name, indicatorName: this._indicatorName }
+    });
+  }
+
+  get logEvent() {
+    return this._logEvent;
+  }
 
   _checkParameters() {
     if (
@@ -243,10 +260,6 @@ class BaseIndicator extends cpz.Indicator {
     this._candle = candle;
     this._candles = candles;
     this._candlesProps = candlesProps;
-  }
-
-  get handleCandles() {
-    return this._handleCandles;
   }
 
   get initialized() {

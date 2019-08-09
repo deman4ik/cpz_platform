@@ -1,3 +1,5 @@
+import { ValidationSchema } from "fastest-validator";
+
 export interface AnyObject {
   [key: string]: any;
 }
@@ -22,13 +24,29 @@ export namespace cpz {
 
   const enum Event {
     LOG = "log",
+    ERROR = "error",
     IMPORTER_STARTED = "importer.started",
+    IMPORTER_STOPPED = "importer.stopped",
     IMPORTER_FINISHED = "importer.finished",
     IMPORTER_FAILED = "importer.failed",
+    BACKTESTER_STARTED = "backtester.started",
+    BACKTESTER_STOPPED = "backtester.stopped",
+    BACKTESTER_FINISHED = "backtester.finished",
+    BACKTESTER_FAILED = "backtester.failed",
+    ROBOT_STARTED = "robot.started",
+    ROBOT_STOPPED = "robot.stopped",
+    ROBOT_UPDATED = "robot.updated",
+    ROBOT_PAUSED = "robot.paused",
+    ROBOT_FAILED = "robot.failed",
+    TRADER_STARTED = "trader.started",
+    TRADER_STOPPED = "trader.stopped",
+    TRADER_UPDATED = "trader.updated",
+    TRADER_PAUSED = "trader.paused",
+    TRADER_FAILED = "trader.failed",
     CANDLE_NEW = "candle.new",
     TICK_NEW = "tick.new",
-    SIGNAL_NEW = "signal.new",
-    TRADE_SIGNAL_NEW = "tradesignal.new"
+    SIGNAL_ALERT = "signal.alert",
+    SIGNAL_TRADE = "signal.trade"
   }
 
   const enum Status {
@@ -36,6 +54,7 @@ export namespace cpz {
     queued = "queued",
     started = "started",
     stopped = "stopped",
+    paused = "paused",
     finished = "finished",
     failed = "failed"
   }
@@ -48,9 +67,9 @@ export namespace cpz {
     failed = "failed"
   }
 
-  const enum RobotPositionDirection {
-    buy = "buy",
-    sell = "sell"
+  const enum PositionDirection {
+    long = "long",
+    short = "short"
   }
 
   const enum RobotPositionStatus {
@@ -83,6 +102,11 @@ export namespace cpz {
     tulip = "tulip"
     /*talib = "talib",
     techind = "techind"*/
+  }
+
+  const enum SignalType {
+    alert = "alert",
+    trade = "trade"
   }
 
   const enum CandleType {
@@ -200,15 +224,19 @@ export namespace cpz {
     data: any;
   }
 
-  interface SignalInfo {
+  interface AlertInfo {
     action: TradeAction;
     orderType: OrderType;
     price: number;
+  }
+
+  interface SignalInfo extends AlertInfo {
+    type: SignalType;
     position: {
       id: string;
       prefix: string;
       code: string;
-      parentId: string;
+      parentId?: string;
     };
   }
 
@@ -248,18 +276,158 @@ export namespace cpz {
     error?: any;
   }
 
-  // TODO
+  interface IndicatorState {
+    [key: string]: any;
+    name: string;
+    indicatorName: string;
+    initialized?: boolean;
+    parameters?: { [key: string]: number };
+    robotSettings?: { [key: string]: any };
+    variables?: { [key: string]: any };
+    indicatorFunctions?: { [key: string]: () => any };
+    parametersSchema?: ValidationSchema;
+    log?: (...args: any) => void;
+  }
+
+  interface IndicatorCode {
+    [key: string]: any;
+    init(): void;
+    calc(): void;
+  }
+
   class Indicator {
+    constructor(state: cpz.IndicatorState);
     [key: string]: any;
+    initialized: boolean;
+    parameters?: { [key: string]: number };
+    _eventsToSend: cpz.Events[];
+    _checkParameters(): void;
+    _handleCandles(
+      candle: cpz.Candle,
+      candles: cpz.Candle[],
+      candlesProps: cpz.CandleProps
+    ): void;
+    init(): void;
+    calc(): void;
+  }
+  interface StrategyState {
+    initialized?: boolean;
+    parameters?: { [key: string]: number | string };
+    robotSettings: { [key: string]: any };
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: cpz.Timeframe;
+    robotId: string;
+    posLastNumb?: { [key: string]: number };
+    positions?: cpz.RobotPositionState[];
+    parametersSchema?: ValidationSchema;
+    indicators?: {
+      [key: string]: IndicatorState;
+    };
+    variables?: { [key: string]: any };
+    strategyFunctions?: { [key: string]: () => any };
+    log?: (...args: any) => void;
   }
 
-  // TODO
+  interface StrategyCode {
+    [key: string]: any;
+    init(): void;
+    check(): void;
+  }
+
   class Strategy {
+    constructor(state: cpz.StrategyState);
     [key: string]: any;
+    initialized: boolean;
+    posLastNumb: { [key: string]: number };
+    hasAlerts: boolean;
+    hasActivePositions: boolean;
+    indicators: {
+      [key: string]: cpz.IndicatorState;
+    };
+    validPositions: RobotPositionState[];
+    _events: cpz.Events[];
+    init(): void;
+    check(): void;
+    log(...args: any): void;
+    logEvent(...args: any): void;
+    _checkParameters(): void;
+    _handleCandles(
+      candle: cpz.Candle,
+      candles: cpz.Candle[],
+      candlesProps: cpz.CandleProps
+    ): void;
+    _handleIndicators(indicators: { [key: string]: cpz.IndicatorState }): void;
+    _clearAlerts(): void;
+    _checkAlerts(): void;
   }
 
-  // TODO
+  interface RobotPositionState {
+    id: string;
+    robot_id: string;
+    prefix: string;
+    code: string;
+    parent_id?: string;
+    direction?: PositionDirection;
+    status?: RobotPositionStatus;
+    entry_status?: RobotTradeStatus;
+    entry_price?: number;
+    entry_date?: string;
+    entry_order_type?: OrderType;
+    entry_action?: TradeAction;
+    exit_status?: RobotTradeStatus;
+    exit_price?: number;
+    exit_date?: string;
+    exit_order_type?: OrderType;
+    exit_action?: TradeAction;
+    alerts?: { [key: string]: cpz.AlertInfo };
+    profit?: number;
+  }
+
   class RobotPosition {
+    constructor(state: cpz.RobotPositionState);
+    id: string;
+    prefix: string;
+    code: string;
+    parentId: string;
+    direction: PositionDirection;
+    entryStatus: RobotTradeStatus;
+    exitStatus: RobotTradeStatus;
+    status: RobotPositionStatus;
+    isActive: boolean;
+    hasAlerts: boolean;
+    hasAlertsToPublish: boolean;
+    hasTradeToPublish: boolean;
+    state: RobotPositionState;
+    alertsToPublish: SignalInfo[];
+    tradeToPublish: SignalInfo;
+    _clearAlertsToPublish(): void;
+    _clearTradeToPublish(): void;
+    _clearAlerts(): void;
+    _handleCandle(candle: Candle): void;
+    _checkAlerts(): void;
+  }
+
+  interface RobotState {
     [key: string]: any;
+    robot_id: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: Timeframe;
+    strategy_name: string;
+    settings?: { [key: string]: any };
+    last_candle?: Candle;
+    strategy: {
+      variables: { [key: string]: any };
+      positions: RobotPositionState[];
+      initialized: boolean;
+    };
+    has_alerts: boolean;
+    indicators: { [key: string]: IndicatorState };
+    status: Status;
+    started_at: string;
+    stopped_at?: string;
   }
 }

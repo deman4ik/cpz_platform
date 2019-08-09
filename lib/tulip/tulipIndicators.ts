@@ -1,5 +1,6 @@
 import BaseIndicator from "../../state/robot/robot_indicator";
 import tulip from "./create";
+import { cpz } from "../../types/cpz";
 
 // TODO: объявить тип для класса
 class Tulip extends BaseIndicator {
@@ -11,7 +12,7 @@ class Tulip extends BaseIndicator {
     volume: number[];
   }) => { [key: string]: number };
 
-  constructor(state: { [key: string]: any }) {
+  constructor(state: cpz.IndicatorState) {
     super(state);
     this._parametersSchema = {
       candlesLength: {
