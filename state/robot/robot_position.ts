@@ -29,6 +29,7 @@ class Position implements cpz.RobotPosition {
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
   private _tradeToPublish: cpz.SignalInfo;
+  private _log: (...args: any) => void;
 
   constructor(state: cpz.RobotPositionState) {
     this._id = state.id;
@@ -53,6 +54,7 @@ class Position implements cpz.RobotPosition {
     this._alertsToPublish = [];
     this._tradeToPublish = null;
     this._candle = null;
+    this._log = state.log || console.log;
   }
 
   public get id() {
@@ -180,6 +182,9 @@ class Position implements cpz.RobotPosition {
   }
 
   _addAlert(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
+    this._log(
+      `Position alert ${this._code} - ${action} - ${orderType} - ${price}`
+    );
     const alert = {
       action,
       price,
@@ -203,6 +208,11 @@ class Position implements cpz.RobotPosition {
     price: number,
     orderType: cpz.OrderType
   ) {
+    this._log(
+      `Position trade ${this._code} - ${action}.${orderType}.${price} - ${
+        this._candle.timestamp
+      }`
+    );
     this._alertsToPublish = [];
     this._tradeToPublish = {
       type: cpz.SignalType.trade,

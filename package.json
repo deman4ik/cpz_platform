@@ -11,7 +11,7 @@
     "db": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --env --config db.config.ts services/db/candles/*.service.ts services/db/*.service.ts",
     "connector": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --env --config connector.config.ts services/connector/*.service.ts",
     "exwatcher": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config exwatcher.config.ts services/exwatcher.service.ts services/connector/public-connector.service.ts",
-    "backtesterWorker": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importerWorker.config.ts services/backtester/backtester-worker.service.ts",
+    "backtesterWorker": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importerWorker.config.ts services/backtester/backtester-worker.service.ts services/db/candles/*.service.ts",
     "cli": "moleculer connect",
     "start": "moleculer-runner dist/services",
     "ci": "jest --watch",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "async-retry": "^1.2.3",
-    "ccxt": "^1.18.1041",
+    "ccxt": "^1.18.1045",
     "dayjs": "^1.8.15",
     "dotenv": "^8.0.0",
     "fastest-validator": "^0.6.17",
@@ -73,7 +73,7 @@
     "pg-hstore": "^2.3.3",
     "redlock": "^4.0.0",
     "require-from-string": "^2.0.2",
-    "sequelize": "^5.13.0",
+    "sequelize": "^5.14.0",
     "socket.io-client": "^2.2.0",
     "tulind": "^0.8.18",
     "uuid": "^3.3.2"

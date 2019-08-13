@@ -17,7 +17,7 @@ export namespace cpz {
     ROBOT_RUNNER = "robot-runner",
     ROBOT_WORKER = "robot-worker",
     BACKTESTER_RUNNER = "backtester-runner",
-    BACKTESTER_WORKET = "backtester-worker",
+    BACKTESTER_WORKER = "backtester-worker",
     TRADER_RUNNER = "trader-runner",
     TRADER_WORKER = "trader-worker"
   }
@@ -33,6 +33,7 @@ export namespace cpz {
     BACKTESTER_STOPPED = "backtester.stopped",
     BACKTESTER_FINISHED = "backtester.finished",
     BACKTESTER_FAILED = "backtester.failed",
+    BACKTESTER_WORKER_START = "backtester-worker.start",
     ROBOT_STARTED = "robot.started",
     ROBOT_STOPPED = "robot.stopped",
     ROBOT_UPDATED = "robot.updated",
@@ -286,7 +287,7 @@ export namespace cpz {
     variables?: { [key: string]: any };
     indicatorFunctions?: { [key: string]: () => any };
     parametersSchema?: ValidationSchema;
-    log?: (...args: any) => void;
+    log?(...args: any): void;
   }
 
   interface IndicatorCode {
@@ -310,8 +311,17 @@ export namespace cpz {
     init(): void;
     calc(): void;
   }
-  interface StrategyState {
-    initialized?: boolean;
+
+  interface StrategyProps {
+    initialized: boolean;
+    posLastNumb: { [key: string]: number };
+    positions: cpz.RobotPositionState[];
+    indicators: {
+      [key: string]: IndicatorState;
+    };
+    variables: { [key: string]: any };
+  }
+  interface StrategyState extends StrategyProps {
     parameters?: { [key: string]: number | string };
     robotSettings: { [key: string]: any };
     exchange: string;
@@ -319,15 +329,9 @@ export namespace cpz {
     currency: string;
     timeframe: cpz.Timeframe;
     robotId: string;
-    posLastNumb?: { [key: string]: number };
-    positions?: cpz.RobotPositionState[];
-    parametersSchema?: ValidationSchema;
-    indicators?: {
-      [key: string]: IndicatorState;
-    };
-    variables?: { [key: string]: any };
-    strategyFunctions?: { [key: string]: () => any };
-    log?: (...args: any) => void;
+    parametersSchema: ValidationSchema;
+    strategyFunctions: { [key: string]: () => any };
+    log?(...args: any): void;
   }
 
   interface StrategyCode {
@@ -347,7 +351,8 @@ export namespace cpz {
       [key: string]: cpz.IndicatorState;
     };
     validPositions: RobotPositionState[];
-    _events: cpz.Events[];
+    _eventsToSend: cpz.Events[];
+    _positionsToSave: cpz.RobotPositionState[];
     init(): void;
     check(): void;
     log(...args: any): void;
@@ -383,6 +388,7 @@ export namespace cpz {
     exit_action?: TradeAction;
     alerts?: { [key: string]: cpz.AlertInfo };
     profit?: number;
+    log?(...args: any): void;
   }
 
   class RobotPosition {
@@ -409,25 +415,47 @@ export namespace cpz {
     _checkAlerts(): void;
   }
 
+  interface RobotSettings {
+    strategyParameters?: { [key: string]: any };
+    requiredHistoryMaxBars?: number;
+  }
   interface RobotState {
-    [key: string]: any;
     robot_id: string;
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
     strategy_name: string;
-    settings?: { [key: string]: any };
+    settings: RobotSettings;
     last_candle?: Candle;
-    strategy: {
-      variables: { [key: string]: any };
-      positions: RobotPositionState[];
-      initialized: boolean;
-    };
-    has_alerts: boolean;
-    indicators: { [key: string]: IndicatorState };
-    status: Status;
-    started_at: string;
+    strategy?: StrategyProps;
+    has_alerts?: boolean;
+    indicators?: { [key: string]: IndicatorState };
+    status?: Status;
+    started_at?: string;
     stopped_at?: string;
+    log?(...args: any): void;
+  }
+
+  interface BacktesterState {
+    id: string;
+    robot_id: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: Timeframe;
+    strategy_name: string;
+    dateFrom: string;
+    dateTo: string;
+    settings: { [key: string]: any };
+    robot_settings: RobotSettings;
+    total_bars?: number;
+    processed_bars?: number;
+    left_bars?: number;
+    completed_percent?: number;
+    status: string;
+    started_at: string;
+    finsihed_at: string;
+    error?: any;
   }
 }

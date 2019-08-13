@@ -9,9 +9,10 @@ const adapter = new SqlAdapter(
     host: process.env.PG_HOST,
     port: process.env.PG_PORT,
     dialectOptions: {
-      ssl: true
+      ssl: true,
+      useUTC: true
     },
-    logging: false,
+    logging: console.log,
     pool: {
       max: 5,
       min: 1,

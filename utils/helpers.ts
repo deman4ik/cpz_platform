@@ -87,10 +87,24 @@ function chunkArrayIncrEnd<T>(array: T[], chunkSize: number): T[][] {
 }
 
 /**
+ * Разбивка числа по пачкам
+ *
+ * @param {number} number
+ * @param {number} chunkSize
+ * @returns {number[]}
+ */
+function chunkNumberToArray(number: number, chunkSize: number): number[] {
+  const array = [...Array(number + 1).keys()].slice(1);
+  return chunkArray(array, chunkSize).map(val => val.length);
+}
+
+/**
  * Returns all unique values of an array, based on a provided comparator function.
  *
- * @param arr
- * @param fn
+ * @template T
+ * @param {T[]} arr
+ * @param {(a: T, b: T) => boolean} fn
+ * @returns {T[]}
  */
 function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
   return arr.reduce((acc, v) => {
@@ -113,6 +127,7 @@ export {
   arraysDiff,
   chunkArray,
   chunkArrayIncrEnd,
+  chunkNumberToArray,
   uniqueElementsBy,
   sleep
 };

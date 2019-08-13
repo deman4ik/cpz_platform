@@ -28,6 +28,7 @@ class BaseStrategy implements cpz.Strategy {
   };
   _consts: { [key: string]: string };
   _eventsToSend: cpz.Events[];
+  _positionsToSave: cpz.RobotPositionState[];
   _log: (...args: any) => void;
 
   constructor(state: cpz.StrategyState) {
@@ -63,6 +64,7 @@ class BaseStrategy implements cpz.Strategy {
       STOP: cpz.OrderType.stop
     };
     this._eventsToSend = [];
+    this._positionsToSave = [];
     if (state.variables) {
       Object.keys(state.variables).forEach(key => {
         this[key] = state.variables[key];
@@ -73,7 +75,7 @@ class BaseStrategy implements cpz.Strategy {
         this[key] = state.strategyFunctions[key];
       });
     }
-    this._log = state.log;
+    this._log = state.log || console.log;
   }
 
   init() {}
@@ -87,10 +89,6 @@ class BaseStrategy implements cpz.Strategy {
     ) {
       validate(this._parameters, this._parametersSchema);
     }
-  }
-
-  get _events() {
-    return this._eventsToSend;
   }
 
   get log() {
@@ -141,6 +139,7 @@ class BaseStrategy implements cpz.Strategy {
       if (position.hasTradeToPublish) {
         this._createSignalEvent(position.tradeToPublish);
         position._clearTradeToPublish();
+        this._positionsToSave.push(position.state);
       }
     });
   }
@@ -182,7 +181,8 @@ class BaseStrategy implements cpz.Strategy {
       robot_id: this._robotId,
       prefix,
       code,
-      parent_id: parentId
+      parent_id: parentId,
+      log: this._log.bind(this)
     });
 
     this._positions[code]._handleCandle(this._candle);
@@ -251,6 +251,9 @@ class BaseStrategy implements cpz.Strategy {
         if (this._positions[key].hasTradeToPublish) {
           this._createTadeEvent(this._positions[key].tradeToPublish);
           this._positions[key]._clearTradeToPublish();
+          if (this._positions[key].status === cpz.RobotPositionStatus.closed) {
+            delete this._positions[key];
+          }
         }
       }
     });
@@ -306,6 +309,11 @@ class BaseStrategy implements cpz.Strategy {
       variables: {}
     };
   }
+
+  get addIndicator() {
+    return this._addIndicator;
+  }
+
   _addTulipIndicator(
     name: string,
     indicatorName: string,
@@ -313,6 +321,10 @@ class BaseStrategy implements cpz.Strategy {
   ) {
     this._addIndicator(name, indicatorName, parameters);
     this._indicators[name].type = cpz.IndicatorType.tulip;
+  }
+
+  get addTulipIndicator() {
+    return this._addTulipIndicator;
   }
 
   /*

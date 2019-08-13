@@ -1,5 +1,6 @@
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
+import { CANDLES_RECENT_AMOUNT } from "../../config";
 import { Errors } from "moleculer";
 import BaseStrategy from "./robot_strategy";
 import BaseIndicator from "./robot_indicator";
@@ -15,12 +16,7 @@ class Robot {
   _strategyName: string;
   _settings: { [key: string]: any };
   _lastCandle: cpz.Candle;
-  _strategy: {
-    variables: { [key: string]: any };
-    positions: cpz.RobotPositionState[];
-    posLastNumb?: { [key: string]: number };
-    initialized: boolean;
-  };
+  _strategy: cpz.StrategyProps;
   _strategyInstance: cpz.Strategy;
   _indicatorInstances: { [key: string]: cpz.Indicator };
   _hasAlerts: boolean;
@@ -33,6 +29,7 @@ class Robot {
   _startedAt: string;
   _stoppedAt: string;
   _eventsToSend: cpz.Events[];
+  _postionsToSave: cpz.RobotPositionState[];
   _error: any;
   _log: (...args: any) => void;
 
@@ -51,13 +48,20 @@ class Robot {
     this._strategyName = state.strategy_name;
 
     /* Настройки */
-    this._settings = state.settings;
+    this._settings = {
+      ...state.settings,
+      strategyParameters: state.settings.strategyParameters || {},
+      requiredHistoryMaxBars:
+        state.settings.requiredHistoryMaxBars || CANDLES_RECENT_AMOUNT
+    };
     /* Последняя свеча */
     this._lastCandle = state.last_candle;
     /* Состояне стратегии */
     this._strategy = state.strategy || {
       variables: {},
       positions: [],
+      posLastNumb: {},
+      indicators: {},
       initialized: false
     };
     /* Действия для проверки */
@@ -77,10 +81,32 @@ class Robot {
     this._stoppedAt = state.stopped_at;
 
     this._eventsToSend = [];
+    this._indicatorInstances = {};
+    this._log = state.log || console.log;
   }
 
-  get events() {
+  get eventsToSend() {
     return this._eventsToSend;
+  }
+
+  get positionsToSave() {
+    return this._postionsToSave;
+  }
+
+  get alertEventsToSend() {
+    return this._eventsToSend.filter(
+      ({ type }) => type === cpz.Event.SIGNAL_ALERT
+    );
+  }
+
+  get tradeEventsToSend() {
+    return this._eventsToSend.filter(
+      ({ type }) => type === cpz.Event.SIGNAL_TRADE
+    );
+  }
+
+  get logEventsToSend() {
+    return this._eventsToSend.filter(({ type }) => type === cpz.Event.LOG);
   }
 
   start() {
@@ -142,6 +168,10 @@ class Robot {
     });
   }
 
+  get requiredHistoryMaxBars() {
+    return this._settings.requiredHistoryMaxBars;
+  }
+
   get status() {
     return this._status;
   }
@@ -184,10 +214,9 @@ class Robot {
 
   setStrategy(
     strategyCode: cpz.StrategyCode,
-    strategyStateProp: cpz.StrategyState
+    strategyState: cpz.StrategyProps = this._strategy
   ) {
     try {
-      const strategyState = strategyStateProp || this._strategy;
       // Функции стратегии
       const strategyFunctions: { [key: string]: () => any } = {};
       Object.getOwnPropertyNames(strategyCode)
@@ -265,7 +294,8 @@ class Robot {
               robotId: this._robotId,
               parametersSchema,
               indicatorFunctions, // функции индикатора
-              ...indicator // стейт индикатора
+              ...indicator, // стейт индикатора
+              log: this._log.bind(this)
             });
 
             break;
@@ -282,7 +312,8 @@ class Robot {
               robotSettings: this._settings,
               robotId: this._robotId,
               parameters: indicator.parameters,
-              ...indicator // стейт индикатора
+              ...indicator, // стейт индикатора
+              log: this._log.bind(this)
             });
 
             break;
@@ -437,7 +468,7 @@ class Robot {
     }
   }
 
-  handleCachedCandles(candles: cpz.Candle[]) {
+  handleHistoryCandles(candles: cpz.Candle[]) {
     this._candles = candles;
   }
 
@@ -464,18 +495,26 @@ class Robot {
   }
 
   handleCandle(candle: cpz.Candle) {
-    if (candle.id === this._lastCandle.id) return;
-    if (this._candles.filter(({ id }) => id === candle.id).length === 0) {
-      this._candles = [...new Set([...this._candles, candle])];
+    if (this._lastCandle && candle.id === this._lastCandle.id) return;
+    if (this._candles.filter(({ time }) => time === candle.time).length === 0) {
+      this._candles = [...this._candles, candle];
     }
+    this._candles = this._candles.slice(-this._settings.requiredHistoryMaxBars);
     this._candle = candle;
-    if (!this._lastCandle.id && this._candles.length > 1)
+    if (!this._lastCandle && this._candles.length > 1)
       this._lastCandle = this._candles[this._candles.length - 2];
     this._prepareCandles();
   }
 
   handleCurrentCandle(candle: cpz.Candle) {
     this._candle = candle;
+  }
+
+  clearEvents() {
+    this._eventsToSend = [];
+    this._postionsToSave = [];
+    this._strategyInstance._eventsToSend = [];
+    this._strategyInstance._positionsToSave = [];
   }
 
   finalize() {
@@ -525,8 +564,9 @@ class Robot {
     try {
       this._eventsToSend = [
         ...this._eventsToSend,
-        ...this._strategyInstance._events
+        ...this._strategyInstance._eventsToSend
       ];
+      this._postionsToSave = this._strategyInstance._positionsToSave;
       this._strategy.initialized = this._strategyInstance.initialized;
       this._strategy.positions = this._strategyInstance.validPositions;
       this._strategy.posLastNumb = this._strategyInstance.posLastNumb;

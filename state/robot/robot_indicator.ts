@@ -56,6 +56,7 @@ class BaseIndicator implements cpz.Indicator {
       });
     }
     this._parametersSchema = state.parametersSchema;
+    this._eventsToSend = [];
     this._log = state.log || console.log;
   }
 
