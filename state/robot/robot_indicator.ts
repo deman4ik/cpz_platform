@@ -21,7 +21,7 @@ class BaseIndicator implements cpz.Indicator {
     [key: string]: any;
   };
   _parametersSchema: ValidationSchema;
-  _eventsToSend: cpz.Events[];
+  _eventsToSend: cpz.Events<any>[];
   result: number | number[];
   _log = console.log();
 

@@ -1,5 +1,6 @@
 import { sortAsc } from "../../utils";
 import { cpz } from "../../types/cpz";
+import dayjs from "../../lib/dayjs";
 
 /**
  * Robot position
@@ -19,11 +20,13 @@ class Position implements cpz.RobotPosition {
   private _entryDate?: string;
   private _entryOrderType?: cpz.OrderType;
   private _entryAction?: cpz.TradeAction;
+  private _entryCandleTimestamp?: string;
   private _exitStatus?: cpz.RobotTradeStatus;
   private _exitPrice?: number;
   private _exitDate?: string;
   private _exitOrderType?: cpz.OrderType;
   private _exitAction?: cpz.TradeAction;
+  private _exitCandleTimestamp?: string;
   private _alerts?: { [key: string]: cpz.AlertInfo };
   private _profit: number;
   private _candle?: cpz.Candle;
@@ -44,11 +47,13 @@ class Position implements cpz.RobotPosition {
     this._entryDate = state.entryDate;
     this._entryOrderType = state.entryOrderType;
     this._entryAction = state.entryAction;
+    this._entryCandleTimestamp = state.entryCandleTimestamp;
     this._exitStatus = state.exitStatus;
     this._exitPrice = state.exitPrice;
     this._exitDate = state.exitDate;
     this._exitOrderType = state.exitOrderType;
     this._exitAction = state.exitAction;
+    this._exitCandleTimestamp = state.exitCandleTimestamp;
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
     this._alertsToPublish = [];
@@ -126,11 +131,13 @@ class Position implements cpz.RobotPosition {
       entryDate: this._entryDate,
       entryOrderType: this._entryOrderType,
       entryAction: this._entryAction,
+      entryCandleTimestamp: this._entryCandleTimestamp,
       exitStatus: this._exitStatus,
       exitPrice: this._exitPrice,
       exitDate: this._exitDate,
       exitOrderType: this._exitOrderType,
       exitAction: this._exitAction,
+      exitCandleTimestamp: this._exitCandleTimestamp,
       alerts: this._alerts,
       profit: this._profit
     };
@@ -193,12 +200,10 @@ class Position implements cpz.RobotPosition {
     this._alertsToPublish.push({
       ...alert,
       type: cpz.SignalType.alert,
-      position: {
-        id: this._id,
-        prefix: this._prefix,
-        code: this._code,
-        parentId: this._parentId
-      }
+      positionId: this._id,
+      positionPrefix: this._prefix,
+      positionCode: this._code,
+      positionParentId: this._parentId
     });
   }
 
@@ -218,12 +223,10 @@ class Position implements cpz.RobotPosition {
       action,
       orderType,
       price,
-      position: {
-        id: this._id,
-        prefix: this._prefix,
-        code: this._code,
-        parentId: this._parentId
-      }
+      positionId: this._id,
+      positionPrefix: this._prefix,
+      positionCode: this._code,
+      positionParentId: this._parentId
     };
   }
 
@@ -232,9 +235,10 @@ class Position implements cpz.RobotPosition {
     this._status = cpz.RobotPositionStatus.open;
     this._entryStatus = cpz.RobotTradeStatus.closed;
     this._entryPrice = price;
-    this._entryDate = this._candle.timestamp;
+    this._entryDate = dayjs.utc().toISOString();
     this._entryOrderType = orderType;
     this._entryAction = action;
+    this._entryCandleTimestamp = this._candle.timestamp;
     this._direction =
       action === cpz.TradeAction.long || action === cpz.TradeAction.short
         ? cpz.PositionDirection.long
@@ -251,9 +255,10 @@ class Position implements cpz.RobotPosition {
         : cpz.TradeAction.closeShort;
     this._exitStatus = cpz.RobotTradeStatus.closed;
     this._exitPrice = price;
-    this._exitDate = this._candle.timestamp;
+    this._exitDate = dayjs.utc().toISOString();
     this._exitOrderType = orderType;
     this._exitAction = action;
+    this._exitCandleTimestamp = this._candle.timestamp;
     this._calcProfit();
     this._createTradeSignal(action, price, orderType);
   }

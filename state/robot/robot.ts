@@ -28,7 +28,7 @@ class Robot {
   _status: cpz.Status;
   _startedAt: string;
   _stoppedAt: string;
-  _eventsToSend: cpz.Events[];
+  _eventsToSend: cpz.Events<any>[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
   _log = console.log;
@@ -81,6 +81,7 @@ class Robot {
     this._stoppedAt = state.stoppedAt;
 
     this._eventsToSend = [];
+    this._postionsToSave = [];
     this._indicatorInstances = {};
   }
 
@@ -92,13 +93,13 @@ class Robot {
     return this._postionsToSave;
   }
 
-  get alertEventsToSend() {
+  get alertEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
     return this._eventsToSend.filter(
       ({ type }) => type === cpz.Event.SIGNAL_ALERT
     );
   }
 
-  get tradeEventsToSend() {
+  get tradeEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
     return this._eventsToSend.filter(
       ({ type }) => type === cpz.Event.SIGNAL_TRADE
     );

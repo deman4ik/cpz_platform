@@ -11,6 +11,9 @@ export namespace cpz {
     DB_CANDLES_CURRENT = "db-candles-current",
     DB_EXWATCHERS = "db-exwatchers",
     DB_BACKTESTS = "db-backtests",
+    DB_BACKTEST_POSITIONS = "db-backtest-positions",
+    DB_BACKTEST_SIGNALS = "db-backtest-signals",
+    DB_BACKTEST_LOGS = "db-backtest-logs",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -221,9 +224,9 @@ export namespace cpz {
     [key: number]: TimeframeProps;
   }
 
-  interface Events {
+  interface Events<T> {
     type: cpz.Event;
-    data: any;
+    data: T;
   }
 
   interface AlertInfo {
@@ -234,23 +237,21 @@ export namespace cpz {
 
   interface SignalInfo extends AlertInfo {
     type: SignalType;
-    position: {
-      id: string;
-      prefix: string;
-      code: string;
-      parentId?: string;
-    };
+    positionId: string;
+    positionPrefix: string;
+    positionCode: string;
+    positionParentId?: string;
   }
 
   interface SignalEvent extends SignalInfo {
-    signalId: string;
+    id: string;
     robotId: string;
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
     candleTimestamp: string;
-    signalTimestamp: string;
+    timestamp: string;
   }
 
   interface Importer {
@@ -300,7 +301,7 @@ export namespace cpz {
     [key: string]: any;
     initialized: boolean;
     parameters?: { [key: string]: number };
-    _eventsToSend: cpz.Events[];
+    _eventsToSend: cpz.Events<any>[];
     _checkParameters(): void;
     _handleCandles(
       candle: cpz.Candle,
@@ -350,7 +351,7 @@ export namespace cpz {
       [key: string]: cpz.IndicatorState;
     };
     validPositions: RobotPositionState[];
-    _eventsToSend: cpz.Events[];
+    _eventsToSend: cpz.Events<any>[];
     _positionsToSave: cpz.RobotPositionState[];
     init(): void;
     check(): void;
@@ -464,7 +465,18 @@ export namespace cpz {
     backtestId: string;
   }
 
-  interface BacktesterSignals extends SignalEvent {
+  interface BacktesterSignals {
+    id: string;
     backtestId: string;
+    action: TradeAction;
+    orderType: OrderType;
+    price: number;
+    type: SignalType;
+    positionId: string;
+    positionPrefix: string;
+    positionCode: string;
+    positionParentId?: string;
+    candleTimestamp: string;
+    timestamp: string;
   }
 }

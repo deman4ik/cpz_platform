@@ -27,7 +27,7 @@ class BaseStrategy implements cpz.Strategy {
     [key: string]: cpz.IndicatorState;
   };
   _consts: { [key: string]: string };
-  _eventsToSend: cpz.Events[];
+  _eventsToSend: cpz.Events<any>[];
   _positionsToSave: cpz.RobotPositionState[];
   _log: (...args: any) => void;
 
@@ -98,7 +98,10 @@ class BaseStrategy implements cpz.Strategy {
   _logEvent(data: any) {
     this._eventsToSend.push({
       type: cpz.Event.LOG,
-      data: data
+      data: {
+        ...data,
+        robotId: this._robotId
+      }
     });
   }
 
@@ -143,14 +146,14 @@ class BaseStrategy implements cpz.Strategy {
   _createSignalEvent(signal: cpz.SignalInfo, type: cpz.Event) {
     const signalData: cpz.SignalEvent = {
       ...signal,
-      signalId: uuid(),
+      id: uuid(),
       robotId: this._robotId,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
       candleTimestamp: this._candle.timestamp,
-      signalTimestamp: dayjs.utc().toISOString()
+      timestamp: dayjs.utc().toISOString()
     };
 
     this._eventsToSend.push({
@@ -261,6 +264,7 @@ class BaseStrategy implements cpz.Strategy {
             this._positions[key].tradeToPublish,
             cpz.Event.SIGNAL_TRADE
           );
+          this._positionsToSave.push(this._positions[key].state);
           this._positions[key]._clearTradeToPublish();
           if (this._positions[key].status === cpz.RobotPositionStatus.closed) {
             delete this._positions[key];

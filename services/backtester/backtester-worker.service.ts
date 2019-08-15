@@ -15,6 +15,9 @@ class BacktesterWorkerService extends Service {
       mixins: [Microjob],
       dependencies: [
         `${cpz.Service.DB_BACKTESTS}`,
+        `${cpz.Service.DB_BACKTEST_POSITIONS}`,
+        `${cpz.Service.DB_BACKTEST_SIGNALS}`,
+        `${cpz.Service.DB_BACKTEST_LOGS}`,
         `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
@@ -113,7 +116,6 @@ class BacktesterWorkerService extends Service {
       );
 
       if (existedBacktest) {
-        this.logger.info(existedBacktest);
         this.logger.info("Found previous backtest. Deleting...");
         await this.broker.call(`${cpz.Service.DB_BACKTESTS}.remove`, { id });
       }
@@ -208,13 +210,11 @@ class BacktesterWorkerService extends Service {
           }
         }
       );
-      this.logger.warn(backtesterState.totalBars);
 
       const iterations: number[] = chunkNumberToArray(
         backtesterState.totalBars,
         10000
       );
-      this.logger.warn(iterations);
       let prevIteration: number = 0;
       let prevPercent = 0;
       for (const iteration of iterations) {
@@ -236,7 +236,7 @@ class BacktesterWorkerService extends Service {
             }
           }
         );
-        this.logger.warn(requiredCandles.length);
+
         const historyCandles: cpz.Candle[] = requiredCandles.map(candle => ({
           ...candle,
           timeframe
@@ -247,10 +247,10 @@ class BacktesterWorkerService extends Service {
             historyCandles[historyCandles.length - 1].timestamp
           }`
         );
-        let logs: cpz.Events[] = [];
-        let alerts: cpz.Events[] = [];
-        let trades: cpz.Events[] = [];
-        const positions: { [key: string]: cpz.RobotPositionState } = {};
+        let logs: { id: string; backtestId: string; data: any }[] = [];
+        let alerts: cpz.BacktesterSignals[] = [];
+        let trades: cpz.BacktesterSignals[] = [];
+        const positions: { [key: string]: cpz.BacktesterPositionState } = {};
 
         for (const candle of historyCandles) {
           robot.handleCandle(candle);
@@ -259,10 +259,23 @@ class BacktesterWorkerService extends Service {
           robot.clearEvents();
           robot.checkAlerts();
 
-          logs = robot.logEventsToSend;
-          trades = robot.tradeEventsToSend;
+          logs = [
+            ...logs,
+            ...robot.logEventsToSend.map(log => ({
+              id: uuid(),
+              backtestId: backtesterState.id,
+              data: log.data
+            }))
+          ];
+          trades = [
+            ...trades,
+            ...robot.tradeEventsToSend.map(({ data }) => ({
+              ...data,
+              backtestId: backtesterState.id
+            }))
+          ];
           robot.positionsToSave.forEach(pos => {
-            positions[pos.id] = pos;
+            positions[pos.id] = { ...pos, backtestId: backtesterState.id };
           });
 
           // Running strategy
@@ -271,12 +284,38 @@ class BacktesterWorkerService extends Service {
           robot.runStrategy();
           robot.finalize();
 
-          logs = [...logs, ...robot.logEventsToSend];
-          alerts = robot.alertEventsToSend;
-          trades = [...trades, ...robot.tradeEventsToSend];
+          logs = [
+            ...logs,
+            ...robot.logEventsToSend.map(log => ({
+              id: uuid(),
+              backtestId: backtesterState.id,
+              data: log.data
+            }))
+          ];
+          alerts = [
+            ...alerts,
+            ...robot.alertEventsToSend.map(({ data }) => ({
+              ...data,
+              backtestId: backtesterState.id
+            }))
+          ];
+          trades = [
+            ...trades,
+            ...robot.tradeEventsToSend.map(({ data }) => ({
+              ...data,
+              backtestId: backtesterState.id
+            }))
+          ];
+
           robot.positionsToSave.forEach(pos => {
-            positions[pos.id] = pos;
+            positions[pos.id] = { ...pos, backtestId: backtesterState.id };
           });
+
+          this.logger.info(
+            `logs ${logs.length} - alerts ${alerts.length} - trades ${
+              trades.length
+            } - postions ${Object.keys(positions).length}`
+          );
           backtesterState.processedBars += 1;
           backtesterState.leftBars =
             backtesterState.totalBars - backtesterState.processedBars;
@@ -293,8 +332,23 @@ class BacktesterWorkerService extends Service {
           }
         }
 
-        //TODO: Save data
-
+        if (Object.keys(positions).length > 0)
+          await this.broker.call(
+            `${cpz.Service.DB_BACKTEST_POSITIONS}.insert`,
+            { entities: Object.values(positions) }
+          );
+        if (alerts.length > 0)
+          await this.broker.call(`${cpz.Service.DB_BACKTEST_SIGNALS}.insert`, {
+            entities: alerts
+          });
+        if (trades.length > 0)
+          await this.broker.call(`${cpz.Service.DB_BACKTEST_SIGNALS}.insert`, {
+            entities: trades
+          });
+        if (logs.length > 0)
+          await this.broker.call(`${cpz.Service.DB_BACKTEST_LOGS}.insert`, {
+            entities: logs
+          });
         await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
           entity: backtesterState
         });
@@ -305,16 +359,17 @@ class BacktesterWorkerService extends Service {
       const duration = dayjs
         .utc(backtesterState.finishedAt)
         .diff(dayjs.utc(backtesterState.startedAt), "minute");
-      await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
-        entity: backtesterState
-      });
+
       this.logger.info(`Backtest finished after ${duration} minutes!`);
       //TODO: Send finished event
     } catch (e) {
       this.logger.error(e);
       backtesterState.status = cpz.Status.failed;
       backtesterState.error = e.message;
-      //TODO: Send event and save state
+      await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+        entity: backtesterState
+      });
+      //TODO: Send event
     }
   }
 }
