@@ -12,7 +12,7 @@ const adapter = new SqlAdapter(
       ssl: true,
       useUTC: true
     },
-    logging: console.log,
+    logging: false,
     pool: {
       max: 5,
       min: 1,

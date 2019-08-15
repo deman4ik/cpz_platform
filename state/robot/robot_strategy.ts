@@ -120,34 +120,42 @@ class BaseStrategy implements cpz.Strategy {
     Object.values(this._positions).forEach(position => {
       if (position.hasAlertsToPublish) {
         position.alertsToPublish.forEach(signal =>
-          this._createSignalEvent(signal)
+          this._createSignalEvent(signal, cpz.Event.SIGNAL_ALERT)
         );
         position._clearAlertsToPublish();
       }
     });
   }
 
-  _createAlertEvent(signal: cpz.SignalInfo) {
-    this._eventsToSend.push({
-      type: cpz.Event.SIGNAL_ALERT,
-      data: signal
-    });
-  }
-
   _createTradeEvents() {
     Object.values(this._positions).forEach(position => {
       if (position.hasTradeToPublish) {
-        this._createSignalEvent(position.tradeToPublish);
+        this._createSignalEvent(
+          position.tradeToPublish,
+          cpz.Event.SIGNAL_TRADE
+        );
         position._clearTradeToPublish();
         this._positionsToSave.push(position.state);
       }
     });
   }
 
-  _createTadeEvent(signal: cpz.SignalInfo) {
+  _createSignalEvent(signal: cpz.SignalInfo, type: cpz.Event) {
+    const signalData: cpz.SignalEvent = {
+      ...signal,
+      signalId: uuid(),
+      robotId: this._robotId,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      timeframe: this._timeframe,
+      candleTimestamp: this._candle.timestamp,
+      signalTimestamp: dayjs.utc().toISOString()
+    };
+
     this._eventsToSend.push({
-      type: cpz.Event.SIGNAL_TRADE,
-      data: signal
+      type: type,
+      data: signalData
     });
   }
   /** POSITIONS */
@@ -178,13 +186,12 @@ class BaseStrategy implements cpz.Strategy {
     const code = this._getNextPositionCode(prefix);
     this._positions[code] = new Position({
       id: uuid(),
-      robot_id: this._robotId,
+      robotId: this._robotId,
       prefix,
       code,
-      parent_id: parentId,
-      log: this._log.bind(this)
+      parentId: parentId
     });
-
+    this._positions[code]._log = this._log.bind(this);
     this._positions[code]._handleCandle(this._candle);
     return this._positions[code];
   }
@@ -234,6 +241,7 @@ class BaseStrategy implements cpz.Strategy {
     if (positions && Array.isArray(positions) && positions.length > 0) {
       positions.forEach(position => {
         this._positions[position.code] = new Position(position);
+        this._positions[position.code]._log = this._log.bind(this);
       });
     }
   }
@@ -249,7 +257,10 @@ class BaseStrategy implements cpz.Strategy {
       if (this._positions[key].hasAlerts) {
         this._positions[key]._checkAlerts();
         if (this._positions[key].hasTradeToPublish) {
-          this._createTadeEvent(this._positions[key].tradeToPublish);
+          this._createSignalEvent(
+            this._positions[key].tradeToPublish,
+            cpz.Event.SIGNAL_TRADE
+          );
           this._positions[key]._clearTradeToPublish();
           if (this._positions[key].status === cpz.RobotPositionStatus.closed) {
             delete this._positions[key];

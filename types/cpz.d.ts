@@ -10,6 +10,7 @@ export namespace cpz {
     DB_CANDLES = "db-candles",
     DB_CANDLES_CURRENT = "db-candles-current",
     DB_EXWATCHERS = "db-exwatchers",
+    DB_BACKTESTS = "db-backtests",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -162,7 +163,7 @@ export namespace cpz {
     exchange: string;
     asset: string;
     currency: string;
-    id: string;
+    id?: string;
     time: number;
     timestamp: string;
     open: number;
@@ -248,9 +249,8 @@ export namespace cpz {
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    candleId: string;
     candleTimestamp: string;
-    timestamp: string;
+    signalTimestamp: string;
   }
 
   interface Importer {
@@ -261,8 +261,8 @@ export namespace cpz {
     type: cpz.ImportType;
     params: any;
     status: cpz.Status;
-    started_at?: string;
-    ended_at?: string;
+    startedAt?: string;
+    endedAt?: string;
     error?: any;
   }
 
@@ -272,8 +272,8 @@ export namespace cpz {
     asset: string;
     currency: string;
     status: cpz.ExwatcherStatus;
-    node_id: string;
-    importer_id: string;
+    nodeID: string;
+    importerId: string;
     error?: any;
   }
 
@@ -287,7 +287,6 @@ export namespace cpz {
     variables?: { [key: string]: any };
     indicatorFunctions?: { [key: string]: () => any };
     parametersSchema?: ValidationSchema;
-    log?(...args: any): void;
   }
 
   interface IndicatorCode {
@@ -355,6 +354,7 @@ export namespace cpz {
     _positionsToSave: cpz.RobotPositionState[];
     init(): void;
     check(): void;
+    _log(...args: any): void;
     log(...args: any): void;
     logEvent(...args: any): void;
     _checkParameters(): void;
@@ -370,25 +370,26 @@ export namespace cpz {
 
   interface RobotPositionState {
     id: string;
-    robot_id: string;
+    robotId: string;
     prefix: string;
     code: string;
-    parent_id?: string;
+    parentId?: string;
     direction?: PositionDirection;
     status?: RobotPositionStatus;
-    entry_status?: RobotTradeStatus;
-    entry_price?: number;
-    entry_date?: string;
-    entry_order_type?: OrderType;
-    entry_action?: TradeAction;
-    exit_status?: RobotTradeStatus;
-    exit_price?: number;
-    exit_date?: string;
-    exit_order_type?: OrderType;
-    exit_action?: TradeAction;
+    entryStatus?: RobotTradeStatus;
+    entryPrice?: number;
+    entryDate?: string;
+    entryOrderType?: OrderType;
+    entryAction?: TradeAction;
+    entryCandleTimestamp?: string;
+    exitStatus?: RobotTradeStatus;
+    exitPrice?: number;
+    exitDate?: string;
+    exitOrderType?: OrderType;
+    exitAction?: TradeAction;
+    exitCandleTimestamp?: string;
     alerts?: { [key: string]: cpz.AlertInfo };
     profit?: number;
-    log?(...args: any): void;
   }
 
   class RobotPosition {
@@ -413,6 +414,7 @@ export namespace cpz {
     _clearAlerts(): void;
     _handleCandle(candle: Candle): void;
     _checkAlerts(): void;
+    _log(...args: any): void;
   }
 
   interface RobotSettings {
@@ -420,42 +422,49 @@ export namespace cpz {
     requiredHistoryMaxBars?: number;
   }
   interface RobotState {
-    robot_id: string;
+    id: string;
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    strategy_name: string;
+    strategyName: string;
     settings: RobotSettings;
-    last_candle?: Candle;
+    lastCandle?: Candle;
     strategy?: StrategyProps;
-    has_alerts?: boolean;
+    hasAlerts?: boolean;
     indicators?: { [key: string]: IndicatorState };
     status?: Status;
-    started_at?: string;
-    stopped_at?: string;
-    log?(...args: any): void;
+    startedAt?: string;
+    stoppedAt?: string;
   }
 
   interface BacktesterState {
     id: string;
-    robot_id: string;
+    robotId?: string;
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    strategy_name: string;
+    strategyName: string;
     dateFrom: string;
     dateTo: string;
     settings: { [key: string]: any };
-    robot_settings: RobotSettings;
-    total_bars?: number;
-    processed_bars?: number;
-    left_bars?: number;
-    completed_percent?: number;
+    robotSettings: RobotSettings;
+    totalBars?: number;
+    processedBars?: number;
+    leftBars?: number;
+    completedPercent?: number;
     status: string;
-    started_at: string;
-    finsihed_at: string;
+    startedAt?: string;
+    finishedAt?: string;
     error?: any;
+  }
+
+  interface BacktesterPositionState extends RobotPositionState {
+    backtestId: string;
+  }
+
+  interface BacktesterSignals extends SignalEvent {
+    backtestId: string;
   }
 }

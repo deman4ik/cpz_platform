@@ -51,7 +51,7 @@ const ImporterWorkerService: ServiceSchema = {
               ...job.data,
               status: cpz.Status.started,
               started_at: dayjs.utc().toISOString(),
-              ended_at: null,
+              endedAt: null,
               error: null
             };
             const currentState = await this.broker.call(
@@ -71,7 +71,7 @@ const ImporterWorkerService: ServiceSchema = {
             } else if (state.type === "history") {
               await this.importerHistory(job, state);
             }
-            state.ended_at = dayjs.utc().toISOString();
+            state.endedAt = dayjs.utc().toISOString();
             state.status = cpz.Status.finished;
             await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
               entity: state

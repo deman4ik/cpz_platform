@@ -214,7 +214,7 @@ class ExwatcherService extends Service {
     const { id: importerId } = ctx.params;
     this.logger.info(`Importer ${importerId} finished!`);
     const subscription = Object.values(this.subscriptions).find(
-      (sub: cpz.Exwatcher) => sub.importer_id === importerId
+      (sub: cpz.Exwatcher) => sub.importerId === importerId
     );
     await this.subscribe(subscription);
   }
@@ -230,7 +230,7 @@ class ExwatcherService extends Service {
     this.logger.warn(`Importer ${importerId} failed!`, error);
     const { id } = <cpz.Exwatcher>(
       Object.values(this.subscriptions).find(
-        (sub: cpz.Exwatcher) => sub.importer_id === importerId
+        (sub: cpz.Exwatcher) => sub.importerId === importerId
       )
     );
     if (id) {
@@ -364,8 +364,8 @@ class ExwatcherService extends Service {
           asset,
           currency,
           status: cpz.ExwatcherStatus.pending,
-          node_id: this.broker.nodeID,
-          importer_id: null,
+          nodeID: this.broker.nodeID,
+          importerId: null,
           error: null
         };
 
@@ -374,7 +374,7 @@ class ExwatcherService extends Service {
         );
         if (importerId) {
           this.subscriptions[id].status = cpz.ExwatcherStatus.importing;
-          this.subscriptions[id].importer_id = importerId;
+          this.subscriptions[id].importerId = importerId;
           await this.saveSubscription(this.subscriptions[id]);
         }
       }

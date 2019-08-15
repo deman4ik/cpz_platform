@@ -20,8 +20,12 @@ class ImportersService extends Service {
           currency: Sequelize.STRING,
           params: Sequelize.JSONB,
           status: Sequelize.STRING,
-          started_at: { type: Sequelize.DATE, allowNull: true },
-          ended_at: { type: Sequelize.DATE, allowNull: true },
+          startedAt: {
+            type: Sequelize.DATE,
+            field: "started_at",
+            allowNull: true
+          },
+          endedAt: { type: Sequelize.DATE, field: "ended_at", allowNull: true },
           error: { type: Sequelize.JSONB, allowNull: true }
         },
         options: {
@@ -44,11 +48,11 @@ class ImportersService extends Service {
                 type: "string",
                 params: "object",
                 status: "string",
-                started_at: {
+                startedAt: {
                   type: "string",
                   optional: true
                 },
-                ended_at: {
+                endedAt: {
                   type: "string",
                   optional: true
                 },
@@ -75,8 +79,8 @@ class ImportersService extends Service {
         type,
         params,
         status,
-        started_at,
-        ended_at,
+        startedAt,
+        endedAt,
         error
       }: cpz.Importer = ctx.params.entity;
       const value = Object.values({
@@ -87,15 +91,16 @@ class ImportersService extends Service {
         type,
         params: JSON.stringify(params),
         status,
-        started_at,
-        ended_at,
+        startedAt,
+        endedAt,
         error: JSON.stringify(error)
       });
       const query = `INSERT INTO importers 
     (id, exchange, asset, currency, type, params, status, started_at, ended_at, error) 
     VALUES (?)
      ON CONFLICT ON CONSTRAINT importers_pkey 
-     DO UPDATE SET status = excluded.status,
+     DO UPDATE SET updated_at = now(),
+     status = excluded.status,
      started_at = excluded.started_at,
      ended_at = excluded.ended_at,
      error = excluded.error;`;

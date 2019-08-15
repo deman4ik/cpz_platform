@@ -13,6 +13,17 @@ class BacktesterWorkerService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.BACKTESTER_WORKER,
       mixins: [Microjob],
+      dependencies: [
+        `${cpz.Service.DB_BACKTESTS}`,
+        `${cpz.Service.DB_CANDLES}1`,
+        `${cpz.Service.DB_CANDLES}5`,
+        `${cpz.Service.DB_CANDLES}15`,
+        `${cpz.Service.DB_CANDLES}30`,
+        `${cpz.Service.DB_CANDLES}60`,
+        `${cpz.Service.DB_CANDLES}120`,
+        `${cpz.Service.DB_CANDLES}240`,
+        `${cpz.Service.DB_CANDLES}1440`
+      ],
       actions: {
         test: ctx => {
           this.logger.info("test");
@@ -34,12 +45,12 @@ class BacktesterWorkerService extends Service {
     this.logger.info("start");
 
     const res = await this.execute({
-      id: uuid(),
+      id: "ec7c0464-d06c-4691-b080-dec5271e3129",
       exchange: "bitfinex",
       asset: "BTC",
       currency: "USD",
       timeframe: 1,
-      robotId: "TEST",
+      robotId: "029a826e-2077-4398-9e35-23dd920f641c",
       strategyName: "t2_trend_friend",
       dateFrom: "2019-07-03T00:00:00.000Z",
       dateTo: "2019-07-04T01:00:00.000Z",
@@ -77,41 +88,54 @@ class BacktesterWorkerService extends Service {
   }) {
     const backtesterState: cpz.BacktesterState = {
       id,
-      robot_id: robotId,
+      robotId: robotId,
       exchange,
       asset,
       currency,
       timeframe,
-      strategy_name: strategyName,
-      dateFrom,
-      dateTo,
+      strategyName: strategyName,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
       settings,
-      robot_settings: robotSettings,
+      robotSettings: robotSettings,
       status: cpz.Status.started,
-      started_at: dayjs.utc().toISOString(),
-      finsihed_at: null,
-      total_bars: 0,
-      processed_bars: 0,
-      left_bars: 0,
-      completed_percent: 0
+      startedAt: dayjs.utc().toISOString(),
+      finishedAt: null,
+      totalBars: 0,
+      processedBars: 0,
+      leftBars: 0,
+      completedPercent: 0
     };
     try {
+      const existedBacktest = await this.broker.call(
+        `${cpz.Service.DB_BACKTESTS}.get`,
+        { id }
+      );
+
+      if (existedBacktest) {
+        this.logger.info(existedBacktest);
+        this.logger.info("Found previous backtest. Deleting...");
+        await this.broker.call(`${cpz.Service.DB_BACKTESTS}.remove`, { id });
+      }
+
       const robot = new Robot({
-        robot_id: robotId,
+        id: robotId,
         exchange,
         asset,
         currency,
         timeframe,
-        strategy_name: strategyName,
-        settings: robotSettings,
-        log: this.logger.info
+        strategyName,
+        settings: robotSettings
       });
-      backtesterState.robot_settings = robot.settings;
-
+      robot._log = this.logger.info;
+      backtesterState.robotSettings = robot.settings;
+      await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+        entity: backtesterState
+      });
       let strategyCode;
       if (backtesterState.settings.local) {
         strategyCode = await import(
-          `../../strategies/${backtesterState.strategy_name}`
+          `../../strategies/${backtesterState.strategyName}`
         );
       } else {
         //TODO
@@ -170,7 +194,7 @@ class BacktesterWorkerService extends Service {
         robot.handleHistoryCandles(historyCandles);
       }
 
-      backtesterState.total_bars = await this.broker.call(
+      backtesterState.totalBars = await this.broker.call(
         `${cpz.Service.DB_CANDLES}${timeframe}.count`,
         {
           query: {
@@ -184,10 +208,10 @@ class BacktesterWorkerService extends Service {
           }
         }
       );
-      this.logger.warn(backtesterState.total_bars);
+      this.logger.warn(backtesterState.totalBars);
 
       const iterations: number[] = chunkNumberToArray(
-        backtesterState.total_bars,
+        backtesterState.totalBars,
         10000
       );
       this.logger.warn(iterations);
@@ -253,31 +277,37 @@ class BacktesterWorkerService extends Service {
           robot.positionsToSave.forEach(pos => {
             positions[pos.id] = pos;
           });
+          backtesterState.processedBars += 1;
+          backtesterState.leftBars =
+            backtesterState.totalBars - backtesterState.processedBars;
+          backtesterState.completedPercent = Math.floor(
+            (backtesterState.processedBars / backtesterState.totalBars) * 100
+          );
+          if (backtesterState.completedPercent > prevPercent) {
+            prevPercent = backtesterState.completedPercent;
+            this.logger.info(
+              `Processed ${backtesterState.processedBars} bars, left ${
+                backtesterState.leftBars
+              } - ${backtesterState.completedPercent}%`
+            );
+          }
         }
 
         //TODO: Save data
-        backtesterState.processed_bars += 1;
-        backtesterState.left_bars =
-          backtesterState.total_bars - backtesterState.processed_bars;
-        backtesterState.completed_percent = Math.round(
-          (backtesterState.processed_bars / backtesterState.total_bars) * 100
-        );
-        if (backtesterState.completed_percent > prevPercent) {
-          prevPercent = backtesterState.completed_percent;
-          this.logger.info(
-            `Processed ${backtesterState.processed_bars} bars, left ${
-              backtesterState.left_bars
-            } - ${backtesterState.completed_percent}%`
-          );
-        }
+
+        await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+          entity: backtesterState
+        });
       }
 
-      backtesterState.finsihed_at = dayjs.utc().toISOString();
+      backtesterState.finishedAt = dayjs.utc().toISOString();
       backtesterState.status = cpz.Status.finished;
       const duration = dayjs
-        .utc(backtesterState.finsihed_at)
-        .diff(dayjs.utc(backtesterState.started_at), "minute");
-
+        .utc(backtesterState.finishedAt)
+        .diff(dayjs.utc(backtesterState.startedAt), "minute");
+      await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+        entity: backtesterState
+      });
       this.logger.info(`Backtest finished after ${duration} minutes!`);
       //TODO: Send finished event
     } catch (e) {

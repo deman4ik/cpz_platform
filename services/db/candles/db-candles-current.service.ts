@@ -100,7 +100,8 @@ class CandlesCurrentService extends Service {
           })
           .join(",")} 
          ON CONFLICT ON CONSTRAINT candles_current_exchange_asset_currency_timeframe_key
-         DO UPDATE SET open = excluded.open,
+         DO UPDATE SET updated_at = now(),
+         open = excluded.open,
          high = excluded.high,
          low = excluded.low,
          close = excluded.close,

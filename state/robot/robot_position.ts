@@ -29,32 +29,31 @@ class Position implements cpz.RobotPosition {
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
   private _tradeToPublish: cpz.SignalInfo;
-  private _log: (...args: any) => void;
+  _log = console.log;
 
   constructor(state: cpz.RobotPositionState) {
     this._id = state.id;
-    this._robotId = state.robot_id;
+    this._robotId = state.robotId;
     this._prefix = state.prefix;
     this._code = state.code;
-    this._parentId = state.parent_id;
+    this._parentId = state.parentId;
     this._direction = state.direction;
     this._status = state.status || cpz.RobotPositionStatus.new;
-    this._entryStatus = state.entry_status;
-    this._entryPrice = state.entry_price;
-    this._entryDate = state.entry_date;
-    this._entryOrderType = state.entry_order_type;
-    this._entryAction = state.entry_action;
-    this._exitStatus = state.exit_status;
-    this._exitPrice = state.exit_price;
-    this._exitDate = state.exit_date;
-    this._exitOrderType = state.exit_order_type;
-    this._exitAction = state.exit_action;
+    this._entryStatus = state.entryStatus;
+    this._entryPrice = state.entryPrice;
+    this._entryDate = state.entryDate;
+    this._entryOrderType = state.entryOrderType;
+    this._entryAction = state.entryAction;
+    this._exitStatus = state.exitStatus;
+    this._exitPrice = state.exitPrice;
+    this._exitDate = state.exitDate;
+    this._exitOrderType = state.exitOrderType;
+    this._exitAction = state.exitAction;
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
     this._alertsToPublish = [];
     this._tradeToPublish = null;
     this._candle = null;
-    this._log = state.log || console.log;
   }
 
   public get id() {
@@ -116,22 +115,22 @@ class Position implements cpz.RobotPosition {
   public get state() {
     return {
       id: this._id,
-      robot_id: this._robotId,
+      robotId: this._robotId,
       prefix: this._prefix,
       code: this._code,
       parentId: this._parentId,
       direction: this._direction,
       status: this._status,
-      entry_status: this._entryStatus,
-      entry_price: this._entryPrice,
-      entry_date: this._entryDate,
-      entry_order_type: this._entryOrderType,
-      entry_action: this._entryAction,
-      exit_status: this._exitStatus,
-      exit_price: this._exitPrice,
-      exit_date: this._exitDate,
-      exit_order_type: this._exitOrderType,
-      exit_action: this._exitAction,
+      entryStatus: this._entryStatus,
+      entryPrice: this._entryPrice,
+      entryDate: this._entryDate,
+      entryOrderType: this._entryOrderType,
+      entryAction: this._entryAction,
+      exitStatus: this._exitStatus,
+      exitPrice: this._exitPrice,
+      exitDate: this._exitDate,
+      exitOrderType: this._exitOrderType,
+      exitAction: this._exitAction,
       alerts: this._alerts,
       profit: this._profit
     };

@@ -8,7 +8,7 @@ import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
 
 class Robot {
   [key: string]: any;
-  _robotId: string;
+  _id: string;
   _exchange: string;
   _asset: string;
   _currency: string;
@@ -31,11 +31,11 @@ class Robot {
   _eventsToSend: cpz.Events[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
-  _log: (...args: any) => void;
+  _log = console.log;
 
   constructor(state: cpz.RobotState) {
     /* Идентификатор робота */
-    this._robotId = state.robot_id;
+    this._id = state.id;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -45,7 +45,7 @@ class Robot {
     /* Таймфрейм */
     this._timeframe = state.timeframe;
     /* Имя файла стратегии */
-    this._strategyName = state.strategy_name;
+    this._strategyName = state.strategyName;
 
     /* Настройки */
     this._settings = {
@@ -55,7 +55,7 @@ class Robot {
         state.settings.requiredHistoryMaxBars || CANDLES_RECENT_AMOUNT
     };
     /* Последняя свеча */
-    this._lastCandle = state.last_candle;
+    this._lastCandle = state.lastCandle;
     /* Состояне стратегии */
     this._strategy = state.strategy || {
       variables: {},
@@ -65,7 +65,7 @@ class Robot {
       initialized: false
     };
     /* Действия для проверки */
-    this._hasAlerts = state.has_alerts || false;
+    this._hasAlerts = state.hasAlerts || false;
     /* Состояние индикаторов */
     this._indicators = state.indicators || {};
     this._baseIndicatorsCode = {};
@@ -77,12 +77,11 @@ class Robot {
     /* Текущий статус сервиса */
     this._status = state.status || cpz.Status.pending;
     /* Дата и время запуска */
-    this._startedAt = state.started_at;
-    this._stoppedAt = state.stopped_at;
+    this._startedAt = state.startedAt;
+    this._stoppedAt = state.stoppedAt;
 
     this._eventsToSend = [];
     this._indicatorInstances = {};
-    this._log = state.log || console.log;
   }
 
   get eventsToSend() {
@@ -115,7 +114,7 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STARTED,
       data: {
-        robotId: this._robotId
+        robotId: this._id
       }
     });
   }
@@ -127,7 +126,7 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STOPPED,
       data: {
-        robotId: this._robotId
+        robotId: this._id
       }
     });
   }
@@ -137,7 +136,7 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_UPDATED,
       data: {
-        robotId: this._robotId
+        robotId: this._id
       }
     });
   }
@@ -236,14 +235,14 @@ class Robot {
         asset: this._asset,
         currency: this._currency,
         timeframe: this._timeframe,
-        robotId: this._robotId,
+        robotId: this._id,
         posLastNumb: strategyState.posLastNumb,
         positions: strategyState.positions,
         parametersSchema,
         strategyFunctions, // функции стратегии
-        log: this._log.bind(this),
         ...strategyState // предыдущий стейт стратегии
       });
+      this._strategyInstance._log = this._log.bind(this);
     } catch (error) {
       throw error;
     }
@@ -291,13 +290,12 @@ class Robot {
               currency: this._currency,
               timeframe: this._timeframe,
               robotSettings: this._settings,
-              robotId: this._robotId,
+              robotId: this._id,
               parametersSchema,
               indicatorFunctions, // функции индикатора
-              ...indicator, // стейт индикатора
-              log: this._log.bind(this)
+              ...indicator // стейт индикатора
             });
-
+            this._indicatorInstances[key]._log = this._log.bind(this);
             break;
           }
           case cpz.IndicatorType.tulip: {
@@ -310,12 +308,11 @@ class Robot {
               currency: this._currency,
               timeframe: this._timeframe,
               robotSettings: this._settings,
-              robotId: this._robotId,
+              robotId: this._id,
               parameters: indicator.parameters,
-              ...indicator, // стейт индикатора
-              log: this._log.bind(this)
+              ...indicator // стейт индикатора
             });
-
+            this._indicatorInstances[key]._log = this._log.bind(this);
             break;
           }
           /* case INDICATORS_TALIB: {
@@ -328,7 +325,7 @@ class Robot {
                 currency: this._currency,
                 timeframe: this._timeframe,
                 robotSettings: this._settings,
-                robotId: this._robotId,
+                robotId: this._id,
                 parameters: indicator.parameters,
                 ...indicator // стейт индикатора
               });
@@ -345,7 +342,7 @@ class Robot {
                 currency: this._currency,
                 timeframe: this._timeframe,
                 robotSettings: this._settings,
-                robotId: this._robotId,
+                robotId: this._id,
                 parameters: indicator.parameters,
                 ...indicator // стейт индикатора
               });
@@ -583,31 +580,31 @@ class Robot {
     }
   }
 
-  get state() {
+  get state(): cpz.RobotState {
     return {
-      robot_id: this._robotId,
+      id: this._id,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      strategy_name: this._strategyName,
+      strategyName: this._strategyName,
       settings: this._settings,
-      last_candle: this._lastCandle,
-      has_actions: this._hasAlerts,
+      lastCandle: this._lastCandle,
+      hasAlerts: this._hasAlerts,
       status: this._status,
-      started_at: this._started_at,
-      stopped_at: this._stopped_at
+      startedAt: this._startedAt,
+      stoppedAt: this._stoppedAt
     };
   }
 
   get props() {
     return {
-      robot_id: this._robotId,
+      robotId: this._id,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      strategy_name: this._strategyName
+      strategyName: this._strategyName
     };
   }
 

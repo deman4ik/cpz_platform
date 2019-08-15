@@ -19,9 +19,10 @@ class ExwatchersService extends Service {
           asset: Sequelize.STRING,
           currency: Sequelize.STRING,
           status: Sequelize.STRING,
-          node_id: { type: Sequelize.STRING },
-          importer_id: {
+          nodeID: { type: Sequelize.STRING, field: "node_id" },
+          importerId: {
             type: Sequelize.UUID,
+            field: "importer_id",
             allowNull: true
           },
           error: { type: Sequelize.JSONB, allowNull: true }
@@ -44,8 +45,8 @@ class ExwatchersService extends Service {
                 asset: "string",
                 currency: "string",
                 status: "string",
-                node_id: "string",
-                importer_id: { type: "string", optional: true },
+                nodeID: "string",
+                importerId: { type: "string", optional: true },
                 error: {
                   type: "object",
                   optional: true
@@ -67,8 +68,8 @@ class ExwatchersService extends Service {
         asset,
         currency,
         status,
-        node_id,
-        importer_id,
+        nodeID,
+        importerId,
         error
       }: cpz.Exwatcher = ctx.params.entity;
       const value = Object.values({
@@ -77,8 +78,8 @@ class ExwatchersService extends Service {
         asset,
         currency,
         status,
-        node_id,
-        importer_id,
+        nodeID,
+        importerId,
         error: JSON.stringify(error)
       });
       const query = `INSERT INTO exwatchers 
@@ -93,7 +94,8 @@ class ExwatchersService extends Service {
         ) 
         VALUES (?)
          ON CONFLICT ON CONSTRAINT exwatchers_pkey 
-         DO UPDATE SET status = excluded.status,
+         DO UPDATE SET updated_at = now(),
+         status = excluded.status,
          importer_id = excluded.importer_id,
          error = excluded.error;`;
 
