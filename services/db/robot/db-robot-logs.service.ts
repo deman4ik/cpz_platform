@@ -4,18 +4,18 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
 
-class BacktestLogsService extends Service {
+class RobotLogsService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
-      name: cpz.Service.DB_BACKTEST_LOGS,
+      name: cpz.Service.DB_ROBOT_LOGS,
       mixins: [DbService],
       adapter: SqlAdapter,
       model: {
-        name: "backtest_logs",
+        name: "robot_logs",
         define: {
           id: { type: Sequelize.STRING, primaryKey: true },
-          backtestId: { type: Sequelize.STRING, field: "backtest_id" },
+          robotId: { type: Sequelize.STRING, field: "robot_id" },
           data: { type: Sequelize.JSONB }
         },
         options: {
@@ -29,4 +29,4 @@ class BacktestLogsService extends Service {
   }
 }
 
-export = BacktestLogsService;
+export = RobotLogsService;

@@ -14,6 +14,14 @@ export namespace cpz {
     DB_BACKTEST_POSITIONS = "db-backtest-positions",
     DB_BACKTEST_SIGNALS = "db-backtest-signals",
     DB_BACKTEST_LOGS = "db-backtest-logs",
+    DB_STRATEGIES = "db-strategies",
+    DB_INDICATORS = "db-indicators",
+    DB_ROBOTS = "db-robots",
+    DB_ROBOT_JOBS = "db-robot-jobs",
+    DB_ROBOT_POSITIONS = "db-robot-positions",
+    DB_ROBOT_SIGNALS = "db-robot-signals",
+    DB_ROBOT_LOGS = "db-robot-logs",
+    DB_ROBOT_HISTORY = "db-robot-history",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -57,6 +65,8 @@ export namespace cpz {
   const enum Status {
     pending = "pending",
     queued = "queued",
+    starting = "starting",
+    stopping = "stopping",
     started = "started",
     stopped = "stopped",
     paused = "paused",
@@ -70,6 +80,14 @@ export namespace cpz {
     subscribed = "subscribed",
     unsubscribed = "unsubscribed",
     failed = "failed"
+  }
+
+  const enum RobotJobType {
+    start = "start",
+    stop = "stop",
+    pause = "pause",
+    candle = "candle",
+    tick = "tick"
   }
 
   const enum PositionDirection {
@@ -138,7 +156,8 @@ export namespace cpz {
   }
 
   const enum Queue {
-    importCandles = "importCandles"
+    importCandles = "importCandles",
+    runRobot = "runRobot"
   }
 
   type ImportType = "recent" | "history";
@@ -276,6 +295,14 @@ export namespace cpz {
     nodeID: string;
     importerId: string;
     error?: any;
+  }
+
+  interface CodeFilesInDB {
+    id: string;
+    name: string;
+    author?: string;
+    available: number;
+    file: string;
   }
 
   interface IndicatorState {
@@ -424,19 +451,30 @@ export namespace cpz {
   }
   interface RobotState {
     id: string;
+    code?: string;
+    name?: string;
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
     strategyName: string;
+    description?: string;
     settings: RobotSettings;
+    available?: number;
     lastCandle?: Candle;
-    strategy?: StrategyProps;
+    state?: StrategyProps;
     hasAlerts?: boolean;
     indicators?: { [key: string]: IndicatorState };
     status?: Status;
     startedAt?: string;
     stoppedAt?: string;
+    statistics?: { [key: string]: any };
+  }
+
+  interface RobotJob {
+    robotId: string;
+    type: RobotJobType;
+    data?: Candle | ExwatcherTrade;
   }
 
   interface BacktesterState {

@@ -1,6 +1,6 @@
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
-import { CANDLES_RECENT_AMOUNT } from "../../config";
+
 import { Errors } from "moleculer";
 import BaseStrategy from "./robot_strategy";
 import BaseIndicator from "./robot_indicator";
@@ -9,6 +9,8 @@ import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
 class Robot {
   [key: string]: any;
   _id: string;
+  _code: string;
+  _name: string;
   _exchange: string;
   _asset: string;
   _currency: string;
@@ -28,6 +30,7 @@ class Robot {
   _status: cpz.Status;
   _startedAt: string;
   _stoppedAt: string;
+  _statistics: { [key: string]: any };
   _eventsToSend: cpz.Events<any>[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
@@ -36,6 +39,10 @@ class Robot {
   constructor(state: cpz.RobotState) {
     /* Идентификатор робота */
     this._id = state.id;
+
+    this._code = state.code;
+
+    this._name = state.name;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -48,16 +55,11 @@ class Robot {
     this._strategyName = state.strategyName;
 
     /* Настройки */
-    this._settings = {
-      ...state.settings,
-      strategyParameters: state.settings.strategyParameters || {},
-      requiredHistoryMaxBars:
-        state.settings.requiredHistoryMaxBars || CANDLES_RECENT_AMOUNT
-    };
+    this._settings = state.settings;
     /* Последняя свеча */
     this._lastCandle = state.lastCandle;
     /* Состояне стратегии */
-    this._strategy = state.strategy || {
+    this._strategy = state.state || {
       variables: {},
       positions: [],
       posLastNumb: {},
@@ -79,6 +81,7 @@ class Robot {
     /* Дата и время запуска */
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
+    this._statistics = state.statistics || {};
 
     this._eventsToSend = [];
     this._postionsToSave = [];
@@ -584,6 +587,8 @@ class Robot {
   get state(): cpz.RobotState {
     return {
       id: this._id,
+      code: this._code,
+      name: this._name,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,
@@ -594,7 +599,10 @@ class Robot {
       hasAlerts: this._hasAlerts,
       status: this._status,
       startedAt: this._startedAt,
-      stoppedAt: this._stoppedAt
+      stoppedAt: this._stoppedAt,
+      indicators: this._indicators,
+      state: this._strategy,
+      statistics: this._statistics
     };
   }
 

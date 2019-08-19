@@ -11,7 +11,7 @@ const brokerConfig: BrokerOptions = {
   // Log level for built-in console logger. Available values: trace, debug, info, warn, error, fatal
   logLevel: "info",
   transporter: "TCP",
-  cacher: "Redis",
+  cacher: false,
   serializer: "JSON",
   requestTimeout: 60 * 1000,
 
