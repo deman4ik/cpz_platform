@@ -5,6 +5,7 @@ import { Errors } from "moleculer";
 import BaseStrategy from "./robot_strategy";
 import BaseIndicator from "./robot_indicator";
 import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
+import { combineRobotSettings } from "../settings";
 
 class Robot {
   [key: string]: any;
@@ -55,7 +56,7 @@ class Robot {
     this._strategyName = state.strategyName;
 
     /* Настройки */
-    this._settings = state.settings;
+    this._settings = combineRobotSettings(state.settings);
     /* Последняя свеча */
     this._lastCandle = state.lastCandle;
     /* Состояне стратегии */
@@ -110,6 +111,26 @@ class Robot {
 
   get logEventsToSend() {
     return this._eventsToSend.filter(({ type }) => type === cpz.Event.LOG);
+  }
+
+  get strategyName() {
+    return this._strategyName;
+  }
+
+  get exchange() {
+    return this._exchange;
+  }
+
+  get asset() {
+    return this._asset;
+  }
+
+  get currency() {
+    return this._currency;
+  }
+
+  get timeframe() {
+    return this._timeframe;
   }
 
   start() {

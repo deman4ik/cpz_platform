@@ -3,7 +3,8 @@ import QueueService from "moleculer-bull";
 import { Job } from "bull";
 import { cpz } from "../../types/cpz";
 import Robot from "../../state/robot/robot";
-import { combineRobotSettings } from "../../state/settings";
+import { sortAsc } from "../../utils";
+import { v4 as uuid } from "uuid";
 import { Op } from "sequelize";
 import requireFromString from "require-from-string";
 
@@ -19,7 +20,16 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_STRATEGIES}`,
         `${cpz.Service.DB_ROBOTS}`,
         `${cpz.Service.DB_ROBOT_JOBS}`,
-        `${cpz.Service.DB_ROBOT_POSITIONS}`
+        `${cpz.Service.DB_ROBOT_POSITIONS}`,
+        `${cpz.Service.DB_CANDLES}1`,
+        `${cpz.Service.DB_CANDLES}5`,
+        `${cpz.Service.DB_CANDLES}15`,
+        `${cpz.Service.DB_CANDLES}30`,
+        `${cpz.Service.DB_CANDLES}60`,
+        `${cpz.Service.DB_CANDLES}120`,
+        `${cpz.Service.DB_CANDLES}240`,
+        `${cpz.Service.DB_CANDLES}1440`,
+        `${cpz.Service.DB_CANDLES_CURRENT}`
       ],
       mixins: [
         QueueService(process.env.REDIS_URL, {
@@ -44,16 +54,19 @@ class RobotWorkerService extends Service {
           concurrency: 100,
           async process(job: Job) {
             this.logger.info(`Running robot ${job.id}`);
-
-            return { success: true };
+            await this.processJobs(job.id);
+            return { success: true, id: job.id };
           }
         }
+      },
+      events: {
+        [cpz.Event.ROBOT_WORKER_RELOAD_CODE]: this.loadCode
       },
       started: this.startedService
     });
   }
 
-  async startedService() {
+  async loadCode() {
     const strategies: cpz.CodeFilesInDB[] = await this.broker.call(
       `${cpz.Service.DB_STRATEGIES}.find`,
       {
@@ -70,7 +83,7 @@ class RobotWorkerService extends Service {
         }
       }
     );
-    if (process.env.LOCAL_CODE_FILES) {
+    if (process.env.CODE_FILES_LOCATION === "local") {
       this.logger.warn("Loading local strategy and indicators files");
       strategies.forEach(async ({ id }) => {
         this._strategiesCode[id] = await import(`../../strategies/${id}`);
@@ -79,6 +92,7 @@ class RobotWorkerService extends Service {
         this._baseIndicatorsCode[id] = await import(`../../indicators/${id}`);
       });
     } else {
+      this.logger.info("Loading remote strategy and indicator files");
       strategies.forEach(({ id, file }) => {
         this._strategiesCode[id] = requireFromString(file);
       });
@@ -86,23 +100,179 @@ class RobotWorkerService extends Service {
         this._baseIndicatorsCode[id] = requireFromString(file);
       });
     }
+    this.logger.info(
+      `Loaded ${Object.keys(this._strategiesCode).length} strategies and ${
+        Object.keys(this._baseIndicatorsCode).length
+      } indicators`
+    );
+  }
+
+  async startedService() {
+    await this.loadCode();
   }
 
   async start(ctx: Context) {
     const { id } = ctx.params;
-    const robotState: cpz.RobotState = await this.broker.call(
-      `${cpz.Service.DB_ROBOTS}.get`,
-      { id }
-    );
-    if (!robotState) throw new Error(`Robot ${id} not found.`);
-    const { status, settings } = robotState;
-    if (status === cpz.Status.starting) {
-      const robot = new Robot({
-        ...robotState,
-        settings: combineRobotSettings(settings)
-      });
+
+    await this.run({ id: uuid(), robotId: id, type: cpz.RobotJobType.start });
+    return { id, status: cpz.Status.started };
+  }
+
+  async processJobs(robotId: string) {
+    try {
+      let [nextJob]: cpz.RobotJob[] = await this.broker.call(
+        `${cpz.Service.DB_ROBOT_JOBS}.find`,
+        {
+          limit: 1,
+          sort: "createdAt",
+          query: {
+            robotId
+          }
+        }
+      );
+      if (nextJob) {
+        while (nextJob) {
+          let status = await this.run(nextJob);
+          await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
+            id: nextJob.id
+          });
+          if (status === cpz.Status.started) {
+            [nextJob] = await this.broker.call(
+              `${cpz.Service.DB_ROBOT_JOBS}.find`,
+              {
+                limit: 1,
+                sort: "createdAt",
+                query: {
+                  robotId
+                }
+              }
+            );
+          } else {
+            nextJob = null;
+          }
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return { id, status };
+  }
+
+  async run(job: cpz.RobotJob) {
+    const { type, robotId, data } = job;
+    this.logger.info(`Robot ${robotId} - ${type}`);
+    try {
+      const robotState: cpz.RobotState = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        { id: robotId }
+      );
+      if (!robotState) throw new Error(`Robot ${robotId} not found.`);
+      const robot = new Robot(robotState);
+      if (type === cpz.RobotJobType.tick) {
+        // New tick - checking alerts
+        const currentCandle: cpz.Candle = await this.broker.call(
+          `${cpz.Service.DB_CANDLES_CURRENT}.get`,
+          {
+            query: {
+              exchange: robot.exchange,
+              asset: robot.asset,
+              currency: robot.currency,
+              timeframe: robot.timeframe
+            }
+          }
+        );
+        robot.handleCurrentCandle(currentCandle);
+
+        robot.checkAlerts();
+      } else if (type === cpz.RobotJobType.candle) {
+        // New candle - running strategy
+        robot.setStrategy(this._strategiesCode[robot.strategyName]);
+        if (robot.hasBaseIndicators) {
+          let baseIndicatorsCode;
+          robot.baseIndicatorsFileNames.forEach(fileName => {
+            return { fileName, code: this._baseIndicatorsCode[fileName] };
+          });
+          robot.setBaseIndicatorsCode(baseIndicatorsCode);
+        }
+        robot.setIndicators();
+
+        const requiredCandles: cpz.DBCandle[] = await this.broker.call(
+          `${cpz.Service.DB_CANDLES}${robot.timeframe}.find`,
+          {
+            limit: robot.requiredHistoryMaxBars,
+            sort: "-time",
+            query: {
+              exchange: robot.exchange,
+              asset: robot.asset,
+              currency: robot.currency
+            }
+          }
+        );
+        const historyCandles = requiredCandles
+          .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
+          .map(candle => ({ ...candle, timeframe: robot.timeframe }));
+        robot.handleHistoryCandles(historyCandles);
+        robot.handleCandle(<cpz.Candle>data);
+        await robot.calcIndicators();
+        robot.runStrategy();
+        robot.finalize();
+      } else if (type === cpz.RobotJobType.start) {
+        // Start robot - init strategy and indicators
+        robot.setStrategy(this._strategiesCode[robot.strategyName]);
+        robot.initStrategy();
+        if (robot.hasBaseIndicators) {
+          let baseIndicatorsCode;
+          robot.baseIndicatorsFileNames.forEach(fileName => {
+            return { fileName, code: this._baseIndicatorsCode[fileName] };
+          });
+          robot.setBaseIndicatorsCode(baseIndicatorsCode);
+        }
+        robot.setIndicators();
+        robot.initIndicators();
+        robot.start();
+      } else if (type === cpz.RobotJobType.stop) {
+        // Stop robot
+        robot.stop();
+      } else if (type === cpz.RobotJobType.pause) {
+        // Pause robot
+        robot.pause();
+      } else {
+        throw new Error(`Unknown type "${type}"`);
+      }
+
+      // Saving robot state
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, robot.state);
+      // Saving robot positions
+      if (robot.positionsToSave.length > 0) {
+        await Promise.all(
+          robot.positionsToSave.map(
+            async position =>
+              await this.broker.call(
+                `${cpz.Service.DB_ROBOT_POSITIONS}.upsert`,
+                position
+              )
+          )
+        );
+      }
+      // Sending robot events
+      if (robot.eventsToSend.length > 0) {
+        await Promise.all(
+          robot.eventsToSend.map(
+            async ({ type, data }) => await this.broker.emit(type, data)
+          )
+        );
+      }
+
+      return robot.status;
+    } catch (e) {
+      this.logger.error(e);
+      await this.broker.emit(cpz.Event.ROBOT_FAILED, {
+        robotId,
+        jobType: type,
+        error: e
+      });
+      throw e;
+    }
   }
 }
 

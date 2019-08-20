@@ -51,6 +51,7 @@ export namespace cpz {
     ROBOT_UPDATED = "robot.updated",
     ROBOT_PAUSED = "robot.paused",
     ROBOT_FAILED = "robot.failed",
+    ROBOT_WORKER_RELOAD_CODE = "robot-worker.reload-code",
     TRADER_STARTED = "trader.started",
     TRADER_STOPPED = "trader.stopped",
     TRADER_UPDATED = "trader.updated",
@@ -472,6 +473,7 @@ export namespace cpz {
   }
 
   interface RobotJob {
+    id: string;
     robotId: string;
     type: RobotJobType;
     data?: Candle | ExwatcherTrade;

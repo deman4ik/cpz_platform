@@ -1,7 +1,9 @@
 import { Service, ServiceBroker, Context } from "moleculer";
+import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
+import { Op } from "sequelize";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -45,6 +47,10 @@ class RobotRunnerService extends Service {
           handler: this.resume
         }
       },
+      events: {
+        [cpz.Event.CANDLE_NEW]: this.handleNewCandle,
+        [cpz.Event.TICK_NEW]: this.handleNewTick
+      },
       started: this.startedService
     });
   }
@@ -68,14 +74,15 @@ class RobotRunnerService extends Service {
     );
   }
 
-  async queueJob(job: cpz.RobotJob) {
+  async queueJob(job: cpz.RobotJob, status: string) {
     await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.upsert`, job);
     const { robotId } = job;
-    await this.createJob(cpz.Queue.runRobot, job, {
-      jobId: robotId,
-      removeOnComplete: true,
-      removeOnFail: true
-    });
+    if (status === cpz.Status.started)
+      await this.createJob(cpz.Queue.runRobot, job, {
+        jobId: robotId,
+        removeOnComplete: true,
+        removeOnFail: true
+      });
   }
 
   async start(ctx: Context) {
@@ -108,7 +115,14 @@ class RobotRunnerService extends Service {
         status
       };
 
-    await this.queueJob({ robotId: id, type: cpz.RobotJobType.stop });
+    await this.queueJob(
+      {
+        id: uuid(),
+        robotId: id,
+        type: cpz.RobotJobType.stop
+      },
+      status
+    );
     return {
       id,
       status
@@ -117,13 +131,13 @@ class RobotRunnerService extends Service {
 
   async pause(ctx: Context) {
     const { id } = ctx.params;
-    let robotIds: string[] = [];
+    let robotsToPause: { id: string; status: string }[] = [];
     if (id) {
       const { status } = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.get`,
         { id }
       );
-      if (status === cpz.Status.started) robotIds.push(id);
+      if (status === cpz.Status.started) robotsToPause.push({ id, status });
     } else {
       const robots: cpz.RobotState[] = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.find`,
@@ -131,17 +145,24 @@ class RobotRunnerService extends Service {
           query: { status: cpz.Status.started }
         }
       );
-      robotIds = robots.map(({ id }) => id);
+      robotsToPause = robots.map(({ id, status }) => ({ id, status }));
     }
 
-    if (robotIds.length > 0)
+    if (robotsToPause.length > 0)
       await Promise.all(
-        robotIds.map(async robotId => {
-          await this.queueJob({ robotId, type: cpz.RobotJobType.pause });
+        robotsToPause.map(async ({ id, status }) => {
+          await this.queueJob(
+            {
+              id: uuid(),
+              robotId: id,
+              type: cpz.RobotJobType.pause
+            },
+            status
+          );
         })
       );
 
-    return robotIds.length;
+    return robotsToPause.length;
   }
 
   async resume(ctx: Context) {
@@ -177,7 +198,90 @@ class RobotRunnerService extends Service {
     return robotIds.length;
   }
 
-  async handleNewCandle(ctx: Context) {}
+  async handleNewCandle(ctx: Context) {
+    try {
+      const candle: cpz.Candle = <cpz.Candle>ctx.params;
+      const { exchange, asset, currency, timeframe } = candle;
+      const robots: cpz.RobotState[] = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.find`,
+        {
+          query: {
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            [Op.or]: [
+              {
+                status: cpz.Status.started
+              },
+              {
+                status: cpz.Status.paused
+              }
+            ]
+          }
+        }
+      );
+
+      await Promise.all(
+        robots.map(
+          async ({ id, status }) =>
+            await this.queueJob(
+              {
+                id: uuid(),
+                robotId: id,
+                type: cpz.RobotJobType.candle,
+                data: candle
+              },
+              status
+            )
+        )
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleNewTick(ctx: Context) {
+    try {
+      const tick: cpz.ExwatcherTrade = <cpz.ExwatcherTrade>ctx.params;
+      const { exchange, asset, currency } = tick;
+      const robots: cpz.RobotState[] = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.find`,
+        {
+          query: {
+            exchange,
+            asset,
+            currency,
+            [Op.or]: [
+              {
+                status: cpz.Status.started
+              },
+              {
+                status: cpz.Status.paused
+              }
+            ]
+          }
+        }
+      );
+
+      await Promise.all(
+        robots.map(
+          async ({ id, status }) =>
+            await this.queueJob(
+              {
+                id: uuid(),
+                robotId: id,
+                type: cpz.RobotJobType.tick,
+                data: tick
+              },
+              status
+            )
+        )
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
 }
 
 export = RobotRunnerService;
