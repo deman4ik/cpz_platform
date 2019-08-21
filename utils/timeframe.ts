@@ -171,7 +171,10 @@ class Timeframe {
     timeframe: cpz.Timeframe
   ): number {
     const { amountInUnit, unit } = this.get(timeframe);
-    const duration = dayjs.utc(dateTo).diff(dayjs.utc(dateFrom), unit);
+    const duration = dayjs
+      .utc(dateTo)
+      .add(1, "millisecond")
+      .diff(dayjs.utc(dateFrom), unit);
     return Math.floor(duration / amountInUnit);
   }
 

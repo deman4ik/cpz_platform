@@ -144,16 +144,14 @@ describe("Test 'time' utils", () => {
         5
       );
       expect(Array.isArray(chunks)).toBe(true);
-      expect(total).toBe(9);
+      expect(total).toBe(10);
       expect(chunks.length).toBe(2);
       expect(chunks[0].dateFrom).toBe("2019-07-05T02:00:00.000Z");
       expect(chunks[0].dateTo).toBe("2019-07-05T02:04:59.999Z");
-      expect(chunks[0].duration).toBe(5);
       expect(chunks[chunks.length - 1].dateFrom).toBe(
         "2019-07-05T02:05:00.000Z"
       );
-      expect(chunks[chunks.length - 1].dateTo).toBe("2019-07-05T02:08:59.999Z");
-      expect(chunks[chunks.length - 1].duration).toBe(4);
+      expect(chunks[chunks.length - 1].dateTo).toBe("2019-07-05T02:09:00.000Z");
     });
     it("Should return chunks with corrected amount", () => {
       const dateFrom = dayjs.utc("2019-07-05T02:00:00.000Z").toISOString();
@@ -166,11 +164,10 @@ describe("Test 'time' utils", () => {
         5
       );
       expect(Array.isArray(chunks)).toBe(true);
-      expect(total).toBe(2);
+      expect(total).toBe(3);
       expect(chunks.length).toBe(1);
       expect(chunks[0].dateFrom).toBe("2019-07-05T02:00:00.000Z");
-      expect(chunks[0].dateTo).toBe("2019-07-05T02:05:59.999Z");
-      expect(chunks[0].duration).toBe(2);
+      expect(chunks[0].dateTo).toBe("2019-07-05T02:09:00.000Z");
     });
     it("Should return chunks for 4 hours", () => {
       const dateFrom = dayjs.utc("2019-06-17T06:00:00.000Z").toISOString();
@@ -183,14 +180,21 @@ describe("Test 'time' utils", () => {
         500 / 4
       );
       expect(Array.isArray(chunks)).toBe(true);
-      expect(chunks.length).toBe(2);
+      expect(chunks.length).toBe(3);
     });
     it("Should return chunks for 1 hour", () => {
       const dateFrom = dayjs.utc("2019-06-17T00:00:00.000Z").toISOString();
       const dateTo = dayjs.utc("2019-06-17T06:00:00.000Z").toISOString();
       const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.hour, 1, 1);
       expect(Array.isArray(chunks)).toBe(true);
-      expect(chunks.length).toBe(6);
+      expect(chunks.length).toBe(7);
+    });
+    it("Should return chunks for 1 day", () => {
+      const dateFrom = dayjs.utc("2019-06-17T00:00:00.000Z").toISOString();
+      const dateTo = dayjs.utc("2019-06-19T06:00:00.000Z").toISOString();
+      const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 1, 1);
+      expect(Array.isArray(chunks)).toBe(true);
+      expect(chunks.length).toBe(3);
     });
   });
   describe("Test 'getValidDate'", () => {

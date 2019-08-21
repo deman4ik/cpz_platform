@@ -2,7 +2,6 @@ import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import QueueService from "moleculer-bull";
 import { v4 as uuid } from "uuid";
 import { Job } from "bull";
-import Microjob from "../../mixins/microjob";
 import dayjs from "../../lib/dayjs";
 import {
   sortAsc,
@@ -31,8 +30,7 @@ class ImporterWorkerService extends Service {
             stalledInterval: 120000,
             maxStalledCount: 1
           }
-        }),
-        Microjob
+        })
       ],
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
@@ -51,7 +49,10 @@ class ImporterWorkerService extends Service {
           {
             async process(job: Job) {
               try {
-                this.logger.info(`Importing candles id: ${job.id}`, job.data);
+                this.logger.info(
+                  `Job #${job.id} start importing candles:`,
+                  job.data
+                );
                 const state: cpz.Importer = {
                   ...job.data,
                   status: cpz.Status.started,
@@ -82,7 +83,7 @@ class ImporterWorkerService extends Service {
                   entity: state
                 });
                 this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
-                this.logger.info(`Finished importing candles id: ${job.id}`);
+                this.logger.info(`Job #${job.id} finished`);
                 return {
                   success: true,
                   state
@@ -168,7 +169,7 @@ class ImporterWorkerService extends Service {
             timeframes: loadTimeframes.candles,
             amount
           });
-          this.logger.info(`Loaded and handled candles id: ${id}`);
+          this.logger.info(`Job ${id} loaded and handled candles`);
         }
 
         if (Object.keys(loadTimeframes.trades).length > 0) {
@@ -190,23 +191,21 @@ class ImporterWorkerService extends Service {
             dateFrom,
             dateTo: currentDate.toISOString()
           });
-          this.logger.info(`Loaded ${trades.length} id: ${id}`);
+          this.logger.info(`Job #${id} loaded ${trades.length} trades`);
           await job.progress(25);
-          const candlesFromTradesInTimeframes = await this.executeInThread(
-            createCandlesFromTrades,
+          const candlesFromTradesInTimeframes = await createCandlesFromTrades(
             dateFrom,
             currentDate.toISOString(),
             tradesTimeframes,
             trades
           );
-          this.logger.info(`Created candles from trades id: ${id}`);
+          this.logger.info(`Job #${id} created candles from trades`);
           await job.progress(50);
 
           await Promise.all(
             Object.keys(candlesFromTradesInTimeframes).map(
               async (timeframe: string) => {
-                candlesInTimeframes[+timeframe] = await this.executeInThread(
-                  handleCandleGaps,
+                candlesInTimeframes[+timeframe] = await handleCandleGaps(
                   loadTimeframes.trades[+timeframe].dateFrom,
                   currentDate.toISOString(),
                   candlesInTimeframes[+timeframe]
@@ -214,7 +213,7 @@ class ImporterWorkerService extends Service {
               }
             )
           );
-          this.logger.info(`Handled candle gaps id: ${id}`);
+          this.logger.info(`Job #${id} handled candle gaps`);
         }
       } else {
         candlesInTimeframes = await this.importCandles({
@@ -224,13 +223,13 @@ class ImporterWorkerService extends Service {
           timeframes,
           amount
         });
-        this.logger.info(`Loaded and handled candles id: ${id}`);
+        this.logger.info(`Job #${id} loaded and handled candles`);
       }
       await job.progress(75);
       if (!candlesInTimeframes) throw new Error("Failed to import candles");
 
       await this.saveCandles(candlesInTimeframes);
-      this.logger.info(`Saved candles to db id: ${id}`);
+      this.logger.info(`Job #${id} saved candles to db`);
       await job.progress(100);
     } catch (e) {
       this.logger.error(e);
@@ -253,66 +252,88 @@ class ImporterWorkerService extends Service {
       } = state;
       const dateTo = getValidDate(paramsDateTo);
 
-      let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
       if (exchange === "kraken") {
-        const maxTimeframe = Math.max(...timeframes);
-        const {
-          unit: maxTimeframeUnit,
-          amountInUnit: maxTimeframeAmountInUnit
-        } = Timeframe.get(maxTimeframe);
-        const dateFrom = dayjs
-          .utc(paramsDateFrom)
-          .add(-maxTimeframeAmountInUnit, maxTimeframeUnit)
-          .toISOString();
-        const trades = await this.importTrades({
-          exchange,
-          asset,
-          currency,
-          dateFrom,
-          dateTo
-        });
-        this.logger.info(`Loaded ${trades.length} id: ${id}`);
-        await job.progress(25);
-
-        candlesInTimeframes = await this.executeInThread(
-          createCandlesFromTrades,
-          dateFrom,
+        const { chunks } = chunkDates(
+          paramsDateFrom,
           dateTo,
-          timeframes,
-          trades
+          cpz.TimeUnit.day,
+          1,
+          1
         );
-        this.logger.info(`Created candles from trades id: ${id}`);
-        await job.progress(50);
-
-        await Promise.all(
-          Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
-            candlesInTimeframes[+timeframe] = await this.executeInThread(
-              handleCandleGaps,
-              paramsDateFrom,
-              dateTo,
-              candlesInTimeframes[+timeframe]
-            );
-          })
-        );
-        this.logger.info(`Handled candle gaps id: ${id}`);
+        const total = chunks.length;
+        let prevPercent = 0;
+        let percent = 0;
+        let processed = 0;
+        for (const { dateFrom: loadDateFrom, dateTo: loadDateTo } of chunks) {
+          this.logger.info(
+            `Job #${id} loading from ${loadDateFrom} to ${loadDateTo}`
+          );
+          const trades = await this.importTrades({
+            exchange,
+            asset,
+            currency,
+            dateFrom: dayjs
+              .utc(loadDateFrom)
+              .add(-1, cpz.TimeUnit.hour)
+              .toISOString(),
+            dateTo: loadDateTo
+          });
+          const candlesInTimeframes = await createCandlesFromTrades(
+            loadDateFrom,
+            loadDateTo,
+            timeframes,
+            trades
+          );
+          if (candlesInTimeframes) {
+            for (const timeframe of Object.keys(candlesInTimeframes)) {
+              candlesInTimeframes[+timeframe] = await handleCandleGaps(
+                paramsDateFrom,
+                dateTo,
+                candlesInTimeframes[+timeframe]
+              );
+            }
+            await this.saveCandles(candlesInTimeframes);
+          }
+          processed += 1;
+          percent = Math.floor((processed / total) * 100);
+          if (percent > prevPercent) {
+            prevPercent = percent;
+            await job.progress(percent);
+          }
+        }
       } else {
-        candlesInTimeframes = await this.importCandles({
-          exchange,
-          asset,
-          currency,
-          timeframes,
-          dateFrom: paramsDateFrom,
-          dateTo
-        });
-        this.logger.info(`Loaded and handled candles id: ${id}`);
+        const { chunks } = chunkDates(
+          paramsDateFrom,
+          dateTo,
+          cpz.TimeUnit.day,
+          1,
+          1
+        );
+        const total = chunks.length;
+        let prevPercent = 0;
+        let percent = 0;
+        let processed = 0;
+        for (const { dateFrom: loadDateFrom, dateTo: loadDateTo } of chunks) {
+          this.logger.info(
+            `Job #${id} loading from ${loadDateFrom} to ${loadDateTo}`
+          );
+          const candlesInTimeframes = await this.importCandles({
+            exchange,
+            asset,
+            currency,
+            timeframes,
+            dateFrom: loadDateFrom,
+            dateTo: loadDateTo
+          });
+          await this.saveCandles(candlesInTimeframes);
+          processed += 1;
+          percent = Math.floor((processed / total) * 100);
+          if (percent > prevPercent) {
+            prevPercent = percent;
+            await job.progress(percent);
+          }
+        }
       }
-
-      await job.progress(75);
-      if (!candlesInTimeframes) throw new Error("Failed to import candles");
-
-      await this.saveCandles(candlesInTimeframes);
-      this.logger.info(`Saved candles to db id: ${id}`);
-      await job.progress(100);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -458,7 +479,7 @@ class ImporterWorkerService extends Service {
     dateFrom: string;
     dateTo: string;
   }): Promise<cpz.ExchangeTrade[]> {
-    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 1, 1);
+    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.hour, 2, 1);
 
     const loadedChunks = await Promise.all(
       chunks.map(async ({ dateFrom: loadDateFrom, dateTo: loadDateTo }) => {
@@ -466,9 +487,6 @@ class ImporterWorkerService extends Service {
         let dateNext = dayjs.utc(loadDateFrom);
         while (dateNext.valueOf() <= dayjs.utc(loadDateTo).valueOf()) {
           try {
-            this.logger.info(
-              `Loading  ${exchange} ${asset} ${currency} trades ${dateNext.toISOString()}`
-            );
             const response = await this.broker.call(
               `${cpz.Service.PUBLIC_CONNECTOR}.getTrades`,
               {
@@ -480,12 +498,6 @@ class ImporterWorkerService extends Service {
             );
             if (!response || !Array.isArray(response))
               throw new Error("Wrong connector response");
-
-            this.logger.info(
-              `Loaded trades ${exchange} ${asset} ${currency} ${
-                response.length
-              } trades ${dateNext.toISOString()}`
-            );
             dateNext = dayjs.utc(loadDateTo);
             if (response.length > 0) {
               loadedTrades = uniqueElementsBy(
@@ -529,9 +541,6 @@ class ImporterWorkerService extends Service {
         Object.keys(candlesInTimeframes).map(async (timeframe: string) => {
           try {
             if (candlesInTimeframes[+timeframe].length > 0) {
-              const { exchange, asset, currency } = candlesInTimeframes[
-                +timeframe
-              ][0];
               const chunks = chunkArray(candlesInTimeframes[+timeframe], 500);
               for (const chunk of chunks) {
                 try {

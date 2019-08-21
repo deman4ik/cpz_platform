@@ -2,8 +2,8 @@ import { cpz } from "../types/cpz";
 import dayjs from "../lib/dayjs";
 
 function durationUnit(
-  dateFrom: string | number,
-  dateTo: string | number,
+  dateFrom: string,
+  dateTo: string,
   amountInUnit: number = 1,
   unit: cpz.TimeUnit
 ): number {
@@ -11,8 +11,8 @@ function durationUnit(
 }
 
 function createDatesList(
-  dateFrom: string | number,
-  dateTo: string | number,
+  dateFrom: string,
+  dateTo: string,
   unit: cpz.TimeUnit,
   amountInUnit: number = 1,
   duration: number = durationUnit(dateFrom, dateTo, amountInUnit, unit)
@@ -30,8 +30,8 @@ function createDatesList(
 }
 
 function createDatesListWithRange(
-  dateFrom: string | number,
-  dateTo: string | number,
+  dateFrom: string,
+  dateTo: string,
   unit: cpz.TimeUnit,
   amountInUnit: number = 1,
   duration: number = durationUnit(dateFrom, dateTo, amountInUnit, unit)
@@ -51,24 +51,30 @@ function createDatesListWithRange(
 }
 
 function chunkDates(
-  dateFrom: string | number,
-  dateTo: string | number,
+  dateFrom: string,
+  dateTo: string,
   unit: cpz.TimeUnit,
   amountInUnit: number = 1,
   chunkSize: number
 ) {
-  const list = createDatesList(dateFrom, dateTo, unit, amountInUnit);
+  const list = createDatesListWithRange(
+    dateFrom,
+    dateTo,
+    unit,
+    amountInUnit,
+    durationUnit(dateFrom, dateTo, amountInUnit, unit) + 1
+  );
   const arrayToChunk = [...list];
   const chunks = [];
+  const endDate = dayjs.utc(dateTo).valueOf();
   while (arrayToChunk.length) {
     const chunk = arrayToChunk.splice(0, chunkSize);
     chunks.push({
-      dateFrom: dayjs.utc(chunk[0]).toISOString(),
-      dateTo: dayjs
-        .utc(chunk[chunk.length - 1])
-        .endOf(unit)
-        .toISOString(),
-      duration: chunk.length
+      dateFrom: dayjs.utc(chunk[0].dateFrom).toISOString(),
+      dateTo:
+        dayjs.utc(chunk[chunk.length - 1].dateTo).valueOf() > endDate
+          ? dateTo
+          : dayjs.utc(chunk[chunk.length - 1].dateTo).toISOString()
     });
   }
 
@@ -76,7 +82,7 @@ function chunkDates(
 }
 
 function getValidDate(
-  date: string | number,
+  date: string,
   unit: cpz.TimeUnit = cpz.TimeUnit.minute
 ): string {
   if (

@@ -1,5 +1,6 @@
 import { Service, ServiceBroker, Errors } from "moleculer";
-import ccxt, { Exchange, bitfinex, kraken } from "ccxt";
+import ccxt, { Exchange } from "ccxt";
+import HttpsProxyAgent from "https-proxy-agent";
 import retry from "async-retry";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
@@ -132,19 +133,17 @@ class PublicConnectorService extends Service {
               err && !!err.retryable
           },
           async handler(ctx): Promise<cpz.ExchangeTrade[]> {
-            return this.getTrades(ctx.params);
+            return await this.getTrades(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.currency,
+              ctx.params.dateFrom
+            );
           }
         }
       }
     });
   }
-
-  /**
-   * Custom fetch method with proxy agent
-   *
-   * @memberof PublicConnectorService
-   */
-  _fetch = createFetchMethod(process.env.PROXY_ENDPOINT_PUBLIC);
 
   /**
    * List of ccxt instances
@@ -164,6 +163,13 @@ class PublicConnectorService extends Service {
     minTimeout: 0,
     maxTimeout: 0
   };
+
+  /**
+   * Custom fetch method with proxy agent
+   *
+   * @memberof PublicConnectorService
+   */
+  _fetch = createFetchMethod(process.env.PROXY_ENDPOINT);
 
   /**
    * Initialize public CCXT instance
@@ -477,12 +483,13 @@ class PublicConnectorService extends Service {
               since: since * 1000000
             }
           : null;
+
       const call = async (bail: (e: Error) => void) => {
         try {
           return await this.publicConnectors[exchange].fetchTrades(
             this.getSymbol(asset, currency),
             since,
-            2000,
+            1000,
             params
           );
         } catch (e) {

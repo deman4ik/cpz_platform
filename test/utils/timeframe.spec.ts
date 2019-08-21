@@ -93,6 +93,15 @@ describe("Test 'Timeframe' class", () => {
         )
       ).toBe(1);
     });
+    it("should return duration in days for timeframe 1440", () => {
+      expect(
+        Timeframe.durationTimeframe(
+          "2018-01-01T00:00:00.000Z",
+          "2018-01-01T23:59:59.999Z",
+          1440
+        )
+      ).toBe(1);
+    });
   });
   describe("Test 'getCurrentSince'", () => {
     beforeAll(() => {

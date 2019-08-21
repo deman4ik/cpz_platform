@@ -27,7 +27,7 @@ async function handleCandleGaps(
   // Если есть пропуски
   if (diffs.length > 0) {
     // Для каждой пропущенный свечи
-    diffs.forEach(async diffTime => {
+    for (const diffTime of diffs) {
       // Время предыдущей свечи
       const previousTime = dayjs
         .utc(diffTime)
@@ -56,7 +56,7 @@ async function handleCandleGaps(
         candles.push(gappedCandle);
         candles = candles.sort((a, b) => sortAsc(a.time, b.time));
       }
-    });
+    }
   }
   candles = candles.filter(
     c =>

@@ -2,7 +2,6 @@ import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
-import Microjob from "../../mixins/microjob";
 import Robot from "../../state/robot/robot";
 import { Op } from "sequelize";
 import { sortAsc, chunkNumberToArray } from "../../utils";
@@ -12,7 +11,6 @@ class BacktesterWorkerService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.BACKTESTER_WORKER,
-      mixins: [Microjob],
       dependencies: [
         `${cpz.Service.DB_BACKTESTS}`,
         `${cpz.Service.DB_BACKTEST_POSITIONS}`,
@@ -27,11 +25,6 @@ class BacktesterWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}240`,
         `${cpz.Service.DB_CANDLES}1440`
       ],
-      actions: {
-        test: ctx => {
-          this.logger.info("test");
-        }
-      },
       events: {
         [cpz.Event.BACKTESTER_WORKER_START]: this.handleStartEvent
       },

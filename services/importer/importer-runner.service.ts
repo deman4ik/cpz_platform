@@ -109,7 +109,7 @@ class ImporterRunnerService extends Service {
     this.logger.info(`Job #${jobID} progress is ${progress}%`);
   }
   async jobCompleted(jobID: JobId, res: any) {
-    this.logger.info(`Job #${jobID} completed!. Result:`, res);
+    this.logger.info(`Job #${jobID} completed! Result:`, res);
   }
   async jobError(error: Error) {
     this.logger.error(error);
