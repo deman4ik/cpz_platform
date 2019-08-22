@@ -97,7 +97,7 @@ class BaseStrategy implements cpz.Strategy {
 
   _logEvent(data: any) {
     this._eventsToSend.push({
-      type: cpz.Event.LOG,
+      type: cpz.Event.ROBOT_LOG,
       data: {
         ...data,
         robotId: this._robotId

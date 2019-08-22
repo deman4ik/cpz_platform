@@ -69,7 +69,7 @@ class BaseIndicator implements cpz.Indicator {
 
   _logEvent(data: any) {
     this._eventsToSend.push({
-      type: cpz.Event.LOG,
+      type: cpz.Event.ROBOT_LOG,
       data: { ...data, name: this._name, indicatorName: this._indicatorName }
     });
   }

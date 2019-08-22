@@ -114,7 +114,9 @@ class Robot {
   }
 
   get logEventsToSend() {
-    return this._eventsToSend.filter(({ type }) => type === cpz.Event.LOG);
+    return this._eventsToSend.filter(
+      ({ type }) => type === cpz.Event.ROBOT_LOG
+    );
   }
 
   get strategyName() {

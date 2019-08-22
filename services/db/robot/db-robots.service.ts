@@ -132,7 +132,6 @@ class RobotsService extends Service {
         hasAlerts,
         statistics
       }: cpz.RobotState = ctx.params.entity;
-      this.logger.info(ctx.params.entity);
       const value = Object.values({
         id,
         code,

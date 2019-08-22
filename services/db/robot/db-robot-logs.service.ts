@@ -24,8 +24,23 @@ class RobotLogsService extends Service {
           createdAt: "created_at",
           updatedAt: "updated_at"
         }
+      },
+      events: {
+        [cpz.Event.ROBOT_LOG]: this.handleRobotLog
       }
     });
+  }
+
+  async handleRobotLog(ctx: Context) {
+    try {
+      const { data, data: robotId } = ctx.params;
+      await this.adapter.insert({
+        robotId,
+        data
+      });
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
 
