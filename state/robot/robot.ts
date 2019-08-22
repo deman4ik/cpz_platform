@@ -12,6 +12,8 @@ class Robot {
   _id: string;
   _code: string;
   _name: string;
+  _description: string;
+  _available: number;
   _exchange: string;
   _asset: string;
   _currency: string;
@@ -44,6 +46,8 @@ class Robot {
     this._code = state.code;
 
     this._name = state.name;
+    this._description = state.description;
+    this._available = state.available;
     /* Код биржи */
     this._exchange = state.exchange;
     /* Базовая валюта */
@@ -237,10 +241,12 @@ class Robot {
   }
 
   setStrategy(
-    strategyCode: cpz.StrategyCode,
+    strategyCodeParam: cpz.StrategyCode = { init() {}, check() {} },
     strategyState: cpz.StrategyProps = this._strategy
   ) {
     try {
+      let strategyCode: { [key: string]: any } = {};
+      if (strategyCodeParam) strategyCode = strategyCodeParam;
       // Функции стратегии
       const strategyFunctions: { [key: string]: () => any } = {};
       Object.getOwnPropertyNames(strategyCode)
@@ -610,6 +616,8 @@ class Robot {
       id: this._id,
       code: this._code,
       name: this._name,
+      description: this._description,
+      available: this._available,
       exchange: this._exchange,
       asset: this._asset,
       currency: this._currency,

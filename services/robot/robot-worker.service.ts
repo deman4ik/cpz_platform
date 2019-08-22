@@ -113,18 +113,19 @@ class RobotWorkerService extends Service {
 
   async start(ctx: Context) {
     const { id } = ctx.params;
-
+    this.logger.info(`Robot #${id} starting...`);
     await this.run({ id: uuid(), robotId: id, type: cpz.RobotJobType.start });
     return { id, status: cpz.Status.started };
   }
 
   async processJobs(robotId: string) {
     try {
+      this.logger.info(`Robot #${robotId} started processing jobs`);
       let [nextJob]: cpz.RobotJob[] = await this.broker.call(
         `${cpz.Service.DB_ROBOT_JOBS}.find`,
         {
           limit: 1,
-          sort: "createdAt",
+          sort: "created_at",
           query: {
             robotId
           }
@@ -141,7 +142,7 @@ class RobotWorkerService extends Service {
               `${cpz.Service.DB_ROBOT_JOBS}.find`,
               {
                 limit: 1,
-                sort: "createdAt",
+                sort: "created_at",
                 query: {
                   robotId
                 }
@@ -152,6 +153,7 @@ class RobotWorkerService extends Service {
           }
         }
       }
+      this.logger.info(`Robot #${robotId} finished processing jobs`);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -160,7 +162,7 @@ class RobotWorkerService extends Service {
 
   async run(job: cpz.RobotJob) {
     const { type, robotId, data } = job;
-    this.logger.info(`Robot ${robotId} - ${type}`);
+    this.logger.info(`Robot #${robotId} processing '${type}' job`);
     try {
       const robotState: cpz.RobotState = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.get`,
@@ -170,8 +172,8 @@ class RobotWorkerService extends Service {
       const robot = new Robot(robotState);
       if (type === cpz.RobotJobType.tick) {
         // New tick - checking alerts
-        const currentCandle: cpz.Candle = await this.broker.call(
-          `${cpz.Service.DB_CANDLES_CURRENT}.get`,
+        const [currentCandle]: cpz.Candle[] = await this.broker.call(
+          `${cpz.Service.DB_CANDLES_CURRENT}.find`,
           {
             query: {
               exchange: robot.exchange,
@@ -181,6 +183,7 @@ class RobotWorkerService extends Service {
             }
           }
         );
+        robot.setStrategy(null);
         robot.handleCurrentCandle(currentCandle);
 
         robot.checkAlerts();
@@ -188,10 +191,11 @@ class RobotWorkerService extends Service {
         // New candle - running strategy
         robot.setStrategy(this._strategiesCode[robot.strategyName]);
         if (robot.hasBaseIndicators) {
-          let baseIndicatorsCode;
-          robot.baseIndicatorsFileNames.forEach(fileName => {
-            return { fileName, code: this._baseIndicatorsCode[fileName] };
-          });
+          const baseIndicatorsCode = robot.baseIndicatorsFileNames.map(
+            fileName => {
+              return { fileName, code: this._baseIndicatorsCode[fileName] };
+            }
+          );
           robot.setBaseIndicatorsCode(baseIndicatorsCode);
         }
         robot.setIndicators();
@@ -221,10 +225,11 @@ class RobotWorkerService extends Service {
         robot.setStrategy(this._strategiesCode[robot.strategyName]);
         robot.initStrategy();
         if (robot.hasBaseIndicators) {
-          let baseIndicatorsCode;
-          robot.baseIndicatorsFileNames.forEach(fileName => {
-            return { fileName, code: this._baseIndicatorsCode[fileName] };
-          });
+          const baseIndicatorsCode = robot.baseIndicatorsFileNames.map(
+            fileName => {
+              return { fileName, code: this._baseIndicatorsCode[fileName] };
+            }
+          );
           robot.setBaseIndicatorsCode(baseIndicatorsCode);
         }
         robot.setIndicators();
@@ -241,7 +246,9 @@ class RobotWorkerService extends Service {
       }
 
       // Saving robot state
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, robot.state);
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, {
+        entity: robot.state
+      });
       // Saving robot positions
       if (robot.positionsToSave.length > 0) {
         await Promise.all(
@@ -249,7 +256,7 @@ class RobotWorkerService extends Service {
             async position =>
               await this.broker.call(
                 `${cpz.Service.DB_ROBOT_POSITIONS}.upsert`,
-                position
+                { entity: position }
               )
           )
         );

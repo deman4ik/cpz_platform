@@ -14,7 +14,7 @@ class RobotJobsService extends Service {
       model: {
         name: "robot_jobs",
         define: {
-          id: { type: Sequelize.STRING, primaryKey: true },
+          id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.STRING, field: "robot_id" },
           type: Sequelize.STRING,
           data: { type: Sequelize.JSONB, allowNull: true }
@@ -51,7 +51,7 @@ class RobotJobsService extends Service {
       const value = Object.values({
         robotId,
         type,
-        data
+        data: JSON.stringify(data)
       });
       const query = `INSERT INTO robot_jobs
      (  

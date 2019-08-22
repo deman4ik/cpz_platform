@@ -14,7 +14,7 @@ class IndicatorsService extends Service {
       model: {
         name: "indicators",
         define: {
-          id: { type: Sequelize.STRING, primaryKey: true },
+          id: { type: Sequelize.UUID, primaryKey: true },
           name: { type: Sequelize.STRING },
           author: { type: Sequelize.STRING, allowNull: true },
           available: Sequelize.INTEGER,

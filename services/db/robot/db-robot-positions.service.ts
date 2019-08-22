@@ -14,7 +14,7 @@ class RobotPositionsService extends Service {
       model: {
         name: "robot_positions",
         define: {
-          id: { type: Sequelize.STRING, primaryKey: true },
+          id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.STRING, field: "robot_id" },
           prefix: "string",
           code: "string",
@@ -177,7 +177,7 @@ class RobotPositionsService extends Service {
         exitOrderType,
         exitAction,
         exitCandleTimestamp,
-        alerts,
+        alerts: JSON.stringify(alerts),
         profit
       });
       const query = `INSERT INTO robot_positions

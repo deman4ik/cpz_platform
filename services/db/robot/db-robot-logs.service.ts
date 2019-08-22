@@ -14,7 +14,7 @@ class RobotLogsService extends Service {
       model: {
         name: "robot_logs",
         define: {
-          id: { type: Sequelize.STRING, primaryKey: true },
+          id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.STRING, field: "robot_id" },
           data: { type: Sequelize.JSONB }
         },

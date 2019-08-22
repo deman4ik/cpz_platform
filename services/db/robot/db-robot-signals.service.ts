@@ -14,7 +14,7 @@ class RobotSignalsService extends Service {
       model: {
         name: "robot_signals",
         define: {
-          id: { type: Sequelize.STRING, primaryKey: true },
+          id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.STRING, field: "robot_id" },
           action: { type: Sequelize.STRING },
           orderType: { type: Sequelize.STRING, field: "order_type" },

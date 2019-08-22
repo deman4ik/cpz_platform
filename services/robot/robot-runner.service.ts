@@ -75,7 +75,9 @@ class RobotRunnerService extends Service {
   }
 
   async queueJob(job: cpz.RobotJob, status: string) {
-    await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.upsert`, job);
+    await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.upsert`, {
+      entity: job
+    });
     const { robotId } = job;
     if (status === cpz.Status.started)
       await this.createJob(cpz.Queue.runRobot, job, {
@@ -201,27 +203,21 @@ class RobotRunnerService extends Service {
   async handleNewCandle(ctx: Context) {
     try {
       const candle: cpz.Candle = <cpz.Candle>ctx.params;
-      const { exchange, asset, currency, timeframe } = candle;
+      const { exchange, asset, currency, timeframe, timestamp } = candle;
       const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.find`,
+        `${cpz.Service.DB_ROBOTS}.findActive`,
         {
-          query: {
-            exchange,
-            asset,
-            currency,
-            timeframe,
-            [Op.or]: [
-              {
-                status: cpz.Status.started
-              },
-              {
-                status: cpz.Status.paused
-              }
-            ]
-          }
+          exchange,
+          asset,
+          currency,
+          timeframe
         }
       );
-
+      this.logger.info(
+        `New candle ${exchange}.${asset}.${currency}.${timeframe} ${timestamp} required by ${
+          robots.length
+        }`
+      );
       await Promise.all(
         robots.map(
           async ({ id, status }) =>
@@ -244,26 +240,20 @@ class RobotRunnerService extends Service {
   async handleNewTick(ctx: Context) {
     try {
       const tick: cpz.ExwatcherTrade = <cpz.ExwatcherTrade>ctx.params;
-      const { exchange, asset, currency } = tick;
+      const { exchange, asset, currency, timestamp, price } = tick;
       const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.find`,
+        `${cpz.Service.DB_ROBOTS}.findActive`,
         {
-          query: {
-            exchange,
-            asset,
-            currency,
-            [Op.or]: [
-              {
-                status: cpz.Status.started
-              },
-              {
-                status: cpz.Status.paused
-              }
-            ]
-          }
+          exchange,
+          asset,
+          currency
         }
       );
-
+      this.logger.info(
+        `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${
+          robots.length
+        }`
+      );
       await Promise.all(
         robots.map(
           async ({ id, status }) =>

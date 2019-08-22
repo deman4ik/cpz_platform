@@ -3,6 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
+import { Op } from "sequelize";
 
 class RobotsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -50,6 +51,15 @@ class RobotsService extends Service {
         }
       },
       actions: {
+        findActive: {
+          params: {
+            exchange: "string",
+            asset: "string",
+            currency: "string",
+            timeframe: { type: "number", optional: true }
+          },
+          handler: this.findActive
+        },
         upsert: {
           params: {
             entity: {
@@ -57,13 +67,13 @@ class RobotsService extends Service {
               props: {
                 id: "string",
                 code: "string",
-                name: "string",
+                name: { type: "string", optional: true },
                 exchange: "string",
                 asset: "string",
                 currency: "string",
                 timeframe: { type: "number", integer: true },
                 strategyName: { type: "string" },
-                description: "string",
+                description: { type: "string", optional: true },
                 settings: "object",
                 available: { type: "number", integer: true },
                 status: "string",
@@ -79,6 +89,22 @@ class RobotsService extends Service {
           },
           handler: this.upsert
         }
+      }
+    });
+  }
+
+  async findActive(ctx: Context) {
+    return await this.adapter.find({
+      query: {
+        ...ctx.params,
+        [Op.or]: [
+          {
+            status: cpz.Status.started
+          },
+          {
+            status: cpz.Status.paused
+          }
+        ]
       }
     });
   }
@@ -106,6 +132,7 @@ class RobotsService extends Service {
         hasAlerts,
         statistics
       }: cpz.RobotState = ctx.params.entity;
+      this.logger.info(ctx.params.entity);
       const value = Object.values({
         id,
         code,
@@ -127,7 +154,7 @@ class RobotsService extends Service {
         hasAlerts,
         statistics: JSON.stringify(statistics)
       });
-      const query = `INSERT INTO backtests 
+      const query = `INSERT INTO robots 
         (   id,
             code,
             name,
