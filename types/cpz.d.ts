@@ -49,7 +49,6 @@ export namespace cpz {
     ROBOT_STARTED = "robot.started",
     ROBOT_STOPPED = "robot.stopped",
     ROBOT_UPDATED = "robot.updated",
-    ROBOT_PAUSED = "robot.paused",
     ROBOT_FAILED = "robot.failed",
     ROBOT_LOG = "robot.log",
     ROBOT_WORKER_RELOAD_CODE = "robot-worker.reload-code",
