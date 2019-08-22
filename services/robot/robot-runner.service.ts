@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
-import { Op } from "sequelize";
+import { gql } from "moleculer-apollo-server";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -26,21 +26,33 @@ class RobotRunnerService extends Service {
           params: {
             id: "string"
           },
+          graphql: {
+            mutation: "robotStart(id: ID!): ServiceStatus!"
+          },
           handler: this.start
         },
         stop: {
           params: {
             id: "string"
           },
+          graphql: {
+            mutation: "robotStop(id: ID!): ServiceStatus!"
+          },
           handler: this.stop
         },
         pause: {
+          graphql: {
+            mutation: "robotPause(id: ID): Response!"
+          },
           params: {
             id: { type: "string", optional: true }
           },
           handler: this.pause
         },
         resume: {
+          graphql: {
+            mutation: "robotResume(id: ID): Response!"
+          },
           params: {
             id: { type: "string", optional: true }
           },
@@ -89,115 +101,145 @@ class RobotRunnerService extends Service {
 
   async start(ctx: Context) {
     const { id } = ctx.params;
-    const { status } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
-      id
-    });
-    if (
-      status === cpz.Status.started ||
-      status === cpz.Status.paused ||
-      status === cpz.Status.starting ||
-      status === cpz.Status.stopping
-    )
-      return {
-        id,
-        status
-      };
+    try {
+      const { status } = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id
+        }
+      );
+      if (
+        status === cpz.Status.started ||
+        status === cpz.Status.paused ||
+        status === cpz.Status.starting ||
+        status === cpz.Status.stopping
+      )
+        return {
+          id,
+          status
+        };
 
-    return await this.broker.call(`${cpz.Service.ROBOT_WORKER}.start`, { id });
+      await this.broker.call(`${cpz.Service.ROBOT_WORKER}.start`, {
+        id
+      });
+      return { success: true, id, status: cpz.Status.started };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, id: ctx.params.id, error: e };
+    }
   }
 
   async stop(ctx: Context) {
     const { id } = ctx.params;
-    const { status } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
-      id
-    });
-    if (status === cpz.Status.stopping || status === cpz.Status.stopped)
+    try {
+      const { status } = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id
+        }
+      );
+      if (status === cpz.Status.stopping || status === cpz.Status.stopped)
+        return {
+          id,
+          status
+        };
+
+      await this.queueJob(
+        {
+          id: uuid(),
+          robotId: id,
+          type: cpz.RobotJobType.stop
+        },
+        status
+      );
       return {
+        success: true,
         id,
         status
       };
-
-    await this.queueJob(
-      {
-        id: uuid(),
-        robotId: id,
-        type: cpz.RobotJobType.stop
-      },
-      status
-    );
-    return {
-      id,
-      status
-    };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, id: ctx.params.id, error: e };
+    }
   }
 
   async pause(ctx: Context) {
-    const { id } = ctx.params;
-    let robotsToPause: { id: string; status: string }[] = [];
-    if (id) {
-      const { status } = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.get`,
-        { id }
-      );
-      if (status === cpz.Status.started) robotsToPause.push({ id, status });
-    } else {
-      const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.find`,
-        {
-          query: { status: cpz.Status.started }
-        }
-      );
-      robotsToPause = robots.map(({ id, status }) => ({ id, status }));
+    try {
+      const { id } = ctx.params;
+      let robotsToPause: { id: string; status: string }[] = [];
+      if (id) {
+        const { status } = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.get`,
+          { id }
+        );
+        if (status === cpz.Status.started) robotsToPause.push({ id, status });
+      } else {
+        const robots: cpz.RobotState[] = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.find`,
+          {
+            query: { status: cpz.Status.started }
+          }
+        );
+        robotsToPause = robots.map(({ id, status }) => ({ id, status }));
+      }
+
+      if (robotsToPause.length > 0)
+        await Promise.all(
+          robotsToPause.map(async ({ id, status }) => {
+            await this.queueJob(
+              {
+                id: uuid(),
+                robotId: id,
+                type: cpz.RobotJobType.pause
+              },
+              status
+            );
+          })
+        );
+
+      return { success: true, result: robotsToPause.length };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e };
     }
-
-    if (robotsToPause.length > 0)
-      await Promise.all(
-        robotsToPause.map(async ({ id, status }) => {
-          await this.queueJob(
-            {
-              id: uuid(),
-              robotId: id,
-              type: cpz.RobotJobType.pause
-            },
-            status
-          );
-        })
-      );
-
-    return robotsToPause.length;
   }
 
   async resume(ctx: Context) {
-    const { id } = ctx.params;
-    let robotIds: string[] = [];
-    if (id) {
-      const { status } = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.get`,
-        { id }
-      );
-      if (status === cpz.Status.paused) robotIds.push(id);
-    } else {
-      const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.find`,
-        {
-          query: { status: cpz.Status.paused }
-        }
-      );
-      robotIds = robots.map(({ id }) => id);
+    try {
+      const { id } = ctx.params;
+      let robotIds: string[] = [];
+      if (id) {
+        const { status } = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.get`,
+          { id }
+        );
+        if (status === cpz.Status.paused) robotIds.push(id);
+      } else {
+        const robots: cpz.RobotState[] = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.find`,
+          {
+            query: { status: cpz.Status.paused }
+          }
+        );
+        robotIds = robots.map(({ id }) => id);
+      }
+
+      if (robotIds.length > 0)
+        await Promise.all(
+          robotIds.map(async robotId => {
+            await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+              id: robotId,
+
+              status: cpz.Status.started
+            });
+          })
+        );
+
+      return { success: true, result: robotIds.length };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e };
     }
-
-    if (robotIds.length > 0)
-      await Promise.all(
-        robotIds.map(async robotId => {
-          await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
-            id: robotId,
-
-            status: cpz.Status.started
-          });
-        })
-      );
-
-    return robotIds.length;
   }
 
   async handleNewCandle(ctx: Context) {

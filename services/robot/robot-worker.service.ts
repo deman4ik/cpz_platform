@@ -115,7 +115,6 @@ class RobotWorkerService extends Service {
     const { id } = ctx.params;
     this.logger.info(`Robot #${id} starting...`);
     await this.run({ id: uuid(), robotId: id, type: cpz.RobotJobType.start });
-    return { id, status: cpz.Status.started };
   }
 
   async processJobs(robotId: string) {

@@ -6,7 +6,14 @@ const GreeterService: ServiceSchema = {
   /**
    * Service settings
    */
-  settings: {},
+  settings: {
+    graphql: {
+      type: `type Response {
+        name: String!
+        status: String!
+      }`
+    }
+  },
 
   /**
    * Service dependencies
@@ -35,8 +42,11 @@ const GreeterService: ServiceSchema = {
       params: {
         name: "string"
       },
+      graphql: {
+        mutation: "hello(name: String!): Response"
+      },
       handler(ctx) {
-        return `Welcome, ${ctx.params.name}`;
+        return { name: ctx.params.name, status: "ok" };
       }
     }
   },

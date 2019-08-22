@@ -47,6 +47,10 @@ class ImporterRunnerService extends Service {
               optional: true
             }
           },
+          graphql: {
+            mutation:
+              "importerStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
+          },
           handler: this.startRecent
         },
         startHistory: {
@@ -73,6 +77,10 @@ class ImporterRunnerService extends Service {
               type: "string"
             }
           },
+          graphql: {
+            mutation:
+              "importerStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: Datetime!, dateTo: Datetime!): ServiceStatus!"
+          },
           handler: this.startHistory
         },
         clean: {
@@ -92,11 +100,17 @@ class ImporterRunnerService extends Service {
               optional: true
             }
           },
+          graphql: {
+            mutation: "importerCleanJobs(period: Int, status: String): JSON"
+          },
           handler: this.clean
         },
         getStatus: {
           params: {
             id: "string"
+          },
+          graphql: {
+            query: "importerJobStatus(id: ID!): JSON!"
           },
           handler: this.getStatus
         }
@@ -132,47 +146,57 @@ class ImporterRunnerService extends Service {
 
   async startRecent(ctx: Context) {
     const id = uuid();
-    const state: cpz.Importer = {
-      id,
-      exchange: ctx.params.exchange,
-      asset: ctx.params.asset,
-      currency: ctx.params.currency,
-      type: "recent",
-      params: {
-        timeframes: ctx.params.timeframes || Timeframe.validArray,
-        amount: ctx.params.amount || CANDLES_RECENT_AMOUNT
-      },
-      status: cpz.Status.queued
-    };
-    await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-      entity: state
-    });
-    await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
+    try {
+      const state: cpz.Importer = {
+        id,
+        exchange: ctx.params.exchange,
+        asset: ctx.params.asset,
+        currency: ctx.params.currency,
+        type: "recent",
+        params: {
+          timeframes: ctx.params.timeframes || Timeframe.validArray,
+          amount: ctx.params.amount || CANDLES_RECENT_AMOUNT
+        },
+        status: cpz.Status.queued
+      };
+      await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+        entity: state
+      });
+      await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
 
-    return { id, status: state.status };
+      return { success: true, id, status: state.status };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, id, error: e };
+    }
   }
 
   async startHistory(ctx: Context) {
     const id = uuid();
-    const state: cpz.Importer = {
-      id,
-      exchange: ctx.params.exchange,
-      asset: ctx.params.asset,
-      currency: ctx.params.currency,
-      type: "history",
-      params: {
-        timeframes: ctx.params.timeframes || Timeframe.validArray,
-        dateFrom: ctx.params.dateFrom,
-        dateTo: ctx.params.dateTo
-      },
-      status: cpz.Status.queued
-    };
-    await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-      entity: state
-    });
-    await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
+    try {
+      const state: cpz.Importer = {
+        id,
+        exchange: ctx.params.exchange,
+        asset: ctx.params.asset,
+        currency: ctx.params.currency,
+        type: "history",
+        params: {
+          timeframes: ctx.params.timeframes || Timeframe.validArray,
+          dateFrom: ctx.params.dateFrom,
+          dateTo: ctx.params.dateTo
+        },
+        status: cpz.Status.queued
+      };
+      await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+        entity: state
+      });
+      await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
 
-    return { jobId: id, status: state.status };
+      return { success: true, id, status: state.status };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, id, error: e };
+    }
   }
 
   async clean(ctx: Context) {

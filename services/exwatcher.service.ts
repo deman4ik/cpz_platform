@@ -36,6 +36,15 @@ class ExwatcherService extends Service {
         `${cpz.Service.DB_CANDLES}240`,
         `${cpz.Service.DB_CANDLES}1440`
       ],
+      settings: {
+        graphql: `
+        input Market {
+          exchange: String!
+          asset: String!
+          currency: String!
+        }
+        `
+      },
       /**
        * Actions
        */
@@ -52,6 +61,10 @@ class ExwatcherService extends Service {
             exchange: "string",
             asset: "string",
             currency: "string"
+          },
+          graphql: {
+            mutation:
+              "exwatcherSubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
           async handler(ctx) {
             return await this.addSubscription(
@@ -80,17 +93,26 @@ class ExwatcherService extends Service {
               }
             }
           },
+          graphql: {
+            mutation: "exwatcherSubscribeMany([Market!]!): Response!"
+          },
           async handler(ctx) {
-            return await Promise.all(
-              ctx.params.subscriptions.map(
-                async (sub: {
-                  exchange: string;
-                  asset: string;
-                  currency: string;
-                }) =>
-                  this.addSubscription(sub.exchange, sub.asset, sub.currency)
-              )
-            );
+            try {
+              await Promise.all(
+                ctx.params.subscriptions.map(
+                  async (sub: {
+                    exchange: string;
+                    asset: string;
+                    currency: string;
+                  }) =>
+                    this.addSubscription(sub.exchange, sub.asset, sub.currency)
+                )
+              );
+              return { success: true };
+            } catch (e) {
+              this.logger.error(e);
+              return { success: false, error: e };
+            }
           }
         },
         /**
@@ -105,6 +127,10 @@ class ExwatcherService extends Service {
             exchange: "string",
             asset: "string",
             currency: "string"
+          },
+          graphql: {
+            mutation:
+              "exwatcherUnsubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
           async handler(ctx) {
             return await this.removeSubscription(
@@ -133,17 +159,30 @@ class ExwatcherService extends Service {
               }
             }
           },
+          graphql: {
+            mutation: "exwatcherUnsubscribeMany([Market!]!): Response!"
+          },
           async handler(ctx) {
-            return await Promise.all(
-              ctx.params.subscriptions.map(
-                async (sub: {
-                  exchange: string;
-                  asset: string;
-                  currency: string;
-                }) =>
-                  this.removeSubscription(sub.exchange, sub.asset, sub.currency)
-              )
-            );
+            try {
+              await Promise.all(
+                ctx.params.subscriptions.map(
+                  async (sub: {
+                    exchange: string;
+                    asset: string;
+                    currency: string;
+                  }) =>
+                    this.removeSubscription(
+                      sub.exchange,
+                      sub.asset,
+                      sub.currency
+                    )
+                )
+              );
+              return { success: true };
+            } catch (e) {
+              this.logger.error(e);
+              return { success: false, error: e };
+            }
           }
         }
       },
@@ -379,8 +418,7 @@ class ExwatcherService extends Service {
         }
       }
       return {
-        success: true,
-        subscription: this.subscriptions[id]
+        success: true
       };
     } catch (e) {
       this.logger.error(e);
@@ -411,8 +449,6 @@ class ExwatcherService extends Service {
     currency: string
   ): Promise<{
     success: boolean;
-    id: string;
-    status: string;
     error?: any;
   }> {
     const id = `${exchange}.${asset}.${currency}`;
@@ -430,16 +466,12 @@ class ExwatcherService extends Service {
         Object.keys(this.trades)
       );
       return {
-        success: true,
-        id,
-        status: cpz.ExwatcherStatus.unsubscribed
+        success: true
       };
     } catch (e) {
       this.logger.error(e);
       return {
         success: false,
-        id,
-        status: this.subscriptions[id].status,
         error: e
       };
     }

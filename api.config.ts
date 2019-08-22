@@ -4,14 +4,14 @@ const brokerConfig: BrokerOptions = {
   // Namespace of nodes to segment your nodes on the same network.
   namespace: "cpz-local",
   // Unique node identifier. Must be unique in a namespace.
-  nodeID: "control",
+  nodeID: "api",
 
   // Enable/disable logging or use custom logger. More info: https://moleculer.services/docs/0.13/logging.html
   logger: true,
   // Log level for built-in console logger. Available values: trace, debug, info, warn, error, fatal
   logLevel: "info",
   transporter: "TCP",
-  cacher: "Redis",
+  cacher: false,
   serializer: "JSON",
   requestTimeout: 30 * 1000,
 
