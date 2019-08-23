@@ -36,8 +36,21 @@ class RobotSignalsService extends Service {
           createdAt: "created_at",
           updatedAt: "updated_at"
         }
+      },
+      events: {
+        [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
+        [cpz.Event.SIGNAL_TRADE]: this.handleSignal
       }
     });
+  }
+
+  async handleSignal(ctx: Context) {
+    try {
+      const { data } = ctx.params;
+      await this.adapter.insert(data);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
 
