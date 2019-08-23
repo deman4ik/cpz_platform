@@ -190,6 +190,7 @@ class BaseStrategy implements cpz.Strategy {
     this._positions[code] = new Position({
       id: uuid(),
       robotId: this._robotId,
+      timeframe: this._timeframe,
       prefix,
       code,
       parentId: parentId

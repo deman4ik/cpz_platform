@@ -16,8 +16,9 @@ class BacktestPositionsService extends Service {
         define: {
           id: { type: Sequelize.STRING, primaryKey: true },
           backtestId: { type: Sequelize.STRING, field: "backtest_id" },
-          prefix: "string",
-          code: "string",
+          timeframe: Sequelize.INTEGER,
+          prefix: Sequelize.STRING,
+          code: Sequelize.STRING,
           parentId: {
             type: Sequelize.STRING,
             field: "parent_id",
@@ -86,7 +87,12 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },
-          profit: { type: Sequelize.NUMBER, allowNull: true }
+          profit: { type: Sequelize.NUMBER, allowNull: true },
+          barsHeld: {
+            type: Sequelize.INTEGER,
+            field: "bars_held",
+            allowNull: true
+          }
         },
         options: {
           freezeTableName: true,
@@ -103,7 +109,7 @@ class BacktestPositionsService extends Service {
               props: {
                 id: "string",
                 backtestId: { type: "string" },
-                dateTo: "string",
+                timeframe: { type: "number", integer: true },
                 prefix: "string",
                 code: "string",
                 parentId: { type: "string", optional: true },
@@ -122,7 +128,8 @@ class BacktestPositionsService extends Service {
                 exitAction: { type: "string", optional: true },
                 exitCandleTimestamp: { type: "string", optional: true },
                 alerts: { type: "string", optional: true },
-                profit: { type: "number", optional: true }
+                profit: { type: "number", optional: true },
+                barsHeld: { type: "number", integer: true, optional: true }
               }
             }
           },
@@ -137,6 +144,7 @@ class BacktestPositionsService extends Service {
       const {
         id,
         backtestId,
+        timeframe,
         prefix,
         code,
         parentId,
@@ -155,11 +163,13 @@ class BacktestPositionsService extends Service {
         exitAction,
         exitCandleTimestamp,
         alerts,
-        profit
+        profit,
+        barsHeld
       }: cpz.BacktesterPositionState = ctx.params.entity;
       const value = Object.values({
         id,
         backtestId,
+        timeframe,
         prefix,
         code,
         parentId,
@@ -177,12 +187,14 @@ class BacktestPositionsService extends Service {
         exitOrderType,
         exitAction,
         exitCandleTimestamp,
-        alerts,
-        profit
+        alerts: JSON.stringify(alerts),
+        profit,
+        barsHeld
       });
       const query = `INSERT INTO backtest_positions
      (  id,
         backtest_id,
+        timeframe,
         prefix,
         code,
         parent_id,
@@ -201,7 +213,8 @@ class BacktestPositionsService extends Service {
         exit_action,
         exit_candle_timestamp,
         alerts,
-        profit
+        profit,
+        bars_held
         ) 
         VALUES (?)
          ON CONFLICT ON CONSTRAINT backtest_positions_pkey 
@@ -213,7 +226,8 @@ class BacktestPositionsService extends Service {
          exit_action = excluded.exit_action,
          exit_candle_timestamp = excluded.exit_candle_timestamp,
          alerts = excluded.alerts,
-         profit = excluded.profit;`;
+         profit = excluded.profit,
+         bars_held = excluded.bars_held;`;
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,

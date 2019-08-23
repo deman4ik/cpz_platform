@@ -10,6 +10,7 @@ import dayjs from "../../lib/dayjs";
 class Position implements cpz.RobotPosition {
   private _id: string;
   private _robotId: string;
+  private _timeframe: number;
   private _prefix: string;
   private _code: string;
   private _parentId?: string;
@@ -29,6 +30,7 @@ class Position implements cpz.RobotPosition {
   private _exitCandleTimestamp?: string;
   private _alerts?: { [key: string]: cpz.AlertInfo };
   private _profit: number;
+  private _barsHeld: number;
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
   private _tradeToPublish: cpz.SignalInfo;
@@ -37,6 +39,7 @@ class Position implements cpz.RobotPosition {
   constructor(state: cpz.RobotPositionState) {
     this._id = state.id;
     this._robotId = state.robotId;
+    this._timeframe = state.timeframe;
     this._prefix = state.prefix;
     this._code = state.code;
     this._parentId = state.parentId;
@@ -56,6 +59,7 @@ class Position implements cpz.RobotPosition {
     this._exitCandleTimestamp = state.exitCandleTimestamp;
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
+    this._barsHeld = state.barsHeld || 0;
     this._alertsToPublish = [];
     this._tradeToPublish = null;
     this._candle = null;
@@ -121,6 +125,7 @@ class Position implements cpz.RobotPosition {
     return {
       id: this._id,
       robotId: this._robotId,
+      timeframe: this._timeframe,
       prefix: this._prefix,
       code: this._code,
       parentId: this._parentId,
@@ -139,7 +144,8 @@ class Position implements cpz.RobotPosition {
       exitAction: this._exitAction,
       exitCandleTimestamp: this._exitCandleTimestamp,
       alerts: this._alerts,
-      profit: this._profit
+      profit: this._profit,
+      barsHeld: this._barsHeld
     };
   }
 
@@ -160,12 +166,18 @@ class Position implements cpz.RobotPosition {
     this._alerts = {};
   }
 
-  _calcProfit() {
+  _calcStats() {
     if (this._direction === cpz.PositionDirection.long) {
       this._profit = this._exitPrice - this._entryPrice;
     } else {
       this._profit = this._entryPrice - this._exitPrice;
     }
+    this._barsHeld = Math.floor(
+      dayjs
+        .utc(this._exitCandleTimestamp)
+        .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
+        this._timeframe
+    );
   }
 
   _handleCandle(candle: cpz.Candle) {
@@ -259,7 +271,7 @@ class Position implements cpz.RobotPosition {
     this._exitOrderType = orderType;
     this._exitAction = action;
     this._exitCandleTimestamp = this._candle.timestamp;
-    this._calcProfit();
+    this._calcStats();
     this._createTradeSignal(action, price, orderType);
   }
 

@@ -400,6 +400,7 @@ export namespace cpz {
   interface RobotPositionState {
     id: string;
     robotId: string;
+    timeframe: number;
     prefix: string;
     code: string;
     parentId?: string;
@@ -419,6 +420,7 @@ export namespace cpz {
     exitCandleTimestamp?: string;
     alerts?: { [key: string]: cpz.AlertInfo };
     profit?: number;
+    barsHeld?: number;
   }
 
   class RobotPosition {
@@ -450,6 +452,36 @@ export namespace cpz {
     strategyParameters?: { [key: string]: any };
     requiredHistoryMaxBars?: number;
   }
+
+  interface RobotStatVals {
+    all?: number;
+    long?: number;
+    short?: number;
+  }
+  interface RobotStats {
+    tradesCount?: RobotStatVals;
+    tradesWinning?: RobotStatVals;
+    tradesLosing?: RobotStatVals;
+    winRate?: RobotStatVals;
+    lossRate?: RobotStatVals;
+    avgBarsHeld?: RobotStatVals;
+    avgBarsHeldWinning?: RobotStatVals;
+    avgBarsHeldLosing?: RobotStatVals;
+    netProfit?: RobotStatVals;
+    avgNetProfit?: RobotStatVals;
+    grossProfit?: RobotStatVals;
+    avgProfit?: RobotStatVals;
+    grossLoss?: RobotStatVals;
+    avgLoss?: RobotStatVals;
+    maxSerialWins?: RobotStatVals;
+    maxSerialLosses?: RobotStatVals;
+    maxDrawdawn?: RobotStatVals;
+    maxDrawdawnDate?: string;
+    profitFactor?: RobotStatVals;
+    recoveryFactor?: RobotStatVals;
+    payoffRatio?: RobotStatVals;
+  }
+
   interface RobotState {
     id: string;
     code?: string;
@@ -469,7 +501,7 @@ export namespace cpz {
     status?: Status;
     startedAt?: string;
     stoppedAt?: string;
-    statistics?: { [key: string]: any };
+    statistics?: RobotStats;
   }
 
   interface RobotJob {
