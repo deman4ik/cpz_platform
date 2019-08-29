@@ -289,6 +289,7 @@ class RobotWorkerService extends Service {
     } catch (e) {
       this.logger.error(e);
       await this.broker.emit(cpz.Event.ROBOT_FAILED, {
+        eventType: cpz.Event.ROBOT_FAILED,
         robotId,
         jobType: type,
         error: e

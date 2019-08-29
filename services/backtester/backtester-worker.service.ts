@@ -5,6 +5,7 @@ import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
 import { Op } from "sequelize";
 import { sortAsc, chunkNumberToArray } from "../../utils";
+import requireFromString from "require-from-string";
 
 class BacktesterWorkerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -103,6 +104,9 @@ class BacktesterWorkerService extends Service {
       completedPercent: 0
     };
     try {
+      this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
+        id: backtesterState.id
+      });
       const existedBacktest = await this.broker.call(
         `${cpz.Service.DB_BACKTESTS}.get`,
         { id }
@@ -133,8 +137,15 @@ class BacktesterWorkerService extends Service {
           `../../strategies/${backtesterState.strategyName}`
         );
       } else {
-        //TODO
-        throw Error("Not implemented");
+        const strategy: string = await this.broker.call(
+          `${cpz.Service.DB_STRATEGIES}.get`,
+          {
+            id: backtesterState.strategyName
+          }
+        );
+        if (!strategy)
+          throw new Error(`Strategy ${backtesterState.strategyName} not found`);
+        strategyCode = requireFromString(strategy);
       }
       robot.setStrategy(strategyCode);
       robot.initStrategy();
@@ -149,8 +160,20 @@ class BacktesterWorkerService extends Service {
             })
           );
         } else {
-          //TODO
-          throw Error("Not implemented");
+          baseIndicatorsCode = await Promise.all(
+            robot.baseIndicatorsFileNames.map(async fileName => {
+              const indicator = await this.broker.call(
+                `${cpz.Service.DB_INDICATORS}.get`,
+                {
+                  id: fileName
+                }
+              );
+              if (!indicator)
+                throw new Error(`Indicator ${fileName} not found`);
+              const code = requireFromString(indicator);
+              return { fileName, code };
+            })
+          );
         }
 
         robot.setBaseIndicatorsCode(baseIndicatorsCode);
@@ -359,7 +382,9 @@ class BacktesterWorkerService extends Service {
         .diff(dayjs.utc(backtesterState.startedAt), "minute");
 
       this.logger.info(`Backtest finished after ${duration} minutes!`);
-      //TODO: Send finished event
+      this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED}`, {
+        id: backtesterState.id
+      });
     } catch (e) {
       this.logger.error(e);
       backtesterState.status = cpz.Status.failed;
@@ -367,7 +392,10 @@ class BacktesterWorkerService extends Service {
       await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
         entity: backtesterState
       });
-      //TODO: Send event
+      this.broker.emit(`${cpz.Event.BACKTESTER_FAILED}`, {
+        id: backtesterState.id,
+        error: e
+      });
     }
   }
 }

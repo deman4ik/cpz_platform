@@ -35,7 +35,7 @@ const brokerConfig: BrokerOptions = {
   transporter: "TCP",
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
-  cacher: "Redis",
+  cacher: false,
 
   // Define a serializer.
   // Available values: "JSON", "Avro", "ProtoBuf", "MsgPack", "Notepack", "Thrift".
@@ -48,7 +48,7 @@ const brokerConfig: BrokerOptions = {
   // Retry policy settings. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Retry
   retryPolicy: {
     // Enable feature
-    enabled: false,
+    enabled: true,
     // Count of retries
     retries: 5,
     // First delay in milliseconds.

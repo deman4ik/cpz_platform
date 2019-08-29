@@ -115,6 +115,7 @@ class RobotRunnerService extends Service {
         status === cpz.Status.stopping
       )
         return {
+          success: true,
           id,
           status
         };
@@ -140,6 +141,7 @@ class RobotRunnerService extends Service {
       );
       if (status === cpz.Status.stopping || status === cpz.Status.stopped)
         return {
+          success: true,
           id,
           status
         };
@@ -155,7 +157,7 @@ class RobotRunnerService extends Service {
       return {
         success: true,
         id,
-        status
+        status: cpz.Status.stopping
       };
     } catch (e) {
       this.logger.error(e);

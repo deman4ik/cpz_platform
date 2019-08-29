@@ -37,13 +37,15 @@ class ExwatcherService extends Service {
         `${cpz.Service.DB_CANDLES}1440`
       ],
       settings: {
-        graphql: `
+        graphql: {
+          type: `
         input Market {
           exchange: String!
           asset: String!
           currency: String!
         }
         `
+        }
       },
       /**
        * Actions
@@ -94,7 +96,8 @@ class ExwatcherService extends Service {
             }
           },
           graphql: {
-            mutation: "exwatcherSubscribeMany([Market!]!): Response!"
+            mutation:
+              "exwatcherSubscribeMany(subscriptions: [Market!]!): Response!"
           },
           async handler(ctx) {
             try {
@@ -160,7 +163,8 @@ class ExwatcherService extends Service {
             }
           },
           graphql: {
-            mutation: "exwatcherUnsubscribeMany([Market!]!): Response!"
+            mutation:
+              "exwatcherUnsubscribeMany(subscriptions: [Market!]!): Response!"
           },
           async handler(ctx) {
             try {

@@ -85,8 +85,12 @@ class Robot {
     /* Текущий статус сервиса */
     this._status = state.status || cpz.Status.pending;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt;
-    this._stoppedAt = state.stoppedAt;
+    this._startedAt = state.startedAt
+      ? dayjs.utc(state.startedAt).toISOString()
+      : null;
+    this._stoppedAt = state.stoppedAt
+      ? dayjs.utc(state.stoppedAt).toISOString()
+      : null;
     this._statistics = state.statistics || {};
 
     this._eventsToSend = [];
@@ -143,9 +147,11 @@ class Robot {
   start() {
     this._status = cpz.Status.started;
     this._startedAt = dayjs.utc().toISOString();
+    this._stoppedAt = null;
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STARTED,
       data: {
+        eventType: cpz.Event.ROBOT_STARTED,
         robotId: this._id
       }
     });
@@ -158,6 +164,7 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STOPPED,
       data: {
+        eventType: cpz.Event.ROBOT_STOPPED,
         robotId: this._id
       }
     });
@@ -168,6 +175,7 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_UPDATED,
       data: {
+        eventType: cpz.Event.ROBOT_UPDATED,
         robotId: this._id
       }
     });

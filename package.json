@@ -4,7 +4,7 @@
   "description": "Cryptuoso Cryptocurrency Trading Platform",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config moleculer.config.ts services/**/*.service.ts",
+    "dev": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config moleculer.config.ts services/db/**/*.service.ts services/*.service.ts services/**/*.service.ts",
     "api": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config api.config.ts services/api.service.ts services/greeter.service.ts",
     "importer": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importer.config.ts services/importer/importer-runner.service.ts services/importer/importer-worker.service.ts",
     "importerWorker": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --env --instances=2 --config importerWorker.config.ts services/importer/importer-worker.service.ts services/connector/public-connector.service.ts",
