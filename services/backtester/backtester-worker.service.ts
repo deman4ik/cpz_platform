@@ -210,6 +210,7 @@ class BacktesterWorkerService extends Service {
       );
       let prevIteration: number = 0;
       let prevPercent = 0;
+      const allPositions: { [key: string]: cpz.RobotPositionState } = {};
       for (const iteration of iterations) {
         this.logger.info(`Loading ${iteration} candle from DB...`);
         const requiredCandles: cpz.DBCandle[] = await this.broker.call(
@@ -269,6 +270,7 @@ class BacktesterWorkerService extends Service {
           ];
           robot.positionsToSave.forEach(pos => {
             positions[pos.id] = { ...pos, backtestId: backtesterState.id };
+            allPositions[pos.id] = pos;
           });
 
           // Running strategy
@@ -302,6 +304,7 @@ class BacktesterWorkerService extends Service {
 
           robot.positionsToSave.forEach(pos => {
             positions[pos.id] = { ...pos, backtestId: backtesterState.id };
+            allPositions[pos.id] = pos;
           });
 
           this.logger.info(
@@ -347,6 +350,8 @@ class BacktesterWorkerService extends Service {
         });
       }
 
+      robot.calcStats(Object.values(allPositions));
+      backtesterState.statistics = robot.statistics;
       backtesterState.finishedAt = dayjs.utc().toISOString();
       backtesterState.status = cpz.Status.finished;
       const duration = dayjs

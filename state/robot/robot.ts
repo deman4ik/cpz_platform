@@ -6,6 +6,7 @@ import BaseStrategy from "./robot_strategy";
 import BaseIndicator from "./robot_indicator";
 import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
 import { combineRobotSettings } from "../settings";
+import { calcStatistics } from "../../utils/tradeStatistics";
 
 class Robot {
   [key: string]: any;
@@ -202,6 +203,10 @@ class Robot {
     return this._settings.requiredHistoryMaxBars;
   }
 
+  get id() {
+    return this._id;
+  }
+
   get status() {
     return this._status;
   }
@@ -216,6 +221,10 @@ class Robot {
 
   get settings() {
     return this._settings;
+  }
+
+  get statistics() {
+    return this._statistics;
   }
 
   get hasActions() {
@@ -552,190 +561,8 @@ class Robot {
     // TODO: Send Candles.Handled Event
   }
 
-  calculateStats(positions: cpz.RobotPositionState[]) {
-    const statistics: cpz.RobotStats = {};
-    const longPositions = positions.filter(
-      ({ direction }) => direction === cpz.PositionDirection.long
-    );
-    const shortPositions = positions.filter(
-      ({ direction }) => direction === cpz.PositionDirection.long
-    );
-    statistics.tradesCount = {
-      all: positions.length,
-      long: longPositions.length,
-      short: shortPositions.length
-    };
-
-    const allWinningPositions = positions.filter(({ profit }) => profit > 0);
-    const longWinningPositions = longPositions.filter(
-      ({ profit }) => profit > 0
-    );
-    const shortWinningPositions = shortPositions.filter(
-      ({ profit }) => profit > 0
-    );
-    statistics.tradesWinning = {
-      all: allWinningPositions.length,
-      long: longWinningPositions.length,
-      short: shortWinningPositions.length
-    };
-
-    const allLosingPositions = positions.filter(({ profit }) => profit < 0);
-    const longLosingPositions = longPositions.filter(
-      ({ profit }) => profit < 0
-    );
-    const shortLosingPositions = shortPositions.filter(
-      ({ profit }) => profit < 0
-    );
-    statistics.tradesLosing = {
-      all: allLosingPositions.length,
-      long: longLosingPositions.length,
-      short: shortLosingPositions.length
-    };
-
-    // Win trades / Number of trades
-    statistics.winRate = {
-      all: Math.round(allWinningPositions.length / positions.length),
-      long: Math.round(longWinningPositions.length / longPositions.length),
-      short: Math.round(shortWinningPositions.length / shortPositions.length)
-    };
-
-    // Loss trades / Number of trades
-    statistics.lossRate = {
-      all: Math.round(allLosingPositions.length / positions.length),
-      long: Math.round(longLosingPositions.length / longPositions.length),
-      short: Math.round(shortLosingPositions.length / shortPositions.length)
-    };
-
-    const allAvgBarsHeld =
-      positions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / positions.length;
-    const longAvgBarsHeld =
-      longPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / longPositions.length;
-    const shortAvgBarsHeld =
-      shortPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / shortPositions.length;
-    statistics.avgBarsHeld = {
-      all: allAvgBarsHeld,
-      long: longAvgBarsHeld,
-      short: shortAvgBarsHeld
-    };
-
-    const allAvgWinningBarsHeld =
-      allWinningPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / allWinningPositions.length;
-    const longAvgWinningBarsHeld =
-      longWinningPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / longWinningPositions.length;
-    const shortAvgWinningBarsHeld =
-      shortWinningPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / shortWinningPositions.length;
-    statistics.avgBarsHeldWinning = {
-      all: allAvgWinningBarsHeld,
-      long: longAvgWinningBarsHeld,
-      short: shortAvgWinningBarsHeld
-    };
-
-    const allAvgLosingBarsHeld =
-      allLosingPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / allLosingPositions.length;
-    const longAvgLosingBarsHeld =
-      longLosingPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / longLosingPositions.length;
-    const shortAvgLosingBarsHeld =
-      shortLosingPositions
-        .map(({ barsHeld }) => barsHeld)
-        .reduce((acc, val) => acc + val, 0) / shortLosingPositions.length;
-    statistics.avgBarsHeldLosing = {
-      all: allAvgLosingBarsHeld,
-      long: longAvgLosingBarsHeld,
-      short: shortAvgLosingBarsHeld
-    };
-
-    const allNetProfit = positions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const longNetProfit = longPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const shortNetProfit = shortPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    statistics.netProfit = {
-      all: allNetProfit,
-      long: longNetProfit,
-      short: shortNetProfit
-    };
-
-    // Net profit / Number of trades
-    const allAvgNetProfit = allNetProfit / positions.length;
-    const longAvgNetProfit = longNetProfit / longPositions.length;
-    const shortAvgNetProfit = shortNetProfit / shortPositions.length;
-    statistics.avgNetProfit = {
-      all: allAvgNetProfit,
-      long: longAvgNetProfit,
-      short: shortAvgNetProfit
-    };
-
-    const allGrossProfit = allWinningPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const longGrossProfit = longWinningPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const shortGrossProfit = shortWinningPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    statistics.grossProfit = {
-      all: allGrossProfit,
-      long: longGrossProfit,
-      short: shortGrossProfit
-    };
-
-    const allAvgGrossProfit = allGrossProfit / allWinningPositions.length;
-    const longAvgGrossProfit = longGrossProfit / longWinningPositions.length;
-    const shortAvgGrossProfit = shortGrossProfit / shortWinningPositions.length;
-    statistics.avgProfit = {
-      all: allAvgGrossProfit,
-      long: longAvgGrossProfit,
-      short: shortAvgGrossProfit
-    };
-
-    const allGrossLoss = allLosingPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const longGrossLoss = longLosingPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    const shortGrossLoss = shortLosingPositions
-      .map(({ profit }) => profit)
-      .reduce((acc, val) => acc + val, 0);
-    statistics.grossLoss = {
-      all: allGrossLoss,
-      long: longGrossLoss,
-      short: shortGrossLoss
-    };
-
-    const allAvgGrossLoss = allGrossLoss / allLosingPositions.length;
-    const longAvgGrossLoss = longGrossLoss / longLosingPositions.length;
-    const shortAvgGrossLoss = shortGrossLoss / shortLosingPositions.length;
-    statistics.avgLoss = {
-      all: allAvgGrossLoss,
-      long: longAvgGrossLoss,
-      short: shortAvgGrossLoss
-    };
-
-    //TODO: other stats
-
-    this._statistics = statistics;
+  calcStats(positions: cpz.RobotPositionState[]) {
+    this._statistics = calcStatistics(positions);
   }
   /**
    * Запрос текущего состояния индикаторов

@@ -120,6 +120,46 @@ function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
  */
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Find last element where property is max
+ *
+ * @param {{ [key: string]: any }[]} arr
+ * @param {string} propName
+ * @returns
+ */
+function findLastByMaxProp(arr: { [key: string]: any }[], propName: string) {
+  return arr
+    .filter(
+      el =>
+        el[propName] ===
+        arr.reduce((max, p) => (p[propName] > max ? p[propName] : max), 0)
+    )
+    .pop();
+}
+
+/**
+ * Find last element where property is min
+ *
+ * @param {{ [key: string]: any }[]} arr
+ * @param {string} propName
+ * @returns
+ */
+function findLastByMinProp(arr: { [key: string]: any }[], propName: string) {
+  return arr
+    .filter(
+      el =>
+        el[propName] ===
+        arr.reduce((min, p) => (p[propName] < min ? p[propName] : min), 0)
+    )
+    .pop();
+}
+
+function divideFixed(a: number, b: number): number | 0 {
+  if (!a || !b || a === 0 || b === 0) return 0;
+  const result = a / b;
+  return +result.toFixed(2);
+}
+
 export {
   sortAsc,
   sortDesc,
@@ -129,5 +169,8 @@ export {
   chunkArrayIncrEnd,
   chunkNumberToArray,
   uniqueElementsBy,
-  sleep
+  sleep,
+  findLastByMaxProp,
+  findLastByMinProp,
+  divideFixed
 };

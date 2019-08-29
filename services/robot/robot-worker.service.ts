@@ -244,10 +244,6 @@ class RobotWorkerService extends Service {
         throw new Error(`Unknown type "${type}"`);
       }
 
-      // Saving robot state
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, {
-        entity: robot.state
-      });
       // Saving robot positions
       if (robot.positionsToSave.length > 0) {
         await Promise.all(
@@ -259,7 +255,27 @@ class RobotWorkerService extends Service {
               )
           )
         );
+
+        if (
+          robot.positionsToSave.filter(
+            ({ status }) => status === cpz.RobotPositionStatus.closed
+          ).length > 0
+        ) {
+          const allPositions = await this.broker.call(
+            `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
+            {
+              robotId: robot.id,
+              status: cpz.RobotPositionStatus.closed
+            }
+          );
+          robot.calculateStats(allPositions);
+        }
       }
+
+      // Saving robot state
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, {
+        entity: robot.state
+      });
       // Sending robot events
       if (robot.eventsToSend.length > 0) {
         await Promise.all(

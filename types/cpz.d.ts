@@ -454,9 +454,9 @@ export namespace cpz {
   }
 
   interface RobotStatVals {
-    all?: number;
-    long?: number;
-    short?: number;
+    all?: number | string;
+    long?: number | string;
+    short?: number | string;
   }
   interface RobotStats {
     tradesCount?: RobotStatVals;
@@ -473,10 +473,11 @@ export namespace cpz {
     avgProfit?: RobotStatVals;
     grossLoss?: RobotStatVals;
     avgLoss?: RobotStatVals;
-    maxSerialWins?: RobotStatVals;
-    maxSerialLosses?: RobotStatVals;
-    maxDrawdawn?: RobotStatVals;
-    maxDrawdawnDate?: string;
+    maxConnsecWins?: RobotStatVals;
+    maxConsecLosses?: RobotStatVals;
+    maxDrawdown?: RobotStatVals;
+    maxDrawdownPercent?: RobotStatVals;
+    maxDrawdownDate?: RobotStatVals;
     profitFactor?: RobotStatVals;
     recoveryFactor?: RobotStatVals;
     payoffRatio?: RobotStatVals;
@@ -530,6 +531,7 @@ export namespace cpz {
     status: string;
     startedAt?: string;
     finishedAt?: string;
+    statistics?: RobotStats;
     error?: any;
   }
 
