@@ -493,6 +493,7 @@ class Robot {
       this._strategyInstance._clearAlerts();
       // Запустить проверку стратегии
       this._strategyInstance.check();
+      this._strategyInstance._createAlertEvents();
       this.getStrategyState();
     } catch (error) {
       throw error;

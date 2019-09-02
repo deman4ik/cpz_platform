@@ -38,7 +38,6 @@ class RobotHistoryService extends Service {
   async handleRobotEvents(ctx: Context) {
     try {
       const { eventType, robotId } = ctx.params;
-      this.logger.warn(ctx.params);
       await this.adapter.insert({
         id: uuid(),
         robotId,

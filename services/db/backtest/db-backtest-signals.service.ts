@@ -27,8 +27,11 @@ class BacktestSignalsService extends Service {
             type: Sequelize.STRING,
             field: "position_parent_id"
           },
-          candleTimestamp: { type: Sequelize.DATE, field: "candle_timestamp" },
-          timestamp: { type: Sequelize.DATE }
+          candleTimestamp: {
+            type: Sequelize.STRING,
+            field: "candle_timestamp"
+          },
+          timestamp: { type: Sequelize.STRING }
         },
         options: {
           freezeTableName: true,

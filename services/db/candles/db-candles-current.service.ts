@@ -20,7 +20,7 @@ class CandlesCurrentService extends Service {
           currency: Sequelize.STRING,
           timeframe: Sequelize.INTEGER,
           time: Sequelize.BIGINT,
-          timestamp: Sequelize.DATE,
+          timestamp: Sequelize.STRING,
           open: Sequelize.DOUBLE,
           high: Sequelize.DOUBLE,
           low: Sequelize.DOUBLE,
@@ -106,6 +106,8 @@ class CandlesCurrentService extends Service {
          low = excluded.low,
          close = excluded.close,
          volume = excluded.volume,
+         time = excluded.time,
+         timestamp = excluded.timestamp,
          type = excluded.type;`;
 
       await this.adapter.db.query(query, {

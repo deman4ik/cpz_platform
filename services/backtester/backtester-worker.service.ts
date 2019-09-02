@@ -126,7 +126,7 @@ class BacktesterWorkerService extends Service {
         strategyName,
         settings: robotSettings
       });
-      robot._log = this.logger.info;
+      robot._log = this.logger.info.bind(this);
       backtesterState.robotSettings = robot.settings;
       await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
         entity: backtesterState

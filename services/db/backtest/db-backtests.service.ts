@@ -21,8 +21,8 @@ class BacktestsService extends Service {
           currency: Sequelize.STRING,
           timeframe: Sequelize.INTEGER,
           strategyName: { type: Sequelize.STRING, field: "strategy_name" },
-          dateFrom: { type: Sequelize.DATE, field: "date_from" },
-          dateTo: { type: Sequelize.DATE, field: "date_to" },
+          dateFrom: { type: Sequelize.STRING, field: "date_from" },
+          dateTo: { type: Sequelize.STRING, field: "date_to" },
           settings: Sequelize.JSONB,
           robotSettings: { type: Sequelize.JSONB, field: "robot_settings" },
           totalBars: {
@@ -46,9 +46,9 @@ class BacktestsService extends Service {
             allowNull: true
           },
           status: Sequelize.STRING,
-          startedAt: { type: Sequelize.DATE, field: "started_at" },
+          startedAt: { type: Sequelize.STRING, field: "started_at" },
           finishedAt: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "finished_at",
             allowNull: true
           },

@@ -29,7 +29,7 @@ class BaseStrategy implements cpz.Strategy {
   _consts: { [key: string]: string };
   _eventsToSend: cpz.Events<any>[];
   _positionsToSave: cpz.RobotPositionState[];
-  _log: (...args: any) => void;
+  _log = console.log;
 
   constructor(state: cpz.StrategyState) {
     this._initialized = state.initialized || false; // стратегия инициализирована
@@ -75,7 +75,6 @@ class BaseStrategy implements cpz.Strategy {
         this[key] = state.strategyFunctions[key];
       });
     }
-    this._log = state.log || console.log;
   }
 
   init() {}
@@ -126,6 +125,7 @@ class BaseStrategy implements cpz.Strategy {
           this._createSignalEvent(signal, cpz.Event.SIGNAL_ALERT)
         );
         position._clearAlertsToPublish();
+        this._positionsToSave.push(position.state);
       }
     });
   }
@@ -152,7 +152,7 @@ class BaseStrategy implements cpz.Strategy {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      candleTimestamp: this._candle.timestamp,
+      candleTimestamp: dayjs.utc(this._candle.timestamp).toISOString(),
       timestamp: dayjs.utc().toISOString()
     };
 

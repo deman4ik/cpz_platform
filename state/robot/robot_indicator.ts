@@ -23,7 +23,7 @@ class BaseIndicator implements cpz.Indicator {
   _parametersSchema: ValidationSchema;
   _eventsToSend: cpz.Events<any>[];
   result: number | number[];
-  _log = console.log();
+  _log = console.log;
 
   constructor(state: cpz.IndicatorState) {
     this._name = state.name;

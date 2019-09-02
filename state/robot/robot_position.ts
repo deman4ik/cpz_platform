@@ -47,16 +47,24 @@ class Position implements cpz.RobotPosition {
     this._status = state.status || cpz.RobotPositionStatus.new;
     this._entryStatus = state.entryStatus;
     this._entryPrice = state.entryPrice;
-    this._entryDate = state.entryDate;
+    this._entryDate = state.entryDate
+      ? dayjs.utc(state.entryDate).toISOString()
+      : null;
     this._entryOrderType = state.entryOrderType;
     this._entryAction = state.entryAction;
-    this._entryCandleTimestamp = state.entryCandleTimestamp;
+    this._entryCandleTimestamp = state.entryCandleTimestamp
+      ? dayjs.utc(state.entryCandleTimestamp).toISOString()
+      : null;
     this._exitStatus = state.exitStatus;
     this._exitPrice = state.exitPrice;
-    this._exitDate = state.exitDate;
+    this._exitDate = state.exitDate
+      ? dayjs.utc(state.exitDate).toISOString()
+      : null;
     this._exitOrderType = state.exitOrderType;
     this._exitAction = state.exitAction;
-    this._exitCandleTimestamp = state.exitCandleTimestamp;
+    this._exitCandleTimestamp = state.exitCandleTimestamp
+      ? dayjs.utc(state.exitCandleTimestamp).toISOString()
+      : null;
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
     this._barsHeld = state.barsHeld || 0;
@@ -225,9 +233,11 @@ class Position implements cpz.RobotPosition {
     orderType: cpz.OrderType
   ) {
     this._log(
-      `Position trade ${this._code} - ${action}.${orderType}.${price} - ${
-        this._candle.timestamp
-      }`
+      `Position trade ${
+        this._code
+      } - ${action}.${orderType}.${price} - ${dayjs
+        .utc(this._candle.timestamp)
+        .toISOString()}`
     );
     this._alertsToPublish = [];
     this._tradeToPublish = {
@@ -250,9 +260,11 @@ class Position implements cpz.RobotPosition {
     this._entryDate = dayjs.utc().toISOString();
     this._entryOrderType = orderType;
     this._entryAction = action;
-    this._entryCandleTimestamp = this._candle.timestamp;
+    this._entryCandleTimestamp = dayjs
+      .utc(this._candle.timestamp)
+      .toISOString();
     this._direction =
-      action === cpz.TradeAction.long || action === cpz.TradeAction.short
+      action === cpz.TradeAction.long
         ? cpz.PositionDirection.long
         : cpz.PositionDirection.short;
     this._createTradeSignal(action, price, orderType);
@@ -270,7 +282,7 @@ class Position implements cpz.RobotPosition {
     this._exitDate = dayjs.utc().toISOString();
     this._exitOrderType = orderType;
     this._exitAction = action;
-    this._exitCandleTimestamp = this._candle.timestamp;
+    this._exitCandleTimestamp = dayjs.utc(this._candle.timestamp).toISOString();
     this._calcStats();
     this._createTradeSignal(action, price, orderType);
   }

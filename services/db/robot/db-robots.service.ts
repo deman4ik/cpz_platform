@@ -27,9 +27,9 @@ class RobotsService extends Service {
           settings: Sequelize.JSONB,
           available: Sequelize.INTEGER,
           status: Sequelize.STRING,
-          startedAt: { type: Sequelize.DATE, field: "started_at" },
+          startedAt: { type: Sequelize.STRING, field: "started_at" },
           stoppedAt: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "stopped_at",
             allowNull: true
           },

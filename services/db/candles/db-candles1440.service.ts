@@ -16,7 +16,7 @@ const CandlesService: ServiceSchema = {
       asset: Sequelize.STRING,
       currency: Sequelize.STRING,
       time: Sequelize.BIGINT,
-      timestamp: Sequelize.DATE,
+      timestamp: Sequelize.STRING,
       open: Sequelize.DOUBLE,
       high: Sequelize.DOUBLE,
       low: Sequelize.DOUBLE,

@@ -21,11 +21,15 @@ class ImportersService extends Service {
           params: Sequelize.JSONB,
           status: Sequelize.STRING,
           startedAt: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "started_at",
             allowNull: true
           },
-          endedAt: { type: Sequelize.DATE, field: "ended_at", allowNull: true },
+          endedAt: {
+            type: Sequelize.STRING,
+            field: "ended_at",
+            allowNull: true
+          },
           error: { type: Sequelize.JSONB, allowNull: true }
         },
         options: {

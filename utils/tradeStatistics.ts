@@ -50,19 +50,21 @@ function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
   }
 
   const drawdownPositions = [];
-  for (let i = startPos; i <= endPos; i += 1) {
-    drawdownPositions.push(positions[i]);
+  if (startPos > -1 && endPos > -1) {
+    for (let i = startPos; i <= endPos; i += 1) {
+      drawdownPositions.push(positions[i]);
+    }
+    if (drawdownPositions.length > 0)
+      maxDrawdownSum = drawdownPositions
+        .map(({ profit }) => profit)
+        .reduce((acc, val) => acc + val, 0);
   }
-  maxDrawdownSum = drawdownPositions
-    .map(({ profit }) => profit)
-    .reduce((acc, val) => acc + val, 0);
-
   return {
     maxDrawdown: maxDrawdown * -1,
     maxDrawdownVal: maxDrawdownVal * -1,
     maxDrawdownSum: maxDrawdownSum,
-    startPos: positions[startPos],
-    endPos: positions[endPos]
+    startPos: startPos > -1 ? positions[startPos] : null,
+    endPos: endPos > -1 ? positions[endPos] : null
   };
 }
 
@@ -352,12 +354,11 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: shortMaxDrawdownPerc
   };
 
-  if (allMaxDrawdownPos)
-    statistics.maxDrawdownDate = {
-      all: allMaxDrawdownPos.exitDate,
-      long: longMaxDrawdownPos.exitDate,
-      short: shortMaxDrawdownPos.exitDate
-    };
+  statistics.maxDrawdownDate = {
+    all: allMaxDrawdownPos && allMaxDrawdownPos.exitDate,
+    long: longMaxDrawdownPos && longMaxDrawdownPos.exitDate,
+    short: shortMaxDrawdownPos && shortMaxDrawdownPos.exitDate
+  };
 
   const allRecoveryFactor = divideFixed(allNetProfit, allMaxDrawdown) * -1;
   const longRecoveryFactor = divideFixed(longNetProfit, longMaxDrawdown) * -1;

@@ -37,7 +37,7 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           entryDate: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "entry_date",
             allowNull: true
           },
@@ -52,7 +52,7 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           entryCandleTimestamp: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "entry_candle_timestamp",
             allowNull: true
           },
@@ -67,7 +67,7 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           exitDate: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "exit_date",
             allowNull: true
           },
@@ -82,7 +82,7 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           exitCandleTimestamp: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "exit_candle_timestamp",
             allowNull: true
           },

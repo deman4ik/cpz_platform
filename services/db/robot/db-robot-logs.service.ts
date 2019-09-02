@@ -3,6 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
+import { v4 as uuid } from "uuid";
 
 class RobotLogsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -33,10 +34,11 @@ class RobotLogsService extends Service {
 
   async handleRobotLog(ctx: Context) {
     try {
-      const { data, data: robotId } = ctx.params;
+      const { robotId } = ctx.params;
       await this.adapter.insert({
+        id: uuid(),
         robotId,
-        data
+        data: ctx.params
       });
     } catch (e) {
       this.logger.error(e);

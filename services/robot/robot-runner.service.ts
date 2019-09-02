@@ -108,9 +108,14 @@ class RobotRunnerService extends Service {
           id
         }
       );
+      if (status === cpz.Status.paused) {
+        const result = await this.resume(ctx);
+        if (result && result.success)
+          return { success: true, id, status: cpz.Status.started };
+        else throw result.error;
+      }
       if (
         status === cpz.Status.started ||
-        status === cpz.Status.paused ||
         status === cpz.Status.starting ||
         status === cpz.Status.stopping
       )

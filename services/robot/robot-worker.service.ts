@@ -169,6 +169,7 @@ class RobotWorkerService extends Service {
       );
       if (!robotState) throw new Error(`Robot ${robotId} not found.`);
       const robot = new Robot(robotState);
+      robot._log = this.logger.info.bind(this);
       if (type === cpz.RobotJobType.tick) {
         // New tick - checking alerts
         const [currentCandle]: cpz.Candle[] = await this.broker.call(
@@ -247,13 +248,11 @@ class RobotWorkerService extends Service {
       // Saving robot positions
       if (robot.positionsToSave.length > 0) {
         await Promise.all(
-          robot.positionsToSave.map(
-            async position =>
-              await this.broker.call(
-                `${cpz.Service.DB_ROBOT_POSITIONS}.upsert`,
-                { entity: position }
-              )
-          )
+          robot.positionsToSave.map(async position => {
+            await this.broker.call(`${cpz.Service.DB_ROBOT_POSITIONS}.upsert`, {
+              entity: position
+            });
+          })
         );
 
         if (
@@ -268,7 +267,7 @@ class RobotWorkerService extends Service {
               status: cpz.RobotPositionStatus.closed
             }
           );
-          robot.calculateStats(allPositions);
+          robot.calcStats(allPositions);
         }
       }
 

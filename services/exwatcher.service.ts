@@ -638,11 +638,15 @@ class ExwatcherService extends Service {
         status &&
         status === cpz.ExwatcherStatus.subscribed
       ) {
-        this.logger.info(`${data.timestamp} ${id} ${data.type} ${data.price} `);
         if (data.type === "trade") {
           this.saveTrade(data);
         }
-        if (data.type === "tick") await this.publishTick(data);
+        if (data.type === "tick") {
+          this.logger.info(
+            `${data.timestamp} ${id} ${data.type} ${data.price} `
+          );
+          await this.publishTick(data);
+        }
       }
     }
   }
@@ -775,9 +779,9 @@ class ExwatcherService extends Service {
           side: this.getDirection(valuesArray[4]),
           price: parseFloat(valuesArray[5]),
           time: parseInt(valuesArray[6], 10) * 1000,
-          timestamp: new Date(
-            parseInt(valuesArray[6], 10) * 1000
-          ).toISOString(),
+          timestamp: dayjs
+            .utc(parseInt(valuesArray[6], 10) * 1000)
+            .toISOString(),
           amount: parseFloat(valuesArray[8]),
           tradeId: valuesArray[9]
         };
@@ -793,7 +797,7 @@ class ExwatcherService extends Service {
         side: this.getDirection(valuesArray[4]),
         tradeId: valuesArray[5],
         time: parseInt(valuesArray[6], 10) * 1000,
-        timestamp: new Date(parseInt(valuesArray[6], 10) * 1000).toISOString(),
+        timestamp: dayjs.utc(parseInt(valuesArray[6], 10) * 1000).toISOString(),
         amount: parseFloat(valuesArray[7]),
         price: parseFloat(valuesArray[8])
       };

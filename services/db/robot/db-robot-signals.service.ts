@@ -3,6 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
+import { v4 as uuid } from "uuid";
 
 class RobotSignalsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -27,8 +28,11 @@ class RobotSignalsService extends Service {
             type: Sequelize.STRING,
             field: "position_parent_id"
           },
-          candleTimestamp: { type: Sequelize.DATE, field: "candle_timestamp" },
-          timestamp: { type: Sequelize.DATE }
+          candleTimestamp: {
+            type: Sequelize.STRING,
+            field: "candle_timestamp"
+          },
+          timestamp: { type: Sequelize.STRING }
         },
         options: {
           freezeTableName: true,
@@ -46,8 +50,7 @@ class RobotSignalsService extends Service {
 
   async handleSignal(ctx: Context) {
     try {
-      const { data } = ctx.params;
-      await this.adapter.insert(data);
+      await this.adapter.insert({ id: uuid(), ...ctx.params });
     } catch (e) {
       this.logger.error(e);
     }

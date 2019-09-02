@@ -37,7 +37,7 @@ class RobotPositionsService extends Service {
             allowNull: true
           },
           entryDate: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "entry_date",
             allowNull: true
           },
@@ -52,7 +52,7 @@ class RobotPositionsService extends Service {
             allowNull: true
           },
           entryCandleTimestamp: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "entry_candle_timestamp",
             allowNull: true
           },
@@ -67,7 +67,7 @@ class RobotPositionsService extends Service {
             allowNull: true
           },
           exitDate: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "exit_date",
             allowNull: true
           },
@@ -82,7 +82,7 @@ class RobotPositionsService extends Service {
             allowNull: true
           },
           exitCandleTimestamp: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING,
             field: "exit_candle_timestamp",
             allowNull: true
           },
@@ -127,7 +127,7 @@ class RobotPositionsService extends Service {
                 exitOrderType: { type: "string", optional: true },
                 exitAction: { type: "string", optional: true },
                 exitCandleTimestamp: { type: "string", optional: true },
-                alerts: { type: "string", optional: true },
+                alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
                 barsHeld: { type: "number", integer: true, optional: true }
               }
@@ -219,6 +219,14 @@ class RobotPositionsService extends Service {
         VALUES (?)
          ON CONFLICT ON CONSTRAINT robot_positions_pkey 
          DO UPDATE SET updated_at = now(),
+         direction = excluded.direction,
+         status = excluded.status,
+         entry_status = excluded.entry_status,
+         entry_price = excluded.entry_price,
+         entry_date = excluded.entry_date,
+         entry_order_type = excluded.entry_order_type,
+         entry_action = excluded.entry_action,
+         entry_candle_timestamp = excluded.entry_candle_timestamp,
          exit_status = excluded.exit_status,
          exit_price = excluded.exit_price,
          exit_date = excluded.exit_date,
