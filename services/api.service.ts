@@ -3,6 +3,7 @@ import ApiGateway from "moleculer-web";
 import { ApolloService } from "moleculer-apollo-server";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
+import { cpz } from "../types/cpz";
 
 class ApiService extends Service {
   constructor(broker: ServiceBroker) {
@@ -61,9 +62,17 @@ class ApiService extends Service {
           {
             path: "/api",
             whitelist: [
-              // Access to any actions in all services under "/api" URL
-              "**"
+              `${cpz.Service.AUTH}.login`,
+              `${cpz.Service.AUTH}.register`
             ]
+          },
+          {
+            path: "/api/auth",
+            roles: [cpz.UserRoles.user, cpz.UserRoles.admin],
+            aliases: {
+              "GET me": `${cpz.Service.AUTH}.getCurrentUser`
+            },
+            authorization: true
           }
         ],
 
@@ -95,6 +104,52 @@ class ApiService extends Service {
 
   async getServicesList(ctx: Context) {
     return await this.broker.call("$node.services");
+  }
+
+  /**
+   * Authorize the request
+   *
+   * @param {Context} ctx
+   * @param {Object} route
+   * @param {IncomingRequest} req
+   * @returns {Promise}
+   */
+  async authorize(ctx: Context, route: any, req: any) {
+    let authValue = req.headers["authorization"];
+    if (authValue && authValue.startsWith("Bearer ")) {
+      try {
+        let token = authValue.slice(7);
+        const decoded = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
+          token
+        });
+        if (
+          route.opts.roles &&
+          Array.isArray(route.opts.roles) &&
+          route.opts.roles.indexOf(decoded.role) === -1
+        )
+          throw new ApiGateway.Errors.ForbiddenError("FORBIDDEN", null);
+
+        const user = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+          id: decoded.userId
+        });
+        ctx.meta.user = user;
+        this.logger.info("Logged in user", user);
+      } catch (e) {
+        this.logger.error(e);
+        if (e instanceof ApiGateway.Errors.ForbiddenError) {
+          throw e;
+        }
+        throw new ApiGateway.Errors.UnAuthorizedError(
+          ApiGateway.Errors.ERR_INVALID_TOKEN,
+          e
+        );
+      }
+    } else {
+      throw new ApiGateway.Errors.UnAuthorizedError(
+        ApiGateway.Errors.ERR_NO_TOKEN,
+        null
+      );
+    }
   }
 }
 

@@ -22,6 +22,7 @@ export namespace cpz {
     DB_ROBOT_SIGNALS = "db-robot-signals",
     DB_ROBOT_LOGS = "db-robot-logs",
     DB_ROBOT_HISTORY = "db-robot-history",
+    DB_USERS = "db-users",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -31,7 +32,8 @@ export namespace cpz {
     BACKTESTER_RUNNER = "backtester-runner",
     BACKTESTER_WORKER = "backtester-worker",
     TRADER_RUNNER = "trader-runner",
-    TRADER_WORKER = "trader-worker"
+    TRADER_WORKER = "trader-worker",
+    AUTH = "auth"
   }
 
   const enum Event {
@@ -81,6 +83,19 @@ export namespace cpz {
     subscribed = "subscribed",
     unsubscribed = "unsubscribed",
     failed = "failed"
+  }
+
+  const enum UserStatus {
+    blocked = -1,
+    new = 0,
+    enabled = 1
+  }
+
+  const enum UserRoles {
+    admin = "admin",
+    moderator = "moderator",
+    user = "user",
+    anonymous = "anonymous"
   }
 
   const enum RobotJobType {
@@ -552,5 +567,21 @@ export namespace cpz {
     positionParentId?: string;
     candleTimestamp: string;
     timestamp: string;
+  }
+
+  interface User {
+    id: string;
+    name?: string;
+    email?: string;
+    telegram?: string;
+    status: UserStatus;
+    passwordHash?: string;
+    registrationCode?: string;
+    refreshToken?: string;
+    roles: {
+      allowedRoles: string[];
+      defaultRole: string;
+    };
+    settings: AnyObject;
   }
 }
