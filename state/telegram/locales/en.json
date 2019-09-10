@@ -1,0 +1,26 @@
+{
+  "welcome": "Welcome ${username}",
+  "fail": "❌ Failed to process your request. Please try again later!",
+  "keyboards": {
+    "backKeyboard": {
+      "back": "◀️ Back"
+    },
+    "mainKeyboard": {
+      "signals": "🚦 Signals",
+      "mySignals": "🚥 My Signals",
+      "settings": "⚙️ Settings",
+      "faq": "❓ FAQ",
+      "contact": "✍️ Contact"
+    }
+  },
+  "scenes": {
+    "signals": {
+      "selectAsset": "Select available <b>cryptocurrency</b> pair",
+      "selectRobot": "Select available <b>${asset}</b> robot",
+      "backButton": "◀️ Back",
+      "subscribeSignals": "Subscribe to Signals"
+    }
+  },
+  "menu": "Please use Menu in Telegram keyboard section",
+  "defaultHandler": "🚧 Hey, please choose a section with the Telegram keyboard before typing anything"
+}

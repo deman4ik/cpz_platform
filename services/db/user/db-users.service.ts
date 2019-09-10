@@ -17,7 +17,16 @@ class UsersService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           name: { type: Sequelize.STRING, allowNull: true },
           email: { type: Sequelize.STRING, allowNull: true },
-          telegram: { type: Sequelize.STRING, allowNull: true },
+          telegramId: {
+            type: Sequelize.INTEGER,
+            allowNull: true,
+            field: "telegram_id"
+          },
+          telegramUsername: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            field: "telegram_username"
+          },
           status: Sequelize.INTEGER,
           passwordHash: {
             type: Sequelize.STRING,

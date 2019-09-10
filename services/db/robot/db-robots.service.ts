@@ -60,6 +60,9 @@ class RobotsService extends Service {
           },
           handler: this.findActive
         },
+        getAvailableSignalAssets: {
+          handler: this.getAvailableSignalAssets
+        },
         upsert: {
           params: {
             entity: {
@@ -192,6 +195,19 @@ class RobotsService extends Service {
         replacements: [value]
       });
       return true;
+    } catch (e) {
+      this.logger.error(e);
+      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+    }
+  }
+
+  async getAvailableSignalAssets() {
+    try {
+      const query =
+        "select distinct asset, currency from robots where available = 20 group by asset, currency";
+      return await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT
+      });
     } catch (e) {
       this.logger.error(e);
       throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);

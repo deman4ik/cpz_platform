@@ -23,6 +23,7 @@ export namespace cpz {
     DB_ROBOT_LOGS = "db-robot-logs",
     DB_ROBOT_HISTORY = "db-robot-history",
     DB_USERS = "db-users",
+    DB_USER_SIGNALS = "db-user-signals",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -573,7 +574,8 @@ export namespace cpz {
     id: string;
     name?: string;
     email?: string;
-    telegram?: string;
+    telegramId?: number;
+    telegramUsername?: string;
     status: UserStatus;
     passwordHash?: string;
     registrationCode?: string;
@@ -583,5 +585,15 @@ export namespace cpz {
       defaultRole: string;
     };
     settings: AnyObject;
+  }
+
+  interface UserSignals {
+    id: string;
+    robotId: string;
+    userId: string;
+    telegram: boolean;
+    email: boolean;
+    subscribedAt: string;
+    volume?: number;
   }
 }

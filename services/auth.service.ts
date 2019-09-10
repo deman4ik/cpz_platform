@@ -27,6 +27,14 @@ class AuthService extends Service {
           },
           handler: this.register
         },
+        registerTg: {
+          params: {
+            telegramId: "number",
+            telegramUsername: "string",
+            name: { type: "string", optional: true }
+          },
+          handler: this.registerTg
+        },
         getCurrentUser: {
           handler: this.getCurrentUser
         },
@@ -75,6 +83,35 @@ class AuthService extends Service {
       email,
       status: cpz.UserStatus.enabled,
       passwordHash,
+      roles: {
+        allowedRoles: [cpz.UserRoles.user],
+        defaultRole: cpz.UserRoles.user
+      },
+      settings: {}
+    };
+    await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
+      entity: newUser
+    });
+    return { id: newUser.id };
+  }
+
+  async registerTg(ctx: Context) {
+    this.logger.info("Register Telegram", ctx.params);
+    const { telegramId, telegramUsername, name } = ctx.params;
+    //TODO: check password
+    const [userExists] = await this.broker.call(
+      `${cpz.Service.DB_USERS}.find`,
+      {
+        query: { telegramId }
+      }
+    );
+    if (userExists) return { id: userExists.id };
+    const newUser: cpz.User = {
+      id: uuid(),
+      telegramId,
+      telegramUsername,
+      name,
+      status: cpz.UserStatus.enabled,
       roles: {
         allowedRoles: [cpz.UserRoles.user],
         defaultRole: cpz.UserRoles.user

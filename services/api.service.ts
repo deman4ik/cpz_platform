@@ -42,7 +42,8 @@ class ApiService extends Service {
           routeOptions: {
             path: "/graphql",
             cors: true,
-            mappingPolicy: "restrict"
+            mappingPolicy: "restrict",
+            authorization: true
           },
 
           // https://www.apollographql.com/docs/apollo-server/v2/api/apollo-server.html

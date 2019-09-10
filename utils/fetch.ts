@@ -7,14 +7,20 @@ import HttpsProxyAgent, { HttpsProxyAgentOptions } from "https-proxy-agent";
 // Luminati Proxy Manager Certificate
 const ca = fs.readFileSync(path.resolve(process.cwd(), "vault/ca.crt"));
 
-function createFetchMethod(proxy: string) {
+function createProxyAgent(proxy: string) {
   const proxyHost = urllib.parse(proxy);
   const proxyOptions: HttpsProxyAgentOptions = {
     ...proxyHost,
+    host: proxyHost.host,
+    port: +proxyHost.port,
     ca
   };
 
-  const agent = new HttpsProxyAgent(proxyOptions);
+  return new HttpsProxyAgent(proxyOptions);
+}
+
+function createFetchMethod(proxy: string) {
+  const agent = createProxyAgent(proxy);
   return async function fetchInterface(url: RequestInfo, options: RequestInit) {
     return fetch(url, {
       ...options,
@@ -24,4 +30,4 @@ function createFetchMethod(proxy: string) {
   };
 }
 
-export { createFetchMethod };
+export { createProxyAgent, createFetchMethod };
