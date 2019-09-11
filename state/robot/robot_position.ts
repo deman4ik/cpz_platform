@@ -214,7 +214,9 @@ class Position implements cpz.RobotPosition {
     const alert = {
       action,
       price,
-      orderType
+      orderType,
+      candleTimestamp: dayjs.utc(this._candle.timestamp).toISOString(),
+      timestamp: dayjs.utc().toISOString()
     };
     this._alerts[this._nextAlertNumb] = alert;
     this._alertsToPublish.push({
@@ -227,11 +229,8 @@ class Position implements cpz.RobotPosition {
     });
   }
 
-  _createTradeSignal(
-    action: cpz.TradeAction,
-    price: number,
-    orderType: cpz.OrderType
-  ) {
+  _createTradeSignal(alert: cpz.AlertInfo) {
+    const { action, orderType, price } = alert;
     this._log(
       `Position trade ${
         this._code
@@ -241,10 +240,8 @@ class Position implements cpz.RobotPosition {
     );
     this._alertsToPublish = [];
     this._tradeToPublish = {
+      ...alert,
       type: cpz.SignalType.trade,
-      action,
-      orderType,
-      price,
       positionId: this._id,
       positionPrefix: this._prefix,
       positionCode: this._code,
@@ -252,7 +249,8 @@ class Position implements cpz.RobotPosition {
     };
   }
 
-  _open(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
+  _open(alert: cpz.AlertInfo) {
+    const { action, price, orderType } = alert;
     this._checkOpen();
     this._status = cpz.RobotPositionStatus.open;
     this._entryStatus = cpz.RobotTradeStatus.closed;
@@ -267,16 +265,13 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long
         ? cpz.PositionDirection.long
         : cpz.PositionDirection.short;
-    this._createTradeSignal(action, price, orderType);
+    this._createTradeSignal(alert);
   }
 
-  _close(price: number, orderType: cpz.OrderType) {
+  _close(alert: cpz.AlertInfo) {
+    const { action, price, orderType } = alert;
     this._checkClose();
     this._status = cpz.RobotPositionStatus.closed;
-    const action =
-      this._direction === cpz.PositionDirection.long
-        ? cpz.TradeAction.closeLong
-        : cpz.TradeAction.closeShort;
     this._exitStatus = cpz.RobotTradeStatus.closed;
     this._exitPrice = price;
     this._exitDate = dayjs.utc().toISOString();
@@ -284,7 +279,7 @@ class Position implements cpz.RobotPosition {
     this._exitAction = action;
     this._exitCandleTimestamp = dayjs.utc(this._candle.timestamp).toISOString();
     this._calcStats();
-    this._createTradeSignal(action, price, orderType);
+    this._createTradeSignal(alert);
   }
 
   get _nextAlertNumb() {
@@ -296,11 +291,7 @@ class Position implements cpz.RobotPosition {
       sortAsc(+a, +b)
     )) {
       const alert = this._alerts[key];
-      const success = this._checkAlert(
-        alert.action,
-        alert.price,
-        alert.orderType
-      );
+      const success = this._checkAlert(alert);
       if (success) {
         this._alerts = {};
         break;
@@ -308,11 +299,8 @@ class Position implements cpz.RobotPosition {
     }
   }
 
-  _checkAlert(
-    action: cpz.TradeAction,
-    price: number,
-    orderType: cpz.OrderType
-  ) {
+  _checkAlert(alert: cpz.AlertInfo) {
+    const { orderType, action, price } = alert;
     let nextPrice = null;
     switch (orderType) {
       case cpz.OrderType.stop: {
@@ -332,10 +320,10 @@ class Position implements cpz.RobotPosition {
     }
     if (nextPrice) {
       if (action === cpz.TradeAction.long || action === cpz.TradeAction.short) {
-        this._open(action, nextPrice, orderType);
+        this._open(alert);
         return true;
       }
-      this._close(nextPrice, orderType);
+      this._close(alert);
       return true;
     }
     return false;

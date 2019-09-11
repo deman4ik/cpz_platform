@@ -152,7 +152,6 @@ class BaseStrategy implements cpz.Strategy {
       asset: this._asset,
       currency: this._currency,
       timeframe: this._timeframe,
-      candleTimestamp: dayjs.utc(this._candle.timestamp).toISOString(),
       timestamp: dayjs.utc().toISOString()
     };
 
