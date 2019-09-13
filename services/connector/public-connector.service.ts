@@ -9,7 +9,8 @@ import {
   getCurrentCandleParams,
   getCandlesParams,
   handleCandleGaps,
-  batchCandles
+  batchCandles,
+  round
 } from "../../utils";
 import Timeframe from "../../utils/timeframe";
 
@@ -294,7 +295,7 @@ class PublicConnectorService extends Service {
       currency,
       time: time.valueOf(),
       timestamp: time.toISOString(),
-      price: response.close
+      price: round(response.close, 6)
     };
   }
 
@@ -337,6 +338,7 @@ class PublicConnectorService extends Service {
       const { price } = await this.getCurrentPrice(exchange, asset, currency);
       if (!price) return null;
       const time = dayjs.utc(params.time);
+      const roundedPrice = round(price, 6);
       return {
         exchange,
         asset,
@@ -344,10 +346,10 @@ class PublicConnectorService extends Service {
         timeframe,
         time: time.valueOf(),
         timestamp: time.toISOString(),
-        open: price,
-        high: price,
-        low: price,
-        close: price,
+        open: roundedPrice,
+        high: roundedPrice,
+        low: roundedPrice,
+        close: roundedPrice,
         volume: 0,
         type: cpz.CandleType.previous
       };
@@ -359,11 +361,11 @@ class PublicConnectorService extends Service {
       timeframe: params.timeframe,
       time: +candle[0],
       timestamp: dayjs.utc(+candle[0]).toISOString(),
-      open: +candle[1],
-      high: +candle[2],
-      low: +candle[3],
-      close: +candle[4],
-      volume: +candle[5],
+      open: round(+candle[1], 6),
+      high: round(+candle[2], 6),
+      low: round(+candle[3], 6),
+      close: round(+candle[4], 6),
+      volume: round(+candle[5], 6),
       type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
     }));
 
@@ -377,11 +379,11 @@ class PublicConnectorService extends Service {
           timeframe,
           time: time.valueOf(),
           timestamp: time.toISOString(),
-          open: +candles[0].open,
-          high: Math.max(...candles.map(t => +t.high)),
-          low: Math.min(...candles.map(t => +t.low)),
-          close: +candles[candles.length - 1].close,
-          volume: +candles.map(t => t.volume).reduce((a, b) => a + b),
+          open: round(+candles[0].open, 6),
+          high: round(Math.max(...candles.map(t => +t.high)), 6),
+          low: round(Math.min(...candles.map(t => +t.low)), 6),
+          close: round(+candles[candles.length - 1].close, 6),
+          volume: round(+candles.map(t => t.volume).reduce((a, b) => a + b), 6),
           type: cpz.CandleType.created
         }
       ];
@@ -443,11 +445,11 @@ class PublicConnectorService extends Service {
       timeframe: params.timeframe,
       time: +candle[0],
       timestamp: dayjs.utc(+candle[0]).toISOString(),
-      open: +candle[1],
-      high: +candle[2],
-      low: +candle[3],
-      close: +candle[4],
-      volume: +candle[5],
+      open: round(+candle[1], 6),
+      high: round(+candle[2], 6),
+      low: round(+candle[3], 6),
+      close: round(+candle[4], 6),
+      volume: round(+candle[5], 6),
       type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
     }));
 
@@ -513,8 +515,8 @@ class PublicConnectorService extends Service {
           time: time.valueOf(),
           timestamp: time.toISOString(),
           side: trade.side,
-          price: trade.price,
-          amount: trade.amount
+          price: round(trade.price, 6),
+          amount: round(trade.amount, 6)
         };
       });
 

@@ -11,7 +11,8 @@ import {
   handleCandleGaps,
   createCandlesFromTrades,
   chunkArray,
-  uniqueElementsBy
+  uniqueElementsBy,
+  round
 } from "../../utils";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
@@ -295,7 +296,7 @@ class ImporterWorkerService extends Service {
             await this.saveCandles(candlesInTimeframes);
           }
           processed += 1;
-          percent = Math.floor((processed / total) * 100);
+          percent = round((processed / total) * 100);
           if (percent > prevPercent) {
             prevPercent = percent;
             await job.progress(percent);
@@ -327,7 +328,7 @@ class ImporterWorkerService extends Service {
           });
           await this.saveCandles(candlesInTimeframes);
           processed += 1;
-          percent = Math.floor((processed / total) * 100);
+          percent = round((processed / total) * 100);
           if (percent > prevPercent) {
             prevPercent = percent;
             await job.progress(percent);

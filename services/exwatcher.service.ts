@@ -4,7 +4,7 @@ import cron from "node-cron";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../types/cpz";
 import dayjs from "../lib/dayjs";
-import { capitalize, chunkArray, uniqueElementsBy } from "../utils";
+import { capitalize, chunkArray, uniqueElementsBy, round } from "../utils";
 import Timeframe from "../utils/timeframe";
 
 /**
@@ -464,11 +464,6 @@ class ExwatcherService extends Service {
         delete this.candlesCurrent[id];
         delete this.trades[id];
       }
-      this.logger.info(
-        Object.keys(this.subscriptions),
-        Object.keys(this.candlesCurrent),
-        Object.keys(this.trades)
-      );
       return {
         success: true
       };
@@ -602,9 +597,7 @@ class ExwatcherService extends Service {
         );
         this.candlesCurrent[id][timeframe] = {
           ...candle,
-          id: `${candle.exchange}.${candle.asset}.${candle.currency}.${
-            candle.timeframe
-          }`
+          id: `${candle.exchange}.${candle.asset}.${candle.currency}.${candle.timeframe}`
         };
       })
     );
@@ -777,12 +770,12 @@ class ExwatcherService extends Service {
           asset: valuesArray[2],
           currency: valuesArray[3],
           side: this.getDirection(valuesArray[4]),
-          price: parseFloat(valuesArray[5]),
+          price: round(parseFloat(valuesArray[5]), 6),
           time: parseInt(valuesArray[6], 10) * 1000,
           timestamp: dayjs
             .utc(parseInt(valuesArray[6], 10) * 1000)
             .toISOString(),
-          amount: parseFloat(valuesArray[8]),
+          amount: round(parseFloat(valuesArray[8]), 6),
           tradeId: valuesArray[9]
         };
       }
@@ -798,8 +791,8 @@ class ExwatcherService extends Service {
         tradeId: valuesArray[5],
         time: parseInt(valuesArray[6], 10) * 1000,
         timestamp: dayjs.utc(parseInt(valuesArray[6], 10) * 1000).toISOString(),
-        amount: parseFloat(valuesArray[7]),
-        price: parseFloat(valuesArray[8])
+        amount: round(parseFloat(valuesArray[7]), 6),
+        price: round(parseFloat(valuesArray[8]), 6)
       };
     }
     if (type === "3") {

@@ -1,4 +1,4 @@
-import { sortAsc } from "../../utils";
+import { sortAsc, round } from "../../utils";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
 
@@ -176,11 +176,11 @@ class Position implements cpz.RobotPosition {
 
   _calcStats() {
     if (this._direction === cpz.PositionDirection.long) {
-      this._profit = this._exitPrice - this._entryPrice;
+      this._profit = round(this._exitPrice - this._entryPrice, 6);
     } else {
-      this._profit = this._entryPrice - this._exitPrice;
+      this._profit = round(this._entryPrice - this._exitPrice, 6);
     }
-    this._barsHeld = Math.floor(
+    this._barsHeld = round(
       dayjs
         .utc(this._exitCandleTimestamp)
         .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
@@ -213,7 +213,7 @@ class Position implements cpz.RobotPosition {
     );
     const alert = {
       action,
-      price,
+      price: round(+price, 6),
       orderType,
       candleTimestamp: dayjs.utc(this._candle.timestamp).toISOString(),
       timestamp: dayjs.utc().toISOString()

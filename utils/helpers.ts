@@ -37,8 +37,24 @@ function sortDesc<T>(a: T, b: T): number {
  *
  * @param {string} string исходная строка
  */
-function capitalize(string: string) {
+function capitalize(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Convert underscore string to camelcase
+ *
+ * @param {string} string
+ * @returns {string}
+ * @example underscoreToCamelCase(started_at) -> startedAt
+ */
+function underscoreToCamelCase(string: string): string {
+  var arr = string.split(/[_-]/);
+  var newStr = "";
+  for (var i = 1; i < arr.length; i++) {
+    newStr += arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+  }
+  return arr[0] + newStr;
 }
 
 /**
@@ -154,10 +170,40 @@ function findLastByMinProp(arr: { [key: string]: any }[], propName: string) {
     .pop();
 }
 
-function divideFixed(a: number, b: number): number | 0 {
+const round = (n: number, decimals = 0) =>
+  Number(`${Math.round(+`${n}e${decimals}`)}e-${decimals}`);
+
+function divideRound(a: number, b: number): number | 0 {
   if (!a || !b || a === 0 || b === 0) return 0;
   const result = a / b;
-  return +result.toFixed(2);
+  return round(result, 6);
+}
+
+function deepMapKeys(
+  obj: { [key: string]: any },
+  f: (key: string) => string
+): { [key: string]: any } {
+  return Array.isArray(obj)
+    ? obj.map(val => deepMapKeys(val, f))
+    : typeof obj === "object"
+    ? Object.keys(obj).reduce(
+        (acc: { [key: string]: any }, current: string) => {
+          const val = obj[current];
+          acc[f(current)] =
+            val !== null && typeof val === "object"
+              ? deepMapKeys(val, f)
+              : (acc[f(current)] = val);
+          return acc;
+        },
+        {}
+      )
+    : obj;
+}
+
+function underscoreToCamelCaseKeys(obj: {
+  [key: string]: any;
+}): { [key: string]: any } {
+  return deepMapKeys(obj, key => underscoreToCamelCase(key));
 }
 
 export {
@@ -172,5 +218,7 @@ export {
   sleep,
   findLastByMaxProp,
   findLastByMinProp,
-  divideFixed
+  round,
+  divideRound,
+  underscoreToCamelCaseKeys
 };

@@ -4,7 +4,7 @@ import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
 import { Op } from "sequelize";
-import { sortAsc, chunkNumberToArray } from "../../utils";
+import { sortAsc, chunkNumberToArray, round } from "../../utils";
 import requireFromString from "require-from-string";
 
 class BacktesterWorkerService extends Service {
@@ -201,9 +201,7 @@ class BacktesterWorkerService extends Service {
         );
         if (requiredCandles.length < robot.requiredHistoryMaxBars)
           throw new Error(
-            `Failed to load history candles required: ${
-              robot.requiredHistoryMaxBars
-            } bars but loaded: ${requiredCandles.length} bars`
+            `Failed to load history candles required: ${robot.requiredHistoryMaxBars} bars but loaded: ${requiredCandles.length} bars`
           );
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
@@ -260,9 +258,7 @@ class BacktesterWorkerService extends Service {
         }));
         prevIteration += iteration;
         this.logger.info(
-          `Processing iteration from: ${historyCandles[0].timestamp} to: ${
-            historyCandles[historyCandles.length - 1].timestamp
-          }`
+          `Processing iteration from: ${historyCandles[0].timestamp} to: ${historyCandles[historyCandles.length - 1].timestamp}`
         );
         let logs: { id: string; backtestId: string; data: any }[] = [];
         let alerts: cpz.BacktesterSignals[] = [];
@@ -338,15 +334,13 @@ class BacktesterWorkerService extends Service {
           backtesterState.processedBars += 1;
           backtesterState.leftBars =
             backtesterState.totalBars - backtesterState.processedBars;
-          backtesterState.completedPercent = Math.floor(
+          backtesterState.completedPercent = round(
             (backtesterState.processedBars / backtesterState.totalBars) * 100
           );
           if (backtesterState.completedPercent > prevPercent) {
             prevPercent = backtesterState.completedPercent;
             this.logger.info(
-              `Processed ${backtesterState.processedBars} bars, left ${
-                backtesterState.leftBars
-              } - ${backtesterState.completedPercent}%`
+              `Processed ${backtesterState.processedBars} bars, left ${backtesterState.leftBars} - ${backtesterState.completedPercent}%`
             );
           }
         }
