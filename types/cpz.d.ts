@@ -269,6 +269,7 @@ export namespace cpz {
     action: TradeAction;
     orderType: OrderType;
     price: number;
+    candleTimestamp: string;
   }
 
   interface SignalInfo extends AlertInfo {
@@ -286,7 +287,6 @@ export namespace cpz {
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    candleTimestamp: string;
     timestamp: string;
   }
 
@@ -499,18 +499,21 @@ export namespace cpz {
     payoffRatio?: RobotStatVals;
   }
 
-  interface RobotState {
+  interface RobotHead {
     id: string;
-    code?: string;
+    code?: string; //TODO: required
     name?: string;
+  }
+
+  interface RobotState extends RobotHead {
     exchange: string;
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    strategyName: string;
     description?: string;
-    settings: RobotSettings;
     available?: number;
+    strategyName: string;
+    settings: RobotSettings;
     lastCandle?: Candle;
     state?: StrategyProps;
     hasAlerts?: boolean;

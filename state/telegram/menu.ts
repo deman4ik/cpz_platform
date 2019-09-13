@@ -1,6 +1,7 @@
 import Telegraf, { Extra } from "telegraf";
 import { cpz } from "../../types/cpz";
 import { chunkArray } from "../../utils/helpers";
+
 function getAssetsMenu(
   assets: {
     asset: string;
@@ -30,4 +31,41 @@ function getSignalsMenu(robots: cpz.RobotState[]) {
   });
 }
 
-export { getAssetsMenu, getSignalsMenu };
+function getSignalRobotMenu(ctx: any, robotId: string, subscribed: boolean) {
+  return Extra.HTML().markup((m: any) => {
+    const subscribeToggleButton = !subscribed
+      ? m.callbackButton(
+          ctx.i18n.t("scenes.signals.subscribeSignals"),
+          JSON.stringify({ a: "subscribe", p: robotId }),
+          false
+        )
+      : m.callbackButton(
+          ctx.i18n.t("scenes.signals.unsubscribeSignals"),
+          JSON.stringify({ a: "unsubscribe", p: robotId }),
+          false
+        );
+
+    return m.inlineKeyboard([
+      [
+        m.callbackButton(
+          ctx.i18n.t("robot.menuInfo"),
+          JSON.stringify({ a: "info", p: robotId }),
+          false
+        ),
+        m.callbackButton(
+          ctx.i18n.t("robot.menuStats"),
+          JSON.stringify({ a: "stats", p: robotId }),
+          false
+        ),
+        m.callbackButton(
+          ctx.i18n.t("robot.menuPositions"),
+          JSON.stringify({ a: "pos", p: robotId }),
+          false
+        )
+      ],
+      [subscribeToggleButton]
+    ]);
+  });
+}
+
+export { getAssetsMenu, getSignalsMenu, getSignalRobotMenu };

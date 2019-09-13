@@ -18,8 +18,45 @@
       "selectAsset": "Select available <b>cryptocurrency</b> pair",
       "selectRobot": "Select available <b>${asset}</b> robot",
       "backButton": "◀️ Back",
-      "subscribeSignals": "Subscribe to Signals"
+      "subscribeSignals": "Subscribe to Signals",
+      "unsubscribeSignals": "Unsubscribe from Signals",
+
+      "subscribedSignals": "Succesfully subsribed to ${code} signals!",
+      "unsubscribedSignals": "You unsubsribed from ${code} signals =("
+    },
+    "mySignals": {
+      "robotsList": "Robot signals you subscribed to:"
     }
+  },
+  "robot": {
+    "menuInfo": "Robot Info",
+    "menuStats": "Robot Statistics",
+    "menuPositions": "Latest positions",
+    "info": "Robot: <b>${code}</b> \nExchange: <b>${exchange}</b> \nAsset: <b>${asset}/${currency}</b> \nTimeframe: <b>${timeframe}</b> \n\n",
+    "signals": "<b>Latest signals:</b> ${signals}",
+    "signal": "<b>Position:</b> ${code}\n<b>Signal time:</b> ${timestamp}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Price:</b> $${price}\n",
+    "signalsNone": "\n\nRobot hasn't current signals",
+    "positionsOpen": "<b>Open positions:</b> \n${openPositions}\n\n",
+    "positionOpen": "<b>Position:</b> ${code}\n<b>Entry:</b> ${entryAction} ${entryOrderType}\n<b>Entry Price:</b> ${entryPrice}\n<b>Entry Date:</b> ${entryDate}\n",
+    "positionSignals": "<b>Exit signals:</b> ${signals}",
+    "positionsClosed": "<b>Closed positions:</b> \n${closedPositions}",
+    "positionClosed": "<b>Position:</b> ${code}\n<b>Entry:</b> ${entryAction} ${entryOrderType}\n<b>Entry Price:</b> ${entryPrice}\n<b>Entry Date:</b> ${entryDate}\n<b>Exit:</b> ${exitAction} ${exitOrderType}\n<b>Exit Price:</b> ${exitPrice}\n<b>Exit Date:</b> ${exitDate}\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}\n",
+    "positionsNone": "Robot has no positions yet...",
+    "statsProfit": "<b>Profit</b> \n\n<b>Net Profit:</b> ${netProfit.all} \n<b>Number of Trades:</b> ${tradesCount.all} \n<b>Average Profit:</b> ${avgNetProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeld.all} \n<b>Profit Factor:</b> ${profitFactor.all} \n<b>Recovery Factor:</b> ${recoveryFactor.all} \n<b>Payoff Ratio:</b> ${payoffRatio.all} \n<b>Maximum Drawdown:</b> ${maxDrawdown.all} \n<b>Maximum Drawdown Date:</b> ${maxDrawdownDate.all} \n\n\n",
+    "statsWinners": "<b>Winners</b> \n\n<b>Win Rate:</b> ${winRate.all} \n<b>Gross Profit:</b> ${grossProfit.all} \n<b>Average Profit:</b> ${avgProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeldWinning.all} \n<b>Max. Consecutive Winners:</b> ${maxConnsecWins.all} \n\n\n",
+    "statsLosses": "<b>Losses</b> \n\n<b>Loss Rate:</b> ${lossRate.all} \n<b>Gross Loss:</b> ${grossLoss.all} \n<b>Average Loss:</b> ${avgLoss.all} \n<b>Average Bars held:</b> ${avgBarsHeldLosing.all} \n<b>Max. Consecutive Losses:</b> ${maxConsecLosses.all} \n",
+    "statsNone": "Robot has no statistics yet..."
+  },
+  "tradeAction": {
+    "long": "Long (buy)",
+    "short": "Short (sell)",
+    "closeLong": "Close Long (sell)",
+    "closeShort": "Close Short (buy)"
+  },
+  "orderType": {
+    "market": "Market",
+    "limit": "Limit",
+    "stop": "Stop"
   },
   "menu": "Please use Menu in Telegram keyboard section",
   "defaultHandler": "🚧 Hey, please choose a section with the Telegram keyboard before typing anything"
