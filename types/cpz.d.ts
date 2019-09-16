@@ -502,6 +502,7 @@ export namespace cpz {
   interface RobotHead {
     id: string;
     code?: string; //TODO: required
+    mod?: string;
     name?: string;
   }
 
@@ -510,7 +511,6 @@ export namespace cpz {
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    mod: string;
     available?: number;
     strategyName: string;
     settings: RobotSettings;
