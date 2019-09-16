@@ -510,7 +510,7 @@ export namespace cpz {
     asset: string;
     currency: string;
     timeframe: Timeframe;
-    description?: string;
+    mod: string;
     available?: number;
     strategyName: string;
     settings: RobotSettings;

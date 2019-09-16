@@ -20,19 +20,22 @@
       "backButton": "◀️ Back",
       "subscribeSignals": "Subscribe to Signals",
       "unsubscribeSignals": "Unsubscribe from Signals",
-
-      "subscribedSignals": "Succesfully subsribed to ${code} signals!",
-      "unsubscribedSignals": "You unsubsribed from ${code} signals =("
+      "subscribedSignals": "Succesfully subsribed to ${name} signals!",
+      "unsubscribedSignals": "You unsubsribed from ${name} signals =("
     },
     "mySignals": {
       "robotsList": "Robot signals you subscribed to:"
     }
   },
+  "signal": {
+    "alert": "🚨 New Signal!\n\n🤖 Robot: <b>${name}</b>\n\n",
+    "trade": "💸 New Trade!\n\n🤖 Robot: <b>${name}</b>\n\n"
+  },
   "robot": {
     "menuInfo": "Robot Info",
     "menuStats": "Robot Statistics",
     "menuPositions": "Latest positions",
-    "info": "Robot: <b>${code}</b> \nExchange: <b>${exchange}</b> \nAsset: <b>${asset}/${currency}</b> \nTimeframe: <b>${timeframe}</b> \n\n",
+    "info": "🤖\nRobot: <b>${name}</b> \n<b>Description:</b> {description}\n\n",
     "signals": "<b>Latest signals:</b> ${signals}",
     "signal": "<b>Position:</b> ${code}\n<b>Signal time:</b> ${timestamp}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Price:</b> $${price}\n",
     "signalsNone": "\n\nRobot hasn't current signals",
@@ -48,16 +51,26 @@
     "statsNone": "Robot has no statistics yet..."
   },
   "tradeAction": {
-    "long": "Long (buy)",
-    "short": "Short (sell)",
-    "closeLong": "Close Long (sell)",
-    "closeShort": "Close Short (buy)"
+    "long": "Long ✳️ (buy ⬆️)",
+    "short": "Short 🔴 (sell ⬇️)",
+    "closeLong": "Close Long ✳️ (sell ⬇️)",
+    "closeShort": "Close Short 🔴(buy ⬆️)"
   },
   "orderType": {
-    "market": "Market",
-    "limit": "Limit",
-    "stop": "Stop"
+    "market": "Market 〽️",
+    "limit": "Limit ✴️",
+    "stop": "Stop ⛔"
   },
   "menu": "Please use Menu in Telegram keyboard section",
-  "defaultHandler": "🚧 Hey, please choose a section with the Telegram keyboard before typing anything"
+  "defaultHandler": "🚧 Hey, please choose a section with the Telegram keyboard before typing anything",
+  "faq": {
+    "signal1": "<b>What is signal?</b>\nSignal is a recommendation to buy or sell currency at determined price.\nWe will give you the signal when it is better to open and close position and what position to take. You just need to follow the recommendation of robots.\n\n",
+    "signal2": "<b>Why I need signals?</b>\nYou can use signals in 2 different ways:\nChoose the robots you want and follow the recommendations.\nUse the signals as additional filter to you own trading system.\n\n",
+    "signal3": "<b>How it works?</b>\nAll signals based on algorithms that tested on history and work in real-time about 2 years. You can study the results of each robot.\n\n",
+    "signal4": "<b>How can I use it?</b>\nThe signals go out once a day at about the same time so it’s easy to follow manually. Just repeat the orders (buy, sell or stop/limit orders). It’s important to place an order in advance, because you can skip the necessary moment.\n\n",
+    "signal5": "<b>How much it costs?</b>\nDaily signals will be always FREE.\n\n",
+    "robot1": "<b>What is robot?</b>\nRobot is a program that analyzes the current situation on the market without human participation according to a laid algoritm.\n\n",
+    "robot2": "<b>What are the advantages of robot?</b>\nReacts to events much faster.\nDoesn’t get tired and works 24 hours and 7 days a week.\nNot experiencing emotions and strictly following the algorithm.\nCan make a large number of transactions with different instruments.\nCan wait weeks and make a deal at exactly the right moment.\nTrading is conducted on tested conditions with a predictable result."
+  },
+  "contact": "<a href='https://cryptuoso.com'>Our site</a>"
 }

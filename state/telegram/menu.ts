@@ -23,8 +23,8 @@ function getAssetsMenu(
 
 function getSignalsMenu(robots: cpz.RobotState[]) {
   return Extra.HTML().markup((m: any) => {
-    const buttons = robots.map(({ code, id }) => [
-      m.callbackButton(code, JSON.stringify({ a: "robot", p: id }), false)
+    const buttons = robots.map(({ name, id }) => [
+      m.callbackButton(name, JSON.stringify({ a: "robot", p: id }), false)
     ]);
 
     return m.inlineKeyboard(buttons);

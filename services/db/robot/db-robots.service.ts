@@ -23,7 +23,7 @@ class RobotsService extends Service {
           currency: Sequelize.STRING,
           timeframe: Sequelize.INTEGER,
           strategyName: { type: Sequelize.STRING, field: "strategy" },
-          description: { type: Sequelize.TEXT, allowNull: true },
+          mod: { type: Sequelize.STRING },
           settings: Sequelize.JSONB,
           available: Sequelize.INTEGER,
           status: Sequelize.STRING,
@@ -82,7 +82,7 @@ class RobotsService extends Service {
                 currency: "string",
                 timeframe: { type: "number", integer: true },
                 strategyName: { type: "string" },
-                description: { type: "string", optional: true },
+                mod: { type: "string" },
                 settings: "object",
                 available: { type: "number", integer: true },
                 status: "string",
@@ -113,7 +113,7 @@ class RobotsService extends Service {
         currency,
         timeframe,
         strategyName,
-        description,
+        mod,
         settings,
         available,
         status,
@@ -134,7 +134,7 @@ class RobotsService extends Service {
         currency,
         timeframe,
         strategyName,
-        description,
+        mod,
         settings: JSON.stringify(settings),
         available,
         status,
@@ -155,7 +155,7 @@ class RobotsService extends Service {
             currency,
             timeframe,
             strategy,
-            description,
+            mod,
             settings,
             available,
             status,
@@ -227,12 +227,15 @@ class RobotsService extends Service {
       t.id,
       t.code,
       t.name,
-      t.description,
+      t.mod,
       t.exchange,
       t.asset,
       t.currency,
       t.timeframe,
       t.strategy,
+	  s.code as strategy_code,
+	  s.name as strategy_name,
+	  s.description,
       t.settings,
       t.available,
       t.status,
@@ -299,14 +302,15 @@ class RobotsService extends Service {
       )
       as signals 
     from
-      robots t
+      robots t 
+	  inner join strategies s on t.strategy = s.id  
     where t.id = :id;`;
       const [rawRobotInfo] = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id }
       });
       const robotInfo = underscoreToCamelCaseKeys(rawRobotInfo);
-
+      //TODO: TYPINGS!
       let robotSignals: { [key: string]: any }[] = [];
       if (
         robotInfo.signals &&

@@ -28,7 +28,7 @@ export const getMainKeyboard = (ctx: any) => {
   const mainKeyboardContact = ctx.i18n.t("keyboards.mainKeyboard.contact");
   let mainKeyboard: any = Markup.keyboard([
     [mainKeyboardSignals, mainKeyboardMySignals],
-    [mainKeyboardSettings],
+    //  [mainKeyboardSettings],
     [mainKeyboardFAQ, mainKeyboardContact]
   ]);
   mainKeyboard = mainKeyboard.resize().extra();

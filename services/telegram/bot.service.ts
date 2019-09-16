@@ -8,7 +8,7 @@ import Telegraf, {
 } from "telegraf";
 import Stage from "telegraf/stage";
 import Scene from "telegraf/scenes/base";
-import TelegrafI18n, { match } from "telegraf-i18n";
+import TelegrafI18n, { match, reply } from "telegraf-i18n";
 import Session from "telegraf-session-redis";
 import path from "path";
 import {
@@ -22,7 +22,6 @@ import {
   getSignalRobotMenu
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
-import Timeframe from "../../utils/timeframe";
 
 const { enter, leave } = Stage;
 
@@ -40,8 +39,67 @@ class BotService extends Service {
       ],
       created: this.createdService,
       started: this.startedService,
-      stopped: this.stoppedService
+      stopped: this.stoppedService,
+      events: {
+        [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
+        [cpz.Event.SIGNAL_TRADE]: this.handleSignal
+      }
     });
+  }
+
+  async handleSignal(ctx: Context) {
+    try {
+      const signal = <cpz.SignalEvent>ctx.params;
+
+      const { robotId, type } = signal;
+      const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+        id: robotId,
+        fields: ["id", "name"]
+      });
+
+      const subscriptions = await this.broker.call(
+        `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
+        {
+          robotId
+        }
+      );
+
+      if (
+        subscriptions &&
+        Array.isArray(subscriptions) &&
+        subscriptions.length > 0
+      ) {
+        //TODO: Set lang from DB
+        const robotInfo = this.i18n.t("en", `signal.${type}`, { name });
+        const actionText = this.i18n.t("en", `tradeAction.${signal.action}`);
+        const orderTypeText = this.i18n.t(
+          "en",
+          `orderType.${signal.orderType}`
+        );
+        const signalText = this.i18n.t("en", "robot.signal", {
+          code: signal.positionCode,
+          timestamp: dayjs
+            .utc(signal.candleTimestamp)
+            .format("YYYY-MM-DD HH:mm UTC"),
+          action: actionText,
+          orderType: orderTypeText,
+          price: +signal.price
+        });
+
+        const message = `${robotInfo}${signalText}`;
+        await Promise.all(
+          subscriptions.map(
+            async ({ telegramId }: { telegramId: string; userId: string }) => {
+              await this.bot.telegram.sendMessage(telegramId, message, {
+                parse_mode: "HTML"
+              });
+            }
+          )
+        );
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   createdService() {
@@ -57,13 +115,13 @@ class BotService extends Service {
       this.logger.error(err);
     });
     this.bot.use(session);
-    const i18n = new TelegrafI18n({
+    this.i18n = new TelegrafI18n({
       defaultLanguage: "en",
       useSession: true,
       defaultLanguageOnMissing: true,
       directory: path.resolve(process.cwd(), "state/telegram/locales")
     });
-    this.bot.use(i18n.middleware());
+    this.bot.use(this.i18n.middleware());
     const signalsScene = new Scene("signals");
     signalsScene.enter(this.signalsEnter.bind(this));
     signalsScene.leave(this.signalsLeave.bind(this));
@@ -97,6 +155,11 @@ class BotService extends Service {
     this.bot.hears(
       match("keyboards.mainKeyboard.mySignals"),
       enter("mySignals")
+    );
+    this.bot.hears(match("keyboards.mainKeyboard.faq"), this.faq);
+    this.bot.hears(
+      match("keyboards.mainKeyboard.contact"),
+      reply("contact", Extra.HTML())
     );
     this.bot.hears(/(.*?)/, this.defaultHandler.bind(this));
   }
@@ -173,7 +236,26 @@ class BotService extends Service {
       );
     } catch (e) {
       this.logger.error(e);
-      return ctx.reply("");
+      return ctx.reply(ctx.i18n.t("failed"));
+    }
+  }
+
+  async faq(ctx: any) {
+    try {
+      return ctx.reply(
+        "<b>F</b>requently <b>A</b>sked <b>Q</b>uestions\n\n" +
+          ctx.i18n.t("faq.signal1") +
+          ctx.i18n.t("faq.signal2") +
+          ctx.i18n.t("faq.signal3") +
+          ctx.i18n.t("faq.signal4") +
+          ctx.i18n.t("faq.signal5") +
+          ctx.i18n.t("faq.robot1") +
+          ctx.i18n.t("faq.robot2"),
+        Extra.HTML()
+      );
+    } catch (e) {
+      this.logger.error(e);
+      return ctx.reply(ctx.i18n.t("failed"));
     }
   }
 
@@ -221,7 +303,7 @@ class BotService extends Service {
       ctx.scene.state.selectedAsset = selectedAsset;
       const [asset, currency] = selectedAsset.split("/");
       const robots = await this.broker.call(`${cpz.Service.DB_ROBOTS}.find`, {
-        fields: ["id", "code"],
+        fields: ["id", "name"],
         query: {
           available: { [Op.gte]: 20 },
           asset,
@@ -282,7 +364,7 @@ class BotService extends Service {
 
       await ctx.editMessageText(
         ctx.i18n.t("scenes.signals.subscribedSignals", {
-          code: ctx.scene.state.selectedRobot.robot.code
+          name: ctx.scene.state.selectedRobot.robot.name
         })
       );
       ctx.scene.leave();
@@ -307,7 +389,7 @@ class BotService extends Service {
       );
       await ctx.editMessageText(
         ctx.i18n.t("scenes.signals.unsubscribedSignals", {
-          code: ctx.scene.state.selectedRobot.robot.code
+          name: ctx.scene.state.selectedRobot.robot.name
         })
       );
       ctx.scene.leave();
@@ -384,10 +466,7 @@ class BotService extends Service {
         );
       } else signalsText = ctx.i18n.t("robot.signalsNone");
       signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
-      const message = `${ctx.i18n.t("robot.info", {
-        ...robot,
-        timeframe: Timeframe.timeframes[robot.timeframe].str
-      })}${signalsText}`;
+      const message = `${ctx.i18n.t("robot.info", robot)}${signalsText}`;
       return ctx.editMessageText(
         message,
         getSignalRobotMenu(ctx, robot.id, subscription.telegram)

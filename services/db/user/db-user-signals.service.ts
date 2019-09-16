@@ -5,6 +5,7 @@ import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../types/cpz";
 import dayjs from "../../../lib/dayjs";
+import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
 
 class UserSignalsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -42,6 +43,12 @@ class UserSignalsService extends Service {
           },
           handler: this.getSignalRobot
         },
+        getTelegramSubscriptions: {
+          params: {
+            robotId: "string"
+          },
+          handler: this.getTelegramSubscriptions
+        },
         subscribe: {
           params: {
             robotId: "string"
@@ -62,7 +69,6 @@ class UserSignalsService extends Service {
     try {
       const { id: user_id } = ctx.meta.user;
       const query = `select  t.id,
-        t.code,
         t.name
         from robots t right outer join user_signals s ON s.robot_id = t.id
         where s.user_id = :user_id;`;
@@ -100,6 +106,32 @@ class UserSignalsService extends Service {
           email: subscription && subscription.email
         }
       };
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getTelegramSubscriptions(ctx: Context) {
+    try {
+      const { robotId: robot_id } = ctx.params;
+      const query = `select u.telegram_id, s.user_id 
+      from user_signals s 
+      inner join users u on s.user_id = u.id 
+      where s.robot_id = :robot_id 
+        and s.telegram = true 
+        and u.telegram_id is not null;`;
+      const subscribtionsRaw = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: { robot_id }
+      });
+      if (
+        !subscribtionsRaw ||
+        !Array.isArray(subscribtionsRaw) ||
+        subscribtionsRaw.length === 0
+      )
+        return [];
+      return subscribtionsRaw.map(sub => underscoreToCamelCaseKeys(sub));
     } catch (e) {
       this.logger.error(e);
       throw e;
