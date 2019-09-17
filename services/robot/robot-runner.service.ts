@@ -68,7 +68,7 @@ class RobotRunnerService extends Service {
   }
 
   async jobCompleted(jobID: JobId, res: any) {
-    this.logger.info(`Robot #${jobID} completed job`, res);
+    this.logger.info(`Robot #${jobID} completed job`);
   }
 
   async jobError(error: Error) {
@@ -263,9 +263,7 @@ class RobotRunnerService extends Service {
         }
       );
       this.logger.info(
-        `New candle ${exchange}.${asset}.${currency}.${timeframe} ${timestamp} required by ${
-          robots.length
-        }`
+        `New candle ${exchange}.${asset}.${currency}.${timeframe} ${timestamp} required by ${robots.length}`
       );
       await Promise.all(
         robots.map(
@@ -299,9 +297,7 @@ class RobotRunnerService extends Service {
         }
       );
       this.logger.info(
-        `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${
-          robots.length
-        }`
+        `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${robots.length}`
       );
       await Promise.all(
         robots.map(

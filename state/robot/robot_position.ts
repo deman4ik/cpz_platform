@@ -97,8 +97,16 @@ class Position implements cpz.RobotPosition {
     return this._entryStatus;
   }
 
+  public get entryPrice() {
+    return this._entryPrice;
+  }
+
   public get exitStatus() {
     return this._exitStatus;
+  }
+
+  public get exitPrice() {
+    return this._exitPrice;
   }
 
   public get status() {

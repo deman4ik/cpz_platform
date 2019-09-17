@@ -25,6 +25,7 @@ import dayjs from "../../lib/dayjs";
 
 const { enter, leave } = Stage;
 
+//TODO: Logging
 class BotService extends Service {
   bot: any;
   constructor(broker: ServiceBroker) {
@@ -208,7 +209,6 @@ class BotService extends Service {
 
   async auth(ctx: any, next: () => any) {
     const sessionData = ctx.session;
-    this.logger.info(sessionData);
     if (!sessionData || !sessionData.user) {
       const user = await this.broker.call(`${cpz.Service.AUTH}.registerTg`, {
         telegramId: ctx.from.id,
@@ -226,7 +226,6 @@ class BotService extends Service {
 
   async start(ctx: any) {
     try {
-      this.logger.info(ctx.from, ctx.chat);
       const { mainKeyboard } = getMainKeyboard(ctx);
       return ctx.reply(
         ctx.i18n.t("welcome", {
@@ -310,7 +309,6 @@ class BotService extends Service {
           currency
         }
       });
-      this.logger.info(robots);
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
         throw new Error("Failed to load signal robots");
       }
@@ -416,7 +414,6 @@ class BotService extends Service {
           }
         }
       );
-      this.logger.info(robots);
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
         throw new Error("Failed to load signal robots");
       }
@@ -439,7 +436,6 @@ class BotService extends Service {
     try {
       const { robot, subscription } = ctx.scene.state.selectedRobot;
       const { signals } = robot;
-      this.logger.info(signals);
       let signalsText = "";
       if (signals.length > 0) {
         signals.forEach(
