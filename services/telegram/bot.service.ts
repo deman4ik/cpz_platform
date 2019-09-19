@@ -52,7 +52,7 @@ class BotService extends Service {
     try {
       const signal = <cpz.SignalEvent>ctx.params;
 
-      const { robotId, type } = signal;
+      const { robotId, type, action } = signal;
       const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "name"]
@@ -71,23 +71,76 @@ class BotService extends Service {
         subscriptions.length > 0
       ) {
         //TODO: Set lang from DB
+        let message = "";
         const robotInfo = this.i18n.t("en", `signal.${type}`, { name });
         const actionText = this.i18n.t("en", `tradeAction.${signal.action}`);
         const orderTypeText = this.i18n.t(
           "en",
           `orderType.${signal.orderType}`
         );
-        const signalText = this.i18n.t("en", "robot.signal", {
-          code: signal.positionCode,
-          timestamp: dayjs
-            .utc(signal.candleTimestamp)
-            .format("YYYY-MM-DD HH:mm UTC"),
-          action: actionText,
-          orderType: orderTypeText,
-          price: +signal.price
-        });
 
-        const message = `${robotInfo}${signalText}`;
+        if (type === cpz.SignalType.alert) {
+          const signalText = this.i18n.t("en", "robot.signal", {
+            code: signal.positionCode,
+            timestamp: dayjs
+              .utc(signal.candleTimestamp)
+              .format("YYYY-MM-DD HH:mm UTC"),
+            action: actionText,
+            orderType: orderTypeText,
+            price: +signal.price
+          });
+
+          message = `${robotInfo}${signalText}`;
+        } else {
+          let tradeText = "";
+
+          if (
+            action === cpz.TradeAction.closeLong ||
+            action === cpz.TradeAction.closeShort
+          ) {
+            const position = await this.broker.call(
+              `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
+              {
+                id: signal.positionId
+              }
+            );
+            tradeText = this.i18n.t("en", "robot.positionClosed", {
+              code: signal.positionCode,
+              entryAction: this.i18n.t(
+                "en",
+                `tradeAction.${position.entryAction}`
+              ),
+              entryOrderType: this.i18n.t(
+                "en",
+                `orderType.${position.entryOrderType}`
+              ),
+              entryPrice: position.entryPrice,
+              entryDate: dayjs
+                .utc(position.entryDate)
+                .format("YYYY-MM-DD HH:mm UTC"),
+              exitAction: actionText,
+              exitOrderType: orderTypeText,
+              exitPrice: +signal.price,
+              exitDate: dayjs
+                .utc(signal.timestamp)
+                .format("YYYY-MM-DD HH:mm UTC"),
+              barsHeld: position.barsHeld,
+              profit: position.profit
+            });
+          } else {
+            tradeText = this.i18n.t("en", "robot.positionOpen", {
+              code: signal.positionCode,
+              entryAction: actionText,
+              entryOrderType: orderTypeText,
+              entryPrice: +signal.price,
+              entryDate: dayjs
+                .utc(signal.timestamp)
+                .format("YYYY-MM-DD HH:mm UTC")
+            });
+          }
+          message = `${robotInfo}${tradeText}`;
+        }
+
         await Promise.all(
           subscriptions.map(
             async ({ telegramId }: { telegramId: string; userId: string }) => {
@@ -276,7 +329,10 @@ class BotService extends Service {
         `${cpz.Service.DB_ROBOTS}.getAvailableSignalAssets`
       );
       const { backKeyboard } = getBackKeyboard(ctx);
-      await ctx.reply("🤖", backKeyboard);
+      await ctx.reply(
+        ctx.i18n.t("keyboards.mainKeyboard.signals"),
+        backKeyboard
+      );
       if (!assets || !Array.isArray(assets) || assets.length < 0) {
         throw new Error("Failed to load signal assets");
       }
@@ -286,8 +342,8 @@ class BotService extends Service {
       );
     } catch (e) {
       this.logger.error(e);
-      ctx.scene.leave();
-      return ctx.reply(ctx.i18n.t("failed"));
+      await ctx.reply(ctx.i18n.t("failed"));
+      await ctx.scene.leave();
     }
   }
 
@@ -318,8 +374,8 @@ class BotService extends Service {
       );
     } catch (e) {
       this.logger.error(e);
-      ctx.scene.leave();
-      return ctx.reply(ctx.i18n.t("failed"));
+      await ctx.reply(ctx.i18n.t("failed"));
+      await ctx.scene.leave();
     }
   }
 
@@ -343,7 +399,7 @@ class BotService extends Service {
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 
@@ -359,17 +415,51 @@ class BotService extends Service {
           }
         }
       );
+      const { signals } = ctx.scene.state.selectedRobot.robot;
+      let signalsText = "";
+      if (signals.length > 0) {
+        signals.forEach(
+          (signal: {
+            code: string;
+            action: cpz.TradeAction;
+            orderType: cpz.OrderType;
+            price: number;
+            candleTimestamp: string;
+          }) => {
+            const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
+            const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
+            const text = ctx.i18n.t("robot.signal", {
+              code: signal.code,
+              timestamp: dayjs
+                .utc(signal.candleTimestamp)
+                .format("YYYY-MM-DD HH:mm UTC"),
+              action: actionText,
+              orderType: orderTypeText,
+              price: +signal.price
+            });
+            signalsText = `${signalsText}\n${text}`;
+          }
+        );
+      }
 
       await ctx.editMessageText(
         ctx.i18n.t("scenes.signals.subscribedSignals", {
           name: ctx.scene.state.selectedRobot.robot.name
-        })
+        }),
+        Extra.HTML()
       );
-      ctx.scene.leave();
+      if (signalsText !== "") {
+        signalsText = ctx.i18n.t("robot.currentSignals", {
+          name: ctx.scene.state.selectedRobot.robot.name,
+          signals: signalsText
+        });
+        await ctx.reply(signalsText, Extra.HTML());
+      }
+      await ctx.scene.leave();
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 
@@ -388,14 +478,15 @@ class BotService extends Service {
       await ctx.editMessageText(
         ctx.i18n.t("scenes.signals.unsubscribedSignals", {
           name: ctx.scene.state.selectedRobot.robot.name
-        })
+        }),
+        Extra.HTML()
       );
-      ctx.scene.leave();
+      await ctx.scene.leave();
     } catch (e) {
       this.logger.error(e);
 
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 
@@ -414,6 +505,11 @@ class BotService extends Service {
           }
         }
       );
+      const { backKeyboard } = getBackKeyboard(ctx);
+      await ctx.reply(
+        ctx.i18n.t("keyboards.mainKeyboard.mySignals"),
+        backKeyboard
+      );
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
         throw new Error("Failed to load signal robots");
       }
@@ -423,8 +519,8 @@ class BotService extends Service {
       );
     } catch (e) {
       this.logger.error(e);
-      ctx.scene.leave();
-      return ctx.reply(ctx.i18n.t("failed"));
+      await ctx.reply(ctx.i18n.t("failed"));
+      await ctx.scene.leave();
     }
   }
 
@@ -434,6 +530,8 @@ class BotService extends Service {
 
   async robotInfo(ctx: any) {
     try {
+      if (ctx.scene.state.page === "info") return;
+      ctx.scene.state.page = "info";
       const { robot, subscription } = ctx.scene.state.selectedRobot;
       const { signals } = robot;
       let signalsText = "";
@@ -457,7 +555,7 @@ class BotService extends Service {
               orderType: orderTypeText,
               price: +signal.price
             });
-            signalsText = `${signalsText}\n\n${text}`;
+            signalsText = `${signalsText}\n${text}`;
           }
         );
       } else signalsText = ctx.i18n.t("robot.signalsNone");
@@ -470,12 +568,14 @@ class BotService extends Service {
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 
   async robotStats(ctx: any) {
     try {
+      if (ctx.scene.state.page === "stats") return;
+      ctx.scene.state.page = "stats";
       const { robot, subscription } = ctx.scene.state.selectedRobot;
       const { statistics } = robot;
       let message;
@@ -486,18 +586,20 @@ class BotService extends Service {
         )}${ctx.i18n.t("robot.statsLosses", statistics)}`;
       else message = ctx.i18n.t("robot.statsNone");
       return ctx.editMessageText(
-        message,
+        ctx.i18n.t("robot.name", { name: robot.name }) + message,
         getSignalRobotMenu(ctx, robot.id, subscription.telegram)
       );
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 
   async robotPositions(ctx: any) {
     try {
+      if (ctx.scene.state.page === "pos") return;
+      ctx.scene.state.page = "pos";
       const { robot, subscription } = ctx.scene.state.selectedRobot;
       const { openPositions, closedPositions } = robot;
       let openPositionsText = "";
@@ -527,7 +629,7 @@ class BotService extends Service {
                 orderType: orderTypeText,
                 price: +signal.price
               });
-              signalsText = `${signalsText}\n\n${text}`;
+              signalsText = `${signalsText}\n${text}`;
             });
             signalsText = ctx.i18n.t("robot.positionSignals", {
               signals: signalsText
@@ -564,7 +666,8 @@ class BotService extends Service {
       }
 
       const message =
-        openPositionsText !== "" && closedPositionsText !== ""
+        ctx.i18n.t("robot.name", { name: robot.name }) + openPositionsText !==
+          "" && closedPositionsText !== ""
           ? `${openPositionsText}${closedPositionsText}`
           : ctx.i18n.t("robot.positionsNone");
       return ctx.editMessageText(
@@ -574,7 +677,7 @@ class BotService extends Service {
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
-      ctx.scene.leave();
+      await ctx.scene.leave();
     }
   }
 }

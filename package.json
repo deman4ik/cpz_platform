@@ -12,7 +12,7 @@
     "exwatcher": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config exwatcher.config.ts services/exwatcher.service.ts services/connector/public-connector.service.ts",
     "backtesterWorker": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importerWorker.config.ts services/backtester/backtester-worker.service.ts services/db/candles/*.service.ts services/db/backtest/*.service.ts",
     "robot": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config robot.config.ts services/robot/*.service.ts",
-    "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config moleculer.config.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts services/db/robot/*.service.ts services/telegram/*.service.ts",
+    "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dev.config.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts services/db/robot/*.service.ts services/telegram/*.service.ts",
     "cli": "moleculer connect",
     "start": "node ./node_modules/moleculer/bin/moleculer-runner --env --config prod.config.js dist/services",
     "ci": "jest --watch",

@@ -1,4 +1,4 @@
-import Telegraf, { Extra } from "telegraf";
+import Telegraf, { Extra, Markup } from "telegraf";
 import { cpz } from "../../types/cpz";
 import { chunkArray } from "../../utils/helpers";
 
@@ -51,12 +51,16 @@ function getSignalRobotMenu(ctx: any, robotId: string, subscribed: boolean) {
           ctx.i18n.t("robot.menuInfo"),
           JSON.stringify({ a: "info", p: robotId }),
           false
-        ),
+        )
+      ],
+      [
         m.callbackButton(
           ctx.i18n.t("robot.menuStats"),
           JSON.stringify({ a: "stats", p: robotId }),
           false
-        ),
+        )
+      ],
+      [
         m.callbackButton(
           ctx.i18n.t("robot.menuPositions"),
           JSON.stringify({ a: "pos", p: robotId }),
