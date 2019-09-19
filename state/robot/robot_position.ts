@@ -184,11 +184,11 @@ class Position implements cpz.RobotPosition {
 
   _calcStats() {
     if (this._direction === cpz.PositionDirection.long) {
-      this._profit = round(this._exitPrice - this._entryPrice, 6);
+      this._profit = +round(this._exitPrice - this._entryPrice, 6);
     } else {
-      this._profit = round(this._entryPrice - this._exitPrice, 6);
+      this._profit = +round(this._entryPrice - this._exitPrice, 6);
     }
-    this._barsHeld = round(
+    this._barsHeld = +round(
       dayjs
         .utc(this._exitCandleTimestamp)
         .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
@@ -281,7 +281,7 @@ class Position implements cpz.RobotPosition {
     this._checkClose();
     this._status = cpz.RobotPositionStatus.closed;
     this._exitStatus = cpz.RobotTradeStatus.closed;
-    this._exitPrice = price;
+    this._exitPrice = +price;
     this._exitDate = dayjs.utc().toISOString();
     this._exitOrderType = orderType;
     this._exitAction = action;
@@ -342,13 +342,13 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      return Math.max(this._candle.open, price);
+      return +Math.max(+this._candle.open, +price);
     }
     if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      return Math.min(this._candle.open, price);
+      return +Math.min(+this._candle.open, +price);
     }
     throw new Error(`Unknown action ${action}`);
   }
@@ -358,12 +358,14 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      if (this._candle.high >= price) return Math.max(this._candle.open, price);
+      if (+this._candle.high >= +price)
+        return +Math.max(+this._candle.open, +price);
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      if (this._candle.low <= price) return Math.min(this._candle.open, price);
+      if (+this._candle.low <= +price)
+        return +Math.min(+this._candle.open, +price);
     } else {
       throw new Error(`Unknown action ${action}`);
     }
@@ -375,74 +377,76 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      if (this._candle.high <= price) return Math.min(this._candle.open, price);
+      if (+this._candle.high <= +price)
+        return +Math.min(+this._candle.open, +price);
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      if (this._candle.low >= price) return Math.max(this._candle.open, price);
+      if (+this._candle.low >= +price)
+        return +Math.max(+this._candle.open, +price);
     } else {
       throw new Error(`Unknown action ${action}`);
     }
     return null;
   }
 
-  public buyAtMarket(price = this._candle.close) {
+  public buyAtMarket(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.market);
   }
 
-  public sellAtMarket(price = this._candle.close) {
+  public sellAtMarket(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.market);
   }
 
-  public shortAtMarket(price = this._candle.close) {
+  public shortAtMarket(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.market);
   }
 
-  public coverAtMarket(price = this._candle.close) {
+  public coverAtMarket(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.market);
   }
 
-  public buyAtStop(price = this._candle.close) {
+  public buyAtStop(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.stop);
   }
 
-  public sellAtStop(price = this._candle.close) {
+  public sellAtStop(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.stop);
   }
 
-  public shortAtStop(price = this._candle.close) {
+  public shortAtStop(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.stop);
   }
 
-  public coverAtStop(price = this._candle.close) {
+  public coverAtStop(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.stop);
   }
 
-  public buyAtLimit(price = this._candle.close) {
+  public buyAtLimit(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.long, price, cpz.OrderType.limit);
   }
 
-  public sellAtLimit(price = this._candle.close) {
+  public sellAtLimit(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.limit);
   }
 
-  public shortAtLimit(price = this._candle.close) {
+  public shortAtLimit(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.limit);
   }
 
-  public coverAtLimit(price = this._candle.close) {
+  public coverAtLimit(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.limit);
   }

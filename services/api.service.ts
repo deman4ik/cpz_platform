@@ -62,10 +62,10 @@ class ApiService extends Service {
         routes: [
           {
             path: "/api",
-            whitelist: [
-              `${cpz.Service.AUTH}.login`,
-              `${cpz.Service.AUTH}.register`
-            ]
+            aliases: {
+              "POST login": `${cpz.Service.AUTH}.login`,
+              "POST register": `${cpz.Service.AUTH}.register`
+            }
           },
           {
             path: "/api/auth",

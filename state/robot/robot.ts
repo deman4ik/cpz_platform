@@ -290,9 +290,9 @@ class Robot {
         positions: strategyState.positions,
         parametersSchema,
         strategyFunctions, // функции стратегии
+        log: this._log.bind(this),
         ...strategyState // предыдущий стейт стратегии
       });
-      this._strategyInstance._log = this._log.bind(this);
     } catch (error) {
       throw error;
     }

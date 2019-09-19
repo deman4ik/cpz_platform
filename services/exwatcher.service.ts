@@ -882,11 +882,10 @@ class ExwatcherService extends Service {
                   this.candlesCurrent[id][timeframe].close = +currentTrades[
                     currentTrades.length - 1
                   ].price;
-                  this.candlesCurrent[id][
-                    timeframe
-                  ].volume += +currentTrades
-                    .map(t => t.amount)
-                    .reduce((a, b) => a + b, 0);
+                  this.candlesCurrent[id][timeframe].volume +=
+                    +currentTrades
+                      .map(t => t.amount)
+                      .reduce((a, b) => a + b, 0) || 0;
                   this.candlesCurrent[id][timeframe].type =
                     this.candlesCurrent[id][timeframe].volume === 0
                       ? cpz.CandleType.previous

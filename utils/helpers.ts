@@ -170,13 +170,13 @@ function findLastByMinProp(arr: { [key: string]: any }[], propName: string) {
     .pop();
 }
 
-const round = (n: number, decimals = 0) =>
-  Number(`${Math.round(+`${n}e${decimals}`)}e-${decimals}`);
+const round = (n: number, decimals = 0): number =>
+  +Number(`${Math.round(+`${n}e${decimals}`)}e-${decimals}`);
 
 function divideRound(a: number, b: number): number | 0 {
   if (!a || !b || a === 0 || b === 0) return 0;
   const result = a / b;
-  return round(result, 6);
+  return +round(result, 6);
 }
 
 function deepMapKeys(

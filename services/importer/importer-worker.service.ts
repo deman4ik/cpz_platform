@@ -51,8 +51,7 @@ class ImporterWorkerService extends Service {
             async process(job: Job) {
               try {
                 this.logger.info(
-                  `Job #${job.id} start importing candles:`,
-                  job.data
+                  `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
                 );
                 const state: cpz.Importer = {
                   ...job.data,

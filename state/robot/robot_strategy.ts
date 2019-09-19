@@ -32,6 +32,7 @@ class BaseStrategy implements cpz.Strategy {
   _log = console.log;
 
   constructor(state: cpz.StrategyState) {
+    this._log = state.log || console.log;
     this._initialized = state.initialized || false; // стратегия инициализирована
     this._parameters = state.parameters || {};
     this._robotSettings = state.robotSettings;

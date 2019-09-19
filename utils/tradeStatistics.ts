@@ -24,21 +24,22 @@ function calcConsec(profits: number[]) {
 }
 
 function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
-  let highWaterMark = -Infinity;
-  let maxDrawdown = 0;
-  let maxDrawdownVal = 0;
-  let maxDrawdownSum = 0;
-  let posHighWaterMark = null;
-  let startPos = -1;
-  let endPos = -1;
+  let highWaterMark: number = -Infinity;
+  let maxDrawdown: number = 0;
+  let maxDrawdownVal: number = 0;
+  let maxDrawdownSum: number = 0;
+  let posHighWaterMark: number = null;
+  let startPos: number = -1;
+  let endPos: number = -1;
 
   for (let i = 0; i < positions.length; i += 1) {
-    if (positions[i].profit > highWaterMark) {
-      highWaterMark = positions[i].profit;
+    const profit = +positions[i].profit;
+    if (profit > highWaterMark) {
+      highWaterMark = profit;
       posHighWaterMark = i;
     }
 
-    let ddVal = highWaterMark - positions[i].profit;
+    let ddVal = highWaterMark - profit;
     let dd = divideRound(ddVal, highWaterMark);
 
     if (dd > maxDrawdown) {
@@ -82,10 +83,12 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: shortPositions.length
   };
 
-  const allWinningPositions = positions.filter(({ profit }) => profit > 0);
-  const longWinningPositions = longPositions.filter(({ profit }) => profit > 0);
+  const allWinningPositions = positions.filter(({ profit }) => +profit > 0);
+  const longWinningPositions = longPositions.filter(
+    ({ profit }) => +profit > 0
+  );
   const shortWinningPositions = shortPositions.filter(
-    ({ profit }) => profit > 0
+    ({ profit }) => +profit > 0
   );
   statistics.tradesWinning = {
     all: allWinningPositions.length,
@@ -93,10 +96,10 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: shortWinningPositions.length
   };
 
-  const allLosingPositions = positions.filter(({ profit }) => profit < 0);
-  const longLosingPositions = longPositions.filter(({ profit }) => profit < 0);
+  const allLosingPositions = positions.filter(({ profit }) => +profit < 0);
+  const longLosingPositions = longPositions.filter(({ profit }) => +profit < 0);
   const shortLosingPositions = shortPositions.filter(
-    ({ profit }) => profit < 0
+    ({ profit }) => +profit < 0
   );
   statistics.tradesLosing = {
     all: allLosingPositions.length,
@@ -121,19 +124,19 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
 
   const allAvgBarsHeld = divideRound(
     positions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     positions.length
   );
   const longAvgBarsHeld = divideRound(
     longPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     longPositions.length
   );
   const shortAvgBarsHeld = divideRound(
     shortPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     shortPositions.length
   );
@@ -145,19 +148,19 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
 
   const allAvgWinningBarsHeld = divideRound(
     allWinningPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     allWinningPositions.length
   );
   const longAvgWinningBarsHeld = divideRound(
     longWinningPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     longWinningPositions.length
   );
   const shortAvgWinningBarsHeld = divideRound(
     shortWinningPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     shortWinningPositions.length
   );
@@ -169,19 +172,19 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
 
   const allAvgLosingBarsHeld = divideRound(
     allLosingPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     allLosingPositions.length
   );
   const longAvgLosingBarsHeld = divideRound(
     longLosingPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     longLosingPositions.length
   );
   const shortAvgLosingBarsHeld = divideRound(
     shortLosingPositions
-      .map(({ barsHeld }) => barsHeld)
+      .map(({ barsHeld }) => +barsHeld)
       .reduce((acc, val) => acc + val, 0),
     shortLosingPositions.length
   );
@@ -192,18 +195,18 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
   };
 
   const allNetProfit = round(
-    positions.map(({ profit }) => profit).reduce((acc, val) => acc + val, 0),
+    positions.map(({ profit }) => +profit).reduce((acc, val) => acc + val, 0),
     6
   );
   const longNetProfit = round(
     longPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
   const shortNetProfit = round(
     shortPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
@@ -225,19 +228,19 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
 
   const allGrossProfit = round(
     allWinningPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
   const longGrossProfit = round(
     longWinningPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
   const shortGrossProfit = round(
     shortWinningPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
@@ -267,19 +270,19 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
 
   const allGrossLoss = round(
     allLosingPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
   const longGrossLoss = round(
     longLosingPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
   const shortGrossLoss = round(
     shortLosingPositions
-      .map(({ profit }) => profit)
+      .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
     6
   );
@@ -329,15 +332,15 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
   const {
     maxConsecWin: allMaxConsecWin,
     maxConsecLoss: allMaxConsecLoss
-  } = calcConsec(positions.map(({ profit }) => profit));
+  } = calcConsec(positions.map(({ profit }) => +profit));
   const {
     maxConsecWin: longMaxConsecWin,
     maxConsecLoss: longMaxConsecLoss
-  } = calcConsec(longPositions.map(({ profit }) => profit));
+  } = calcConsec(longPositions.map(({ profit }) => +profit));
   const {
     maxConsecWin: shortMaxConsecWin,
     maxConsecLoss: shortMaxConsecLoss
-  } = calcConsec(shortPositions.map(({ profit }) => profit));
+  } = calcConsec(shortPositions.map(({ profit }) => +profit));
 
   statistics.maxConnsecWins = {
     all: allMaxConsecWin,
