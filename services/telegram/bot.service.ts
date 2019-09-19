@@ -160,7 +160,8 @@ class BotService extends Service {
     const session = new Session({
       store: {
         host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT
+        port: process.env.REDIS_PORT,
+        url: process.env.REDIS_URL
       },
       getSessionKey: this.getSessionKey.bind(this)
     });
@@ -223,13 +224,13 @@ class BotService extends Service {
    *****************************/
 
   async startedService() {
-    if (process.env.NODE_ENV === "dev") {
+    if (process.env.NODE_ENV === "production") {
+      await this.bot.telegram.setWebhook(`${process.env.BOT_HOST}/tgendpoint`);
+      await this.bot.startWebhook("/tgendpoint", null, 5000);
+    } else {
       this.logger.warn("Bot in development mode!");
       await this.bot.telegram.deleteWebhook();
       await this.bot.startPolling();
-    } else {
-      await this.bot.telegram.setWebhook(`${process.env.BOT_HOST}/tgendpoint`);
-      await this.bot.startWebhook("/tgendpoint", null, 5000);
     }
   }
 
