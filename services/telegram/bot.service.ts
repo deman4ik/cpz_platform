@@ -668,12 +668,11 @@ class BotService extends Service {
       }
 
       const message =
-        ctx.i18n.t("robot.name", { name: robot.name }) + openPositionsText !==
-          "" && closedPositionsText !== ""
+        openPositionsText !== "" || closedPositionsText !== ""
           ? `${openPositionsText}${closedPositionsText}`
           : ctx.i18n.t("robot.positionsNone");
       return ctx.editMessageText(
-        message,
+        ctx.i18n.t("robot.name", { name: robot.name }) + message,
         getSignalRobotMenu(ctx, robot.id, subscription.telegram)
       );
     } catch (e) {
