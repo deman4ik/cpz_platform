@@ -62,7 +62,7 @@ class ImporterWorkerService extends Service {
                 const state: cpz.Importer = {
                   ...job.data,
                   status: cpz.Status.started,
-                  started_at: dayjs.utc().toISOString(),
+                  startedAt: dayjs.utc().toISOString(),
                   endedAt: null,
                   error: null
                 };
