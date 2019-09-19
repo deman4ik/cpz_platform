@@ -29,7 +29,7 @@ const brokerConfig = {
       // Filename template. You can use {date}, {nodeID} & {namespace} variables.
       filename: "cpz-{namespace}-{nodeID}-{date}.log",
       // Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
-      formatter: "json",
+      formatter: "full",
       // Custom object printer. If not defined, it uses the `util.inspect` method.
       objectPrinter: null,
       // End of line. Default values comes from the OS settings.
