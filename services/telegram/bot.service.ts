@@ -159,8 +159,10 @@ class BotService extends Service {
   createdService() {
     const session = new Session({
       store: {
-       url: process.env.REDIS_URL,
-       tls: true
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        tls: true
       },
       getSessionKey: this.getSessionKey.bind(this)
     });

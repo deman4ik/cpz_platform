@@ -32,8 +32,11 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_CANDLES_CURRENT}`
       ],
       mixins: [
-        QueueService(process.env.REDIS_URL, {
+        QueueService({
           redis: {
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD,
             tls: true
           },
           settings: {

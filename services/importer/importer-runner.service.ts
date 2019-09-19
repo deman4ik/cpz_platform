@@ -12,9 +12,12 @@ class ImporterRunnerService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.IMPORTER_RUNNER,
       mixins: [
-        QueueService(process.env.REDIS_URL, {
+        QueueService({
           redis: {
-            tls: true
+            tls: true,
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD
           },
           settings: {
             lockDuration: 120000,

@@ -12,8 +12,11 @@ class RobotRunnerService extends Service {
       name: cpz.Service.ROBOT_RUNNER,
       dependencies: [`${cpz.Service.DB_ROBOTS}`],
       mixins: [
-        QueueService(process.env.REDIS_URL, {
+        QueueService({
           redis: {
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD,
             tls: true
           },
           settings: {
