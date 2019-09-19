@@ -144,6 +144,20 @@ class Robot {
     return this._timeframe;
   }
 
+  clear() {
+    this._lastCandle = null;
+    this._strategy = {
+      variables: {},
+      positions: [],
+      posLastNumb: {},
+      indicators: {},
+      initialized: false
+    };
+    this._hasAlerts = false;
+    this._indicators = {};
+    this._statistics = {};
+  }
+
   start() {
     this._status = cpz.Status.started;
     this._startedAt = dayjs.utc().toISOString();

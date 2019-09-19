@@ -228,6 +228,7 @@ class RobotWorkerService extends Service {
         robot.finalize();
       } else if (type === cpz.RobotJobType.start) {
         // Start robot - init strategy and indicators
+        robot.clear();
         robot.setStrategy(this._strategiesCode[robot.strategyName]);
         robot.initStrategy();
         if (robot.hasBaseIndicators) {
