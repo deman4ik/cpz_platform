@@ -85,7 +85,7 @@ class ImporterRunnerService extends Service {
           },
           graphql: {
             mutation:
-              "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: Datetime!, dateTo: Datetime!): ServiceStatus!"
+              "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String!, dateTo: String!): ServiceStatus!"
           },
           handler: this.startHistory
         },
