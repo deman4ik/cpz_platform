@@ -13,6 +13,9 @@ class RobotRunnerService extends Service {
       dependencies: [`${cpz.Service.DB_ROBOTS}`],
       mixins: [
         QueueService(process.env.REDIS_URL, {
+          redis: {
+            tls: true
+          },
           settings: {
             lockDuration: 20000,
             lockRenewTime: 5000,

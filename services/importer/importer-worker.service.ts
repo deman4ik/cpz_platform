@@ -25,6 +25,9 @@ class ImporterWorkerService extends Service {
       name: cpz.Service.IMPORTER_WORKER,
       mixins: [
         QueueService(process.env.REDIS_URL, {
+          redis: {
+            tls: true
+          },
           settings: {
             lockDuration: 120000,
             lockRenewTime: 10000,

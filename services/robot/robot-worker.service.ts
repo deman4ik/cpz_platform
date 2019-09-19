@@ -33,6 +33,9 @@ class RobotWorkerService extends Service {
       ],
       mixins: [
         QueueService(process.env.REDIS_URL, {
+          redis: {
+            tls: true
+          },
           settings: {
             lockDuration: 20000,
             lockRenewTime: 5000,
