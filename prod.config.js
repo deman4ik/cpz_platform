@@ -19,14 +19,25 @@ const brokerConfig = {
   // Unique node identifier. Must be unique in a namespace.
   nodeID: "cpz",
 
-  // Enable/disable logging or use custom logger. More info: https://moleculer.services/docs/0.13/logging.html
-  logger: true,
-  // Log level for built-in console logger. Available values: trace, debug, info, warn, error, fatal
-  logLevel: "info",
-  // Log formatter for built-in console logger. Available values: default, simple, short. It can be also a `Function`.
-  logFormatter: "default",
-  // Custom object & array printer for built-in console logger.
-  logObjectPrinter: null,
+  logger: {
+    type: "File",
+    options: {
+      // Logging level
+      level: "info",
+      // Folder path to save files. You can use {nodeID} & {namespace} variables.
+      folder: "./logs",
+      // Filename template. You can use {date}, {nodeID} & {namespace} variables.
+      filename: "cpz-{namespace}-{nodeID}-{date}.log",
+      // Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
+      formatter: "json",
+      // Custom object printer. If not defined, it uses the `util.inspect` method.
+      objectPrinter: null,
+      // End of line. Default values comes from the OS settings.
+      eol: "\n",
+      // File appending interval in milliseconds.
+      interval: 1 * 1000
+    }
+  },
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
