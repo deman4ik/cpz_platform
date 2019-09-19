@@ -284,11 +284,9 @@ class RobotWorkerService extends Service {
       });
       // Sending robot events
       if (robot.eventsToSend.length > 0) {
-        await Promise.all(
-          robot.eventsToSend.map(
-            async ({ type, data }) => await this.broker.emit(type, data)
-          )
-        );
+        for (const { type, data } of robot.eventsToSend) {
+          await this.broker.emit(type, data);
+        }
       }
 
       return robot.status;
