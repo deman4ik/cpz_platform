@@ -86,6 +86,7 @@ class ImporterWorkerService extends Service {
                 }
                 state.endedAt = dayjs.utc().toISOString();
                 state.status = cpz.Status.finished;
+                state.progress = 100;
                 await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
                   entity: state
                 });
