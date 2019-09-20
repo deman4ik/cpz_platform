@@ -336,7 +336,7 @@ class PublicConnectorService extends Service {
       }
     };
     const response: ccxt.Ticker = await retry(call, this.retryOptions);
-    if (!response) return null;
+    if (!response || !response.timestamp) return null;
     const time = dayjs.utc(response.timestamp);
     return {
       exchange,
@@ -405,6 +405,8 @@ class PublicConnectorService extends Service {
     }
     let candles: cpz.ExchangeCandle[] = response.map(candle => {
       try {
+        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+          throw new Error("Wrong response");
         return {
           exchange,
           asset,
@@ -494,6 +496,8 @@ class PublicConnectorService extends Service {
 
     candles = response.map(candle => {
       try {
+        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+          throw new Error("Wrong response");
         return {
           exchange,
           asset,
@@ -567,6 +571,8 @@ class PublicConnectorService extends Service {
 
     candles = response.map(candle => {
       try {
+        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+          throw new Error("Wrong response");
         return {
           exchange,
           asset,
@@ -643,6 +649,7 @@ class PublicConnectorService extends Service {
 
       const trades = response.map(trade => {
         try {
+          if (!trade || !trade.datetime) throw new Error("Wrong response");
           const time = dayjs.utc(trade.datetime);
           return {
             exchange,
