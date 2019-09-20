@@ -365,7 +365,7 @@ class PublicConnectorService extends Service {
       high: round(+candle[2], 6),
       low: round(+candle[3], 6),
       close: round(+candle[4], 6),
-      volume: round(+candle[5], 6),
+      volume: round(+candle[5] || 0, 6),
       type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
     }));
 
@@ -383,7 +383,10 @@ class PublicConnectorService extends Service {
           high: round(Math.max(...candles.map(t => +t.high)), 6),
           low: round(Math.min(...candles.map(t => +t.low)), 6),
           close: round(+candles[candles.length - 1].close, 6),
-          volume: round(+candles.map(t => t.volume).reduce((a, b) => a + b), 6),
+          volume: round(
+            +candles.map(t => t.volume).reduce((a, b) => a + b, 0) || 0,
+            6
+          ),
           type: cpz.CandleType.created
         }
       ];
@@ -449,7 +452,7 @@ class PublicConnectorService extends Service {
       high: round(+candle[2], 6),
       low: round(+candle[3], 6),
       close: round(+candle[4], 6),
-      volume: round(+candle[5], 6),
+      volume: round(+candle[5], 6) || 0,
       type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
     }));
 

@@ -29,7 +29,7 @@ class ImporterWorkerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: true
+            tls: process.env.REDIS_TLS
           },
           settings: {
             lockDuration: 120000,
@@ -55,17 +55,17 @@ class ImporterWorkerService extends Service {
         [cpz.Queue.importCandles]: [
           {
             async process(job: Job) {
+              this.logger.info(
+                `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
+              );
+              const state: cpz.Importer = {
+                ...job.data,
+                status: cpz.Status.started,
+                startedAt: dayjs.utc().toISOString(),
+                endedAt: null,
+                error: null
+              };
               try {
-                this.logger.info(
-                  `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
-                );
-                const state: cpz.Importer = {
-                  ...job.data,
-                  status: cpz.Status.started,
-                  startedAt: dayjs.utc().toISOString(),
-                  endedAt: null,
-                  error: null
-                };
                 const currentState = await this.broker.call(
                   `${cpz.Service.DB_IMPORTERS}.get`,
                   { id: state.id }
@@ -99,6 +99,11 @@ class ImporterWorkerService extends Service {
                 this.broker.emit(cpz.Event.IMPORTER_FAILED, {
                   id: job.id,
                   error: e.message
+                });
+                state.status = cpz.Status.failed;
+                state.error = e.message;
+                await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+                  entity: state
                 });
                 if (e instanceof Errors.ValidationError) {
                   return {

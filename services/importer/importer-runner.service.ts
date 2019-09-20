@@ -14,7 +14,7 @@ class ImporterRunnerService extends Service {
       mixins: [
         QueueService({
           redis: {
-            tls: true,
+            tls: process.env.REDIS_TLS,
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD
@@ -129,7 +129,7 @@ class ImporterRunnerService extends Service {
     this.logger.info(`Job #${jobID} progress is ${progress}%`);
   }
   async jobCompleted(jobID: JobId, res: any) {
-    this.logger.info(`Job #${jobID} completed!`);
+    this.logger.info(`Job #${jobID} completed!`, res);
   }
   async jobError(error: Error) {
     this.logger.error(error);

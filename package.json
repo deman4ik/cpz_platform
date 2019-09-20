@@ -5,8 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dev.config.ts services/*.service.ts services/**/*.service.ts services/**/**/*.service.ts",
-    "importer": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importer.config.ts services/importer/importer-runner.service.ts services/importer/importer-worker.service.ts",
-    "importerWorker": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --env --instances=2 --config importerWorker.config.ts services/importer/importer-worker.service.ts services/connector/public-connector.service.ts",
+    "importer": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config importer.config.ts services/importer/importer-runner.service.ts services/importer/importer-worker.service.ts services/connector/public-connector.service.ts services/db/candles/*.service.ts services/db/db-importers.service.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts",
     "db": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config db.config.ts services/db/*/*.service.ts services/db/*.service.ts",
     "connector": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config connector.config.ts services/connector/*.service.ts",
     "exwatcher": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config exwatcher.config.ts services/exwatcher.service.ts services/connector/public-connector.service.ts",

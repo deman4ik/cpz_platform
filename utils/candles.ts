@@ -103,9 +103,8 @@ async function batchCandles(
       .filter(candle => candle.time >= timeFrom && candle.time < timeTo)
       .sort((a, b) => sortAsc(a.time, b.time));
     if (currentCandles.length > 0) {
-      const volume = +currentCandles
-        .map(t => t.volume)
-        .reduce((a, b) => a + b, 0);
+      const volume =
+        +currentCandles.map(t => t.volume).reduce((a, b) => a + b, 0) || 0;
       timeframeCandles.push({
         exchange,
         asset,
@@ -167,9 +166,9 @@ async function createCandlesFromTrades(
 
                 if (dateTrades && dateTrades.length > 0) {
                   currentTrades = currentTrades.slice(dateTrades.length);
-                  const volume = +dateTrades
-                    .map(t => t.amount)
-                    .reduce((a, b) => a + b, 0);
+                  const volume =
+                    +dateTrades.map(t => t.amount).reduce((a, b) => a + b, 0) ||
+                    0;
                   const prices = dateTrades.map(t => +t.price);
                   result[timeframe].push({
                     exchange,
