@@ -45,11 +45,15 @@ class PublicConnectorService extends Service {
             asset: "string",
             currency: "string"
           },
+          graphql: {
+            query:
+              "getMarket(exchange: String!, asset: String!, currency: String!): JSON!"
+          },
           async handler(ctx) {
             return this.getMarket(
               ctx.params.exchange,
               ctx.params.asset,
-              ctx.params.asset
+              ctx.params.currency
             );
           }
         },
@@ -110,6 +114,30 @@ class PublicConnectorService extends Service {
           },
           async handler(ctx): Promise<cpz.ExchangeCandle[]> {
             return this.getCandles(
+              ctx.params.exchange,
+              ctx.params.asset,
+              ctx.params.currency,
+              ctx.params.timeframe,
+              ctx.params.dateFrom,
+              ctx.params.limit
+            );
+          }
+        },
+        getRawCandles: {
+          params: {
+            exchange: "string",
+            asset: "string",
+            currency: "string",
+            timeframe: {
+              description: "Timeframe in minutes.",
+              type: "enum",
+              values: Timeframe.validArray
+            },
+            dateFrom: "string",
+            limit: "number"
+          },
+          async handler(ctx): Promise<cpz.ExchangeCandle[]> {
+            return this.getRawCandles(
               ctx.params.exchange,
               ctx.params.asset,
               ctx.params.currency,
@@ -222,10 +250,31 @@ class PublicConnectorService extends Service {
     const response: ccxt.Market = await this.publicConnectors[exchange].market(
       this.getSymbol(asset, currency)
     );
+    let loadFrom;
+    if (exchange === "kraken") {
+      const [firstTrade] = await this.getTrades(
+        exchange,
+        asset,
+        currency,
+        dayjs.utc("01.01.2013").toISOString()
+      );
+      if (firstTrade) loadFrom = firstTrade.timestamp;
+    } else if (exchange === "bitfinex") {
+      const [firstCandle] = await this.getRawCandles(
+        exchange,
+        asset,
+        currency,
+        1,
+        dayjs.utc("01.01.2013").toISOString(),
+        10
+      );
+      if (firstCandle) loadFrom = firstCandle.timestamp;
+    }
     return {
       exchange,
       asset,
       currency,
+      loadFrom,
       amountLimits: {
         min: response.limits.amount.min,
         max: response.limits.amount.max
@@ -354,20 +403,28 @@ class PublicConnectorService extends Service {
         type: cpz.CandleType.previous
       };
     }
-    let candles: cpz.ExchangeCandle[] = response.map(candle => ({
-      exchange,
-      asset,
-      currency,
-      timeframe: params.timeframe,
-      time: +candle[0],
-      timestamp: dayjs.utc(+candle[0]).toISOString(),
-      open: round(+candle[1], 6),
-      high: round(+candle[2], 6),
-      low: round(+candle[3], 6),
-      close: round(+candle[4], 6),
-      volume: round(+candle[5] || 0, 6),
-      type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
-    }));
+    let candles: cpz.ExchangeCandle[] = response.map(candle => {
+      try {
+        return {
+          exchange,
+          asset,
+          currency,
+          timeframe: params.timeframe,
+          time: +candle[0],
+          timestamp: dayjs.utc(+candle[0]).toISOString(),
+          open: round(+candle[1], 6),
+          high: round(+candle[2], 6),
+          low: round(+candle[3], 6),
+          close: round(+candle[4], 6),
+          volume: round(+candle[5] || 0, 6),
+          type:
+            +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+        };
+      } catch (e) {
+        this.logger.error(e, candle);
+        throw e;
+      }
+    });
 
     if (candles.length > 0 && params.batch) {
       const time = dayjs.utc(params.time);
@@ -392,6 +449,73 @@ class PublicConnectorService extends Service {
       ];
     }
     return candles[candles.length - 1];
+  }
+
+  /**
+   * Get raw exchange candles
+   *
+   * @param {ExchangeName} exchange
+   * @param {string} asset
+   * @param {string} currency
+   * @param {cpz.Timeframe} timeframe
+   * @param {string} dateFrom
+   * @param {number} limit
+   * @returns {Promise<cpz.ExchangeCandle[]>}
+   * @memberof PublicConnectorService
+   */
+  async getRawCandles(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string,
+    timeframe: cpz.Timeframe,
+    dateFrom: string,
+    limit: number = 100
+  ): Promise<cpz.ExchangeCandle[]> {
+    await this.initConnector(exchange);
+    const { str } = Timeframe.get(timeframe);
+    let candles: cpz.ExchangeCandle[] = [];
+
+    const call = async (bail: (e: Error) => void) => {
+      try {
+        return await this.publicConnectors[exchange].fetchOHLCV(
+          this.getSymbol(asset, currency),
+          str,
+          dayjs.utc(dateFrom).valueOf(),
+          limit
+        );
+      } catch (e) {
+        if (e instanceof ccxt.NetworkError) throw e;
+        bail(e);
+      }
+    };
+    const response: ccxt.OHLCV[] = await retry(call, this.retryOptions);
+    if (!response || !Array.isArray(response) || response.length === 0)
+      return candles;
+
+    candles = response.map(candle => {
+      try {
+        return {
+          exchange,
+          asset,
+          currency,
+          timeframe: timeframe,
+          time: +candle[0],
+          timestamp: dayjs.utc(+candle[0]).toISOString(),
+          open: round(+candle[1], 6),
+          high: round(+candle[2], 6),
+          low: round(+candle[3], 6),
+          close: round(+candle[4], 6),
+          volume: round(+candle[5], 6) || 0,
+          type:
+            +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+        };
+      } catch (e) {
+        this.logger.error(e, candle);
+        throw e;
+      }
+    });
+
+    return candles;
   }
 
   /**
@@ -441,20 +565,28 @@ class PublicConnectorService extends Service {
     if (!response || !Array.isArray(response) || response.length === 0)
       return candles;
 
-    candles = response.map(candle => ({
-      exchange,
-      asset,
-      currency,
-      timeframe: params.timeframe,
-      time: +candle[0],
-      timestamp: dayjs.utc(+candle[0]).toISOString(),
-      open: round(+candle[1], 6),
-      high: round(+candle[2], 6),
-      low: round(+candle[3], 6),
-      close: round(+candle[4], 6),
-      volume: round(+candle[5], 6) || 0,
-      type: +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
-    }));
+    candles = response.map(candle => {
+      try {
+        return {
+          exchange,
+          asset,
+          currency,
+          timeframe: params.timeframe,
+          time: +candle[0],
+          timestamp: dayjs.utc(+candle[0]).toISOString(),
+          open: round(+candle[1], 6),
+          high: round(+candle[2], 6),
+          low: round(+candle[3], 6),
+          close: round(+candle[4], 6),
+          volume: round(+candle[5], 6) || 0,
+          type:
+            +candle[5] === 0 ? cpz.CandleType.previous : cpz.CandleType.loaded
+        };
+      } catch (e) {
+        this.logger.error(e, candle);
+        throw e;
+      }
+    });
 
     candles = await handleCandleGaps(dateFrom, dateTo, candles);
     if (params.batch && timeframe > cpz.Timeframe["1m"])
@@ -510,17 +642,22 @@ class PublicConnectorService extends Service {
       if (response.length === 0) return [];
 
       const trades = response.map(trade => {
-        const time = dayjs.utc(trade.datetime);
-        return {
-          exchange,
-          asset,
-          currency,
-          time: time.valueOf(),
-          timestamp: time.toISOString(),
-          side: trade.side,
-          price: round(trade.price, 6),
-          amount: round(trade.amount, 6)
-        };
+        try {
+          const time = dayjs.utc(trade.datetime);
+          return {
+            exchange,
+            asset,
+            currency,
+            time: time.valueOf(),
+            timestamp: time.toISOString(),
+            side: trade.side,
+            price: round(trade.price, 6),
+            amount: round(trade.amount, 6)
+          };
+        } catch (e) {
+          this.logger.error(e, trade);
+          throw e;
+        }
       });
 
       return trades;
