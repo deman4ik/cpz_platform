@@ -298,6 +298,7 @@ export namespace cpz {
     type: cpz.ImportType;
     params: any;
     status: cpz.Status;
+    progress?: number;
     startedAt?: string;
     endedAt?: string;
     error?: any;

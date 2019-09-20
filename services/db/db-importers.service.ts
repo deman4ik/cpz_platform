@@ -20,6 +20,7 @@ class ImportersService extends Service {
           currency: Sequelize.STRING,
           params: Sequelize.JSONB,
           status: Sequelize.STRING,
+          progress: { type: Sequelize.INTEGER, allowNull: true },
           startedAt: {
             type: Sequelize.STRING,
             field: "started_at",
@@ -52,6 +53,7 @@ class ImportersService extends Service {
                 type: "string",
                 params: "object",
                 status: "string",
+                progress: { type: "number", integer: true, optional: true },
                 startedAt: {
                   type: "string",
                   optional: true
@@ -83,6 +85,7 @@ class ImportersService extends Service {
         type,
         params,
         status,
+        progress,
         startedAt,
         endedAt,
         error
@@ -95,16 +98,18 @@ class ImportersService extends Service {
         type,
         params: JSON.stringify(params),
         status,
+        progress,
         startedAt,
         endedAt,
         error: JSON.stringify(error)
       });
       const query = `INSERT INTO importers 
-    (id, exchange, asset, currency, type, params, status, started_at, ended_at, error) 
+    (id, exchange, asset, currency, type, params, status, progress, started_at, ended_at, error) 
     VALUES (?)
      ON CONFLICT ON CONSTRAINT importers_pkey 
      DO UPDATE SET updated_at = now(),
      status = excluded.status,
+     progress = excluded.progress,
      started_at = excluded.started_at,
      ended_at = excluded.ended_at,
      error = excluded.error;`;

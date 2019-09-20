@@ -63,7 +63,8 @@ class ImporterWorkerService extends Service {
                 status: cpz.Status.started,
                 startedAt: dayjs.utc().toISOString(),
                 endedAt: null,
-                error: null
+                error: null,
+                progress: 0
               };
               try {
                 const currentState = await this.broker.call(
@@ -204,6 +205,9 @@ class ImporterWorkerService extends Service {
           });
           this.logger.info(`Job #${id} loaded ${trades.length} trades`);
           await job.progress(25);
+          await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+            entity: { ...state, progress: 25 }
+          });
           const candlesFromTradesInTimeframes = await createCandlesFromTrades(
             dateFrom,
             currentDate.toISOString(),
@@ -212,7 +216,9 @@ class ImporterWorkerService extends Service {
           );
           this.logger.info(`Job #${id} created candles from trades`);
           await job.progress(50);
-
+          await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+            entity: { ...state, progress: 50 }
+          });
           await Promise.all(
             Object.keys(candlesFromTradesInTimeframes).map(
               async (timeframe: string) => {
@@ -237,6 +243,9 @@ class ImporterWorkerService extends Service {
         this.logger.info(`Job #${id} loaded and handled candles`);
       }
       await job.progress(75);
+      await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+        entity: { ...state, progress: 75 }
+      });
       if (!candlesInTimeframes) throw new Error("Failed to import candles");
 
       await this.saveCandles(candlesInTimeframes);
@@ -310,6 +319,9 @@ class ImporterWorkerService extends Service {
           if (percent > prevPercent) {
             prevPercent = percent;
             await job.progress(percent);
+            await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+              entity: { ...state, progress: percent }
+            });
           }
         }
       } else {
@@ -342,6 +354,9 @@ class ImporterWorkerService extends Service {
           if (percent > prevPercent) {
             prevPercent = percent;
             await job.progress(percent);
+            await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+              entity: { ...state, progress: percent }
+            });
           }
         }
       }
@@ -424,20 +439,19 @@ class ImporterWorkerService extends Service {
         const loadResults = await Promise.all(
           chunks.map(async ({ dateFrom: loadFrom }) => {
             let candles;
-            try{
+            try {
               candles = await this.broker.call(
-              `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
-              {
-                exchange,
-                asset,
-                currency,
-                timeframe,
-                dateFrom: loadFrom,
-                limit
-              }
-            );
-            }
-            catch (e) {
+                `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
+                {
+                  exchange,
+                  asset,
+                  currency,
+                  timeframe,
+                  dateFrom: loadFrom,
+                  limit
+                }
+              );
+            } catch (e) {
               this.logger.error(e);
               throw e;
             }
