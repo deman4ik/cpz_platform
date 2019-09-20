@@ -423,7 +423,9 @@ class ImporterWorkerService extends Service {
 
         const loadResults = await Promise.all(
           chunks.map(async ({ dateFrom: loadFrom }) => {
-            const candles = await this.broker.call(
+            let candles;
+            try{
+              candles = await this.broker.call(
               `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
               {
                 exchange,
@@ -434,9 +436,14 @@ class ImporterWorkerService extends Service {
                 limit
               }
             );
+            }
+            catch (e) {
+              this.logger.error(e);
+              throw e;
+            }
 
             if (!candles || !Array.isArray(candles) || candles.length === 0) {
-              this.logger.error(`${slug} ${loadFrom} empty response!`);
+              this.logger.warn(`${slug} ${loadFrom} empty response!`);
               return [];
             } else {
               return candles;
