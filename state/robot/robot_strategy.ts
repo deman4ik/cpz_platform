@@ -30,6 +30,7 @@ class BaseStrategy implements cpz.Strategy {
   _eventsToSend: cpz.Events<any>[];
   _positionsToSave: cpz.RobotPositionState[];
   _log = console.log;
+  _dayjs = dayjs;
 
   constructor(state: cpz.StrategyState) {
     this._log = state.log || console.log;
@@ -117,6 +118,10 @@ class BaseStrategy implements cpz.Strategy {
       }
     });
     return hasAlerts;
+  }
+
+  get dayjs() {
+    return dayjs;
   }
 
   _createAlertEvents() {
