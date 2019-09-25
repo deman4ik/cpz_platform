@@ -209,7 +209,7 @@ class Position implements cpz.RobotPosition {
 
   _addAlert(action: cpz.TradeAction, price: number, orderType: cpz.OrderType) {
     this._log(
-      `Position alert ${this._code} - ${action} - ${orderType} - ${price}`
+      `${this._candle.timestamp} Position alert ${this._code} - ${action} - ${orderType} - ${price}`
     );
     const alert = {
       action,
@@ -232,11 +232,7 @@ class Position implements cpz.RobotPosition {
   _createTradeSignal(alert: cpz.AlertInfo) {
     const { action, orderType, price } = alert;
     this._log(
-      `Position trade ${
-        this._code
-      } - ${action}.${orderType}.${price} - ${dayjs
-        .utc(this._candle.timestamp)
-        .toISOString()}`
+      `${this._candle.timestamp} Position trade ${this._code} - ${action}.${orderType}.${price}`
     );
     this._alertsToPublish = [];
     this._tradeToPublish = {

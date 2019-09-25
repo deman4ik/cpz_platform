@@ -44,15 +44,15 @@ class BacktesterWorkerService extends Service {
     this.logger.info("start");
 
     const res = await this.execute({
-      id: "76e1ba67-7355-485a-9183-0cd62d0712cc",
+      id: "e7e0b639-cf0d-4706-9575-7504b4dacc12",
       exchange: "bitfinex",
       asset: "BTC",
       currency: "USD",
       timeframe: 60,
-      robotId: "1a67c69e-3f5e-4564-81bb-ab333be8777b",
-      strategyName: "breakout",
+      robotId: "41589628-718f-4efd-8249-1c62e59db1af",
+      strategyName: "breakout_v2",
       dateFrom: "2017-03-31T12:00:00.000Z",
-      dateTo: "2017-05-01T00:00:00.000Z",
+      dateTo: "2019-09-01T00:00:00.000Z",
       settings: { local: true },
       robotSettings: {
         requiredHistoryMaxBars: 300
@@ -354,7 +354,7 @@ class BacktesterWorkerService extends Service {
 
         if (Object.keys(positions).length > 0)
           await this.broker.call(
-            `${cpz.Service.DB_BACKTEST_POSITIONS}.insert`,
+            `${cpz.Service.DB_BACKTEST_POSITIONS}.upsert`,
             { entities: Object.values(positions) }
           );
         if (alerts.length > 0)

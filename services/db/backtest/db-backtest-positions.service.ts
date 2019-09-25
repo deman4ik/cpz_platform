@@ -143,10 +143,43 @@ class BacktestPositionsService extends Service {
                 exitOrderType: { type: "string", optional: true },
                 exitAction: { type: "string", optional: true },
                 exitCandleTimestamp: { type: "string", optional: true },
-                alerts: { type: "string", optional: true },
+                alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
                 barsHeld: { type: "number", integer: true, optional: true }
-              }
+              },
+              optional: true
+            },
+            entities: {
+              type: "array",
+              items: {
+                type: "object",
+                props: {
+                  id: "string",
+                  backtestId: { type: "string" },
+                  timeframe: { type: "number", integer: true },
+                  prefix: "string",
+                  code: "string",
+                  parentId: { type: "string", optional: true },
+                  direction: { type: "string", optional: true },
+                  status: { type: "string", optional: true },
+                  entryStatus: { type: "string", optional: true },
+                  entryPrice: { type: "number", optional: true },
+                  entryDate: { type: "string", optional: true },
+                  entryOrderType: { type: "string", optional: true },
+                  entryAction: { type: "string", optional: true },
+                  entryCandleTimestamp: { type: "string", optional: true },
+                  exitStatus: { type: "string", optional: true },
+                  exitPrice: { type: "number", optional: true },
+                  exitDate: { type: "string", optional: true },
+                  exitOrderType: { type: "string", optional: true },
+                  exitAction: { type: "string", optional: true },
+                  exitCandleTimestamp: { type: "string", optional: true },
+                  alerts: { type: "object", optional: true },
+                  profit: { type: "number", optional: true },
+                  barsHeld: { type: "number", integer: true, optional: true }
+                }
+              },
+              optional: true
             }
           },
           handler: this.upsert
@@ -157,56 +190,71 @@ class BacktestPositionsService extends Service {
 
   async upsert(ctx: Context) {
     try {
-      const {
-        id,
-        backtestId,
-        timeframe,
-        prefix,
-        code,
-        parentId,
-        direction,
-        status,
-        entryStatus,
-        entryPrice,
-        entryDate,
-        entryOrderType,
-        entryAction,
-        entryCandleTimestamp,
-        exitStatus,
-        exitPrice,
-        exitDate,
-        exitOrderType,
-        exitAction,
-        exitCandleTimestamp,
-        alerts,
-        profit,
-        barsHeld
-      }: cpz.BacktesterPositionState = ctx.params.entity;
-      const value = Object.values({
-        id,
-        backtestId,
-        timeframe,
-        prefix,
-        code,
-        parentId,
-        direction,
-        status,
-        entryStatus,
-        entryPrice,
-        entryDate,
-        entryOrderType,
-        entryAction,
-        entryCandleTimestamp,
-        exitStatus,
-        exitPrice,
-        exitDate,
-        exitOrderType,
-        exitAction,
-        exitCandleTimestamp,
-        alerts: JSON.stringify(alerts),
-        profit,
-        barsHeld
-      });
+      if (
+        !ctx.params.entity &&
+        (!ctx.params.entities ||
+          (Array.isArray(ctx.params.entities) &&
+            ctx.params.entities.length === 0))
+      )
+        throw new Errors.ValidationError("Entity or Entities is required!");
+
+      let entitiesRaw: cpz.BacktesterPositionState[] = [];
+      if (ctx.params.entity) entitiesRaw = [ctx.params.entity];
+      else entitiesRaw = ctx.params.entities;
+
+      const entities = entitiesRaw.map(
+        ({
+          id,
+          backtestId,
+          timeframe,
+          prefix,
+          code,
+          parentId,
+          direction,
+          status,
+          entryStatus,
+          entryPrice,
+          entryDate,
+          entryOrderType,
+          entryAction,
+          entryCandleTimestamp,
+          exitStatus,
+          exitPrice,
+          exitDate,
+          exitOrderType,
+          exitAction,
+          exitCandleTimestamp,
+          alerts,
+          profit,
+          barsHeld
+        }: cpz.BacktesterPositionState) =>
+          Object.values({
+            id,
+            backtestId,
+            timeframe,
+            prefix,
+            code,
+            parentId,
+            direction,
+            status,
+            entryStatus,
+            entryPrice,
+            entryDate,
+            entryOrderType,
+            entryAction,
+            entryCandleTimestamp,
+            exitStatus,
+            exitPrice,
+            exitDate,
+            exitOrderType,
+            exitAction,
+            exitCandleTimestamp,
+            alerts: JSON.stringify(alerts),
+            profit,
+            barsHeld
+          })
+      );
+
       const query = `INSERT INTO backtest_positions
      (  id,
         backtest_id,
@@ -232,9 +280,21 @@ class BacktestPositionsService extends Service {
         profit,
         bars_held
         ) 
-        VALUES (?)
+        VALUES ${entities
+          .map((_: any) => {
+            return "(?)";
+          })
+          .join(",")} 
          ON CONFLICT ON CONSTRAINT backtest_positions_pkey 
          DO UPDATE SET updated_at = now(),
+         direction = excluded.direction,
+         status = excluded.status,
+         entry_status = excluded.entry_status,
+         entry_price = excluded.entry_price,
+         entry_date = excluded.entry_date,
+         entry_order_type = excluded.entry_order_type,
+         entry_action = excluded.entry_action,
+         entry_candle_timestamp = excluded.entry_candle_timestamp,
          exit_status = excluded.exit_status,
          exit_price = excluded.exit_price,
          exit_date = excluded.exit_date,
@@ -247,7 +307,7 @@ class BacktestPositionsService extends Service {
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,
-        replacements: [value]
+        replacements: entities
       });
       return true;
     } catch (e) {
