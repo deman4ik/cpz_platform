@@ -53,6 +53,20 @@ class Timeframe {
       unit: cpz.TimeUnit.hour,
       amountInUnit: 4
     },
+    480: {
+      str: "8h",
+      value: 480,
+      lower: 60,
+      unit: cpz.TimeUnit.hour,
+      amountInUnit: 8
+    },
+    720: {
+      str: "12h",
+      value: 720,
+      lower: 60,
+      unit: cpz.TimeUnit.hour,
+      amountInUnit: 12
+    },
     1440: {
       str: "1d",
       value: 1440,

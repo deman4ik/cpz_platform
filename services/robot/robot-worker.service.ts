@@ -28,6 +28,8 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}60`,
         `${cpz.Service.DB_CANDLES}120`,
         `${cpz.Service.DB_CANDLES}240`,
+        `${cpz.Service.DB_CANDLES}480`,
+        `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`,
         `${cpz.Service.DB_CANDLES_CURRENT}`
       ],

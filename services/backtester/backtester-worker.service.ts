@@ -24,6 +24,8 @@ class BacktesterWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}60`,
         `${cpz.Service.DB_CANDLES}120`,
         `${cpz.Service.DB_CANDLES}240`,
+        `${cpz.Service.DB_CANDLES}480`,
+        `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`
       ],
       events: {
@@ -42,18 +44,18 @@ class BacktesterWorkerService extends Service {
     this.logger.info("start");
 
     const res = await this.execute({
-      id: "ec7c0464-d06c-4691-b080-dec5271e3129",
+      id: "76e1ba67-7355-485a-9183-0cd62d0712cc",
       exchange: "bitfinex",
       asset: "BTC",
       currency: "USD",
-      timeframe: 1,
-      robotId: "029a826e-2077-4398-9e35-23dd920f641c",
-      strategyName: "t2_trend_friend",
-      dateFrom: "2019-07-03T00:00:00.000Z",
-      dateTo: "2019-07-04T01:00:00.000Z",
+      timeframe: 60,
+      robotId: "1a67c69e-3f5e-4564-81bb-ab333be8777b",
+      strategyName: "breakout",
+      dateFrom: "2017-03-31T12:00:00.000Z",
+      dateTo: "2017-05-01T00:00:00.000Z",
       settings: { local: true },
       robotSettings: {
-        requiredHistoryMaxBars: 30
+        requiredHistoryMaxBars: 300
       }
     });
   }
@@ -107,15 +109,19 @@ class BacktesterWorkerService extends Service {
       this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
         id: backtesterState.id
       });
-      const existedBacktest = await this.broker.call(
-        `${cpz.Service.DB_BACKTESTS}.get`,
-        { id }
+      const [existedBacktest] = await this.broker.call(
+        `${cpz.Service.DB_BACKTESTS}.find`,
+        { query: { id } }
       );
 
       if (existedBacktest) {
         this.logger.info("Found previous backtest. Deleting...");
         await this.broker.call(`${cpz.Service.DB_BACKTESTS}.remove`, { id });
       }
+      const robotState = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        { id: robotId }
+      );
 
       const robot = new Robot({
         id: robotId,
@@ -124,7 +130,7 @@ class BacktesterWorkerService extends Service {
         currency,
         timeframe,
         strategyName,
-        settings: robotSettings
+        settings: { ...robotState.settings, ...robotSettings }
       });
       robot._log = this.logger.info.bind(this);
       backtesterState.robotSettings = robot.settings;
@@ -206,7 +212,8 @@ class BacktesterWorkerService extends Service {
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
           .map(candle => ({ ...candle, timeframe }));
-
+        const [firstCandle] = historyCandles;
+        this.logger.info("History from", firstCandle.timestamp);
         robot.handleHistoryCandles(historyCandles);
       }
 
@@ -326,11 +333,11 @@ class BacktesterWorkerService extends Service {
             allPositions[pos.id] = pos;
           });
 
-          this.logger.info(
+          /*this.logger.info(
             `logs ${logs.length} - alerts ${alerts.length} - trades ${
               trades.length
             } - postions ${Object.keys(positions).length}`
-          );
+          );*/
           backtesterState.processedBars += 1;
           backtesterState.leftBars =
             backtesterState.totalBars - backtesterState.processedBars;
