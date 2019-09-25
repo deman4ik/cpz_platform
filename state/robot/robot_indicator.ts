@@ -139,9 +139,11 @@ class BaseIndicator implements cpz.Indicator {
   candlePropsLatestChunks(chunkQuantity: number) {
     let candlesArr = [];
     for (let i = 0; i < chunkQuantity; i += 1) {
-      const end = i + 1;
-      const arr = this._candles.slice(0, -end);
-      candlesArr.push(arr);
+      if (i === 0) candlesArr.push(this._candles);
+      else {
+        const arr = this._candles.slice(0, -i);
+        candlesArr.push(arr);
+      }
     }
 
     candlesArr = candlesArr.reverse();
