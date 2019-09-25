@@ -22,14 +22,22 @@ class ImportersService extends Service {
           status: Sequelize.STRING,
           progress: { type: Sequelize.INTEGER, allowNull: true },
           startedAt: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "started_at",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("startedAt");
+              return (value && value.toISOString()) || value;
+            }
           },
           endedAt: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "ended_at",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("endedAt");
+              return (value && value.toISOString()) || value;
+            }
           },
           error: { type: Sequelize.JSONB, allowNull: true }
         },

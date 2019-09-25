@@ -27,11 +27,22 @@ class RobotsService extends Service {
           settings: Sequelize.JSONB,
           available: Sequelize.INTEGER,
           status: Sequelize.STRING,
-          startedAt: { type: Sequelize.STRING, field: "started_at" },
+          startedAt: {
+            type: Sequelize.DATE,
+            field: "started_at",
+            get: function() {
+              const value = this.getDataValue("startedAt");
+              return (value && value.toISOString()) || value;
+            }
+          },
           stoppedAt: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "stopped_at",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("stoppedAt");
+              return (value && value.toISOString()) || value;
+            }
           },
           indicators: { type: Sequelize.JSONB, allowNull: true },
           state: { type: Sequelize.JSONB, allowNull: true },

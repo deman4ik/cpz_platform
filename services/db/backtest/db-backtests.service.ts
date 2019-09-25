@@ -21,8 +21,22 @@ class BacktestsService extends Service {
           currency: Sequelize.STRING,
           timeframe: Sequelize.INTEGER,
           strategyName: { type: Sequelize.STRING, field: "strategy_name" },
-          dateFrom: { type: Sequelize.STRING, field: "date_from" },
-          dateTo: { type: Sequelize.STRING, field: "date_to" },
+          dateFrom: {
+            type: Sequelize.STRING,
+            field: "date_from",
+            get: function() {
+              const value = this.getDataValue("dateFrom");
+              return (value && value.toISOString()) || value;
+            }
+          },
+          dateTo: {
+            type: Sequelize.STRING,
+            field: "date_to",
+            get: function() {
+              const value = this.getDataValue("dateTo");
+              return (value && value.toISOString()) || value;
+            }
+          },
           settings: Sequelize.JSONB,
           robotSettings: { type: Sequelize.JSONB, field: "robot_settings" },
           totalBars: {
@@ -46,11 +60,22 @@ class BacktestsService extends Service {
             allowNull: true
           },
           status: Sequelize.STRING,
-          startedAt: { type: Sequelize.STRING, field: "started_at" },
+          startedAt: {
+            type: Sequelize.STRING,
+            field: "started_at",
+            get: function() {
+              const value = this.getDataValue("startedAt");
+              return (value && value.toISOString()) || value;
+            }
+          },
           finishedAt: {
             type: Sequelize.STRING,
             field: "finished_at",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("finishedAt");
+              return (value && value.toISOString()) || value;
+            }
           },
           error: { type: Sequelize.JSONB, allowNull: true }
         },

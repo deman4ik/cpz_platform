@@ -37,9 +37,13 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           entryDate: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "entry_date",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("entryDate");
+              return (value && value.toISOString()) || value;
+            }
           },
           entryOrderType: {
             type: Sequelize.STRING,
@@ -52,9 +56,13 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           entryCandleTimestamp: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "entry_candle_timestamp",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("entryCandleTimestamp");
+              return (value && value.toISOString()) || value;
+            }
           },
           exitStatus: {
             type: Sequelize.STRING,
@@ -67,9 +75,13 @@ class BacktestPositionsService extends Service {
             allowNull: true
           },
           exitDate: {
-            type: Sequelize.STRING,
+            type: Sequelize.DATE,
             field: "exit_date",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("exitDate");
+              return (value && value.toISOString()) || value;
+            }
           },
           exitOrderType: {
             type: Sequelize.STRING,
@@ -84,7 +96,11 @@ class BacktestPositionsService extends Service {
           exitCandleTimestamp: {
             type: Sequelize.STRING,
             field: "exit_candle_timestamp",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("exitCandleTimestamp");
+              return (value && value.toISOString()) || value;
+            }
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },
           profit: { type: Sequelize.NUMBER, allowNull: true },

@@ -1,5 +1,8 @@
 import SqlAdapter from "moleculer-db-adapter-sequelize";
-
+require("pg").types.setTypeParser(1114, (stringValue: string) => {
+  return new Date(stringValue + "+0000");
+  // e.g., UTC offset. Use any offset that you would like.
+});
 const adapter = new SqlAdapter(
   process.env.PG_DBNAME,
   process.env.PG_USER,

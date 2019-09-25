@@ -23,7 +23,14 @@ class UserSignalsService extends Service {
           userId: { type: Sequelize.UUID, field: "user_id" },
           telegram: { type: Sequelize.BOOLEAN },
           email: { type: Sequelize.BOOLEAN },
-          subscribedAt: { type: Sequelize.STRING, field: "subscribed_at" },
+          subscribedAt: {
+            type: Sequelize.DATE,
+            field: "subscribed_at",
+            get: function() {
+              const value = this.getDataValue("subscribedAt");
+              return (value && value.toISOString()) || value;
+            }
+          },
           volume: { type: Sequelize.NUMBER, allowNull: true }
         },
         options: {

@@ -29,10 +29,20 @@ class RobotSignalsService extends Service {
             field: "position_parent_id"
           },
           candleTimestamp: {
-            type: Sequelize.STRING,
-            field: "candle_timestamp"
+            type: Sequelize.DATE,
+            field: "candle_timestamp",
+            get: function() {
+              const value = this.getDataValue("candleTimestamp");
+              return (value && value.toISOString()) || value;
+            }
           },
-          timestamp: { type: Sequelize.STRING }
+          timestamp: {
+            type: Sequelize.DATE,
+            get: function() {
+              const value = this.getDataValue("timestamp");
+              return (value && value.toISOString()) || value;
+            }
+          }
         },
         options: {
           freezeTableName: true,
