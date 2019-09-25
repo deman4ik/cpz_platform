@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
+import dayjs from "../../lib/dayjs";
 
 class ImporterRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -188,7 +189,10 @@ class ImporterRunnerService extends Service {
         type: "history",
         params: {
           timeframes: ctx.params.timeframes || Timeframe.validArray,
-          dateFrom: ctx.params.dateFrom,
+          dateFrom: dayjs
+            .utc(ctx.params.dateFrom)
+            .startOf(cpz.TimeUnit.day)
+            .toISOString(),
           dateTo: ctx.params.dateTo
         },
         status: cpz.Status.queued
