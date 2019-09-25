@@ -47,24 +47,16 @@ class Position implements cpz.RobotPosition {
     this._status = state.status || cpz.RobotPositionStatus.new;
     this._entryStatus = state.entryStatus;
     this._entryPrice = state.entryPrice;
-    this._entryDate = state.entryDate
-      ? dayjs.utc(state.entryDate).toISOString()
-      : null;
+    this._entryDate = state.entryDate;
     this._entryOrderType = state.entryOrderType;
     this._entryAction = state.entryAction;
-    this._entryCandleTimestamp = state.entryCandleTimestamp
-      ? dayjs.utc(state.entryCandleTimestamp).toISOString()
-      : null;
+    this._entryCandleTimestamp = state.entryCandleTimestamp;
     this._exitStatus = state.exitStatus;
     this._exitPrice = state.exitPrice;
-    this._exitDate = state.exitDate
-      ? dayjs.utc(state.exitDate).toISOString()
-      : null;
+    this._exitDate = state.exitDate;
     this._exitOrderType = state.exitOrderType;
     this._exitAction = state.exitAction;
-    this._exitCandleTimestamp = state.exitCandleTimestamp
-      ? dayjs.utc(state.exitCandleTimestamp).toISOString()
-      : null;
+    this._exitCandleTimestamp = state.exitCandleTimestamp;
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
     this._barsHeld = state.barsHeld || 0;
@@ -223,7 +215,7 @@ class Position implements cpz.RobotPosition {
       action,
       price: round(+price, 6),
       orderType,
-      candleTimestamp: dayjs.utc(this._candle.timestamp).toISOString(),
+      candleTimestamp: this._candle.timestamp,
       timestamp: dayjs.utc().toISOString()
     };
     this._alerts[this._nextAlertNumb] = alert;
@@ -285,7 +277,7 @@ class Position implements cpz.RobotPosition {
     this._exitDate = dayjs.utc().toISOString();
     this._exitOrderType = orderType;
     this._exitAction = action;
-    this._exitCandleTimestamp = dayjs.utc(this._candle.timestamp).toISOString();
+    this._exitCandleTimestamp = this._candle.timestamp;
     this._calcStats();
     this._createTradeSignal(alert);
   }

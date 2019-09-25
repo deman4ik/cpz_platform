@@ -85,12 +85,8 @@ class Robot {
     /* Текущий статус сервиса */
     this._status = state.status || cpz.Status.pending;
     /* Дата и время запуска */
-    this._startedAt = state.startedAt
-      ? dayjs.utc(state.startedAt).toISOString()
-      : null;
-    this._stoppedAt = state.stoppedAt
-      ? dayjs.utc(state.stoppedAt).toISOString()
-      : null;
+    this._startedAt = state.startedAt;
+    this._stoppedAt = state.stoppedAt;
     this._statistics = state.statistics || {};
 
     this._eventsToSend = [];
