@@ -101,6 +101,7 @@ class BaseStrategy implements cpz.Strategy {
       type: cpz.Event.ROBOT_LOG,
       data: {
         ...data,
+        candle: this._candle,
         robotId: this._robotId
       }
     });
