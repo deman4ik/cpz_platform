@@ -398,6 +398,14 @@ class BaseStrategy implements cpz.Strategy {
     return this._candle;
   }
 
+  get candles() {
+    return this._candles;
+  }
+
+  get candlesProps() {
+    return this._candlesProps;
+  }
+
   get indicators() {
     return this._indicators;
   }
