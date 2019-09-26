@@ -112,7 +112,7 @@ async function batchCandles(
         timeframe,
         time: timeFrom, // время в милисекундах
         timestamp: dayjs.utc(timeFrom).toISOString(), // время в ISO UTC
-        open: +candles[0].open, // цена открытия - цена открытия первой свечи
+        open: +currentCandles[0].open, // цена открытия - цена открытия первой свечи
         high: Math.max(...currentCandles.map(t => +t.high)), // максимальная цена
         low: Math.min(...currentCandles.map(t => +t.low)), // минимальная цена
         close: +currentCandles[currentCandles.length - 1].close, // цена закрытия - цена закрытия последней свечи

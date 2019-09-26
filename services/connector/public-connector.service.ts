@@ -549,7 +549,6 @@ class PublicConnectorService extends Service {
       dateFrom,
       limit
     );
-    this.logger.info(params);
     const dateTo = dayjs.utc(params.dateTo).toISOString();
     let candles: cpz.ExchangeCandle[] = [];
 
