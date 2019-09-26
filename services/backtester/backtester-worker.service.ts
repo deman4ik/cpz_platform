@@ -44,14 +44,14 @@ class BacktesterWorkerService extends Service {
     this.logger.info("start");
 
     const res = await this.execute({
-      id: "e7e0b639-cf0d-4706-9575-7504b4dacc12",
+      id: "ec7c0464-d06c-4691-b080-dec5271e3129",
       exchange: "bitfinex",
       asset: "BTC",
       currency: "USD",
       timeframe: 60,
-      robotId: "41589628-718f-4efd-8249-1c62e59db1af",
-      strategyName: "breakout_v2",
-      dateFrom: "2017-03-31T12:00:00.000Z",
+      robotId: "b7a4fc1f-4a56-4557-b246-f5723661d4a7",
+      strategyName: "parabolic",
+      dateFrom: "2017-03-31T00:00:00.000Z",
       dateTo: "2019-09-01T00:00:00.000Z",
       settings: { local: true },
       robotSettings: {
