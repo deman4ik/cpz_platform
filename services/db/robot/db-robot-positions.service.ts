@@ -34,7 +34,11 @@ class RobotPositionsService extends Service {
           entryPrice: {
             type: Sequelize.STRING,
             field: "entry_price",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("entryPrice");
+              return (value && +value) || value;
+            }
           },
           entryDate: {
             type: Sequelize.DATE,
@@ -72,7 +76,11 @@ class RobotPositionsService extends Service {
           exitPrice: {
             type: Sequelize.NUMBER,
             field: "exit_price",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("exitPrice");
+              return (value && +value) || value;
+            }
           },
           exitDate: {
             type: Sequelize.DATE,
@@ -103,11 +111,22 @@ class RobotPositionsService extends Service {
             }
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },
-          profit: { type: Sequelize.NUMBER, allowNull: true },
+          profit: {
+            type: Sequelize.NUMBER,
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("profit");
+              return (value && +value) || value;
+            }
+          },
           barsHeld: {
             type: Sequelize.INTEGER,
             field: "bars_held",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("barsHeld");
+              return (value && +value) || value;
+            }
           }
         },
         options: {
