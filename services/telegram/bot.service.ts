@@ -566,8 +566,9 @@ class BotService extends Service {
             signalsText = `${signalsText}\n${text}`;
           }
         );
-      } else signalsText = ctx.i18n.t("robot.signalsNone");
-      signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
+      }
+      if (signalsText !== "")
+        signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
       const message = `${ctx.i18n.t("robot.info", robot)}${signalsText}`;
       return ctx.editMessageText(
         message,
