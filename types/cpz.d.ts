@@ -552,6 +552,8 @@ export namespace cpz {
     startedAt?: string;
     finishedAt?: string;
     statistics?: RobotStats;
+    robotState?: StrategyProps;
+    robotIndicators?: { [key: string]: IndicatorState };
     error?: any;
   }
 

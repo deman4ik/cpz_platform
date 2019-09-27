@@ -51,7 +51,7 @@ class BacktesterWorkerService extends Service {
       timeframe: 60,
       robotId: "b7a4fc1f-4a56-4557-b246-f5723661d4a7",
       strategyName: "parabolic",
-      dateFrom: "2017-03-31T00:00:00.000Z",
+      dateFrom: "2017-03-31T12:00:00.000Z",
       dateTo: "2019-09-01T00:00:00.000Z",
       settings: { local: true },
       robotSettings: {
@@ -376,6 +376,9 @@ class BacktesterWorkerService extends Service {
 
       robot.calcStats(Object.values(allPositions));
       backtesterState.statistics = robot.statistics;
+      const { state, indicators } = robot.state;
+      backtesterState.robotState = state;
+      backtesterState.robotIndicators = indicators;
       backtesterState.finishedAt = dayjs.utc().toISOString();
       backtesterState.status = cpz.Status.finished;
       const duration = dayjs
