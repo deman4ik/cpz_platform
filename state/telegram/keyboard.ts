@@ -26,10 +26,12 @@ export const getMainKeyboard = (ctx: any) => {
   const mainKeyboardSettings = ctx.i18n.t("keyboards.mainKeyboard.settings");
   const mainKeyboardFAQ = ctx.i18n.t("keyboards.mainKeyboard.faq");
   const mainKeyboardContact = ctx.i18n.t("keyboards.mainKeyboard.contact");
+  const mainKeyboardDonation = ctx.i18n.t("keyboards.mainKeyboard.donation");
   let mainKeyboard: any = Markup.keyboard([
     [mainKeyboardSignals, mainKeyboardMySignals],
     //  [mainKeyboardSettings],
-    [mainKeyboardFAQ, mainKeyboardContact]
+    [mainKeyboardFAQ, mainKeyboardContact],
+    [mainKeyboardDonation]
   ]);
   mainKeyboard = mainKeyboard.resize().extra();
 

@@ -217,6 +217,10 @@ class BotService extends Service {
       match("keyboards.mainKeyboard.contact"),
       reply("contact", Extra.HTML())
     );
+    this.bot.hears(
+      match("keyboards.mainKeyboard.donation"),
+      reply("donation", Extra.HTML())
+    );
     this.bot.hears(/(.*?)/, this.defaultHandler.bind(this));
   }
 
@@ -513,7 +517,8 @@ class BotService extends Service {
         backKeyboard
       );
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
-        throw new Error("Failed to load signal robots");
+        await ctx.reply(ctx.i18n.t("scenes.mySignals.robotsNone"));
+        await ctx.scene.leave();
       }
       return ctx.reply(
         ctx.i18n.t("scenes.mySignals.robotsList"),

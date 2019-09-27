@@ -10,7 +10,8 @@
       "mySignals": "🚥 My Signals",
       "settings": "⚙️ Settings",
       "faq": "❓ FAQ",
-      "contact": "✍️ Contact"
+      "contact": "✍️ Contact",
+      "donation": "💰 Donation"
     }
   },
   "scenes": {
@@ -24,7 +25,8 @@
       "unsubscribedSignals": "You unsubsribed from <b>${name}</b> signals =("
     },
     "mySignals": {
-      "robotsList": "Robot signals you subscribed to:"
+      "robotsList": "Robot signals you subscribed to:",
+      "robotsNone": "You are not subscribed to any signals."
     }
   },
   "signal": {
@@ -42,10 +44,10 @@
     "signal": "<b>Position:</b> ${code}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Signal time:</b> ${timestamp}\n<b>Price:</b> $${price}\n",
     "signalsNone": "\n\nRobot hasn't current signals",
     "positionsOpen": "<b>Open positions:</b> \n${openPositions}\n",
-    "positionOpen": "<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction} ${entryOrderType}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> $${entryPrice}\n",
+    "positionOpen": "<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> $${entryPrice}\n",
     "positionSignals": "<b>Exit signals:</b> ${signals}",
     "positionsClosed": "<b>Closed positions:</b> \n${closedPositions}",
-    "positionClosed": "<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction} ${entryOrderType}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> $${entryPrice}\n\n<b>Exit:</b> ${exitAction} ${exitOrderType}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> $${exitPrice}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> $${profit}\n",
+    "positionClosed": "<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> $${entryPrice}\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> $${exitPrice}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> $${profit}\n",
     "positionsNone": "Robot has no positions yet...",
     "statsProfit": "<b>Profit</b> \n\n<b>Net Profit:</b> ${netProfit.all} \n<b>Number of Trades:</b> ${tradesCount.all} \n<b>Average Profit:</b> ${avgNetProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeld.all} \n<b>Profit Factor:</b> ${profitFactor.all} \n<b>Recovery Factor:</b> ${recoveryFactor.all} \n<b>Payoff Ratio:</b> ${payoffRatio.all} \n<b>Maximum Drawdown:</b> ${maxDrawdown.all} \n<b>Maximum Drawdown Date:</b> ${maxDrawdownDate.all} \n\n\n",
     "statsWinners": "<b>Winners</b> \n\n<b>Win Rate:</b> ${winRate.all} \n<b>Gross Profit:</b> ${grossProfit.all} \n<b>Average Profit:</b> ${avgProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeldWinning.all} \n<b>Max. Consecutive Winners:</b> ${maxConnsecWins.all} \n\n\n",
@@ -53,10 +55,10 @@
     "statsNone": "Robot has no statistics yet..."
   },
   "tradeAction": {
-    "long": "Long ✳️ (BUY ⬆️)",
-    "short": "Short 🔴 (SELL ⬇️)",
-    "closeLong": "Close Long ✳️ (SELL ⬇️)",
-    "closeShort": "Close Short 🔴 (BUY ⬆️)"
+    "long": "BUY ⬆️ (Long ✳️)",
+    "short": "SELL ⬇️ (Short 🔴)",
+    "closeLong": "SELL ⬇️ (Close Long ✳️)",
+    "closeShort": "BUY ⬆️ (Close Short 🔴)"
   },
   "orderType": {
     "market": "Market 〽️",
@@ -74,5 +76,6 @@
     "robot1": "<b>What is robot?</b>\nRobot is a program that analyzes the current situation on the market without human participation according to a laid algoritm.\n\n",
     "robot2": "<b>What are the advantages of robot?</b>\nReacts to events much faster.\nDoesn’t get tired and works 24 hours and 7 days a week.\nNot experiencing emotions and strictly following the algorithm.\nCan make a large number of transactions with different instruments.\nCan wait weeks and make a deal at exactly the right moment.\nTrading is conducted on tested conditions with a predictable result."
   },
-  "contact": "<a href='https://cryptuoso.com'>Our site</a>"
+  "contact": "<a href='https://cryptuoso.com'>Our site</a>",
+  "donation": "Donation TODO"
 }
