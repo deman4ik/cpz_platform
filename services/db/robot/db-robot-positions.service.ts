@@ -17,6 +17,13 @@ class RobotPositionsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.STRING, field: "robot_id" },
           timeframe: Sequelize.INTEGER,
+          volume: {
+            type: Sequelize.NUMBER,
+            get: function() {
+              const value = this.getDataValue("volume");
+              return (value && +value) || value;
+            }
+          },
           prefix: Sequelize.STRING,
           code: Sequelize.STRING,
           parentId: {
@@ -145,6 +152,7 @@ class RobotPositionsService extends Service {
                 id: "string",
                 robotId: { type: "string" },
                 timeframe: { type: "number", integer: true },
+                volume: "number",
                 prefix: "string",
                 code: "string",
                 parentId: { type: "string", optional: true },
@@ -180,6 +188,7 @@ class RobotPositionsService extends Service {
         id,
         robotId,
         timeframe,
+        volume,
         prefix,
         code,
         parentId,
@@ -205,6 +214,7 @@ class RobotPositionsService extends Service {
         id,
         robotId,
         timeframe,
+        volume,
         prefix,
         code,
         parentId,
@@ -230,6 +240,7 @@ class RobotPositionsService extends Service {
      (  id,
         robot_id,
         timeframe,
+        volume,
         prefix,
         code,
         parent_id,

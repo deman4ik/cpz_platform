@@ -3,11 +3,13 @@ import { CANDLES_RECENT_AMOUNT } from "../config";
 
 function combineRobotSettings({
   strategyParameters,
-  requiredHistoryMaxBars
+  requiredHistoryMaxBars,
+  volume
 }: cpz.RobotSettings): cpz.RobotSettings {
   return {
     strategyParameters: strategyParameters || {},
-    requiredHistoryMaxBars: requiredHistoryMaxBars || CANDLES_RECENT_AMOUNT
+    requiredHistoryMaxBars: requiredHistoryMaxBars || CANDLES_RECENT_AMOUNT,
+    volume: volume || 1
   };
 }
 

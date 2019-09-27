@@ -418,6 +418,7 @@ export namespace cpz {
     id: string;
     robotId: string;
     timeframe: number;
+    volume: number;
     prefix: string;
     code: string;
     parentId?: string;
@@ -467,6 +468,7 @@ export namespace cpz {
 
   interface RobotSettings {
     strategyParameters?: { [key: string]: any };
+    volume?: number;
     requiredHistoryMaxBars?: number;
   }
 

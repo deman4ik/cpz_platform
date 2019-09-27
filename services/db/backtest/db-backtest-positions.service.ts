@@ -17,6 +17,13 @@ class BacktestPositionsService extends Service {
           id: { type: Sequelize.STRING, primaryKey: true },
           backtestId: { type: Sequelize.STRING, field: "backtest_id" },
           timeframe: Sequelize.INTEGER,
+          volume: {
+            type: Sequelize.NUMBER,
+            get: function() {
+              const value = this.getDataValue("volume");
+              return (value && +value) || value;
+            }
+          },
           prefix: Sequelize.STRING,
           code: Sequelize.STRING,
           parentId: {
@@ -34,7 +41,11 @@ class BacktestPositionsService extends Service {
           entryPrice: {
             type: Sequelize.STRING,
             field: "entry_price",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("entryPrice");
+              return (value && +value) || value;
+            }
           },
           entryDate: {
             type: Sequelize.DATE,
@@ -72,7 +83,11 @@ class BacktestPositionsService extends Service {
           exitPrice: {
             type: Sequelize.NUMBER,
             field: "exit_price",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("exitPrice");
+              return (value && +value) || value;
+            }
           },
           exitDate: {
             type: Sequelize.DATE,
@@ -103,11 +118,22 @@ class BacktestPositionsService extends Service {
             }
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },
-          profit: { type: Sequelize.NUMBER, allowNull: true },
+          profit: {
+            type: Sequelize.NUMBER,
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("profit");
+              return (value && +value) || value;
+            }
+          },
           barsHeld: {
             type: Sequelize.INTEGER,
             field: "bars_held",
-            allowNull: true
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("barsHeld");
+              return (value && +value) || value;
+            }
           }
         },
         options: {
@@ -126,6 +152,7 @@ class BacktestPositionsService extends Service {
                 id: "string",
                 backtestId: { type: "string" },
                 timeframe: { type: "number", integer: true },
+                volume: "number",
                 prefix: "string",
                 code: "string",
                 parentId: { type: "string", optional: true },
@@ -157,6 +184,7 @@ class BacktestPositionsService extends Service {
                   id: "string",
                   backtestId: { type: "string" },
                   timeframe: { type: "number", integer: true },
+                  volume: "number",
                   prefix: "string",
                   code: "string",
                   parentId: { type: "string", optional: true },
@@ -207,6 +235,7 @@ class BacktestPositionsService extends Service {
           id,
           backtestId,
           timeframe,
+          volume,
           prefix,
           code,
           parentId,
@@ -232,6 +261,7 @@ class BacktestPositionsService extends Service {
             id,
             backtestId,
             timeframe,
+            volume,
             prefix,
             code,
             parentId,
@@ -259,6 +289,7 @@ class BacktestPositionsService extends Service {
      (  id,
         backtest_id,
         timeframe,
+        volume,
         prefix,
         code,
         parent_id,

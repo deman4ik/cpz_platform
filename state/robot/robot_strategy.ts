@@ -11,7 +11,7 @@ class BaseStrategy implements cpz.Strategy {
   [key: string]: any;
   _initialized: boolean;
   _parameters: { [key: string]: number | string };
-  _robotSettings: { [key: string]: number | string };
+  _robotSettings: cpz.RobotSettings;
   _exchange: string;
   _asset: string;
   _currency: string;
@@ -197,6 +197,7 @@ class BaseStrategy implements cpz.Strategy {
       id: uuid(),
       robotId: this._robotId,
       timeframe: this._timeframe,
+      volume: this._robotSettings.volume,
       prefix,
       code,
       parentId: parentId

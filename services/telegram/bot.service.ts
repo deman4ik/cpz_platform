@@ -232,7 +232,7 @@ class BotService extends Service {
     if (process.env.NODE_ENV === "production") {
       await this.bot.telegram.setWebhook(`${process.env.BOT_HOST}/tgendpoint`);
       await this.bot.startWebhook("/tgendpoint", null, 5000);
-    } else {
+    } else if (process.env.NODE_ENV === "dev") {
       this.logger.warn("Bot in development mode!");
       await this.bot.telegram.deleteWebhook();
       await this.bot.startPolling();

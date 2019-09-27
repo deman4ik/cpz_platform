@@ -6,6 +6,7 @@ const positions: cpz.RobotPositionState[] = [
     id: "baaf50a2-e3e0-4673-9826-9be7ecedf046",
     robotId: "31556072-0379-486b-9feb-3e2539ff01e2",
     timeframe: 1,
+    volume: 0.1,
     prefix: "p",
     code: "p_1",
     parentId: undefined,
