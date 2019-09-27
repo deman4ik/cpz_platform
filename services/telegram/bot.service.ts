@@ -519,12 +519,12 @@ class BotService extends Service {
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
         await ctx.reply(ctx.i18n.t("scenes.mySignals.robotsNone"));
         await ctx.scene.leave();
-        return;
+      } else {
+        return ctx.reply(
+          ctx.i18n.t("scenes.mySignals.robotsList"),
+          getSignalsMenu(robots)
+        );
       }
-      return ctx.reply(
-        ctx.i18n.t("scenes.mySignals.robotsList"),
-        getSignalsMenu(robots)
-      );
     } catch (e) {
       this.logger.error(e);
       await ctx.reply(ctx.i18n.t("failed"));
