@@ -519,6 +519,7 @@ class BotService extends Service {
       if (!robots || !Array.isArray(robots) || robots.length === 0) {
         await ctx.reply(ctx.i18n.t("scenes.mySignals.robotsNone"));
         await ctx.scene.leave();
+        return;
       }
       return ctx.reply(
         ctx.i18n.t("scenes.mySignals.robotsList"),
