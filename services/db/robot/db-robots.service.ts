@@ -70,7 +70,8 @@ class RobotsService extends Service {
             field: "last_candle"
           },
           hasAlerts: { type: Sequelize.BOOLEAN, field: "has_alerts" },
-          statistics: { type: Sequelize.JSONB, allowNull: true }
+          statistics: { type: Sequelize.JSONB, allowNull: true },
+          equity: { type: Sequelize.JSONB, allowNull: true }
         },
         options: {
           freezeTableName: true,
@@ -121,7 +122,8 @@ class RobotsService extends Service {
                 state: { type: "object", optional: true },
                 lastCandle: { type: "object", optional: true },
                 hasAlerts: "boolean",
-                statistics: { type: "object", optional: true }
+                statistics: { type: "object", optional: true },
+                equity: { type: "object", optional: true }
               }
             }
           },
@@ -176,7 +178,8 @@ class RobotsService extends Service {
         state,
         lastCandle,
         hasAlerts,
-        statistics
+        statistics,
+        equity
       }: cpz.RobotState = ctx.params.entity;
       const value = Object.values({
         id,
@@ -197,7 +200,8 @@ class RobotsService extends Service {
         state: JSON.stringify(state),
         lastCandle: JSON.stringify(lastCandle),
         hasAlerts,
-        statistics: JSON.stringify(statistics)
+        statistics: JSON.stringify(statistics),
+        equity: JSON.stringify(equity)
       });
       const query = `INSERT INTO robots 
         (   id,
@@ -218,7 +222,8 @@ class RobotsService extends Service {
             state,
             last_candle,
             has_alerts,
-            statistics
+            statistics,
+            equity
         ) 
         VALUES (?)
          ON CONFLICT ON CONSTRAINT robots_pkey 
@@ -231,7 +236,8 @@ class RobotsService extends Service {
          has_alerts = excluded.has_alerts,
          started_at = excluded.started_at,
          stopped_at = excluded.stopped_at,
-         statistics = excluded.statistics;`;
+         statistics = excluded.statistics,
+         equity = excluded.equity;`;
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,

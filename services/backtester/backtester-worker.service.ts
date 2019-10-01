@@ -376,6 +376,7 @@ class BacktesterWorkerService extends Service {
 
       robot.calcStats(Object.values(allPositions));
       backtesterState.statistics = robot.statistics;
+      backtesterState.equity = robot.equity;
       const { state, indicators } = robot.state;
       backtesterState.robotState = state;
       backtesterState.robotIndicators = indicators;

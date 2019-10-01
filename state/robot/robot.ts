@@ -35,6 +35,7 @@ class Robot {
   _startedAt: string;
   _stoppedAt: string;
   _statistics: cpz.RobotStats;
+  _equity: cpz.RobotEquity;
   _eventsToSend: cpz.Events<any>[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
@@ -88,7 +89,7 @@ class Robot {
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._statistics = state.statistics || {};
-
+    this._equity = state.equity || {};
     this._eventsToSend = [];
     this._postionsToSave = [];
     this._indicatorInstances = {};
@@ -243,6 +244,10 @@ class Robot {
 
   get statistics() {
     return this._statistics;
+  }
+
+  get equity() {
+    return this._equity;
   }
 
   get hasActions() {
@@ -581,7 +586,9 @@ class Robot {
   }
 
   calcStats(positions: cpz.RobotPositionState[]) {
-    this._statistics = calcStatistics(positions);
+    const { statistics, equity } = calcStatistics(positions);
+    this._statistics = statistics;
+    this._equity = equity;
   }
   /**
    * Запрос текущего состояния индикаторов
@@ -664,7 +671,8 @@ class Robot {
       stoppedAt: this._stoppedAt,
       indicators: this._indicators,
       state: this._strategy,
-      statistics: this._statistics
+      statistics: this._statistics,
+      equity: this._equity
     };
   }
 

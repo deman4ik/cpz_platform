@@ -173,6 +173,16 @@ function findLastByMinProp(arr: { [key: string]: any }[], propName: string) {
 const round = (n: number, decimals = 0): number =>
   +Number(`${Math.round(+`${n}e${decimals}`)}e-${decimals}`);
 
+/**
+ * Returns the average of two or more numbers.
+ *
+ * @param nums
+ */
+const average = (...nums: number[]) =>
+  nums.reduce((acc, val) => acc + val, 0) / nums.length;
+
+const averageRound = (...nums: number[]) => +round(average(...nums));
+
 function divideRound(a: number, b: number): number | 0 {
   if (!a || !b || a === 0 || b === 0) return 0;
   const result = a / b;
@@ -239,7 +249,9 @@ export {
   findLastByMaxProp,
   findLastByMinProp,
   round,
+  averageRound,
   divideRound,
   underscoreToCamelCaseKeys,
-  equals
+  equals,
+  average
 };

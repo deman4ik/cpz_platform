@@ -474,34 +474,41 @@ export namespace cpz {
     requiredHistoryMaxBars?: number;
   }
 
-  interface RobotStatVals {
-    all?: number | string;
-    long?: number | string;
-    short?: number | string;
+  interface RobotStatVals<T> {
+    all?: T;
+    long?: T;
+    short?: T;
   }
+
   interface RobotStats {
-    tradesCount?: RobotStatVals;
-    tradesWinning?: RobotStatVals;
-    tradesLosing?: RobotStatVals;
-    winRate?: RobotStatVals;
-    lossRate?: RobotStatVals;
-    avgBarsHeld?: RobotStatVals;
-    avgBarsHeldWinning?: RobotStatVals;
-    avgBarsHeldLosing?: RobotStatVals;
-    netProfit?: RobotStatVals;
-    avgNetProfit?: RobotStatVals;
-    grossProfit?: RobotStatVals;
-    avgProfit?: RobotStatVals;
-    grossLoss?: RobotStatVals;
-    avgLoss?: RobotStatVals;
-    maxConnsecWins?: RobotStatVals;
-    maxConsecLosses?: RobotStatVals;
-    maxDrawdown?: RobotStatVals;
-    maxDrawdownPercent?: RobotStatVals;
-    maxDrawdownDate?: RobotStatVals;
-    profitFactor?: RobotStatVals;
-    recoveryFactor?: RobotStatVals;
-    payoffRatio?: RobotStatVals;
+    tradesCount?: RobotStatVals<number>;
+    tradesWinning?: RobotStatVals<number>;
+    tradesLosing?: RobotStatVals<number>;
+    winRate?: RobotStatVals<number>;
+    lossRate?: RobotStatVals<number>;
+    avgBarsHeld?: RobotStatVals<number>;
+    avgBarsHeldWinning?: RobotStatVals<number>;
+    avgBarsHeldLosing?: RobotStatVals<number>;
+    netProfit?: RobotStatVals<number>;
+    avgNetProfit?: RobotStatVals<number>;
+    grossProfit?: RobotStatVals<number>;
+    avgProfit?: RobotStatVals<number>;
+    grossLoss?: RobotStatVals<number>;
+    avgLoss?: RobotStatVals<number>;
+    maxConnsecWins?: RobotStatVals<number>;
+    maxConsecLosses?: RobotStatVals<number>;
+    maxDrawdown?: RobotStatVals<number>;
+    maxDrawdownPercent?: RobotStatVals<number>;
+    maxDrawdownDate?: RobotStatVals<string>;
+    profitFactor?: RobotStatVals<number>;
+    recoveryFactor?: RobotStatVals<number>;
+    payoffRatio?: RobotStatVals<number>;
+  }
+
+  interface RobotEquity {
+    profit?: number;
+    lastProfit?: number;
+    changes?: { x: number; y: number }[];
   }
 
   interface RobotHead {
@@ -527,6 +534,7 @@ export namespace cpz {
     startedAt?: string;
     stoppedAt?: string;
     statistics?: RobotStats;
+    equity?: RobotEquity;
   }
 
   interface RobotJob {
@@ -556,6 +564,7 @@ export namespace cpz {
     startedAt?: string;
     finishedAt?: string;
     statistics?: RobotStats;
+    equity?: RobotEquity;
     robotState?: StrategyProps;
     robotIndicators?: { [key: string]: IndicatorState };
     error?: any;

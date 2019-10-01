@@ -1,4 +1,11 @@
-import { divideRound, round } from "./helpers";
+import {
+  divideRound,
+  round,
+  chunkArray,
+  average,
+  averageRound
+} from "./helpers";
+import dayjs from "../lib/dayjs";
 import { cpz } from "../types/cpz";
 
 function calcConsec(profits: number[]) {
@@ -69,8 +76,18 @@ function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
   };
 }
 
-function calcStatistics(positions: cpz.RobotPositionState[]) {
+function calcStatistics(
+  positions: cpz.RobotPositionState[]
+): {
+  statistics: cpz.RobotStats;
+  equity: cpz.RobotEquity;
+} {
   const statistics: cpz.RobotStats = {};
+  const equity: cpz.RobotEquity = {};
+
+  if (!positions || !Array.isArray(positions) || positions.length === 0)
+    return { statistics, equity };
+
   const allPositions = positions.map(pos => ({
     ...pos,
     profit: +pos.profit,
@@ -82,6 +99,9 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
   const shortPositions = allPositions.filter(
     ({ direction }) => direction === cpz.PositionDirection.short
   );
+  const lastPosition = allPositions[allPositions.length - 1];
+  equity.lastProfit = lastPosition.profit;
+
   statistics.tradesCount = {
     all: allPositions.length,
     long: longPositions.length,
@@ -127,23 +147,14 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: divideRound(shortLosingPositions.length, shortPositions.length) * 100
   };
 
-  const allAvgBarsHeld = divideRound(
-    positions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    allPositions.length
+  const allAvgBarsHeld = averageRound(
+    ...allPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const longAvgBarsHeld = divideRound(
-    longPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    longPositions.length
+  const longAvgBarsHeld = averageRound(
+    ...longPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const shortAvgBarsHeld = divideRound(
-    shortPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    shortPositions.length
+  const shortAvgBarsHeld = averageRound(
+    ...shortPositions.map(({ barsHeld }) => +barsHeld)
   );
   statistics.avgBarsHeld = {
     all: allAvgBarsHeld,
@@ -151,23 +162,14 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: shortAvgBarsHeld
   };
 
-  const allAvgWinningBarsHeld = divideRound(
-    allWinningPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    allWinningPositions.length
+  const allAvgWinningBarsHeld = averageRound(
+    ...allWinningPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const longAvgWinningBarsHeld = divideRound(
-    longWinningPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    longWinningPositions.length
+  const longAvgWinningBarsHeld = averageRound(
+    ...longWinningPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const shortAvgWinningBarsHeld = divideRound(
-    shortWinningPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    shortWinningPositions.length
+  const shortAvgWinningBarsHeld = averageRound(
+    ...shortWinningPositions.map(({ barsHeld }) => +barsHeld)
   );
   statistics.avgBarsHeldWinning = {
     all: allAvgWinningBarsHeld,
@@ -175,23 +177,14 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     short: shortAvgWinningBarsHeld
   };
 
-  const allAvgLosingBarsHeld = divideRound(
-    allLosingPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    allLosingPositions.length
+  const allAvgLosingBarsHeld = averageRound(
+    ...allLosingPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const longAvgLosingBarsHeld = divideRound(
-    longLosingPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    longLosingPositions.length
+  const longAvgLosingBarsHeld = averageRound(
+    ...longLosingPositions.map(({ barsHeld }) => +barsHeld)
   );
-  const shortAvgLosingBarsHeld = divideRound(
-    shortLosingPositions
-      .map(({ barsHeld }) => +barsHeld)
-      .reduce((acc, val) => acc + val, 0),
-    shortLosingPositions.length
+  const shortAvgLosingBarsHeld = averageRound(
+    ...shortLosingPositions.map(({ barsHeld }) => +barsHeld)
   );
   statistics.avgBarsHeldLosing = {
     all: allAvgLosingBarsHeld,
@@ -222,6 +215,7 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     long: longNetProfit,
     short: shortNetProfit
   };
+  equity.profit = allNetProfit;
 
   // Net profit / Number of trades
   const allAvgNetProfit = divideRound(allNetProfit, allPositions.length);
@@ -405,7 +399,14 @@ function calcStatistics(positions: cpz.RobotPositionState[]) {
     long: longRecoveryFactor,
     short: shortRecoveryFactor
   };
-  return statistics;
+
+  const positionChunks = chunkArray(allPositions, 50);
+  equity.changes = positionChunks.map(chunk => ({
+    x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
+    y: averageRound(...chunk.map(c => +c.profit))
+  }));
+
+  return { statistics, equity };
 }
 
 export { calcStatistics };
