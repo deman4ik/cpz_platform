@@ -300,7 +300,6 @@ class RobotWorkerService extends Service {
         jobType: type,
         error: e
       });
-      throw e;
     }
   }
 }

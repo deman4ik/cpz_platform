@@ -4,12 +4,30 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
 import { Op } from "sequelize";
-import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
+import { underscoreToCamelCaseKeys, equals } from "../../../utils/helpers";
+import { createRobotCode, createRobotName } from "../../../utils/naming";
+
 class RobotsService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_ROBOTS,
+      settings: {
+        graphql: {
+          type: `
+          input RobotImportEntity {
+            exchange: String!,
+            asset: String!, 
+            currency: String!, 
+            timeframe: Int!, 
+            strategy: String!, 
+            mod: String, 
+            settings: JSON!, 
+            available: Int
+          }
+          `
+        }
+      },
       mixins: [DbService],
       adapter: SqlAdapter,
       model: {
@@ -108,6 +126,30 @@ class RobotsService extends Service {
             }
           },
           handler: this.upsert
+        },
+        import: {
+          params: {
+            entities: {
+              type: "array",
+              items: {
+                type: "object",
+                props: {
+                  exchange: "string",
+                  asset: "string",
+                  currency: "string",
+                  timeframe: { type: "number", integer: true },
+                  strategy: { type: "string" },
+                  mod: { type: "string", optional: true },
+                  settings: "object",
+                  available: { type: "number", integer: true, optional: true }
+                }
+              }
+            }
+          },
+          graphql: {
+            mutation: "importRobots(entities: [RobotImportEntity!]!): Response!"
+          },
+          handler: this.import
         }
       }
     });
@@ -199,6 +241,115 @@ class RobotsService extends Service {
     } catch (e) {
       this.logger.error(e);
       throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+    }
+  }
+
+  async import(ctx: Context) {
+    try {
+      const strategiesList = await this.broker.call(
+        `${cpz.Service.DB_STRATEGIES}.find`,
+        {
+          fields: ["id", "code"]
+        }
+      );
+      const strategies: { [key: string]: string } = {};
+      strategiesList.forEach(({ id, code }: { id: string; code: string }) => {
+        strategies[id] = code;
+      });
+      const query = `INSERT INTO robots 
+        (   code,
+            name,
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategy,
+            mod,
+            settings,
+            available
+        ) 
+         VALUES (?)
+         ON CONFLICT ON CONSTRAINT robots_pkey 
+         DO UPDATE SET updated_at = now(),
+         status = excluded.status,
+         settings = excluded.settings,
+         indicators = excluded.indicators,
+         state = excluded.state,
+         last_candle = excluded.last_candle,
+         has_alerts = excluded.has_alerts,
+         started_at = excluded.started_at,
+         stopped_at = excluded.stopped_at,
+         statistics = excluded.statistics;`;
+      let importedCount = 0;
+      for (const {
+        exchange,
+        asset,
+        currency,
+        timeframe,
+        strategy,
+        mod,
+        settings,
+        available
+      } of ctx.params.entities) {
+        let mode = mod || 1;
+        const [robotEntity] = await this.adapter.find({
+          fields: ["id", "mod", "settings"],
+          sort: "-created_at",
+          query: {
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategyName: strategy
+          }
+        });
+
+        const robotExists =
+          robotEntity && this.adapter.entityToObject(robotEntity);
+
+        if (robotExists) {
+          if (equals(settings, robotExists.settings)) continue;
+          const tryNumMod = +robotExists.mod;
+          mode = (tryNumMod && tryNumMod + 1) || `${robotExists.mod}-1`;
+        }
+
+        const entity = Object.values({
+          code: createRobotCode(
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategies[strategy],
+            mode
+          ),
+          name: createRobotName(
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategies[strategy],
+            mode
+          ),
+          exchange,
+          asset,
+          currency,
+          timeframe,
+          strategyName: strategy,
+          mod: `${mode}`,
+          settings: JSON.stringify(settings),
+          available
+        });
+        await this.adapter.db.query(query, {
+          type: Sequelize.QueryTypes.INSERT,
+          replacements: [entity]
+        });
+        importedCount += 1;
+      }
+
+      return { success: true, result: `Imported ${importedCount} robots` };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e };
     }
   }
 

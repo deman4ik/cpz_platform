@@ -15,6 +15,7 @@ class StrategiesService extends Service {
         name: "strategies",
         define: {
           id: { type: Sequelize.STRING, primaryKey: true },
+          code: { type: Sequelize.STRING },
           name: { type: Sequelize.STRING },
           description: { type: Sequelize.TEXT, allowNull: true },
           author: { type: Sequelize.STRING, allowNull: true },
