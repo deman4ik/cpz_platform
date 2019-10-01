@@ -204,8 +204,20 @@ async function createCandlesFromTrades(
   }
 }
 
+function converExchangeTimeframes(exchangeTimeframes: {
+  [key: string]: string | number;
+}): cpz.ExchangeTimeframes {
+  const timeframes: cpz.ExchangeTimeframes = {};
+  Object.keys(exchangeTimeframes).forEach(key => {
+    let tf = exchangeTimeframes[key];
+    if (typeof tf !== "number") tf = Timeframe.stringToTimeframe(`${tf}`);
+    timeframes[key] = tf;
+  });
+  return timeframes;
+}
+
 function getCurrentCandleParams(
-  exchangeTimeframes: cpz.ExchangeTimeframes,
+  exchangeTimeframes: { [key: string]: string | number },
   timeframe: cpz.Timeframe
 ) {
   const timeframeStr = Timeframe.toString(timeframe);
@@ -219,10 +231,11 @@ function getCurrentCandleParams(
     limit: 1,
     batch: false
   };
-  const exchangeHasTimeframe = Timeframe.inList(
-    exchangeTimeframes,
-    timeframeStr
+  const timeframes: cpz.ExchangeTimeframes = converExchangeTimeframes(
+    exchangeTimeframes
   );
+
+  const exchangeHasTimeframe = Timeframe.inList(timeframes, timeframeStr);
 
   if (!exchangeHasTimeframe) {
     const { lower, amountInUnit } = Timeframe.get(timeframe);
@@ -237,14 +250,17 @@ function getCurrentCandleParams(
 }
 
 function getCandlesParams(
-  exchangeTimeframes: cpz.ExchangeTimeframes,
+  exchangeTimeframes: { [key: string]: string | number },
   timeframe: cpz.Timeframe,
   dateFrom: string,
   limit: number = 100
 ) {
+  const timeframes: cpz.ExchangeTimeframes = converExchangeTimeframes(
+    exchangeTimeframes
+  );
   let currentTimeframe = Timeframe.get(timeframe);
   const exchangeHasTimeframe = Timeframe.inList(
-    exchangeTimeframes,
+    timeframes,
     Timeframe.toString(timeframe)
   );
   if (!exchangeHasTimeframe) {
