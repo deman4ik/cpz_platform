@@ -224,14 +224,15 @@ class Position implements cpz.RobotPosition {
       timestamp: dayjs.utc().toISOString()
     };
     this._alerts[this._nextAlertNumb] = alert;
-    this._alertsToPublish.push({
-      ...alert,
-      type: cpz.SignalType.alert,
-      positionId: this._id,
-      positionPrefix: this._prefix,
-      positionCode: this._code,
-      positionParentId: this._parentId
-    });
+    if (orderType !== cpz.OrderType.market)
+      this._alertsToPublish.push({
+        ...alert,
+        type: cpz.SignalType.alert,
+        positionId: this._id,
+        positionPrefix: this._prefix,
+        positionCode: this._code,
+        positionParentId: this._parentId
+      });
   }
 
   _createTradeSignal(alert: cpz.AlertInfo) {
