@@ -154,13 +154,6 @@ class PublicConnectorService extends Service {
             currency: "string",
             dateFrom: "string"
           },
-          retryPolicy: {
-            enabled: true,
-            retries: 20,
-            delay: 0,
-            check: (err: Errors.MoleculerRetryableError) =>
-              err && !!err.retryable
-          },
           async handler(ctx): Promise<cpz.ExchangeTrade[]> {
             return await this.getTrades(
               ctx.params.exchange,
@@ -190,7 +183,7 @@ class PublicConnectorService extends Service {
   retryOptions = {
     retries: 100,
     minTimeout: 0,
-    maxTimeout: 0
+    maxTimeout: 100
   };
 
   /**
