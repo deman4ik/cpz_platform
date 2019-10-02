@@ -176,7 +176,8 @@ export namespace cpz {
 
   const enum Queue {
     importCandles = "importCandles",
-    runRobot = "runRobot"
+    runRobot = "runRobot",
+    backtest = "backtest"
   }
 
   type ImportType = "recent" | "history";
@@ -544,18 +545,23 @@ export namespace cpz {
     data?: Candle | ExwatcherTrade;
   }
 
+  interface BacktesterSettings {
+    local?: boolean;
+    populateHistory?: boolean;
+  }
+
   interface BacktesterState {
     id: string;
-    robotId?: string;
-    exchange: string;
-    asset: string;
-    currency: string;
-    timeframe: Timeframe;
-    strategyName: string;
+    robotId: string;
+    exchange?: string;
+    asset?: string;
+    currency?: string;
+    timeframe?: Timeframe;
+    strategyName?: string;
     dateFrom: string;
     dateTo: string;
-    settings: { [key: string]: any };
-    robotSettings: RobotSettings;
+    settings?: BacktesterSettings;
+    robotSettings?: RobotSettings;
     totalBars?: number;
     processedBars?: number;
     leftBars?: number;

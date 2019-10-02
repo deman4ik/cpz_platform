@@ -39,8 +39,16 @@ class BacktestsService extends Service {
           },
           settings: Sequelize.JSONB,
           robotSettings: { type: Sequelize.JSONB, field: "robot_settings" },
-          robotState: { type: Sequelize.JSONB, allowNull: true },
-          robotIndicators: { type: Sequelize.JSONB, allowNull: true },
+          robotState: {
+            type: Sequelize.JSONB,
+            allowNull: true,
+            field: "robot_state"
+          },
+          robotIndicators: {
+            type: Sequelize.JSONB,
+            allowNull: true,
+            field: "robot_indicators"
+          },
           statistics: { type: Sequelize.JSON, allowNull: true },
           equity: { type: Sequelize.JSON, allowNull: true },
           totalBars: {
@@ -107,8 +115,8 @@ class BacktestsService extends Service {
                 dateTo: "string",
                 settings: "object",
                 robotSettings: "object",
-                robotState: "object",
-                robotIndicators: "object",
+                robotState: { type: "object", optional: true },
+                robotIndicators: { type: "object", optional: true },
                 statistics: { type: "object", optional: true },
                 equity: { type: "object", optional: true },
                 totalBars: { type: "number", optional: true },
@@ -119,7 +127,7 @@ class BacktestsService extends Service {
                 startedAt: { type: "string", optional: true },
                 finishedAt: { type: "string", optional: true },
                 error: {
-                  type: "object",
+                  type: "string",
                   optional: true
                 }
               }

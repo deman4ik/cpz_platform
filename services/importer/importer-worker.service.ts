@@ -54,77 +54,76 @@ class ImporterWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}1440`
       ],
       queues: {
-        [cpz.Queue.importCandles]: [
-          {
-            async process(job: Job) {
-              this.logger.info(
-                `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
+        [cpz.Queue.importCandles]: {
+          concurrency: 100,
+          async process(job: Job) {
+            this.logger.info(
+              `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
+            );
+            const state: cpz.Importer = {
+              ...job.data,
+              status: cpz.Status.started,
+              startedAt: dayjs.utc().toISOString(),
+              endedAt: null,
+              error: null,
+              progress: 0
+            };
+            try {
+              const currentState = await this.broker.call(
+                `${cpz.Service.DB_IMPORTERS}.get`,
+                { id: state.id }
               );
-              const state: cpz.Importer = {
-                ...job.data,
-                status: cpz.Status.started,
-                startedAt: dayjs.utc().toISOString(),
-                endedAt: null,
-                error: null,
-                progress: 0
-              };
-              try {
-                const currentState = await this.broker.call(
-                  `${cpz.Service.DB_IMPORTERS}.get`,
-                  { id: state.id }
-                );
-                if (currentState.status === cpz.Status.finished)
-                  return {
-                    success: true,
-                    state: currentState
-                  };
-                await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-                  entity: state
-                });
-                if (state.type === "recent") {
-                  await this.importerRecent(job, state);
-                } else if (state.type === "history") {
-                  await this.importerHistory(job, state);
-                }
-                state.endedAt = dayjs.utc().toISOString();
-                state.status = cpz.Status.finished;
-                state.progress = 100;
-                await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-                  entity: state
-                });
-                this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
-                this.logger.info(`Job #${job.id} finished`);
+              if (currentState.status === cpz.Status.finished)
                 return {
                   success: true,
-                  state
+                  state: currentState
                 };
-              } catch (e) {
-                this.logger.error(e);
-                this.broker.emit(cpz.Event.IMPORTER_FAILED, {
-                  id: job.id,
-                  error: e.message
-                });
-                state.status = cpz.Status.failed;
-                state.error = e.message;
-                await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-                  entity: state
-                });
-                if (e instanceof Errors.ValidationError) {
-                  return {
-                    success: false,
-                    state: { id: job.id, error: e }
-                  };
-                }
-                throw new Errors.MoleculerError(
-                  `Failed to import candles jobId: ${job.id}`,
-                  500,
-                  this.name,
-                  { ...job.data }
-                );
+              await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+                entity: state
+              });
+              if (state.type === "recent") {
+                await this.importerRecent(job, state);
+              } else if (state.type === "history") {
+                await this.importerHistory(job, state);
               }
+              state.endedAt = dayjs.utc().toISOString();
+              state.status = cpz.Status.finished;
+              state.progress = 100;
+              await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+                entity: state
+              });
+              this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
+              this.logger.info(`Job #${job.id} finished`);
+              return {
+                success: true,
+                state
+              };
+            } catch (e) {
+              this.logger.error(e);
+              this.broker.emit(cpz.Event.IMPORTER_FAILED, {
+                id: job.id,
+                error: e.message
+              });
+              state.status = cpz.Status.failed;
+              state.error = e.message;
+              await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+                entity: state
+              });
+              if (e instanceof Errors.ValidationError) {
+                return {
+                  success: false,
+                  state: { id: job.id, error: e }
+                };
+              }
+              throw new Errors.MoleculerError(
+                `Failed to import candles jobId: ${job.id}`,
+                500,
+                this.name,
+                { ...job.data }
+              );
             }
           }
-        ]
+        }
       }
     });
   }

@@ -90,6 +90,10 @@ class RobotRunnerService extends Service {
       "error",
       this.jobError.bind(this)
     );
+    await this.getQueue(cpz.Queue.runRobot).on(
+      "fail",
+      this.jobError.bind(this)
+    );
   }
 
   async queueJob(job: cpz.RobotJob, status: string) {

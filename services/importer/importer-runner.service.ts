@@ -149,6 +149,10 @@ class ImporterRunnerService extends Service {
       "error",
       this.jobError.bind(this)
     );
+    await this.getQueue(cpz.Queue.importCandles).on(
+      "fail",
+      this.jobError.bind(this)
+    );
   }
 
   async startRecent(ctx: Context) {
@@ -210,7 +214,7 @@ class ImporterRunnerService extends Service {
   }
 
   async clean(ctx: Context) {
-    return await this.getQueue("importCandles").clean(
+    return await this.getQueue(cpz.Queue.importCandles).clean(
       ctx.params.period || 5000,
       ctx.params.status || "completed"
     );
