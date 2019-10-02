@@ -55,7 +55,7 @@ class ImporterWorkerService extends Service {
       ],
       queues: {
         [cpz.Queue.importCandles]: {
-          concurrency: 100,
+          concurrency: 3,
           async process(job: Job) {
             this.logger.info(
               `Job #${job.id} start importing ${job.data.exchange}-${job.data.asset}-${job.data.currency} ${job.data.type} candles`
