@@ -9,6 +9,16 @@ class BacktesterRunnerService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.BACKTESTER_RUNNER,
+      settings: {
+        graphql: {
+          type: `
+          input BacktestSettings {
+            local: Boolean,
+            populateHistory: Boolean
+          }
+          `
+        }
+      },
       mixins: [
         QueueService({
           redis: {
@@ -62,7 +72,7 @@ class BacktesterRunnerService extends Service {
           },
           graphql: {
             mutation:
-              "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: JSON, robotSettings: JSON): ServiceStatus!"
+              "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: BacktestSettings, robotSettings: JSON): ServiceStatus!"
           },
           handler: this.start
         },

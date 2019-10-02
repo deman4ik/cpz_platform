@@ -6,7 +6,7 @@ import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
 import { Op } from "sequelize";
-import { sortAsc, chunkNumberToArray, round } from "../../utils";
+import { sortAsc, chunkNumberToArray, round, chunkArray } from "../../utils";
 import requireFromString from "require-from-string";
 import { combineBacktestSettings } from "../../state/settings";
 
@@ -45,7 +45,9 @@ class BacktesterWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}240`,
         `${cpz.Service.DB_CANDLES}480`,
         `${cpz.Service.DB_CANDLES}720`,
-        `${cpz.Service.DB_CANDLES}1440`
+        `${cpz.Service.DB_CANDLES}1440`,
+        `${cpz.Service.DB_ROBOTS}`,
+        `${cpz.Service.DB_ROBOT_POSITIONS}`
       ],
       queues: {
         [cpz.Queue.backtest]: {
@@ -237,6 +239,7 @@ class BacktesterWorkerService extends Service {
       );
       let prevIteration: number = 0;
       let prevPercent = 0;
+      let firstCandleTimestamp = null;
       const allPositions: { [key: string]: cpz.RobotPositionState } = {};
       for (const iteration of iterations) {
         this.logger.info(`Loading ${iteration} candle from DB...`);
@@ -266,6 +269,8 @@ class BacktesterWorkerService extends Service {
         this.logger.info(
           `Processing iteration from: ${historyCandles[0].timestamp} to: ${historyCandles[historyCandles.length - 1].timestamp}`
         );
+        if (!firstCandleTimestamp)
+          firstCandleTimestamp = historyCandles[0].timestamp;
         let logs: { id: string; backtestId: string; data: any }[] = [];
         let alerts: cpz.BacktesterSignals[] = [];
         let trades: cpz.BacktesterSignals[] = [];
@@ -357,6 +362,7 @@ class BacktesterWorkerService extends Service {
             `${cpz.Service.DB_BACKTEST_POSITIONS}.upsert`,
             { entities: Object.values(positions) }
           );
+
         if (alerts.length > 0)
           await this.broker.call(`${cpz.Service.DB_BACKTEST_SIGNALS}.insert`, {
             entities: alerts
@@ -374,14 +380,41 @@ class BacktesterWorkerService extends Service {
         });
       }
 
-      robot.calcStats(Object.values(allPositions));
-      backtesterState.statistics = robot.statistics;
-      backtesterState.equity = robot.equity;
-      const { state, indicators } = robot.state;
+      robot.calcStats(
+        Object.values(allPositions).filter(
+          ({ status }) => status === cpz.RobotPositionStatus.closed
+        )
+      );
+
+      const { state, indicators, statistics, equity, lastCandle } = robot.state;
+      backtesterState.statistics = statistics;
+      backtesterState.equity = equity;
       backtesterState.robotState = state;
       backtesterState.robotIndicators = indicators;
+
+      if (backtesterState.settings.populateHistory) {
+        await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+          id: robotId,
+          startedAt: firstCandleTimestamp,
+          lastCandle,
+          indicators,
+          state,
+          statistics,
+          equity
+        });
+        const chunks = chunkArray(Object.values(allPositions), 100);
+        for (const chunk of chunks) {
+          await this.broker.call(`${cpz.Service.DB_ROBOT_POSITIONS}.upsert`, {
+            entities: chunk
+          });
+        }
+      }
+
       backtesterState.finishedAt = dayjs.utc().toISOString();
       backtesterState.status = cpz.Status.finished;
+      await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+        entity: backtesterState
+      });
       const duration = dayjs
         .utc(backtesterState.finishedAt)
         .diff(dayjs.utc(backtesterState.startedAt), "minute");

@@ -173,7 +173,41 @@ class RobotPositionsService extends Service {
                 alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
                 barsHeld: { type: "number", integer: true, optional: true }
-              }
+              },
+              optional: true
+            },
+            entities: {
+              type: "array",
+              items: {
+                type: "object",
+                props: {
+                  id: "string",
+                  robotId: { type: "string" },
+                  timeframe: { type: "number", integer: true },
+                  volume: "number",
+                  prefix: "string",
+                  code: "string",
+                  parentId: { type: "string", optional: true },
+                  direction: { type: "string", optional: true },
+                  status: { type: "string", optional: true },
+                  entryStatus: { type: "string", optional: true },
+                  entryPrice: { type: "number", optional: true },
+                  entryDate: { type: "string", optional: true },
+                  entryOrderType: { type: "string", optional: true },
+                  entryAction: { type: "string", optional: true },
+                  entryCandleTimestamp: { type: "string", optional: true },
+                  exitStatus: { type: "string", optional: true },
+                  exitPrice: { type: "number", optional: true },
+                  exitDate: { type: "string", optional: true },
+                  exitOrderType: { type: "string", optional: true },
+                  exitAction: { type: "string", optional: true },
+                  exitCandleTimestamp: { type: "string", optional: true },
+                  alerts: { type: "object", optional: true },
+                  profit: { type: "number", optional: true },
+                  barsHeld: { type: "number", integer: true, optional: true }
+                }
+              },
+              optional: true
             }
           },
           handler: this.upsert
@@ -184,58 +218,72 @@ class RobotPositionsService extends Service {
 
   async upsert(ctx: Context) {
     try {
-      const {
-        id,
-        robotId,
-        timeframe,
-        volume,
-        prefix,
-        code,
-        parentId,
-        direction,
-        status,
-        entryStatus,
-        entryPrice,
-        entryDate,
-        entryOrderType,
-        entryAction,
-        entryCandleTimestamp,
-        exitStatus,
-        exitPrice,
-        exitDate,
-        exitOrderType,
-        exitAction,
-        exitCandleTimestamp,
-        alerts,
-        profit,
-        barsHeld
-      }: cpz.RobotPositionState = ctx.params.entity;
-      const value = Object.values({
-        id,
-        robotId,
-        timeframe,
-        volume,
-        prefix,
-        code,
-        parentId,
-        direction,
-        status,
-        entryStatus,
-        entryPrice,
-        entryDate,
-        entryOrderType,
-        entryAction,
-        entryCandleTimestamp,
-        exitStatus,
-        exitPrice,
-        exitDate,
-        exitOrderType,
-        exitAction,
-        exitCandleTimestamp,
-        alerts: JSON.stringify(alerts),
-        profit,
-        barsHeld
-      });
+      if (
+        !ctx.params.entity &&
+        (!ctx.params.entities ||
+          (Array.isArray(ctx.params.entities) &&
+            ctx.params.entities.length === 0))
+      )
+        throw new Errors.ValidationError("Entity or Entities is required!");
+
+      let entitiesRaw: cpz.RobotPositionState[] = [];
+      if (ctx.params.entity) entitiesRaw = [ctx.params.entity];
+      else entitiesRaw = ctx.params.entities;
+
+      const entities = entitiesRaw.map(
+        ({
+          id,
+          robotId,
+          timeframe,
+          volume,
+          prefix,
+          code,
+          parentId,
+          direction,
+          status,
+          entryStatus,
+          entryPrice,
+          entryDate,
+          entryOrderType,
+          entryAction,
+          entryCandleTimestamp,
+          exitStatus,
+          exitPrice,
+          exitDate,
+          exitOrderType,
+          exitAction,
+          exitCandleTimestamp,
+          alerts,
+          profit,
+          barsHeld
+        }: cpz.RobotPositionState) =>
+          Object.values({
+            id,
+            robotId,
+            timeframe,
+            volume,
+            prefix,
+            code,
+            parentId,
+            direction,
+            status,
+            entryStatus,
+            entryPrice,
+            entryDate,
+            entryOrderType,
+            entryAction,
+            entryCandleTimestamp,
+            exitStatus,
+            exitPrice,
+            exitDate,
+            exitOrderType,
+            exitAction,
+            exitCandleTimestamp,
+            alerts: JSON.stringify(alerts),
+            profit,
+            barsHeld
+          })
+      );
       const query = `INSERT INTO robot_positions
      (  id,
         robot_id,
@@ -262,7 +310,11 @@ class RobotPositionsService extends Service {
         profit,
         bars_held
         ) 
-        VALUES (?)
+        VALUES ${entities
+          .map((_: any) => {
+            return "(?)";
+          })
+          .join(",")} 
          ON CONFLICT ON CONSTRAINT robot_positions_pkey 
          DO UPDATE SET updated_at = now(),
          direction = excluded.direction,
@@ -285,7 +337,7 @@ class RobotPositionsService extends Service {
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,
-        replacements: [value]
+        replacements: entities
       });
       return true;
     } catch (e) {
