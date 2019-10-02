@@ -50,11 +50,11 @@ class RobotWorkerService extends Service {
         })
       ],
       actions: {
-        start: {
+        startUp: {
           params: {
             id: "string"
           },
-          handler: this.start
+          handler: this.startUp
         }
       },
       queues: {
@@ -119,7 +119,7 @@ class RobotWorkerService extends Service {
     await this.loadCode();
   }
 
-  async start(ctx: Context) {
+  async startUp(ctx: Context) {
     const { id } = ctx.params;
     this.logger.info(`Robot #${id} starting...`);
     await this.run({ id: uuid(), robotId: id, type: cpz.RobotJobType.start });

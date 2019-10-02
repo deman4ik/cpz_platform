@@ -368,6 +368,9 @@ class RobotsService extends Service {
             status: cpz.Status.started
           },
           {
+            status: cpz.Status.starting
+          },
+          {
             status: cpz.Status.paused
           }
         ]

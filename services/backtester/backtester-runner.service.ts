@@ -146,6 +146,13 @@ class BacktesterRunnerService extends Service {
     try {
       const { robotId, dateFrom, dateTo, settings, robotSettings } = ctx.params;
 
+      if (settings && settings.populateHistory && id !== robotId)
+        return {
+          success: false,
+          id,
+          status: cpz.Status.failed,
+          error: new Error("Wrong Backtester ID for history populating")
+        };
       await this.createJob(
         cpz.Queue.backtest,
         {

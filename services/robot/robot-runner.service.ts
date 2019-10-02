@@ -3,7 +3,8 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
-import { gql } from "moleculer-apollo-server";
+import dayjs from "../../lib/dayjs";
+import Timeframe from "../../utils/timeframe";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -28,12 +29,25 @@ class RobotRunnerService extends Service {
         })
       ],
       actions: {
-        start: {
+        startup: {
           params: {
             id: "string"
           },
           graphql: {
-            mutation: "robotStart(id: ID!): ServiceStatus!"
+            mutation: "robotStartup(id: ID!): ServiceStatus!"
+          },
+          handler: this.startUp
+        },
+        start: {
+          params: {
+            id: "string",
+            dateFrom: {
+              type: "string",
+              optional: true
+            }
+          },
+          graphql: {
+            mutation: "robotStart(id: ID!, dateFrom: String): ServiceStatus!"
           },
           handler: this.start
         },
@@ -67,7 +81,9 @@ class RobotRunnerService extends Service {
       },
       events: {
         [cpz.Event.CANDLE_NEW]: this.handleNewCandle,
-        [cpz.Event.TICK_NEW]: this.handleNewTick
+        [cpz.Event.TICK_NEW]: this.handleNewTick,
+        [cpz.Event.BACKTESTER_FINISHED_HISTORY]: this.handleBacktesterFinished,
+        [cpz.Event.BACKTESTER_FAILED]: this.handleBacktesterFailed
       },
       started: this.startedService
     });
@@ -110,6 +126,88 @@ class RobotRunnerService extends Service {
   }
 
   async start(ctx: Context) {
+    const { id, dateFrom } = ctx.params;
+    try {
+      const {
+        status,
+        exchange,
+        asset,
+        currency,
+        timeframe,
+        settings: { requiredHistoryMaxBars }
+      } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+        id
+      });
+      if (status === cpz.Status.paused) {
+        const result = await this.resume(ctx);
+        if (result && result.success)
+          return { success: true, id, status: cpz.Status.started };
+        else throw result.error;
+      }
+      if (
+        status === cpz.Status.started ||
+        status === cpz.Status.starting ||
+        status === cpz.Status.stopping
+      )
+        return {
+          success: true,
+          id,
+          status
+        };
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+        id,
+        status: cpz.Status.starting
+      });
+
+      const [firstCandle] = await this.broker.call(
+        `${cpz.Service.DB_CANDLES}${timeframe}.find`,
+        {
+          limit: 1,
+          sort: "time",
+          query: {
+            exchange,
+            asset,
+            currency
+          }
+        }
+      );
+      const { unit, amountInUnit } = Timeframe.get(timeframe);
+      let historyDateFrom = dayjs
+        .utc(firstCandle.timestamp)
+        .add(requiredHistoryMaxBars * amountInUnit, unit)
+        .startOf(unit)
+        .toISOString();
+      if (dateFrom)
+        historyDateFrom =
+          dayjs.utc(historyDateFrom).valueOf() > dayjs.utc(dateFrom).valueOf()
+            ? historyDateFrom
+            : dateFrom;
+      const dateTo = dayjs
+        .utc()
+        .startOf(unit)
+        .toISOString();
+      const backtesterStatus = await this.broker.call(
+        `${cpz.Service.BACKTESTER_RUNNER}.start`,
+        {
+          id,
+          robotId: id,
+          dateFrom: historyDateFrom,
+          dateTo,
+          settings: {
+            local: false,
+            populateHistory: true
+          }
+        }
+      );
+      if (backtesterStatus.success === false) return backtesterStatus;
+      return { success: true, id, status: cpz.Status.starting };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, id: ctx.params.id, error: e };
+    }
+  }
+
+  async startUp(ctx: Context) {
     const { id } = ctx.params;
     try {
       const { status } = await this.broker.call(
@@ -135,7 +233,7 @@ class RobotRunnerService extends Service {
           status
         };
 
-      await this.broker.call(`${cpz.Service.ROBOT_WORKER}.start`, {
+      await this.broker.call(`${cpz.Service.ROBOT_WORKER}.startUp`, {
         id
       });
       return { success: true, id, status: cpz.Status.started };
@@ -246,7 +344,6 @@ class RobotRunnerService extends Service {
           robotIds.map(async robotId => {
             await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
               id: robotId,
-
               status: cpz.Status.started
             });
           })
@@ -323,6 +420,42 @@ class RobotRunnerService extends Service {
             )
         )
       );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleBacktesterFinished(ctx: Context) {
+    try {
+      const { id } = ctx.params;
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+        id,
+        status: cpz.Status.started
+      });
+      await this.broker.emit(`${cpz.Event.ROBOT_STARTED}`, {
+        robotId: id,
+        eventType: cpz.Event.ROBOT_STARTED
+      });
+      this.logger.info(`Robot ${id} started!`);
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleBacktesterFailed(ctx: Context) {
+    try {
+      const { id, error } = ctx.params;
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+        id,
+        status: cpz.Status.failed,
+        error
+      });
+      await this.broker.emit(`${cpz.Event.ROBOT_FAILED}`, {
+        robotId: id,
+        eventType: cpz.Event.ROBOT_FAILED,
+        error
+      });
+      this.logger.error(`Failed to start Robot ${id}`, error);
     } catch (e) {
       this.logger.error(e);
     }

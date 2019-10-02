@@ -432,6 +432,10 @@ class BacktesterWorkerService extends Service {
       this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED}`, {
         id: backtesterState.id
       });
+      if (backtesterState.settings.populateHistory)
+        this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED_HISTORY}`, {
+          id: backtesterState.id
+        });
       return { success: true, duration };
     } catch (e) {
       this.logger.error(e);
@@ -444,6 +448,11 @@ class BacktesterWorkerService extends Service {
         id: backtesterState.id,
         error: e
       });
+      if (backtesterState.settings.populateHistory)
+        this.broker.emit(`${cpz.Event.BACKTESTER_FAILED_HISTORY}`, {
+          id: backtesterState.id,
+          error: e
+        });
       return { success: false, error: e };
     }
   }
