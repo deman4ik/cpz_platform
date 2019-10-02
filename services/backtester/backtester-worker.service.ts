@@ -386,7 +386,14 @@ class BacktesterWorkerService extends Service {
         )
       );
 
-      const { state, indicators, statistics, equity, lastCandle } = robot.state;
+      const {
+        state,
+        indicators,
+        statistics,
+        equity,
+        lastCandle,
+        hasAlerts
+      } = robot.state;
       backtesterState.statistics = statistics;
       backtesterState.equity = equity;
       backtesterState.robotState = state;
@@ -396,6 +403,8 @@ class BacktesterWorkerService extends Service {
         await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
           id: robotId,
           startedAt: firstCandleTimestamp,
+          stoppedAt: null,
+          hasAlerts,
           lastCandle,
           indicators,
           state,
