@@ -333,8 +333,13 @@ class BacktesterWorkerService extends Service {
           ];
 
           robot.positionsToSave.forEach(pos => {
-            positions[pos.id] = { ...pos, backtestId: backtesterState.id };
-            allPositions[pos.id] = pos;
+            const newPos = {
+              ...pos,
+              entryDate: pos.entryCandleTimestamp,
+              exitDate: pos.exitCandleTimestamp
+            };
+            positions[pos.id] = { ...newPos, backtestId: backtesterState.id };
+            allPositions[pos.id] = newPos;
           });
 
           /*this.logger.info(
