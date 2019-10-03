@@ -83,7 +83,7 @@ class BotService extends Service {
           const signalText = this.i18n.t("en", "robot.signal", {
             code: signal.positionCode,
             timestamp: dayjs
-              .utc(signal.candleTimestamp)
+              .utc(signal.timestamp)
               .format("YYYY-MM-DD HH:mm UTC"),
             action: actionText,
             orderType: orderTypeText,
