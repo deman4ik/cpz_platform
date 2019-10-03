@@ -264,22 +264,31 @@ class BaseStrategy implements cpz.Strategy {
   }
 
   _checkAlerts() {
-    Object.keys(this._positions).forEach(key => {
-      if (this._positions[key].hasAlerts) {
-        this._positions[key]._checkAlerts();
-        if (this._positions[key].hasTradeToPublish) {
-          this._createSignalEvent(
-            this._positions[key].tradeToPublish,
-            cpz.Event.SIGNAL_TRADE
-          );
-          this._positionsToSave.push(this._positions[key].state);
-          this._positions[key]._clearTradeToPublish();
-          if (this._positions[key].status === cpz.RobotPositionStatus.closed) {
-            delete this._positions[key];
+    Object.keys(this._positions)
+      .sort((a, b) =>
+        sortAsc(
+          this._positions[a].code.split("_")[1],
+          this._positions[b].code.split("_")[1]
+        )
+      )
+      .forEach(key => {
+        if (this._positions[key].hasAlerts) {
+          this._positions[key]._checkAlerts();
+          if (this._positions[key].hasTradeToPublish) {
+            this._createSignalEvent(
+              this._positions[key].tradeToPublish,
+              cpz.Event.SIGNAL_TRADE
+            );
+            this._positionsToSave.push(this._positions[key].state);
+            this._positions[key]._clearTradeToPublish();
+            if (
+              this._positions[key].status === cpz.RobotPositionStatus.closed
+            ) {
+              delete this._positions[key];
+            }
           }
         }
-      }
-    });
+      });
   }
 
   _clearAlerts() {
