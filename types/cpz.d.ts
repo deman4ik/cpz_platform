@@ -500,7 +500,6 @@ export namespace cpz {
     maxConnsecWins?: RobotStatVals<number>;
     maxConsecLosses?: RobotStatVals<number>;
     maxDrawdown?: RobotStatVals<number>;
-    maxDrawdownPercent?: RobotStatVals<number>;
     maxDrawdownDate?: RobotStatVals<string>;
     profitFactor?: RobotStatVals<number>;
     recoveryFactor?: RobotStatVals<number>;

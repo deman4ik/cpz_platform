@@ -31,48 +31,25 @@ function calcConsec(profits: number[]) {
 }
 
 function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
-  let highWaterMark: number = -Infinity;
-  let maxDrawdown: number = 0;
-  let maxDrawdownVal: number = 0;
-  let maxDrawdownSum: number = 0;
-  let posHighWaterMark: number = null;
-  let startPos: number = -1;
-  let endPos: number = -1;
+  let accum = 0;
+  let localMax = 0;
+  let maxDrawdown = 0;
+  let maxDrawdownPos = null;
+  for (let i = 0; i < positions.length; i++) {
+    const { profit } = positions[i];
+    accum += profit;
 
-  for (let i = 0; i < positions.length; i += 1) {
-    const profit = +positions[i].profit;
-    if (profit > highWaterMark) {
-      highWaterMark = profit;
-      posHighWaterMark = i;
+    if (accum > localMax) localMax = accum;
+
+    const drawdown = accum - localMax;
+    if (maxDrawdown > drawdown) {
+      maxDrawdown = drawdown;
+      maxDrawdownPos = positions[i];
     }
-
-    let ddVal = highWaterMark - profit;
-    let dd = divideRound(ddVal, highWaterMark);
-
-    if (dd > maxDrawdown) {
-      maxDrawdown = dd;
-      maxDrawdownVal = ddVal;
-      startPos = posHighWaterMark;
-      endPos = i;
-    }
-  }
-
-  const drawdownPositions = [];
-  if (startPos > -1 && endPos > -1) {
-    for (let i = startPos + 1; i <= endPos; i += 1) {
-      drawdownPositions.push(positions[i]);
-    }
-    if (drawdownPositions.length > 0)
-      maxDrawdownSum = drawdownPositions
-        .map(({ profit }) => +profit)
-        .reduce((acc, val) => acc + val, 0);
   }
   return {
-    maxDrawdown: round(maxDrawdown * -1, 6),
-    maxDrawdownVal: round(maxDrawdownVal * -1, 6),
-    maxDrawdownSum: round(maxDrawdownSum, 6),
-    startPos: startPos > -1 ? positions[startPos] : null,
-    endPos: endPos > -1 ? positions[endPos] : null
+    maxDrawdown,
+    maxDrawdownPos
   };
 }
 
@@ -308,9 +285,13 @@ function calcStatistics(
     short: shortAvgGrossLoss
   };
 
-  const allProfitFactor = divideRound(allGrossProfit, allGrossLoss) * -1;
-  const longProfitFactor = divideRound(longGrossProfit, longGrossLoss) * -1;
-  const shortProfitFactor = divideRound(shortGrossProfit, shortGrossLoss) * -1;
+  const allProfitFactor = Math.abs(divideRound(allGrossProfit, allGrossLoss));
+  const longProfitFactor = Math.abs(
+    divideRound(longGrossProfit, longGrossLoss)
+  );
+  const shortProfitFactor = Math.abs(
+    divideRound(shortGrossProfit, shortGrossLoss)
+  );
 
   statistics.profitFactor = {
     all: allProfitFactor,
@@ -318,11 +299,15 @@ function calcStatistics(
     short: shortProfitFactor
   };
 
-  const allPayoffRatio = divideRound(allAvgGrossProfit, allAvgGrossLoss) * -1;
-  const longPayoffRatio =
-    divideRound(longAvgGrossProfit, longAvgGrossLoss) * -1;
-  const shortPayoffRatio =
-    divideRound(shortAvgGrossProfit, shortAvgGrossLoss) * -1;
+  const allPayoffRatio = Math.abs(
+    divideRound(allAvgGrossProfit, allAvgGrossLoss)
+  );
+  const longPayoffRatio = Math.abs(
+    divideRound(longAvgGrossProfit, longAvgGrossLoss)
+  );
+  const shortPayoffRatio = Math.abs(
+    divideRound(shortAvgGrossProfit, shortAvgGrossLoss)
+  );
 
   statistics.payoffRatio = {
     all: allPayoffRatio,
@@ -356,19 +341,16 @@ function calcStatistics(
   };
 
   const {
-    maxDrawdown: allMaxDrawdownPerc,
-    maxDrawdownSum: allMaxDrawdown,
-    endPos: allMaxDrawdownPos
+    maxDrawdown: allMaxDrawdown,
+    maxDrawdownPos: allMaxDrawdownPos
   } = calcMaxDrawdown(positions);
   const {
-    maxDrawdown: longMaxDrawdownPerc,
-    maxDrawdownSum: longMaxDrawdown,
-    endPos: longMaxDrawdownPos
+    maxDrawdown: longMaxDrawdown,
+    maxDrawdownPos: longMaxDrawdownPos
   } = calcMaxDrawdown(longPositions);
   const {
-    maxDrawdown: shortMaxDrawdownPerc,
-    maxDrawdownSum: shortMaxDrawdown,
-    endPos: shortMaxDrawdownPos
+    maxDrawdown: shortMaxDrawdown,
+    maxDrawdownPos: shortMaxDrawdownPos
   } = calcMaxDrawdown(shortPositions);
 
   statistics.maxDrawdown = {
@@ -377,22 +359,19 @@ function calcStatistics(
     short: shortMaxDrawdown
   };
 
-  statistics.maxDrawdownPercent = {
-    all: allMaxDrawdownPerc,
-    long: longMaxDrawdownPerc,
-    short: shortMaxDrawdownPerc
-  };
-
   statistics.maxDrawdownDate = {
     all: allMaxDrawdownPos && allMaxDrawdownPos.exitDate,
     long: longMaxDrawdownPos && longMaxDrawdownPos.exitDate,
     short: shortMaxDrawdownPos && shortMaxDrawdownPos.exitDate
   };
 
-  const allRecoveryFactor = divideRound(allNetProfit, allMaxDrawdown) * -1;
-  const longRecoveryFactor = divideRound(longNetProfit, longMaxDrawdown) * -1;
-  const shortRecoveryFactor =
-    divideRound(shortNetProfit, shortMaxDrawdown) * -1;
+  const allRecoveryFactor = Math.abs(divideRound(allNetProfit, allMaxDrawdown));
+  const longRecoveryFactor = Math.abs(
+    divideRound(longNetProfit, longMaxDrawdown)
+  );
+  const shortRecoveryFactor = Math.abs(
+    divideRound(shortNetProfit, shortMaxDrawdown)
+  );
 
   statistics.recoveryFactor = {
     all: allRecoveryFactor,
