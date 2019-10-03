@@ -179,11 +179,15 @@ class Position implements cpz.RobotPosition {
 
   _calcStats() {
     if (this._direction === cpz.PositionDirection.long) {
-      this._profit =
-        +round(this._exitPrice - this._entryPrice, 6) * this._volume;
+      this._profit = +round(
+        (this._exitPrice - this._entryPrice) * this._volume,
+        6
+      );
     } else {
-      this._profit =
-        +round(this._entryPrice - this._exitPrice, 6) * this._volume;
+      this._profit = +round(
+        (this._entryPrice - this._exitPrice) * this._volume,
+        6
+      );
     }
     this._barsHeld = +round(
       dayjs
