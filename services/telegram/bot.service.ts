@@ -578,7 +578,7 @@ class BotService extends Service {
         signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
       const message = `${ctx.i18n.t("robot.info", {
         ...robot,
-        signalsCount: round(robot.timeframe / 1440)
+        signalsCount: round(1440 / robot.timeframe)
       })}${signalsText}`;
       return ctx.editMessageText(
         message,
