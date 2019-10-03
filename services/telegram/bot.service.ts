@@ -22,7 +22,7 @@ import {
   getSignalRobotMenu
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
-import { round } from "../../utils/helpers"
+import { round } from "../../utils/helpers";
 
 const { enter, leave } = Stage;
 
@@ -576,7 +576,10 @@ class BotService extends Service {
       }
       if (signalsText !== "")
         signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
-      const message = `${ctx.i18n.t("robot.info", {...robot, signalsCount: round(robot.timeframe/1440))}${signalsText}`;
+      const message = `${ctx.i18n.t("robot.info", {
+        ...robot,
+        signalsCount: round(robot.timeframe / 1440)
+      })}${signalsText}`;
       return ctx.editMessageText(
         message,
         getSignalRobotMenu(ctx, robot.id, subscription.telegram)
