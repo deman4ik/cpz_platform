@@ -38,7 +38,7 @@
     "menuStats": "Robot Statistics",
     "menuPositions": "Latest positions",
     "name": "🤖\nRobot: <b>${name}</b>\n\n",
-    "info": "🤖\nRobot: <b>${name}</b> \n<b>Description:</b> ${description}\n\n",
+    "info": "🤖\nRobot: <b>${name}</b> \n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
     "signals": "<b>Latest signals:</b>\n${signals}",
     "currentSignals": "Robot <b>${name}</b> has active signals!\n${signals}",
     "signal": "<b>Position:</b> ${code}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Signal time:</b> ${timestamp}\n<b>Price:</b> ${price}$\n",
