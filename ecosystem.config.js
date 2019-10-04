@@ -77,7 +77,7 @@ module.exports = {
       name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config --prod.config.js --instances=2 dist/services/robot/robot-worker.service.js",
+        "--env --instances=2 --config prod.config.js dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "development",
         NODEID: "robot-worker"
