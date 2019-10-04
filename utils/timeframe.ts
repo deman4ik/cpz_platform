@@ -1,6 +1,6 @@
 import dayjs from "../lib/dayjs";
 import { cpz } from "../types/cpz";
-import { round, sortAsc } from "./helpers";
+import { sortAsc } from "./helpers";
 
 class Timeframe {
   private static _timeframes: cpz.Timeframes = {
@@ -118,7 +118,7 @@ class Timeframe {
   ): { amount: number; unit: cpz.TimeUnit } {
     const { amountInUnit, unit } = this.get(timeframe);
     return {
-      amount: round(amount * amountInUnit),
+      amount: Math.floor(amount * amountInUnit),
       unit
     };
   }
@@ -189,7 +189,7 @@ class Timeframe {
       .utc(dateTo)
       .add(1, "millisecond")
       .diff(dayjs.utc(dateFrom), unit);
-    return round(duration / amountInUnit);
+    return Math.floor(duration / amountInUnit);
   }
 
   static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {
