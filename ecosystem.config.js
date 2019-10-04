@@ -89,11 +89,22 @@ module.exports = {
     {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js",
+      args: "--env --config prod.config.js dist/services/api.service.js",
       env: {
         NODE_ENV: "development",
         NODEID: "api"
+      },
+      env_production: {
+        NODE_ENV: "production"
+      }
+    },
+    {
+      name: "auth",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args: "--env --config prod.config.js dist/services/auth.service.js",
+      env: {
+        NODE_ENV: "development",
+        NODEID: "auth"
       },
       env_production: {
         NODE_ENV: "production"
