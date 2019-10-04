@@ -99,7 +99,6 @@ module.exports = {
         NODE_ENV: "production"
       }
     },
-    ,
     {
       name: "telegram",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
