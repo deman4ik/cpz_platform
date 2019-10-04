@@ -51,7 +51,7 @@ class BacktesterWorkerService extends Service {
       ],
       queues: {
         [cpz.Queue.backtest]: {
-          concurrency: 100,
+          concurrency: 10,
           async process(job: Job) {
             try {
               return await this.execute(job);
