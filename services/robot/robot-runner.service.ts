@@ -5,6 +5,8 @@ import { JobId } from "bull";
 import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Timeframe from "../../utils/timeframe";
+import { Op } from "sequelize";
+import { CANDLES_RECENT_AMOUNT } from "../../config";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -163,11 +165,13 @@ class RobotRunnerService extends Service {
         `${cpz.Service.DB_CANDLES}${timeframe}.find`,
         {
           limit: 1,
+          offset: CANDLES_RECENT_AMOUNT,
           sort: "time",
           query: {
             exchange,
             asset,
-            currency
+            currency,
+            type: { [Op.ne]: cpz.CandleType.previous }
           }
         }
       );
