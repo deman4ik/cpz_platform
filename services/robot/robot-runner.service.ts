@@ -176,11 +176,7 @@ class RobotRunnerService extends Service {
         }
       );
       const { unit, amountInUnit } = Timeframe.get(timeframe);
-      let historyDateFrom = dayjs
-        .utc(firstCandle.timestamp)
-        .add(requiredHistoryMaxBars * amountInUnit, unit)
-        .startOf(unit)
-        .toISOString();
+      let historyDateFrom = firstCandle.timestamp;
       if (dateFrom)
         historyDateFrom =
           dayjs.utc(historyDateFrom).valueOf() > dayjs.utc(dateFrom).valueOf()
