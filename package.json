@@ -12,6 +12,7 @@
     "backtester": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dev.config.ts services/backtester/*.service.ts services/db/**/*.service.ts services/db/*.service.ts services/api.service.ts services/auth.service.ts",
     "robot": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config robot.config.ts services/robot/*.service.ts",
     "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dev.config.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts services/db/robot/*.service.ts services/telegram/*.service.ts",
+    "telegram": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --env --config prod.config.js services/telegram/bot.service.ts",
     "cli": "moleculer connect",
     "start": "node ./node_modules/moleculer/bin/moleculer-runner --env --config prod.config.js dist/services",
     "startPM": "pm2 start ecosystem.config.js",

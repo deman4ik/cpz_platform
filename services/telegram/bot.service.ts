@@ -1,11 +1,6 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { cpz } from "../../types/cpz";
-import Telegraf, {
-  Context as TContext,
-  Telegram,
-  Markup,
-  Extra
-} from "telegraf";
+import Telegraf, { Extra } from "telegraf";
 import Stage from "telegraf/stage";
 import Scene from "telegraf/scenes/base";
 import TelegrafI18n, { match, reply } from "telegraf-i18n";
@@ -231,16 +226,16 @@ class BotService extends Service {
 
   async startedService() {
     if (process.env.NODE_ENV === "production") {
-      this.logger.warn("Bot in production mode!");
       await this.bot.telegram.setWebhook(`${process.env.BOT_HOST}/tgendpoint`);
       await this.bot.startWebhook("/tgendpoint", null, 5000);
+      this.logger.warn("Bot in production mode!");
     } else if (
       process.env.NODE_ENV === "dev" ||
       process.env.NODE_ENV === "development"
     ) {
-      this.logger.warn("Bot in development mode!");
       await this.bot.telegram.deleteWebhook();
       await this.bot.startPolling();
+      this.logger.warn("Bot in development mode!");
     } else {
       this.logger.warn("Bot not started!");
     }
