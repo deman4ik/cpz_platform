@@ -11,6 +11,10 @@ class RobotsService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_ROBOTS,
+      dependencies: [
+        cpz.Service.DB_ROBOT_POSITIONS,
+        cpz.Service.DB_ROBOT_SIGNALS
+      ],
       settings: {
         graphql: {
           type: `
@@ -151,6 +155,12 @@ class RobotsService extends Service {
             mutation: "importRobots(entities: [RobotImportEntity!]!): Response!"
           },
           handler: this.import
+        },
+        clear: {
+          params: {
+            robotId: "string"
+          },
+          handler: this.clear
         }
       }
     });
@@ -359,22 +369,27 @@ class RobotsService extends Service {
   }
 
   async findActive(ctx: Context) {
-    return await this.adapter.find({
-      query: {
-        ...ctx.params,
-        $or: [
-          {
-            status: cpz.Status.started
-          },
-          {
-            status: cpz.Status.starting
-          },
-          {
-            status: cpz.Status.paused
-          }
-        ]
-      }
-    });
+    try {
+      return await this.adapter.find({
+        query: {
+          ...ctx.params,
+          $or: [
+            {
+              status: cpz.Status.started
+            },
+            {
+              status: cpz.Status.starting
+            },
+            {
+              status: cpz.Status.paused
+            }
+          ]
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
   }
 
   async getAvailableSignalAssets() {
@@ -386,7 +401,7 @@ class RobotsService extends Service {
       });
     } catch (e) {
       this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+      throw e;
     }
   }
 
@@ -499,7 +514,27 @@ class RobotsService extends Service {
       return robotInfo;
     } catch (e) {
       this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+      throw e;
+    }
+  }
+
+  async clear(ctx: Context) {
+    try {
+      const query = `delete from robot_positions 
+     where robot_id=:id`;
+      const query2 = `delete from robot_signals 
+     where robot_id=:id`;
+      await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.DELETE,
+        replacements: { id: ctx.params.robotId }
+      });
+      await this.adapter.db.query(query2, {
+        type: Sequelize.QueryTypes.DELETE,
+        replacements: { id: ctx.params.robotId }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
   }
 }

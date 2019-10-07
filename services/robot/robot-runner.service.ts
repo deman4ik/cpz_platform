@@ -174,6 +174,9 @@ class RobotRunnerService extends Service {
           initialized: false
         }
       });
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.clear`, {
+        robotId: id
+      });
 
       const [firstCandle] = await this.broker.call(
         `${cpz.Service.DB_CANDLES}${timeframe}.find`,
