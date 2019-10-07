@@ -41,7 +41,12 @@ const brokerConfig = {
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
-  transporter: "TCP",
+  transporter: {
+    type: "TCP",
+    options: {
+      maxPacketSize: 2 * 1024 * 1024
+    }
+  },
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
   cacher: false,
