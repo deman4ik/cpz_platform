@@ -19,7 +19,7 @@ const brokerConfig: any = {
   // Namespace of nodes to segment your nodes on the same network.
   namespace: "cpz-local",
   // Unique node identifier. Must be unique in a namespace.
-  nodeID: "cpz",
+  nodeID: "cpz-dev",
 
   logger: {
     type: "File",

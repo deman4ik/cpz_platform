@@ -2,10 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import { ServiceBroker } from "moleculer";
 import TestService from "../../services/db/robot/db-robots.service";
-import { v4 as uuid } from "uuid";
-import dayjs from "../../lib/dayjs";
-import { cpz } from "../../types/cpz";
-import { Op } from "sequelize";
 
 jest.setTimeout(60000);
 

@@ -5,7 +5,6 @@ import { cpz } from "../../types/cpz";
 import Robot from "../../state/robot/robot";
 import { sortAsc } from "../../utils";
 import { v4 as uuid } from "uuid";
-import { Op } from "sequelize";
 import requireFromString from "require-from-string";
 
 class RobotWorkerService extends Service {
@@ -78,16 +77,20 @@ class RobotWorkerService extends Service {
     const strategies: cpz.CodeFilesInDB[] = await this.broker.call(
       `${cpz.Service.DB_STRATEGIES}.find`,
       {
-        available: {
-          [Op.gte]: 5
+        query: {
+          available: {
+            $gte: 5
+          }
         }
       }
     );
     const baseIndicators: cpz.CodeFilesInDB[] = await this.broker.call(
       `${cpz.Service.DB_INDICATORS}.find`,
       {
-        available: {
-          [Op.gte]: 5
+        query: {
+          available: {
+            $gte: 5
+          }
         }
       }
     );
@@ -272,8 +275,10 @@ class RobotWorkerService extends Service {
           const allPositions = await this.broker.call(
             `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
             {
-              robotId: robot.id,
-              status: cpz.RobotPositionStatus.closed
+              query: {
+                robotId: robot.id,
+                status: cpz.RobotPositionStatus.closed
+              }
             }
           );
           robot.calcStats(allPositions);

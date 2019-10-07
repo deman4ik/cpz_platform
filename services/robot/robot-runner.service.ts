@@ -5,7 +5,6 @@ import { JobId } from "bull";
 import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Timeframe from "../../utils/timeframe";
-import { Op } from "sequelize";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 
 class RobotRunnerService extends Service {
@@ -156,9 +155,24 @@ class RobotRunnerService extends Service {
           id,
           status
         };
+
       await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
-        status: cpz.Status.starting
+        status: cpz.Status.starting,
+        startedAt: null,
+        stoppedAt: null,
+        statistics: {},
+        equity: {},
+        lastCandle: null,
+        hasAlerts: false,
+        indicators: {},
+        state: {
+          variables: {},
+          positions: [],
+          posLastNumb: {},
+          indicators: {},
+          initialized: false
+        }
       });
 
       const [firstCandle] = await this.broker.call(
@@ -171,11 +185,11 @@ class RobotRunnerService extends Service {
             exchange,
             asset,
             currency,
-            type: { [Op.ne]: cpz.CandleType.previous }
+            type: { $ne: cpz.CandleType.previous }
           }
         }
       );
-      const { unit, amountInUnit } = Timeframe.get(timeframe);
+      const { unit } = Timeframe.get(timeframe);
       let historyDateFrom = firstCandle.timestamp;
       if (dateFrom)
         historyDateFrom =

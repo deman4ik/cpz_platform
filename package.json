@@ -62,7 +62,7 @@
   "dependencies": {
     "async-retry": "^1.2.3",
     "bcrypt": "^3.0.6",
-    "ccxt": "^1.18.1220",
+    "ccxt": "^1.18.1225",
     "dayjs": "^1.8.16",
     "dotenv": "^8.1.0",
     "fastest-validator": "^0.6.18",
@@ -86,7 +86,7 @@
     "pg-hstore": "^2.3.3",
     "redlock": "^4.0.0",
     "require-from-string": "^2.0.2",
-    "sequelize": "^5.19.2",
+    "sequelize": "^5.19.3",
     "socket.io-client": "^2.3.0",
     "telegraf": "^3.32.0",
     "telegraf-i18n": "^6.6.0",

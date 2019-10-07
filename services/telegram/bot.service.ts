@@ -10,7 +10,6 @@ import {
   getMainKeyboard,
   getBackKeyboard
 } from "../../state/telegram/keyboard";
-import { Op } from "sequelize";
 import {
   getAssetsMenu,
   getSignalsMenu,
@@ -45,110 +44,124 @@ class BotService extends Service {
   }
 
   async handleSignal(ctx: Context) {
-    try {
-      const signal = <cpz.SignalEvent>ctx.params;
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.NODE_ENV === "dev" ||
+      process.env.NODE_ENV === "development"
+    ) {
+      try {
+        const signal = <cpz.SignalEvent>ctx.params;
 
-      const { robotId, type, action } = signal;
-      const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
-        id: robotId,
-        fields: ["id", "name"]
-      });
-
-      const subscriptions = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
-        {
-          robotId
-        }
-      );
-
-      if (
-        subscriptions &&
-        Array.isArray(subscriptions) &&
-        subscriptions.length > 0
-      ) {
-        //TODO: Set lang from DB
-        let message = "";
-        const robotInfo = this.i18n.t("en", `signal.${type}`, { name });
-        const actionText = this.i18n.t("en", `tradeAction.${signal.action}`);
-        const orderTypeText = this.i18n.t(
-          "en",
-          `orderType.${signal.orderType}`
+        const { robotId, type, action } = signal;
+        const { name } = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.get`,
+          {
+            id: robotId,
+            fields: ["id", "name"]
+          }
         );
 
-        if (type === cpz.SignalType.alert) {
-          const signalText = this.i18n.t("en", "robot.signal", {
-            code: signal.positionCode,
-            timestamp: dayjs
-              .utc(signal.timestamp)
-              .format("YYYY-MM-DD HH:mm UTC"),
-            action: actionText,
-            orderType: orderTypeText,
-            price: +signal.price
-          });
-
-          message = `${robotInfo}${signalText}`;
-        } else {
-          let tradeText = "";
-
-          if (
-            action === cpz.TradeAction.closeLong ||
-            action === cpz.TradeAction.closeShort
-          ) {
-            const position = await this.broker.call(
-              `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
-              {
-                id: signal.positionId
-              }
-            );
-            tradeText = this.i18n.t("en", "robot.positionClosed", {
-              code: signal.positionCode,
-              entryAction: this.i18n.t(
-                "en",
-                `tradeAction.${position.entryAction}`
-              ),
-              entryOrderType: this.i18n.t(
-                "en",
-                `orderType.${position.entryOrderType}`
-              ),
-              entryPrice: position.entryPrice,
-              entryDate: dayjs
-                .utc(position.entryDate)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              exitAction: actionText,
-              exitOrderType: orderTypeText,
-              exitPrice: +signal.price,
-              exitDate: dayjs
-                .utc(signal.timestamp)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              barsHeld: position.barsHeld,
-              profit: position.profit
-            });
-          } else {
-            tradeText = this.i18n.t("en", "robot.positionOpen", {
-              code: signal.positionCode,
-              entryAction: actionText,
-              entryOrderType: orderTypeText,
-              entryPrice: +signal.price,
-              entryDate: dayjs
-                .utc(signal.timestamp)
-                .format("YYYY-MM-DD HH:mm UTC")
-            });
+        const subscriptions = await this.broker.call(
+          `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
+          {
+            robotId
           }
-          message = `${robotInfo}${tradeText}`;
-        }
+        );
 
-        await Promise.all(
-          subscriptions.map(
-            async ({ telegramId }: { telegramId: string; userId: string }) => {
-              await this.bot.telegram.sendMessage(telegramId, message, {
-                parse_mode: "HTML"
+        if (
+          subscriptions &&
+          Array.isArray(subscriptions) &&
+          subscriptions.length > 0
+        ) {
+          //TODO: Set lang from DB
+          let message = "";
+          const robotInfo = this.i18n.t("en", `signal.${type}`, { name });
+          const actionText = this.i18n.t("en", `tradeAction.${signal.action}`);
+          const orderTypeText = this.i18n.t(
+            "en",
+            `orderType.${signal.orderType}`
+          );
+
+          if (type === cpz.SignalType.alert) {
+            const signalText = this.i18n.t("en", "robot.signal", {
+              code: signal.positionCode,
+              timestamp: dayjs
+                .utc(signal.timestamp)
+                .format("YYYY-MM-DD HH:mm UTC"),
+              action: actionText,
+              orderType: orderTypeText,
+              price: +signal.price
+            });
+
+            message = `${robotInfo}${signalText}`;
+          } else {
+            let tradeText = "";
+
+            if (
+              action === cpz.TradeAction.closeLong ||
+              action === cpz.TradeAction.closeShort
+            ) {
+              const position = await this.broker.call(
+                `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
+                {
+                  id: signal.positionId
+                }
+              );
+              tradeText = this.i18n.t("en", "robot.positionClosed", {
+                code: signal.positionCode,
+                entryAction: this.i18n.t(
+                  "en",
+                  `tradeAction.${position.entryAction}`
+                ),
+                entryOrderType: this.i18n.t(
+                  "en",
+                  `orderType.${position.entryOrderType}`
+                ),
+                entryPrice: position.entryPrice,
+                entryDate: dayjs
+                  .utc(position.entryDate)
+                  .format("YYYY-MM-DD HH:mm UTC"),
+                exitAction: actionText,
+                exitOrderType: orderTypeText,
+                exitPrice: +signal.price,
+                exitDate: dayjs
+                  .utc(signal.timestamp)
+                  .format("YYYY-MM-DD HH:mm UTC"),
+                barsHeld: position.barsHeld,
+                profit: position.profit
+              });
+            } else {
+              tradeText = this.i18n.t("en", "robot.positionOpen", {
+                code: signal.positionCode,
+                entryAction: actionText,
+                entryOrderType: orderTypeText,
+                entryPrice: +signal.price,
+                entryDate: dayjs
+                  .utc(signal.timestamp)
+                  .format("YYYY-MM-DD HH:mm UTC")
               });
             }
-          )
-        );
+            message = `${robotInfo}${tradeText}`;
+          }
+
+          await Promise.all(
+            subscriptions.map(
+              async ({
+                telegramId
+              }: {
+                telegramId: string;
+                userId: string;
+              }) => {
+                await this.bot.telegram.sendMessage(telegramId, message, {
+                  parse_mode: "HTML"
+                });
+              }
+            )
+          );
+        }
+      } catch (e) {
+        this.logger.error(e);
       }
-    } catch (e) {
-      this.logger.error(e);
     }
   }
 
@@ -368,7 +381,7 @@ class BotService extends Service {
       const robots = await this.broker.call(`${cpz.Service.DB_ROBOTS}.find`, {
         fields: ["id", "name"],
         query: {
-          available: { [Op.gte]: 20 },
+          available: { $gte: 20 },
           asset,
           currency
         }

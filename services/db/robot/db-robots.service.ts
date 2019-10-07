@@ -3,7 +3,6 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../types/cpz";
-import { Op } from "sequelize";
 import { underscoreToCamelCaseKeys, equals } from "../../../utils/helpers";
 import { createRobotCode, createRobotName } from "../../../utils/naming";
 
@@ -363,7 +362,7 @@ class RobotsService extends Service {
     return await this.adapter.find({
       query: {
         ...ctx.params,
-        [Op.or]: [
+        $or: [
           {
             status: cpz.Status.started
           },

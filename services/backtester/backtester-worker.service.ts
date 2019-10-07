@@ -5,7 +5,6 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
-import { Op } from "sequelize";
 import { sortAsc, chunkNumberToArray, round, chunkArray } from "../../utils";
 import requireFromString from "require-from-string";
 import { combineBacktestSettings } from "../../state/settings";
@@ -201,7 +200,7 @@ class BacktesterWorkerService extends Service {
               asset,
               currency,
               time: {
-                [Op.lt]: dayjs.utc(dateFrom).valueOf()
+                $lt: dayjs.utc(dateFrom).valueOf()
               }
             }
           }
@@ -226,8 +225,8 @@ class BacktesterWorkerService extends Service {
             asset,
             currency,
             time: {
-              [Op.gte]: dayjs.utc(dateFrom).valueOf(),
-              [Op.lte]: dayjs.utc(dateTo).valueOf()
+              $gte: dayjs.utc(dateFrom).valueOf(),
+              $lte: dayjs.utc(dateTo).valueOf()
             }
           }
         }
@@ -254,8 +253,8 @@ class BacktesterWorkerService extends Service {
               asset,
               currency,
               time: {
-                [Op.gte]: dayjs.utc(dateFrom).valueOf(),
-                [Op.lte]: dayjs.utc(dateTo).valueOf()
+                $gte: dayjs.utc(dateFrom).valueOf(),
+                $lte: dayjs.utc(dateTo).valueOf()
               }
             }
           }
