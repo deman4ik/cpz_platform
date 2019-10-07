@@ -298,8 +298,13 @@ class BacktesterWorkerService extends Service {
             }))
           ];
           robot.positionsToSave.forEach(pos => {
-            positions[pos.id] = { ...pos, backtestId: backtesterState.id };
-            allPositions[pos.id] = pos;
+            const newPos = {
+              ...pos,
+              entryDate: pos.entryCandleTimestamp,
+              exitDate: pos.exitCandleTimestamp
+            };
+            positions[pos.id] = { ...newPos, backtestId: backtesterState.id };
+            allPositions[pos.id] = newPos;
           });
 
           // Running strategy
@@ -357,6 +362,9 @@ class BacktesterWorkerService extends Service {
             this.logger.info(
               `Processed ${backtesterState.processedBars} bars, left ${backtesterState.leftBars} - ${backtesterState.completedPercent}%`
             );
+            await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
+              entity: backtesterState
+            });
             await job.progress(backtesterState.completedPercent);
           }
         }
