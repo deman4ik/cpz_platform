@@ -152,23 +152,26 @@ class ImporterWorkerService extends Service {
         };
         timeframes.forEach((timeframe: cpz.Timeframe) => {
           const { unit, amountInUnit } = Timeframe.get(timeframe);
-          const dateFrom = currentDate.add(-amount * amountInUnit, unit);
+          const validTimeframeDate = dayjs.utc(
+            Timeframe.validTimeframeDate(currentDate.toISOString(), timeframe)
+          );
+          const dateFrom = validTimeframeDate.add(-amount * amountInUnit, unit);
           if (
             (timeframe === cpz.Timeframe["1m"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.hour) > 10) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.hour) > 10) ||
             (timeframe === cpz.Timeframe["5m"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 1) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 1) ||
             (timeframe === cpz.Timeframe["15m"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 6) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 6) ||
             (timeframe === cpz.Timeframe["30m"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 13) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 13) ||
             ((timeframe === cpz.Timeframe["1h"] ||
               timeframe === cpz.Timeframe["2h"]) &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 28) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 28) ||
             (timeframe === cpz.Timeframe["4h"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 110) ||
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 110) ||
             (timeframe === cpz.Timeframe["1d"] &&
-              currentDate.diff(dateFrom, cpz.TimeUnit.day) > 710)
+              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 710)
           ) {
             loadTimeframes.trades[timeframe] = {
               dateFrom: dateFrom.toISOString()
@@ -195,7 +198,13 @@ class ImporterWorkerService extends Service {
             unit: maxTimeframeUnit,
             amountInUnit: maxTimeframeAmountInUnit
           } = Timeframe.get(maxTimeframe);
-          const dateFrom = currentDate
+          const validTimeframeDate = dayjs.utc(
+            Timeframe.validTimeframeDate(
+              currentDate.toISOString(),
+              maxTimeframe
+            )
+          );
+          const dateFrom = validTimeframeDate
             .add(-((amount + 1) * maxTimeframeAmountInUnit), maxTimeframeUnit)
             .toISOString();
           const trades = await this.importTrades({
@@ -203,7 +212,7 @@ class ImporterWorkerService extends Service {
             asset,
             currency,
             dateFrom,
-            dateTo: currentDate.toISOString()
+            dateTo: validTimeframeDate.toISOString()
           });
           this.logger.info(`Job #${id} loaded ${trades.length} trades`);
           await job.progress(25);
@@ -212,7 +221,7 @@ class ImporterWorkerService extends Service {
           });
           const candlesFromTradesInTimeframes = await createCandlesFromTrades(
             dateFrom,
-            currentDate.toISOString(),
+            validTimeframeDate.toISOString(),
             tradesTimeframes,
             trades
           );
@@ -226,7 +235,7 @@ class ImporterWorkerService extends Service {
               async (timeframe: string) => {
                 candlesInTimeframes[+timeframe] = await handleCandleGaps(
                   loadTimeframes.trades[+timeframe].dateFrom,
-                  currentDate.toISOString(),
+                  validTimeframeDate.toISOString(),
                   candlesInTimeframes[+timeframe]
                 );
               }
@@ -419,12 +428,17 @@ class ImporterWorkerService extends Service {
         const limit =
           amount && loadLimit(exchange) > amount ? amount : loadLimit(exchange);
 
-        let dateStart = dateFrom;
+        let dateStart =
+          dateFrom && Timeframe.validTimeframeDate(dateFrom, timeframe);
         let dateStop = getValidDate(dateTo, unit);
 
         if (!dateStart && amount) {
+          const validTimeframeDate = Timeframe.validTimeframeDate(
+            dateStop,
+            timeframe
+          );
           dateStart = dayjs
-            .utc(dateStop)
+            .utc(validTimeframeDate)
             .add(-amountInUnit * amount, unit)
             .startOf(unit)
             .toISOString();

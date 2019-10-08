@@ -28,7 +28,7 @@ class ImporterRunnerService extends Service {
           }
         })
       ],
-      dependencies: [cpz.Service.DB_IMPORTERS],
+      dependencies: [cpz.Service.DB_IMPORTERS, cpz.Service.PUBLIC_CONNECTOR],
       actions: {
         startRecent: {
           params: {
@@ -78,15 +78,17 @@ class ImporterRunnerService extends Service {
               optional: true
             },
             dateFrom: {
-              type: "string"
+              type: "string",
+              optional: true
             },
             dateTo: {
-              type: "string"
+              type: "string",
+              optional: true
             }
           },
           graphql: {
             mutation:
-              "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String!, dateTo: String!): ServiceStatus!"
+              "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
           },
           handler: this.startHistory
         },
@@ -185,6 +187,24 @@ class ImporterRunnerService extends Service {
   async startHistory(ctx: Context) {
     const id = uuid();
     try {
+      let dateFrom;
+      if (!ctx.params.dateFrom) {
+        const { loadFrom } = await this.broker.call(
+          `${cpz.Service.PUBLIC_CONNECTOR}.getMarket`,
+          {
+            exchange: ctx.params.exchange,
+            asset: ctx.params.asset,
+            currency: ctx.params.currency
+          }
+        );
+        if (!loadFrom) throw new Error("Failed to find market");
+        dateFrom = loadFrom;
+      } else {
+        dateFrom = dayjs
+          .utc(ctx.params.dateFrom)
+          .startOf(cpz.TimeUnit.day)
+          .toISOString();
+      }
       const state: cpz.Importer = {
         id,
         exchange: ctx.params.exchange,
@@ -193,10 +213,7 @@ class ImporterRunnerService extends Service {
         type: "history",
         params: {
           timeframes: ctx.params.timeframes || Timeframe.validArray,
-          dateFrom: dayjs
-            .utc(ctx.params.dateFrom)
-            .startOf(cpz.TimeUnit.day)
-            .toISOString(),
+          dateFrom,
           dateTo: ctx.params.dateTo
         },
         status: cpz.Status.queued

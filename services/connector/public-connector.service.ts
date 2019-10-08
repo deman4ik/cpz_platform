@@ -251,7 +251,12 @@ class PublicConnectorService extends Service {
         currency,
         dayjs.utc("01.01.2013").toISOString()
       );
-      if (firstTrade) loadFrom = firstTrade.timestamp;
+      if (firstTrade)
+        loadFrom = dayjs
+          .utc(firstTrade.timestamp)
+          .add(1, cpz.TimeUnit.day)
+          .startOf(cpz.TimeUnit.day)
+          .toISOString();
     } else if (exchange === "bitfinex") {
       const [firstCandle] = await this.getRawCandles(
         exchange,
@@ -261,7 +266,12 @@ class PublicConnectorService extends Service {
         dayjs.utc("01.01.2013").toISOString(),
         10
       );
-      if (firstCandle) loadFrom = firstCandle.timestamp;
+      if (firstCandle)
+        loadFrom = dayjs
+          .utc(firstCandle.timestamp)
+          .add(1, cpz.TimeUnit.day)
+          .startOf(cpz.TimeUnit.day)
+          .toISOString();
     }
     return {
       exchange,
