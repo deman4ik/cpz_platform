@@ -924,7 +924,8 @@ class ExwatcherService extends Service {
               await this.saveCandles(candles);
               await Promise.all(
                 candles.map(async candle => {
-                  await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
+                  if (candle.type !== cpz.CandleType.previous)
+                    await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
                 })
               );
             }

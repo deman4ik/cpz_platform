@@ -110,7 +110,7 @@ class PublicConnectorService extends Service {
               values: Timeframe.validArray
             },
             dateFrom: "string",
-            limit: "number"
+            limit: { type: "number", optional: true }
           },
           async handler(ctx): Promise<cpz.ExchangeCandle[]> {
             return this.getCandles(

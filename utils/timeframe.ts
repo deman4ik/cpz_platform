@@ -157,6 +157,53 @@ class Timeframe {
     return this.checkTimeframeByDate(hour, minute, timeframe);
   }
 
+  static validTimeframeDate(
+    inputDate: string,
+    timeframe: cpz.Timeframe
+  ): string {
+    const { amountInUnit, unit } = Timeframe.get(timeframe);
+    let date = dayjs.utc(inputDate);
+    if (timeframe > 1 && timeframe < 60) {
+      const minute = date.minute();
+      const diff = minute % timeframe;
+      let newDate;
+      if (diff === 0) newDate = date.startOf(unit).toISOString();
+      else
+        newDate = date
+          .add(timeframe - diff, cpz.TimeUnit.minute)
+          .startOf(unit)
+          .toISOString();
+      return newDate;
+    } else if (timeframe >= 60 && timeframe < 1440) {
+      const minute = date.minute();
+      if (minute !== 0)
+        date = date.add(1, cpz.TimeUnit.hour).startOf(cpz.TimeUnit.hour);
+      const hour = date.hour();
+      const diff = hour % amountInUnit;
+      let newDate;
+      if (diff === 0) newDate = date.startOf(unit).toISOString();
+      else
+        newDate = date
+          .add(amountInUnit - diff, cpz.TimeUnit.hour)
+          .startOf(unit)
+          .toISOString();
+      return newDate;
+    } else if (timeframe === 1440) {
+      const hour = date.hour();
+      const minute = date.minute();
+      let newDate = date.startOf(unit).toISOString();
+      if (hour !== 0 || minute !== 0) {
+        newDate = date
+          .add(1, unit)
+          .startOf(unit)
+          .toISOString();
+      }
+      return newDate;
+    }
+
+    return date.startOf(unit).toISOString();
+  }
+
   static timeframesByDate(inputDate: string): cpz.Timeframe[] {
     const date = dayjs.utc(inputDate);
 

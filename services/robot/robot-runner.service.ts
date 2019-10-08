@@ -376,6 +376,7 @@ class RobotRunnerService extends Service {
   async handleNewCandle(ctx: Context) {
     try {
       const candle: cpz.Candle = <cpz.Candle>ctx.params;
+      if (candle.type === cpz.CandleType.previous) return;
       const { exchange, asset, currency, timeframe, timestamp } = candle;
       const robots: cpz.RobotState[] = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.findActive`,

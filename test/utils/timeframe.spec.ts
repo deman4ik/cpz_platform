@@ -159,4 +159,57 @@ describe("Test 'Timeframe' class", () => {
       expect(currentTimeframes).toStrictEqual([1, 5, 15]);
     });
   });
+
+  describe("Test 'validTimeframeDate'", () => {
+    it("should return valid date for timeframe 1", () => {
+      const date = "2019-08-03T21:15:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 1);
+      expect(result).toBe("2019-08-03T21:15:00.000Z");
+    });
+    it("should return valid date for timeframe 5", () => {
+      const date = "2019-08-03T21:15:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 5);
+      expect(result).toBe("2019-08-03T21:15:00.000Z");
+    });
+    it("should return valid date for timeframe 5", () => {
+      const date = "2019-08-03T21:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 5);
+      expect(result).toBe("2019-08-03T21:20:00.000Z");
+    });
+    it("should return valid date for timeframe 60", () => {
+      const date = "2019-08-03T21:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 60);
+      expect(result).toBe("2019-08-03T22:00:00.000Z");
+    });
+    it("should return valid date for timeframe 120", () => {
+      const date = "2019-08-03T21:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 120);
+      expect(result).toBe("2019-08-03T22:00:00.000Z");
+    });
+    it("should return valid date for timeframe 120", () => {
+      const date = "2019-08-03T22:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 120);
+      expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+    it("should return valid date for timeframe 480", () => {
+      const date = "2019-08-03T22:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 480);
+      expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+    it("should return valid date for timeframe 720", () => {
+      const date = "2019-08-03T22:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 720);
+      expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+    it("should return valid date for timeframe 720", () => {
+      const date = "2019-08-03T01:16:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 720);
+      expect(result).toBe("2019-08-03T12:00:00.000Z");
+    });
+    it("should return valid date for timeframe 1440", () => {
+      const date = "2019-08-03T21:15:10.006Z";
+      const result = Timeframe.validTimeframeDate(date, 1440);
+      expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+  });
 });

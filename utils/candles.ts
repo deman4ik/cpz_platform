@@ -5,7 +5,7 @@ import { createDatesList, createDatesListWithRange } from "./time";
 import { arraysDiff, sortAsc, uniqueElementsBy } from "./helpers";
 
 async function handleCandleGaps(
-  dateFrom: string,
+  dateFromInput: string,
   dateTo: string,
   inputCandles: cpz.ExchangeCandle[]
 ): Promise<cpz.ExchangeCandle[]> {
@@ -16,7 +16,9 @@ async function handleCandleGaps(
   )
     return [];
   let candles = [...inputCandles];
+
   const { exchange, asset, currency, timeframe } = inputCandles[0];
+  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
   const fullDatesList = createDatesList(dateFrom, dateTo, unit, 1, duration);
@@ -67,7 +69,7 @@ async function handleCandleGaps(
 }
 
 async function batchCandles(
-  dateFrom: string,
+  dateFromInput: string,
   dateTo: string,
   timeframe: cpz.Timeframe,
   inputCandles: cpz.ExchangeCandle[]
@@ -81,6 +83,7 @@ async function batchCandles(
     return [];
   let candles = [...inputCandles];
   const { exchange, asset, currency } = inputCandles[0];
+  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
   const fullDatesList = createDatesList(
@@ -252,7 +255,7 @@ function getCurrentCandleParams(
 function getCandlesParams(
   exchangeTimeframes: { [key: string]: string | number },
   timeframe: cpz.Timeframe,
-  dateFrom: string,
+  dateFromInput: string,
   limit: number = 100
 ) {
   const timeframes: cpz.ExchangeTimeframes = converExchangeTimeframes(
@@ -271,6 +274,20 @@ function getCandlesParams(
     limit,
     currentTimeframe.value
   );
+  const validCurrentTimeframeDate = Timeframe.validTimeframeDate(
+    dayjs.utc().toISOString(),
+    timeframe
+  );
+  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateToCalc = dayjs
+    .utc(dateFrom)
+    .add(amount, unit)
+    .toISOString();
+  const dateTo =
+    (dayjs.utc(dateToCalc).valueOf() <
+      dayjs.utc(validCurrentTimeframeDate).valueOf() &&
+      dateToCalc) ||
+    validCurrentTimeframeDate;
 
   return {
     timeframe: currentTimeframe.value,
@@ -279,10 +296,7 @@ function getCandlesParams(
       .utc(dateFrom)
       .add(-3 * currentTimeframe.amountInUnit, unit)
       .valueOf(),
-    dateTo: dayjs
-      .utc(dateFrom)
-      .add(amount, unit)
-      .valueOf(),
+    dateTo,
     unit,
     limit: limit + 3,
     batch: !exchangeHasTimeframe
