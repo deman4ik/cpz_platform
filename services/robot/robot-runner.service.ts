@@ -199,6 +199,12 @@ class RobotRunnerService extends Service {
           dayjs.utc(historyDateFrom).valueOf() > dayjs.utc(dateFrom).valueOf()
             ? historyDateFrom
             : dateFrom;
+      historyDateFrom =
+        (dayjs.utc(historyDateFrom).valueOf() <
+          dayjs.utc("2017-01-01T00:00:00.000Z").valueOf() &&
+          dayjs.utc("2017-01-01T00:00:00.000Z").toISOString()) ||
+        historyDateFrom;
+
       const dateTo = dayjs
         .utc()
         .startOf(unit)
