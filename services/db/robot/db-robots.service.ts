@@ -438,7 +438,9 @@ class RobotsService extends Service {
               robot_positions cp 
             where
               cp.robot_id = t.id 
-              and cp.status = 'closed' limit 5 
+              and cp.status = 'closed' 
+            order by cp.entry_date desc
+            limit 5 
           )
           pos 
       )
@@ -456,6 +458,7 @@ class RobotsService extends Service {
               op.robot_id = t.id 
               and 
               op.status = 'open'
+            order by op.entry_date desc
           )
           pos 
       )
