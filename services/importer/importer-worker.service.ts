@@ -430,15 +430,16 @@ class ImporterWorkerService extends Service {
 
         let dateStart =
           dateFrom && Timeframe.validTimeframeDate(dateFrom, timeframe);
-        let dateStop = getValidDate(dateTo, unit);
+        let dateStop = dayjs
+          .utc(
+            Timeframe.validTimeframeDate(getValidDate(dateTo, unit), timeframe)
+          )
+          .add(-amountInUnit, unit)
+          .toISOString();
 
         if (!dateStart && amount) {
-          const validTimeframeDate = Timeframe.validTimeframeDate(
-            dateStop,
-            timeframe
-          );
           dateStart = dayjs
-            .utc(validTimeframeDate)
+            .utc(dateStop)
             .add(-amountInUnit * amount, unit)
             .startOf(unit)
             .toISOString();

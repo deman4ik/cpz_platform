@@ -6,7 +6,7 @@ import { arraysDiff, sortAsc, uniqueElementsBy } from "./helpers";
 
 async function handleCandleGaps(
   dateFromInput: string,
-  dateTo: string,
+  dateToInput: string,
   inputCandles: cpz.ExchangeCandle[]
 ): Promise<cpz.ExchangeCandle[]> {
   if (
@@ -18,9 +18,13 @@ async function handleCandleGaps(
   let candles = [...inputCandles];
 
   const { exchange, asset, currency, timeframe } = inputCandles[0];
-  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
-  const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
+  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateTo = dayjs
+    .utc(Timeframe.validTimeframeDate(dateFromInput, timeframe))
+    .add(-amountInUnit, unit)
+    .toISOString();
+  const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const fullDatesList = createDatesList(dateFrom, dateTo, unit, 1, duration);
 
   const loadedDatesList = candles.map(candle => candle.time);
@@ -70,7 +74,7 @@ async function handleCandleGaps(
 
 async function batchCandles(
   dateFromInput: string,
-  dateTo: string,
+  dateToInput: string,
   timeframe: cpz.Timeframe,
   inputCandles: cpz.ExchangeCandle[]
 ): Promise<cpz.ExchangeCandle[]> {
@@ -83,9 +87,14 @@ async function batchCandles(
     return [];
   let candles = [...inputCandles];
   const { exchange, asset, currency } = inputCandles[0];
-  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
-  const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
+  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateTo = dayjs
+    .utc(Timeframe.validTimeframeDate(dateFromInput, timeframe))
+    .add(-amountInUnit, unit)
+    .toISOString();
+  const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
+
   const fullDatesList = createDatesList(
     dateFrom,
     dateTo,
