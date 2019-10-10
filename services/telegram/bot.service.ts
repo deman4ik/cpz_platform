@@ -39,6 +39,15 @@ class BotService extends Service {
       events: {
         [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
         [cpz.Event.SIGNAL_TRADE]: this.handleSignal
+      },
+      actions: {
+        broadcastMessage: {
+          params: {
+            userId: { type: "string", optional: true },
+            message: "string"
+          },
+          handler: this.broadcastMessage
+        }
       }
     });
   }
@@ -149,12 +158,17 @@ class BotService extends Service {
               async ({
                 telegramId
               }: {
-                telegramId: string;
+                telegramId: number;
                 userId: string;
               }) => {
-                await this.bot.telegram.sendMessage(telegramId, message, {
-                  parse_mode: "HTML"
-                });
+                try {
+                  await this.bot.telegram.sendMessage(telegramId, message, {
+                    parse_mode: "HTML"
+                  });
+                } catch (err) {
+                  this.logger.error(err);
+                  this.blockHandler(telegramId, err.response);
+                }
               }
             )
           );
@@ -165,13 +179,57 @@ class BotService extends Service {
     }
   }
 
+  async broadcastMessage(ctx: Context) {
+    try {
+      const users = [];
+      if (ctx.params.userId) {
+        const { telegramId } = await this.broker.call(
+          `${cpz.Service.DB_USERS}.get`,
+          { id: ctx.params.userId }
+        );
+        if (telegramId) users.push(telegramId);
+      } else {
+        const userslist = await this.broker.call(
+          `${cpz.Service.DB_USERS}.find`,
+          {
+            fields: ["id", "telegramId"],
+            query: {
+              status: { $gt: 0 },
+              telegramId: { $ne: null }
+            }
+          }
+        );
+        this.logger.info(userslist);
+        userslist.forEach(({ telegramId }: cpz.User) => {
+          users.push(telegramId);
+        });
+      }
+
+      if (users.length > 0) {
+        for (const id of users) {
+          try {
+            await this.bot.telegram.sendMessage(id, ctx.params.message, {
+              parse_mode: "HTML"
+            });
+          } catch (err) {
+            this.logger.error(err);
+            this.blockHandler(id, err.response);
+          }
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   createdService() {
     const session = new Session({
       store: {
         host: process.env.REDIS_HOST,
         port: process.env.REDIS_PORT,
         password: process.env.REDIS_PASSWORD,
-        tls: true
+        tls: process.env.REDIS_TLS
       },
       getSessionKey: this.getSessionKey.bind(this)
     });
@@ -187,6 +245,7 @@ class BotService extends Service {
       directory: path.resolve(process.cwd(), "state/telegram/locales")
     });
     this.bot.use(this.i18n.middleware());
+
     const signalsScene = new Scene("signals");
     signalsScene.enter(this.signalsEnter.bind(this));
     signalsScene.leave(this.signalsLeave.bind(this));
@@ -214,7 +273,6 @@ class BotService extends Service {
     const stage = new Stage([signalsScene, mySignalsScene]);
     this.bot.use(this.auth.bind(this));
     this.bot.use(stage.middleware());
-
     this.bot.start(this.start.bind(this));
     this.bot.hears(match("keyboards.mainKeyboard.signals"), enter("signals"));
     this.bot.hears(
@@ -313,6 +371,56 @@ class BotService extends Service {
     }
   }
 
+  async blockHandler(
+    telegramId: number,
+    error: { ok: boolean; error_code: number; description: string }
+  ) {
+    try {
+      this.logger.warn(telegramId, error);
+      if (
+        error &&
+        error.ok === false &&
+        error.error_code === 403 &&
+        error.description === "Forbidden: bot was blocked by the user"
+      ) {
+        const [user] = await this.broker.call(`${cpz.Service.DB_USERS}.find`, {
+          fields: ["id"],
+          query: { telegramId }
+        });
+
+        if (user) {
+          //TODO: change subscription flag
+          const { id } = user;
+          const subscriptions = await this.broker.call(
+            `${cpz.Service.DB_USER_SIGNALS}.find`,
+            {
+              fields: ["robotId"],
+              query: {
+                userId: id,
+                telegram: true
+              }
+            }
+          );
+          for (const { robotId } of subscriptions) {
+            await this.broker.call(
+              `${cpz.Service.DB_USER_SIGNALS}.unsubscribe`,
+              {
+                robotId
+              },
+              {
+                meta: {
+                  user: { id }
+                }
+              }
+            );
+          }
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
   async faq(ctx: any) {
     try {
       return ctx.reply(
@@ -333,6 +441,7 @@ class BotService extends Service {
   }
 
   async defaultHandler(ctx: any) {
+    this.logger.info(ctx);
     const { mainKeyboard } = getMainKeyboard(ctx);
     await ctx.reply(ctx.i18n.t("defaultHandler"), mainKeyboard);
   }
