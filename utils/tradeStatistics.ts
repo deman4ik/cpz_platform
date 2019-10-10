@@ -379,7 +379,20 @@ function calcStatistics(
     short: shortRecoveryFactor
   };
 
-  const positionChunks = chunkArray(allPositions, 50);
+  const maxEquityLength = 50;
+  let chunkLength;
+
+  if (allPositions.length < maxEquityLength) {
+    chunkLength = 1;
+  } else if (
+    allPositions.length > maxEquityLength &&
+    allPositions.length < maxEquityLength * 2
+  ) {
+    chunkLength = 1.5;
+  } else {
+    chunkLength = allPositions.length / maxEquityLength;
+  }
+  const positionChunks = chunkArray(allPositions, chunkLength);
   equity.changes = positionChunks.map(chunk => ({
     x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
     y: averageRound(...chunk.map(c => +c.profit))
