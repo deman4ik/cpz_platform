@@ -16,7 +16,7 @@ import {
   getSignalRobotMenu
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
-import { round } from "../../utils/helpers";
+import { round, sortAsc } from "../../utils/helpers";
 
 const { enter, leave } = Stage;
 
@@ -784,18 +784,27 @@ class BotService extends Service {
         Array.isArray(closedPositions) &&
         closedPositions.length > 0
       ) {
-        closedPositions.forEach((pos: cpz.RobotPositionState) => {
-          const posText = ctx.i18n.t("robot.positionClosed", {
-            ...pos,
-            entryDate: dayjs.utc(pos.entryDate).format("YYYY-MM-DD HH:mm UTC"),
-            exitDate: dayjs.utc(pos.exitDate).format("YYYY-MM-DD HH:mm UTC"),
-            entryAction: ctx.i18n.t(`tradeAction.${pos.entryAction}`),
-            entryOrderType: ctx.i18n.t(`orderType.${pos.entryOrderType}`),
-            exitAction: ctx.i18n.t(`tradeAction.${pos.exitAction}`),
-            exitOrderType: ctx.i18n.t(`orderType.${pos.exitOrderType}`)
+        closedPositions
+          .sort((a, b) =>
+            sortAsc(
+              dayjs.utc(a.entryDate).valueOf(),
+              dayjs.utc(b.entryDate).valueOf()
+            )
+          )
+          .forEach((pos: cpz.RobotPositionState) => {
+            const posText = ctx.i18n.t("robot.positionClosed", {
+              ...pos,
+              entryDate: dayjs
+                .utc(pos.entryDate)
+                .format("YYYY-MM-DD HH:mm UTC"),
+              exitDate: dayjs.utc(pos.exitDate).format("YYYY-MM-DD HH:mm UTC"),
+              entryAction: ctx.i18n.t(`tradeAction.${pos.entryAction}`),
+              entryOrderType: ctx.i18n.t(`orderType.${pos.entryOrderType}`),
+              exitAction: ctx.i18n.t(`tradeAction.${pos.exitAction}`),
+              exitOrderType: ctx.i18n.t(`orderType.${pos.exitOrderType}`)
+            });
+            closedPositionsText = `${closedPositionsText}\n\n${posText}`;
           });
-          closedPositionsText = `${closedPositionsText}\n\n${posText}`;
-        });
         closedPositionsText = ctx.i18n.t("robot.positionsClosed", {
           closedPositions: closedPositionsText
         });
@@ -803,7 +812,7 @@ class BotService extends Service {
 
       const message =
         openPositionsText !== "" || closedPositionsText !== ""
-          ? `${openPositionsText}${closedPositionsText}`
+          ? `${closedPositionsText}${openPositionsText}`
           : ctx.i18n.t("robot.positionsNone");
       return ctx.editMessageText(
         ctx.i18n.t("robot.name", { name: robot.name }) + message,
