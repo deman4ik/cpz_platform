@@ -297,8 +297,8 @@ class BotService extends Service {
 
   async startedService() {
     if (process.env.NODE_ENV === "production") {
-      await this.bot.telegram.setWebhook(`${process.env.BOT_HOST}/tgendpoint`);
-      await this.bot.startWebhook("/tgendpoint", null, 5000);
+      await this.bot.telegram.setWebhook(process.env.BOT_HOST);
+      await this.bot.startWebhook("/", null, 5000);
       this.logger.warn("Bot in production mode!");
     } else if (
       process.env.NODE_ENV === "dev" ||
