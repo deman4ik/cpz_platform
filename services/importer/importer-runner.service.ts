@@ -195,6 +195,9 @@ class ImporterRunnerService extends Service {
             exchange: ctx.params.exchange,
             asset: ctx.params.asset,
             currency: ctx.params.currency
+          },
+          {
+            retries: 20
           }
         );
         if (!loadFrom) throw new Error("Failed to find market");

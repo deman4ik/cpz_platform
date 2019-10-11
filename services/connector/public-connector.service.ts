@@ -49,6 +49,14 @@ class PublicConnectorService extends Service {
             query:
               "getMarket(exchange: String!, asset: String!, currency: String!): JSON!"
           },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
+          },
           async handler(ctx) {
             return this.getMarket(
               ctx.params.exchange,
@@ -59,7 +67,15 @@ class PublicConnectorService extends Service {
         },
         getTimeframes: {
           params: {
-            exchange: "string"
+            exchange: { type: "string" }
+          },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
           },
           async handler(ctx) {
             return this.getTimeframes(ctx.params.exchange);
@@ -70,6 +86,14 @@ class PublicConnectorService extends Service {
             exchange: "string",
             asset: "string",
             currency: "string"
+          },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
           },
           async handler(ctx): Promise<cpz.ExchangePrice> {
             return this.getCurrentPrice(
@@ -89,6 +113,14 @@ class PublicConnectorService extends Service {
               type: "enum",
               values: Timeframe.validArray
             }
+          },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
           },
           async handler(ctx): Promise<cpz.ExchangeCandle> {
             return this.getCurrentCandle(
@@ -111,6 +143,14 @@ class PublicConnectorService extends Service {
             },
             dateFrom: "string",
             limit: { type: "number", optional: true }
+          },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
           },
           async handler(ctx): Promise<cpz.ExchangeCandle[]> {
             return this.getCandles(
@@ -136,6 +176,14 @@ class PublicConnectorService extends Service {
             dateFrom: "string",
             limit: "number"
           },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
+          },
           async handler(ctx): Promise<cpz.ExchangeCandle[]> {
             return this.getRawCandles(
               ctx.params.exchange,
@@ -153,6 +201,14 @@ class PublicConnectorService extends Service {
             asset: "string",
             currency: "string",
             dateFrom: "string"
+          },
+          retryPolicy: {
+            retries: 20,
+            delay: 100,
+            maxDelay: 100,
+            factor: 1,
+            check: (err: Errors.MoleculerRetryableError) =>
+              err && !!err.retryable
           },
           async handler(ctx): Promise<cpz.ExchangeTrade[]> {
             return await this.getTrades(

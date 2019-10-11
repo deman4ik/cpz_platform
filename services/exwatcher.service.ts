@@ -595,6 +595,9 @@ class ExwatcherService extends Service {
             asset,
             currency,
             timeframe
+          },
+          {
+            retries: 20
           }
         );
         this.candlesCurrent[id][timeframe] = {

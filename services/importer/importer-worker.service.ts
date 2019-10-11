@@ -466,6 +466,9 @@ class ImporterWorkerService extends Service {
                   timeframe,
                   dateFrom: loadFrom,
                   limit
+                },
+                {
+                  retries: 20
                 }
               );
             } catch (e) {
@@ -543,6 +546,9 @@ class ImporterWorkerService extends Service {
                 asset,
                 currency,
                 dateFrom: dateNext.toISOString()
+              },
+              {
+                retries: 20
               }
             );
             if (!response || !Array.isArray(response))
