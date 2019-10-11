@@ -3,37 +3,30 @@ module.exports = {
     {
       name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/db",
+      args: "--env --instances=2 --config prod.config.js dist/services/db",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "db"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
       name: "backtester",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/backtester",
+      args:
+        "--env --instances=2 --config prod.config.js dist/services/backtester",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "backtester"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
       name: "connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/connector",
+      args:
+        "--env --instances=2 --config prod.config.js dist/services/connector",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "connector"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -41,11 +34,8 @@ module.exports = {
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/exwatcher.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "exwatcher"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -53,11 +43,8 @@ module.exports = {
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/importer",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "importer"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -66,24 +53,18 @@ module.exports = {
       args:
         "--env --config prod.config.js dist/services/robot/robot-runner.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "robot-runner"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
       name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=2 --config prod.config.js dist/services/robot/robot-worker.service.js",
+        "--env --instances=3 --config prod.config.js dist/services/robot/robot-worker.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "robot-worker"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -91,11 +72,8 @@ module.exports = {
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/api.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "api"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -103,11 +81,8 @@ module.exports = {
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/auth.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "auth"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     },
     {
@@ -116,11 +91,8 @@ module.exports = {
       args:
         "--env --config prod.config.js dist/services/telegram/bot.service.js",
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
         NODEID: "telegram"
-      },
-      env_production: {
-        NODE_ENV: "production"
       }
     }
   ]

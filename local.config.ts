@@ -1,3 +1,5 @@
+import { BrokerOptions, Errors } from "moleculer";
+
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -13,14 +15,14 @@
  * 	via environment variables, use the `MOL_` prefix and double underscore `__` for nested properties in .env file.
  * 	For example, to set the cacher prefix to `MYCACHE`, you should declare an env var as `MOL_CACHER__OPTIONS__PREFIX=MYCACHE`.
  */
-const brokerConfig = {
+const brokerConfig: any = {
   // Namespace of nodes to segment your nodes on the same network.
-  namespace: "cpz",
+  namespace: "cpz-local",
   // Unique node identifier. Must be unique in a namespace.
-  nodeID: "cpz",
+  nodeID: "cpz-local",
 
   logger: {
-    type: "File",
+    type: "Console",
     options: {
       // Logging level
       level: "info",
@@ -41,12 +43,7 @@ const brokerConfig = {
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
-  transporter: {
-    type: "TCP",
-    options: {
-      maxPacketSize: 2 * 1024 * 1024
-    }
-  },
+  transporter: "TCP",
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
   cacher: false,
@@ -64,7 +61,7 @@ const brokerConfig = {
     // Enable feature
     enabled: true,
     // Count of retries
-    retries: 10,
+    retries: 5,
     // First delay in milliseconds.
     delay: 100,
     // Maximum delay in milliseconds.
@@ -72,7 +69,7 @@ const brokerConfig = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err => err && !!err.retryable
+    check: (err: Errors.MoleculerRetryableError) => err && !!err.retryable
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -106,7 +103,7 @@ const brokerConfig = {
   // Settings of Circuit Breaker. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Circuit-Breaker
   circuitBreaker: {
     // Enable feature
-    enabled: true,
+    enabled: false,
     // Threshold value. 0.5 means that 50% should be failed for tripping.
     threshold: 0.5,
     // Minimum request count. Below it, CB does not trip.
@@ -116,7 +113,7 @@ const brokerConfig = {
     // Number of milliseconds to switch from open to half-open state
     halfOpenTime: 10 * 1000,
     // A function to check failed requests.
-    check: err => err && err.code >= 500
+    check: (err: Errors.MoleculerRetryableError) => err && err.code >= 500
   },
 
   // Settings of bulkhead feature. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Bulkhead
@@ -147,16 +144,16 @@ const brokerConfig = {
   middlewares: [],
 
   // Called after broker created.
-  created(broker) {},
+  created() {},
 
   // Called after broker starte.
-  started(broker) {},
+  started() {},
 
   // Called after broker stopped.
-  stopped(broker) {},
+  stopped() {},
 
   // Register custom REPL commands.
   replCommands: null
 };
 
-module.exports = brokerConfig;
+export = brokerConfig;

@@ -1,5 +1,3 @@
-import { BrokerOptions, Errors } from "moleculer";
-
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -15,9 +13,9 @@ import { BrokerOptions, Errors } from "moleculer";
  * 	via environment variables, use the `MOL_` prefix and double underscore `__` for nested properties in .env file.
  * 	For example, to set the cacher prefix to `MYCACHE`, you should declare an env var as `MOL_CACHER__OPTIONS__PREFIX=MYCACHE`.
  */
-const brokerConfig: any = {
+const brokerConfig = {
   // Namespace of nodes to segment your nodes on the same network.
-  namespace: "cpz-local",
+  namespace: "cpz-dev",
   // Unique node identifier. Must be unique in a namespace.
   nodeID: "cpz-dev",
 
@@ -43,7 +41,12 @@ const brokerConfig: any = {
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
-  transporter: "TCP",
+  transporter: {
+    type: "TCP",
+    options: {
+      maxPacketSize: 2 * 1024 * 1024
+    }
+  },
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
   cacher: false,
@@ -69,7 +72,7 @@ const brokerConfig: any = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: (err: Errors.MoleculerRetryableError) => err && !!err.retryable
+    check: err => err && !!err.retryable
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -113,7 +116,7 @@ const brokerConfig: any = {
     // Number of milliseconds to switch from open to half-open state
     halfOpenTime: 10 * 1000,
     // A function to check failed requests.
-    check: (err: Errors.MoleculerRetryableError) => err && err.code >= 500
+    check: err => err && err.code >= 500
   },
 
   // Settings of bulkhead feature. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Bulkhead
@@ -144,16 +147,16 @@ const brokerConfig: any = {
   middlewares: [],
 
   // Called after broker created.
-  created() {},
+  created(broker) {},
 
   // Called after broker starte.
-  started() {},
+  started(broker) {},
 
   // Called after broker stopped.
-  stopped() {},
+  stopped(broker) {},
 
   // Register custom REPL commands.
   replCommands: null
 };
 
-export = brokerConfig;
+module.exports = brokerConfig;
