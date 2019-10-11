@@ -604,6 +604,7 @@ class ExwatcherService extends Service {
           ...candle,
           id: `${candle.exchange}.${candle.asset}.${candle.currency}.${candle.timeframe}`
         };
+        await this.saveCurrentCandles([this.candlesCurrent[id][timeframe]]);
       })
     );
   }
