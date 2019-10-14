@@ -4,15 +4,16 @@ import { ApolloService } from "moleculer-apollo-server";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
 import { cpz } from "../types/cpz";
-
+import Auth from "../mixins/auth";
 class ApiService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
-      name: "api",
+      name: cpz.Service.API,
 
       mixins: [
         ApiGateway,
+        Auth,
         ApolloService({
           // Global GraphQL typeDefs
           typeDefs: [
@@ -43,7 +44,8 @@ class ApiService extends Service {
             path: "/graphql",
             cors: true,
             mappingPolicy: "restrict",
-            authorization: true
+            onBeforeCall: this.checkAuth
+            // authorization: true
           },
 
           // https://www.apollographql.com/docs/apollo-server/v2/api/apollo-server.html
@@ -53,6 +55,11 @@ class ApiService extends Service {
             introspection: true,
             engine: {
               apiKey: process.env.ENGINE_API_KEY
+            },
+            formatError: (err: any) => {
+              this.logger.info(err.message, err.code, err.type, err.data);
+              // return new Error("Custom Error");
+              return err;
             }
           }
         })
@@ -64,7 +71,8 @@ class ApiService extends Service {
             path: "/api",
             aliases: {
               "POST login": `${cpz.Service.AUTH}.login`,
-              "POST register": `${cpz.Service.AUTH}.register`
+              "POST register": `${cpz.Service.AUTH}.register`,
+              "GET nodes": `${cpz.Service.API}.nodesList`
             }
           },
           {
@@ -87,11 +95,19 @@ class ApiService extends Service {
           graphql: {
             query: `nodesList: JSON!`
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.getNodesList
         },
         servicesList: {
           graphql: {
             query: `servicesList: JSON!`
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.getServicesList
         }
@@ -107,6 +123,36 @@ class ApiService extends Service {
     return await this.broker.call("$node.services");
   }
 
+  async checkAuth(ctx: Context, route: any, req: any) {
+    let authValue = req.headers["authorization"];
+    if (authValue && authValue.startsWith("Bearer ")) {
+      try {
+        let token = authValue.slice(7);
+        const decoded = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
+          token
+        });
+        const user = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+          id: decoded.userId
+        });
+        ctx.meta.user = user;
+      } catch (e) {
+        this.logger.warn(e);
+        ctx.meta.user = {
+          roles: {
+            allowedRoles: [cpz.UserRoles.anonymous],
+            defaultRole: cpz.UserRoles.anonymous
+          }
+        };
+      }
+    } else {
+      ctx.meta.user = {
+        roles: {
+          allowedRoles: [cpz.UserRoles.anonymous],
+          defaultRole: cpz.UserRoles.anonymous
+        }
+      };
+    }
+  }
   /**
    * Authorize the request
    *

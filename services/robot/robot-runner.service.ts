@@ -6,6 +6,7 @@ import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
+import Auth from "../../mixins/auth";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -14,6 +15,7 @@ class RobotRunnerService extends Service {
       name: cpz.Service.ROBOT_RUNNER,
       dependencies: [`${cpz.Service.DB_ROBOTS}`],
       mixins: [
+        Auth,
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
@@ -37,6 +39,10 @@ class RobotRunnerService extends Service {
           graphql: {
             mutation: "robotStartup(id: ID!): ServiceStatus!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.startUp
         },
         start: {
@@ -50,6 +56,10 @@ class RobotRunnerService extends Service {
           graphql: {
             mutation: "robotStart(id: ID!, dateFrom: String): ServiceStatus!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.start
         },
         stop: {
@@ -58,6 +68,10 @@ class RobotRunnerService extends Service {
           },
           graphql: {
             mutation: "robotStop(id: ID!): ServiceStatus!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.stop
         },
@@ -68,6 +82,10 @@ class RobotRunnerService extends Service {
           params: {
             id: { type: "string", optional: true }
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.pause
         },
         resume: {
@@ -76,6 +94,10 @@ class RobotRunnerService extends Service {
           },
           params: {
             id: { type: "string", optional: true }
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.resume
         }

@@ -34,7 +34,8 @@ export namespace cpz {
     BACKTESTER_WORKER = "backtester-worker",
     TRADER_RUNNER = "trader-runner",
     TRADER_WORKER = "trader-worker",
-    AUTH = "auth"
+    AUTH = "auth",
+    API = "api"
   }
 
   const enum Event {

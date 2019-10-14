@@ -3,6 +3,7 @@ import QueueService from "moleculer-bull";
 import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../types/cpz";
+import Auth from "../../mixins/auth";
 
 class BacktesterRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -20,6 +21,7 @@ class BacktesterRunnerService extends Service {
         }
       },
       mixins: [
+        Auth,
         QueueService({
           redis: {
             tls: process.env.REDIS_TLS,
@@ -74,6 +76,10 @@ class BacktesterRunnerService extends Service {
             mutation:
               "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: BacktestSettings, robotSettings: JSON): ServiceStatus!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.start
         },
         clean: {
@@ -96,6 +102,10 @@ class BacktesterRunnerService extends Service {
           graphql: {
             mutation: "backtesterCleanJobs(period: Int, status: String): JSON"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.clean
         },
         getStatus: {
@@ -104,6 +114,10 @@ class BacktesterRunnerService extends Service {
           },
           graphql: {
             query: "backtesterJobStatus(id: ID!): JSON!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.getStatus
         }

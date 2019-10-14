@@ -6,6 +6,7 @@ import { cpz } from "../../types/cpz";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 import dayjs from "../../lib/dayjs";
+import Auth from "../../mixins/auth";
 
 class ImporterRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -13,6 +14,7 @@ class ImporterRunnerService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.IMPORTER_RUNNER,
       mixins: [
+        Auth,
         QueueService({
           redis: {
             tls: process.env.REDIS_TLS,
@@ -58,6 +60,10 @@ class ImporterRunnerService extends Service {
             mutation:
               "importerStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.startRecent
         },
         startHistory: {
@@ -90,6 +96,10 @@ class ImporterRunnerService extends Service {
             mutation:
               "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.startHistory
         },
         clean: {
@@ -112,6 +122,10 @@ class ImporterRunnerService extends Service {
           graphql: {
             mutation: "importerCleanJobs(period: Int, status: String): JSON"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.clean
         },
         getStatus: {
@@ -120,6 +134,10 @@ class ImporterRunnerService extends Service {
           },
           graphql: {
             query: "importerJobStatus(id: ID!): JSON!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.getStatus
         }

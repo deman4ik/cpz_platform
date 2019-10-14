@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Errors } from "moleculer";
 import ccxt, { Exchange } from "ccxt";
-import HttpsProxyAgent from "https-proxy-agent";
+import Auth from "../../mixins/auth";
 import retry from "async-retry";
 import { cpz } from "../../types/cpz";
 import dayjs from "../../lib/dayjs";
@@ -35,6 +35,7 @@ class PublicConnectorService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.PUBLIC_CONNECTOR,
+      mixins: [Auth],
       /**
        * Actions
        */
@@ -48,6 +49,10 @@ class PublicConnectorService extends Service {
           graphql: {
             query:
               "getMarket(exchange: String!, asset: String!, currency: String!): JSON!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           retryPolicy: {
             retries: 20,

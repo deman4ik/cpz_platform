@@ -17,6 +17,7 @@ import {
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
 import { round, sortAsc } from "../../utils/helpers";
+import Auth from "../../mixins/auth";
 
 const { enter, leave } = Stage;
 
@@ -45,6 +46,10 @@ class BotService extends Service {
           params: {
             userId: { type: "string", optional: true },
             message: "string"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           handler: this.broadcastMessage
         }

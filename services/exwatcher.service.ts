@@ -6,6 +6,7 @@ import { cpz } from "../types/cpz";
 import dayjs from "../lib/dayjs";
 import { capitalize, chunkArray, uniqueElementsBy, round } from "../utils";
 import Timeframe from "../utils/timeframe";
+import Auth from "../mixins/auth";
 
 /**
  * Watching streaming market data and creating candles
@@ -23,6 +24,7 @@ class ExwatcherService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.EXWATCHER,
+      mixins: [Auth],
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
@@ -70,6 +72,10 @@ class ExwatcherService extends Service {
             mutation:
               "exwatcherSubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           async handler(ctx) {
             return await this.addSubscription(
               ctx.params.exchange,
@@ -100,6 +106,10 @@ class ExwatcherService extends Service {
           graphql: {
             mutation:
               "exwatcherSubscribeMany(subscriptions: [Market!]!): Response!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           async handler(ctx) {
             try {
@@ -137,6 +147,10 @@ class ExwatcherService extends Service {
             mutation:
               "exwatcherUnsubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           async handler(ctx) {
             return await this.removeSubscription(
               ctx.params.exchange,
@@ -167,6 +181,10 @@ class ExwatcherService extends Service {
           graphql: {
             mutation:
               "exwatcherUnsubscribeMany(subscriptions: [Market!]!): Response!"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
           },
           async handler(ctx) {
             try {
