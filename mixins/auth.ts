@@ -1,9 +1,9 @@
-import { ServiceSchema, Context, Errors } from "moleculer";
+import { ServiceSchema, Errors } from "moleculer";
 
 const Auth: ServiceSchema = {
   name: "",
   methods: {
-    async authAction(ctx: Context) {
+    async authAction(ctx: any) {
       if (
         ctx.meta.user &&
         ctx.action.roles &&
