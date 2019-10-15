@@ -14,7 +14,7 @@ const Auth: ServiceSchema = {
           !ctx.meta.user.roles ||
           !ctx.meta.user.roles.allowedRoles ||
           !Array.isArray(ctx.meta.user.roles.allowedRoles) ||
-          !ctx.action.roles.some(r =>
+          !ctx.action.roles.some((r: string) =>
             ctx.meta.user.roles.allowedRoles.includes(r)
           )
         )

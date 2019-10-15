@@ -1,6 +1,6 @@
 import { ValidationSchema } from "fastest-validator";
 
-export interface AnyObject {
+export interface GenericObject {
   [key: string]: any;
 }
 
@@ -596,6 +596,11 @@ export namespace cpz {
     timestamp: string;
   }
 
+  interface UserRolesList {
+    allowedRoles: string[];
+    defaultRole: string;
+  }
+
   interface User {
     id: string;
     name?: string;
@@ -606,11 +611,8 @@ export namespace cpz {
     passwordHash?: string;
     registrationCode?: string;
     refreshToken?: string;
-    roles: {
-      allowedRoles: string[];
-      defaultRole: string;
-    };
-    settings: AnyObject;
+    roles: UserRolesList;
+    settings: GenericObject;
   }
 
   interface UserSignals {

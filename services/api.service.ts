@@ -123,15 +123,28 @@ class ApiService extends Service {
     return await this.broker.call("$node.services");
   }
 
-  async checkAuth(ctx: Context, route: any, req: any) {
+  async checkAuth(
+    ctx: Context<
+      any,
+      {
+        user: cpz.User | { roles: cpz.UserRolesList };
+      }
+    >,
+    route: any,
+    req: any
+  ) {
     let authValue = req.headers["authorization"];
     if (authValue && authValue.startsWith("Bearer ")) {
       try {
         let token = authValue.slice(7);
-        const decoded = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
+        const decoded: {
+          userId: string;
+          role: string;
+          allowedRoles: string[];
+        } = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
           token
         });
-        const user = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
           id: decoded.userId
         });
         ctx.meta.user = user;

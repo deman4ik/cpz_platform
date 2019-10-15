@@ -148,6 +148,7 @@ class AuthService extends Service {
       {
         userId: id,
         role: defaultRole,
+        allowedRoles: allowedRoles,
         "https://hasura.io/jwt/claims": {
           "x-hasura-default-role": defaultRole,
           "x-hasura-allowed-roles": allowedRoles,
