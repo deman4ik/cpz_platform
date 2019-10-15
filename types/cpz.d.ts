@@ -624,4 +624,27 @@ export namespace cpz {
     subscribedAt: string;
     volume?: number;
   }
+
+  interface EncryptedData {
+    data: string;
+    iv: string;
+  }
+  interface UserExchangeKeys {
+    main: {
+      key: EncryptedData;
+      secret: EncryptedData;
+    };
+    spare?: {
+      key: EncryptedData;
+      secret: EncryptedData;
+    };
+  }
+
+  interface UserExchangeAccount {
+    id: string;
+    userId: string;
+    exchange: string;
+    keys: UserExchangeKeys;
+    status: string;
+  }
 }
