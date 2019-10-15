@@ -48,12 +48,15 @@ class AuthService extends Service {
     });
   }
 
-  async login(ctx: Context) {
+  async login(ctx: Context<{ email: string; password: string }>) {
     this.logger.info("Login", ctx.params);
     const { email, password } = ctx.params;
-    const [user] = await this.broker.call(`${cpz.Service.DB_USERS}.find`, {
-      query: { email }
-    });
+    const [user]: cpz.User[] = await this.broker.call(
+      `${cpz.Service.DB_USERS}.find`,
+      {
+        query: { email }
+      }
+    );
     this.logger.info(user);
     if (!user) throw new Errors.MoleculerClientError("User not found");
     if (user.status === cpz.UserStatus.blocked)
@@ -65,11 +68,11 @@ class AuthService extends Service {
     return this.generateToken(user);
   }
 
-  async register(ctx: Context) {
+  async register(ctx: Context<{ email: string; password: string }>) {
     this.logger.info("Register", ctx.params);
     const { email, password } = ctx.params;
     //TODO: check password
-    const [userExists] = await this.broker.call(
+    const [userExists]: cpz.User[] = await this.broker.call(
       `${cpz.Service.DB_USERS}.find`,
       {
         query: { email }
@@ -95,11 +98,13 @@ class AuthService extends Service {
     return { id: newUser.id };
   }
 
-  async registerTg(ctx: Context) {
+  async registerTg(
+    ctx: Context<{ telegramId: number; telegramUsername: string; name: string }>
+  ) {
     this.logger.info("Register Telegram", ctx.params);
     const { telegramId, telegramUsername, name } = ctx.params;
     //TODO: check password
-    const [userExists] = await this.broker.call(
+    const [userExists]: cpz.User[] = await this.broker.call(
       `${cpz.Service.DB_USERS}.find`,
       {
         query: { telegramId }
@@ -124,13 +129,13 @@ class AuthService extends Service {
     return { id: newUser.id };
   }
 
-  getCurrentUser(ctx: Context) {
-    const { id, name, email, telegram, settings } = ctx.meta.user;
+  getCurrentUser(ctx: Context<null, { user: cpz.User }>) {
+    const { id, name, email, telegramId, settings, roles } = ctx.meta.user;
     return {
       id,
       name,
       email,
-      telegram,
+      telegramId,
       settings
     };
   }

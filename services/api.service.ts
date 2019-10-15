@@ -127,7 +127,7 @@ class ApiService extends Service {
     ctx: Context<
       any,
       {
-        user: cpz.User | { roles: cpz.UserRolesList };
+        user?: cpz.User | { roles: cpz.UserRolesList };
       }
     >,
     route: any,
@@ -139,7 +139,7 @@ class ApiService extends Service {
         let token = authValue.slice(7);
         const decoded: {
           userId: string;
-          role: string;
+          defaultRole: string;
           allowedRoles: string[];
         } = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
           token
@@ -174,22 +174,37 @@ class ApiService extends Service {
    * @param {IncomingRequest} req
    * @returns {Promise}
    */
-  async authorize(ctx: Context, route: any, req: any) {
+  async authorize(
+    ctx: Context<
+      any,
+      {
+        user?: cpz.User | { roles: cpz.UserRolesList };
+      }
+    >,
+    route: any,
+    req: any
+  ) {
     let authValue = req.headers["authorization"];
     if (authValue && authValue.startsWith("Bearer ")) {
       try {
         let token = authValue.slice(7);
-        const decoded = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
+        const decoded: {
+          userId: string;
+          defaultRole: string;
+          allowedRoles: string[];
+        } = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
           token
         });
         if (
           route.opts.roles &&
           Array.isArray(route.opts.roles) &&
-          route.opts.roles.indexOf(decoded.role) === -1
+          !route.opts.roles.some((r: string) =>
+            decoded.allowedRoles.includes(r)
+          )
         )
           throw new ApiGateway.Errors.ForbiddenError("FORBIDDEN", null);
 
-        const user = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
           id: decoded.userId
         });
         ctx.meta.user = user;
