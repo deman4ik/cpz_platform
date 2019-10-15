@@ -3,7 +3,7 @@ import ApiGateway from "moleculer-web";
 import { ApolloService } from "moleculer-apollo-server";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 import Auth from "../mixins/auth";
 class ApiService extends Service {
   constructor(broker: ServiceBroker) {

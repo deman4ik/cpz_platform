@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 
 const pwd = process.env.ENCRYPTION_PWD;
 

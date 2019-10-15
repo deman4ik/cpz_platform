@@ -2,7 +2,7 @@ import { ServiceSchema, Errors } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
-import { cpz } from "../../../types/cpz";
+import { cpz } from "../../../@types";
 
 const CandlesService: ServiceSchema = {
   name: `${cpz.Service.DB_CANDLES}5`,

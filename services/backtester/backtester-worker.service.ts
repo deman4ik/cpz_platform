@@ -2,7 +2,7 @@ import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import QueueService from "moleculer-bull";
 import { Job } from "bull";
 import { v4 as uuid } from "uuid";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
 import { sortAsc, chunkNumberToArray, round, chunkArray } from "../../utils";

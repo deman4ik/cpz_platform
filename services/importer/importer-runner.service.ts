@@ -2,7 +2,7 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import QueueService from "moleculer-bull";
 import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 import dayjs from "../../lib/dayjs";

@@ -2,7 +2,7 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import socketio from "socket.io-client";
 import cron from "node-cron";
 import { v4 as uuid } from "uuid";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 import dayjs from "../lib/dayjs";
 import { capitalize, chunkArray, uniqueElementsBy, round } from "../utils";
 import Timeframe from "../utils/timeframe";

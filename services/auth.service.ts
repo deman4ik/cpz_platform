@@ -1,7 +1,7 @@
 import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 import { v4 as uuid } from "uuid";
 
 class AuthService extends Service {

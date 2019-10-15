@@ -1,6 +1,6 @@
 import BaseIndicator from "../../state/robot/robot_indicator";
 import tulip from "./create";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 
 // TODO: объявить тип для класса
 class Tulip extends BaseIndicator {

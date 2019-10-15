@@ -10,7 +10,7 @@
     "target": "es2019",
     "baseUrl": "./",
     "resolveJsonModule": true,
-    "paths": { "*": ["types/*"] },
+    "paths": { "*": ["@types/*"] },
     "outDir": "dist"
   },
   "exclude": ["public", ".vscode", "node_modules"]

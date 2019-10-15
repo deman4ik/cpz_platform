@@ -6,7 +6,7 @@ import {
   averageRound
 } from "./helpers";
 import dayjs from "../lib/dayjs";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 
 function calcConsec(profits: number[]) {
   let maxConsecWin = 0;

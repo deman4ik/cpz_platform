@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { v4 as uuid } from "uuid";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";

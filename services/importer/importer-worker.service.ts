@@ -14,7 +14,7 @@ import {
   uniqueElementsBy,
   round
 } from "../../utils";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 

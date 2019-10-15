@@ -1,4 +1,4 @@
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import { ValidationSchema } from "fastest-validator";
 import dayjs from "../../lib/dayjs";
 import { v4 as uuid } from "uuid";

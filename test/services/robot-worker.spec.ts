@@ -1,6 +1,6 @@
 import { ServiceBroker, Errors } from "moleculer";
 import TestService from "../../services/robot/robot-worker.service";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 
 describe("Test 'robot-worker' service", () => {
   let broker = new ServiceBroker();

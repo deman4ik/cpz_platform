@@ -1,4 +1,4 @@
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import { chunkArrayIncrEnd, validate } from "../../utils";
 import { ValidationSchema } from "fastest-validator";
 import createTulip from "../../lib/tulip/create";

@@ -1,7 +1,7 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import QueueService from "moleculer-bull";
 import { Job } from "bull";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import Robot from "../../state/robot/robot";
 import { sortAsc } from "../../utils";
 import { v4 as uuid } from "uuid";

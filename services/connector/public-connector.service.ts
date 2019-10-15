@@ -2,7 +2,7 @@ import { Service, ServiceBroker, Errors } from "moleculer";
 import ccxt, { Exchange } from "ccxt";
 import Auth from "../../mixins/auth";
 import retry from "async-retry";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import {
   createFetchMethod,

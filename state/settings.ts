@@ -1,4 +1,4 @@
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 import { CANDLES_RECENT_AMOUNT } from "../config";
 
 function combineRobotSettings({

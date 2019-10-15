@@ -1,4 +1,4 @@
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 
 import { Errors } from "moleculer";

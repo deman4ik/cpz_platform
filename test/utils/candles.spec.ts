@@ -5,7 +5,7 @@ import {
   getCandlesParams
 } from "../../utils/candles";
 import dayjs from "../../lib/dayjs";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import {
   candles1,
   candles60 as gappedCandles60

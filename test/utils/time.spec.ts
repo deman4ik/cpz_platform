@@ -6,7 +6,7 @@ import {
   getValidDate
 } from "../../utils/time";
 import dayjs from "../../lib/dayjs";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 
 describe("Test 'time' utils", () => {
   describe("Test 'durationUnit'", () => {

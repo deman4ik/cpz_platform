@@ -1,5 +1,5 @@
 import { Service, ServiceBroker, Context } from "moleculer";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import Telegraf, { Extra } from "telegraf";
 import Stage from "telegraf/stage";
 import Scene from "telegraf/scenes/base";

@@ -3,7 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
-import { cpz } from "../../../types/cpz";
+import { cpz } from "../../../@types";
 import dayjs from "../../../lib/dayjs";
 import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
 

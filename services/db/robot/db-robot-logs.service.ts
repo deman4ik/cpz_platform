@@ -2,7 +2,7 @@ import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
-import { cpz } from "../../../types/cpz";
+import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 
 class RobotLogsService extends Service {

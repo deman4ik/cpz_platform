@@ -1,4 +1,4 @@
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 
 const trades: cpz.ExchangeTrade[] = [
   {

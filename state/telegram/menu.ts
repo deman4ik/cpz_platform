@@ -1,5 +1,5 @@
 import Telegraf, { Extra, Markup } from "telegraf";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 import { chunkArray } from "../../utils/helpers";
 
 function getAssetsMenu(

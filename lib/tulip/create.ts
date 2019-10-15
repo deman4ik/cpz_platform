@@ -1,6 +1,6 @@
 /* from https://github.com/askmike/gekko/ */
 import tulind from "tulind";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 //TODO: ts typings!
 
 function isNumeric(obj: any) {

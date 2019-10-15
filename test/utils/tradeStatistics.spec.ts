@@ -1,5 +1,5 @@
 import { calcStatistics } from "../../utils/tradeStatistics";
-import { cpz } from "../../types/cpz";
+import { cpz } from "../../@types";
 
 const positions: cpz.RobotPositionState[] = [
   {

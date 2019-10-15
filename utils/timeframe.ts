@@ -1,5 +1,5 @@
 import dayjs from "../lib/dayjs";
-import { cpz } from "../types/cpz";
+import { cpz } from "../@types";
 import { sortAsc } from "./helpers";
 
 class Timeframe {
