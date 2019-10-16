@@ -13,7 +13,8 @@ import {
 import {
   getAssetsMenu,
   getSignalsMenu,
-  getSignalRobotMenu
+  getSignalRobotMenu,
+  getFAQMenu
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
 import { round, sortAsc } from "../../utils/helpers";
@@ -274,8 +275,13 @@ class BotService extends Service {
     mySignalsScene.action(/info/, this.robotInfo.bind(this));
     mySignalsScene.action(/stats/, this.robotStats.bind(this));
     mySignalsScene.action(/pos/, this.robotPositions.bind(this));
-
-    const stage = new Stage([signalsScene, mySignalsScene]);
+    const faqScene = new Scene("faq");
+    faqScene.enter(this.faqEnter.bind(this));
+    faqScene.leave(this.faqLeave.bind(this));
+    faqScene.hears(match("keyboards.backKeyboard.back"), leave());
+    faqScene.command("back", leave());
+    faqScene.action(/q/, this.faqSelected.bind(this));
+    const stage = new Stage([signalsScene, mySignalsScene, faqScene]);
     this.bot.use(this.auth.bind(this));
     this.bot.use(stage.middleware());
     this.bot.start(this.start.bind(this));
@@ -284,7 +290,7 @@ class BotService extends Service {
       match("keyboards.mainKeyboard.mySignals"),
       enter("mySignals")
     );
-    this.bot.hears(match("keyboards.mainKeyboard.faq"), this.faq);
+    this.bot.hears(match("keyboards.mainKeyboard.faq"), enter("faq"));
     this.bot.hears(
       match("keyboards.mainKeyboard.contact"),
       reply("contact", Extra.HTML())
@@ -449,6 +455,46 @@ class BotService extends Service {
     this.logger.info(ctx);
     const { mainKeyboard } = getMainKeyboard(ctx);
     await ctx.reply(ctx.i18n.t("defaultHandler"), mainKeyboard);
+  }
+
+  /*****************************
+   *  FAQ Stage
+   *****************************/
+  async faqEnter(ctx: any) {
+    try {
+      const { backKeyboard } = getBackKeyboard(ctx);
+      await ctx.reply(ctx.i18n.t("keyboards.mainKeyboard.faq"), backKeyboard);
+
+      return ctx.reply(ctx.i18n.t("scenes.faq.title"), getFAQMenu(ctx));
+    } catch (e) {
+      this.logger.error(e);
+      await ctx.reply(ctx.i18n.t("failed"));
+      await ctx.scene.leave();
+    }
+  }
+
+  async faqLeave(ctx: any) {
+    const { mainKeyboard } = getMainKeyboard(ctx);
+    await ctx.reply(ctx.i18n.t("menu"), mainKeyboard);
+  }
+
+  async faqSelected(ctx: any) {
+    try {
+      const { p: selectedQ } = JSON.parse(ctx.callbackQuery.data);
+      if (ctx.scene.state.q === selectedQ) return;
+      ctx.scene.state.q = selectedQ;
+
+      return ctx.editMessageText(
+        `<b>${ctx.i18n.t(`scenes.faq.q.${selectedQ}`)}</b>\n\n${ctx.i18n.t(
+          `scenes.faq.a.${selectedQ}`
+        )}`,
+        getFAQMenu(ctx)
+      );
+    } catch (e) {
+      this.logger.error(e);
+      await ctx.reply(ctx.i18n.t("failed"));
+      await ctx.scene.leave();
+    }
   }
 
   /*****************************

@@ -72,4 +72,23 @@ function getSignalRobotMenu(ctx: any, robotId: string, subscribed: boolean) {
   });
 }
 
-export { getAssetsMenu, getSignalsMenu, getSignalRobotMenu };
+function getFAQMenu(ctx: any) {
+  const {
+    scenes: {
+      faq: { q }
+    }
+  } = require("./locales/en.json");
+  return Extra.HTML().markup((m: any) => {
+    const buttons = Object.keys(q).map(key => [
+      m.callbackButton(
+        ctx.i18n.t(`scenes.faq.q.${key}`),
+        JSON.stringify({ a: "q", p: key.toString() }),
+        false
+      )
+    ]);
+
+    return m.inlineKeyboard(buttons);
+  });
+}
+
+export { getAssetsMenu, getSignalsMenu, getSignalRobotMenu, getFAQMenu };
