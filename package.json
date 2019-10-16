@@ -14,7 +14,7 @@
     "tg": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts services/db/robot/*.service.ts services/telegram/*.service.ts",
     "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/api.service.ts services/auth.service.ts services/db/user/db-users.service.ts services/db/user/db-user-exchange-accs.service.ts",
     "cli": "moleculer connect",
-    "start": "node ./node_modules/moleculer/bin/moleculer-runner --env --config prod.config.js dist/services",
+    "start": "node ./node_modules/moleculer/bin/moleculer-runner --env --config dev.config.js dist/services",
     "startPM": "pm2 start pm.prod.config.js",
     "stopPM": "pm2 stop pm.prod.config.js",
     "startPM:dev": "pm2 start pm.dev.config.js",

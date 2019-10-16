@@ -1,6 +1,7 @@
 import Telegraf, { Extra, Markup } from "telegraf";
 import { cpz } from "../../@types";
 import { chunkArray } from "../../utils/helpers";
+import { scenes } from "./locales/en.json";
 
 function getAssetsMenu(
   assets: {
@@ -73,13 +74,8 @@ function getSignalRobotMenu(ctx: any, robotId: string, subscribed: boolean) {
 }
 
 function getFAQMenu(ctx: any) {
-  const {
-    scenes: {
-      faq: { q }
-    }
-  } = require("./locales/en.json");
   return Extra.HTML().markup((m: any) => {
-    const buttons = Object.keys(q).map(key => [
+    const buttons = Object.keys(scenes.faq.q).map(key => [
       m.callbackButton(
         ctx.i18n.t(`scenes.faq.q.${key}`),
         JSON.stringify({ a: "q", p: key.toString() }),
