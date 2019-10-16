@@ -24,6 +24,7 @@ export namespace cpz {
     DB_ROBOT_HISTORY = "db-robot-history",
     DB_USERS = "db-users",
     DB_USER_SIGNALS = "db-user-signals",
+    DB_USER_EXCHANGE_ACCS = "db-user-exchange-accs",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -180,6 +181,11 @@ export namespace cpz {
     importCandles = "importCandles",
     runRobot = "runRobot",
     backtest = "backtest"
+  }
+
+  const enum UserExchangeAccStatus {
+    valid = "valid",
+    invalid = "invalid"
   }
 
   type ImportType = "recent" | "history";
@@ -630,21 +636,17 @@ export namespace cpz {
     iv: string;
   }
   interface UserExchangeKeys {
-    main: {
-      key: EncryptedData;
-      secret: EncryptedData;
-    };
-    spare?: {
-      key: EncryptedData;
-      secret: EncryptedData;
-    };
+    key: EncryptedData;
+    secret: EncryptedData;
+    pass?: EncryptedData;
   }
 
   interface UserExchangeAccount {
     id: string;
     userId: string;
     exchange: string;
+    name?: string;
     keys: UserExchangeKeys;
-    status: string;
+    status: UserExchangeAccStatus;
   }
 }
