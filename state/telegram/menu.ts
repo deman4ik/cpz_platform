@@ -75,15 +75,15 @@ function getSignalRobotMenu(ctx: any, robotId: string, subscribed: boolean) {
 
 function getFAQMenu(ctx: any) {
   return Extra.HTML().markup((m: any) => {
-    const buttons = Object.keys(scenes.faq.q).map(key => [
+    const buttons = Object.keys(scenes.faq.q).map(key =>
       m.callbackButton(
         ctx.i18n.t(`scenes.faq.q.${key}`),
         JSON.stringify({ a: "q", p: key.toString() }),
         false
       )
-    ]);
-
-    return m.inlineKeyboard(buttons);
+    );
+    const chunkedButtons = chunkArray(buttons, 2);
+    return m.inlineKeyboard(chunkedButtons);
   });
 }
 
