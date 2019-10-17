@@ -11,16 +11,16 @@ import { createFetchMethod } from "../../utils";
 type ExchangeName = "kraken" | "bitfinex";
 
 /**
- * Private Exchange Connector Service
+ * Private Exchange Connector Worker Service
  *
- * @class PrivateConnectorService
+ * @class PrivateConnectorWorkerService
  * @extends {Service}
  */
-class PrivateConnectorService extends Service {
+class PrivateConnectorWorkerService extends Service {
   /**
-   *Creates an instance of PrivateConnectorService.
+   *Creates an instance of PrivateConnectorWorkerService.
    * @param {ServiceBroker} broker
-   * @memberof PrivateConnectorService
+   * @memberof PrivateConnectorWorkerService
    */
   constructor(broker: ServiceBroker) {
     super(broker);
@@ -46,7 +46,7 @@ class PrivateConnectorService extends Service {
   /**
    * Retry exchange requests options
    *
-   * @memberof PrivateConnectorService
+   * @memberof PrivateConnectorWorkerService
    */
   retryOptions = {
     retries: 100,
@@ -57,7 +57,7 @@ class PrivateConnectorService extends Service {
   /**
    * Custom fetch method with proxy agent
    *
-   * @memberof PrivateConnectorService
+   * @memberof PrivateConnectorWorkerService
    */
   _fetch = createFetchMethod(process.env.PROXY_ENDPOINT);
 
@@ -66,7 +66,7 @@ class PrivateConnectorService extends Service {
    *
    * @param {ExchangeName} exchange
    * @returns {Promise<void>}
-   * @memberof PrivateConnectorService
+   * @memberof PrivateConnectorWorkerService
    */
   async initConnector(exchange: ExchangeName): Promise<void> {
     if (!(exchange in this.publicConnectors)) {
@@ -91,7 +91,7 @@ class PrivateConnectorService extends Service {
    * @param {string} asset
    * @param {string} currency
    * @returns {string}
-   * @memberof PrivateConnectorService
+   * @memberof PrivateConnectorWorkerService
    */
   getSymbol(asset: string, currency: string): string {
     return `${asset}/${currency}`;
@@ -140,4 +140,4 @@ class PrivateConnectorService extends Service {
   }
 }
 
-export = PrivateConnectorService;
+export = PrivateConnectorWorkerService;
