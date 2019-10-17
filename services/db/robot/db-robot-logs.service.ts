@@ -32,7 +32,12 @@ class RobotLogsService extends Service {
     });
   }
 
-  async handleRobotLog(ctx: Context) {
+  async handleRobotLog(
+    ctx: Context<{
+      robotId: string;
+      [key: string]: any;
+    }>
+  ) {
     try {
       const { robotId } = ctx.params;
       await this.adapter.insert({

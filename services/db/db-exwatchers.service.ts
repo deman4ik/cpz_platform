@@ -60,7 +60,11 @@ class ExwatchersService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(
+    ctx: Context<{
+      entity: cpz.Exwatcher;
+    }>
+  ) {
     try {
       const {
         id,

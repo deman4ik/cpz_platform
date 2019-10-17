@@ -1,4 +1,4 @@
-import { ServiceSchema, Errors } from "moleculer";
+import { ServiceSchema, Context, Errors } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -66,7 +66,7 @@ const CandlesService: ServiceSchema = {
           }
         }
       },
-      async handler(ctx) {
+      async handler(ctx: Context<{ entities: cpz.Candle[] }>) {
         try {
           const values = ctx.params.entities.map((candle: cpz.DBCandle) => {
             const val = {
@@ -88,7 +88,7 @@ const CandlesService: ServiceSchema = {
 
           const query = `INSERT INTO candles30 (id, exchange, asset, currency, open, high, low, close, volume, time, timestamp, type) VALUES
           ${values
-            .map((_: cpz.DBCandle) => {
+            .map(_ => {
               return "(?)";
             })
             .join(",")} 

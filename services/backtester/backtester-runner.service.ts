@@ -155,7 +155,16 @@ class BacktesterRunnerService extends Service {
     );
   }
 
-  async start(ctx: Context) {
+  async start(
+    ctx: Context<{
+      id: string;
+      robotId: string;
+      dateFrom: string;
+      dateTo: string;
+      settings: cpz.BacktesterSettings;
+      robotSettings: cpz.RobotSettings;
+    }>
+  ) {
     const id = ctx.params.id || uuid();
     try {
       const { robotId, dateFrom, dateTo, settings, robotSettings } = ctx.params;
@@ -187,14 +196,19 @@ class BacktesterRunnerService extends Service {
     }
   }
 
-  async clean(ctx: Context) {
+  async clean(
+    ctx: Context<{
+      period?: number;
+      status?: string;
+    }>
+  ) {
     return await this.getQueue(cpz.Queue.backtest).clean(
       ctx.params.period || 5000,
       ctx.params.status || "completed"
     );
   }
 
-  async getStatus(ctx: Context) {
+  async getStatus(ctx: Context<{ id: string }>) {
     const job = await this.getQueue(cpz.Queue.backtest).getJob(ctx.params.id);
     const status = await job.getState();
     return { id: ctx.params.id, status };

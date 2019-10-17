@@ -29,6 +29,8 @@ export namespace cpz {
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
     PUBLIC_CONNECTOR = "public-connector",
+    PRIVATE_CONNECTOR_RUNNER = "private-connector-runner",
+    PRIVATE_CONNECTOR_WORKER = "private-connector-worker",
     ROBOT_RUNNER = "robot-runner",
     ROBOT_WORKER = "robot-worker",
     BACKTESTER_RUNNER = "backtester-runner",

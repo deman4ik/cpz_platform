@@ -148,7 +148,12 @@ class RobotRunnerService extends Service {
       });
   }
 
-  async start(ctx: Context) {
+  async start(
+    ctx: Context<{
+      id: string;
+      dateFrom?: string;
+    }>
+  ) {
     const { id, dateFrom } = ctx.params;
     try {
       const {
@@ -252,7 +257,11 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async startUp(ctx: Context) {
+  async startUp(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     const { id } = ctx.params;
     try {
       const { status } = await this.broker.call(
@@ -288,7 +297,11 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async stop(ctx: Context) {
+  async stop(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     const { id } = ctx.params;
     try {
       const { status } = await this.broker.call(
@@ -323,7 +336,11 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async pause(ctx: Context) {
+  async pause(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     try {
       const { id } = ctx.params;
       let robotsToPause: { id: string; status: string }[] = [];
@@ -364,7 +381,11 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async resume(ctx: Context) {
+  async resume(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     try {
       const { id } = ctx.params;
       let robotIds: string[] = [];
@@ -401,9 +422,9 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async handleNewCandle(ctx: Context) {
+  async handleNewCandle(ctx: Context<cpz.Candle>) {
     try {
-      const candle: cpz.Candle = <cpz.Candle>ctx.params;
+      const candle: cpz.Candle = ctx.params;
       if (candle.type === cpz.CandleType.previous) return;
       const { exchange, asset, currency, timeframe, timestamp } = candle;
       const robots: cpz.RobotState[] = await this.broker.call(
@@ -437,9 +458,9 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async handleNewTick(ctx: Context) {
+  async handleNewTick(ctx: Context<cpz.ExwatcherTrade>) {
     try {
-      const tick: cpz.ExwatcherTrade = <cpz.ExwatcherTrade>ctx.params;
+      const tick: cpz.ExwatcherTrade = ctx.params;
       const { exchange, asset, currency, timestamp, price } = tick;
       const robots: cpz.RobotState[] = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.findActive`,
@@ -471,7 +492,11 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async handleBacktesterFinished(ctx: Context) {
+  async handleBacktesterFinished(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     try {
       const { id } = ctx.params;
       await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
@@ -488,7 +513,12 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async handleBacktesterFailed(ctx: Context) {
+  async handleBacktesterFailed(
+    ctx: Context<{
+      id: string;
+      error: any;
+    }>
+  ) {
     try {
       const { id, error } = ctx.params;
       await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {

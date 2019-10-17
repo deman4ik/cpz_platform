@@ -175,7 +175,15 @@ class ImporterRunnerService extends Service {
     );
   }
 
-  async startRecent(ctx: Context) {
+  async startRecent(
+    ctx: Context<{
+      exchange: string;
+      asset: string;
+      currency: string;
+      timeframes: cpz.Timeframe[];
+      amount?: number;
+    }>
+  ) {
     const id = uuid();
     try {
       const state: cpz.Importer = {
@@ -202,7 +210,16 @@ class ImporterRunnerService extends Service {
     }
   }
 
-  async startHistory(ctx: Context) {
+  async startHistory(
+    ctx: Context<{
+      exchange: string;
+      asset: string;
+      currency: string;
+      timeframes: cpz.Timeframe[];
+      dateFrom: string;
+      dateTo: string;
+    }>
+  ) {
     const id = uuid();
     try {
       let dateFrom;
@@ -251,14 +268,23 @@ class ImporterRunnerService extends Service {
     }
   }
 
-  async clean(ctx: Context) {
+  async clean(
+    ctx: Context<{
+      period?: number;
+      status?: string;
+    }>
+  ) {
     return await this.getQueue(cpz.Queue.importCandles).clean(
       ctx.params.period || 5000,
       ctx.params.status || "completed"
     );
   }
 
-  async getStatus(ctx: Context) {
+  async getStatus(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     const job = await this.getQueue(cpz.Queue.importCandles).getJob(
       ctx.params.id
     );

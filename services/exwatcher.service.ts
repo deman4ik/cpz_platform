@@ -76,7 +76,13 @@ class ExwatcherService extends Service {
           hooks: {
             before: "authAction"
           },
-          async handler(ctx) {
+          async handler(
+            ctx: Context<{
+              exchange: string;
+              asset: string;
+              currency: string;
+            }>
+          ) {
             return await this.addSubscription(
               ctx.params.exchange,
               ctx.params.asset,
@@ -111,7 +117,15 @@ class ExwatcherService extends Service {
           hooks: {
             before: "authAction"
           },
-          async handler(ctx) {
+          async handler(
+            ctx: Context<{
+              subscriptions: {
+                exchange: string;
+                asset: string;
+                currency: string;
+              }[];
+            }>
+          ) {
             try {
               await Promise.all(
                 ctx.params.subscriptions.map(
@@ -151,7 +165,13 @@ class ExwatcherService extends Service {
           hooks: {
             before: "authAction"
           },
-          async handler(ctx) {
+          async handler(
+            ctx: Context<{
+              exchange: string;
+              asset: string;
+              currency: string;
+            }>
+          ) {
             return await this.removeSubscription(
               ctx.params.exchange,
               ctx.params.asset,
@@ -186,7 +206,15 @@ class ExwatcherService extends Service {
           hooks: {
             before: "authAction"
           },
-          async handler(ctx) {
+          async handler(
+            ctx: Context<{
+              subscriptions: {
+                exchange: string;
+                asset: string;
+                currency: string;
+              }[];
+            }>
+          ) {
             try {
               await Promise.all(
                 ctx.params.subscriptions.map(
@@ -273,7 +301,11 @@ class ExwatcherService extends Service {
    * @param {Context} ctx
    * @memberof ExwatcherService
    */
-  async handleImporterFinishedEvent(ctx: Context) {
+  async handleImporterFinishedEvent(
+    ctx: Context<{
+      id: string;
+    }>
+  ) {
     const { id: importerId } = ctx.params;
     this.logger.info(`Importer ${importerId} finished!`);
     const subscription = Object.values(this.subscriptions).find(
@@ -288,7 +320,12 @@ class ExwatcherService extends Service {
    * @param {Context} ctx
    * @memberof ExwatcherService
    */
-  async handleImporterFailedEvent(ctx: Context) {
+  async handleImporterFailedEvent(
+    ctx: Context<{
+      id: string;
+      error: any;
+    }>
+  ) {
     const { id: importerId, error } = ctx.params;
     this.logger.warn(`Importer ${importerId} failed!`, error);
     const { id } = <cpz.Exwatcher>(

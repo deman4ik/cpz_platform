@@ -72,7 +72,7 @@ class UserSignalsService extends Service {
     });
   }
 
-  async getSignalRobots(ctx: Context) {
+  async getSignalRobots(ctx: Context<null, { user: cpz.User }>) {
     try {
       const { id: user_id } = ctx.meta.user;
       const query = `select  t.id,
@@ -89,7 +89,7 @@ class UserSignalsService extends Service {
     }
   }
 
-  async getSignalRobot(ctx: Context) {
+  async getSignalRobot(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
@@ -119,7 +119,7 @@ class UserSignalsService extends Service {
     }
   }
 
-  async getTelegramSubscriptions(ctx: Context) {
+  async getTelegramSubscriptions(ctx: Context<{ robotId: string }>) {
     try {
       const { robotId: robot_id } = ctx.params;
       const query = `select u.telegram_id, s.user_id 
@@ -147,7 +147,7 @@ class UserSignalsService extends Service {
 
   //TODO: email subscription
   //TODO: volume
-  async subscribe(ctx: Context) {
+  async subscribe(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
@@ -165,7 +165,7 @@ class UserSignalsService extends Service {
     }
   }
 
-  async unsubscribe(ctx: Context) {
+  async unsubscribe(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;

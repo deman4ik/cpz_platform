@@ -1,4 +1,4 @@
-import { Service, ServiceBroker, Errors } from "moleculer";
+import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import ccxt, { Exchange } from "ccxt";
 import Auth from "../../mixins/auth";
 import retry from "async-retry";
@@ -62,7 +62,9 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx) {
+          async handler(
+            ctx: Context<{ exchange: string; asset: string; currency: string }>
+          ) {
             return this.getMarket(
               ctx.params.exchange,
               ctx.params.asset,
@@ -82,7 +84,7 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx) {
+          async handler(ctx: Context<{ exchange: string }>) {
             return this.getTimeframes(ctx.params.exchange);
           }
         },
@@ -100,7 +102,13 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx): Promise<cpz.ExchangePrice> {
+          async handler(
+            ctx: Context<{
+              exchange: ExchangeName;
+              asset: string;
+              currency: string;
+            }>
+          ): Promise<cpz.ExchangePrice> {
             return this.getCurrentPrice(
               ctx.params.exchange,
               ctx.params.asset,
@@ -127,7 +135,14 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx): Promise<cpz.ExchangeCandle> {
+          async handler(
+            ctx: Context<{
+              exchange: ExchangeName;
+              asset: string;
+              currency: string;
+              timeframe: cpz.Timeframe;
+            }>
+          ): Promise<cpz.ExchangeCandle> {
             return this.getCurrentCandle(
               ctx.params.exchange,
               ctx.params.asset,
@@ -157,7 +172,16 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx): Promise<cpz.ExchangeCandle[]> {
+          async handler(
+            ctx: Context<{
+              exchange: ExchangeName;
+              asset: string;
+              currency: string;
+              timeframe: cpz.Timeframe;
+              dateFrom: string;
+              limit?: number;
+            }>
+          ): Promise<cpz.ExchangeCandle[]> {
             return this.getCandles(
               ctx.params.exchange,
               ctx.params.asset,
@@ -189,7 +213,16 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx): Promise<cpz.ExchangeCandle[]> {
+          async handler(
+            ctx: Context<{
+              exchange: ExchangeName;
+              asset: string;
+              currency: string;
+              timeframe: cpz.Timeframe;
+              dateFrom: string;
+              limit?: number;
+            }>
+          ): Promise<cpz.ExchangeCandle[]> {
             return this.getRawCandles(
               ctx.params.exchange,
               ctx.params.asset,
@@ -215,7 +248,15 @@ class PublicConnectorService extends Service {
             check: (err: Errors.MoleculerRetryableError) =>
               err && !!err.retryable
           },
-          async handler(ctx): Promise<cpz.ExchangeTrade[]> {
+          async handler(
+            ctx: Context<{
+              exchange: ExchangeName;
+              asset: string;
+              currency: string;
+              timeframe: cpz.Timeframe;
+              dateFrom: string;
+            }>
+          ): Promise<cpz.ExchangeTrade[]> {
             return await this.getTrades(
               ctx.params.exchange,
               ctx.params.asset,

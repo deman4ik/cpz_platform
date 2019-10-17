@@ -139,7 +139,7 @@ class BacktestsService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(ctx: Context<{ entity: cpz.BacktesterState }>) {
     try {
       const {
         id,

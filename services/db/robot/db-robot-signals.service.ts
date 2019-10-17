@@ -58,7 +58,7 @@ class RobotSignalsService extends Service {
     });
   }
 
-  async handleSignal(ctx: Context) {
+  async handleSignal(ctx: Context<cpz.SignalEvent>) {
     try {
       await this.adapter.insert({ id: uuid(), ...ctx.params });
     } catch (e) {

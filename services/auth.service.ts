@@ -140,7 +140,11 @@ class AuthService extends Service {
     };
   }
 
-  verifyToken(ctx: Context) {
+  verifyToken(
+    ctx: Context<{
+      token: string;
+    }>
+  ) {
     return jwt.verify(ctx.params.token, process.env.JWT_SECRET);
   }
 

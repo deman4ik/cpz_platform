@@ -216,7 +216,12 @@ class RobotPositionsService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(
+    ctx: Context<{
+      entity?: cpz.RobotPositionState;
+      entities?: cpz.RobotPositionState[];
+    }>
+  ) {
     try {
       if (
         !ctx.params.entity &&

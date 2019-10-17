@@ -45,7 +45,7 @@ class RobotJobsService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(ctx: Context<{ entity: cpz.RobotJob }>) {
     try {
       const { robotId, type, data }: cpz.RobotJob = ctx.params.entity;
       const value = Object.values({

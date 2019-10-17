@@ -216,7 +216,12 @@ class BacktestPositionsService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(
+    ctx: Context<{
+      entity?: cpz.BacktesterPositionState;
+      entities?: cpz.BacktesterPositionState[];
+    }>
+  ) {
     try {
       if (
         !ctx.params.entity &&

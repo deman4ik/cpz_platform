@@ -185,7 +185,7 @@ class BotService extends Service {
     }
   }
 
-  async broadcastMessage(ctx: Context) {
+  async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
     try {
       const users = [];
       if (ctx.params.userId) {

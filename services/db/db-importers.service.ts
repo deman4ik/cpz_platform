@@ -83,7 +83,7 @@ class ImportersService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(ctx: Context<{ entity: cpz.Importer }>) {
     try {
       const {
         id,

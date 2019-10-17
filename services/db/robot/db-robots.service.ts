@@ -166,7 +166,7 @@ class RobotsService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(ctx: Context<{ entity: cpz.RobotState }>) {
     try {
       const {
         id,
@@ -259,7 +259,20 @@ class RobotsService extends Service {
     }
   }
 
-  async import(ctx: Context) {
+  async import(
+    ctx: Context<{
+      entities: {
+        exchange: string;
+        asset: string;
+        currency: string;
+        timeframe: cpz.Timeframe;
+        strategy: string;
+        mod: string;
+        settings: cpz.RobotSettings;
+        available: number;
+      }[];
+    }>
+  ) {
     try {
       const strategiesList = await this.broker.call(
         `${cpz.Service.DB_STRATEGIES}.find`,
@@ -335,7 +348,7 @@ class RobotsService extends Service {
             currency,
             timeframe,
             strategies[strategy],
-            mode
+            `${mode}`
           ),
           name: createRobotName(
             exchange,
@@ -343,7 +356,7 @@ class RobotsService extends Service {
             currency,
             timeframe,
             strategies[strategy],
-            mode
+            `${mode}`
           ),
           exchange,
           asset,
@@ -405,7 +418,7 @@ class RobotsService extends Service {
     }
   }
 
-  async getRobotInfo(ctx: Context) {
+  async getRobotInfo(ctx: Context<{ id: string }>) {
     try {
       const { id } = ctx.params;
       const query = `select
@@ -521,7 +534,7 @@ class RobotsService extends Service {
     }
   }
 
-  async clear(ctx: Context) {
+  async clear(ctx: Context<{ robotId: string }>) {
     try {
       const query = `delete from robot_positions 
      where robot_id=:id`;

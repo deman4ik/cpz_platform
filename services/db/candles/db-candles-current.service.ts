@@ -78,7 +78,7 @@ class CandlesCurrentService extends Service {
     });
   }
 
-  async upsert(ctx: Context) {
+  async upsert(ctx: Context<{ entities: cpz.Candle[] }>) {
     try {
       const values = ctx.params.entities.map((candle: cpz.Candle) => {
         const val = {
@@ -101,7 +101,7 @@ class CandlesCurrentService extends Service {
 
       const query = `INSERT INTO candles_current (id, exchange, asset, currency, timeframe, open, high, low, close, volume, time, timestamp, type) VALUES
         ${values
-          .map((_: cpz.Candle) => {
+          .map(_ => {
             return "(?)";
           })
           .join(",")} 
