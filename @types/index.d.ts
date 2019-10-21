@@ -1,7 +1,7 @@
 import { ValidationSchema } from "fastest-validator";
 
-export interface GenericObject {
-  [key: string]: any;
+export interface GenericObject<T> {
+  [key: string]: T;
 }
 
 export namespace cpz {
@@ -25,6 +25,10 @@ export namespace cpz {
     DB_USERS = "db-users",
     DB_USER_SIGNALS = "db-user-signals",
     DB_USER_EXCHANGE_ACCS = "db-user-exchange-accs",
+    DB_USER_ROBOTS = "db-user-robots",
+    DB_USER_ORDERS = "db-user-orders",
+    DB_USER_POSITIONS = "db-user-positions",
+    DB_CONNECTOR_JOBS = "db-connector-jobs",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -78,6 +82,7 @@ export namespace cpz {
     stopping = "stopping",
     started = "started",
     stopped = "stopped",
+    stopRequested = "stopRequested",
     paused = "paused",
     finished = "finished",
     failed = "failed"
@@ -117,9 +122,22 @@ export namespace cpz {
     short = "short"
   }
 
+  const enum OrderDirection {
+    buy = "buy",
+    sell = "sell"
+  }
+
   const enum RobotPositionStatus {
     new = "new",
     open = "open",
+    closed = "closed"
+  }
+
+  const enum UserPositionStatus {
+    delayed = "delayed",
+    new = "new",
+    open = "open",
+    closeRequested = "closeRequested",
     closed = "closed"
   }
 
@@ -140,6 +158,13 @@ export namespace cpz {
     stop = "stop",
     limit = "limit",
     market = "market"
+  }
+
+  const enum OrderStatus {
+    new = "new",
+    open = "open",
+    closed = "closed",
+    canceled = "canceled"
   }
 
   const enum IndicatorType {
@@ -188,6 +213,12 @@ export namespace cpz {
   const enum UserExchangeAccStatus {
     valid = "valid",
     invalid = "invalid"
+  }
+
+  const enum ConnectorJobType {
+    create = "create",
+    cancel = "cancel",
+    check = "check"
   }
 
   type ImportType = "recent" | "history";
@@ -303,6 +334,32 @@ export namespace cpz {
     timestamp: string;
   }
 
+  interface Order {
+    id: string;
+    userExAccId: string;
+    userRobotId: string;
+    positionId: string;
+    userPositionId: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    action: cpz.TradeAction;
+    direction: cpz.OrderDirection;
+    type: cpz.OrderType;
+    signalPrice?: number;
+    price?: number;
+    volume: number;
+    params: GenericObject<any>;
+    createdAt: string;
+    status: OrderStatus;
+    exId?: string;
+    exTimestamp?: string;
+    exLastTradeAt?: string;
+    remaining?: number;
+    executed?: number;
+    lastCheckedAt?: string;
+    error?: any;
+  }
   interface Importer {
     id: string;
     exchange: string;
@@ -485,6 +542,26 @@ export namespace cpz {
     requiredHistoryMaxBars?: number;
   }
 
+  interface RobotTradeSettings {
+    slippage?: {
+      entry?: {
+        stepPercent: number;
+        count?: number;
+        timeout?: number;
+      };
+      exit?: {
+        stepPercent: number;
+        count?: number;
+        timeout?: number;
+      };
+    };
+    deviation?: {
+      entry?: number;
+      exit?: number;
+    };
+    orderTimeout?: number;
+    multiPosition?: boolean;
+  }
   interface RobotStatVals<T> {
     all?: T;
     long?: T;
@@ -523,9 +600,9 @@ export namespace cpz {
 
   interface RobotHead {
     id: string;
-    code?: string; //TODO: required
-    mod?: string;
-    name?: string;
+    code: string;
+    mod: string;
+    name: string;
   }
 
   interface RobotState extends RobotHead {
@@ -536,6 +613,7 @@ export namespace cpz {
     available?: number;
     strategyName: string;
     settings: RobotSettings;
+    tradeSettings: RobotTradeSettings;
     lastCandle?: Candle;
     state?: StrategyProps;
     hasAlerts?: boolean;
@@ -620,7 +698,7 @@ export namespace cpz {
     registrationCode?: string;
     refreshToken?: string;
     roles: UserRolesList;
-    settings: GenericObject;
+    settings: GenericObject<any>;
   }
 
   interface UserSignals {
@@ -637,6 +715,7 @@ export namespace cpz {
     data: string;
     iv: string;
   }
+
   interface UserExchangeKeys {
     key: EncryptedData;
     secret: EncryptedData;
@@ -650,5 +729,82 @@ export namespace cpz {
     name?: string;
     keys: UserExchangeKeys;
     status: UserExchangeAccStatus;
+    ordersCache: GenericObject<any>;
+  }
+
+  interface UserRobotSettings {
+    volume: number;
+    kraken?: {
+      leverage?: number;
+    };
+  }
+
+  interface UserRobotDB {
+    id: string;
+    userExAccId: string;
+    robotId: string;
+    settings: UserRobotSettings;
+    latestSignal?: SignalEvent;
+    status: Status;
+    startedAt?: string;
+    stoppedAt?: string;
+    statistics?: RobotStats;
+    equity?: RobotEquity;
+  }
+
+  interface UserRobotState extends UserRobotDB {
+    robot: {
+      exchange: string;
+      asset: string;
+      currency: string;
+      timeframe: Timeframe;
+      tradeSettings: RobotTradeSettings;
+    };
+  }
+
+  interface UserPositionDB {
+    id: string;
+    positionId: string;
+    userRobotId: string;
+    status: UserPositionStatus;
+    parentId?: string;
+    direction: PositionDirection;
+    entryStatus?: OrderStatus;
+    entryPrice?: number;
+    entryDate?: string;
+    entryVolume?: number;
+    entrySlippageCount: number;
+    entryOrderIds?: string[];
+    exitStatus?: OrderStatus;
+    exitPrice?: number;
+    exitDate?: string;
+    exitVolume?: number;
+    exitOrderIds?: string[];
+    exitSlippageCount: number;
+    reason?: string; //TODO ENUM
+    profit?: number;
+    barsHeld?: number;
+  }
+
+  interface UserPositionState extends UserPositionDB {
+    robot: {
+      exchange: string;
+      asset: string;
+      currency: string;
+      timeframe: Timeframe;
+      tradeSettings: RobotTradeSettings;
+    };
+    userRobot: {
+      settings: UserRobotSettings;
+    };
+    entryOrders?: Order[];
+    exitOrders?: Order[];
+  }
+
+  interface ConnectorJob {
+    id: string;
+    userExAccId: string;
+    type: ConnectorJobType;
+    orderId: string;
   }
 }

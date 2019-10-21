@@ -18,7 +18,7 @@ class RobotsService extends Service {
       settings: {
         graphql: {
           type: `
-          input RobotImportEntity {
+          input RobotCreateEntity {
             exchange: String!,
             asset: String!, 
             currency: String!, 
@@ -26,6 +26,7 @@ class RobotsService extends Service {
             strategy: String!, 
             mod: String, 
             settings: JSON!, 
+            tradeSettings: JSON!,
             available: Int
           }
           `
@@ -38,7 +39,7 @@ class RobotsService extends Service {
         define: {
           id: { type: Sequelize.STRING, primaryKey: true },
           code: Sequelize.STRING,
-          name: { type: Sequelize.STRING, allowNull: true },
+          name: { type: Sequelize.STRING },
           exchange: Sequelize.STRING,
           asset: Sequelize.STRING,
           currency: Sequelize.STRING,
@@ -46,6 +47,7 @@ class RobotsService extends Service {
           strategyName: { type: Sequelize.STRING, field: "strategy" },
           mod: { type: Sequelize.STRING },
           settings: Sequelize.JSONB,
+          tradeSettings: { type: Sequelize.JSONB, field: "tradeSettings" },
           available: Sequelize.INTEGER,
           status: Sequelize.STRING,
           startedAt: {
@@ -108,16 +110,6 @@ class RobotsService extends Service {
               type: "object",
               props: {
                 id: "string",
-                code: "string",
-                name: { type: "string", optional: true },
-                exchange: "string",
-                asset: "string",
-                currency: "string",
-                timeframe: { type: "number", integer: true },
-                strategyName: { type: "string" },
-                mod: { type: "string" },
-                settings: "object",
-                available: { type: "number", integer: true },
                 status: "string",
                 startedAt: { type: "string", optional: true },
                 stoppedAt: { type: "string", optional: true },
@@ -132,7 +124,7 @@ class RobotsService extends Service {
           },
           handler: this.upsert
         },
-        import: {
+        create: {
           params: {
             entities: {
               type: "array",
@@ -146,15 +138,16 @@ class RobotsService extends Service {
                   strategy: { type: "string" },
                   mod: { type: "string", optional: true },
                   settings: "object",
+                  tradeSettings: "object",
                   available: { type: "number", integer: true, optional: true }
                 }
               }
             }
           },
           graphql: {
-            mutation: "importRobots(entities: [RobotImportEntity!]!): Response!"
+            mutation: "createRobots(entities: [RobotCreateEntity!]!): Response!"
           },
-          handler: this.import
+          handler: this.create
         },
         clear: {
           params: {
@@ -170,16 +163,6 @@ class RobotsService extends Service {
     try {
       const {
         id,
-        code,
-        name,
-        exchange,
-        asset,
-        currency,
-        timeframe,
-        strategyName,
-        mod,
-        settings,
-        available,
         status,
         startedAt,
         stoppedAt,
@@ -192,16 +175,6 @@ class RobotsService extends Service {
       }: cpz.RobotState = ctx.params.entity;
       const value = Object.values({
         id,
-        code,
-        name,
-        exchange,
-        asset,
-        currency,
-        timeframe,
-        strategyName,
-        mod,
-        settings: JSON.stringify(settings),
-        available,
         status,
         startedAt,
         stoppedAt,
@@ -214,16 +187,6 @@ class RobotsService extends Service {
       });
       const query = `INSERT INTO robots 
         (   id,
-            code,
-            name,
-            exchange,
-            asset,
-            currency,
-            timeframe,
-            strategy,
-            mod,
-            settings,
-            available,
             status,
             started_at,
             stopped_at,
@@ -259,7 +222,7 @@ class RobotsService extends Service {
     }
   }
 
-  async import(
+  async create(
     ctx: Context<{
       entities: {
         exchange: string;
@@ -269,6 +232,7 @@ class RobotsService extends Service {
         strategy: string;
         mod: string;
         settings: cpz.RobotSettings;
+        tradeSettings: cpz.RobotTradeSettings;
         available: number;
       }[];
     }>
@@ -294,6 +258,7 @@ class RobotsService extends Service {
             strategy,
             mod,
             settings,
+            trade_settings,
             available
         ) 
          VALUES (?)
@@ -301,6 +266,7 @@ class RobotsService extends Service {
          DO UPDATE SET updated_at = now(),
          status = excluded.status,
          settings = excluded.settings,
+         trade_settings = excluded.trade_settings,
          indicators = excluded.indicators,
          state = excluded.state,
          last_candle = excluded.last_candle,
@@ -317,6 +283,7 @@ class RobotsService extends Service {
         strategy,
         mod,
         settings,
+        tradeSettings,
         available
       } of ctx.params.entities) {
         let mode = mod || 1;
@@ -365,6 +332,7 @@ class RobotsService extends Service {
           strategyName: strategy,
           mod: `${mode}`,
           settings: JSON.stringify(settings),
+          tradeSettings: JSON.stringify(tradeSettings),
           available
         });
         await this.adapter.db.query(query, {

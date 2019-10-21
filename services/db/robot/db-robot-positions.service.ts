@@ -39,7 +39,7 @@ class RobotPositionsService extends Service {
             allowNull: true
           },
           entryPrice: {
-            type: Sequelize.STRING,
+            type: Sequelize.NUMBER,
             field: "entry_price",
             allowNull: true,
             get: function() {

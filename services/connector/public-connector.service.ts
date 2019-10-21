@@ -275,7 +275,7 @@ class PublicConnectorService extends Service {
    * @type {{ [key: string]: Exchange }}
    * @memberof PublicConnectorService
    */
-  publicConnectors: { [key: string]: Exchange } = {};
+  connectors: { [key: string]: Exchange } = {};
 
   /**
    * Retry exchange requests options
@@ -303,13 +303,13 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   async initConnector(exchange: ExchangeName): Promise<void> {
-    if (!(exchange in this.publicConnectors)) {
-      this.publicConnectors[exchange] = new ccxt[exchange]({
+    if (!(exchange in this.connectors)) {
+      this.connectors[exchange] = new ccxt[exchange]({
         fetchImplementation: this._fetch
       });
       const call = async (bail: (e: Error) => void) => {
         try {
-          return await this.publicConnectors[exchange].loadMarkets();
+          return await this.connectors[exchange].loadMarkets();
         } catch (e) {
           if (e instanceof ccxt.NetworkError) throw e;
           bail(e);
@@ -342,7 +342,7 @@ class PublicConnectorService extends Service {
    */
   async getMarket(exchange: ExchangeName, asset: string, currency: string) {
     await this.initConnector(exchange);
-    const response: ccxt.Market = await this.publicConnectors[exchange].market(
+    const response: ccxt.Market = await this.connectors[exchange].market(
       this.getSymbol(asset, currency)
     );
     let loadFrom;
@@ -408,7 +408,7 @@ class PublicConnectorService extends Service {
     await this.initConnector(exchange);
     const timeframes: cpz.ExchangeTimeframes = {};
 
-    Object.keys(this.publicConnectors[exchange].timeframes).forEach(key => {
+    Object.keys(this.connectors[exchange].timeframes).forEach(key => {
       const timeframe = Timeframe.stringToTimeframe(key);
       if (timeframe) timeframes[key] = timeframe;
     });
@@ -432,7 +432,7 @@ class PublicConnectorService extends Service {
     await this.initConnector(exchange);
     const call = async (bail: (e: Error) => void) => {
       try {
-        return await this.publicConnectors[exchange].fetchTicker(
+        return await this.connectors[exchange].fetchTicker(
           this.getSymbol(asset, currency)
         );
       } catch (e) {
@@ -471,12 +471,12 @@ class PublicConnectorService extends Service {
   ): Promise<cpz.ExchangeCandle> {
     await this.initConnector(exchange);
     const params = getCurrentCandleParams(
-      this.publicConnectors[exchange].timeframes,
+      this.connectors[exchange].timeframes,
       timeframe
     );
     const call = async (bail: (e: Error) => void) => {
       try {
-        return await this.publicConnectors[exchange].fetchOHLCV(
+        return await this.connectors[exchange].fetchOHLCV(
           this.getSymbol(asset, currency),
           params.timeframeStr,
           params.dateFrom,
@@ -584,7 +584,7 @@ class PublicConnectorService extends Service {
 
     const call = async (bail: (e: Error) => void) => {
       try {
-        return await this.publicConnectors[exchange].fetchOHLCV(
+        return await this.connectors[exchange].fetchOHLCV(
           this.getSymbol(asset, currency),
           str,
           dayjs.utc(dateFrom).valueOf(),
@@ -649,7 +649,7 @@ class PublicConnectorService extends Service {
   ): Promise<cpz.ExchangeCandle[]> {
     await this.initConnector(exchange);
     const params = getCandlesParams(
-      this.publicConnectors[exchange].timeframes,
+      this.connectors[exchange].timeframes,
       timeframe,
       dateFrom,
       limit
@@ -659,7 +659,7 @@ class PublicConnectorService extends Service {
 
     const call = async (bail: (e: Error) => void) => {
       try {
-        return await this.publicConnectors[exchange].fetchOHLCV(
+        return await this.connectors[exchange].fetchOHLCV(
           this.getSymbol(asset, currency),
           params.timeframeStr,
           params.dateFrom,
@@ -734,7 +734,7 @@ class PublicConnectorService extends Service {
 
       const call = async (bail: (e: Error) => void) => {
         try {
-          return await this.publicConnectors[exchange].fetchTrades(
+          return await this.connectors[exchange].fetchTrades(
             this.getSymbol(asset, currency),
             since,
             1000,

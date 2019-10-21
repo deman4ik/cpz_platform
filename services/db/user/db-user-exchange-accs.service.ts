@@ -32,7 +32,8 @@ class UserExchangeAccsService extends Service {
           exchange: { type: Sequelize.STRING },
           name: { type: Sequelize.STRING, allowNull: true },
           keys: { type: Sequelize.JSONB },
-          status: { type: Sequelize.STRING }
+          status: { type: Sequelize.STRING },
+          ordersCache: { type: Sequelize.JSONB, field: "orders_cache" }
         },
         options: {
           freezeTableName: true,
@@ -82,7 +83,17 @@ class UserExchangeAccsService extends Service {
         keys: { key, secret, pass }
       } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      //TODO: Check Keys
+
+      await this.broker.call(
+        `${cpz.Service.PRIVATE_CONNECTOR_WORKER}.checkAPIKeys`,
+        {
+          exchange,
+          key,
+          secret,
+          pass
+        }
+      );
+
       const encryptedKeys: cpz.UserExchangeKeys = {
         key: await encrypt(userId, key),
         secret: await encrypt(userId, secret),
@@ -94,7 +105,8 @@ class UserExchangeAccsService extends Service {
         exchange,
         name,
         keys: encryptedKeys,
-        status: cpz.UserExchangeAccStatus.valid
+        status: cpz.UserExchangeAccStatus.valid,
+        ordersCache: {}
       };
       if (id) {
         const existed = await this.adapter.findById(id);
