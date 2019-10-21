@@ -613,7 +613,7 @@ export namespace cpz {
     available?: number;
     strategyName: string;
     settings: RobotSettings;
-    tradeSettings: RobotTradeSettings;
+    tradeSettings?: RobotTradeSettings;
     lastCandle?: Candle;
     state?: StrategyProps;
     hasAlerts?: boolean;

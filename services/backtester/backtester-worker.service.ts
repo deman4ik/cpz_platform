@@ -115,10 +115,22 @@ class BacktesterWorkerService extends Service {
         { id: robotId }
       );
 
-      const { exchange, asset, currency, timeframe, strategyName } = robotState;
+      const {
+        exchange,
+        asset,
+        currency,
+        timeframe,
+        strategyName,
+        code,
+        mod,
+        name
+      } = robotState;
 
       const robot = new Robot({
         id: robotId,
+        code,
+        mod,
+        name,
         exchange,
         asset,
         currency,
