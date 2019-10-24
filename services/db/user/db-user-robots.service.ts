@@ -18,10 +18,9 @@ class UserRobotsService extends Service {
           userExAccId: { type: Sequelize.UUID, field: "user_ex_acc_id" },
           robotId: { type: Sequelize.UUID, field: "robot_id" },
           settings: Sequelize.JSONB,
-          latestSignals: {
+          internalState: {
             type: Sequelize.JSONB,
-            allowNull: true,
-            field: "latest_signals"
+            field: "internal_state"
           },
           status: Sequelize.STRING,
           startedAt: {

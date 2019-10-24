@@ -60,7 +60,6 @@ class RobotWorkerService extends Service {
         [cpz.Queue.runRobot]: {
           concurrency: 100,
           async process(job: Job) {
-            this.logger.info(`Running robot ${job.id}`);
             await this.processJobs(job.id);
             return { success: true, id: job.id };
           }

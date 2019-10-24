@@ -26,6 +26,8 @@ export namespace cpz {
     DB_USER_SIGNALS = "db-user-signals",
     DB_USER_EXCHANGE_ACCS = "db-user-exchange-accs",
     DB_USER_ROBOTS = "db-user-robots",
+    DB_USER_ROBOT_JOBS = "db-user-robot-jobs",
+    DB_USER_ROBOT_HISTORY = "db-user-robot-history",
     DB_USER_ORDERS = "db-user-orders",
     DB_USER_POSITIONS = "db-user-positions",
     DB_CONNECTOR_JOBS = "db-connector-jobs",
@@ -39,8 +41,8 @@ export namespace cpz {
     ROBOT_WORKER = "robot-worker",
     BACKTESTER_RUNNER = "backtester-runner",
     BACKTESTER_WORKER = "backtester-worker",
-    TRADER_RUNNER = "trader-runner",
-    TRADER_WORKER = "trader-worker",
+    USER_ROBOT_RUNNER = "user-robot-runner",
+    USER_ROBOT_WORKER = "user-robot-worker",
     AUTH = "auth",
     API = "api"
   }
@@ -59,20 +61,26 @@ export namespace cpz {
     BACKTESTER_FAILED = "backtester.failed",
     BACKTESTER_FAILED_HISTORY = "backtester.failed.history",
     ROBOT_STARTED = "robot.started",
+    ROBOT_STARTING = "robot.starting",
     ROBOT_STOPPED = "robot.stopped",
     ROBOT_UPDATED = "robot.updated",
+    ROBOT_PAUSED = "robot.paused",
+    ROBOT_RESUMED = "robot.resumed",
     ROBOT_FAILED = "robot.failed",
     ROBOT_LOG = "robot.log",
     ROBOT_WORKER_RELOAD_CODE = "robot-worker.reload-code",
-    TRADER_STARTED = "trader.started",
-    TRADER_STOPPED = "trader.stopped",
-    TRADER_UPDATED = "trader.updated",
-    TRADER_PAUSED = "trader.paused",
-    TRADER_FAILED = "trader.failed",
+    USER_ROBOT_STARTED = "user-robot.started",
+    USER_ROBOT_STOPPED = "user-robot.stopped",
+    USER_ROBOT_UPDATED = "user-robot.updated",
+    USER_ROBOT_PAUSED = "user-robot.paused",
+    USER_ROBOT_RESUMED = "user-robot.resumed",
+    USER_ROBOT_FAILED = "user-robot.failed",
     CANDLE_NEW = "candle.new",
     TICK_NEW = "tick.new",
     SIGNAL_ALERT = "signal.alert",
-    SIGNAL_TRADE = "signal.trade"
+    SIGNAL_TRADE = "signal.trade",
+    ORDER_STATUS = "order.status",
+    ORDER_ERROR = "order.error"
   }
 
   const enum Status {
@@ -207,16 +215,26 @@ export namespace cpz {
   const enum Queue {
     importCandles = "importCandles",
     runRobot = "runRobot",
-    backtest = "backtest"
+    backtest = "backtest",
+    connector = "connector",
+    runUserRobot = "runUserRobot"
   }
 
   const enum UserExchangeAccStatus {
-    valid = "valid",
+    enabled = "enabled",
+    disabled = "disabled",
     invalid = "invalid"
+  }
+
+  const enum UserRobotJobType {
+    stop = "stop",
+    pause = "pause",
+    signal = "signal"
   }
 
   const enum ConnectorJobType {
     create = "create",
+    recreate = "recreate",
     cancel = "cancel",
     check = "check"
   }
@@ -309,10 +327,21 @@ export namespace cpz {
     data: T;
   }
 
-  interface AlertInfo {
+  interface RobotEventData extends GenericObject<any> {
+    robotId: string;
+  }
+
+  interface UserRobotEventData extends GenericObject<any> {
+    userRobotId: string;
+  }
+
+  interface TradeInfo {
     action: TradeAction;
     orderType: OrderType;
     price: number;
+  }
+
+  interface AlertInfo extends TradeInfo {
     candleTimestamp: string;
   }
 
@@ -739,12 +768,16 @@ export namespace cpz {
     };
   }
 
+  interface UserRobotInternalState {
+    latestSignal?: SignalEvent;
+    posLastNumb: GenericObject<number>;
+  }
   interface UserRobotDB {
     id: string;
     userExAccId: string;
     robotId: string;
     settings: UserRobotSettings;
-    latestSignal?: SignalEvent;
+    internalState: UserRobotInternalState;
     status: Status;
     startedAt?: string;
     stoppedAt?: string;
@@ -760,10 +793,36 @@ export namespace cpz {
       timeframe: Timeframe;
       tradeSettings: RobotTradeSettings;
     };
+    positions: UserPositionState[];
   }
 
+  class UserRobot {
+    constructor(state: UserRobotState);
+    handleSignal(signal: SignalEvent): void;
+    state: {
+      userRobot: UserRobotDB;
+      positions: UserPositionDB[];
+      connectorJobs: ConnectorJob[];
+      orders: Order[];
+      eventsToSend: Events<UserRobotEventData>[];
+    };
+    _log(...args: any): void;
+  }
+  interface UserRobotJob {
+    id: string;
+    userRobotId: string;
+    type: UserRobotJobType;
+    data?: SignalEvent | string[];
+  }
+
+  interface UserPositionInternalState {
+    entrySlippageCount: number;
+    exitSlippageCount: number;
+  }
   interface UserPositionDB {
     id: string;
+    prefix: string;
+    code: string;
     positionId: string;
     userRobotId: string;
     status: UserPositionStatus;
@@ -773,14 +832,13 @@ export namespace cpz {
     entryPrice?: number;
     entryDate?: string;
     entryVolume?: number;
-    entrySlippageCount: number;
     entryOrderIds?: string[];
     exitStatus?: OrderStatus;
     exitPrice?: number;
     exitDate?: string;
     exitVolume?: number;
     exitOrderIds?: string[];
-    exitSlippageCount: number;
+    internalState: UserPositionInternalState;
     reason?: string; //TODO ENUM
     profit?: number;
     barsHeld?: number;
@@ -795,10 +853,25 @@ export namespace cpz {
       tradeSettings: RobotTradeSettings;
     };
     userRobot: {
+      userExAccId: string;
       settings: UserRobotSettings;
     };
     entryOrders?: Order[];
     exitOrders?: Order[];
+  }
+
+  class UserPosition {
+    constructor(state: cpz.UserPositionState);
+    id: string;
+    prefix: string;
+    code: string;
+    positionId: string;
+    status: UserPositionStatus;
+    parentId?: string;
+    state: UserPositionDB;
+    connectorJobs: ConnectorJob[];
+    ordersToSave: Order[];
+    _log(...args: any): void;
   }
 
   interface ConnectorJob {

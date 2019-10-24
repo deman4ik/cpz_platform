@@ -17,6 +17,8 @@ class UserPositionsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           positionId: { type: Sequelize.UUID, field: "position_id" },
           userRobotId: { type: Sequelize.UUID, field: "user_robot_id" },
+          prefix: Sequelize.STRING,
+          code: Sequelize.STRING,
           parentId: {
             type: Sequelize.STRING,
             field: "parent_id",
@@ -53,14 +55,6 @@ class UserPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryVolume");
-              return (value && +value) || value;
-            }
-          },
-          entrySlippageCount: {
-            type: Sequelize.INTEGER,
-            field: "entry_slippage_count",
-            get: function() {
-              const value = this.getDataValue("entrySlippageCount");
               return (value && +value) || value;
             }
           },
@@ -101,19 +95,12 @@ class UserPositionsService extends Service {
               return (value && +value) || value;
             }
           },
-          exitSlippageCount: {
-            type: Sequelize.INTEGER,
-            field: "exit_slippage_count",
-            get: function() {
-              const value = this.getDataValue("exitSlippageCount");
-              return (value && +value) || value;
-            }
-          },
           exitOrderIds: {
             type: Sequelize.JSONB,
             field: "exit_order_ids",
             allowNull: true
           },
+          internalState: { type: Sequelize.JSONB, field: "internal_state" },
           reason: { type: Sequelize.STRING, allowNull: true },
           profit: {
             type: Sequelize.NUMBER,

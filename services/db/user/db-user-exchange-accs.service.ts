@@ -105,7 +105,7 @@ class UserExchangeAccsService extends Service {
         exchange,
         name,
         keys: encryptedKeys,
-        status: cpz.UserExchangeAccStatus.valid,
+        status: cpz.UserExchangeAccStatus.enabled,
         ordersCache: {}
       };
       if (id) {

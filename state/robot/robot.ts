@@ -36,7 +36,7 @@ class Robot {
   _stoppedAt: string;
   _statistics: cpz.RobotStats;
   _equity: cpz.RobotEquity;
-  _eventsToSend: cpz.Events<any>[];
+  _eventsToSend: cpz.Events<cpz.RobotEventData | cpz.SignalEvent>[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
   _log = console.log;
@@ -104,14 +104,14 @@ class Robot {
   }
 
   get alertEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
-    return this._eventsToSend.filter(
-      ({ type }) => type === cpz.Event.SIGNAL_ALERT
+    return <cpz.Events<cpz.SignalEvent>[]>(
+      this._eventsToSend.filter(({ type }) => type === cpz.Event.SIGNAL_ALERT)
     );
   }
 
   get tradeEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
-    return this._eventsToSend.filter(
-      ({ type }) => type === cpz.Event.SIGNAL_TRADE
+    return <cpz.Events<cpz.SignalEvent>[]>(
+      this._eventsToSend.filter(({ type }) => type === cpz.Event.SIGNAL_TRADE)
     );
   }
 
@@ -162,7 +162,6 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STARTED,
       data: {
-        eventType: cpz.Event.ROBOT_STARTED,
         robotId: this._id
       }
     });
@@ -175,18 +174,16 @@ class Robot {
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_STOPPED,
       data: {
-        eventType: cpz.Event.ROBOT_STOPPED,
         robotId: this._id
       }
     });
   }
 
-  update(settings: { [key: string]: any }) {
+  update(settings: cpz.RobotSettings) {
     this._settings = { ...this._settings, ...settings };
     this._eventsToSend.push({
       type: cpz.Event.ROBOT_UPDATED,
       data: {
-        eventType: cpz.Event.ROBOT_UPDATED,
         robotId: this._id
       }
     });
@@ -194,6 +191,12 @@ class Robot {
 
   pause() {
     this._status = cpz.Status.paused;
+    this._eventsToSend.push({
+      type: cpz.Event.ROBOT_PAUSED,
+      data: {
+        robotId: this._id
+      }
+    });
   }
 
   setError(err: any) {

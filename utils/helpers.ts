@@ -236,6 +236,22 @@ const equals = (a: any, b: any): boolean => {
   return keys.every(k => equals(a[k], b[k]));
 };
 
+/**
+ * Flattens an array up to the specified depth.
+ *
+ * @param {any[]} arr
+ * @param {number} [depth=1]
+ * @returns {any[]}
+ */
+function flatten(arr: any[], depth = 1): any[] {
+  if (!arr || !Array.isArray(arr) || arr.length === 0) return arr;
+  return arr.reduce(
+    (a, v) =>
+      a.concat(depth > 1 && Array.isArray(v) ? flatten(v, depth - 1) : v),
+    []
+  );
+}
+
 export {
   sortAsc,
   sortDesc,
@@ -253,5 +269,6 @@ export {
   divideRound,
   underscoreToCamelCaseKeys,
   equals,
-  average
+  average,
+  flatten
 };

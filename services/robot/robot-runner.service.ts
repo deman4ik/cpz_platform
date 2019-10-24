@@ -412,6 +412,7 @@ class RobotRunnerService extends Service {
               id: robotId,
               status: cpz.Status.started
             });
+            await this.broker.emit(`${cpz.Event.ROBOT_RESUMED}`, { robotId });
           })
         );
 

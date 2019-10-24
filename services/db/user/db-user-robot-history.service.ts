@@ -5,18 +5,18 @@ import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 
-class RobotHistoryService extends Service {
+class UserRobotHistoryService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
-      name: cpz.Service.DB_ROBOT_HISTORY,
+      name: cpz.Service.DB_USER_ROBOT_HISTORY,
       mixins: [DbService],
       adapter: SqlAdapter,
       model: {
-        name: "robot_history",
+        name: "user_robot_history",
         define: {
           id: { type: Sequelize.UUID, primaryKey: true },
-          robotId: { type: Sequelize.STRING, field: "robot_id" },
+          userRobotId: { type: Sequelize.STRING, field: "user_robot_id" },
           type: Sequelize.STRING,
           data: { type: Sequelize.JSONB, allowNull: true }
         },
@@ -28,17 +28,17 @@ class RobotHistoryService extends Service {
         }
       },
       events: {
-        ["robot.*"]: this.handleRobotEvents
+        ["user-robot.*"]: this.handleUserRobotEvents
       }
     });
   }
 
-  async handleRobotEvents(ctx: Context<cpz.RobotEventData>) {
+  async handleUserRobotEvents(ctx: Context<cpz.UserRobotEventData>) {
     try {
-      const { robotId } = ctx.params;
+      const { userRobotId } = ctx.params;
       await this.adapter.insert({
         id: uuid(),
-        robotId,
+        userRobotId,
         type: ctx.eventName,
         data: ctx.params
       });
@@ -48,4 +48,4 @@ class RobotHistoryService extends Service {
   }
 }
 
-export = RobotHistoryService;
+export = UserRobotHistoryService;

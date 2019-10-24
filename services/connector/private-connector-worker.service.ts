@@ -1,5 +1,7 @@
 import Moleculer, { Service, ServiceBroker, Errors, Context } from "moleculer";
 import ccxt, { Exchange, Order } from "ccxt";
+import QueueService from "moleculer-bull";
+import { Job } from "bull";
 import retry from "async-retry";
 import { cpz, GenericObject } from "../../@types";
 import dayjs from "../../lib/dayjs";
@@ -8,6 +10,7 @@ import { createFetchMethod, decrypt } from "../../utils";
  * Available exchanges
  */
 type ExchangeName = "kraken" | "bitfinex";
+//TODO: invalidate user exwatcher account on error
 
 /**
  * Private Exchange Connector Worker Service
@@ -25,6 +28,37 @@ class PrivateConnectorWorkerService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.PRIVATE_CONNECTOR_WORKER,
+      dependencies: [
+        cpz.Service.DB_CONNECTOR_JOBS,
+        cpz.Service.DB_USER_ORDERS,
+        cpz.Service.DB_USER_EXCHANGE_ACCS,
+        cpz.Service.PUBLIC_CONNECTOR
+      ],
+      mixins: [
+        QueueService({
+          redis: {
+            host: process.env.REDIS_HOST,
+            port: process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD,
+            tls: process.env.REDIS_TLS
+          },
+          settings: {
+            lockDuration: 20000,
+            lockRenewTime: 5000,
+            stalledInterval: 30000,
+            maxStalledCount: 1
+          }
+        })
+      ],
+      queues: {
+        [cpz.Queue.connector]: {
+          concurrency: 100,
+          async process(job: Job) {
+            await this.processJobs(job.id);
+            return { success: true, id: job.id };
+          }
+        }
+      },
       /**
        * Actions
        */
@@ -334,13 +368,19 @@ class PrivateConnectorWorkerService extends Service {
       }
 
       await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, order);
+      await this.broker.emit(cpz.Event.ORDER_STATUS, order);
     } catch (err) {
       this.logger.error(err);
-      await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, {
+      const failedOrder = {
         ...order,
         lastCheckedAt: dayjs.utc().toISOString(),
         error: err
-      });
+      };
+      await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.update`,
+        failedOrder
+      );
+      await this.broker.emit(cpz.Event.ORDER_ERROR, failedOrder);
       throw err;
     }
   }
