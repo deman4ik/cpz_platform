@@ -113,6 +113,20 @@ class UserSignalsService extends Service {
               const value = this.getDataValue("createdAt");
               return (value && value.toISOString()) || value;
             }
+          },
+          nextJobAt: {
+            type: Sequelize.DATE,
+            field: "next_job_at",
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("nextJobAt");
+              return (value && value.toISOString()) || value;
+            }
+          },
+          nextJob: {
+            type: Sequelize.JSONB,
+            field: "next_job",
+            allowNull: true
           }
         },
         options: {
@@ -121,8 +135,23 @@ class UserSignalsService extends Service {
           createdAt: "created_at",
           updatedAt: "updated_at"
         }
+      },
+      actions: {
+        getUserExAccsWithJobs: this.getUserExAccsWithJobs
       }
     });
+  }
+
+  async getUserExAccsWithJobs(ctx: Context) {
+    try {
+      const query = `select user_ex_acc_id from user_orders where next_job_at is not null and next_job_at <= now() group by user_ex_acc_id;`;
+      return await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
   }
 }
 

@@ -6,6 +6,7 @@ import retry from "async-retry";
 import { cpz, GenericObject } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import { createFetchMethod, decrypt } from "../../utils";
+import { ORDER_CHECK_TIMEOUT } from "../../config";
 /**
  * Available exchanges
  */
@@ -207,7 +208,7 @@ class PrivateConnectorWorkerService extends Service {
         }
       );
       if (nextJob) {
-        const exchangeAcc = await this.broker.call(
+        const exchangeAcc: cpz.UserExchangeAccount = await this.broker.call(
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
           { id: userExAccId }
         );
@@ -216,6 +217,13 @@ class PrivateConnectorWorkerService extends Service {
             "Failed to get user exchange account",
             404,
             "ERR_NOT_FOUND",
+            { userExAccId }
+          );
+        if (exchangeAcc.status !== cpz.UserExchangeAccStatus.enabled)
+          throw new Errors.MoleculerError(
+            "User Excahnge Account is not enabled",
+            500,
+            "ERR_INVALID_STATUS",
             { userExAccId }
           );
         await this.initConnector(exchangeAcc);
@@ -288,99 +296,173 @@ class PrivateConnectorWorkerService extends Service {
     }
   }
 
+  async getNextOrder(userExAccId: string) {
+    try {
+      const [order] = await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.find`,
+        {
+          sort: ["last_checked_at", "nextJobAt"],
+          query: {
+            userExAccId,
+            nextJob: { $ne: null },
+            nextJobAt: { $lte: dayjs.utc().toISOString() }
+          }
+        }
+      );
+      return order;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async run(
     exAcc: cpz.UserExchangeAccount,
     job: cpz.ConnectorJob
   ): Promise<cpz.Order> {
     const { exchange } = exAcc;
-    const { userExAccId, type, orderId } = job;
-    let order;
+    const { userExAccId, type, data } = job;
     try {
-      order = await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.get`, {
-        id: orderId
-      });
-      if (!order)
-        throw new Errors.MoleculerError(
-          "Failed to get order",
-          404,
-          "ERR_NOT_FOUND",
-          { orderId }
-        );
-      if (order.exchange !== exchange)
-        throw new Errors.MoleculerError(
-          "Wrong exchange",
-          400,
-          "ERR_INVALID_PARAMS",
-          { exAcc, job, order }
-        );
-    } catch (err) {
-      this.logger.error(err);
-      throw err;
-    }
-    try {
-      if (type === cpz.ConnectorJobType.create) {
-        if (order.exId || order.status !== cpz.OrderStatus.new) {
-          this.logger.error(
-            `Failed to create order #${order.id} - order already processed!`
-          );
-          return {
-            ...order,
-            error: new Error(`Failed to create order - already processed!`)
-          };
-        }
-        order = await this.createOrder(order);
-      } else if (type === cpz.ConnectorJobType.cancel) {
-        if (!order.exId) {
-          this.logger.error(
-            `Failed to cancel order #${order.id} - no exchange id!`
-          );
-          return {
-            ...order,
-            error: new Error(`Failed to cancel order - no exchange id!`)
-          };
-        }
-        if (
-          order.status === cpz.OrderStatus.canceled ||
-          order.status === cpz.OrderStatus.closed
-        ) {
-          return order;
-        }
-        order = await this.cancelOrder(order);
-      } else if (type === cpz.ConnectorJobType.check) {
-        if (!order.exId) {
-          this.logger.error(
-            `Failed to check order #${order.id} - no exchange id!`
-          );
-          return {
-            ...order,
-            error: new Error(`Failed to check order - no exchange id!`)
-          };
-        }
-        if (order.status === cpz.OrderStatus.closed) return order;
-        order = await this.checkOrder(order);
-      } else {
-        throw new Errors.MoleculerError(
-          "Wrong connector job type",
-          400,
-          "ERR_INVALID_PARAMS",
-          { job }
-        );
-      }
+      if (type === cpz.ConnectorJobType.order) {
+        let order = await this.getNextOrder(userExAccId);
 
-      await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, order);
-      await this.broker.emit(cpz.Event.ORDER_STATUS, order);
+        if (order) {
+          while (order) {
+            if (order.exchange !== exchange)
+              throw new Errors.MoleculerError(
+                "Wrong exchange",
+                400,
+                "ERR_INVALID_PARAMS",
+                { exAcc, job, order }
+              );
+            const {
+              nextJob: { type: orderJobType, data: orderJobData }
+            } = order;
+            try {
+              if (orderJobType === cpz.OrderJobType.create) {
+                if (order.exId || order.status !== cpz.OrderStatus.new) {
+                  this.logger.error(
+                    `Failed to create order #${order.id} - order already processed!`
+                  );
+                  return {
+                    ...order,
+                    error: new Error(
+                      `Failed to create order - already processed!`
+                    )
+                  };
+                }
+                order = await this.createOrder(order);
+                order.nextJob = {
+                  type: cpz.OrderJobType.check
+                };
+                order.nextJobAt = dayjs
+                  .utc()
+                  .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                  .toISOString();
+              } else if (orderJobType === cpz.OrderJobType.recreate) {
+                const checkedOrder = await this.checkOrder(order);
+                if (checkedOrder.status === cpz.OrderStatus.canceled) {
+                  order = await this.createOrder({
+                    ...checkedOrder,
+                    price: orderJobData.prce
+                  });
+                  order.nextJob = {
+                    type: cpz.OrderJobType.check
+                  };
+                  order.nextJobAt = dayjs
+                    .utc()
+                    .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                    .toISOString();
+                }
+              } else if (orderJobType === cpz.OrderJobType.cancel) {
+                if (!order.exId) {
+                  return {
+                    ...order,
+                    status: cpz.OrderStatus.canceled
+                  };
+                }
+                if (
+                  order.status === cpz.OrderStatus.canceled ||
+                  order.status === cpz.OrderStatus.closed
+                ) {
+                  return order;
+                }
+                order = await this.cancelOrder(order);
+                order.nextJob = null;
+                order.nextJobAt = null;
+              } else if (orderJobType === cpz.OrderJobType.check) {
+                if (!order.exId) {
+                  this.logger.error(
+                    `Failed to check order #${order.id} - no exchange id!`
+                  );
+                  return {
+                    ...order,
+                    error: new Error(`Failed to check order - no exchange id!`)
+                  };
+                }
+                if (order.status === cpz.OrderStatus.closed) return order;
+                order = await this.checkOrder(order);
+                if (order.status === cpz.OrderStatus.open) {
+                  if (
+                    order.exTimestamp &&
+                    dayjs
+                      .utc()
+                      .diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
+                      order.settings.orderTimeout
+                  ) {
+                    order = await this.cancelOrder(order);
+                  } else {
+                    order.nextJob = {
+                      type: cpz.OrderJobType.check
+                    };
+                    order.nextJobAt = dayjs
+                      .utc()
+                      .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                      .toISOString();
+                  }
+                } else {
+                  order.nextJob = null;
+                  order.nextJobAt = null;
+                }
+              } else {
+                throw new Errors.MoleculerError(
+                  "Wrong connector job type",
+                  400,
+                  "ERR_INVALID_PARAMS",
+                  { job }
+                );
+              }
+
+              await this.broker.call(
+                `${cpz.Service.DB_USER_ORDERS}.update`,
+                order
+              );
+
+              if (
+                order.status === cpz.OrderStatus.closed ||
+                order.status === cpz.OrderStatus.canceled
+              )
+                await this.broker.emit(cpz.Event.ORDER_STATUS, order);
+
+              order = await this.getNextOrder(userExAccId);
+            } catch (err) {
+              this.logger.error(err);
+              const failedOrder = {
+                ...order,
+                lastCheckedAt: dayjs.utc().toISOString(),
+                error: err
+              };
+              await this.broker.call(
+                `${cpz.Service.DB_USER_ORDERS}.update`,
+                failedOrder
+              );
+              await this.broker.emit(cpz.Event.ORDER_ERROR, failedOrder);
+              throw err;
+            }
+          }
+        }
+      }
     } catch (err) {
       this.logger.error(err);
-      const failedOrder = {
-        ...order,
-        lastCheckedAt: dayjs.utc().toISOString(),
-        error: err
-      };
-      await this.broker.call(
-        `${cpz.Service.DB_USER_ORDERS}.update`,
-        failedOrder
-      );
-      await this.broker.emit(cpz.Event.ORDER_ERROR, failedOrder);
       throw err;
     }
   }
@@ -394,6 +476,7 @@ class PrivateConnectorWorkerService extends Service {
           ? cpz.OrderType.market
           : cpz.OrderType.limit;
       const signalPrice =
+        order.price ||
         order.signalPrice ||
         (await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentPrice`,

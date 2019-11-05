@@ -5,7 +5,7 @@ import { Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
 
-class UserRobot extends cpz.UserRobot {
+class UserRobot implements cpz.UserRobot {
   _log = console.log;
   _id: string;
   _userExAccId: string;
@@ -24,10 +24,9 @@ class UserRobot extends cpz.UserRobot {
   };
   _positions: GenericObject<UserPosition>;
   _eventsToSend: cpz.Events<cpz.UserRobotEventData>[];
-  _error: any;
+  _error?: any;
 
   constructor(state: cpz.UserRobotState) {
-    super(state);
     this._id = state.id;
     this._userExAccId = state.userExAccId;
     this._robotId = state.robotId;
@@ -36,9 +35,7 @@ class UserRobot extends cpz.UserRobot {
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._robot = state.robot;
-    this._internalState = state.internalState || {
-      posLastNumb: {}
-    };
+    this._internalState = state.internalState || {};
     this._positions = {};
     this._setPositions(state.positions);
   }
@@ -64,11 +61,11 @@ class UserRobot extends cpz.UserRobot {
         stoppedAt: this._stoppedAt
       },
       positions: Object.values(this._positions).map(pos => pos.state),
-      orders: flatten(
-        Object.values(this._positions).map(pos => pos.ordersToSave)
+      ordersToCreate: flatten(
+        Object.values(this._positions).map(pos => pos.ordersToCreate)
       ),
-      connectorJobs: flatten(
-        Object.values(this._positions).map(pos => pos.connectorJobs)
+      ordersWithJobs: flatten(
+        Object.values(this._positions).map(pos => pos.orderWithJobs)
       ),
       eventsToSend: this._eventsToSend
     };
@@ -88,6 +85,7 @@ class UserRobot extends cpz.UserRobot {
   }
 
   _getNextPositionCode(prefix: string) {
+    if (!this._internalState.posLastNumb) this._internalState.posLastNumb = {};
     if (
       Object.prototype.hasOwnProperty.call(
         this._internalState.posLastNumb,
@@ -134,6 +132,12 @@ class UserRobot extends cpz.UserRobot {
   }
 
   handleSignal(signal: cpz.SignalEvent) {
+    if (signal.robotId !== this._robotId)
+      throw new Errors.MoleculerError("Wrong robot id", 400, "ERR_WRONG", {
+        signal,
+        robotId: this._robotId,
+        userRobotId: this._id
+      });
     if (
       this._internalState.latestSignal &&
       this._internalState.latestSignal.id === signal.id
@@ -188,6 +192,27 @@ class UserRobot extends cpz.UserRobot {
     }
 
     this._positions[signal.positionId].handleSignal(signal);
+  }
+
+  handleOrder(order: cpz.Order) {
+    if (order.userRobotId !== this._id)
+      throw new Errors.MoleculerError("Wrong user robot id", 400, "ERR_WRONG", {
+        order,
+        userRobotId: this._id
+      });
+
+    if (!this._positions[order.positionId])
+      throw new Errors.MoleculerError(
+        "Position not found",
+        404,
+        "ERR_NOT_FOUND",
+        {
+          order,
+          userRobotId: this._id
+        }
+      );
+
+    this._positions[order.positionId].handleOrder(order);
   }
 }
 

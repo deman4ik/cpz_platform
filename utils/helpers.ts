@@ -252,6 +252,12 @@ function flatten(arr: any[], depth = 1): any[] {
   );
 }
 
+function addPercent(numb: number, perc: number) {
+  const number = +numb || 0;
+  const percent = +perc || 0;
+  return round(number + (number / 100) * percent, 6);
+}
+
 export {
   sortAsc,
   sortDesc,
@@ -270,5 +276,6 @@ export {
   underscoreToCamelCaseKeys,
   equals,
   average,
-  flatten
+  flatten,
+  addPercent
 };

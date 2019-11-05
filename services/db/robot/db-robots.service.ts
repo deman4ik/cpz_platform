@@ -47,7 +47,7 @@ class RobotsService extends Service {
           strategyName: { type: Sequelize.STRING, field: "strategy" },
           mod: { type: Sequelize.STRING },
           settings: Sequelize.JSONB,
-          tradeSettings: { type: Sequelize.JSONB, field: "tradeSettings" },
+          tradeSettings: { type: Sequelize.JSONB, field: "trade_settings" },
           available: Sequelize.INTEGER,
           status: Sequelize.STRING,
           startedAt: {

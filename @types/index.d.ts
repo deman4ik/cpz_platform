@@ -4,7 +4,7 @@ export interface GenericObject<T> {
   [key: string]: T;
 }
 
-export namespace cpz {
+declare namespace cpz {
   const enum Service {
     DB_IMPORTERS = "db-importers",
     DB_CANDLES = "db-candles",
@@ -145,8 +145,9 @@ export namespace cpz {
     delayed = "delayed",
     new = "new",
     open = "open",
-    closeRequested = "closeRequested",
-    closed = "closed"
+    canceled = "canceled",
+    closed = "closed",
+    closedAuto = "closedAuto"
   }
 
   const enum RobotTradeStatus {
@@ -165,7 +166,8 @@ export namespace cpz {
   const enum OrderType {
     stop = "stop",
     limit = "limit",
-    market = "market"
+    market = "market",
+    forceMarket = "forceMarket"
   }
 
   const enum OrderStatus {
@@ -173,6 +175,28 @@ export namespace cpz {
     open = "open",
     closed = "closed",
     canceled = "canceled"
+  }
+
+  const enum OrderJobType {
+    create = "create",
+    recreate = "recreate",
+    cancel = "cancel",
+    check = "check"
+  }
+
+  const enum UserPositionOrderStatus {
+    new = "new",
+    open = "open",
+    partial = "partial",
+    closed = "closed",
+    canceled = "canceled"
+  }
+
+  const enum UserPositionJob {
+    open = "open",
+    cancel = "cancel",
+    close = "close",
+    forceClose = "forceClose"
   }
 
   const enum IndicatorType {
@@ -194,6 +218,7 @@ export namespace cpz {
   }
 
   const enum TimeUnit {
+    second = "second",
     minute = "minute",
     hour = "hour",
     day = "day"
@@ -229,18 +254,22 @@ export namespace cpz {
   const enum UserRobotJobType {
     stop = "stop",
     pause = "pause",
-    signal = "signal"
+    signal = "signal",
+    order = "order"
   }
 
   const enum ConnectorJobType {
-    create = "create",
-    recreate = "recreate",
-    cancel = "cancel",
-    check = "check"
+    order = "order"
   }
 
   type ImportType = "recent" | "history";
 
+  interface ConnectorJob {
+    id: string;
+    userExAccId: string;
+    type: ConnectorJobType;
+    data?: any;
+  }
   interface ExchangeCandle {
     exchange: string;
     asset: string;
@@ -338,7 +367,7 @@ export namespace cpz {
   interface TradeInfo {
     action: TradeAction;
     orderType: OrderType;
-    price: number;
+    price?: number;
   }
 
   interface AlertInfo extends TradeInfo {
@@ -363,6 +392,16 @@ export namespace cpz {
     timestamp: string;
   }
 
+  interface OrderJob {
+    type: OrderJobType;
+    data?: any;
+  }
+
+  interface OrderWithJob {
+    id: string;
+    nextJobAt: string;
+    nextJob: OrderJob;
+  }
   interface Order {
     id: string;
     userExAccId: string;
@@ -388,6 +427,8 @@ export namespace cpz {
     executed?: number;
     lastCheckedAt?: string;
     error?: any;
+    nextJobAt?: string;
+    nextJob?: OrderJob;
   }
   interface Importer {
     id: string;
@@ -576,12 +617,10 @@ export namespace cpz {
       entry?: {
         stepPercent: number;
         count?: number;
-        timeout?: number;
       };
       exit?: {
         stepPercent: number;
         count?: number;
-        timeout?: number;
       };
     };
     deviation?: {
@@ -696,19 +735,8 @@ export namespace cpz {
     backtestId: string;
   }
 
-  interface BacktesterSignals {
-    id: string;
+  interface BacktesterSignals extends SignalEvent {
     backtestId: string;
-    action: TradeAction;
-    orderType: OrderType;
-    price: number;
-    type: SignalType;
-    positionId: string;
-    positionPrefix: string;
-    positionCode: string;
-    positionParentId?: string;
-    candleTimestamp: string;
-    timestamp: string;
   }
 
   interface UserRolesList {
@@ -770,7 +798,7 @@ export namespace cpz {
 
   interface UserRobotInternalState {
     latestSignal?: SignalEvent;
-    posLastNumb: GenericObject<number>;
+    posLastNumb?: GenericObject<number>;
   }
   interface UserRobotDB {
     id: string;
@@ -783,6 +811,7 @@ export namespace cpz {
     stoppedAt?: string;
     statistics?: RobotStats;
     equity?: RobotEquity;
+    error?: any;
   }
 
   interface UserRobotState extends UserRobotDB {
@@ -798,21 +827,22 @@ export namespace cpz {
 
   class UserRobot {
     constructor(state: UserRobotState);
-    handleSignal(signal: SignalEvent): void;
     state: {
       userRobot: UserRobotDB;
-      positions: UserPositionDB[];
-      connectorJobs: ConnectorJob[];
-      orders: Order[];
-      eventsToSend: Events<UserRobotEventData>[];
+      positions?: UserPositionDB[];
+      ordersToCreate?: Order[];
+      orderWithJobs?: OrderWithJob[];
+      eventsToSend?: Events<UserRobotEventData>[];
     };
     _log(...args: any): void;
+    handleSignal(signal: SignalEvent): void;
+    handleOrder(order: Order): void;
   }
   interface UserRobotJob {
     id: string;
     userRobotId: string;
     type: UserRobotJobType;
-    data?: SignalEvent | string[];
+    data?: SignalEvent | Order;
   }
 
   interface UserPositionInternalState {
@@ -828,20 +858,28 @@ export namespace cpz {
     status: UserPositionStatus;
     parentId?: string;
     direction: PositionDirection;
-    entryStatus?: OrderStatus;
+    entryStatus?: UserPositionOrderStatus;
+    entrySignalPrice?: number;
     entryPrice?: number;
     entryDate?: string;
     entryVolume?: number;
+    entryExecuted?: number;
+    entryRemaining?: number;
     entryOrderIds?: string[];
-    exitStatus?: OrderStatus;
+    exitStatus?: UserPositionOrderStatus;
+    exitSignalPrice?: number;
     exitPrice?: number;
     exitDate?: string;
     exitVolume?: number;
+    exitExecuted?: number;
+    exitRemaining?: number;
     exitOrderIds?: string[];
     internalState: UserPositionInternalState;
     reason?: string; //TODO ENUM
     profit?: number;
     barsHeld?: number;
+    nextJobAt?: string;
+    nextJob?: UserPositionJob;
   }
 
   interface UserPositionState extends UserPositionDB {
@@ -869,15 +907,10 @@ export namespace cpz {
     status: UserPositionStatus;
     parentId?: string;
     state: UserPositionDB;
-    connectorJobs: ConnectorJob[];
-    ordersToSave: Order[];
+    ordersToCreate: Order[];
+    orderWithJobs: OrderWithJob[];
     _log(...args: any): void;
-  }
-
-  interface ConnectorJob {
-    id: string;
-    userExAccId: string;
-    type: ConnectorJobType;
-    orderId: string;
+    handleSignal(signal: SignalEvent): void;
+    handleOrder(order: Order): void;
   }
 }

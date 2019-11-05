@@ -174,7 +174,7 @@ class RobotWorkerService extends Service {
     this.logger.info(`Robot #${robotId} processing '${type}' job`);
     try {
       const robotState: cpz.RobotState = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.get`,
+        `${cpz.Service.DB_ROBOTS}.getState`,
         { id: robotId }
       );
       if (!robotState) throw new Error(`Robot ${robotId} not found.`);
@@ -299,7 +299,6 @@ class RobotWorkerService extends Service {
     } catch (e) {
       this.logger.error(e);
       await this.broker.emit(cpz.Event.ROBOT_FAILED, {
-        eventType: cpz.Event.ROBOT_FAILED,
         robotId,
         jobType: type,
         error: e

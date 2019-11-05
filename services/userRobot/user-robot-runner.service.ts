@@ -91,7 +91,6 @@ class UserRobotRunnerService extends Service {
       },
       events: {
         [cpz.Event.ORDER_STATUS]: this.handleOrder,
-        [cpz.Event.ORDER_ERROR]: this.handleOrder,
         [cpz.Event.SIGNAL_TRADE]: this.handleSignalTrade
       },
       started: this.startedService
@@ -163,7 +162,8 @@ class UserRobotRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
         id,
         status: cpz.Status.started,
-        startedAt: null,
+        startedAt: dayjs.utc().toISOString(),
+        error: null,
         stoppedAt: null,
         latestSignal: null,
         statistics: {},
@@ -347,7 +347,27 @@ class UserRobotRunnerService extends Service {
   }
 
   async handleOrder(ctx: Context<cpz.Order>) {
-    //TODO
+    const order = ctx.params;
+    try {
+      const { status }: cpz.UserRobotDB = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.get`,
+        {
+          id: order.userRobotId
+        }
+      );
+      if (status)
+        await this.queueJob(
+          {
+            id: uuid(),
+            userRobotId: order.userRobotId,
+            type: cpz.UserRobotJobType.order,
+            data: order
+          },
+          status
+        );
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
 

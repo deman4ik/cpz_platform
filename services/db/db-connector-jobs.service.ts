@@ -17,7 +17,7 @@ class ConnectorJobsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           userExAccId: { type: Sequelize.UUID, field: "user_ex_acc_id" },
           type: Sequelize.STRING,
-          orderId: { type: Sequelize.JSONB, field: "order_id" }
+          data: { type: Sequelize.JSONB, allowNull: true }
         },
         options: {
           freezeTableName: true,
@@ -35,7 +35,7 @@ class ConnectorJobsService extends Service {
                 id: "string",
                 userExAccId: "string",
                 type: "string",
-                orderId: "string"
+                data: { type: "object", optional: true }
               }
             }
           },
@@ -47,22 +47,21 @@ class ConnectorJobsService extends Service {
 
   async upsert(ctx: Context<{ entity: cpz.ConnectorJob }>) {
     try {
-      const { userExAccId, type, orderId } = ctx.params.entity;
+      const { userExAccId, type, data } = ctx.params.entity;
       const value = Object.values({
         userExAccId,
         type,
-        orderId
+        data
       });
       const query = `INSERT INTO connector_jobs
      (  
         user_ex_acc_id,
         type,
-        order_id
+        data
         ) 
         VALUES (?)
-         ON CONFLICT ON CONSTRAINT connector_jobs_user_ex_acc_id_order_id_key 
-         DO UPDATE SET updated_at = now(),
-         type = excluded.type`;
+         ON CONFLICT ON CONSTRAINT connector_jobs_user_ex_acc_id_type_key 
+         DO NOTHING`;
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,
@@ -71,7 +70,7 @@ class ConnectorJobsService extends Service {
       return true;
     } catch (e) {
       this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+      throw new Errors.MoleculerError(e.message, 500, `ERR_${this.name}`, e);
     }
   }
 }

@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
+import cron from "node-cron";
 
 class PricateConnectorRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -30,13 +31,43 @@ class PricateConnectorRunnerService extends Service {
           params: {
             userExAccId: "string",
             type: "string",
-            orderId: "string"
+            data: { type: "object", optional: true }
           },
           handler: this.addJob
         }
       },
-      started: this.startedService
+      started: this.startedService,
+      stopped: this.stoppedService
     });
+  }
+
+  cronOrders: cron.ScheduledTask = cron.schedule(
+    "*/15 * * * * *",
+    this.checkOrders.bind(this)
+  );
+
+  async checkOrders() {
+    try {
+      const userExAccIds = await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.getUserExAccsWithJobs`
+      );
+      if (userExAccIds && Array.isArray(userExAccIds) && userExAccIds.length) {
+        for (const userExAccId of userExAccIds) {
+          const { status } = await this.broker.call(
+            `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
+            {
+              id: userExAccId
+            }
+          );
+          await this.queueJob(
+            { id: uuid(), userExAccId, type: cpz.ConnectorJobType.order },
+            status
+          );
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   async jobCompleted(jobID: JobId, res: any) {
@@ -60,6 +91,11 @@ class PricateConnectorRunnerService extends Service {
       "fail",
       this.jobError.bind(this)
     );
+    this.cronOrders.start();
+  }
+
+  async stoppedService() {
+    this.cronOrders.stop();
   }
 
   async queueJob(job: cpz.ConnectorJob, status: string) {
@@ -79,18 +115,18 @@ class PricateConnectorRunnerService extends Service {
     ctx: Context<{
       userExAccId: string;
       type: cpz.ConnectorJobType;
-      orderId: string;
+      data?: any;
     }>
   ) {
     try {
-      const { userExAccId, type, orderId } = ctx.params;
+      const { userExAccId, type, data } = ctx.params;
       const { status } = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         {
           id: userExAccId
         }
       );
-      await this.queueJob({ id: uuid(), userExAccId, type, orderId }, status);
+      await this.queueJob({ id: uuid(), userExAccId, type, data }, status);
     } catch (err) {
       this.logger.error(err);
       throw err;
