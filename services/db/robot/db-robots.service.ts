@@ -105,26 +105,6 @@ class RobotsService extends Service {
           },
           handler: this.getRobotInfo
         },
-        upsert: {
-          params: {
-            entity: {
-              type: "object",
-              props: {
-                id: "string",
-                status: "string",
-                startedAt: { type: "string", optional: true },
-                stoppedAt: { type: "string", optional: true },
-                indicators: { type: "object", optional: true },
-                state: { type: "object", optional: true },
-                lastCandle: { type: "object", optional: true },
-                hasAlerts: "boolean",
-                statistics: { type: "object", optional: true },
-                equity: { type: "object", optional: true }
-              }
-            }
-          },
-          handler: this.upsert
-        },
         create: {
           params: {
             entities: {
@@ -159,69 +139,6 @@ class RobotsService extends Service {
         }
       }
     });
-  }
-
-  async upsert(ctx: Context<{ entity: cpz.RobotState }>) {
-    try {
-      const {
-        id,
-        status,
-        startedAt,
-        stoppedAt,
-        indicators,
-        state,
-        lastCandle,
-        hasAlerts,
-        statistics,
-        equity
-      }: cpz.RobotState = ctx.params.entity;
-      const value = Object.values({
-        id,
-        status,
-        startedAt,
-        stoppedAt,
-        indicators: JSON.stringify(indicators),
-        state: JSON.stringify(state),
-        lastCandle: JSON.stringify(lastCandle),
-        hasAlerts,
-        statistics: JSON.stringify(statistics),
-        equity: JSON.stringify(equity)
-      });
-      const query = `INSERT INTO robots 
-        (   id,
-            status,
-            started_at,
-            stopped_at,
-            indicators,
-            state,
-            last_candle,
-            has_alerts,
-            statistics,
-            equity
-        ) 
-        VALUES (?)
-         ON CONFLICT ON CONSTRAINT robots_pkey 
-         DO UPDATE SET updated_at = now(),
-         status = excluded.status,
-         settings = excluded.settings,
-         indicators = excluded.indicators,
-         state = excluded.state,
-         last_candle = excluded.last_candle,
-         has_alerts = excluded.has_alerts,
-         started_at = excluded.started_at,
-         stopped_at = excluded.stopped_at,
-         statistics = excluded.statistics,
-         equity = excluded.equity;`;
-
-      await this.adapter.db.query(query, {
-        type: Sequelize.QueryTypes.INSERT,
-        replacements: [value]
-      });
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
-    }
   }
 
   async create(

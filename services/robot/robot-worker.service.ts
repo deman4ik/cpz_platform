@@ -16,10 +16,10 @@ class RobotWorkerService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.ROBOT_WORKER,
       dependencies: [
-        `${cpz.Service.DB_STRATEGIES}`,
-        `${cpz.Service.DB_ROBOTS}`,
-        `${cpz.Service.DB_ROBOT_JOBS}`,
-        `${cpz.Service.DB_ROBOT_POSITIONS}`,
+        cpz.Service.DB_STRATEGIES,
+        cpz.Service.DB_ROBOTS,
+        cpz.Service.DB_ROBOT_JOBS,
+        cpz.Service.DB_ROBOT_POSITIONS,
         `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
@@ -30,7 +30,7 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}480`,
         `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`,
-        `${cpz.Service.DB_CANDLES_CURRENT}`
+        cpz.Service.DB_CANDLES_CURRENT
       ],
       mixins: [
         QueueService({
@@ -174,7 +174,7 @@ class RobotWorkerService extends Service {
     this.logger.info(`Robot #${robotId} processing '${type}' job`);
     try {
       const robotState: cpz.RobotState = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.getState`,
+        `${cpz.Service.DB_ROBOTS}.get`,
         { id: robotId }
       );
       if (!robotState) throw new Error(`Robot ${robotId} not found.`);
@@ -285,9 +285,7 @@ class RobotWorkerService extends Service {
       }
 
       // Saving robot state
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.upsert`, {
-        entity: robot.state
-      });
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, robot.state);
       // Sending robot events
       if (robot.eventsToSend.length > 0) {
         for (const { type, data } of robot.eventsToSend) {

@@ -517,7 +517,7 @@ class PublicConnectorService extends Service {
     }
     let candles: cpz.ExchangeCandle[] = response.map(candle => {
       try {
-        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+        if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
         return {
           exchange,
@@ -608,7 +608,7 @@ class PublicConnectorService extends Service {
 
     candles = response.map(candle => {
       try {
-        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+        if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
         return {
           exchange,

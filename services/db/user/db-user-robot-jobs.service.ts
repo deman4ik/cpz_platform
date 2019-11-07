@@ -55,7 +55,7 @@ class UserRobotJobsService extends Service {
       });
       const query = `INSERT INTO user_robot_jobs
      (  
-        robot_id,
+        user_robot_id,
         type,
         data
         ) 
@@ -72,7 +72,7 @@ class UserRobotJobsService extends Service {
       return true;
     } catch (e) {
       this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+      throw e;
     }
   }
 }

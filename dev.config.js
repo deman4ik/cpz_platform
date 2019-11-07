@@ -42,9 +42,13 @@ const brokerConfig = {
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
   transporter: {
-    type: "TCP",
+    type: "Redis",
     options: {
-      maxPacketSize: 2 * 1024 * 1024
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      tls: process.env.REDIS_TLS,
+      db: 1
     }
   },
 

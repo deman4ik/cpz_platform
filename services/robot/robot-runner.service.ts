@@ -13,7 +13,22 @@ class RobotRunnerService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.ROBOT_RUNNER,
-      dependencies: [`${cpz.Service.DB_ROBOTS}`],
+      dependencies: [
+        cpz.Service.DB_ROBOTS,
+        cpz.Service.DB_ROBOT_JOBS,
+        cpz.Service.ROBOT_WORKER,
+        `${cpz.Service.DB_CANDLES}1`,
+        `${cpz.Service.DB_CANDLES}5`,
+        `${cpz.Service.DB_CANDLES}15`,
+        `${cpz.Service.DB_CANDLES}30`,
+        `${cpz.Service.DB_CANDLES}60`,
+        `${cpz.Service.DB_CANDLES}120`,
+        `${cpz.Service.DB_CANDLES}240`,
+        `${cpz.Service.DB_CANDLES}480`,
+        `${cpz.Service.DB_CANDLES}720`,
+        `${cpz.Service.DB_CANDLES}1440`,
+        cpz.Service.BACKTESTER_RUNNER
+      ],
       mixins: [
         Auth,
         QueueService({
@@ -463,6 +478,7 @@ class RobotRunnerService extends Service {
     try {
       const tick: cpz.ExwatcherTrade = ctx.params;
       const { exchange, asset, currency, timestamp, price } = tick;
+      //TODO: query with has alerts
       const robots: cpz.RobotState[] = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.findActive`,
         {

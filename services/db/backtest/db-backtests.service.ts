@@ -249,7 +249,7 @@ class BacktestsService extends Service {
       return true;
     } catch (e) {
       this.logger.error(e);
-      throw new Errors.MoleculerRetryableError(e.message, 500, this.name, e);
+      throw e
     }
   }
 }

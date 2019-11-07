@@ -22,7 +22,7 @@ module.exports = {
       name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=5 --config dev.config.js dist/services/connector/public-connector.service.js",
+        "--env --config dev.config.js dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "public-connector"
@@ -42,7 +42,7 @@ module.exports = {
       name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=5 --config dev.config.js dist/services/connector/private-connector-worker.service.js",
+        "--env --config dev.config.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "private-connector-worker"
@@ -80,7 +80,7 @@ module.exports = {
       name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=2 --config dev.config.js dist/services/robot/robot-worker.service.js",
+        "--env --config dev.config.js dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "robot-worker"
@@ -93,14 +93,14 @@ module.exports = {
         "--env --config dev.config.js dist/services/userRobot/user-robot-runner.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "robot-runner"
+        NODEID: "user-robot-runner"
       }
     },
     {
       name: "user-robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=2 --config dev.config.js dist/services/robot/user-robot-worker.service.js",
+        "--env --config dev.config.js dist/services/robot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "user-robot-worker"
