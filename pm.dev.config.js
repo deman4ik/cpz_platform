@@ -19,12 +19,33 @@ module.exports = {
       }
     },
     {
-      name: "connector",
+      name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config dev.config.js dist/services/connector",
+      args:
+        "--env --instances=5 --config dev.config.js dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "connector"
+        NODEID: "public-connector"
+      }
+    },
+    {
+      name: "private-connector-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/connector/private-connector-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "private-connector-runner"
+      }
+    },
+    {
+      name: "private-connector-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=5 --config dev.config.js dist/services/connector/private-connector-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "private-connector-worker"
       }
     },
     {
@@ -66,6 +87,26 @@ module.exports = {
       }
     },
     {
+      name: "user-robot-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/userRobot/user-robot-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "robot-runner"
+      }
+    },
+    {
+      name: "user-robot-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=2 --config dev.config.js dist/services/robot/user-robot-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "user-robot-worker"
+      }
+    },
+    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config dev.config.js dist/services/api.service.js",
@@ -89,7 +130,7 @@ module.exports = {
       args:
         "--env --config dev.config.js dist/services/telegram/bot.service.js",
       env: {
-        NODE_ENV: "production",
+        NODE_ENV: "devr",
         NODEID: "telegram"
       }
     }

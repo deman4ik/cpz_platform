@@ -29,6 +29,7 @@ class ExwatcherService extends Service {
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
         cpz.Service.DB_CANDLES_CURRENT,
+        cpz.Service.IMPORTER_RUNNER,
         `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
@@ -257,11 +258,17 @@ class ExwatcherService extends Service {
   socket: SocketIOClient.Socket = undefined;
   cronCandlecreator: cron.ScheduledTask = cron.schedule(
     "* * * * * *",
-    this.candlecreator.bind(this)
+    this.candlecreator.bind(this),
+    {
+      scheduled: false
+    }
   );
   cronCheck: cron.ScheduledTask = cron.schedule(
     "*/30 * * * * *",
-    this.check.bind(this)
+    this.check.bind(this),
+    {
+      scheduled: false
+    }
   );
 
   get activeSubscriptions() {
@@ -328,15 +335,15 @@ class ExwatcherService extends Service {
   ) {
     const { id: importerId, error } = ctx.params;
     this.logger.warn(`Importer ${importerId} failed!`, error);
-    const { id } = <cpz.Exwatcher>(
-      Object.values(this.subscriptions).find(
-        (sub: cpz.Exwatcher) => sub.importerId === importerId
-      )
+
+    const subscription = Object.values(this.subscriptions).find(
+      (sub: cpz.Exwatcher) => sub.importerId === importerId
     );
-    if (id) {
-      this.subscriptions[id].status = cpz.ExwatcherStatus.failed;
-      this.subscriptions[id].error = error;
-      await this.saveSubscription(this.subscriptions[id]);
+
+    if (subscription && subscription.id) {
+      this.subscriptions[subscription.id].status = cpz.ExwatcherStatus.failed;
+      this.subscriptions[subscription.id].error = error;
+      await this.saveSubscription(this.subscriptions[subscription.id]);
     }
   }
 

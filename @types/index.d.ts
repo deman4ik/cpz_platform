@@ -90,7 +90,6 @@ declare namespace cpz {
     stopping = "stopping",
     started = "started",
     stopped = "stopped",
-    stopRequested = "stopRequested",
     paused = "paused",
     finished = "finished",
     failed = "failed"
@@ -195,8 +194,7 @@ declare namespace cpz {
   const enum UserPositionJob {
     open = "open",
     cancel = "cancel",
-    close = "close",
-    forceClose = "forceClose"
+    close = "close"
   }
 
   const enum IndicatorType {
@@ -342,7 +340,6 @@ declare namespace cpz {
   interface TimeframeProps {
     str: string;
     value: Timeframe;
-    lower: Timeframe;
     unit: TimeUnit;
     amountInUnit: number;
   }

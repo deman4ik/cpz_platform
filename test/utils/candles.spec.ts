@@ -2,7 +2,7 @@ import {
   handleCandleGaps,
   batchCandles,
   createCandlesFromTrades,
-  getCandlesParams
+  convertExchangeTimeframes
 } from "../../utils/candles";
 import dayjs from "../../lib/dayjs";
 import { cpz } from "../../@types";
@@ -105,6 +105,24 @@ describe("Test 'candles' utils", () => {
       expect(result[60][0].timestamp).toBe(dateFrom);
       expect(result[60][0].open).toBe(10749.4);
       expect(result[60][0].close).toBe(11014.3);
+    });
+  });
+
+  describe("Test 'convertExchangeTimeframes", () => {
+    it("Should convert kraken timeframes", () => {
+      const exchangeTimeframes = {
+        "1m": "1",
+        "5m": "5",
+        "15m": "15",
+        "30m": "30",
+        "1h": "60",
+        "4h": "240",
+        "1d": "1440",
+        "1w": "10080",
+        "2w": "21600"
+      };
+      const timeframes = convertExchangeTimeframes(exchangeTimeframes);
+      expect(Object.keys(timeframes).length).toBe(7);
     });
   });
 });

@@ -141,118 +141,14 @@ class ImporterWorkerService extends Service {
       } = state;
       let candlesInTimeframes: cpz.ExchangeCandlesInTimeframes = null;
 
-      if (exchange === "kraken") {
-        const currentDate = dayjs.utc();
-        const loadTimeframes: {
-          trades: { [key: number]: { dateFrom: string } };
-          candles: cpz.Timeframe[];
-        } = {
-          trades: [],
-          candles: []
-        };
-        timeframes.forEach((timeframe: cpz.Timeframe) => {
-          const { unit, amountInUnit } = Timeframe.get(timeframe);
-          const validTimeframeDate = dayjs.utc(
-            Timeframe.validTimeframeDate(currentDate.toISOString(), timeframe)
-          );
-          const dateFrom = validTimeframeDate.add(-amount * amountInUnit, unit);
-          if (
-            (timeframe === cpz.Timeframe["1m"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.hour) > 10) ||
-            (timeframe === cpz.Timeframe["5m"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 1) ||
-            (timeframe === cpz.Timeframe["15m"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 6) ||
-            (timeframe === cpz.Timeframe["30m"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 13) ||
-            ((timeframe === cpz.Timeframe["1h"] ||
-              timeframe === cpz.Timeframe["2h"]) &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 28) ||
-            (timeframe === cpz.Timeframe["4h"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 110) ||
-            (timeframe === cpz.Timeframe["1d"] &&
-              validTimeframeDate.diff(dateFrom, cpz.TimeUnit.day) > 710)
-          ) {
-            loadTimeframes.trades[timeframe] = {
-              dateFrom: dateFrom.toISOString()
-            };
-          } else loadTimeframes.candles.push(timeframe);
-        });
-        if (loadTimeframes.candles.length > 0) {
-          candlesInTimeframes = await this.importCandles({
-            exchange,
-            asset,
-            currency,
-            timeframes: loadTimeframes.candles,
-            amount
-          });
-          this.logger.info(`Job ${id} loaded and handled candles`);
-        }
-
-        if (Object.keys(loadTimeframes.trades).length > 0) {
-          const tradesTimeframes = Object.keys(loadTimeframes.trades).map(
-            timeframe => +timeframe
-          );
-          const maxTimeframe = Math.max(...tradesTimeframes);
-          const {
-            unit: maxTimeframeUnit,
-            amountInUnit: maxTimeframeAmountInUnit
-          } = Timeframe.get(maxTimeframe);
-          const validTimeframeDate = dayjs.utc(
-            Timeframe.validTimeframeDate(
-              currentDate.toISOString(),
-              maxTimeframe
-            )
-          );
-          const dateFrom = validTimeframeDate
-            .add(-((amount + 1) * maxTimeframeAmountInUnit), maxTimeframeUnit)
-            .toISOString();
-          const trades = await this.importTrades({
-            exchange,
-            asset,
-            currency,
-            dateFrom,
-            dateTo: validTimeframeDate.toISOString()
-          });
-          this.logger.info(`Job #${id} loaded ${trades.length} trades`);
-          await job.progress(25);
-          await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-            entity: { ...state, progress: 25 }
-          });
-          const candlesFromTradesInTimeframes = await createCandlesFromTrades(
-            dateFrom,
-            validTimeframeDate.toISOString(),
-            tradesTimeframes,
-            trades
-          );
-          this.logger.info(`Job #${id} created candles from trades`);
-          await job.progress(50);
-          await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-            entity: { ...state, progress: 50 }
-          });
-          await Promise.all(
-            Object.keys(candlesFromTradesInTimeframes).map(
-              async (timeframe: string) => {
-                candlesInTimeframes[+timeframe] = await handleCandleGaps(
-                  loadTimeframes.trades[+timeframe].dateFrom,
-                  validTimeframeDate.toISOString(),
-                  candlesInTimeframes[+timeframe]
-                );
-              }
-            )
-          );
-          this.logger.info(`Job #${id} handled candle gaps`);
-        }
-      } else {
-        candlesInTimeframes = await this.importCandles({
-          exchange,
-          asset,
-          currency,
-          timeframes,
-          amount
-        });
-        this.logger.info(`Job #${id} loaded and handled candles`);
-      }
+      candlesInTimeframes = await this.importCandles({
+        exchange,
+        asset,
+        currency,
+        timeframes,
+        amount
+      });
+      this.logger.info(`Job #${id} loaded and handled candles`);
       await job.progress(75);
       await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: { ...state, progress: 75 }
@@ -531,7 +427,7 @@ class ImporterWorkerService extends Service {
     dateFrom: string;
     dateTo: string;
   }): Promise<cpz.ExchangeTrade[]> {
-    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.hour, 2, 1);
+    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 30, 1);
 
     const loadedChunks = await Promise.all(
       chunks.map(async ({ dateFrom: loadDateFrom, dateTo: loadDateTo }) => {

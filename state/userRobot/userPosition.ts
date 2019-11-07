@@ -117,11 +117,6 @@ class UserPosition implements cpz.UserPosition {
     return this._parentId;
   }
 
-  closeForce() {
-    this._nextJob = cpz.UserPositionJob.forceClose;
-    this._nextJobAt = dayjs.utc().toISOString();
-  }
-
   cancel() {
     this._nextJob = cpz.UserPositionJob.cancel;
     this._nextJobAt = dayjs.utc().toISOString();
@@ -156,7 +151,7 @@ class UserPosition implements cpz.UserPosition {
     ) {
       this._status = cpz.UserPositionStatus.open;
     } else if (this._exitStatus === cpz.UserPositionOrderStatus.closed) {
-      if (this._nextJob === cpz.UserPositionJob.forceClose)
+      if (this._nextJob === cpz.UserPositionJob.cancel)
         this._status = cpz.UserPositionStatus.closedAuto;
       else this._status = cpz.UserPositionStatus.closed;
 
@@ -279,6 +274,7 @@ class UserPosition implements cpz.UserPosition {
       ).length > 0
     );
   }
+
   get hasOpenExitOrders() {
     return (
       this._exitOrders &&
@@ -435,7 +431,7 @@ class UserPosition implements cpz.UserPosition {
     return order;
   }
 
-  _closePosition() {
+  _cancelPosition() {
     // Position entry not closed
     if (
       this._entryStatus &&
@@ -587,15 +583,11 @@ class UserPosition implements cpz.UserPosition {
         );
 
       if (this._entryStatus !== cpz.UserPositionOrderStatus.closed) {
-        this._closePosition();
+        this.cancel();
         return;
       }
 
-      if (
-        this._nextJob === cpz.UserPositionJob.forceClose ||
-        this._nextJob === cpz.UserPositionJob.cancel
-      )
-        return;
+      if (this._nextJob === cpz.UserPositionJob.cancel) return;
     }
     const order = this._createOrder(signal);
 
@@ -712,17 +704,14 @@ class UserPosition implements cpz.UserPosition {
               nextJobAt: dayjs.utc().toISOString()
             });
           } else {
-            this._closePosition();
+            this._cancelPosition();
           }
         } else {
-          this._closePosition();
+          this._cancelPosition();
         }
       }
-    } else if (
-      this._nextJob === cpz.UserPositionJob.forceClose ||
-      this._nextJob === cpz.UserPositionJob.cancel
-    ) {
-      this._closePosition();
+    } else if (this._nextJob === cpz.UserPositionJob.cancel) {
+      this._cancelPosition();
     }
   }
 }

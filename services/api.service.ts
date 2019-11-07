@@ -165,6 +165,7 @@ class ApiService extends Service {
         }
       };
     }
+    this.logger.info(ctx.meta.user);
   }
   /**
    * Authorize the request

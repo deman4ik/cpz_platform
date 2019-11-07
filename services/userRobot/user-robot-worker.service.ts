@@ -2,8 +2,6 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import QueueService from "moleculer-bull";
 import { Job } from "bull";
 import { cpz } from "../../@types";
-import { sortAsc } from "../../utils";
-import { v4 as uuid } from "uuid";
 import UserRobot from "../../state/userRobot/userRobot";
 
 class UserRobotWorkerService extends Service {
@@ -16,7 +14,8 @@ class UserRobotWorkerService extends Service {
         cpz.Service.DB_USER_ROBOTS,
         cpz.Service.DB_USER_ROBOT_JOBS,
         cpz.Service.DB_USER_POSITIONS,
-        cpz.Service.DB_USER_ORDERS
+        cpz.Service.DB_USER_ORDERS,
+        cpz.Service.PRIVATE_CONNECTOR_RUNNER
       ],
       mixins: [
         QueueService({
@@ -153,6 +152,12 @@ class UserRobotWorkerService extends Service {
           );
         }
       }
+
+      if (
+        userRobot.status === cpz.Status.stopping &&
+        !userRobot.hasActivePositions
+      )
+        userRobot.setStop();
 
       // Saving robot state
       await this.broker.call(

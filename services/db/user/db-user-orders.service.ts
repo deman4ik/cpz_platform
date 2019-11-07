@@ -4,7 +4,7 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 
-class UserSignalsService extends Service {
+class UserOrdersService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
@@ -137,7 +137,9 @@ class UserSignalsService extends Service {
         }
       },
       actions: {
-        getUserExAccsWithJobs: this.getUserExAccsWithJobs
+        getUserExAccsWithJobs: {
+          handler: this.getUserExAccsWithJobs
+        }
       }
     });
   }
@@ -155,4 +157,4 @@ class UserSignalsService extends Service {
   }
 }
 
-export = UserSignalsService;
+export = UserOrdersService;

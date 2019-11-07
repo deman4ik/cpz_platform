@@ -5,6 +5,7 @@ import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { underscoreToCamelCaseKeys, equals } from "../../../utils/helpers";
 import { createRobotCode, createRobotName } from "../../../utils/naming";
+import Auth from "../../../mixins/auth";
 
 class RobotsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -32,7 +33,7 @@ class RobotsService extends Service {
           `
         }
       },
-      mixins: [DbService],
+      mixins: [Auth, DbService],
       adapter: SqlAdapter,
       model: {
         name: "robots",
@@ -147,6 +148,7 @@ class RobotsService extends Service {
           graphql: {
             mutation: "createRobots(entities: [RobotCreateEntity!]!): Response!"
           },
+          roles: [cpz.UserRoles.admin],
           handler: this.create
         },
         clear: {
@@ -478,7 +480,10 @@ class RobotsService extends Service {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id }
       });
-      const robotInfo = underscoreToCamelCaseKeys(rawRobotInfo);
+      const robotInfo: {
+        [key: string]: any;
+        signals?: { code?: string; alerts?: { [key: string]: any }[] }[];
+      } = underscoreToCamelCaseKeys(rawRobotInfo);
       //TODO: TYPINGS!
       let robotSignals: { [key: string]: any }[] = [];
       if (

@@ -196,6 +196,13 @@ describe("Test 'time' utils", () => {
       expect(Array.isArray(chunks)).toBe(true);
       expect(chunks.length).toBe(3);
     });
+    it("Should return chunks for 30 days", () => {
+      const dateFrom = dayjs.utc("2019-06-17T00:00:00.000Z").toISOString();
+      const dateTo = dayjs.utc("2019-09-19T06:00:00.000Z").toISOString();
+      const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 30, 1);
+      expect(Array.isArray(chunks)).toBe(true);
+      expect(chunks.length).toBe(5);
+    });
   });
   describe("Test 'getValidDate'", () => {
     it("Should return valid date", () => {

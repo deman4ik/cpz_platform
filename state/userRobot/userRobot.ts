@@ -75,6 +75,16 @@ class UserRobot implements cpz.UserRobot {
     return Object.values(this._positions).map(pos => pos.state);
   }
 
+  get hasActivePositions() {
+    return (
+      Object.values(this._positions).filter(
+        pos =>
+          pos.status === cpz.UserPositionStatus.new ||
+          pos.status === cpz.UserPositionStatus.open
+      ).length > 0
+    );
+  }
+
   _setPositions(positions: cpz.UserPositionState[]) {
     if (positions && Array.isArray(positions) && positions.length > 0) {
       positions.forEach(position => {
@@ -100,6 +110,16 @@ class UserRobot implements cpz.UserRobot {
   }
 
   stop() {
+    this._status = cpz.Status.stopping;
+    if (this.hasActivePositions)
+      Object.keys(this._positions).forEach(key => {
+        this._positions[key].cancel();
+        this._positions[key].executeJob();
+      });
+    else this.setStop();
+  }
+
+  setStop() {
     this._status = cpz.Status.stopped;
     this._stoppedAt = dayjs.utc().toISOString();
     this._error = null;
@@ -192,6 +212,7 @@ class UserRobot implements cpz.UserRobot {
     }
 
     this._positions[signal.positionId].handleSignal(signal);
+    this._positions[signal.positionId].executeJob();
   }
 
   handleOrder(order: cpz.Order) {
@@ -213,6 +234,7 @@ class UserRobot implements cpz.UserRobot {
       );
 
     this._positions[order.positionId].handleOrder(order);
+    this._positions[order.positionId].executeJob();
   }
 }
 

@@ -2,7 +2,7 @@ import { cpz } from "../@types";
 import dayjs from "../lib/dayjs";
 import Timeframe from "./timeframe";
 import { createDatesList, createDatesListWithRange } from "./time";
-import { arraysDiff, sortAsc, uniqueElementsBy } from "./helpers";
+import { arraysDiff, sortAsc, uniqueElementsBy, sortDesc } from "./helpers";
 
 async function handleCandleGaps(
   dateFromInput: string,
@@ -208,14 +208,16 @@ async function createCandlesFromTrades(
   }
 }
 
-function converExchangeTimeframes(exchangeTimeframes: {
+function convertExchangeTimeframes(exchangeTimeframes: {
   [key: string]: string | number;
 }): cpz.ExchangeTimeframes {
   const timeframes: cpz.ExchangeTimeframes = {};
   Object.keys(exchangeTimeframes).forEach(key => {
-    let tf = exchangeTimeframes[key];
-    if (typeof tf !== "number") tf = Timeframe.stringToTimeframe(`${tf}`);
-    timeframes[key] = tf;
+    let tf = +exchangeTimeframes[key] || exchangeTimeframes[key];
+    if (Timeframe.exists(tf)) {
+      if (typeof tf !== "number") tf = Timeframe.stringToTimeframe(`${tf}`);
+      timeframes[key] = tf;
+    }
   });
   return timeframes;
 }
@@ -235,17 +237,23 @@ function getCurrentCandleParams(
     limit: 1,
     batch: false
   };
-  const timeframes: cpz.ExchangeTimeframes = converExchangeTimeframes(
+  const timeframes: cpz.ExchangeTimeframes = convertExchangeTimeframes(
     exchangeTimeframes
   );
 
   const exchangeHasTimeframe = Timeframe.inList(timeframes, timeframeStr);
 
   if (!exchangeHasTimeframe) {
-    const { lower, amountInUnit } = Timeframe.get(timeframe);
-    params.timeframe = lower;
-    params.timeframeStr = Timeframe.toString(lower);
-    params.dateFrom = Timeframe.getCurrentSince(amountInUnit, lower);
+    const { amountInUnit } = Timeframe.get(timeframe);
+    const exchangeTimeframeList = Object.values(timeframes)
+      .map(t => +t)
+      .sort(sortDesc);
+    const lowerTimeframe = exchangeTimeframeList.filter(
+      t => +t < +timeframe
+    )[0];
+    params.timeframe = lowerTimeframe;
+    params.timeframeStr = Timeframe.toString(lowerTimeframe);
+    params.dateFrom = Timeframe.getCurrentSince(amountInUnit, lowerTimeframe);
     params.limit = amountInUnit;
     params.batch = true;
   }
@@ -259,7 +267,7 @@ function getCandlesParams(
   dateFromInput: string,
   limit: number = 100
 ) {
-  const timeframes: cpz.ExchangeTimeframes = converExchangeTimeframes(
+  const timeframes: cpz.ExchangeTimeframes = convertExchangeTimeframes(
     exchangeTimeframes
   );
   let currentTimeframe = Timeframe.get(timeframe);
@@ -268,7 +276,13 @@ function getCandlesParams(
     Timeframe.toString(timeframe)
   );
   if (!exchangeHasTimeframe) {
-    currentTimeframe = Timeframe.get(currentTimeframe.lower);
+    const exchangeTimeframeList = Object.values(timeframes)
+      .map(t => +t)
+      .sort(sortDesc);
+    const lowerTimeframe = exchangeTimeframeList.filter(
+      t => +t < +timeframe
+    )[0];
+    currentTimeframe = Timeframe.get(lowerTimeframe);
   }
 
   const { amount, unit } = Timeframe.timeframeAmountToTimeUnit(
@@ -318,6 +332,7 @@ function loadLimit(exchange: string) {
 export {
   handleCandleGaps,
   batchCandles,
+  convertExchangeTimeframes,
   createCandlesFromTrades,
   getCurrentCandleParams,
   getCandlesParams,

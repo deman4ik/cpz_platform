@@ -283,9 +283,16 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   retryOptions = {
-    retries: 100,
+    retries: 1000,
     minTimeout: 0,
-    maxTimeout: 100
+    maxTimeout: 0,
+    onRetry: (err: any, i: number) => {
+      this.logger.info("Retry", i);
+      if (err) {
+        // eslint-disable-next-line no-console
+        this.logger.warn("Retry error : ", err);
+      }
+    }
   };
 
   /**
@@ -676,7 +683,7 @@ class PublicConnectorService extends Service {
 
     candles = response.map(candle => {
       try {
-        if (!candle[1] || !candle[2] || !candle[3] || !candle[4] || !candle[5])
+        if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
         return {
           exchange,
@@ -734,6 +741,7 @@ class PublicConnectorService extends Service {
 
       const call = async (bail: (e: Error) => void) => {
         try {
+          this.logger.info("getTrades", asset, currency, dateFrom);
           return await this.connectors[exchange].fetchTrades(
             this.getSymbol(asset, currency),
             since,
@@ -746,7 +754,13 @@ class PublicConnectorService extends Service {
         }
       };
       const response: ccxt.Trade[] = await retry(call, this.retryOptions);
-
+      this.logger.info(
+        "getTrades response",
+        asset,
+        currency,
+        dateFrom,
+        response.length
+      );
       if (!response || !Array.isArray(response))
         throw new Errors.MoleculerRetryableError("Failed to fetch trades");
 

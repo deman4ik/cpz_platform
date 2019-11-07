@@ -4,8 +4,6 @@ import { cpz } from "../../@types";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
-import Timeframe from "../../utils/timeframe";
-import { CANDLES_RECENT_AMOUNT } from "../../config";
 import Auth from "../../mixins/auth";
 
 class UserRobotRunnerService extends Service {
@@ -14,9 +12,11 @@ class UserRobotRunnerService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.USER_ROBOT_RUNNER,
       dependencies: [
+        cpz.Service.DB_ROBOTS,
         cpz.Service.DB_USER_ROBOTS,
         cpz.Service.DB_USER_POSITIONS,
-        cpz.Service.DB_USER_ORDERS
+        cpz.Service.DB_USER_ORDERS,
+        cpz.Service.DB_USER_ROBOT_JOBS
       ],
       mixins: [
         Auth,

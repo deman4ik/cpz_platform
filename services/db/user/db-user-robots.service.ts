@@ -5,13 +5,24 @@ import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
+import Auth from "../../../mixins/auth";
 
 class UserRobotsService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_ROBOTS,
-      mixins: [DbService],
+      settings: {
+        graphql: {
+          type: `
+          input UserRobotSettings {
+            volume: Float!,
+            kraken: JSON
+          }
+          `
+        }
+      },
+      mixins: [Auth, DbService],
       adapter: SqlAdapter,
       model: {
         name: "user_robots",
@@ -76,6 +87,11 @@ class UserRobotsService extends Service {
               }
             }
           },
+          graphql: {
+            mutation:
+              "createUserRobot(userExAccId: String!, robotId: String!, settings: UserRobotSettings!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
           handler: this.create
         },
         getState: {
@@ -95,12 +111,13 @@ class UserRobotsService extends Service {
         robotId: string;
         settings: cpz.UserRobotSettings;
       },
-      cpz.User
+      { user: cpz.User }
     >
   ) {
     try {
       const { userExAccId, robotId, settings } = ctx.params;
-      const userExAccExists = await this.broker.call(
+      const { id } = ctx.meta.user;
+      const userExAccExists: cpz.UserExchangeAccount = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         { id: userExAccId }
       );
@@ -111,6 +128,9 @@ class UserRobotsService extends Service {
           "ERR_NOT_FOUND",
           { userExAccId }
         );
+
+      if (id && userExAccExists.userId !== id)
+        throw new Errors.MoleculerClientError("FORBIDDEN");
       const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "available"]
@@ -124,7 +144,7 @@ class UserRobotsService extends Service {
         );
       //TODO: check available
 
-      const userRobotExists = await this.adapter.find({
+      const [userRobotExists] = await this.adapter.find({
         query: {
           robotId,
           userExAccId
@@ -139,9 +159,10 @@ class UserRobotsService extends Service {
         id: userRobotId,
         robotId,
         userExAccId,
+        status: cpz.Status.stopped,
         settings
       });
-      return { success: true, userRobotId };
+      return { success: true, result: userRobotId };
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };

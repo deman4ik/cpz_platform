@@ -10,6 +10,11 @@ class PricateConnectorRunnerService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.PRIVATE_CONNECTOR_RUNNER,
+      dependencies: [
+        cpz.Service.DB_USER_ORDERS,
+        cpz.Service.DB_USER_EXCHANGE_ACCS,
+        cpz.Service.DB_CONNECTOR_JOBS
+      ],
       mixins: [
         QueueService({
           redis: {
@@ -43,7 +48,10 @@ class PricateConnectorRunnerService extends Service {
 
   cronOrders: cron.ScheduledTask = cron.schedule(
     "*/15 * * * * *",
-    this.checkOrders.bind(this)
+    this.checkOrders.bind(this),
+    {
+      scheduled: false
+    }
   );
 
   async checkOrders() {

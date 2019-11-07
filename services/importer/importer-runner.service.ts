@@ -201,7 +201,11 @@ class ImporterRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
-      await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
+      await this.createJob(cpz.Queue.importCandles, state, {
+        jobId: id,
+        removeOnComplete: true,
+        removeOnFail: true
+      });
 
       return { success: true, id, status: state.status };
     } catch (e) {
@@ -259,7 +263,11 @@ class ImporterRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
-      await this.createJob(cpz.Queue.importCandles, state, { jobId: id });
+      await this.createJob(cpz.Queue.importCandles, state, {
+        jobId: id,
+        removeOnComplete: true,
+        removeOnFail: true
+      });
 
       return { success: true, id, status: state.status };
     } catch (e) {
