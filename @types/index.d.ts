@@ -610,6 +610,7 @@ declare namespace cpz {
   }
 
   interface RobotTradeSettings {
+    orderTimeout: number;
     slippage?: {
       entry?: {
         stepPercent: number;
@@ -624,9 +625,8 @@ declare namespace cpz {
       entry?: number;
       exit?: number;
     };
-    orderTimeout?: number;
-    multiPosition?: boolean;
   }
+
   interface RobotStatVals<T> {
     all?: T;
     long?: T;
@@ -845,7 +845,9 @@ declare namespace cpz {
   interface UserPositionInternalState {
     entrySlippageCount: number;
     exitSlippageCount: number;
+    delayedSignal?: SignalEvent;
   }
+
   interface UserPositionDB {
     id: string;
     prefix: string;
@@ -862,7 +864,6 @@ declare namespace cpz {
     entryVolume?: number;
     entryExecuted?: number;
     entryRemaining?: number;
-    entryOrderIds?: string[];
     exitStatus?: UserPositionOrderStatus;
     exitSignalPrice?: number;
     exitPrice?: number;
@@ -870,7 +871,6 @@ declare namespace cpz {
     exitVolume?: number;
     exitExecuted?: number;
     exitRemaining?: number;
-    exitOrderIds?: string[];
     internalState: UserPositionInternalState;
     reason?: string; //TODO ENUM
     profit?: number;

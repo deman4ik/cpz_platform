@@ -85,11 +85,6 @@ class UserPositionsService extends Service {
               return (value && +value) || value;
             }
           },
-          entryOrderIds: {
-            type: Sequelize.JSONB,
-            field: "entry_order_ids",
-            allowNull: true
-          },
           exitStatus: {
             type: Sequelize.STRING,
             field: "exit_status",
@@ -148,11 +143,6 @@ class UserPositionsService extends Service {
               const value = this.getDataValue("exitRemaining");
               return (value && +value) || value;
             }
-          },
-          exitOrderIds: {
-            type: Sequelize.JSONB,
-            field: "exit_order_ids",
-            allowNull: true
           },
           internalState: { type: Sequelize.JSONB, field: "internal_state" },
           reason: { type: Sequelize.STRING, allowNull: true },
@@ -249,7 +239,6 @@ class UserPositionsService extends Service {
           entryVolume,
           entryExecuted,
           entryRemaining,
-          entryOrderIds,
           exitStatus,
           exitSignalPrice,
           exitPrice,
@@ -257,7 +246,6 @@ class UserPositionsService extends Service {
           exitVolume,
           exitExecuted,
           exitRemaining,
-          exitOrderIds,
           internalState,
           reason,
           profit,
@@ -281,7 +269,6 @@ class UserPositionsService extends Service {
             entryVolume,
             entryExecuted,
             entryRemaining,
-            entryOrderIds,
             exitStatus,
             exitSignalPrice,
             exitPrice,
@@ -289,7 +276,6 @@ class UserPositionsService extends Service {
             exitVolume,
             exitExecuted,
             exitRemaining,
-            exitOrderIds,
             internalState,
             reason,
             profit,
@@ -315,7 +301,6 @@ class UserPositionsService extends Service {
         entry_volume,
         entry_executed,
         entry_remaining,
-        entry_order_ids,
         exit_status,
         exit_signal_price,
         exit_price,
@@ -323,7 +308,6 @@ class UserPositionsService extends Service {
         exit_volume,
         exit_executed,
         exit_remaining,
-        exit_order_ids,
         internal_state,
         reason,
         profit,
@@ -346,7 +330,6 @@ class UserPositionsService extends Service {
           entry_volume = excluded.entry_volume,
           entry_executed = excluded.entry_executed,
           entry_remaining = excluded.entry_remaining,
-          entry_order_ids = excluded.entry_order_ids,
           exit_status = excluded.exit_status,
           exit_signal_price = excluded.exit_signal_price,
           exit_price = excluded.exit_price,
@@ -354,7 +337,6 @@ class UserPositionsService extends Service {
           exit_volume = excluded.exit_volume,
           exit_executed = excluded.exit_executed,
           exit_remaining = excluded.exit_remaining,
-          exit_order_ids = excluded.exit_order_ids,
           internal_state = excluded.internal_state,
           reason = excluded.reason,
           profit = excluded.profit,

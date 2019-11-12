@@ -184,7 +184,21 @@ class UserRobotsService extends Service {
           WHERE r.id = ur.robot_id) rr) AS robot,
       (SELECT array_to_json(array_agg(pos))
        FROM
-         (SELECT p.*
+         (SELECT p.*,
+            (SELECT array_to_json(array_agg(eo))
+             FROM
+               (SELECT o.*
+                FROM user_orders o
+                WHERE o.user_position_id = p.id
+                  AND (o.action = 'long'
+                       OR o.action = 'short')) eo) AS entry_orders,
+            (SELECT array_to_json(array_agg(eo))
+             FROM
+               (SELECT o.*
+                FROM user_orders o
+                WHERE o.user_position_id = p.id
+                  AND (o.action = 'closeLong'
+                       OR o.action = 'closeShort')) eo) AS exit_orders
           FROM user_positions p
           WHERE p.user_robot_id = ur.id
             AND p.status IN ('delayed',
