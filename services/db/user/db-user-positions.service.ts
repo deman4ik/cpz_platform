@@ -276,7 +276,7 @@ class UserPositionsService extends Service {
             exitVolume,
             exitExecuted,
             exitRemaining,
-            internalState,
+            internalState: JSON.stringify(internalState),
             reason,
             profit,
             barsHeld,

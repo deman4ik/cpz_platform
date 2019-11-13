@@ -146,7 +146,7 @@ class UserRobotWorkerService extends Service {
           await this.broker.call(
             `${cpz.Service.PRIVATE_CONNECTOR_RUNNER}.addJob`,
             {
-              userExAccId: order.userExAccId,
+              userExAccId: state.userRobot.userExAccId,
               type: cpz.ConnectorJobType.order
             }
           );

@@ -181,7 +181,7 @@ class UserRobotsService extends Service {
                  r.timeframe,
                  r.trade_settings
           FROM robots r
-          WHERE r.id = ur.robot_id) rr) AS robot,
+          WHERE r.id = ur.robot_id) rr)->0 AS robot,
       (SELECT array_to_json(array_agg(pos))
        FROM
          (SELECT p.*,
@@ -206,10 +206,22 @@ class UserRobotsService extends Service {
                              'open')) pos) AS positions
     FROM user_robots ur
     WHERE ur.id = :id;`;
-      const [rawUserRobotState] = await this.adapter.db.query(query, {
+      let [rawUserRobotState] = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id }
       });
+      rawUserRobotState.started_at =
+        rawUserRobotState.started_at &&
+        rawUserRobotState.started_at.toISOString();
+      rawUserRobotState.stopped_at =
+        rawUserRobotState.stopped_at &&
+        rawUserRobotState.stopped_at.toISOString();
+      rawUserRobotState.created_at =
+        rawUserRobotState.created_at &&
+        rawUserRobotState.created_at.toISOString();
+      rawUserRobotState.updated_at =
+        rawUserRobotState.updated_at &&
+        rawUserRobotState.updated_at.toISOString();
       const userRobotState = underscoreToCamelCaseKeys(rawUserRobotState);
       return userRobotState;
     } catch (e) {

@@ -301,7 +301,8 @@ class PrivateConnectorWorkerService extends Service {
       const [order] = await this.broker.call(
         `${cpz.Service.DB_USER_ORDERS}.find`,
         {
-          sort: ["last_checked_at", "nextJobAt"],
+          limit: 1,
+          sort: "last_checked_at next_job_at",
           query: {
             userExAccId,
             nextJob: { $ne: null },
@@ -315,10 +316,7 @@ class PrivateConnectorWorkerService extends Service {
     }
   }
 
-  async run(
-    exAcc: cpz.UserExchangeAccount,
-    job: cpz.ConnectorJob
-  ): Promise<cpz.Order> {
+  async run(exAcc: cpz.UserExchangeAccount, job: cpz.ConnectorJob) {
     const { exchange } = exAcc;
     const { userExAccId, type, data } = job;
     try {
@@ -334,109 +332,20 @@ class PrivateConnectorWorkerService extends Service {
                 "ERR_INVALID_PARAMS",
                 { exAcc, job, order }
               );
-            const {
-              nextJob: { type: orderJobType, data: orderJobData }
-            } = order;
+
             try {
-              if (orderJobType === cpz.OrderJobType.create) {
-                if (order.exId || order.status !== cpz.OrderStatus.new) {
-                  this.logger.error(
-                    `Failed to create order #${order.id} - order already processed!`
-                  );
-                  return {
-                    ...order,
-                    error: new Error(
-                      `Failed to create order - already processed!`
-                    )
-                  };
-                }
-                order = await this.createOrder(order);
-                order.nextJob = {
-                  type: cpz.OrderJobType.check
-                };
-                order.nextJobAt = dayjs
-                  .utc()
-                  .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-                  .toISOString();
-              } else if (orderJobType === cpz.OrderJobType.recreate) {
-                const checkedOrder = await this.checkOrder(order);
-                if (checkedOrder.status === cpz.OrderStatus.canceled) {
-                  order = await this.createOrder({
-                    ...checkedOrder,
-                    price: orderJobData.prce
-                  });
-                  order.nextJob = {
-                    type: cpz.OrderJobType.check
-                  };
-                  order.nextJobAt = dayjs
-                    .utc()
-                    .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-                    .toISOString();
-                }
-              } else if (orderJobType === cpz.OrderJobType.cancel) {
-                if (!order.exId) {
-                  return {
-                    ...order,
-                    status: cpz.OrderStatus.canceled
-                  };
-                }
-                if (
-                  order.status === cpz.OrderStatus.canceled ||
-                  order.status === cpz.OrderStatus.closed
-                ) {
-                  return order;
-                }
-                order = await this.cancelOrder(order);
-                order.nextJob = null;
-                order.nextJobAt = null;
-              } else if (orderJobType === cpz.OrderJobType.check) {
-                if (!order.exId) {
-                  this.logger.error(
-                    `Failed to check order #${order.id} - no exchange id!`
-                  );
-                  return {
-                    ...order,
-                    error: new Error(`Failed to check order - no exchange id!`)
-                  };
-                }
-                if (order.status === cpz.OrderStatus.closed) return order;
-                order = await this.checkOrder(order);
-                if (order.status === cpz.OrderStatus.open) {
-                  if (
-                    order.exTimestamp &&
-                    dayjs
-                      .utc()
-                      .diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
-                      order.settings.orderTimeout
-                  ) {
-                    order = await this.cancelOrder(order);
-                  } else {
-                    order.nextJob = {
-                      type: cpz.OrderJobType.check
-                    };
-                    order.nextJobAt = dayjs
-                      .utc()
-                      .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-                      .toISOString();
-                  }
-                } else {
-                  order.nextJob = null;
-                  order.nextJobAt = null;
-                }
-              } else {
-                throw new Errors.MoleculerError(
-                  "Wrong connector job type",
-                  400,
-                  "ERR_INVALID_PARAMS",
-                  { job }
+              order = await this.processOrder(order);
+              this.logger.info("Saving order", order);
+              try {
+                await this.broker.call(
+                  `${cpz.Service.DB_USER_ORDERS}.update`,
+                  order
                 );
+              } catch (e) {
+                this.logger.error("ORDERS UPDATE ERROR", order, e);
+                throw e;
               }
-
-              await this.broker.call(
-                `${cpz.Service.DB_USER_ORDERS}.update`,
-                order
-              );
-
+              this.logger.info("Saved order");
               if (
                 order.status === cpz.OrderStatus.closed ||
                 order.status === cpz.OrderStatus.canceled
@@ -465,6 +374,105 @@ class PrivateConnectorWorkerService extends Service {
       this.logger.error(err);
       throw err;
     }
+  }
+
+  async processOrder(order: cpz.Order): Promise<cpz.Order> {
+    const {
+      nextJob: { type: orderJobType, data: orderJobData }
+    } = order;
+
+    if (orderJobType === cpz.OrderJobType.create) {
+      if (order.exId || order.status !== cpz.OrderStatus.new) {
+        this.logger.error(
+          `Failed to create order #${order.id} - order already processed!`
+        );
+        return {
+          ...order,
+          error: new Error(`Failed to create order - already processed!`)
+        };
+      }
+      order = await this.createOrder(order);
+      order.nextJob = {
+        type: cpz.OrderJobType.check
+      };
+      order.nextJobAt = dayjs
+        .utc()
+        .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+        .toISOString();
+    } else if (orderJobType === cpz.OrderJobType.recreate) {
+      const checkedOrder = await this.checkOrder(order);
+      if (checkedOrder.status === cpz.OrderStatus.canceled) {
+        order = await this.createOrder({
+          ...checkedOrder,
+          price: orderJobData.prce
+        });
+        order.nextJob = {
+          type: cpz.OrderJobType.check
+        };
+        order.nextJobAt = dayjs
+          .utc()
+          .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+          .toISOString();
+      }
+    } else if (orderJobType === cpz.OrderJobType.cancel) {
+      if (!order.exId) {
+        return {
+          ...order,
+          status: cpz.OrderStatus.canceled,
+          nextJob: null,
+          nextJobAt: null
+        };
+      }
+      if (
+        order.status === cpz.OrderStatus.canceled ||
+        order.status === cpz.OrderStatus.closed
+      ) {
+        return { ...order, nextJob: null, nextJobAt: null };
+      }
+      order = await this.cancelOrder(order);
+      order.nextJob = null;
+      order.nextJobAt = null;
+    } else if (orderJobType === cpz.OrderJobType.check) {
+      if (!order.exId) {
+        this.logger.error(
+          `Failed to check order #${order.id} - no exchange id!`
+        );
+        return {
+          ...order,
+          error: new Error(`Failed to check order - no exchange id!`)
+        };
+      }
+      if (order.status === cpz.OrderStatus.closed) return order;
+      order = await this.checkOrder(order);
+      if (order.status === cpz.OrderStatus.open) {
+        if (
+          order.exTimestamp &&
+          dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
+            order.params.orderTimeout
+        ) {
+          order = await this.cancelOrder(order);
+        } else {
+          order.nextJob = {
+            type: cpz.OrderJobType.check
+          };
+          order.nextJobAt = dayjs
+            .utc()
+            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+            .toISOString();
+        }
+      } else {
+        order.nextJob = null;
+        order.nextJobAt = null;
+      }
+    } else {
+      throw new Errors.MoleculerError(
+        "Wrong connector job type",
+        400,
+        "ERR_INVALID_PARAMS",
+        { order }
+      );
+    }
+    return order;
   }
 
   async createOrder(order: cpz.Order): Promise<cpz.Order> {

@@ -302,6 +302,7 @@ class RobotRunnerService extends Service {
           status
         };
 
+      await this.broker.call(`${cpz.Service.DB_ROBOTS}.clear`, { robotId: id });
       await this.broker.call(`${cpz.Service.ROBOT_WORKER}.startUp`, {
         id
       });

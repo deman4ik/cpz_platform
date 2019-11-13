@@ -175,22 +175,41 @@ class UserRobot implements cpz.UserRobot {
       );
     }
 
-    const hasActiveParent =
-      signal.positionParentId &&
-      this._positions[signal.positionParentId] &&
-      this._positions[signal.positionParentId].isActive;
-
     if (
       signal.action === cpz.TradeAction.long ||
       signal.action === cpz.TradeAction.short
     ) {
+      const hasActiveParent =
+        signal.positionParentId &&
+        this._positions[signal.positionParentId] &&
+        this._positions[signal.positionParentId].isActive;
+      const previousActivePositions = Object.values(this._positions).filter(
+        pos =>
+          pos.isActive &&
+          pos.prefix === signal.positionPrefix &&
+          pos.number <
+            +signal.positionCode.split(`${signal.positionPrefix}_`)[1]
+      );
+      if (
+        previousActivePositions &&
+        Array.isArray(previousActivePositions) &&
+        previousActivePositions.length > 0
+      ) {
+        previousActivePositions.forEach(p => {
+          this._positions[p.positionId].cancel();
+          this._positions[p.positionId].executeJob();
+        });
+      }
+
+      const delay = hasActiveParent || previousActivePositions.length > 0;
+
       this._positions[signal.positionId] = new UserPosition({
         id: uuid(),
         prefix: signal.positionPrefix,
         code: this._getNextPositionCode(signal.positionPrefix),
         positionId: signal.positionId,
         userRobotId: this._id,
-        status: hasActiveParent
+        status: delay
           ? cpz.UserPositionStatus.delayed
           : cpz.UserPositionStatus.new,
         parentId: signal.positionParentId,
@@ -206,15 +225,19 @@ class UserRobot implements cpz.UserRobot {
         internalState: {
           entrySlippageCount: 0,
           exitSlippageCount: 0,
-          delayedSignal: hasActiveParent && signal
+          delayedSignal: delay && signal
         }
       });
       this._positions[signal.positionId]._log = this._log.bind(this);
+      if (!delay) {
+        this._positions[signal.positionId].handleSignal(signal);
+        this._positions[signal.positionId].executeJob();
+      }
     } else {
       if (!this._positions[signal.positionId]) {
         const previousPositions = Object.values(this._positions).filter(
           pos =>
-            pos.status === cpz.UserPositionStatus.open &&
+            pos.isActive &&
             pos.prefix === signal.positionPrefix &&
             pos.number <
               +signal.positionCode.split(`${signal.positionPrefix}_`)[1] &&
@@ -232,14 +255,11 @@ class UserRobot implements cpz.UserRobot {
           const [previousPosition] = previousPositions;
           this._positions[previousPosition.positionId].handleSignal(signal);
           this._positions[previousPosition.positionId].executeJob();
-          return;
         }
+      } else {
+        this._positions[signal.positionId].handleSignal(signal);
+        this._positions[signal.positionId].executeJob();
       }
-    }
-
-    if (!hasActiveParent) {
-      this._positions[signal.positionId].handleSignal(signal);
-      this._positions[signal.positionId].executeJob();
     }
   }
 
@@ -247,8 +267,14 @@ class UserRobot implements cpz.UserRobot {
     this.positions
       .filter(p => p.status === cpz.UserPositionStatus.delayed)
       .forEach(pos => {
-        this._positions[pos.positionId].handleDelayedSignal();
-        this._positions[pos.positionId].executeJob();
+        if (
+          !this._positions[pos.parentId] ||
+          (this._positions[pos.parentId] &&
+            !this._positions[pos.parentId].isActive)
+        ) {
+          this._positions[pos.positionId].handleDelayedSignal();
+          this._positions[pos.positionId].executeJob();
+        }
       });
   }
 

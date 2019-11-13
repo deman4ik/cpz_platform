@@ -14,7 +14,7 @@ class UserOrdersService extends Service {
       model: {
         name: "user_orders",
         define: {
-          id: { type: Sequelize.UUID, primaryKey: true },
+          id: { type: Sequelize.STRING, primaryKey: true },
           userExAccId: { type: Sequelize.UUID, field: "user_ex_acc_id" },
           userRobotId: { type: Sequelize.UUID, field: "user_robot_id" },
           positionId: { type: Sequelize.UUID, field: "position_id" },
@@ -139,17 +139,36 @@ class UserOrdersService extends Service {
       actions: {
         getUserExAccsWithJobs: {
           handler: this.getUserExAccsWithJobs
+        },
+        update: {
+          handler: this.update
         }
       }
     });
   }
 
-  async getUserExAccsWithJobs(ctx: Context) {
+  async update(ctx: Context<cpz.Order>) {
+    this.logger.info(ctx.params);
+    const data: { [key: string]: any } = ctx.params;
+    let id;
+    let set: { [key: string]: any } = {};
+    Object.keys(data).forEach(key => {
+      if (key === "id") id = data[key];
+      else set[key] = data[key];
+    });
+
+    await this.adapter.updateById(id, { $set: set });
+  }
+
+  async getUserExAccsWithJobs(ctx: Context): Promise<string[]> {
     try {
       const query = `select user_ex_acc_id from user_orders where next_job_at is not null and next_job_at <= now() group by user_ex_acc_id;`;
-      return await this.adapter.db.query(query, {
+      const rawData = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT
       });
+      if (rawData && Array.isArray(rawData) && rawData.length > 0)
+        return rawData.map((d: { user_ex_acc_id: string }) => d.user_ex_acc_id);
+      return [];
     } catch (e) {
       this.logger.error(e);
       throw e;
