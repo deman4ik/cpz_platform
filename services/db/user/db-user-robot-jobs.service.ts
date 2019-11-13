@@ -17,7 +17,16 @@ class UserRobotJobsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           userRobotId: { type: Sequelize.STRING, field: "user_robot_id" },
           type: Sequelize.STRING,
-          data: { type: Sequelize.JSONB, allowNull: true }
+          data: { type: Sequelize.JSONB, allowNull: true },
+          createdAt: {
+            type: Sequelize.DATE,
+            allowNull: true,
+            field: "created_at",
+            get: function() {
+              const value = this.getDataValue("createdAt");
+              return (value && value.toISOString()) || value;
+            }
+          }
         },
         options: {
           freezeTableName: true,

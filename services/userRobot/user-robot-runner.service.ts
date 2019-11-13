@@ -5,6 +5,7 @@ import { JobId } from "bull";
 import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Auth from "../../mixins/auth";
+import cron from "node-cron";
 
 class UserRobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -93,8 +94,48 @@ class UserRobotRunnerService extends Service {
         [cpz.Event.ORDER_STATUS]: this.handleOrder,
         [cpz.Event.SIGNAL_TRADE]: this.handleSignalTrade
       },
-      started: this.startedService
+      started: this.startedService,
+      stopped: this.stoppedService
     });
+  }
+
+  cronJobs: cron.ScheduledTask = cron.schedule(
+    "*/15 * * * * *",
+    this.checkJobs.bind(this),
+    {
+      scheduled: false
+    }
+  );
+
+  async checkJobs() {
+    try {
+      const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
+        {
+          query: {
+            createdAt: {
+              $lte: dayjs
+                .utc()
+                .add(-30, cpz.TimeUnit.second)
+                .toISOString()
+            }
+          }
+        }
+      );
+
+      if (idledJobs && Array.isArray(idledJobs) && idledJobs.length > 0) {
+        this.logger.info(`Requeue ${idledJobs.length} jobs`);
+        idledJobs.forEach(async job => {
+          await this.createJob(cpz.Queue.runUserRobot, job, {
+            jobId: job.userRobotId,
+            removeOnComplete: true,
+            removeOnFail: true
+          });
+        });
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   async jobCompleted(jobID: JobId, res: any) {
@@ -118,6 +159,11 @@ class UserRobotRunnerService extends Service {
       "fail",
       this.jobError.bind(this)
     );
+    this.cronJobs.start();
+  }
+
+  async stoppedService() {
+    this.cronJobs.stop();
   }
 
   async queueJob(job: cpz.UserRobotJob, status: string) {
@@ -125,7 +171,7 @@ class UserRobotRunnerService extends Service {
       entity: job
     });
     const { userRobotId } = job;
-    if (status === cpz.Status.started)
+    if (status === cpz.Status.started || status === cpz.Status.stopping)
       await this.createJob(cpz.Queue.runUserRobot, job, {
         jobId: userRobotId,
         removeOnComplete: true,
