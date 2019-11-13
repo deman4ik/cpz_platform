@@ -60,6 +60,7 @@ class PricateConnectorRunnerService extends Service {
         `${cpz.Service.DB_USER_ORDERS}.getUserExAccsWithJobs`
       );
       if (userExAccIds && Array.isArray(userExAccIds) && userExAccIds.length) {
+        this.logger.info(`${userExAccIds.length} userExAccs has order jobs`);
         for (const userExAccId of userExAccIds) {
           const { status } = await this.broker.call(
             `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
@@ -117,6 +118,7 @@ class PricateConnectorRunnerService extends Service {
         removeOnComplete: true,
         removeOnFail: true
       });
+    this.logger.info("Queued", job);
   }
 
   async addJob(

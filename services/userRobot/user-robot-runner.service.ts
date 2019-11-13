@@ -131,6 +131,7 @@ class UserRobotRunnerService extends Service {
         removeOnComplete: true,
         removeOnFail: true
       });
+    this.logger.info("Queued", job);
   }
 
   async start(
@@ -225,10 +226,9 @@ class UserRobotRunnerService extends Service {
       const { id } = ctx.params;
       let userRobotsToPause: { id: string; status: string }[] = [];
       if (id) {
-        const { status } = await this.broker.call(
-          `${cpz.Service.DB_USER_ROBOTS}.get`,
-          { id }
-        );
+        const {
+          status
+        } = await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.get`, { id });
         if (status === cpz.Status.started)
           userRobotsToPause.push({ id, status });
       } else {
@@ -271,10 +271,9 @@ class UserRobotRunnerService extends Service {
       const { id } = ctx.params;
       let userRobotIds: string[] = [];
       if (id) {
-        const { status } = await this.broker.call(
-          `${cpz.Service.DB_USER_ROBOTS}.get`,
-          { id }
-        );
+        const {
+          status
+        } = await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.get`, { id });
         if (status === cpz.Status.paused) userRobotIds.push(id);
       } else {
         const robots: cpz.RobotState[] = await this.broker.call(
@@ -349,6 +348,9 @@ class UserRobotRunnerService extends Service {
   async handleOrder(ctx: Context<cpz.Order>) {
     const order = ctx.params;
     try {
+      this.logger.info(
+        `New ${cpz.Event.ORDER_STATUS} event for User Robot #${order.userRobotId}`
+      );
       const { status }: cpz.UserRobotDB = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {

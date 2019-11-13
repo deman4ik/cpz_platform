@@ -399,6 +399,15 @@ declare namespace cpz {
     nextJobAt: string;
     nextJob: OrderJob;
   }
+
+  interface OrderParams {
+    orderTimeout: number;
+    kraken?: {
+      leverage?: number;
+    };
+    [key: string]: any;
+  }
+
   interface Order {
     id: string;
     userExAccId: string;
@@ -414,7 +423,7 @@ declare namespace cpz {
     signalPrice?: number;
     price?: number;
     volume: number;
-    params: GenericObject<any>;
+    params: OrderParams;
     createdAt: string;
     status: OrderStatus;
     exId?: string;
@@ -852,6 +861,7 @@ declare namespace cpz {
     id: string;
     prefix: string;
     code: string;
+    positionCode: string;
     positionId: string;
     userRobotId: string;
     status: UserPositionStatus;

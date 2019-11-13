@@ -335,7 +335,7 @@ class PrivateConnectorWorkerService extends Service {
 
             try {
               order = await this.processOrder(order);
-              this.logger.info("Saving order", order);
+
               try {
                 await this.broker.call(
                   `${cpz.Service.DB_USER_ORDERS}.update`,
@@ -345,13 +345,15 @@ class PrivateConnectorWorkerService extends Service {
                 this.logger.error("ORDERS UPDATE ERROR", order, e);
                 throw e;
               }
-              this.logger.info("Saved order");
               if (
                 order.status === cpz.OrderStatus.closed ||
                 order.status === cpz.OrderStatus.canceled
               )
                 await this.broker.emit(cpz.Event.ORDER_STATUS, order);
-
+              this.logger.info(
+                `UserExAcc #${order.userExAccId} processed order`,
+                order
+              );
               order = await this.getNextOrder(userExAccId);
             } catch (err) {
               this.logger.error(err);
@@ -382,6 +384,9 @@ class PrivateConnectorWorkerService extends Service {
     } = order;
 
     if (orderJobType === cpz.OrderJobType.create) {
+      this.logger.info(
+        `UserExAcc #${order.userExAccId} creating order ${order.positionId}/${order.id}`
+      );
       if (order.exId || order.status !== cpz.OrderStatus.new) {
         this.logger.error(
           `Failed to create order #${order.id} - order already processed!`
@@ -400,6 +405,9 @@ class PrivateConnectorWorkerService extends Service {
         .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
         .toISOString();
     } else if (orderJobType === cpz.OrderJobType.recreate) {
+      this.logger.info(
+        `UserExAcc #${order.userExAccId} recreating order ${order.positionId}/${order.id}`
+      );
       const checkedOrder = await this.checkOrder(order);
       if (checkedOrder.status === cpz.OrderStatus.canceled) {
         order = await this.createOrder({
@@ -415,6 +423,9 @@ class PrivateConnectorWorkerService extends Service {
           .toISOString();
       }
     } else if (orderJobType === cpz.OrderJobType.cancel) {
+      this.logger.info(
+        `UserExAcc #${order.userExAccId} canceling order ${order.positionId}/${order.id}`
+      );
       if (!order.exId) {
         return {
           ...order,
@@ -433,6 +444,9 @@ class PrivateConnectorWorkerService extends Service {
       order.nextJob = null;
       order.nextJobAt = null;
     } else if (orderJobType === cpz.OrderJobType.check) {
+      this.logger.info(
+        `UserExAcc #${order.userExAccId} checking order ${order.positionId}/${order.id}`
+      );
       if (!order.exId) {
         this.logger.error(
           `Failed to check order #${order.id} - no exchange id!`
@@ -478,22 +492,31 @@ class PrivateConnectorWorkerService extends Service {
   async createOrder(order: cpz.Order): Promise<cpz.Order> {
     try {
       const { userExAccId, exchange, asset, currency, direction } = order;
+
       const type =
         order.type === cpz.OrderType.market &&
         this.connectors[userExAccId].has.createMarketOrder
           ? cpz.OrderType.market
           : cpz.OrderType.limit;
-      const signalPrice =
-        order.price ||
-        order.signalPrice ||
-        (await this.broker.call(
+
+      let signalPrice: number;
+
+      if (order.price && order.price > 0) {
+        signalPrice = order.price;
+      } else if (order.signalPrice && order.signalPrice > 0) {
+        signalPrice = order.signalPrice;
+      } else {
+        const currentPrice: cpz.ExchangePrice = await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentPrice`,
           {
             exchange,
             asset,
             currency
           }
-        ));
+        );
+        signalPrice = currentPrice.price;
+      }
+
       const orderParams = this.getOrderParams(
         <ExchangeName>exchange,
         order.params,
@@ -528,7 +551,7 @@ class PrivateConnectorWorkerService extends Service {
 
       return {
         ...order,
-        params: orderParams,
+        params: { ...order.params, exchangeParams: orderParams },
         signalPrice,
         exId,
         exTimestamp,

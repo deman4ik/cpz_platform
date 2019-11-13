@@ -10,6 +10,7 @@ class UserPosition implements cpz.UserPosition {
   _id: string;
   _prefix: string;
   _code: string;
+  _positionCode: string;
   _positionId: string;
   _userRobotId: string;
   _status: cpz.UserPositionStatus;
@@ -57,6 +58,7 @@ class UserPosition implements cpz.UserPosition {
     this._id = state.id;
     this._prefix = state.prefix;
     this._code = state.code;
+    this._positionCode = state.positionCode;
     this._positionId = state.positionId;
     this._userRobotId = state.userRobotId;
     this._status = state.status;
@@ -76,7 +78,10 @@ class UserPosition implements cpz.UserPosition {
     this._exitVolume = state.exitVolume;
     this._exitExecuted = state.exitExecuted;
     this._exitRemaining = state.exitRemaining;
-    this._internalState = state.internalState;
+    this._internalState = state.internalState || {
+      entrySlippageCount: 0,
+      exitSlippageCount: 0
+    };
     this._reason = state.reason;
     this._profit = state.profit;
     this._barsHeld = state.barsHeld;
@@ -98,8 +103,8 @@ class UserPosition implements cpz.UserPosition {
     return this._prefix;
   }
 
-  get number() {
-    return +this._code.split(`${this._prefix}_`)[1];
+  get positionNumber() {
+    return +this._positionCode.split(`${this._prefix}_`)[1];
   }
 
   get code() {
@@ -142,7 +147,7 @@ class UserPosition implements cpz.UserPosition {
     )
       this._status = cpz.UserPositionStatus.new;
     else if (this._entryStatus === cpz.UserPositionOrderStatus.canceled) {
-      this._status === cpz.UserPositionStatus.canceled;
+      this._status = cpz.UserPositionStatus.canceled;
       this._nextJob = null;
       this._nextJobAt = null;
     } else if (this._entryStatus === cpz.UserPositionOrderStatus.partial) {
@@ -240,6 +245,7 @@ class UserPosition implements cpz.UserPosition {
       id: this._id,
       prefix: this._prefix,
       code: this._code,
+      positionCode: this._positionCode,
       positionId: this._positionId,
       userRobotId: this._userRobotId,
       status: this._status,
@@ -348,6 +354,7 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _setPrice(trade: cpz.TradeInfo) {
+    if (!trade.price) return trade.price;
     let price: number = trade.price;
     let slippage: number;
     if (this._isActionEntry(trade.action)) {
@@ -402,19 +409,6 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _createOrder(trade: cpz.TradeInfo) {
-    const params: GenericObject<any> = {};
-    params.orderTimeout =
-      this._robot.tradeSettings.orderTimeout || ORDER_OPEN_TIMEOUT;
-    if (this._robot.exchange === "kraken") {
-      if (
-        this._userRobot.settings.kraken &&
-        this._userRobot.settings.kraken.leverage
-      ) {
-        params.kraken = {
-          leverage: this._userRobot.settings.kraken.leverage
-        };
-      }
-    }
     const order: cpz.Order = {
       id: uuid(),
       userExAccId: this._userRobot.userExAccId,
@@ -434,12 +428,29 @@ class UserPosition implements cpz.UserPosition {
       volume: this._isActionExit(trade.action)
         ? this._exitRemaining || this._entryExecuted
         : this._userRobot.settings.volume,
-      params,
+      executed: 0,
+      params: {
+        orderTimeout:
+          this._robot.tradeSettings.orderTimeout || ORDER_OPEN_TIMEOUT
+      },
       createdAt: dayjs.utc().toISOString(),
       status: cpz.OrderStatus.new,
       nextJobAt: dayjs.utc().toISOString(),
       nextJob: { type: cpz.OrderJobType.create }
     };
+
+    order.remaining = order.volume;
+
+    if (this._robot.exchange === "kraken") {
+      if (
+        this._userRobot.settings.kraken &&
+        this._userRobot.settings.kraken.leverage
+      ) {
+        order.params.kraken = {
+          leverage: this._userRobot.settings.kraken.leverage
+        };
+      }
+    }
 
     return order;
   }
@@ -619,8 +630,7 @@ class UserPosition implements cpz.UserPosition {
       this._entrySignalPrice = signal.price;
       this._nextJob = cpz.UserPositionJob.open;
       this._nextJobAt = dayjs.utc().toISOString();
-    }
-    if (this._isActionExit(order.action)) {
+    } else if (this._isActionExit(order.action)) {
       this._exitOrders.push(order);
       this._exitStatus = cpz.UserPositionOrderStatus.new;
       this._exitVolume = order.volume;
@@ -663,7 +673,7 @@ class UserPosition implements cpz.UserPosition {
           Array.isArray(canceledOrders) &&
           canceledOrders.length > 0
         ) {
-          const [canceledOrder] = canceledOrders;
+          const canceledOrder = canceledOrders[canceledOrders.length - 1];
           if (
             this.hasEntrySlippage &&
             this._internalState.entrySlippageCount <
@@ -684,7 +694,7 @@ class UserPosition implements cpz.UserPosition {
               nextJobAt: dayjs.utc().toISOString()
             });
           } else {
-            if (this._entryExecuted) {
+            if (this._entryExecuted && this._entryExecuted > 0) {
               this._entryStatus = cpz.UserPositionOrderStatus.closed;
               this._setStatus();
             } else {
@@ -710,7 +720,7 @@ class UserPosition implements cpz.UserPosition {
           Array.isArray(canceledOrders) &&
           canceledOrders.length > 0
         ) {
-          const [canceledOrder] = canceledOrders;
+          const canceledOrder = canceledOrders[canceledOrders.length - 1];
           if (
             this.hasExitSlippage &&
             this._internalState.exitSlippageCount <

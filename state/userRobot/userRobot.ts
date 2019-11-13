@@ -183,30 +183,35 @@ class UserRobot implements cpz.UserRobot {
         signal.positionParentId &&
         this._positions[signal.positionParentId] &&
         this._positions[signal.positionParentId].isActive;
-      const previousActivePositions = Object.values(this._positions).filter(
-        pos =>
-          pos.isActive &&
-          pos.prefix === signal.positionPrefix &&
-          pos.number <
-            +signal.positionCode.split(`${signal.positionPrefix}_`)[1]
-      );
-      if (
-        previousActivePositions &&
-        Array.isArray(previousActivePositions) &&
-        previousActivePositions.length > 0
-      ) {
-        previousActivePositions.forEach(p => {
-          this._positions[p.positionId].cancel();
-          this._positions[p.positionId].executeJob();
-        });
+      let hasPreviousActivePositions = false;
+      if (!hasActiveParent) {
+        const previousActivePositions = Object.values(this._positions).filter(
+          pos =>
+            pos.isActive &&
+            pos.prefix === signal.positionPrefix &&
+            pos.positionNumber <
+              +signal.positionCode.split(`${signal.positionPrefix}_`)[1]
+        );
+        if (
+          previousActivePositions &&
+          Array.isArray(previousActivePositions) &&
+          previousActivePositions.length > 0
+        ) {
+          hasPreviousActivePositions = true;
+          previousActivePositions.forEach(p => {
+            this._positions[p.positionId].cancel();
+            this._positions[p.positionId].executeJob();
+          });
+        }
       }
 
-      const delay = hasActiveParent || previousActivePositions.length > 0;
+      const delay = hasActiveParent || hasPreviousActivePositions;
 
       this._positions[signal.positionId] = new UserPosition({
         id: uuid(),
         prefix: signal.positionPrefix,
         code: this._getNextPositionCode(signal.positionPrefix),
+        positionCode: signal.positionCode,
         positionId: signal.positionId,
         userRobotId: this._id,
         status: delay
@@ -239,7 +244,7 @@ class UserRobot implements cpz.UserRobot {
           pos =>
             pos.isActive &&
             pos.prefix === signal.positionPrefix &&
-            pos.number <
+            pos.positionNumber <
               +signal.positionCode.split(`${signal.positionPrefix}_`)[1] &&
             ((pos.direction === cpz.PositionDirection.long &&
               signal.action === cpz.TradeAction.closeLong) ||

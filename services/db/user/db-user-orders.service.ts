@@ -148,7 +148,6 @@ class UserOrdersService extends Service {
   }
 
   async update(ctx: Context<cpz.Order>) {
-    this.logger.info(ctx.params);
     const data: { [key: string]: any } = ctx.params;
     let id;
     let set: { [key: string]: any } = {};
@@ -156,7 +155,6 @@ class UserOrdersService extends Service {
       if (key === "id") id = data[key];
       else set[key] = data[key];
     });
-
     await this.adapter.updateById(id, { $set: set });
   }
 
