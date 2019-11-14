@@ -304,6 +304,24 @@ class UserPosition implements cpz.UserPosition {
     );
   }
 
+  get lastEntryOrder() {
+    return (
+      this._entryOrders &&
+      Array.isArray(this._entryOrders) &&
+      this._entryOrders.length > 0 &&
+      this._entryOrders[this._entryOrders.length - 1]
+    );
+  }
+
+  get lastExitOrder() {
+    return (
+      this._exitOrders &&
+      Array.isArray(this._exitOrders) &&
+      this._exitOrders.length > 0 &&
+      this._exitOrders[this._exitOrders.length - 1]
+    );
+  }
+
   get hasEntrySlippage() {
     return (
       this._robot.tradeSettings.slippage &&
@@ -455,7 +473,173 @@ class UserPosition implements cpz.UserPosition {
     return order;
   }
 
-  _cancelPosition() {
+  _open(trade: cpz.TradeInfo) {
+    const order = this._createOrder(trade);
+    this._ordersToCreate.push(order);
+    this._entryOrders.push(order);
+    this._entryVolume = this._userRobot.settings.volume;
+    this._updateEntry();
+    this._setStatus();
+  }
+
+  _close(trade: cpz.TradeInfo) {
+    const order = this._createOrder(trade);
+    this._ordersToCreate.push(order);
+    this._exitOrders.push(order);
+    if (!this._exitVolume || this._exitVolume === 0)
+      this._exitVolume = this._entryExecuted;
+    this._updateExit();
+    this._setStatus();
+  }
+
+  handleSignal(signal: cpz.SignalEvent) {
+    if (this._isActionEntry(signal.action)) {
+      if (this._entryStatus || this._nextJob === cpz.UserPositionJob.open)
+        throw new Errors.MoleculerError(
+          "Position already open",
+          409,
+          "ERR_CONFLICT",
+          { userPositionId: this._id }
+        );
+    }
+
+    if (this._isActionExit(signal.action)) {
+      if (this._exitStatus || this._nextJob === cpz.UserPositionJob.close)
+        throw new Errors.MoleculerError(
+          "Position already closed",
+          409,
+          "ERR_CONFLICT",
+          { userPositionId: this._id }
+        );
+
+      if (this._entryStatus !== cpz.UserPositionOrderStatus.closed) {
+        this.cancel();
+        return;
+      }
+
+      if (this._nextJob === cpz.UserPositionJob.cancel) return;
+    }
+
+    if (this._isActionEntry(signal.action)) {
+      this._entrySignalPrice = signal.price;
+      this._nextJob = cpz.UserPositionJob.open;
+      this._nextJobAt = dayjs.utc().toISOString();
+      this._open(signal);
+    } else if (this._isActionExit(signal.action)) {
+      this._exitSignalPrice = signal.price;
+      this._nextJob = cpz.UserPositionJob.close;
+      this._nextJobAt = dayjs.utc().toISOString();
+      this._close(signal);
+    }
+  }
+
+  handleDelayedSignal() {
+    this.handleSignal(this._internalState.delayedSignal);
+  }
+
+  handleOrder(order: cpz.Order) {
+    if (this._isActionEntry(order.action)) {
+      this._entryDate = order.exLastTradeAt || order.exTimestamp;
+      this._updateEntry();
+    } else {
+      this._exitDate = order.exLastTradeAt || order.exTimestamp;
+      this._updateExit();
+    }
+
+    this._setStatus();
+  }
+
+  _tryToOpen() {
+    if (
+      this._entryStatus === cpz.UserPositionOrderStatus.closed ||
+      (this._entryExecuted && this._entryExecuted === this._entryVolume) ||
+      this.hasOpenEntryOrders
+    )
+      return;
+
+    const lastOrder = this.lastEntryOrder;
+    if (!lastOrder) return;
+    if (
+      this.hasEntrySlippage &&
+      this._internalState.entrySlippageCount <
+        this._robot.tradeSettings.slippage.entry.count
+    ) {
+      if (lastOrder.status === cpz.OrderStatus.canceled) {
+        this._orderWithJobs.push({
+          id: lastOrder.id,
+          nextJob: {
+            type: cpz.OrderJobType.recreate,
+            data: {
+              price: this._setPrice({
+                action: lastOrder.action,
+                orderType: lastOrder.type,
+                price: lastOrder.signalPrice
+              })
+            }
+          },
+          nextJobAt: dayjs.utc().toISOString()
+        });
+      } else if (lastOrder.status === cpz.OrderStatus.closed) {
+        this._open({
+          action: lastOrder.action,
+          orderType: lastOrder.type,
+          price: this._entrySignalPrice
+        });
+      }
+    } else {
+      if (this._entryExecuted && this._entryExecuted > 0) {
+        this._entryStatus = cpz.UserPositionOrderStatus.closed;
+        this._setStatus();
+      } else {
+        this._entryStatus = cpz.UserPositionOrderStatus.canceled;
+        this._setStatus();
+      }
+    }
+  }
+
+  _tryToClose() {
+    if (
+      this._exitStatus === cpz.UserPositionOrderStatus.closed ||
+      (this._exitExecuted && this._exitExecuted === this._exitVolume) ||
+      this.hasOpenExitOrders
+    )
+      return;
+    const lastOrder = this.lastExitOrder;
+    if (!lastOrder) return;
+
+    if (
+      this.hasExitSlippage &&
+      this._internalState.exitSlippageCount <
+        this._robot.tradeSettings.slippage.exit.count
+    ) {
+      if (lastOrder.status === cpz.OrderStatus.canceled) {
+        this._orderWithJobs.push({
+          id: lastOrder.id,
+          nextJob: {
+            type: cpz.OrderJobType.recreate,
+            data: {
+              price: this._setPrice({
+                action: lastOrder.action,
+                orderType: lastOrder.type,
+                price: lastOrder.signalPrice
+              })
+            }
+          },
+          nextJobAt: dayjs.utc().toISOString()
+        });
+      } else if (lastOrder.status === cpz.OrderStatus.closed) {
+        this._close({
+          action: lastOrder.action,
+          orderType: lastOrder.type,
+          price: this._exitSignalPrice
+        });
+      }
+    } else {
+      this._tryToCancel();
+    }
+  }
+
+  _tryToCancel() {
     // Position entry not closed
     if (
       this._entryStatus &&
@@ -520,14 +704,13 @@ class UserPosition implements cpz.UserPosition {
         // Entry hasn't any open signal orders
         if (!this.hasOpenEntryOrders) {
           // Creating new exit order to close position
-          const order = this._createOrder({
+          this._close({
             action:
               this._direction === cpz.PositionDirection.long
                 ? cpz.TradeAction.closeLong
                 : cpz.TradeAction.closeShort,
             orderType: cpz.OrderType.forceMarket
           });
-          this._ordersToCreate.push(order);
         }
       }
     }
@@ -537,14 +720,13 @@ class UserPosition implements cpz.UserPosition {
       !this._exitStatus
     ) {
       // Creating new exit order to close position
-      const order = this._createOrder({
+      this._close({
         action:
           this._direction === cpz.PositionDirection.long
             ? cpz.TradeAction.closeLong
             : cpz.TradeAction.closeShort,
         orderType: cpz.OrderType.forceMarket
       });
-      this._ordersToCreate.push(order);
     }
     // Position is open, and there was an exit signal
     if (
@@ -580,175 +762,24 @@ class UserPosition implements cpz.UserPosition {
       // Exit hasn't any open signal orders
       if (!this.hasOpenExitOrders) {
         // Creating new exit order to close position
-        const order = this._createOrder({
+        this._close({
           action:
             this._direction === cpz.PositionDirection.long
               ? cpz.TradeAction.closeLong
               : cpz.TradeAction.closeShort,
           orderType: cpz.OrderType.forceMarket
         });
-        this._ordersToCreate.push(order);
       }
     }
-  }
-
-  handleSignal(signal: cpz.SignalEvent) {
-    if (this._isActionEntry(signal.action)) {
-      if (this._entryStatus || this._nextJob === cpz.UserPositionJob.open)
-        throw new Errors.MoleculerError(
-          "Position already open",
-          409,
-          "ERR_CONFLICT",
-          { userPositionId: this._id }
-        );
-    }
-
-    if (this._isActionExit(signal.action)) {
-      if (this._exitStatus || this._nextJob === cpz.UserPositionJob.close)
-        throw new Errors.MoleculerError(
-          "Position already closed",
-          409,
-          "ERR_CONFLICT",
-          { userPositionId: this._id }
-        );
-
-      if (this._entryStatus !== cpz.UserPositionOrderStatus.closed) {
-        this.cancel();
-        return;
-      }
-
-      if (this._nextJob === cpz.UserPositionJob.cancel) return;
-    }
-    const order = this._createOrder(signal);
-
-    this._ordersToCreate.push(order);
-
-    if (this._isActionEntry(order.action)) {
-      this._entryOrders.push(order);
-      this._entryStatus = cpz.UserPositionOrderStatus.new;
-      this._entryVolume = order.volume;
-      this._entrySignalPrice = signal.price;
-      this._nextJob = cpz.UserPositionJob.open;
-      this._nextJobAt = dayjs.utc().toISOString();
-    } else if (this._isActionExit(order.action)) {
-      this._exitOrders.push(order);
-      this._exitStatus = cpz.UserPositionOrderStatus.new;
-      this._exitVolume = order.volume;
-      this._exitSignalPrice = signal.price;
-      this._nextJob = cpz.UserPositionJob.close;
-      this._nextJobAt = dayjs.utc().toISOString();
-    }
-    this._setStatus();
-  }
-
-  handleDelayedSignal() {
-    this.handleSignal(this._internalState.delayedSignal);
-  }
-
-  handleOrder(order: cpz.Order) {
-    if (this._isActionEntry(order.action)) {
-      this._entryDate = order.exLastTradeAt || order.exTimestamp;
-      this._updateEntry();
-    } else {
-      this._exitDate = order.exLastTradeAt || order.exTimestamp;
-      this._updateExit();
-    }
-
-    this._setStatus();
   }
 
   executeJob() {
     if (this._nextJob === cpz.UserPositionJob.open) {
-      if (
-        this._entryStatus === cpz.UserPositionOrderStatus.closed ||
-        (this._entryExecuted && this._entryExecuted === this._entryVolume)
-      )
-        return;
-      if (!this.hasOpenEntryOrders) {
-        const canceledOrders =
-          this._entryOrders &&
-          this._entryOrders.filter(o => o.status === cpz.OrderStatus.canceled);
-        if (
-          canceledOrders &&
-          Array.isArray(canceledOrders) &&
-          canceledOrders.length > 0
-        ) {
-          const canceledOrder = canceledOrders[canceledOrders.length - 1];
-          if (
-            this.hasEntrySlippage &&
-            this._internalState.entrySlippageCount <
-              this._robot.tradeSettings.slippage.entry.count
-          ) {
-            this._orderWithJobs.push({
-              id: canceledOrder.id,
-              nextJob: {
-                type: cpz.OrderJobType.recreate,
-                data: {
-                  price: this._setPrice({
-                    action: canceledOrder.action,
-                    orderType: canceledOrder.type,
-                    price: canceledOrder.signalPrice
-                  })
-                }
-              },
-              nextJobAt: dayjs.utc().toISOString()
-            });
-          } else {
-            if (this._entryExecuted && this._entryExecuted > 0) {
-              this._entryStatus = cpz.UserPositionOrderStatus.closed;
-              this._setStatus();
-            } else {
-              this._entryStatus = cpz.UserPositionOrderStatus.canceled;
-              this._setStatus();
-            }
-          }
-        }
-      }
+      this._tryToOpen();
     } else if (this._nextJob === cpz.UserPositionJob.close) {
-      if (
-        this._exitStatus === cpz.UserPositionOrderStatus.closed ||
-        (this._exitExecuted && this._exitExecuted === this._exitVolume)
-      )
-        return;
-
-      if (!this.hasOpenExitOrders) {
-        const canceledOrders = this._exitOrders.filter(
-          o => o.status === cpz.OrderStatus.canceled
-        );
-        if (
-          canceledOrders &&
-          Array.isArray(canceledOrders) &&
-          canceledOrders.length > 0
-        ) {
-          const canceledOrder = canceledOrders[canceledOrders.length - 1];
-          if (
-            this.hasExitSlippage &&
-            this._internalState.exitSlippageCount <
-              this._robot.tradeSettings.slippage.exit.count
-          ) {
-            this._orderWithJobs.push({
-              id: canceledOrder.id,
-              nextJob: {
-                type: cpz.OrderJobType.recreate,
-                data: {
-                  price: this._setPrice({
-                    action: canceledOrder.action,
-                    orderType: canceledOrder.type,
-                    price: canceledOrder.signalPrice
-                  })
-                }
-              },
-              nextJobAt: dayjs.utc().toISOString()
-            });
-          } else {
-            this._cancelPosition();
-          }
-        } else {
-          this._cancelPosition();
-        }
-      }
+      this._tryToClose();
     } else if (this._nextJob === cpz.UserPositionJob.cancel) {
-      this._cancelPosition();
+      this._tryToCancel();
     }
   }
 }

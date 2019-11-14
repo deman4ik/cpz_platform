@@ -271,6 +271,141 @@ describe("Test User Robot", () => {
     expect(userRobot.state.ordersToCreate[0].price).toBe(6599.8);
   });
 
+  it("Should create order to close previous position", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalClose: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_2",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.closeShort,
+      orderType: cpz.OrderType.market,
+      price: 5998
+    };
+    userRobot.handleSignal(signalClose);
+    expect(userRobot.state.ordersToCreate.length).toBe(1);
+    expect(userRobot.state.ordersToCreate[0].positionId).toBe(
+      openOrder.positionId
+    );
+    expect(userRobot.state.ordersToCreate[0].signalPrice).toBe(
+      signalClose.price
+    );
+    expect(userRobot.state.ordersToCreate[0].price).toBe(6599.8);
+  });
+
+  it("Should force close position after new open signal", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalOpenNew: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_2",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+    userRobot.handleSignal(signalOpenNew);
+    expect(userRobot.state.positions[0].nextJob).toBe(
+      cpz.UserPositionJob.cancel
+    );
+    expect(userRobot.state.ordersToCreate.length).toBe(1);
+    expect(userRobot.state.ordersToCreate[0].type).toBe(
+      cpz.OrderType.forceMarket
+    );
+  });
+
   it("Should close position", () => {
     const signalOpen: cpz.SignalEvent = {
       id: uuid(),
@@ -352,6 +487,282 @@ describe("Test User Robot", () => {
     expect(userRobot.state.positions[0].status).toBe(
       cpz.UserPositionStatus.closed
     );
+  });
+
+  it("Should handle entry partial order", () => {
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      }
+    });
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: 0.2,
+      remaining: 0.8
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.open
+    );
+    expect(userRobot.state.positions[0].entryStatus).toBe(
+      cpz.UserPositionOrderStatus.closed
+    );
+    expect(userRobot.state.positions[0].entryExecuted).toBe(0.2);
+    expect(userRobot.state.ordersWithJobs.length).toBe(0);
+  });
+
+  it("Should handle exit partial order", () => {
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      }
+    });
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalClose: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: signalOpen.positionId,
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.closeShort,
+      orderType: cpz.OrderType.market,
+      price: 5998
+    };
+    userRobot.handleSignal(signalClose);
+    const closeOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: 0.5,
+      remaining: 0.5
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          exitOrders: [closeOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(closeOrder);
+    expect(userRobot.state.positions[0].exitStatus).toBe(
+      cpz.UserPositionOrderStatus.partial
+    );
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.open
+    );
+    expect(userRobot.state.ordersToCreate[0].type).toBe(
+      cpz.OrderType.forceMarket
+    );
+    expect(userRobot.state.ordersToCreate[0].volume).toBe(0.5);
+  });
+
+  it("Should handle exit partial order with slippage", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalClose: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: signalOpen.positionId,
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.closeShort,
+      orderType: cpz.OrderType.market,
+      price: 5998
+    };
+    userRobot.handleSignal(signalClose);
+    const closeOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: 0.5,
+      remaining: 0.5
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          exitOrders: [closeOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(closeOrder);
+    expect(userRobot.state.positions[0].exitStatus).toBe(
+      cpz.UserPositionOrderStatus.partial
+    );
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.open
+    );
+    expect(userRobot.state.ordersToCreate[0].type).toBe(cpz.OrderType.market);
+    expect(userRobot.state.ordersToCreate[0].volume).toBe(0.5);
   });
 
   it("Should handle entry canceled order and cancel position", () => {
@@ -796,5 +1207,82 @@ describe("Test User Robot", () => {
     expect(userRobot.state.positions[1].status).toBe(
       cpz.UserPositionStatus.new
     );
+  });
+
+  it("Should force close position after Robot stop", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+
+    userRobot.stop();
+    expect(userRobot.state.userRobot.status).toBe(cpz.Status.stopping);
+    expect(userRobot.state.ordersToCreate.length).toBe(1);
+    expect(userRobot.state.ordersToCreate[0].type).toBe(
+      cpz.OrderType.forceMarket
+    );
+    expect(userRobot.state.ordersToCreate[0].action).toBe(
+      cpz.TradeAction.closeShort
+    );
+    const closeOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          exitOrders: [closeOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(closeOrder);
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.closedAuto
+    );
+    userRobot.stop();
+    expect(userRobot.state.userRobot.status).toBe(cpz.Status.stopped);
   });
 });
