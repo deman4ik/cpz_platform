@@ -361,10 +361,9 @@ class RobotRunnerService extends Service {
       const { id } = ctx.params;
       let robotsToPause: { id: string; status: string }[] = [];
       if (id) {
-        const { status } = await this.broker.call(
-          `${cpz.Service.DB_ROBOTS}.get`,
-          { id }
-        );
+        const {
+          status
+        } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, { id });
         if (status === cpz.Status.started) robotsToPause.push({ id, status });
       } else {
         const robots: cpz.RobotState[] = await this.broker.call(
@@ -406,10 +405,9 @@ class RobotRunnerService extends Service {
       const { id } = ctx.params;
       let robotIds: string[] = [];
       if (id) {
-        const { status } = await this.broker.call(
-          `${cpz.Service.DB_ROBOTS}.get`,
-          { id }
-        );
+        const {
+          status
+        } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, { id });
         if (status === cpz.Status.paused) robotIds.push(id);
       } else {
         const robots: cpz.RobotState[] = await this.broker.call(
@@ -445,12 +443,25 @@ class RobotRunnerService extends Service {
       if (candle.type === cpz.CandleType.previous) return;
       const { exchange, asset, currency, timeframe, timestamp } = candle;
       const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.findActive`,
+        `${cpz.Service.DB_ROBOTS}.find`,
         {
-          exchange,
-          asset,
-          currency,
-          timeframe
+          query: {
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            $or: [
+              {
+                status: cpz.Status.started
+              },
+              {
+                status: cpz.Status.starting
+              },
+              {
+                status: cpz.Status.paused
+              }
+            ]
+          }
         }
       );
       this.logger.info(
@@ -479,13 +490,26 @@ class RobotRunnerService extends Service {
     try {
       const tick: cpz.ExwatcherTrade = ctx.params;
       const { exchange, asset, currency, timestamp, price } = tick;
-      //TODO: query with has alerts
       const robots: cpz.RobotState[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.findActive`,
+        `${cpz.Service.DB_ROBOTS}.find`,
         {
-          exchange,
-          asset,
-          currency
+          query: {
+            exchange,
+            asset,
+            currency,
+            $or: [
+              {
+                status: cpz.Status.started
+              },
+              {
+                status: cpz.Status.starting
+              },
+              {
+                status: cpz.Status.paused
+              }
+            ],
+            hasAlerts: true
+          }
         }
       );
       this.logger.info(

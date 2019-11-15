@@ -87,15 +87,6 @@ class RobotsService extends Service {
         }
       },
       actions: {
-        findActive: {
-          params: {
-            exchange: "string",
-            asset: "string",
-            currency: "string",
-            timeframe: { type: "number", optional: true }
-          },
-          handler: this.findActive
-        },
         getAvailableSignalAssets: {
           handler: this.getAvailableSignalAssets
         },
@@ -265,30 +256,6 @@ class RobotsService extends Service {
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e };
-    }
-  }
-
-  async findActive(ctx: Context) {
-    try {
-      return await this.adapter.find({
-        query: {
-          ...ctx.params,
-          $or: [
-            {
-              status: cpz.Status.started
-            },
-            {
-              status: cpz.Status.starting
-            },
-            {
-              status: cpz.Status.paused
-            }
-          ]
-        }
-      });
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
     }
   }
 
