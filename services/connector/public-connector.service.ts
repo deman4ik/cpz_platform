@@ -287,10 +287,10 @@ class PublicConnectorService extends Service {
     minTimeout: 0,
     maxTimeout: 0,
     onRetry: (err: any, i: number) => {
-      this.logger.info("Retry", i);
+      //this.logger.info("Retry", i);
       if (err) {
         // eslint-disable-next-line no-console
-        this.logger.warn("Retry error : ", err);
+        //this.logger.warn("Retry error : ", err);
       }
     }
   };

@@ -1,4 +1,4 @@
-import { Service, ServiceBroker, Context } from "moleculer";
+import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import { JobId } from "bull";
@@ -6,6 +6,7 @@ import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Auth from "../../mixins/auth";
 import cron from "node-cron";
+import retry from "async-retry";
 
 class UserRobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -106,6 +107,19 @@ class UserRobotRunnerService extends Service {
       scheduled: false
     }
   );
+
+  retryOptions = {
+    retries: 5,
+    minTimeout: 500,
+    maxTimeout: 10000,
+    onRetry: (err: any, i: number) => {
+      this.logger.info("Retry", i);
+      if (err) {
+        // eslint-disable-next-line no-console
+        this.logger.warn("Retry error : ", err);
+      }
+    }
+  };
 
   async checkJobs() {
     try {
@@ -352,40 +366,48 @@ class UserRobotRunnerService extends Service {
     try {
       const signal = ctx.params;
       const { robotId } = signal;
-      const userRobots: cpz.UserRobotDB[] = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOTS}.find`,
-        {
-          query: {
-            robotId,
-            $or: [
-              {
-                status: cpz.Status.started
-              },
-              {
-                status: cpz.Status.paused
+      const call = async (bail: (e: Error) => void) => {
+        try {
+          const userRobots: cpz.UserRobotDB[] = await this.broker.call(
+            `${cpz.Service.DB_USER_ROBOTS}.find`,
+            {
+              query: {
+                robotId,
+                $or: [
+                  {
+                    status: cpz.Status.started
+                  },
+                  {
+                    status: cpz.Status.paused
+                  }
+                ]
               }
-            ]
-          }
-        }
-      );
+            }
+          );
 
-      this.logger.info(
-        `New signal #${robotId} required by ${userRobots.length}`
-      );
-      await Promise.all(
-        userRobots.map(
-          async ({ id, status }) =>
-            await this.queueJob(
-              {
-                id: uuid(),
-                userRobotId: id,
-                type: cpz.UserRobotJobType.signal,
-                data: signal
-              },
-              status
+          this.logger.info(
+            `New signal #${robotId} required by ${userRobots.length}`
+          );
+          await Promise.all(
+            userRobots.map(
+              async ({ id, status }) =>
+                await this.queueJob(
+                  {
+                    id: uuid(),
+                    userRobotId: id,
+                    type: cpz.UserRobotJobType.signal,
+                    data: signal
+                  },
+                  status
+                )
             )
-        )
-      );
+          );
+        } catch (e) {
+          if (e instanceof Errors.ValidationError) throw e;
+          bail(e);
+        }
+      };
+      await retry(call, this.retryOptions);
     } catch (e) {
       this.logger.error(e);
     }
@@ -397,22 +419,30 @@ class UserRobotRunnerService extends Service {
       this.logger.info(
         `New ${cpz.Event.ORDER_STATUS} event for User Robot #${order.userRobotId}`
       );
-      const { status }: cpz.UserRobotDB = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOTS}.get`,
-        {
-          id: order.userRobotId
+      const call = async (bail: (e: Error) => void) => {
+        try {
+          const { status }: cpz.UserRobotDB = await this.broker.call(
+            `${cpz.Service.DB_USER_ROBOTS}.get`,
+            {
+              id: order.userRobotId
+            }
+          );
+          if (status)
+            await this.queueJob(
+              {
+                id: uuid(),
+                userRobotId: order.userRobotId,
+                type: cpz.UserRobotJobType.order,
+                data: order
+              },
+              status
+            );
+        } catch (e) {
+          if (e instanceof Errors.ValidationError) throw e;
+          bail(e);
         }
-      );
-      if (status)
-        await this.queueJob(
-          {
-            id: uuid(),
-            userRobotId: order.userRobotId,
-            type: cpz.UserRobotJobType.order,
-            data: order
-          },
-          status
-        );
+      };
+      await retry(call, this.retryOptions);
     } catch (e) {
       this.logger.error(e);
     }
