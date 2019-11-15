@@ -1037,7 +1037,7 @@ describe("Test User Robot", () => {
     );
   });
 
-  it("Should create new delayed position", () => {
+  it("Should create new delayed position if open signal first", () => {
     const signalOpen: cpz.SignalEvent = {
       id: uuid(),
       robotId,
@@ -1098,6 +1098,182 @@ describe("Test User Robot", () => {
     userRobot.handleSignal(signalOpenNew);
     expect(userRobot.state.positions.length).toBe(2);
     expect(userRobot.state.positions[1].status).toBe(
+      cpz.UserPositionStatus.delayed
+    );
+  });
+
+  it("Should create new delayed position after close signal", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalClose: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: signalOpen.positionId,
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.closeShort,
+      orderType: cpz.OrderType.market,
+      price: 5998
+    };
+    userRobot.handleSignal(signalClose);
+    const signalOpenNew: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T01:10:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_2",
+      positionParentId: signalOpen.positionId,
+      candleTimestamp: dayjs.utc("2019-10-26T01:10:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 7000
+    };
+    userRobot.handleSignal(signalOpenNew);
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.open
+    );
+    expect(userRobot.state.positions.length).toBe(2);
+    expect(userRobot.state.positions[1].status).toBe(
+      cpz.UserPositionStatus.delayed
+    );
+  });
+
+  it("Should cancel previous parent positions", () => {
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot,
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalOpen2: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T01:10:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_2",
+      positionParentId: signalOpen.positionId,
+      candleTimestamp: dayjs.utc("2019-10-26T01:10:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 7000
+    };
+    userRobot.handleSignal(signalOpen2);
+    const signalOpenNew3: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T01:10:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_3",
+      positionParentId: signalOpen2.positionId,
+      candleTimestamp: dayjs.utc("2019-10-26T01:10:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 7000
+    };
+    userRobot.handleSignal(signalOpenNew3);
+    expect(userRobot.state.positions.length).toBe(3);
+    expect(userRobot.state.positions[0].nextJob).toBe(
+      cpz.UserPositionJob.cancel
+    );
+    expect(userRobot.state.positions[1].status).toBe(
+      cpz.UserPositionStatus.canceled
+    );
+    expect(userRobot.state.positions[2].status).toBe(
       cpz.UserPositionStatus.delayed
     );
   });

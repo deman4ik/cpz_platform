@@ -156,6 +156,29 @@ class UserRobot implements cpz.UserRobot {
     });
   }
 
+  _cancelPreviousParentPositions(parentId: string) {
+    if (this._positions[parentId] && this._positions[parentId].isActive) {
+      if (this._positions[parentId].status === cpz.UserPositionStatus.delayed) {
+        this._positions[parentId].cancel();
+        this._positions[parentId].executeJob();
+      }
+      const previousParentId = this._positions[parentId].parentId;
+      if (
+        previousParentId &&
+        this._positions[previousParentId] &&
+        this._positions[previousParentId].isActive
+      ) {
+        this._positions[previousParentId].cancel();
+        this._positions[previousParentId].executeJob();
+        if (this._positions[previousParentId].parentId) {
+          this._cancelPreviousParentPositions(
+            this._positions[previousParentId].parentId
+          );
+        }
+      }
+    }
+  }
+
   handleSignal(signal: cpz.SignalEvent) {
     if (signal.robotId !== this._robotId)
       throw new Errors.MoleculerError("Wrong robot id", 400, "ERR_WRONG", {
@@ -184,7 +207,9 @@ class UserRobot implements cpz.UserRobot {
         this._positions[signal.positionParentId] &&
         this._positions[signal.positionParentId].isActive;
       let hasPreviousActivePositions = false;
-      if (!hasActiveParent) {
+      if (hasActiveParent) {
+        this._cancelPreviousParentPositions(signal.positionParentId);
+      } else {
         const previousActivePositions = Object.values(this._positions).filter(
           pos =>
             pos.isActive &&

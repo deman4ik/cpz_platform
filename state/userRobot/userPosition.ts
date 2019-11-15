@@ -713,12 +713,11 @@ class UserPosition implements cpz.UserPosition {
           });
         }
       }
-    }
-    // Position is open, but there is no exit signal
-    if (
+    } else if (
       this._entryStatus === cpz.UserPositionOrderStatus.closed &&
       !this._exitStatus
     ) {
+      // Position is open, but there is no exit signal
       // Creating new exit order to close position
       this._close({
         action:
@@ -727,12 +726,11 @@ class UserPosition implements cpz.UserPosition {
             : cpz.TradeAction.closeShort,
         orderType: cpz.OrderType.forceMarket
       });
-    }
-    // Position is open, and there was an exit signal
-    if (
+    } else if (
       this._exitStatus &&
       this._exitStatus !== cpz.UserPositionOrderStatus.closed
     ) {
+      // Position is open, and there was an exit signal
       // Getting exit open signal orders
       const orders =
         this._exitOrders &&
@@ -770,6 +768,13 @@ class UserPosition implements cpz.UserPosition {
           orderType: cpz.OrderType.forceMarket
         });
       }
+    } else if (
+      !this._entryStatus &&
+      !this._exitStatus &&
+      !this.hasOpenEntryOrders &&
+      !this.hasOpenExitOrders
+    ) {
+      this._status = cpz.UserPositionStatus.canceled;
     }
   }
 
