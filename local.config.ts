@@ -69,7 +69,8 @@ const brokerConfig: any = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: (err: Errors.MoleculerRetryableError) => err && !!err.retryable
+    check: (err: Errors.MoleculerError) =>
+      !(err instanceof Errors.ValidationError)
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -83,7 +84,7 @@ const brokerConfig: any = {
   // Tracking requests and waiting for running requests before shutdowning. More info: https://moleculer.services/docs/0.13/fault-tolerance.html
   tracking: {
     // Enable feature
-    enabled: false,
+    enabled: true,
     // Number of milliseconds to wait before shutdowning the process
     shutdownTimeout: 5000
   },

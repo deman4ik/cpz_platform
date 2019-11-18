@@ -80,7 +80,8 @@ declare namespace cpz {
     SIGNAL_ALERT = "signal.alert",
     SIGNAL_TRADE = "signal.trade",
     ORDER_STATUS = "order.status",
-    ORDER_ERROR = "order.error"
+    ORDER_ERROR = "order.error",
+    USER_EX_ACC_ERROR = "user_ex_acc.error"
   }
 
   const enum Status {
@@ -107,6 +108,14 @@ declare namespace cpz {
     blocked = -1,
     new = 0,
     enabled = 1
+  }
+
+  const enum UserMessages {
+    by_user_request = "by user request",
+    by_admin = "by admin",
+    order_error = "order error",
+    invalid_exchange_account = "invalid exchange account",
+    exchange_error = "excahnge error"
   }
 
   const enum UserRoles {
@@ -793,6 +802,7 @@ declare namespace cpz {
     keys: UserExchangeKeys;
     status: UserExchangeAccStatus;
     ordersCache: GenericObject<any>;
+    error?: any;
   }
 
   interface UserRobotSettings {
@@ -817,7 +827,7 @@ declare namespace cpz {
     stoppedAt?: string;
     statistics?: RobotStats;
     equity?: RobotEquity;
-    error?: any;
+    message?: string;
   }
 
   interface UserRobotState extends UserRobotDB {
@@ -844,11 +854,12 @@ declare namespace cpz {
     handleSignal(signal: SignalEvent): void;
     handleOrder(order: Order): void;
   }
+
   interface UserRobotJob {
     id: string;
     userRobotId: string;
     type: UserRobotJobType;
-    data?: SignalEvent | Order;
+    data?: SignalEvent | Order | { message?: string };
   }
 
   interface UserPositionInternalState {

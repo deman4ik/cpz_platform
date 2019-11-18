@@ -6,7 +6,7 @@ import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Auth from "../../mixins/auth";
 import cron from "node-cron";
-import retry from "async-retry";
+//import retry from "async-retry";
 
 class UserRobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -39,11 +39,12 @@ class UserRobotRunnerService extends Service {
       ],
       actions: {
         start: {
-          params: {
-            id: "string"
-          },
           graphql: {
-            mutation: "userRobotStart(id: ID!): ServiceStatus!"
+            mutation: "userRobotStart(id: ID!, message: String): ServiceStatus!"
+          },
+          params: {
+            id: "string",
+            message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.user],
           hooks: {
@@ -52,11 +53,12 @@ class UserRobotRunnerService extends Service {
           handler: this.start
         },
         stop: {
-          params: {
-            id: "string"
-          },
           graphql: {
-            mutation: "userRobotStop(id: ID!): ServiceStatus!"
+            mutation: "userRobotStop(id: ID!, message: String): ServiceStatus!"
+          },
+          params: {
+            id: "string",
+            message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.user],
           hooks: {
@@ -66,10 +68,14 @@ class UserRobotRunnerService extends Service {
         },
         pause: {
           graphql: {
-            mutation: "userRobotPause(id: ID): Response!"
+            mutation:
+              "userRobotPause(id: ID, userExAccId: ID, exchange: String, message: String): Response!"
           },
           params: {
-            id: { type: "string", optional: true }
+            id: { type: "string", optional: true },
+            userExAccId: { type: "string", optional: true },
+            exchange: { type: "string", optional: true },
+            message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -79,10 +85,11 @@ class UserRobotRunnerService extends Service {
         },
         resume: {
           graphql: {
-            mutation: "userRobotResume(id: ID): Response!"
+            mutation: "userRobotResume(id: ID, message: String): Response!"
           },
           params: {
-            id: { type: "string", optional: true }
+            id: { type: "string", optional: true },
+            message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -93,7 +100,8 @@ class UserRobotRunnerService extends Service {
       },
       events: {
         [cpz.Event.ORDER_STATUS]: this.handleOrder,
-        [cpz.Event.SIGNAL_TRADE]: this.handleSignalTrade
+        [cpz.Event.SIGNAL_TRADE]: this.handleSignalTrade,
+        [cpz.Event.USER_EX_ACC_ERROR]: this.handleUserExAccError
       },
       started: this.startedService,
       stopped: this.stoppedService
@@ -115,7 +123,6 @@ class UserRobotRunnerService extends Service {
     onRetry: (err: any, i: number) => {
       this.logger.info("Retry", i);
       if (err) {
-        // eslint-disable-next-line no-console
         this.logger.warn("Retry error : ", err);
       }
     }
@@ -197,9 +204,10 @@ class UserRobotRunnerService extends Service {
   async start(
     ctx: Context<{
       id: string;
+      message?: string;
     }>
   ) {
-    const { id } = ctx.params;
+    const { id, message } = ctx.params;
     try {
       const { status } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
@@ -208,7 +216,10 @@ class UserRobotRunnerService extends Service {
         }
       );
       if (status === cpz.Status.paused) {
-        const result = await this.resume(ctx);
+        const result = await this.broker.call(
+          `${cpz.Service.ROBOT_RUNNER}.resume`,
+          ctx.params
+        );
         if (result && result.success)
           return { success: true, id, status: cpz.Status.started };
         else throw result.error;
@@ -223,6 +234,7 @@ class UserRobotRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
         id,
         status: cpz.Status.started,
+        message,
         startedAt: dayjs.utc().toISOString(),
         error: null,
         stoppedAt: null,
@@ -231,6 +243,10 @@ class UserRobotRunnerService extends Service {
         equity: {}
       });
 
+      await this.broker.emit(cpz.Event.USER_ROBOT_STARTED, {
+        userRobotId: id,
+        message
+      });
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
       this.logger.error(e);
@@ -241,9 +257,10 @@ class UserRobotRunnerService extends Service {
   async stop(
     ctx: Context<{
       id: string;
+      message?: string;
     }>
   ) {
-    const { id } = ctx.params;
+    const { id, message } = ctx.params;
     try {
       const { status } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
@@ -262,7 +279,10 @@ class UserRobotRunnerService extends Service {
         {
           id: uuid(),
           userRobotId: id,
-          type: cpz.UserRobotJobType.stop
+          type: cpz.UserRobotJobType.stop,
+          data: {
+            message
+          }
         },
         status
       );
@@ -279,11 +299,14 @@ class UserRobotRunnerService extends Service {
 
   async pause(
     ctx: Context<{
-      id: string;
+      id?: string;
+      userExAccId?: string;
+      exchange?: string;
+      message?: string;
     }>
   ) {
     try {
-      const { id } = ctx.params;
+      const { id, userExAccId, exchange, message } = ctx.params;
       let userRobotsToPause: { id: string; status: string }[] = [];
       if (id) {
         const {
@@ -291,6 +314,22 @@ class UserRobotRunnerService extends Service {
         } = await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.get`, { id });
         if (status === cpz.Status.started)
           userRobotsToPause.push({ id, status });
+      } else if (userExAccId) {
+        const robots: cpz.UserRobotDB[] = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.find`,
+          {
+            query: { status: cpz.Status.started, userExAccId }
+          }
+        );
+        userRobotsToPause = robots.map(({ id, status }) => ({ id, status }));
+      } else if (exchange) {
+        const robots: cpz.UserRobotDB[] = await this.broker.call(
+          `${cpz.Service.DB_ROBOTS}.find`,
+          {
+            query: { status: cpz.Status.started, exchange }
+          }
+        );
+        userRobotsToPause = robots.map(({ id, status }) => ({ id, status }));
       } else {
         const robots: cpz.UserRobotDB[] = await this.broker.call(
           `${cpz.Service.DB_ROBOTS}.find`,
@@ -308,7 +347,10 @@ class UserRobotRunnerService extends Service {
               {
                 id: uuid(),
                 userRobotId: id,
-                type: cpz.UserRobotJobType.pause
+                type: cpz.UserRobotJobType.pause,
+                data: {
+                  message
+                }
               },
               status
             );
@@ -325,10 +367,11 @@ class UserRobotRunnerService extends Service {
   async resume(
     ctx: Context<{
       id: string;
+      message?: string;
     }>
   ) {
     try {
-      const { id } = ctx.params;
+      const { id, message } = ctx.params;
       let userRobotIds: string[] = [];
       if (id) {
         const {
@@ -352,6 +395,10 @@ class UserRobotRunnerService extends Service {
               id: userRobotId,
               status: cpz.Status.started
             });
+            await this.broker.emit(cpz.Event.USER_ROBOT_RESUMED, {
+              userRobotId,
+              message
+            });
           })
         );
 
@@ -366,48 +413,51 @@ class UserRobotRunnerService extends Service {
     try {
       const signal = ctx.params;
       const { robotId } = signal;
-      const call = async (bail: (e: Error) => void) => {
-        try {
-          const userRobots: cpz.UserRobotDB[] = await this.broker.call(
-            `${cpz.Service.DB_USER_ROBOTS}.find`,
-            {
-              query: {
-                robotId,
-                $or: [
-                  {
-                    status: cpz.Status.started
-                  },
-                  {
-                    status: cpz.Status.paused
-                  }
-                ]
+      /* const call = async (bail: (e: Error) => void) => {
+        try { */
+      const userRobots: cpz.UserRobotDB[] = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.find`,
+        {
+          query: {
+            robotId,
+            $or: [
+              {
+                status: cpz.Status.started
+              },
+              {
+                status: cpz.Status.paused
               }
-            }
-          );
+            ]
+          }
+        }
+      );
 
-          this.logger.info(
-            `New signal #${robotId} required by ${userRobots.length}`
-          );
-          await Promise.all(
-            userRobots.map(
-              async ({ id, status }) =>
-                await this.queueJob(
-                  {
-                    id: uuid(),
-                    userRobotId: id,
-                    type: cpz.UserRobotJobType.signal,
-                    data: signal
-                  },
-                  status
-                )
-            )
-          );
-        } catch (e) {
+      this.logger.info(
+        `New signal #${robotId} required by ${userRobots.length}`
+      );
+      await Promise.all(
+        userRobots.map(async ({ id, status }) => {
+          try {
+            await this.queueJob(
+              {
+                id: uuid(),
+                userRobotId: id,
+                type: cpz.UserRobotJobType.signal,
+                data: signal
+              },
+              status
+            );
+          } catch (e) {
+            this.logger.error(e);
+          }
+        })
+      );
+      /*   } catch (e) {
           if (e instanceof Errors.ValidationError) throw e;
           bail(e);
         }
       };
-      await retry(call, this.retryOptions);
+      await retry(call, this.retryOptions); */
     } catch (e) {
       this.logger.error(e);
     }
@@ -419,30 +469,51 @@ class UserRobotRunnerService extends Service {
       this.logger.info(
         `New ${cpz.Event.ORDER_STATUS} event for User Robot #${order.userRobotId}`
       );
-      const call = async (bail: (e: Error) => void) => {
-        try {
-          const { status }: cpz.UserRobotDB = await this.broker.call(
-            `${cpz.Service.DB_USER_ROBOTS}.get`,
-            {
-              id: order.userRobotId
-            }
-          );
-          if (status)
-            await this.queueJob(
-              {
-                id: uuid(),
-                userRobotId: order.userRobotId,
-                type: cpz.UserRobotJobType.order,
-                data: order
-              },
-              status
-            );
-        } catch (e) {
+      /*   const call = async (bail: (e: Error) => void) => {
+        try { */
+      const { status }: cpz.UserRobotDB = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.get`,
+        {
+          id: order.userRobotId
+        }
+      );
+      if (status)
+        await this.queueJob(
+          {
+            id: uuid(),
+            userRobotId: order.userRobotId,
+            type: cpz.UserRobotJobType.order,
+            data: order
+          },
+          status
+        );
+      /*    } catch (e) {
           if (e instanceof Errors.ValidationError) throw e;
           bail(e);
         }
       };
-      await retry(call, this.retryOptions);
+      await retry(call, this.retryOptions); */
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleUserExAccError(
+    ctx: Context<{ id: string; errorMessage: string }>
+  ) {
+    try {
+      const { id, errorMessage } = ctx.params;
+      this.logger.info(
+        `New ${cpz.Event.USER_EX_ACC_ERROR} event. User exchange account #${id} is invalid. Pausing user robots...`
+      );
+      let message: string = cpz.UserMessages.invalid_exchange_account;
+      if (errorMessage) {
+        message = `${message} (${errorMessage})`;
+      }
+      await this.broker.call(`${cpz.Service.USER_ROBOT_RUNNER}.pause`, {
+        userExAccId: id,
+        message
+      });
     } catch (e) {
       this.logger.error(e);
     }

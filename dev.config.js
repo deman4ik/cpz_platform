@@ -1,3 +1,4 @@
+const { Errors } = require("moleculer");
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -76,7 +77,7 @@ const brokerConfig = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err => err && !!err.retryable
+    check: err => !(err instanceof Errors.ValidationError)
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -90,7 +91,7 @@ const brokerConfig = {
   // Tracking requests and waiting for running requests before shutdowning. More info: https://moleculer.services/docs/0.13/fault-tolerance.html
   tracking: {
     // Enable feature
-    enabled: false,
+    enabled: true,
     // Number of milliseconds to wait before shutdowning the process
     shutdownTimeout: 5000
   },

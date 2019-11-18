@@ -253,6 +253,18 @@ class PrivateConnectorWorkerService extends Service {
 
       this.logger.info(`Connector #${userExAccId} finished processing jobs`);
     } catch (e) {
+      if (
+        e instanceof ccxt.AuthenticationError ||
+        e instanceof ccxt.InsufficientFunds
+      ) {
+        await this.broker.call(
+          `${cpz.Service.DB_USER_EXCHANGE_ACCS}.invalidate`,
+          {
+            id: userExAccId,
+            error: e
+          }
+        );
+      }
       this.logger.error(e);
       throw e;
     }
@@ -357,17 +369,19 @@ class PrivateConnectorWorkerService extends Service {
               order = await this.getNextOrder(userExAccId);
             } catch (err) {
               this.logger.error(err);
+
               const failedOrder = {
                 ...order,
                 lastCheckedAt: dayjs.utc().toISOString(),
-                error: err
+                error: err,
+                nextJob: null,
+                nextJobAt: null
               };
               await this.broker.call(
                 `${cpz.Service.DB_USER_ORDERS}.update`,
                 failedOrder
               );
               await this.broker.emit(cpz.Event.ORDER_ERROR, failedOrder);
-              throw err;
             }
           }
         }
@@ -391,19 +405,13 @@ class PrivateConnectorWorkerService extends Service {
         this.logger.error(
           `Failed to create order #${order.id} - order already processed!`
         );
-        return {
-          ...order,
-          error: new Error(`Failed to create order - already processed!`)
+        order.nextJob = {
+          type: cpz.OrderJobType.check
         };
+        order.nextJobAt = dayjs.utc().toISOString();
+        return order;
       }
       order = await this.createOrder(order);
-      order.nextJob = {
-        type: cpz.OrderJobType.check
-      };
-      order.nextJobAt = dayjs
-        .utc()
-        .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-        .toISOString();
     } else if (orderJobType === cpz.OrderJobType.recreate) {
       this.logger.info(
         `UserExAcc #${order.userExAccId} recreating order ${order.positionId}/${order.id}`
@@ -414,13 +422,8 @@ class PrivateConnectorWorkerService extends Service {
           ...checkedOrder,
           price: orderJobData.prce
         });
-        order.nextJob = {
-          type: cpz.OrderJobType.check
-        };
-        order.nextJobAt = dayjs
-          .utc()
-          .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-          .toISOString();
+      } else {
+        order = checkedOrder;
       }
     } else if (orderJobType === cpz.OrderJobType.cancel) {
       this.logger.info(
@@ -441,8 +444,6 @@ class PrivateConnectorWorkerService extends Service {
         return { ...order, nextJob: null, nextJobAt: null };
       }
       order = await this.cancelOrder(order);
-      order.nextJob = null;
-      order.nextJobAt = null;
     } else if (orderJobType === cpz.OrderJobType.check) {
       this.logger.info(
         `UserExAcc #${order.userExAccId} checking order ${order.positionId}/${order.id}`
@@ -458,25 +459,14 @@ class PrivateConnectorWorkerService extends Service {
       }
       if (order.status === cpz.OrderStatus.closed) return order;
       order = await this.checkOrder(order);
-      if (order.status === cpz.OrderStatus.open) {
-        if (
-          order.exTimestamp &&
-          dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
-            order.params.orderTimeout
-        ) {
-          order = await this.cancelOrder(order);
-        } else {
-          order.nextJob = {
-            type: cpz.OrderJobType.check
-          };
-          order.nextJobAt = dayjs
-            .utc()
-            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-            .toISOString();
-        }
-      } else {
-        order.nextJob = null;
-        order.nextJobAt = null;
+
+      if (
+        order.status === cpz.OrderStatus.open &&
+        order.exTimestamp &&
+        dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
+          order.params.orderTimeout
+      ) {
+        order = await this.cancelOrder(order);
       }
     } else {
       throw new Errors.MoleculerError(
@@ -563,10 +553,47 @@ class PrivateConnectorWorkerService extends Service {
         executed:
           (executed && +executed) ||
           (volume && remaining && +volume - +remaining),
-        lastCheckedAt: dayjs.utc().toISOString()
+        lastCheckedAt: dayjs.utc().toISOString(),
+        nextJob: {
+          type: cpz.OrderJobType.check
+        },
+        nextJobAt: dayjs
+          .utc()
+          .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+          .toISOString(),
+
+        error: null
       };
     } catch (err) {
       this.logger.error(err);
+      if (
+        err instanceof ccxt.AuthenticationError ||
+        err instanceof ccxt.InsufficientFunds
+      ) {
+        throw err;
+      }
+      if (err instanceof ccxt.InvalidOrder) {
+        return {
+          ...order,
+          error: err,
+          status: cpz.OrderStatus.canceled,
+          nextJob: null,
+          nextJobAt: null
+        };
+      }
+      if (
+        err instanceof ccxt.ExchangeError ||
+        err instanceof ccxt.NetworkError
+      ) {
+        return {
+          ...order,
+          error: err,
+          nextJobAt: dayjs
+            .utc()
+            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+            .toISOString()
+        };
+      }
       throw err;
     }
   }
@@ -605,10 +632,49 @@ class PrivateConnectorWorkerService extends Service {
         executed:
           (executed && +executed) ||
           (volume && remaining && +volume - +remaining),
-        lastCheckedAt: dayjs.utc().toISOString()
+        lastCheckedAt: dayjs.utc().toISOString(),
+        nextJob:
+          <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
+          <cpz.OrderStatus>status === cpz.OrderStatus.closed
+            ? null
+            : {
+                type: cpz.OrderJobType.check
+              },
+        nextJobAt:
+          <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
+          <cpz.OrderStatus>status === cpz.OrderStatus.closed
+            ? null
+            : dayjs
+                .utc()
+                .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                .toISOString(),
+
+        error: null
       };
     } catch (err) {
       this.logger.error(err);
+      if (
+        err instanceof ccxt.AuthenticationError ||
+        err instanceof ccxt.InsufficientFunds
+      ) {
+        throw err;
+      }
+      if (err instanceof ccxt.InvalidOrder) {
+        throw err;
+      }
+      if (
+        err instanceof ccxt.ExchangeError ||
+        err instanceof ccxt.NetworkError
+      ) {
+        return {
+          ...order,
+          error: err,
+          nextJobAt: dayjs
+            .utc()
+            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+            .toISOString()
+        };
+      }
       throw err;
     }
   }
@@ -631,6 +697,28 @@ class PrivateConnectorWorkerService extends Service {
       return this.checkOrder(order);
     } catch (err) {
       this.logger.error(err);
+      if (
+        err instanceof ccxt.AuthenticationError ||
+        err instanceof ccxt.InsufficientFunds
+      ) {
+        throw err;
+      }
+      if (err instanceof ccxt.InvalidOrder) {
+        return this.checkOrder(order);
+      }
+      if (
+        err instanceof ccxt.ExchangeError ||
+        err instanceof ccxt.NetworkError
+      ) {
+        return {
+          ...order,
+          error: err,
+          nextJobAt: dayjs
+            .utc()
+            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+            .toISOString()
+        };
+      }
       throw err;
     }
   }

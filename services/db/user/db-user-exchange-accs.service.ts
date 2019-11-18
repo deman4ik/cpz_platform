@@ -33,6 +33,7 @@ class UserExchangeAccsService extends Service {
           name: { type: Sequelize.STRING, allowNull: true },
           keys: { type: Sequelize.JSONB },
           status: { type: Sequelize.STRING },
+          error: { type: Sequelize.JSONB },
           ordersCache: { type: Sequelize.JSONB, field: "orders_cache" }
         },
         options: {
@@ -59,6 +60,13 @@ class UserExchangeAccsService extends Service {
             before: "authAction"
           },
           handler: this.upsert
+        },
+        invalidate: {
+          params: {
+            id: "string",
+            error: "object"
+          },
+          handler: this.invalidate
         }
       }
     });
@@ -106,6 +114,7 @@ class UserExchangeAccsService extends Service {
         name,
         keys: encryptedKeys,
         status: cpz.UserExchangeAccStatus.enabled,
+        error: null,
         ordersCache: {}
       };
       if (id) {
@@ -116,7 +125,8 @@ class UserExchangeAccsService extends Service {
           $set: {
             exchange: exchangeAcc.exchange,
             keys: exchangeAcc.keys,
-            status: exchangeAcc.status
+            status: exchangeAcc.status,
+            error: null
           }
         });
       } else {
@@ -129,6 +139,25 @@ class UserExchangeAccsService extends Service {
         success: false,
         error: err
       };
+    }
+  }
+
+  async invalidate(ctx: Context<{ id: string; error: any }>) {
+    try {
+      const { id, error } = ctx.params;
+      await this.adapter.updateById(id, {
+        $set: {
+          status: cpz.UserExchangeAccStatus.invalid,
+          error
+        }
+      });
+      await this.broker.emit(cpz.Event.USER_EX_ACC_ERROR, {
+        id,
+        errorMessage: error.message
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
   }
 }

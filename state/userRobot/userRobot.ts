@@ -24,7 +24,7 @@ class UserRobot implements cpz.UserRobot {
   };
   _positions: GenericObject<UserPosition>;
   _eventsToSend: cpz.Events<cpz.UserRobotEventData>[];
-  _error?: any;
+  _message?: string;
 
   constructor(state: cpz.UserRobotState) {
     this._id = state.id;
@@ -35,6 +35,7 @@ class UserRobot implements cpz.UserRobot {
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
     this._robot = state.robot;
+    this._message = state.message;
     this._internalState = state.internalState || {};
     this._positions = {}; // key -> positionId not id
     this._setPositions(state.positions);
@@ -114,8 +115,9 @@ class UserRobot implements cpz.UserRobot {
     return `${prefix}_${this._internalState.posLastNumb[prefix]}`;
   }
 
-  stop() {
+  stop({ message }: { message?: string }) {
     this._status = cpz.Status.stopping;
+    this._message = message;
     if (this.hasActivePositions)
       Object.keys(this._positions).forEach(key => {
         this._positions[key].cancel();
@@ -127,11 +129,11 @@ class UserRobot implements cpz.UserRobot {
   setStop() {
     this._status = cpz.Status.stopped;
     this._stoppedAt = dayjs.utc().toISOString();
-    this._error = null;
     this._eventsToSend.push({
       type: cpz.Event.USER_ROBOT_STOPPED,
       data: {
-        userRobotId: this._id
+        userRobotId: this._id,
+        message: this._message
       }
     });
   }
@@ -146,12 +148,14 @@ class UserRobot implements cpz.UserRobot {
     });
   }
 
-  pause() {
+  pause({ message }: { message?: string }) {
     this._status = cpz.Status.paused;
+    this._message = message;
     this._eventsToSend.push({
       type: cpz.Event.USER_ROBOT_PAUSED,
       data: {
-        userRobotId: this._id
+        userRobotId: this._id,
+        message
       }
     });
   }

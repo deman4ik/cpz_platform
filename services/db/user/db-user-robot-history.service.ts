@@ -28,12 +28,15 @@ class UserRobotHistoryService extends Service {
         }
       },
       events: {
-        ["user-robot.*"]: this.handleUserRobotEvents
+        ["user-robot.*"]: this.handleUserRobotEvents,
+        [cpz.Event.ORDER_ERROR]: this.handleUserRobotEvents
       }
     });
   }
 
-  async handleUserRobotEvents(ctx: Context<cpz.UserRobotEventData>) {
+  async handleUserRobotEvents(
+    ctx: Context<cpz.UserRobotEventData | cpz.Order>
+  ) {
     try {
       const { userRobotId } = ctx.params;
       await this.adapter.insert({

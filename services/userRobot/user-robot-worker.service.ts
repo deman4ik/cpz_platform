@@ -105,10 +105,10 @@ class UserRobotWorkerService extends Service {
         userRobot.handleOrder(<cpz.Order>data);
       } else if (type === cpz.UserRobotJobType.stop) {
         // Stop robot
-        userRobot.stop();
+        userRobot.stop(<{ message?: string }>data);
       } else if (type === cpz.UserRobotJobType.pause) {
         // Pause robot
-        userRobot.pause();
+        userRobot.pause(<{ message?: string }>data);
       } else {
         throw new Error(`Unknown type "${type}"`);
       }

@@ -55,7 +55,8 @@ class UserRobotsService extends Service {
             }
           },
           statistics: { type: Sequelize.JSONB, allowNull: true },
-          equity: { type: Sequelize.JSONB, allowNull: true }
+          equity: { type: Sequelize.JSONB, allowNull: true },
+          message: { type: Sequelize.STRING, allowNull: true }
         },
         options: {
           freezeTableName: true,
