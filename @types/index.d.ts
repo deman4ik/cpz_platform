@@ -30,6 +30,7 @@ declare namespace cpz {
     DB_USER_ROBOT_HISTORY = "db-user-robot-history",
     DB_USER_ORDERS = "db-user-orders",
     DB_USER_POSITIONS = "db-user-positions",
+    DB_USER_AGGR_STATS = "db-user-aggr-stats",
     DB_CONNECTOR_JOBS = "db-connector-jobs",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
@@ -43,6 +44,8 @@ declare namespace cpz {
     BACKTESTER_WORKER = "backtester-worker",
     USER_ROBOT_RUNNER = "user-robot-runner",
     USER_ROBOT_WORKER = "user-robot-worker",
+    STATS_CALC_RUNNER = "stats-calc-runner",
+    STATS_CALC_WORKER = "stats-calc-worker",
     AUTH = "auth",
     API = "api"
   }
@@ -81,7 +84,9 @@ declare namespace cpz {
     SIGNAL_TRADE = "signal.trade",
     ORDER_STATUS = "order.status",
     ORDER_ERROR = "order.error",
-    USER_EX_ACC_ERROR = "user_ex_acc.error"
+    USER_EX_ACC_ERROR = "user_ex_acc.error",
+    STATS_CALC_ROBOT = "stats.calc.robot",
+    STATS_CALC_USER_ROBOT = "stats.calc.user-robot"
   }
 
   const enum Status {
@@ -249,7 +254,8 @@ declare namespace cpz {
     runRobot = "runRobot",
     backtest = "backtest",
     connector = "connector",
-    runUserRobot = "runUserRobot"
+    runUserRobot = "runUserRobot",
+    statsCalc = "statsCalc"
   }
 
   const enum UserExchangeAccStatus {
@@ -386,6 +392,7 @@ declare namespace cpz {
     positionPrefix: string;
     positionCode: string;
     positionParentId?: string;
+    positionBarsHeld?: number;
   }
 
   interface SignalEvent extends SignalInfo {
@@ -396,6 +403,19 @@ declare namespace cpz {
     currency: string;
     timeframe: Timeframe;
     timestamp: string;
+  }
+
+  interface StatsCalcRobotEvent {
+    robotId: string;
+    exchange: string;
+    asset: string;
+  }
+
+  interface StatsCalcUserRobotEvent {
+    userRobotId: string;
+    userId: string;
+    exchange: string;
+    asset: string;
   }
 
   interface OrderJob {
@@ -569,6 +589,14 @@ declare namespace cpz {
     _checkAlerts(): void;
   }
 
+  interface PositionDataForStats {
+    id: string;
+    direction?: PositionDirection;
+    exitDate?: string;
+    profit?: number;
+    barsHeld?: number;
+  }
+
   interface RobotPositionState {
     id: string;
     robotId: string;
@@ -652,6 +680,7 @@ declare namespace cpz {
   }
 
   interface RobotStats {
+    lastUpdatedAt?: string;
     tradesCount?: RobotStatVals<number>;
     tradesWinning?: RobotStatVals<number>;
     tradesLosing?: RobotStatVals<number>;
@@ -780,7 +809,9 @@ declare namespace cpz {
     telegram: boolean;
     email: boolean;
     subscribedAt: string;
-    volume?: number;
+    volume: number;
+    statistics?: RobotStats;
+    equity?: RobotEquity;
   }
 
   interface EncryptedData {
@@ -819,6 +850,7 @@ declare namespace cpz {
   interface UserRobotDB {
     id: string;
     userExAccId: string;
+    userId: string;
     robotId: string;
     settings: UserRobotSettings;
     internalState: UserRobotInternalState;
@@ -875,6 +907,10 @@ declare namespace cpz {
     positionCode: string;
     positionId: string;
     userRobotId: string;
+    userId: string;
+    exchange: string;
+    asset: string;
+    currency: string;
     status: UserPositionStatus;
     parentId?: string;
     direction: PositionDirection;
@@ -900,11 +936,16 @@ declare namespace cpz {
     nextJob?: UserPositionJob;
   }
 
+  interface UserSignalPosition extends UserPositionDB {
+    exchange: string;
+    asset: string;
+    currency: string;
+    userId: string;
+    userSignalVolume: number;
+  }
+
   interface UserPositionState extends UserPositionDB {
     robot: {
-      exchange: string;
-      asset: string;
-      currency: string;
       timeframe: Timeframe;
       tradeSettings: RobotTradeSettings;
     };
@@ -930,5 +971,33 @@ declare namespace cpz {
     _log(...args: any): void;
     handleSignal(signal: SignalEvent): void;
     handleOrder(order: Order): void;
+  }
+
+  const enum StatsCalcJobType {
+    robot = "robot",
+    userSignals = "userSignals",
+    userRobot = "userRobot",
+    userSignalsAggr = "userSignalsAggr",
+    userRobotAggr = "userRobotAggr"
+  }
+
+  interface StatsCalcJob {
+    id: string;
+    type: StatsCalcJobType;
+    robotId?: string;
+    userRobotId?: string;
+    userId?: string;
+    exchange?: string;
+    asset?: string;
+  }
+
+  interface UserAggrStatsDB {
+    id: string;
+    userId: string;
+    exchange?: string;
+    asset?: string;
+    type: "signal" | "userRobot";
+    statistics: RobotStats;
+    equity: RobotEquity;
   }
 }

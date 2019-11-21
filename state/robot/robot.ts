@@ -2,8 +2,8 @@ import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 
 import { Errors } from "moleculer";
-import BaseStrategy from "./robot_strategy";
-import BaseIndicator from "./robot_indicator";
+import BaseStrategy from "./robotStrategy";
+import BaseIndicator from "./robotIndicator";
 import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
 import { combineRobotSettings } from "../settings";
 import { calcStatistics } from "../../utils/tradeStatistics";
@@ -34,8 +34,6 @@ class Robot {
   _status: cpz.Status;
   _startedAt: string;
   _stoppedAt: string;
-  _statistics: cpz.RobotStats;
-  _equity: cpz.RobotEquity;
   _eventsToSend: cpz.Events<cpz.RobotEventData | cpz.SignalEvent>[];
   _postionsToSave: cpz.RobotPositionState[];
   _error: any;
@@ -88,8 +86,6 @@ class Robot {
     /* Дата и время запуска */
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
-    this._statistics = state.statistics || {};
-    this._equity = state.equity || {};
     this._eventsToSend = [];
     this._postionsToSave = [];
     this._indicatorInstances = {};
@@ -101,6 +97,12 @@ class Robot {
 
   get positionsToSave() {
     return this._postionsToSave;
+  }
+
+  get hasClosedPositions() {
+    return this._postionsToSave.filter(
+      ({ status }) => status === cpz.RobotPositionStatus.closed
+    ).length > 0
   }
 
   get alertEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
@@ -588,11 +590,6 @@ class Robot {
     // TODO: Send Candles.Handled Event
   }
 
-  calcStats(positions: cpz.RobotPositionState[]) {
-    const { statistics, equity } = calcStatistics(positions);
-    this._statistics = statistics;
-    this._equity = equity;
-  }
   /**
    * Запрос текущего состояния индикаторов
    *
@@ -673,9 +670,7 @@ class Robot {
       startedAt: this._startedAt,
       stoppedAt: this._stoppedAt,
       indicators: this._indicators,
-      state: this._strategy,
-      statistics: this._statistics,
-      equity: this._equity
+      state: this._strategy
     };
   }
 

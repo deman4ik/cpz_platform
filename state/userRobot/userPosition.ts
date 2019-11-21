@@ -13,6 +13,10 @@ class UserPosition implements cpz.UserPosition {
   _positionCode: string;
   _positionId: string;
   _userRobotId: string;
+  _userId: string;
+  _exchange: string;
+  _asset: string;
+  _currency: string;
   _status: cpz.UserPositionStatus;
   _parentId?: string;
   _direction: cpz.PositionDirection;
@@ -40,9 +44,6 @@ class UserPosition implements cpz.UserPosition {
   _nextJob?: cpz.UserPositionJob;
 
   _robot: {
-    exchange: string;
-    asset: string;
-    currency: string;
     timeframe: cpz.Timeframe;
     tradeSettings: cpz.RobotTradeSettings;
   };
@@ -61,6 +62,10 @@ class UserPosition implements cpz.UserPosition {
     this._positionCode = state.positionCode;
     this._positionId = state.positionId;
     this._userRobotId = state.userRobotId;
+    this._userId = state.userId;
+    this._exchange = state.exchange;
+    this._asset = state.asset;
+    this._currency = state.currency;
     this._status = state.status;
     this._parentId = state.parentId;
     this._direction = state.direction;
@@ -175,6 +180,7 @@ class UserPosition implements cpz.UserPosition {
 
       this._nextJob = null;
       this._nextJobAt = null;
+      this._calcStats();
     }
   }
 
@@ -240,6 +246,28 @@ class UserPosition implements cpz.UserPosition {
     }
   }
 
+  _calcStats() {
+    if (this._direction === cpz.PositionDirection.long) {
+      this._profit = +round(
+        (this._exitPrice - this._entryPrice) * this._exitExecuted,
+        6
+      );
+    } else {
+      this._profit = +round(
+        (this._entryPrice - this._exitPrice) * this._exitExecuted,
+        6
+      );
+    }
+
+    if (!this._barsHeld)
+      this._barsHeld = +round(
+        dayjs
+          .utc(this._exitDate)
+          .diff(dayjs.utc(this._entryDate), cpz.TimeUnit.minute) /
+          this._robot.timeframe
+      );
+  }
+
   get state() {
     return {
       id: this._id,
@@ -248,6 +276,10 @@ class UserPosition implements cpz.UserPosition {
       positionCode: this._positionCode,
       positionId: this._positionId,
       userRobotId: this._userRobotId,
+      userId: this._userId,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
       status: this._status,
       parentId: this._parentId,
       direction: this._direction,
@@ -433,9 +465,9 @@ class UserPosition implements cpz.UserPosition {
       userRobotId: this._userRobotId,
       positionId: this._positionId,
       userPositionId: this._id,
-      exchange: this._robot.exchange,
-      asset: this._robot.asset,
-      currency: this._robot.currency,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
       action: trade.action,
       direction: this._isActionBuy(trade.action)
         ? cpz.OrderDirection.buy
@@ -459,7 +491,7 @@ class UserPosition implements cpz.UserPosition {
 
     order.remaining = order.volume;
 
-    if (this._robot.exchange === "kraken") {
+    if (this._exchange === "kraken") {
       if (
         this._userRobot.settings.kraken &&
         this._userRobot.settings.kraken.leverage
@@ -501,9 +533,12 @@ class UserPosition implements cpz.UserPosition {
           "ERR_CONFLICT",
           { userPositionId: this._id }
         );
-    }
 
-    if (this._isActionExit(signal.action)) {
+      this._entrySignalPrice = signal.price;
+      this._nextJob = cpz.UserPositionJob.open;
+      this._nextJobAt = dayjs.utc().toISOString();
+      this._open(signal);
+    } else if (this._isActionExit(signal.action)) {
       if (this._exitStatus || this._nextJob === cpz.UserPositionJob.close)
         throw new Errors.MoleculerError(
           "Position already closed",
@@ -512,20 +547,14 @@ class UserPosition implements cpz.UserPosition {
           { userPositionId: this._id }
         );
 
+      this._barsHeld = signal.positionBarsHeld;
       if (this._entryStatus !== cpz.UserPositionOrderStatus.closed) {
         this.cancel();
         return;
       }
 
       if (this._nextJob === cpz.UserPositionJob.cancel) return;
-    }
 
-    if (this._isActionEntry(signal.action)) {
-      this._entrySignalPrice = signal.price;
-      this._nextJob = cpz.UserPositionJob.open;
-      this._nextJobAt = dayjs.utc().toISOString();
-      this._open(signal);
-    } else if (this._isActionExit(signal.action)) {
       this._exitSignalPrice = signal.price;
       this._nextJob = cpz.UserPositionJob.close;
       this._nextJobAt = dayjs.utc().toISOString();

@@ -266,21 +266,16 @@ class RobotWorkerService extends Service {
           })
         );
 
-        if (
-          robot.positionsToSave.filter(
-            ({ status }) => status === cpz.RobotPositionStatus.closed
-          ).length > 0
-        ) {
-          const allPositions = await this.broker.call(
-            `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
+        if (this.hasClosedPositions) {
+          const { id, exchange, asset } = robot.state;
+          await this.broker.emit<cpz.StatsCalcRobotEvent>(
+            cpz.Event.STATS_CALC_ROBOT,
             {
-              query: {
-                robotId: robot.id,
-                status: cpz.RobotPositionStatus.closed
-              }
+              robotId: id,
+              exchange,
+              asset
             }
           );
-          robot.calcStats(allPositions);
         }
       }
 

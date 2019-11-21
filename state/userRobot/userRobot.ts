@@ -9,6 +9,7 @@ class UserRobot implements cpz.UserRobot {
   _log = console.log;
   _id: string;
   _userExAccId: string;
+  _userId: string;
   _robotId: string;
   _settings: cpz.UserRobotSettings;
   _internalState: cpz.UserRobotInternalState;
@@ -29,6 +30,7 @@ class UserRobot implements cpz.UserRobot {
   constructor(state: cpz.UserRobotState) {
     this._id = state.id;
     this._userExAccId = state.userExAccId;
+    this._userId = state.userId;
     this._robotId = state.robotId;
     this._settings = state.settings;
     this._status = state.status;
@@ -56,6 +58,7 @@ class UserRobot implements cpz.UserRobot {
       userRobot: {
         id: this._id,
         userExAccId: this._userExAccId,
+        userId: this._userId,
         robotId: this._robotId,
         settings: this._settings,
         internalState: this._internalState,
@@ -63,6 +66,7 @@ class UserRobot implements cpz.UserRobot {
         startedAt: this._startedAt,
         stoppedAt: this._stoppedAt
       },
+      robot: this._robot,
       positions: positions.map(pos => pos.state),
       ordersToCreate: flatten(positions.map(pos => pos.ordersToCreate)),
       ordersWithJobs: flatten(positions.map(pos => pos.orderWithJobs)),
@@ -80,6 +84,16 @@ class UserRobot implements cpz.UserRobot {
         pos =>
           pos.status === cpz.UserPositionStatus.new ||
           pos.status === cpz.UserPositionStatus.open
+      ).length > 0
+    );
+  }
+
+  get hasClosedPositions() {
+    return (
+      this.positions.filter(
+        pos =>
+          pos.status === cpz.UserPositionStatus.closed ||
+          pos.status === cpz.UserPositionStatus.closedAuto
       ).length > 0
     );
   }
@@ -115,7 +129,7 @@ class UserRobot implements cpz.UserRobot {
     return `${prefix}_${this._internalState.posLastNumb[prefix]}`;
   }
 
-  stop({ message }: { message?: string }) {
+  stop({ message }: { message?: string } = { message: null }) {
     this._status = cpz.Status.stopping;
     this._message = message;
     if (this.hasActivePositions)
@@ -148,7 +162,7 @@ class UserRobot implements cpz.UserRobot {
     });
   }
 
-  pause({ message }: { message?: string }) {
+  pause({ message }: { message?: string } = { message: null }) {
     this._status = cpz.Status.paused;
     this._message = message;
     this._eventsToSend.push({
@@ -243,6 +257,10 @@ class UserRobot implements cpz.UserRobot {
         positionCode: signal.positionCode,
         positionId: signal.positionId,
         userRobotId: this._id,
+        userId: this._userId,
+        exchange: this._robot.exchange,
+        asset: this._robot.asset,
+        currency: this._robot.currency,
         status: delay
           ? cpz.UserPositionStatus.delayed
           : cpz.UserPositionStatus.new,

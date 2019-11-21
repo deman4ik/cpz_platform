@@ -1,4 +1,4 @@
-import BaseIndicator from "../../state/robot/robot_indicator";
+import BaseIndicator from "../../state/robot/robotIndicator";
 import tulip from "./create";
 import { cpz } from "../../@types";
 

@@ -3,7 +3,7 @@ import { ValidationSchema } from "fastest-validator";
 import dayjs from "../../lib/dayjs";
 import { v4 as uuid } from "uuid";
 import { validate, sortAsc } from "../../utils";
-import Position from "./robot_position";
+import Position from "./robotPosition";
 
 // TODO: объявить тип для класса
 

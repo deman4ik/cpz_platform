@@ -34,6 +34,7 @@ describe("Test User Robot", () => {
     userRobot = new UserRobot({
       id: uuid(),
       userExAccId: uuid(),
+      userId: uuid(),
       robotId,
       settings: {
         volume: 1,

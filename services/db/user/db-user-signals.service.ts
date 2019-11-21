@@ -31,7 +31,9 @@ class UserSignalsService extends Service {
               return (value && value.toISOString()) || value;
             }
           },
-          volume: { type: Sequelize.NUMBER, allowNull: true }
+          volume: { type: Sequelize.NUMBER },
+          statistics: { type: Sequelize.JSONB, allowNull: true },
+          equity: { type: Sequelize.JSONB, allowNull: true }
         },
         options: {
           freezeTableName: true,
@@ -41,6 +43,14 @@ class UserSignalsService extends Service {
         }
       },
       actions: {
+        getSubscribedUserIds: {
+          params: {
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optional: true },
+            currency: { type: "string", optional: true }
+          },
+          handler: this.getSubscribedUserIds
+        },
         getSignalRobots: {
           handler: this.getSignalRobots
         },
@@ -72,6 +82,42 @@ class UserSignalsService extends Service {
     });
   }
 
+  async getSubscribedUserIds(
+    ctx: Context<{
+      exchange?: string;
+      asset?: string;
+      currency?: string;
+    }>
+  ) {
+    try {
+      const { exchange, asset, currency } = ctx.params;
+      const query = `
+  SELECT us.user_id
+FROM robots r,
+     user_signals us
+WHERE us.robot_id = r.id
+${exchange ? "AND us.exchange = :exchange" : ""}
+  ${asset ? "AND us.asset = :asset" : ""}
+  ${currency ? "AND us.currency = :currency" : ""}
+GROUP BY us.user_id;`;
+
+      const rawUserIds = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: {
+          exchange,
+          asset,
+          currency
+        }
+      });
+      if (!rawUserIds || !Array.isArray(rawUserIds) || rawUserIds.length === 0)
+        return [];
+      const userIds = rawUserIds.map(u => underscoreToCamelCaseKeys(u));
+      return userIds;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   async getSignalRobots(ctx: Context<null, { user: cpz.User }>) {
     try {
       const { id: user_id } = ctx.meta.user;

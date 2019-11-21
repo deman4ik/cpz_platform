@@ -29,6 +29,7 @@ class UserRobotsService extends Service {
         define: {
           id: { type: Sequelize.UUID, primaryKey: true },
           userExAccId: { type: Sequelize.UUID, field: "user_ex_acc_id" },
+          userId: { type: Sequelize.UUID, filed: "user_id " },
           robotId: { type: Sequelize.UUID, field: "robot_id" },
           settings: Sequelize.JSONB,
           internalState: {
@@ -160,6 +161,7 @@ class UserRobotsService extends Service {
         id: userRobotId,
         robotId,
         userExAccId,
+        userId: id,
         status: cpz.Status.stopped,
         settings
       });

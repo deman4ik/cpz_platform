@@ -3,6 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import { underscoreToCamelCaseKeys } from "../../../utils";
 
 class RobotPositionsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -144,6 +145,16 @@ class RobotPositionsService extends Service {
         }
       },
       actions: {
+        getUserSignalPositions: {
+          params: {
+            userId: { type: "string", optional: true },
+            robotId: { type: "string", optional: true },
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optiona: true },
+            currency: { type: "string", optiona: true }
+          },
+          handler: this.getUserSignalPositions
+        },
         upsert: {
           params: {
             entity: {
@@ -345,6 +356,64 @@ class RobotPositionsService extends Service {
         replacements: entities
       });
       return true;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getUserSignalPositions(
+    ctx: Context<{
+      userId?: string;
+      robotId?: string;
+      exchange?: string;
+      asset?: string;
+      currency?: string;
+    }>
+  ) {
+    try {
+      const { userId, robotId, exchange, asset, currency } = ctx.params;
+      const query = `
+      SELECT p.*,
+       r.exchange,
+       r.asset,
+       r.currency,
+       us.user_id,
+       us.volume AS user_signal_volume
+FROM robot_positions p,
+     robots r,
+     user_signals us
+WHERE p.robot_id = r.id
+  AND us.robot_id = r.id
+  AND p.status = 'closed'
+  AND p.entry_date >= us.subscribed_at
+  ${userId ? "AND us.user_id = :user_id" : ""}
+  ${robotId ? "AND us.robot_id = :robot_id" : ""}
+  ${exchange ? "AND us.exchange = :exchange" : ""}
+  ${asset ? "AND us.asset = :asset" : ""}
+  ${currency ? "AND us.currency = :currency" : ""}
+  ;`;
+
+      const rawSignalPositions = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: {
+          user_id: userId,
+          robot_id: robotId,
+          exchange,
+          asset,
+          currency
+        }
+      });
+      if (
+        !rawSignalPositions ||
+        !Array.isArray(rawSignalPositions) ||
+        rawSignalPositions.length === 0
+      )
+        return [];
+      const signalPositions = rawSignalPositions.map(p =>
+        underscoreToCamelCaseKeys(p)
+      );
+      return signalPositions;
     } catch (e) {
       this.logger.error(e);
       throw e;

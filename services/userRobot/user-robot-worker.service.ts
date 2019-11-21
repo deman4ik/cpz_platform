@@ -124,6 +124,20 @@ class UserRobotWorkerService extends Service {
         await this.broker.call(`${cpz.Service.DB_USER_POSITIONS}.upsert`, {
           entities: state.positions
         });
+
+        if (this.hasClosedPositions) {
+          const { id, userId } = userRobot.state.userRobot;
+          const { exchange, asset } = userRobot.state.robot;
+          await this.broker.emit<cpz.StatsCalcUserRobotEvent>(
+            cpz.Event.STATS_CALC_USER_ROBOT,
+            {
+              userRobotId: id,
+              userId,
+              exchange,
+              asset
+            }
+          );
+        }
       }
 
       if (

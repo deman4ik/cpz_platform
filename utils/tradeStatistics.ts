@@ -30,7 +30,7 @@ function calcConsec(profits: number[]) {
   };
 }
 
-function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
+function calcMaxDrawdown(positions: cpz.PositionDataForStats[]) {
   let accum = 0;
   let localMax = 0;
   let maxDrawdown = 0;
@@ -54,7 +54,7 @@ function calcMaxDrawdown(positions: cpz.RobotPositionState[]) {
 }
 
 function calcStatistics(
-  positions: cpz.RobotPositionState[]
+  positions: cpz.PositionDataForStats[]
 ): {
   statistics: cpz.RobotStats;
   equity: cpz.RobotEquity;
@@ -378,6 +378,8 @@ function calcStatistics(
     long: longRecoveryFactor,
     short: shortRecoveryFactor
   };
+
+  statistics.lastUpdatedAt = dayjs.utc().toISOString();
 
   const maxEquityLength = 50;
   let chunkLength;

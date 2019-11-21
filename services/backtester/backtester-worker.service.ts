@@ -5,7 +5,13 @@ import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import Robot from "../../state/robot/robot";
-import { sortAsc, chunkNumberToArray, round, chunkArray } from "../../utils";
+import {
+  sortAsc,
+  chunkNumberToArray,
+  round,
+  chunkArray,
+  calcStatistics
+} from "../../utils";
 import requireFromString from "require-from-string";
 import { combineBacktestSettings } from "../../state/settings";
 
@@ -101,10 +107,11 @@ class BacktesterWorkerService extends Service {
       this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
         id: backtesterState.id
       });
-      const [existedBacktest] = await this.broker.call(
-        `${cpz.Service.DB_BACKTESTS}.find`,
-        { query: { id } }
-      );
+      const [
+        existedBacktest
+      ] = await this.broker.call(`${cpz.Service.DB_BACKTESTS}.find`, {
+        query: { id }
+      });
 
       if (existedBacktest) {
         this.logger.info("Found previous backtest. Deleting...");
@@ -278,7 +285,9 @@ class BacktesterWorkerService extends Service {
         }));
         prevIteration += iteration;
         this.logger.info(
-          `Processing iteration from: ${historyCandles[0].timestamp} to: ${historyCandles[historyCandles.length - 1].timestamp}`
+          `Processing iteration from: ${historyCandles[0].timestamp} to: ${
+            historyCandles[historyCandles.length - 1].timestamp
+          }`
         );
         if (!firstCandleTimestamp)
           firstCandleTimestamp = historyCandles[0].timestamp;
@@ -404,20 +413,12 @@ class BacktesterWorkerService extends Service {
         });
       }
 
-      robot.calcStats(
+      const { statistics, equity } = calcStatistics(
         Object.values(allPositions).filter(
           ({ status }) => status === cpz.RobotPositionStatus.closed
         )
       );
-
-      const {
-        state,
-        indicators,
-        statistics,
-        equity,
-        lastCandle,
-        hasAlerts
-      } = robot.state;
+      const { state, indicators, lastCandle, hasAlerts } = robot.state;
       backtesterState.statistics = statistics;
       backtesterState.equity = equity;
       backtesterState.robotState = state;
