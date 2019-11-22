@@ -29,7 +29,7 @@ class UserRobotWorkerService extends Service {
             lockDuration: 20000,
             lockRenewTime: 5000,
             stalledInterval: 30000,
-            maxStalledCount: 1
+            maxStalledCount: 10
           }
         })
       ],
@@ -125,7 +125,10 @@ class UserRobotWorkerService extends Service {
           entities: state.positions
         });
 
-        if (this.hasClosedPositions) {
+        if (userRobot.hasClosedPositions) {
+          this.logger.info(
+            `User Robot #${state.userRobot.id} has closed positions, sending ${cpz.Event.STATS_CALC_USER_ROBOT} event.`
+          );
           const { id, userId } = userRobot.state.userRobot;
           const { exchange, asset } = userRobot.state.robot;
           await this.broker.emit<cpz.StatsCalcUserRobotEvent>(
@@ -170,9 +173,10 @@ class UserRobotWorkerService extends Service {
       if (
         userRobot.status === cpz.Status.stopping &&
         !userRobot.hasActivePositions
-      )
+      ) {
         userRobot.setStop();
-
+        this.logger.info(`User Robot #${userRobot.id} stopped!`);
+      }
       // Saving robot state
       await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.update`,

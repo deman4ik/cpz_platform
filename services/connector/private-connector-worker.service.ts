@@ -47,7 +47,7 @@ class PrivateConnectorWorkerService extends Service {
             lockDuration: 20000,
             lockRenewTime: 5000,
             stalledInterval: 30000,
-            maxStalledCount: 1
+            maxStalledCount: 10
           }
         })
       ],

@@ -37,8 +37,8 @@ class StatsCalcWorkerService extends Service {
       queues: {
         [cpz.Queue.statsCalc]: {
           concurrency: 100,
-          async process(job: Job) {
-            await this.run(job);
+          async process(job: Job<cpz.StatsCalcJob>) {
+            await this.run(job.data);
             return { success: true, id: job.id };
           }
         }
@@ -49,6 +49,7 @@ class StatsCalcWorkerService extends Service {
   async run(job: cpz.StatsCalcJob) {
     try {
       const { type, robotId, userRobotId, userId, exchange, asset } = job;
+      this.logger.info(`Calculating`, job);
       if (type === cpz.StatsCalcJobType.robot) {
         await this.calcRobot(robotId);
       } else if (type === cpz.StatsCalcJobType.userRobot) {

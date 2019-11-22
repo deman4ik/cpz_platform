@@ -44,7 +44,7 @@ class RobotWorkerService extends Service {
             lockDuration: 20000,
             lockRenewTime: 5000,
             stalledInterval: 30000,
-            maxStalledCount: 1
+            maxStalledCount: 10
           }
         })
       ],
@@ -266,7 +266,10 @@ class RobotWorkerService extends Service {
           })
         );
 
-        if (this.hasClosedPositions) {
+        if (robot.hasClosedPositions) {
+          this.logger.info(
+            `Robot #${robot.id} has closed positions, sending ${cpz.Event.STATS_CALC_ROBOT} event.`
+          );
           const { id, exchange, asset } = robot.state;
           await this.broker.emit<cpz.StatsCalcRobotEvent>(
             cpz.Event.STATS_CALC_ROBOT,

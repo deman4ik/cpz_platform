@@ -107,6 +107,26 @@ module.exports = {
       }
     },
     {
+      name: "stats-calc-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/userRobot/stats-calc-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "stats-calc-runner"
+      }
+    },
+    {
+      name: "stats-calc-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/robot/stats-calc-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "stats-calc-worker"
+      }
+    },
+    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config dev.config.js dist/services/api.service.js",

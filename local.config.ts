@@ -41,6 +41,12 @@ const brokerConfig: any = {
     }
   },
 
+  tracing: {
+    enabled: false,
+    exporter: "Console",
+    events: true,
+    stackTrace: true
+  },
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
   transporter: "TCP",

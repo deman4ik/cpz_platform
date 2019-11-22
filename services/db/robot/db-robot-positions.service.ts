@@ -150,8 +150,8 @@ class RobotPositionsService extends Service {
             userId: { type: "string", optional: true },
             robotId: { type: "string", optional: true },
             exchange: { type: "string", optional: true },
-            asset: { type: "string", optiona: true },
-            currency: { type: "string", optiona: true }
+            asset: { type: "string", optional: true },
+            currency: { type: "string", optional: true }
           },
           handler: this.getUserSignalPositions
         },
@@ -373,6 +373,13 @@ class RobotPositionsService extends Service {
   ) {
     try {
       const { userId, robotId, exchange, asset, currency } = ctx.params;
+      const params: {
+        user_id?: string;
+        robot_id?: string;
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+      } = {};
       const query = `
       SELECT p.*,
        r.exchange,
@@ -388,21 +395,21 @@ WHERE p.robot_id = r.id
   AND p.status = 'closed'
   AND p.entry_date >= us.subscribed_at
   ${userId ? "AND us.user_id = :user_id" : ""}
-  ${robotId ? "AND us.robot_id = :robot_id" : ""}
-  ${exchange ? "AND us.exchange = :exchange" : ""}
-  ${asset ? "AND us.asset = :asset" : ""}
-  ${currency ? "AND us.currency = :currency" : ""}
+  ${robotId ? "AND r.id = :robot_id" : ""}
+  ${exchange ? "AND r.exchange = :exchange" : ""}
+  ${asset ? "AND r.asset = :asset" : ""}
+  ${currency ? "AND r.currency = :currency" : ""}
   ;`;
+
+      if (userId) params.user_id = userId;
+      if (robotId) params.robot_id = robotId;
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (currency) params.currency = currency;
 
       const rawSignalPositions = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
-        replacements: {
-          user_id: userId,
-          robot_id: robotId,
-          exchange,
-          asset,
-          currency
-        }
+        replacements: params
       });
       if (
         !rawSignalPositions ||

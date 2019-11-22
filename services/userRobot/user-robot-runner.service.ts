@@ -224,7 +224,7 @@ class UserRobotRunnerService extends Service {
           return { success: true, id, status: cpz.Status.started };
         else throw result.error;
       }
-      if (status === cpz.Status.started || status === cpz.Status.stopping)
+      if (status === cpz.Status.started)
         return {
           success: true,
           id,

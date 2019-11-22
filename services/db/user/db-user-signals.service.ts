@@ -45,6 +45,7 @@ class UserSignalsService extends Service {
       actions: {
         getSubscribedUserIds: {
           params: {
+            robotId: { type: "string", optional: true },
             exchange: { type: "string", optional: true },
             asset: { type: "string", optional: true },
             currency: { type: "string", optional: true }
@@ -84,30 +85,36 @@ class UserSignalsService extends Service {
 
   async getSubscribedUserIds(
     ctx: Context<{
+      robotId?: string;
       exchange?: string;
       asset?: string;
       currency?: string;
     }>
   ) {
     try {
-      const { exchange, asset, currency } = ctx.params;
-      const query = `
-  SELECT us.user_id
-FROM robots r,
-     user_signals us
-WHERE us.robot_id = r.id
-${exchange ? "AND us.exchange = :exchange" : ""}
-  ${asset ? "AND us.asset = :asset" : ""}
-  ${currency ? "AND us.currency = :currency" : ""}
-GROUP BY us.user_id;`;
+      const { robotId, exchange, asset, currency } = ctx.params;
+      const params: {
+        robot_id?: string;
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+      } = {};
+      const query = `SELECT us.user_id
+                     FROM robots r, user_signals us
+                     WHERE us.robot_id = r.id
+                     ${robotId ? "AND r.id = :robot_id" : ""}
+                     ${exchange ? "AND r.exchange = :exchange" : ""}
+                     ${asset ? "AND r.asset = :asset" : ""}
+                     ${currency ? "AND r.currency = :currency" : ""}
+                     GROUP BY us.user_id;`;
 
+      if (robotId) params.robot_id = robotId;
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (currency) params.currency = currency;
       const rawUserIds = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
-        replacements: {
-          exchange,
-          asset,
-          currency
-        }
+        replacements: params
       });
       if (!rawUserIds || !Array.isArray(rawUserIds) || rawUserIds.length === 0)
         return [];
@@ -121,10 +128,9 @@ GROUP BY us.user_id;`;
   async getSignalRobots(ctx: Context<null, { user: cpz.User }>) {
     try {
       const { id: user_id } = ctx.meta.user;
-      const query = `select  t.id,
-        t.name
-        from robots t right outer join user_signals s ON s.robot_id = t.id
-        where s.user_id = :user_id;`;
+      const query = `SELECT t.id, t.name
+        FROM robots t right outer join user_signals s ON s.robot_id = t.id
+        WHERE s.user_id = :user_id;`;
       return await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { user_id }

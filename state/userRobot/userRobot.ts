@@ -313,6 +313,8 @@ class UserRobot implements cpz.UserRobot {
         this._positions[signal.positionId].executeJob();
       }
     }
+
+    this._internalState.latestSignal = signal;
   }
 
   handleDelayedPositions() {

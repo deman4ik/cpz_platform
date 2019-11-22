@@ -1038,6 +1038,146 @@ describe("Test User Robot", () => {
     );
   });
 
+  it("Should close position with exit canceled order in history", () => {
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      }
+    });
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: userRobot.state.ordersToCreate[0].volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrder);
+    const signalClose: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: signalOpen.positionId,
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.closeShort,
+      orderType: cpz.OrderType.market,
+      price: 5998
+    };
+    userRobot.handleSignal(signalClose);
+    const canceledCloseOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.canceled,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: 0,
+      remaining: openOrder.volume
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          exitOrders: [canceledCloseOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(canceledCloseOrder);
+
+    const closeOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.closed,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: dayjs.utc().toISOString(),
+      executed: openOrder.volume,
+      remaining: 0
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          exitOrders: [canceledCloseOrder, closeOrder]
+        }
+      ]
+    });
+    userRobot.handleOrder(closeOrder);
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.closed
+    );
+  });
+
   it("Should create new delayed position if open signal first", () => {
     const signalOpen: cpz.SignalEvent = {
       id: uuid(),
@@ -1428,6 +1568,7 @@ describe("Test User Robot", () => {
     userRobot.handleOrder(openOrder);
 
     userRobot.stop();
+    expect(userRobot.hasActivePositions).toBe(true);
     expect(userRobot.state.userRobot.status).toBe(cpz.Status.stopping);
     expect(userRobot.state.ordersToCreate.length).toBe(1);
     expect(userRobot.state.ordersToCreate[0].type).toBe(
@@ -1459,7 +1600,13 @@ describe("Test User Robot", () => {
     expect(userRobot.state.positions[0].status).toBe(
       cpz.UserPositionStatus.closedAuto
     );
-    userRobot.stop();
+    expect(userRobot.hasClosedPositions).toBe(true);
+    expect(userRobot.hasActivePositions).toBe(false);
+    if (
+      userRobot.status === cpz.Status.stopping &&
+      !userRobot.hasActivePositions
+    )
+      userRobot.setStop();
     expect(userRobot.state.userRobot.status).toBe(cpz.Status.stopped);
   });
 });

@@ -2,7 +2,7 @@ import { Errors } from "moleculer";
 import { cpz, GenericObject } from "../../@types";
 import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
-import { addPercent, averageRound, average, round } from "../../utils";
+import { addPercent, sum, average, round } from "../../utils";
 import { ORDER_OPEN_TIMEOUT } from "../../config/settings";
 
 class UserPosition implements cpz.UserPosition {
@@ -187,17 +187,16 @@ class UserPosition implements cpz.UserPosition {
   _updateEntry() {
     if (this._entryOrders && this._entryOrders.length > 0) {
       this._entryPrice = round(
-        average(...this._entryOrders.map(o => +o.price || 0)),
+        average(
+          ...this._entryOrders.map(o => +o.price || 0).filter(p => p > 0)
+        ),
         6
       );
       this._entryExecuted = round(
-        average(...this._entryOrders.map(o => +o.executed || 0)),
+        sum(...this._entryOrders.map(o => +o.executed || 0)),
         6
       );
-      this._entryRemaining = round(
-        average(...this._entryOrders.map(o => +o.remaining || 0)),
-        6
-      );
+      this._entryRemaining = this._entryVolume - this._entryExecuted;
     }
     if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
       if (!this._entryExecuted) {
@@ -218,17 +217,14 @@ class UserPosition implements cpz.UserPosition {
   _updateExit() {
     if (this._exitOrders && this._exitOrders.length > 0) {
       this._exitPrice = round(
-        average(...this._exitOrders.map(o => +o.price || 0)),
+        average(...this._exitOrders.map(o => +o.price || 0).filter(p => p > 0)),
         6
       );
       this._exitExecuted = round(
-        average(...this._exitOrders.map(o => +o.executed || 0)),
+        sum(...this._exitOrders.map(o => +o.executed || 0)),
         6
       );
-      this._exitRemaining = round(
-        average(...this._exitOrders.map(o => +o.remaining || 0)),
-        6
-      );
+      this._exitRemaining = this._exitVolume - this._exitExecuted;
     }
     if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
       if (!this._exitExecuted) {

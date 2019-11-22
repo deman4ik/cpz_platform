@@ -85,8 +85,8 @@ declare namespace cpz {
     ORDER_STATUS = "order.status",
     ORDER_ERROR = "order.error",
     USER_EX_ACC_ERROR = "user_ex_acc.error",
-    STATS_CALC_ROBOT = "stats.calc.robot",
-    STATS_CALC_USER_ROBOT = "stats.calc.user-robot"
+    STATS_CALC_ROBOT = "stats-calc.robot",
+    STATS_CALC_USER_ROBOT = "stats-calc.user-robot"
   }
 
   const enum Status {

@@ -70,6 +70,9 @@ class StatsCalcRunnerService extends Service {
   async handleStatsCalcRobotEvent(ctx: Context<cpz.StatsCalcRobotEvent>) {
     try {
       const { robotId, exchange, asset } = ctx.params;
+      this.logger.info(
+        `New ${cpz.Event.STATS_CALC_ROBOT} event - ${robotId}, ${exchange}, ${asset}`
+      );
       await this.queueJob({
         id: robotId,
         type: cpz.StatsCalcJobType.robot,
@@ -80,11 +83,20 @@ class StatsCalcRunnerService extends Service {
         type: cpz.StatsCalcJobType.userSignals,
         robotId
       });
-      await this.queueJob({
-        id: `${cpz.StatsCalcJobType.userSignalsAggr}-${robotId}`,
-        type: cpz.StatsCalcJobType.userSignalsAggr,
-        robotId
-      });
+
+      const usersByRobotId = await this.broker.call(
+        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
+        {
+          robotId
+        }
+      );
+      for (const { userId } of usersByRobotId) {
+        await this.queueJob({
+          id: `${cpz.StatsCalcJobType.userSignalsAggr}-${userId}`,
+          type: cpz.StatsCalcJobType.userSignalsAggr,
+          userId
+        });
+      }
 
       const usersByExchange = await this.broker.call(
         `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
@@ -100,6 +112,7 @@ class StatsCalcRunnerService extends Service {
           exchange
         });
       }
+
       const usersByAsset = await this.broker.call(
         `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
         {
@@ -114,6 +127,7 @@ class StatsCalcRunnerService extends Service {
           asset
         });
       }
+
       const usersByExchangeAsset = await this.broker.call(
         `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
         {
@@ -140,6 +154,9 @@ class StatsCalcRunnerService extends Service {
   ) {
     try {
       const { userRobotId, userId, exchange, asset } = ctx.params;
+      this.logger.info(
+        `New ${cpz.Event.STATS_CALC_USER_ROBOT} event - ${userRobotId}, ${userId}, ${exchange}, ${asset}`
+      );
       await this.queueJob({
         id: userRobotId,
         type: cpz.StatsCalcJobType.userRobot,

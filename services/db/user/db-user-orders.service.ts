@@ -58,7 +58,9 @@ class UserOrdersService extends Service {
             field: "ex_timestamp",
             get: function() {
               const value = this.getDataValue("exTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exLastTradeAt: {
@@ -67,7 +69,9 @@ class UserOrdersService extends Service {
             field: "ex_last_trade_at",
             get: function() {
               const value = this.getDataValue("exLastTradeAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           remaining: {
@@ -94,7 +98,9 @@ class UserOrdersService extends Service {
             field: "last_checked_at",
             get: function() {
               const value = this.getDataValue("lastCheckedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           params: {
@@ -111,7 +117,9 @@ class UserOrdersService extends Service {
             field: "created_at",
             get: function() {
               const value = this.getDataValue("createdAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           nextJobAt: {
@@ -120,7 +128,9 @@ class UserOrdersService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("nextJobAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           nextJob: {

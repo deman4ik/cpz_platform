@@ -20,13 +20,33 @@ module.exports = {
       }
     },
     {
-      name: "connector",
+      name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=2 --config prod.config.js dist/services/connector",
+        "--env --instances=3 --config dev.config.js dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "connector"
+        NODEID: "public-connector"
+      }
+    },
+    {
+      name: "private-connector-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/connector/private-connector-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "private-connector-runner"
+      }
+    },
+    {
+      name: "private-connector-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=3 --config dev.config.js dist/services/connector/private-connector-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "private-connector-worker"
       }
     },
     {
@@ -65,6 +85,46 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         NODEID: "robot-worker"
+      }
+    },
+    {
+      name: "user-robot-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/userRobot/user-robot-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "user-robot-runner"
+      }
+    },
+    {
+      name: "user-robot-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=3 --config dev.config.js dist/services/robot/user-robot-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "user-robot-worker"
+      }
+    },
+    {
+      name: "stats-calc-runner",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/userRobot/stats-calc-runner.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "stats-calc-runner"
+      }
+    },
+    {
+      name: "stats-calc-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=3 --config dev.config.js dist/services/robot/stats-calc-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "stats-calc-worker"
       }
     },
     {

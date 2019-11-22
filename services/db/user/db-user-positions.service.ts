@@ -17,7 +17,7 @@ class UserPositionsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           positionId: { type: Sequelize.UUID, field: "position_id" },
           userRobotId: { type: Sequelize.UUID, field: "user_robot_id" },
-          userId: { type: Sequelize.UUID, filed: "user_id" },
+          userId: { type: Sequelize.UUID, field: "user_id" },
           exchange: { type: Sequelize.STRING },
           asset: { type: Sequelize.STRING },
           currency: { type: Sequelize.STRING },
