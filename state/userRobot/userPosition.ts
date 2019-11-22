@@ -243,16 +243,26 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _calcStats() {
+    const entryBalance = +round(
+      sum(
+        ...this._entryOrders
+          .filter(o => o.status === cpz.OrderStatus.closed)
+          .map(o => +o.price * +o.executed)
+      ),
+      6
+    );
+    const exitBalance = +round(
+      sum(
+        ...this._exitOrders
+          .filter(o => o.status === cpz.OrderStatus.closed)
+          .map(o => +o.price * +o.executed)
+      ),
+      6
+    );
     if (this._direction === cpz.PositionDirection.long) {
-      this._profit = +round(
-        (this._exitPrice - this._entryPrice) * this._exitExecuted,
-        6
-      );
+      this._profit = +round(exitBalance - entryBalance, 6);
     } else {
-      this._profit = +round(
-        (this._entryPrice - this._exitPrice) * this._exitExecuted,
-        6
-      );
+      this._profit = +round(entryBalance - exitBalance, 6);
     }
 
     if (!this._barsHeld)
