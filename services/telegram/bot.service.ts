@@ -42,8 +42,23 @@ class BotService extends Service {
       actions: {
         sendMessage: {
           params: {
-            telegramId: "number",
-            message: "string"
+            entity: {
+              type: "object",
+              props: {
+                telegramId: "number",
+                message: "string"
+              }
+            },
+            entities: {
+              type: "array",
+              items: {
+                type: "object",
+                props: {
+                  telegramId: "number",
+                  message: "string"
+                }
+              }
+            }
           },
           handler: this.sendMessage
         }
@@ -52,15 +67,23 @@ class BotService extends Service {
   }
 
   cronJobs: cron.ScheduledTask = cron.schedule(
-    "* * * * * *",
+    "*/5 * * * * *",
     this.sendMessages.bind(this),
     {
       scheduled: false
     }
   );
 
-  sendMessage(ctx: Context<cpz.TelegramMessage>) {
-    this.messages.push(ctx.params);
+  sendMessage(
+    ctx: Context<{
+      entity: cpz.TelegramMessage;
+      entities: cpz.TelegramMessage[];
+    }>
+  ) {
+    const { entity, entities } = ctx.params;
+    if (entity) this.messages.push(entity);
+    else if (entities && Array.isArray(entities) && entities.length > 0)
+      this.messages = [...this.messages, ...entities];
   }
 
   async sendMessages() {

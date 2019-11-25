@@ -140,19 +140,17 @@ class PublisherService extends Service {
           message = `${robotInfo}${tradeText}`;
         }
 
-        for (const { telegramId } of subscriptions) {
-          try {
-            await this.broker.call<cpz.TelegramMessage>(
-              `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-              {
-                telegramId,
-                message
-              }
-            );
-          } catch (err) {
-            this.logger.error(err);
+        const entities = subscriptions.map(sub => ({
+          telegramId: sub.telegramId,
+          message
+        }));
+
+        await this.broker.call<cpz.TelegramMessage>(
+          `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+          {
+            entities
           }
-        }
+        );
       }
     } catch (e) {
       this.logger.error(e);
@@ -186,19 +184,17 @@ class PublisherService extends Service {
         });
       }
 
-      for (const id of users) {
-        try {
-          await this.broker.call<cpz.TelegramMessage>(
-            `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-            {
-              telegramId: id,
-              message: ctx.params.message
-            }
-          );
-        } catch (err) {
-          this.logger.error(err);
+      const entities = users.map(id => ({
+        telegramId: id,
+        message: ctx.params.message
+      }));
+
+      await this.broker.call<cpz.TelegramMessage>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entities
         }
-      }
+      );
     } catch (e) {
       this.logger.error(e);
       throw e;
