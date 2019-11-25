@@ -480,6 +480,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         }
       ]
@@ -661,6 +662,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         }
       ]
@@ -751,6 +753,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         }
       ]
@@ -1027,6 +1030,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         }
       ]
@@ -1139,6 +1143,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [canceledCloseOrder]
         }
       ]
@@ -1168,6 +1173,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [canceledCloseOrder, closeOrder]
         }
       ]
@@ -1512,6 +1518,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         },
         {
@@ -1592,6 +1599,7 @@ describe("Test User Robot", () => {
       positions: [
         {
           ...userRobot.state.positions[0],
+          entryOrders: [openOrder],
           exitOrders: [closeOrder]
         }
       ]
