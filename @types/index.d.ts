@@ -47,7 +47,9 @@ declare namespace cpz {
     STATS_CALC_RUNNER = "stats-calc-runner",
     STATS_CALC_WORKER = "stats-calc-worker",
     AUTH = "auth",
-    API = "api"
+    API = "api",
+    TELEGRAM_BOT = "telegram-bot",
+    PUBLISHER = "publisher"
   }
 
   const enum Event {
@@ -999,5 +1001,10 @@ declare namespace cpz {
     type: "signal" | "userRobot";
     statistics: RobotStats;
     equity: RobotEquity;
+  }
+
+  interface TelegramMessage {
+    telegramId: number;
+    message: string;
   }
 }

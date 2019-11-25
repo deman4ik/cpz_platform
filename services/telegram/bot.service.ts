@@ -17,19 +17,20 @@ import {
   getFAQMenu
 } from "../../state/telegram/menu";
 import dayjs from "../../lib/dayjs";
-import { round, sortAsc } from "../../utils/helpers";
-import Auth from "../../mixins/auth";
+import { round, sortAsc, sleep } from "../../utils/helpers";
+import cron from "node-cron";
 
 const { enter, leave } = Stage;
 
 //TODO: Logging
 class BotService extends Service {
   bot: any;
+  messages: cpz.TelegramMessage[] = [];
   constructor(broker: ServiceBroker) {
     super(broker);
 
     this.parseServiceSchema({
-      name: "telegram-bot",
+      name: cpz.Service.TELEGRAM_BOT,
       dependencies: [
         `${cpz.Service.AUTH}`,
         `${cpz.Service.DB_ROBOTS}`,
@@ -38,194 +39,45 @@ class BotService extends Service {
       created: this.createdService,
       started: this.startedService,
       stopped: this.stoppedService,
-      events: {
-        [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
-        [cpz.Event.SIGNAL_TRADE]: this.handleSignal
-      },
       actions: {
-        broadcastMessage: {
+        sendMessage: {
           params: {
-            userId: { type: "string", optional: true },
+            telegramId: "number",
             message: "string"
           },
-          roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: "authAction"
-          },
-          handler: this.broadcastMessage
+          handler: this.sendMessage
         }
       }
     });
   }
 
-  async handleSignal(ctx: Context) {
-    if (
-      process.env.NODE_ENV === "production" ||
-      process.env.NODE_ENV === "dev" ||
-      process.env.NODE_ENV === "development"
-    ) {
-      try {
-        const signal = <cpz.SignalEvent>ctx.params;
-
-        const { robotId, type, action } = signal;
-        const { name } = await this.broker.call(
-          `${cpz.Service.DB_ROBOTS}.get`,
-          {
-            id: robotId,
-            fields: ["id", "name"]
-          }
-        );
-
-        const subscriptions = await this.broker.call(
-          `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
-          {
-            robotId
-          }
-        );
-
-        if (
-          subscriptions &&
-          Array.isArray(subscriptions) &&
-          subscriptions.length > 0
-        ) {
-          //TODO: Set lang from DB
-          let message = "";
-          const robotInfo = this.i18n.t("en", `signal.${type}`, { name });
-          const actionText = this.i18n.t("en", `tradeAction.${signal.action}`);
-          const orderTypeText = this.i18n.t(
-            "en",
-            `orderType.${signal.orderType}`
-          );
-
-          if (type === cpz.SignalType.alert) {
-            const signalText = this.i18n.t("en", "robot.signal", {
-              code: signal.positionCode,
-              timestamp: dayjs
-                .utc(signal.timestamp)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              action: actionText,
-              orderType: orderTypeText,
-              price: +signal.price
-            });
-
-            message = `${robotInfo}${signalText}`;
-          } else {
-            let tradeText = "";
-
-            if (
-              action === cpz.TradeAction.closeLong ||
-              action === cpz.TradeAction.closeShort
-            ) {
-              const position = await this.broker.call(
-                `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
-                {
-                  id: signal.positionId
-                }
-              );
-              tradeText = this.i18n.t("en", "robot.positionClosed", {
-                code: signal.positionCode,
-                entryAction: this.i18n.t(
-                  "en",
-                  `tradeAction.${position.entryAction}`
-                ),
-                entryOrderType: this.i18n.t(
-                  "en",
-                  `orderType.${position.entryOrderType}`
-                ),
-                entryPrice: position.entryPrice,
-                entryDate: dayjs
-                  .utc(position.entryDate)
-                  .format("YYYY-MM-DD HH:mm UTC"),
-                exitAction: actionText,
-                exitOrderType: orderTypeText,
-                exitPrice: +signal.price,
-                exitDate: dayjs
-                  .utc(signal.timestamp)
-                  .format("YYYY-MM-DD HH:mm UTC"),
-                barsHeld: position.barsHeld,
-                profit: position.profit
-              });
-            } else {
-              tradeText = this.i18n.t("en", "robot.positionOpen", {
-                code: signal.positionCode,
-                entryAction: actionText,
-                entryOrderType: orderTypeText,
-                entryPrice: +signal.price,
-                entryDate: dayjs
-                  .utc(signal.timestamp)
-                  .format("YYYY-MM-DD HH:mm UTC")
-              });
-            }
-            message = `${robotInfo}${tradeText}`;
-          }
-
-          await Promise.all(
-            subscriptions.map(
-              async ({
-                telegramId
-              }: {
-                telegramId: number;
-                userId: string;
-              }) => {
-                try {
-                  await this.bot.telegram.sendMessage(telegramId, message, {
-                    parse_mode: "HTML"
-                  });
-                } catch (err) {
-                  this.logger.error(err);
-                  this.blockHandler(telegramId, err.response);
-                }
-              }
-            )
-          );
-        }
-      } catch (e) {
-        this.logger.error(e);
-      }
+  cronJobs: cron.ScheduledTask = cron.schedule(
+    "* * * * * *",
+    this.sendMessages.bind(this),
+    {
+      scheduled: false
     }
+  );
+
+  sendMessage(ctx: Context<cpz.TelegramMessage>) {
+    this.messages.push(ctx.params);
   }
 
-  async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
-    try {
-      const users = [];
-      if (ctx.params.userId) {
-        const { telegramId } = await this.broker.call(
-          `${cpz.Service.DB_USERS}.get`,
-          { id: ctx.params.userId }
-        );
-        if (telegramId) users.push(telegramId);
-      } else {
-        const userslist = await this.broker.call(
-          `${cpz.Service.DB_USERS}.find`,
-          {
-            fields: ["id", "telegramId"],
-            query: {
-              status: { $gt: 0 },
-              telegramId: { $ne: null }
-            }
-          }
-        );
-        this.logger.info(userslist);
-        userslist.forEach(({ telegramId }: cpz.User) => {
-          users.push(telegramId);
-        });
-      }
-
-      if (users.length > 0) {
-        for (const id of users) {
-          try {
-            await this.bot.telegram.sendMessage(id, ctx.params.message, {
-              parse_mode: "HTML"
-            });
-          } catch (err) {
-            this.logger.error(err);
-            this.blockHandler(id, err.response);
-          }
+  async sendMessages() {
+    if (this.messages.length > 0) {
+      const msgs = [...this.messages];
+      this.messages.splice(0, msgs.length);
+      for (const { telegramId, message } of msgs) {
+        try {
+          await this.bot.telegram.sendMessage(telegramId, message, {
+            parse_mode: "HTML"
+          });
+          await sleep(100);
+        } catch (err) {
+          this.logger.error(err);
+          this.blockHandler(telegramId, err.response);
         }
       }
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
     }
   }
 
@@ -310,6 +162,7 @@ class BotService extends Service {
     if (process.env.NODE_ENV === "production") {
       await this.bot.telegram.setWebhook(process.env.BOT_HOST);
       await this.bot.startWebhook("/", null, 5000);
+      this.cronJobs.start();
       this.logger.warn("Bot in production mode!");
     } else if (
       process.env.NODE_ENV === "dev" ||
@@ -317,6 +170,7 @@ class BotService extends Service {
     ) {
       await this.bot.telegram.deleteWebhook();
       await this.bot.startPolling();
+      this.cronJobs.start();
       this.logger.warn("Bot in development mode!");
     } else {
       this.logger.warn("Bot not started!");
@@ -324,6 +178,7 @@ class BotService extends Service {
   }
 
   async stoppedService() {
+    this.cronJobs.stop();
     this.bot.stop();
   }
 
