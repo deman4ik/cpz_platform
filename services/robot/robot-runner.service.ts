@@ -157,12 +157,17 @@ class RobotRunnerService extends Service {
       entity: job
     });
     const { robotId } = job;
-    if (status === cpz.Status.started)
+    if (status === cpz.Status.started) {
+      const lastJob = await this.getQueue(cpz.Queue.runRobot).getJob(robotId);
+      if (lastJob && lastJob.isStuck()) {
+        await lastJob.remove();
+      }
       await this.createJob(cpz.Queue.runRobot, job, {
         jobId: robotId,
         removeOnComplete: true,
         removeOnFail: true
       });
+    }
   }
 
   async start(

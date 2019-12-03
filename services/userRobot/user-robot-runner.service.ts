@@ -147,6 +147,12 @@ class UserRobotRunnerService extends Service {
       if (idledJobs && Array.isArray(idledJobs) && idledJobs.length > 0) {
         this.logger.info(`Requeue ${idledJobs.length} jobs`);
         idledJobs.forEach(async job => {
+          const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
+            job.userRobotId
+          );
+          if (lastJob && lastJob.isStuck()) {
+            await lastJob.remove();
+          }
           await this.createJob(cpz.Queue.runUserRobot, job, {
             jobId: job.userRobotId,
             removeOnComplete: true,
@@ -192,12 +198,19 @@ class UserRobotRunnerService extends Service {
       entity: job
     });
     const { userRobotId } = job;
-    if (status === cpz.Status.started || status === cpz.Status.stopping)
+    if (status === cpz.Status.started || status === cpz.Status.stopping) {
+      const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
+        userRobotId
+      );
+      if (lastJob && lastJob.isStuck()) {
+        await lastJob.remove();
+      }
       await this.createJob(cpz.Queue.runUserRobot, job, {
         jobId: userRobotId,
         removeOnComplete: true,
         removeOnFail: true
       });
+    }
     this.logger.info("Queued", job);
   }
 

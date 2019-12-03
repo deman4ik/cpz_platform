@@ -112,12 +112,19 @@ class PricateConnectorRunnerService extends Service {
       entity: job
     });
     const { userExAccId } = job;
-    if (status === cpz.UserExchangeAccStatus.enabled)
+    if (status === cpz.UserExchangeAccStatus.enabled) {
+      const lastJob = await this.getQueue(cpz.Queue.connector).getJob(
+        userExAccId
+      );
+      if (lastJob && lastJob.isStuck()) {
+        await lastJob.remove();
+      }
       await this.createJob(cpz.Queue.connector, job, {
         jobId: userExAccId,
         removeOnComplete: true,
         removeOnFail: true
       });
+    }
     this.logger.info("Queued", job);
   }
 

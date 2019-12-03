@@ -30,7 +30,7 @@ class ImporterRunnerService extends Service {
           }
         })
       ],
-      dependencies: [cpz.Service.DB_IMPORTERS, cpz.Service.PUBLIC_CONNECTOR],
+      dependencies: [cpz.Service.DB_IMPORTERS, cpz.Service.DB_MARKETS],
       actions: {
         startRecent: {
           params: {
@@ -201,6 +201,10 @@ class ImporterRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
+      const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
+      if (lastJob && lastJob.isStuck()) {
+        await lastJob.remove();
+      }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
         removeOnComplete: true,
@@ -228,15 +232,15 @@ class ImporterRunnerService extends Service {
     try {
       let dateFrom;
       if (!ctx.params.dateFrom) {
-        const { loadFrom } = await this.broker.call(
-          `${cpz.Service.PUBLIC_CONNECTOR}.getMarket`,
+        const [{ loadFrom }]: cpz.Market[] = await this.broker.call(
+          `${cpz.Service.DB_MARKETS}.find`,
           {
-            exchange: ctx.params.exchange,
-            asset: ctx.params.asset,
-            currency: ctx.params.currency
-          },
-          {
-            retries: 20
+            fields: ["loadFrom"],
+            query: {
+              exchange: ctx.params.exchange,
+              asset: ctx.params.asset,
+              currency: ctx.params.currency
+            }
           }
         );
         if (!loadFrom) throw new Error("Failed to find market");
@@ -263,6 +267,10 @@ class ImporterRunnerService extends Service {
       await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
+      const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
+      if (lastJob && lastJob.isStuck()) {
+        await lastJob.remove();
+      }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
         removeOnComplete: true,
