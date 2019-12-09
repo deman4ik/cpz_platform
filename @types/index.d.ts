@@ -908,6 +908,12 @@ declare namespace cpz {
     error?: any;
   }
 
+  interface UserExchangeAccountErrorEvent {
+    id: string;
+    name: string;
+    exchange: string;
+    errorMessage: string;
+  }
   interface UserRobotSettings {
     volume: number;
     kraken?: {

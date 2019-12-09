@@ -4,7 +4,7 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
-import { encrypt } from "../../../utils/crypto";
+import { encrypt, capitalize } from "../../../utils";
 
 class UserExchangeAccsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -84,13 +84,25 @@ class UserExchangeAccsService extends Service {
     >
   ) {
     try {
-      const {
+      let {
         id,
         exchange,
         name,
         keys: { key, secret, pass }
       } = ctx.params;
       const { id: userId } = ctx.meta.user;
+
+      let existed: cpz.UserExchangeAccount;
+      if (id) {
+        existed = await this.adapter.findById(id);
+        if (existed) {
+          if (existed.userId !== userId)
+            throw new Error("Invalid exchange account user");
+          if (existed.exchange !== exchange)
+            throw new Error("Invalid exchange");
+          //TODO: Check started user robots or invalid status
+        }
+      }
 
       await this.broker.call(
         `${cpz.Service.PRIVATE_CONNECTOR_WORKER}.checkAPIKeys`,
@@ -107,6 +119,18 @@ class UserExchangeAccsService extends Service {
         secret: await encrypt(userId, secret),
         pass: pass && (await encrypt(userId, pass))
       };
+
+      if (!existed && (!name || name === "")) {
+        const exchangeAccsCount: number = await this._count(ctx, {
+          query: {
+            exchange,
+            userId
+          }
+        });
+
+        name = `${capitalize(exchange)} #${exchangeAccsCount + 1}`;
+      }
+
       const exchangeAcc: cpz.UserExchangeAccount = {
         id: id || uuid(),
         userId,
@@ -117,13 +141,11 @@ class UserExchangeAccsService extends Service {
         error: null,
         ordersCache: {}
       };
-      if (id) {
-        const existed = await this.adapter.findById(id);
-        if (existed.userId !== userId)
-          throw new Error("Invalid exchange account user");
+
+      if (existed) {
         await this.adapter.updateById(id, {
           $set: {
-            exchange: exchangeAcc.exchange,
+            name: name || existed.name,
             keys: exchangeAcc.keys,
             status: exchangeAcc.status,
             error: null
@@ -145,16 +167,26 @@ class UserExchangeAccsService extends Service {
   async invalidate(ctx: Context<{ id: string; error: any }>) {
     try {
       const { id, error } = ctx.params;
-      await this.adapter.updateById(id, {
-        $set: {
-          status: cpz.UserExchangeAccStatus.invalid,
-          error
-        }
-      });
-      await this.broker.emit(cpz.Event.USER_EX_ACC_ERROR, {
-        id,
-        errorMessage: error.message
-      });
+      const userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.getById(
+        id
+      );
+      if (userExchangeAcc) {
+        await this.adapter.updateById(id, {
+          $set: {
+            status: cpz.UserExchangeAccStatus.invalid,
+            error
+          }
+        });
+        await this.broker.emit<cpz.UserExchangeAccountErrorEvent>(
+          cpz.Event.USER_EX_ACC_ERROR,
+          {
+            id,
+            name: userExchangeAcc.name,
+            exchange: userExchangeAcc.exchange,
+            errorMessage: error.message
+          }
+        );
+      }
     } catch (e) {
       this.logger.error(e);
       throw e;
