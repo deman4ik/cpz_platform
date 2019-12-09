@@ -32,6 +32,7 @@ declare namespace cpz {
     DB_USER_POSITIONS = "db-user-positions",
     DB_USER_AGGR_STATS = "db-user-aggr-stats",
     DB_CONNECTOR_JOBS = "db-connector-jobs",
+    DB_MARKETS = "db-markets",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -88,7 +89,9 @@ declare namespace cpz {
     ORDER_ERROR = "order.error",
     USER_EX_ACC_ERROR = "user_ex_acc.error",
     STATS_CALC_ROBOT = "stats-calc.robot",
-    STATS_CALC_USER_ROBOT = "stats-calc.user-robot"
+    STATS_CALC_USER_ROBOT = "stats-calc.user-robot",
+    STATS_CALC_USER_SIGNAL = "stats-calc.user-signal",
+    STATS_CALC_USER_SIGNALS = "stats-calc.user-signals"
   }
 
   const enum Status {
@@ -101,6 +104,16 @@ declare namespace cpz {
     paused = "paused",
     finished = "finished",
     failed = "failed"
+  }
+
+  const enum TelegramScene {
+    SIGNALS = "signals",
+    SEARCH_SIGNALS = "searchSignals",
+    MY_SIGNALS = "mySignals",
+    ROBOT_SIGNAL = "robotSignal",
+    SUBSCRIBE_SIGNALS = "subscribeSignals",
+    PERFOMANCE_SIGNALS = "perfSignals",
+    FAQ = "faq"
   }
 
   const enum ExwatcherStatus {
@@ -278,6 +291,20 @@ declare namespace cpz {
   }
 
   type ImportType = "recent" | "history";
+
+  interface MinMax {
+    min: number;
+    max: number | undefined;
+  }
+
+  interface Market {
+    exchange: string;
+    asset: string;
+    currency: string;
+    precision: { base: number; quote: number; amount: number; price: number };
+    limits: { amount: MinMax; price: MinMax; cost?: MinMax };
+    loadFrom: string;
+  }
 
   interface ConnectorJob {
     id: string;
@@ -739,6 +766,38 @@ declare namespace cpz {
     equity?: RobotEquity;
   }
 
+  interface UserSignalInfo extends AlertInfo {
+    code: string;
+  }
+
+  interface RobotInfo extends RobotHead {
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: Timeframe;
+    strategyCode: string;
+    strategyName: string;
+    description: string;
+    settings: RobotSettings;
+    available: number;
+    signals: boolean;
+    trading: boolean;
+    status: Status;
+    startedAt?: string;
+    stoppedAt?: string;
+    statistics?: RobotStats;
+    equity?: RobotEquity;
+    openPositions: cpz.RobotPositionState[];
+    closedPositions: cpz.RobotPositionState[];
+    currentSignals: UserSignalInfo[];
+  }
+
+  interface UserSignalsInfo extends UserSignals {
+    openPositions: cpz.RobotPositionState[];
+    closedPositions: cpz.RobotPositionState[];
+    currentSignals: UserSignalInfo[];
+  }
+
   interface RobotJob {
     id: string;
     robotId: string;
@@ -790,6 +849,19 @@ declare namespace cpz {
     defaultRole: string;
   }
 
+  interface UserSettings {
+    notifications: {
+      signals: {
+        telegram: boolean;
+        email: boolean;
+      };
+      trading: {
+        telegram: boolean;
+        email: boolean;
+      };
+    };
+  }
+
   interface User {
     id: string;
     name?: string;
@@ -801,15 +873,13 @@ declare namespace cpz {
     registrationCode?: string;
     refreshToken?: string;
     roles: UserRolesList;
-    settings: GenericObject<any>;
+    settings: UserSettings;
   }
 
   interface UserSignals {
     id: string;
     robotId: string;
     userId: string;
-    telegram: boolean;
-    email: boolean;
     subscribedAt: string;
     volume: number;
     statistics?: RobotStats;
@@ -977,6 +1047,7 @@ declare namespace cpz {
 
   const enum StatsCalcJobType {
     robot = "robot",
+    userSignal = "userSignal",
     userSignals = "userSignals",
     userRobot = "userRobot",
     userSignalsAggr = "userSignalsAggr",

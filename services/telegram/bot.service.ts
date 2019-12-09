@@ -2,25 +2,49 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import { cpz } from "../../@types";
 import Telegraf, { Extra } from "telegraf";
 import Stage from "telegraf/stage";
+const { enter, leave } = Stage;
 import Scene from "telegraf/scenes/base";
 import TelegrafI18n, { match, reply } from "telegraf-i18n";
 import Session from "telegraf-session-redis";
 import path from "path";
-import {
-  getMainKeyboard,
-  getBackKeyboard
-} from "../../state/telegram/keyboard";
-import {
-  getAssetsMenu,
-  getSignalsMenu,
-  getSignalRobotMenu,
-  getFAQMenu
-} from "../../state/telegram/menu";
-import dayjs from "../../lib/dayjs";
-import { round, sortAsc, sleep } from "../../utils/helpers";
 import cron from "node-cron";
+import { getMainKeyboard } from "../../state/telegram/keyboard";
+import { sleep } from "../../utils/helpers";
 
-const { enter, leave } = Stage;
+import {
+  signalsEnter,
+  signalsMySignals,
+  signalsSearchSignals,
+  signalsLeave,
+  searchSignalsEnter,
+  searchSignalsSelectedAsset,
+  searchSignalsSelectedRobot,
+  searchSignalsBack,
+  searchSignalsLeave,
+  mySignalsEnter,
+  mySignalsSelectedRobot,
+  mySignalsBack,
+  mySignalsLeave,
+  perfSignalsEnter,
+  perfSignalsBack,
+  perfSignalsLeave,
+  robotSignalInfo,
+  robotSignalPublicStats,
+  robotSignalMyStats,
+  robotSignalPositions,
+  robotSignalSubscribe,
+  robotSignalUnsubscribe,
+  robotSignalBack,
+  robotSignalLeave,
+  signalsSubscribeEnter,
+  signalsSubscribeConfirm,
+  signalsSubscribeBack,
+  signalsSubscribeLeave,
+  faqEnter,
+  faqSelected,
+  faqLeave,
+  signalsPerfSignals
+} from "../../state/telegram/scenes";
 
 //TODO: Logging
 class BotService extends Service {
@@ -47,7 +71,8 @@ class BotService extends Service {
               props: {
                 telegramId: "number",
                 message: "string"
-              }
+              },
+              optional: true
             },
             entities: {
               type: "array",
@@ -57,7 +82,8 @@ class BotService extends Service {
                   telegramId: "number",
                   message: "string"
                 }
-              }
+              },
+              optional: true
             }
           },
           handler: this.sendMessage
@@ -109,8 +135,7 @@ class BotService extends Service {
       store: {
         host: process.env.REDIS_HOST,
         port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD,
-        tls: process.env.REDIS_TLS
+        password: process.env.REDIS_PASSWORD
       },
       getSessionKey: this.getSessionKey.bind(this)
     });
@@ -127,45 +152,105 @@ class BotService extends Service {
     });
     this.bot.use(this.i18n.middleware());
 
-    const signalsScene = new Scene("signals");
-    signalsScene.enter(this.signalsEnter.bind(this));
-    signalsScene.leave(this.signalsLeave.bind(this));
+    const signalsScene = new Scene(cpz.TelegramScene.SIGNALS);
+    signalsScene.enter(signalsEnter.bind(this));
+    signalsScene.leave(signalsLeave.bind(this));
     signalsScene.hears(match("keyboards.backKeyboard.back"), leave());
     signalsScene.command("back", leave());
-    signalsScene.action(/asset/, this.signalsSelectedAsset.bind(this));
-    signalsScene.action(/robot/, this.signalsSelectedRobot.bind(this));
-    signalsScene.action(/unsubscribe/, this.signalsUnsubscribe.bind(this));
-    signalsScene.action(/subscribe/, this.signalsSubscribe.bind(this));
-    signalsScene.action(/info/, this.robotInfo.bind(this));
-    signalsScene.action(/stats/, this.robotStats.bind(this));
-    signalsScene.action(/pos/, this.robotPositions.bind(this));
-    const mySignalsScene = new Scene("mySignals");
-    mySignalsScene.enter(this.mySignalsEnter.bind(this));
-    mySignalsScene.leave(this.signalsLeave.bind(this));
-    mySignalsScene.hears(match("keyboards.backKeyboard.back"), leave());
-    mySignalsScene.command("back", leave());
-    mySignalsScene.action(/robot/, this.signalsSelectedRobot.bind(this));
-    mySignalsScene.action(/unsubscribe/, this.signalsUnsubscribe.bind(this));
-    mySignalsScene.action(/subscribe/, this.signalsSubscribe.bind(this));
-    mySignalsScene.action(/info/, this.robotInfo.bind(this));
-    mySignalsScene.action(/stats/, this.robotStats.bind(this));
-    mySignalsScene.action(/pos/, this.robotPositions.bind(this));
-    const faqScene = new Scene("faq");
-    faqScene.enter(this.faqEnter.bind(this));
-    faqScene.leave(this.faqLeave.bind(this));
+    signalsScene.action(/mySignals/, signalsMySignals.bind(this));
+    signalsScene.action(/searchSignals/, signalsSearchSignals.bind(this));
+    signalsScene.action(/perfSignals/, signalsPerfSignals.bind(this));
+
+    const searchSignalsScene = new Scene(cpz.TelegramScene.SEARCH_SIGNALS);
+    searchSignalsScene.enter(searchSignalsEnter.bind(this));
+    searchSignalsScene.leave(searchSignalsLeave.bind(this));
+    searchSignalsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      searchSignalsBack.bind(this)
+    );
+    searchSignalsScene.command("back", searchSignalsBack.bind(this));
+    searchSignalsScene.action(/asset/, searchSignalsSelectedAsset.bind(this));
+    searchSignalsScene.action(/robot/, searchSignalsSelectedRobot.bind(this));
+
+    const mySignalsScene = new Scene(cpz.TelegramScene.MY_SIGNALS);
+    mySignalsScene.enter(mySignalsEnter.bind(this));
+    mySignalsScene.leave(mySignalsLeave.bind(this));
+    mySignalsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      mySignalsBack.bind(this)
+    );
+    mySignalsScene.command("back", mySignalsBack.bind(this));
+    mySignalsScene.action(/robot/, mySignalsSelectedRobot.bind(this));
+
+    const perfSignalsScene = new Scene(cpz.TelegramScene.PERFOMANCE_SIGNALS);
+    perfSignalsScene.enter(perfSignalsEnter.bind(this));
+    perfSignalsScene.leave(perfSignalsLeave.bind(this));
+    perfSignalsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      perfSignalsBack.bind(this)
+    );
+    perfSignalsScene.command("back", perfSignalsBack.bind(this));
+    perfSignalsScene.action(/back/, perfSignalsBack.bind(this));
+
+    const robotSignalScene = new Scene(cpz.TelegramScene.ROBOT_SIGNAL);
+    robotSignalScene.enter(robotSignalInfo.bind(this));
+    robotSignalScene.leave(robotSignalLeave.bind(this));
+    robotSignalScene.hears(
+      match("keyboards.backKeyboard.back"),
+      robotSignalBack.bind(this)
+    );
+    robotSignalScene.command("back", robotSignalBack.bind(this));
+    robotSignalScene.action(/info/, robotSignalInfo.bind(this));
+    robotSignalScene.action(/pStat/, robotSignalPublicStats.bind(this));
+    robotSignalScene.action(/myStat/, robotSignalMyStats.bind(this));
+    robotSignalScene.action(/pos/, robotSignalPositions.bind(this));
+    robotSignalScene.action(/unsubscribe/, robotSignalUnsubscribe.bind(this));
+    robotSignalScene.action(/subscribe/, robotSignalSubscribe.bind(this));
+    robotSignalScene.action(/changeVolume/, robotSignalSubscribe.bind(this));
+
+    const signalsSubscribe = new Scene(cpz.TelegramScene.SUBSCRIBE_SIGNALS);
+    signalsSubscribe.enter(signalsSubscribeEnter.bind(this));
+    signalsSubscribe.leave(signalsSubscribeLeave.bind(this));
+    signalsSubscribe.hears(
+      match("keyboards.backKeyboard.back"),
+      signalsSubscribeBack.bind(this)
+    );
+    signalsSubscribe.command("back", signalsSubscribeBack.bind(this));
+    signalsSubscribe.hears(/(.*?)/, signalsSubscribeConfirm.bind(this));
+
+    const faqScene = new Scene(cpz.TelegramScene.FAQ);
+    faqScene.enter(faqEnter.bind(this));
+    faqScene.leave(faqLeave.bind(this));
     faqScene.hears(match("keyboards.backKeyboard.back"), leave());
     faqScene.command("back", leave());
-    faqScene.action(/q/, this.faqSelected.bind(this));
-    const stage = new Stage([signalsScene, mySignalsScene, faqScene]);
+    faqScene.action(/q/, faqSelected.bind(this));
+
+    const stage = new Stage([
+      signalsScene,
+      searchSignalsScene,
+      mySignalsScene,
+      perfSignalsScene,
+      robotSignalScene,
+      signalsSubscribe,
+      faqScene
+    ]);
+
     this.bot.use(this.auth.bind(this));
     this.bot.use(stage.middleware());
     this.bot.start(this.start.bind(this));
-    this.bot.hears(match("keyboards.mainKeyboard.signals"), enter("signals"));
+    // Main menu
     this.bot.hears(
-      match("keyboards.mainKeyboard.mySignals"),
-      enter("mySignals")
+      match("keyboards.mainKeyboard.signals"),
+      enter(cpz.TelegramScene.SIGNALS)
     );
-    this.bot.hears(match("keyboards.mainKeyboard.faq"), enter("faq"));
+    this.bot.hears(
+      match("keyboards.mainKeyboard.robots"),
+      enter(cpz.TelegramScene.MY_SIGNALS)
+    );
+    this.bot.hears(
+      match("keyboards.mainKeyboard.faq"),
+      enter(cpz.TelegramScene.FAQ)
+    );
     this.bot.hears(
       match("keyboards.mainKeyboard.contact"),
       reply("contact", Extra.HTML())
@@ -174,6 +259,7 @@ class BotService extends Service {
       match("keyboards.mainKeyboard.donation"),
       reply("donation", Extra.HTML())
     );
+
     this.bot.hears(/(.*?)/, this.defaultHandler.bind(this));
   }
 
@@ -247,12 +333,19 @@ class BotService extends Service {
 
   async start(ctx: any) {
     try {
-      const { mainKeyboard } = getMainKeyboard(ctx);
+      const params = ctx.update.message.text.replace("/start ", "");
+      if (params && params !== "") {
+        const [scene, robotId] = params.split("_");
+        if (scene && robotId && scene === cpz.TelegramScene.ROBOT_SIGNAL) {
+          //TODO: check access to robot
+        }
+      }
+      this.logger.info();
       return ctx.reply(
         ctx.i18n.t("welcome", {
           username: this.formatName(ctx)
         }),
-        mainKeyboard
+        getMainKeyboard(ctx)
       );
     } catch (e) {
       this.logger.error(e);
@@ -278,31 +371,15 @@ class BotService extends Service {
         });
 
         if (user) {
-          //TODO: change subscription flag
-          const { id } = user;
-          const subscriptions = await this.broker.call(
-            `${cpz.Service.DB_USER_SIGNALS}.find`,
+          const { id: userId } = user;
+          await this.broker.call(
+            `${cpz.Service.DB_USERS}.setNotificationSettings`,
             {
-              fields: ["robotId"],
-              query: {
-                userId: id,
-                telegram: true
-              }
+              userId,
+              signalsTelegram: false,
+              tradingTelegram: false
             }
           );
-          for (const { robotId } of subscriptions) {
-            await this.broker.call(
-              `${cpz.Service.DB_USER_SIGNALS}.unsubscribe`,
-              {
-                robotId
-              },
-              {
-                meta: {
-                  user: { id }
-                }
-              }
-            );
-          }
         }
       }
     } catch (e) {
@@ -310,448 +387,12 @@ class BotService extends Service {
     }
   }
 
-  async faq(ctx: any) {
-    try {
-      return ctx.reply(
-        "<b>F</b>requently <b>A</b>sked <b>Q</b>uestions\n\n" +
-          ctx.i18n.t("faq.signal1") +
-          ctx.i18n.t("faq.signal2") +
-          ctx.i18n.t("faq.signal3") +
-          ctx.i18n.t("faq.signal4") +
-          ctx.i18n.t("faq.signal5") +
-          ctx.i18n.t("faq.robot1") +
-          ctx.i18n.t("faq.robot2"),
-        Extra.HTML()
-      );
-    } catch (e) {
-      this.logger.error(e);
-      return ctx.reply(ctx.i18n.t("failed"));
-    }
+  async mainMenu(ctx: any) {
+    await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
   }
 
   async defaultHandler(ctx: any) {
-    this.logger.info(ctx);
-    const { mainKeyboard } = getMainKeyboard(ctx);
-    await ctx.reply(ctx.i18n.t("defaultHandler"), mainKeyboard);
-  }
-
-  /*****************************
-   *  FAQ Stage
-   *****************************/
-  async faqEnter(ctx: any) {
-    try {
-      const { backKeyboard } = getBackKeyboard(ctx);
-      await ctx.reply(ctx.i18n.t("keyboards.mainKeyboard.faq"), backKeyboard);
-
-      return ctx.reply(ctx.i18n.t("scenes.faq.title"), getFAQMenu(ctx));
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async faqLeave(ctx: any) {
-    const { mainKeyboard } = getMainKeyboard(ctx);
-    await ctx.reply(ctx.i18n.t("menu"), mainKeyboard);
-  }
-
-  async faqSelected(ctx: any) {
-    try {
-      const { p: selectedQ } = JSON.parse(ctx.callbackQuery.data);
-      if (ctx.scene.state.q === selectedQ) return;
-      ctx.scene.state.q = selectedQ;
-
-      return ctx.editMessageText(
-        `<b>${ctx.i18n.t(`scenes.faq.q.${selectedQ}`)}</b>\n\n${ctx.i18n.t(
-          `scenes.faq.a.${selectedQ}`
-        )}`,
-        getFAQMenu(ctx)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  /*****************************
-   *  Signals Stage
-   *****************************/
-
-  async signalsEnter(ctx: any) {
-    try {
-      const assets: {
-        asset: string;
-        currency: string;
-      }[] = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.getAvailableSignalAssets`
-      );
-      const { backKeyboard } = getBackKeyboard(ctx);
-      await ctx.reply(
-        ctx.i18n.t("keyboards.mainKeyboard.signals"),
-        backKeyboard
-      );
-      if (!assets || !Array.isArray(assets) || assets.length < 0) {
-        throw new Error("Failed to load signal assets");
-      }
-      return ctx.reply(
-        ctx.i18n.t("scenes.signals.selectAsset"),
-        getAssetsMenu(assets)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async signalsLeave(ctx: any) {
-    const { mainKeyboard } = getMainKeyboard(ctx);
-    await ctx.reply(ctx.i18n.t("menu"), mainKeyboard);
-  }
-
-  async signalsSelectedAsset(ctx: any) {
-    try {
-      const { p: selectedAsset } = JSON.parse(ctx.callbackQuery.data);
-      ctx.scene.state.selectedAsset = selectedAsset;
-      const [asset, currency] = selectedAsset.split("/");
-      const robots = await this.broker.call(`${cpz.Service.DB_ROBOTS}.find`, {
-        fields: ["id", "name"],
-        query: {
-          available: { $gte: 20 },
-          asset,
-          currency
-        }
-      });
-      if (!robots || !Array.isArray(robots) || robots.length === 0) {
-        throw new Error("Failed to load signal robots");
-      }
-      return ctx.editMessageText(
-        ctx.i18n.t("scenes.signals.selectRobot", { asset: selectedAsset }),
-        getSignalsMenu(robots)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async signalsSelectedRobot(ctx: any) {
-    try {
-      const { p: robotId } = JSON.parse(ctx.callbackQuery.data);
-      const signalRobot = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSignalRobot`,
-        {
-          robotId
-        },
-        {
-          meta: {
-            user: ctx.session.user
-          }
-        }
-      );
-      ctx.scene.state.selectedRobot = signalRobot;
-      if (!signalRobot) throw new Error("Failed to load robot");
-      return this.robotInfo(ctx);
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async signalsSubscribe(ctx: any) {
-    try {
-      const { p: robotId } = JSON.parse(ctx.callbackQuery.data);
-      await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.subscribe`,
-        { robotId },
-        {
-          meta: {
-            user: ctx.session.user
-          }
-        }
-      );
-      const { signals } = ctx.scene.state.selectedRobot.robot;
-      let signalsText = "";
-      if (signals.length > 0) {
-        signals.forEach(
-          (signal: {
-            code: string;
-            action: cpz.TradeAction;
-            orderType: cpz.OrderType;
-            price: number;
-            candleTimestamp: string;
-          }) => {
-            const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
-            const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
-            const text = ctx.i18n.t("robot.signal", {
-              code: signal.code,
-              timestamp: dayjs
-                .utc(signal.candleTimestamp)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              action: actionText,
-              orderType: orderTypeText,
-              price: +signal.price
-            });
-            signalsText = `${signalsText}\n${text}`;
-          }
-        );
-      }
-
-      await ctx.editMessageText(
-        ctx.i18n.t("scenes.signals.subscribedSignals", {
-          name: ctx.scene.state.selectedRobot.robot.name
-        }),
-        Extra.HTML()
-      );
-      if (signalsText !== "") {
-        signalsText = ctx.i18n.t("robot.currentSignals", {
-          name: ctx.scene.state.selectedRobot.robot.name,
-          signals: signalsText
-        });
-        await ctx.reply(signalsText, Extra.HTML());
-      }
-      await ctx.scene.leave();
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async signalsUnsubscribe(ctx: any) {
-    try {
-      const { p: robotId } = JSON.parse(ctx.callbackQuery.data);
-      await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.unsubscribe`,
-        { robotId },
-        {
-          meta: {
-            user: ctx.session.user
-          }
-        }
-      );
-      await ctx.editMessageText(
-        ctx.i18n.t("scenes.signals.unsubscribedSignals", {
-          name: ctx.scene.state.selectedRobot.robot.name
-        }),
-        Extra.HTML()
-      );
-      await ctx.scene.leave();
-    } catch (e) {
-      this.logger.error(e);
-
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  /*****************************
-   *  My Signals Stage
-   *****************************/
-
-  async mySignalsEnter(ctx: any) {
-    try {
-      const robots = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSignalRobots`,
-        null,
-        {
-          meta: {
-            user: ctx.session.user
-          }
-        }
-      );
-      const { backKeyboard } = getBackKeyboard(ctx);
-      await ctx.reply(
-        ctx.i18n.t("keyboards.mainKeyboard.mySignals"),
-        backKeyboard
-      );
-      if (!robots || !Array.isArray(robots) || robots.length === 0) {
-        await ctx.reply(ctx.i18n.t("scenes.mySignals.robotsNone"));
-        await ctx.scene.leave();
-      } else {
-        return ctx.reply(
-          ctx.i18n.t("scenes.mySignals.robotsList"),
-          getSignalsMenu(robots)
-        );
-      }
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  /*****************************
-   *  Robot View
-   *****************************/
-
-  async robotInfo(ctx: any) {
-    try {
-      if (ctx.scene.state.page === "info") return;
-      ctx.scene.state.page = "info";
-      const { robot, subscription } = ctx.scene.state.selectedRobot;
-      const { signals } = robot;
-      let signalsText = "";
-      if (signals.length > 0) {
-        signals.forEach(
-          (signal: {
-            code: string;
-            action: cpz.TradeAction;
-            orderType: cpz.OrderType;
-            price: number;
-            candleTimestamp: string;
-          }) => {
-            const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
-            const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
-            const text = ctx.i18n.t("robot.signal", {
-              code: signal.code,
-              timestamp: dayjs
-                .utc(signal.candleTimestamp)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              action: actionText,
-              orderType: orderTypeText,
-              price: +signal.price
-            });
-            signalsText = `${signalsText}\n${text}`;
-          }
-        );
-      }
-      if (signalsText !== "")
-        signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
-      const message = `${ctx.i18n.t("robot.info", {
-        ...robot,
-        signalsCount: round(1440 / robot.timeframe)
-      })}${signalsText}`;
-      return ctx.editMessageText(
-        message,
-        getSignalRobotMenu(ctx, robot.id, subscription.telegram)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async robotStats(ctx: any) {
-    try {
-      if (ctx.scene.state.page === "stats") return;
-      ctx.scene.state.page = "stats";
-      const { robot, subscription } = ctx.scene.state.selectedRobot;
-      const { statistics } = robot;
-      let message;
-      if (statistics && Object.keys(statistics).length > 0)
-        message = `${ctx.i18n.t("robot.statsProfit", statistics)}${ctx.i18n.t(
-          "robot.statsWinners",
-          statistics
-        )}${ctx.i18n.t("robot.statsLosses", statistics)}`;
-      else message = ctx.i18n.t("robot.statsNone");
-      return ctx.editMessageText(
-        ctx.i18n.t("robot.name", { name: robot.name }) + message,
-        getSignalRobotMenu(ctx, robot.id, subscription.telegram)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
-  }
-
-  async robotPositions(ctx: any) {
-    try {
-      if (ctx.scene.state.page === "pos") return;
-      ctx.scene.state.page = "pos";
-      const { robot, subscription } = ctx.scene.state.selectedRobot;
-      const { openPositions, closedPositions } = robot;
-      let openPositionsText = "";
-      if (
-        openPositions &&
-        Array.isArray(openPositions) &&
-        openPositions.length > 0
-      ) {
-        openPositions.forEach((pos: cpz.RobotPositionState) => {
-          const posText = ctx.i18n.t("robot.positionOpen", {
-            ...pos,
-            entryAction: ctx.i18n.t(`tradeAction.${pos.entryAction}`),
-            entryOrderType: ctx.i18n.t(`orderType.${pos.entryOrderType}`),
-            entryDate: dayjs.utc(pos.entryDate).format("YYYY-MM-DD HH:mm UTC")
-          });
-          let signalsText = "";
-          if (pos.alerts && Object.keys(pos.alerts).length > 0) {
-            Object.values(pos.alerts).forEach(signal => {
-              const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
-              const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
-              const text = ctx.i18n.t("robot.signal", {
-                code: pos.code,
-                timestamp: dayjs
-                  .utc(signal.candleTimestamp)
-                  .format("YYYY-MM-DD HH:mm UTC"),
-                action: actionText,
-                orderType: orderTypeText,
-                price: +signal.price
-              });
-              signalsText = `${signalsText}\n${text}`;
-            });
-            signalsText = ctx.i18n.t("robot.positionSignals", {
-              signals: signalsText
-            });
-          }
-          openPositionsText = `${openPositionsText}\n\n${posText}\n${signalsText}`;
-        });
-        openPositionsText = ctx.i18n.t("robot.positionsOpen", {
-          openPositions: openPositionsText
-        });
-      }
-
-      let closedPositionsText = "";
-      if (
-        closedPositions &&
-        Array.isArray(closedPositions) &&
-        closedPositions.length > 0
-      ) {
-        closedPositions
-          .sort((a, b) =>
-            sortAsc(
-              dayjs.utc(a.entryDate).valueOf(),
-              dayjs.utc(b.entryDate).valueOf()
-            )
-          )
-          .forEach((pos: cpz.RobotPositionState) => {
-            const posText = ctx.i18n.t("robot.positionClosed", {
-              ...pos,
-              entryDate: dayjs
-                .utc(pos.entryDate)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              exitDate: dayjs.utc(pos.exitDate).format("YYYY-MM-DD HH:mm UTC"),
-              entryAction: ctx.i18n.t(`tradeAction.${pos.entryAction}`),
-              entryOrderType: ctx.i18n.t(`orderType.${pos.entryOrderType}`),
-              exitAction: ctx.i18n.t(`tradeAction.${pos.exitAction}`),
-              exitOrderType: ctx.i18n.t(`orderType.${pos.exitOrderType}`)
-            });
-            closedPositionsText = `${closedPositionsText}\n\n${posText}`;
-          });
-        closedPositionsText = ctx.i18n.t("robot.positionsClosed", {
-          closedPositions: closedPositionsText
-        });
-      }
-
-      const message =
-        openPositionsText !== "" || closedPositionsText !== ""
-          ? `${closedPositionsText}${openPositionsText}`
-          : ctx.i18n.t("robot.positionsNone");
-      return ctx.editMessageText(
-        ctx.i18n.t("robot.name", { name: robot.name }) + message,
-        getSignalRobotMenu(ctx, robot.id, subscription.telegram)
-      );
-    } catch (e) {
-      this.logger.error(e);
-      await ctx.reply(ctx.i18n.t("failed"));
-      await ctx.scene.leave();
-    }
+    await ctx.reply(ctx.i18n.t("defaultHandler"), getMainKeyboard(ctx));
   }
 }
 

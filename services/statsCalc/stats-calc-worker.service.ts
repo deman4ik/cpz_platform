@@ -54,6 +54,8 @@ class StatsCalcWorkerService extends Service {
         await this.calcRobot(robotId);
       } else if (type === cpz.StatsCalcJobType.userRobot) {
         await this.calcUserRobot(userRobotId);
+      } else if (type === cpz.StatsCalcJobType.userSignal) {
+        await this.calcUserSignal(userId, robotId);
       } else if (type === cpz.StatsCalcJobType.userSignals) {
         await this.calcUserSignals(robotId);
       } else if (type === cpz.StatsCalcJobType.userSignalsAggr) {
@@ -83,6 +85,70 @@ class StatsCalcWorkerService extends Service {
       statistics,
       equity
     });
+  }
+
+  async calcUserSignal(userId: string, robotId: string) {
+    const [userSignal]: cpz.UserSignals[] = await this.broker.call(
+      `${cpz.Service.DB_USER_SIGNALS}.find`,
+      {
+        query: {
+          robotId,
+          userId
+        }
+      }
+    );
+    if (userSignal) {
+      const allPositions: cpz.RobotPositionState[] = await this.broker.call(
+        `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
+        {
+          query: {
+            robotId,
+            status: cpz.RobotPositionStatus.closed,
+            entryDate: {
+              $lte: userSignal.subscribedAt
+            }
+          }
+        }
+      );
+      if (
+        allPositions &&
+        Array.isArray(allPositions) &&
+        allPositions.length > 0
+      ) {
+        const positions = allPositions.filter(
+          pos =>
+            dayjs.utc(pos.entryDate).valueOf() >=
+            dayjs.utc(userSignal.subscribedAt).valueOf()
+        );
+        if (positions.length > 0) {
+          const signalPositions = positions.map(pos => {
+            let profit: number = 0;
+            if (pos.direction === cpz.PositionDirection.long) {
+              profit = +round(
+                (pos.exitPrice - pos.entryPrice) * userSignal.volume,
+                6
+              );
+            } else {
+              profit = +round(
+                (pos.entryPrice - pos.exitPrice) * userSignal.volume,
+                6
+              );
+            }
+            return {
+              ...pos,
+              volume: userSignal.volume,
+              profit
+            };
+          });
+          const { statistics, equity } = calcStatistics(signalPositions);
+          await this.broker.call(`${cpz.Service.DB_USER_SIGNALS}.update`, {
+            id: userSignal.id,
+            statistics,
+            equity
+          });
+        }
+      }
+    }
   }
 
   async calcUserSignals(robotId: string) {

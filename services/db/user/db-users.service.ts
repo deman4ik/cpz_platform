@@ -52,8 +52,72 @@ class UsersService extends Service {
           createdAt: "created_at",
           updatedAt: "updated_at"
         }
+      },
+      actions: {
+        setNotificationSettings: {
+          params: {
+            userId: "string",
+            signalsTelegram: { type: "boolean", optional: true },
+            signalsEmail: { type: "boolean", optional: true },
+            tradingTelegram: { type: "boolean", optional: true },
+            tradingEmail: { type: "boolean", optional: true }
+          },
+          handler: this.setNotificationSettings
+        }
       }
     });
+  }
+  async setNotificationSettings(
+    ctx: Context<{
+      userId: string;
+      signalsTelegram?: boolean;
+      signalsEmail?: boolean;
+      tradingTelegram?: boolean;
+      tradingEmail?: boolean;
+    }>
+  ) {
+    try {
+      const {
+        userId,
+        signalsEmail,
+        signalsTelegram,
+        tradingEmail,
+        tradingTelegram
+      } = ctx.params;
+      const { settings }: cpz.User = await this.adapter.findById(userId);
+      await this.adapter.updateById(userId, {
+        $set: {
+          settings: {
+            ...settings,
+            notifications: {
+              signals: {
+                telegram:
+                  signalsTelegram === true || signalsTelegram === false
+                    ? signalsTelegram
+                    : settings.notifications.signals.telegram,
+                email:
+                  signalsEmail === true || signalsEmail === false
+                    ? signalsEmail
+                    : settings.notifications.signals.email
+              },
+              trading: {
+                telegram:
+                  tradingTelegram === true || tradingTelegram === false
+                    ? tradingTelegram
+                    : settings.notifications.trading.telegram,
+                email:
+                  tradingEmail === true || tradingEmail === false
+                    ? tradingEmail
+                    : settings.notifications.trading.email
+              }
+            }
+          }
+        }
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
   }
 }
 

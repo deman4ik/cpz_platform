@@ -1,32 +1,58 @@
 {
   "welcome": "Welcome ${username}, we advise to divide your trading capital between different robots to maximize the diversification effect and don't borrow margin (credit) money, because cryptocurrency markets are very volatile.\nAll trades you make are at you own risk!",
-  "fail": "❌ Failed to process your request. Please try again later!",
+  "failed": "❌ Failed to process your request. Please try again later!",
   "keyboards": {
     "backKeyboard": {
       "back": "◀️ Back"
     },
     "mainKeyboard": {
       "signals": "🚦 Signals",
-      "mySignals": "🚥 My Signals",
+      "robots": "🤖 Robots",
       "settings": "⚙️ Settings",
-      "faq": "❓ FAQ",
       "contact": "✍️ Contact",
+      "faq": "❓ FAQ",
       "donation": "💰 Donation"
     }
   },
   "scenes": {
     "signals": {
+      "my": "🚥 My Signals",
+      "search": "🔎 Search Signals",
+      "top": "🏆 Top Signals",
+      "perfomance": "📊 Total Perfomance"
+    },
+    "searchSignals": {
       "selectAsset": "Select available <b>cryptocurrency</b> pair",
-      "selectRobot": "Select available <b>${asset}</b> robot",
-      "backButton": "◀️ Back",
-      "subscribeSignals": "Subscribe to Signals",
-      "unsubscribeSignals": "Unsubscribe from Signals",
-      "subscribedSignals": "Succesfully subsribed to <b>${name}</b> signals!",
-      "unsubscribedSignals": "You unsubsribed from <b>${name}</b> signals =("
+      "selectRobot": "Select available <b>${asset}</b> robot"
     },
     "mySignals": {
       "robotsList": "Robot signals you subscribed to:",
       "robotsNone": "You are not subscribed to any signals."
+    },
+    "perfSignals": {
+      "info": "📊 My Signals Total Perfomance",
+      "perfNone": "No enough data to calculate Signals perfomance yet..."
+    },
+    "robotSignal": {
+      "subscribeSignals": "➕ Subscribe to Signals",
+      "unsubscribeSignals": "➖ Unsubscribe from Signals",
+      "changeVolume": "⚙️ Change Volume"
+    },
+    "subscribeSignals": {
+      "enterVolume": "Subscribing to ${name} robot.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "Wrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "subscribedSignals": "Succesfully subsribed to <b>${name}</b> signals with volume ${volume} ${asset}!",
+      "unsubscribedSignals": "You unsubsribed from <b>${name}</b> signals =("
+    },
+    "robots": {
+      "my": "🤖 My Robots",
+      "search": "🔎 Search Robots",
+      "top": "🏆 Top Robots",
+      "perfomance": "📈 Total Perfomance"
+    },
+    "settings": {
+      "turnNotifOff": "🔕 Turn notifications OFF",
+      "turnNotifOn": "🔔 Turn notifications ON"
     },
     "faq": {
       "title": "<b>F</b>requently <b>A</b>sked <b>Q</b>uestions\n\n",
@@ -65,11 +91,15 @@
     "trade": "💸 New Trade!\n\n🤖 Robot: <b>${name}</b>\n\n"
   },
   "robot": {
-    "menuInfo": "Robot Info",
-    "menuStats": "Robot Statistics",
-    "menuPositions": "Latest positions",
-    "name": "🤖\nRobot: <b>${name}</b>\n\n",
-    "info": "🤖\nRobot: <b>${name}</b> \n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
+    "menuInfo": "ℹ️ Robot Info",
+    "menuPublStats": "📉 Public Statistics",
+    "menuMyStats": "📈 My Statistics",
+    "menuPositions": "🗃 Latest positions",
+    "name": "🤖\nRobot: <b>${name}</b> ${subscribed}\n\n",
+    "info": "🤖\nRobot: <b>${name}</b> ${subscribed}\n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
+    "profit": "<b>Profit:</b> ${profit}$ / ${lastProfit}$\n\n",
+    "volume": "<b>Volume:</b> ${volume} ${asset}\n\n",
+    "subscribedAt": "<b>Subscribed at:</b> ${subscribedAt} UTC\n\n",
     "signals": "<b>Latest signals:</b>\n${signals}",
     "currentSignals": "Robot <b>${name}</b> has active signals!\n${signals}",
     "signal": "<b>Position:</b> ${code}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Signal time:</b> ${timestamp}\n<b>Price:</b> ${price}$\n",
@@ -80,9 +110,10 @@
     "positionsClosed": "<b>📪 Closed positions:</b> ${closedPositions}\n",
     "positionClosed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n",
     "positionsNone": "Robot has no positions yet...",
+    "statsLastUpdatedAt": "<b>Last updated at:</b> ${lastUpdatedAt} UTC\n",
     "statsProfit": "<b>💰 Profit</b> \n\n<b>Net Profit:</b> ${netProfit.all} \n<b>Number of Trades:</b> ${tradesCount.all} \n<b>Average Profit:</b> ${avgNetProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeld.all} \n<b>Profit Factor:</b> ${profitFactor.all} \n<b>Recovery Factor:</b> ${recoveryFactor.all} \n<b>Payoff Ratio:</b> ${payoffRatio.all} \n<b>Maximum Drawdown:</b> ${maxDrawdown.all} \n<b>Maximum Drawdown Date:</b> ${maxDrawdownDate.all} \n\n",
     "statsWinners": "<b>🏆 Winners</b> \n\n<b>Win Rate:</b> ${winRate.all} \n<b>Gross Profit:</b> ${grossProfit.all} \n<b>Average Profit:</b> ${avgProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeldWinning.all} \n<b>Max. Consecutive Winners:</b> ${maxConnsecWins.all} \n\n",
-    "statsLosses": "<b>🌋 Losses</b> \n\n<b>Loss Rate:</b> ${lossRate.all} \n<b>Gross Loss:</b> ${grossLoss.all} \n<b>Average Loss:</b> ${avgLoss.all} \n<b>Average Bars held:</b> ${avgBarsHeldLosing.all} \n<b>Max. Consecutive Losses:</b> ${maxConsecLosses.all} \n",
+    "statsLosses": "<b>🌋 Losses</b> \n\n<b>Loss Rate:</b> ${lossRate.all} \n<b>Gross Loss:</b> ${grossLoss.all} \n<b>Average Loss:</b> ${avgLoss.all} \n<b>Average Bars held:</b> ${avgBarsHeldLosing.all} \n<b>Max. Consecutive Losses:</b> ${maxConsecLosses.all} \n\n",
     "statsNone": "Robot has no statistics yet..."
   },
   "tradeAction": {
@@ -97,6 +128,8 @@
     "stop": "Stop ⛔"
   },
   "menu": "Please use Menu in Telegram keyboard section ↘️",
+  "signalsMenu": "🚦 Signals\nPlease use Signals Menu in Telegram keyboard section ↘️",
+  "robotsMenu": "🤖 Robots\nPlease use Robots Menu in Telegram keyboard section ↘️",
   "defaultHandler": "🚧 Hey, please choose a section with the Telegram keyboard before typing anything",
   "contact": "You can reach us in <a href='https://t.me/joinchat/ACVS-0zaWVBgAYm8gOKYHA'>Telegram Community Chat</a>\nor by email <a href='mailto:support@cryptuoso.com'>support@cryptuoso.com</a>\n\nAlso visit:\n\n<a href='https://cryptuoso.com'>Our web site</a>\n\n<a href='https://t.me/cryptuoso'>Telegram Channel</a>\n\n<a href='https://www.instagram.com/cryptuoso/'>Instagram account</a>",
   "donation": "If you like what we do, please donate some coins. 💸\n\nBitcoin Address: 14JMUUDpCqfKxGn3LLh5ViHAegdP2N1C8c\nEthereum Address: 0xD80E764751424cF71BAa83C0fB6afbECE753Cf68\nBitcoin Cash Address: bitcoincash:qzuuv8fm3us85yse474cs4wspjfm00e5n5c93cmu78\nLitecoin Address: LhHPygdGkQt6q1sNFc1b3mVKVhxJ53cQVH\nDash Address: XemAGkD2eY3hV5T87X46pJEX2qhEsdJt7c"

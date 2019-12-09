@@ -5,7 +5,7 @@ import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../@types";
 import dayjs from "../../../lib/dayjs";
-import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
+import { underscoreToCamelCaseKeys, round } from "../../../utils/helpers";
 
 class UserSignalsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -21,8 +21,6 @@ class UserSignalsService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           robotId: { type: Sequelize.UUID, field: "robot_id" },
           userId: { type: Sequelize.UUID, field: "user_id" },
-          telegram: { type: Sequelize.BOOLEAN },
-          email: { type: Sequelize.BOOLEAN },
           subscribedAt: {
             type: Sequelize.DATE,
             field: "subscribed_at",
@@ -43,6 +41,12 @@ class UserSignalsService extends Service {
         }
       },
       actions: {
+        getSubscribedAggr: {
+          params: {
+            userId: "string"
+          },
+          handler: this.getSubscribedAggr
+        },
         getSubscribedUserIds: {
           params: {
             robotId: { type: "string", optional: true },
@@ -53,6 +57,12 @@ class UserSignalsService extends Service {
           handler: this.getSubscribedUserIds
         },
         getSignalRobots: {
+          params: {
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optional: true },
+            currency: { type: "string", optional: true },
+            userId: { type: "string", optional: true }
+          },
           handler: this.getSignalRobots
         },
         getSignalRobot: {
@@ -69,7 +79,8 @@ class UserSignalsService extends Service {
         },
         subscribe: {
           params: {
-            robotId: "string"
+            robotId: "string",
+            volume: "number"
           },
           handler: this.subscribe
         },
@@ -81,6 +92,26 @@ class UserSignalsService extends Service {
         }
       }
     });
+  }
+
+  async getSubscribedAggr(ctx: Context<{ userId: string }>) {
+    try {
+      const { userId: user_id } = ctx.params;
+      const query = `
+  select r.exchange, r.asset from user_signals u, robots r 
+  where u.robot_id = r.id 
+    and u.user_id = :user_id
+  group by r.exchange, r.asset`;
+
+      const rawData = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: { user_id }
+      });
+      return rawData;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
   }
 
   async getSubscribedUserIds(
@@ -125,45 +156,176 @@ class UserSignalsService extends Service {
       throw e;
     }
   }
-  async getSignalRobots(ctx: Context<null, { user: cpz.User }>) {
+
+  async getSignalRobots(
+    ctx: Context<
+      {
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+        userId?: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
     try {
       const { id: user_id } = ctx.meta.user;
-      const query = `SELECT t.id, t.name
-        FROM robots t right outer join user_signals s ON s.robot_id = t.id
-        WHERE s.user_id = :user_id;`;
-      return await this.adapter.db.query(query, {
+      const { exchange, asset, currency, userId } = ctx.params;
+      const params: {
+        user_id?: string;
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+      } = {
+        user_id
+      };
+      const query = `
+      SELECT t.id, t.name, s.user_id
+      FROM  robots t  
+      LEFT JOIN user_signals s 
+      ON s.robot_id = t.id AND s.user_id = :user_id
+	    WHERE t.signals = true
+      ${exchange ? "AND t.exchange = :exchange" : ""}
+      ${asset ? "AND t.asset = :asset" : ""}
+      ${currency ? "AND t.currency = :currency" : ""}
+      ${userId ? "AND s.user_id = :user_id" : ""}
+      ;`;
+
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (currency) params.currency = currency;
+      const rawData = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
-        replacements: { user_id }
+        replacements: params
       });
+      return rawData.map(
+        (r: { id: string; name: string; user_id?: string }) => ({
+          id: r.id,
+          name: r.name,
+          subscribed: !!r.user_id
+        })
+      );
     } catch (e) {
       this.logger.error(e);
       throw e;
     }
   }
 
-  async getSignalRobot(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
+  async getSignalRobot(
+    ctx: Context<{ robotId: string }, { user: cpz.User }>
+  ): Promise<{
+    robotInfo: cpz.RobotInfo;
+    userSignalsInfo?: cpz.UserSignalsInfo;
+    market: cpz.Market;
+  }> {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const robot = await this.broker.call(
+      const robotInfo: cpz.RobotInfo = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.getRobotInfo`,
         {
           id: robotId
         }
       );
-      const [subscription] = await this.adapter.find({
+      const [subscription]: cpz.UserSignals[] = await this._find(ctx, {
         query: {
           robotId,
           userId
         }
       });
-
-      return {
-        robot,
-        subscription: {
-          telegram: subscription && subscription.telegram,
-          email: subscription && subscription.email
+      this.logger.info(subscription);
+      let userSignalsInfo: cpz.UserSignalsInfo;
+      if (subscription) {
+        let openPositions: cpz.RobotPositionState[] = [];
+        let closedPositions: cpz.RobotPositionState[] = [];
+        let currentSignals: cpz.UserSignalInfo[] = [];
+        if (
+          robotInfo.openPositions &&
+          Array.isArray(robotInfo.openPositions) &&
+          robotInfo.openPositions.length > 0
+        ) {
+          openPositions = robotInfo.openPositions.filter(
+            pos =>
+              dayjs.utc(pos.entryDate).valueOf() >=
+              dayjs.utc(subscription.subscribedAt).valueOf()
+          );
         }
+        if (
+          robotInfo.closedPositions &&
+          Array.isArray(robotInfo.closedPositions) &&
+          robotInfo.closedPositions.length > 0
+        ) {
+          closedPositions = robotInfo.closedPositions
+            .filter(
+              pos =>
+                dayjs.utc(pos.entryDate).valueOf() >=
+                dayjs.utc(subscription.subscribedAt).valueOf()
+            )
+            .map(pos => {
+              let profit: number = 0;
+              if (pos.direction === cpz.PositionDirection.long) {
+                profit = +round(
+                  (pos.exitPrice - pos.entryPrice) * subscription.volume,
+                  6
+                );
+              } else {
+                profit = +round(
+                  (pos.entryPrice - pos.exitPrice) * subscription.volume,
+                  6
+                );
+              }
+              return {
+                ...pos,
+                volume: subscription.volume,
+                profit
+              };
+            });
+        }
+        if (
+          robotInfo.currentSignals &&
+          Array.isArray(robotInfo.currentSignals) &&
+          robotInfo.currentSignals.length > 0
+        ) {
+          robotInfo.currentSignals.forEach(signal => {
+            if (
+              signal.action === cpz.TradeAction.long ||
+              signal.action === cpz.TradeAction.short
+            ) {
+              if (
+                dayjs.utc(signal.candleTimestamp).valueOf() >=
+                dayjs.utc(subscription.subscribedAt).valueOf()
+              )
+                currentSignals.push(signal);
+            } else {
+              const position = openPositions.find(
+                pos => pos.code === signal.code
+              );
+              if (position) currentSignals.push(signal);
+            }
+          });
+        }
+        userSignalsInfo = {
+          ...subscription,
+          openPositions,
+          closedPositions,
+          currentSignals
+        };
+      }
+
+      const [market] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange: robotInfo.exchange,
+            asset: robotInfo.asset,
+            currency: robotInfo.currency
+          }
+        }
+      );
+      return {
+        robotInfo,
+        userSignalsInfo,
+        market
       };
     } catch (e) {
       this.logger.error(e);
@@ -174,12 +336,15 @@ class UserSignalsService extends Service {
   async getTelegramSubscriptions(ctx: Context<{ robotId: string }>) {
     try {
       const { robotId: robot_id } = ctx.params;
-      const query = `select u.telegram_id, s.user_id 
-      from user_signals s 
-      inner join users u on s.user_id = u.id 
-      where s.robot_id = :robot_id 
-        and s.telegram = true 
-        and u.telegram_id is not null;`;
+      const query = `SELECT u.telegram_id,
+                            s.user_id,
+                            s.volume,
+                            s.subscribed_at
+                     FROM user_signals s, users u
+                     WHERE s.user_id = u.id
+                     AND u.telegram_id IS NOT NULL
+                     AND u.settings -> 'notifications' -> 'signals' ->> 'telegram' = 'true'
+                     AND s.robot_id = :robot_id ;`;
       const subscribtionsRaw = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { robot_id }
@@ -197,20 +362,68 @@ class UserSignalsService extends Service {
     }
   }
 
-  //TODO: email subscription
-  //TODO: volume
-  async subscribe(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
+  async subscribe(
+    ctx: Context<{ robotId: string; volume: number }, { user: cpz.User }>
+  ) {
     try {
-      const { robotId } = ctx.params;
+      const { robotId, volume } = ctx.params;
+      const { exchange, asset, currency, available } = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id: robotId,
+          fields: ["exchange", "asset", "currency", "available"]
+        }
+      );
+      //TODO: check role
+      const [market]: cpz.Market[] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange,
+            asset,
+            currency
+          }
+        }
+      );
+      if (volume < market.limits.amount.min)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be more than ${market.limits.amount.min}`
+        );
+
+      if (volume > market.limits.amount.max)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be less than ${market.limits.amount.max}`
+        );
       const { id: userId } = ctx.meta.user;
-      await this.adapter.insert({
-        id: uuid(),
-        robotId,
-        userId,
-        telegram: true,
-        email: false,
-        subscribedAt: dayjs.utc().toISOString()
+      const [subscribed]: cpz.UserSignals[] = await this._find(ctx, {
+        fields: ["id"],
+        query: {
+          robotId,
+          userId
+        }
       });
+      if (subscribed) {
+        await this.adapter.updateById(subscribed.id, {
+          $set: {
+            volume
+          }
+        });
+      } else {
+        await this.adapter.insert({
+          id: uuid(),
+          robotId,
+          userId,
+          volume,
+          subscribedAt: dayjs.utc().toISOString()
+        });
+      }
+      await this.broker.emit<{ userId: string; robotId: string }>(
+        cpz.Event.STATS_CALC_USER_SIGNAL,
+        {
+          userId,
+          robotId
+        }
+      );
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -221,14 +434,23 @@ class UserSignalsService extends Service {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const [subscription] = await this.adapter.find({
+      const [subscribed] = await this._find(ctx, {
         fields: ["id"],
         query: {
           robotId,
           userId
         }
       });
-      if (subscription) await this.adapter.removeById(subscription.id);
+      if (subscribed) {
+        await this.adapter.removeById(subscribed.id);
+        await this.broker.emit<{ userId: string; robotId: string }>(
+          cpz.Event.STATS_CALC_USER_SIGNAL,
+          {
+            userId,
+            robotId
+          }
+        );
+      }
     } catch (e) {
       this.logger.error(e);
       throw e;

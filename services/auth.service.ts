@@ -90,7 +90,18 @@ class AuthService extends Service {
         allowedRoles: [cpz.UserRoles.user],
         defaultRole: cpz.UserRoles.user
       },
-      settings: {}
+      settings: {
+        notifications: {
+          signals: {
+            telegram: false,
+            email: true
+          },
+          trading: {
+            telegram: false,
+            email: true
+          }
+        }
+      }
     };
     await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
       entity: newUser
@@ -121,7 +132,18 @@ class AuthService extends Service {
         allowedRoles: [cpz.UserRoles.user],
         defaultRole: cpz.UserRoles.user
       },
-      settings: {}
+      settings: {
+        notifications: {
+          signals: {
+            telegram: true,
+            email: false
+          },
+          trading: {
+            telegram: true,
+            email: false
+          }
+        }
+      }
     };
     await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
       entity: newUser

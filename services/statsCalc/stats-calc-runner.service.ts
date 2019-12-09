@@ -1,4 +1,5 @@
 import { Service, ServiceBroker, Context, Errors } from "moleculer";
+import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
@@ -26,10 +27,13 @@ class StatsCalcRunnerService extends Service {
           }
         })
       ],
-      actions: {},
       events: {
+        [cpz.Event.STATS_CALC_USER_SIGNAL]: this.handleCalcUserSignalEvent,
+        [cpz.Event.STATS_CALC_USER_SIGNALS]: this.handleCalcUserSignalsEvent,
         [cpz.Event.STATS_CALC_ROBOT]: this.handleStatsCalcRobotEvent,
         [cpz.Event.STATS_CALC_USER_ROBOT]: this.handleStatsCalcUserRobotEvent
+        //TODO: CALC ROBOTS
+        //TODO: CALC USER ROBOTS
       },
       started: this.startedService,
       stopped: this.stoppedService
@@ -71,6 +75,139 @@ class StatsCalcRunnerService extends Service {
     });
   }
 
+  async handleCalcUserSignalEvent(
+    ctx: Context<{ userId: string; robotId: string }>
+  ) {
+    try {
+      const { userId, robotId } = ctx.params;
+      const { exchange, asset } = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id: robotId
+        }
+      );
+      const userSignal = await this.broker.call(
+        `${cpz.Service.DB_USER_SIGNALS}.find`,
+        {
+          query: {
+            userId,
+            robotId
+          }
+        }
+      );
+      if (userSignal)
+        await this.queueJob({
+          id: uuid(),
+          type: cpz.StatsCalcJobType.userSignal,
+          userId,
+          robotId
+        });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userSignalsAggr,
+        userId,
+        exchange
+      });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userSignalsAggr,
+        userId,
+        asset
+      });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userSignalsAggr,
+        userId,
+        exchange,
+        asset
+      });
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleCalcUserSignalsEvent(ctx: Context<{ userId: string }>) {
+    try {
+      const { userId } = ctx.params;
+      const userSignals = await this.broker.call(
+        `${cpz.Service.DB_USER_SIGNALS}.find`,
+        {
+          query: {
+            userId
+          }
+        }
+      );
+      if (
+        !userSignals ||
+        !Array.isArray(userSignals) ||
+        userSignals.length === 0
+      )
+        return;
+
+      for (const { robotId } of userSignals) {
+        await this.queueJob({
+          id: uuid(),
+          type: cpz.StatsCalcJobType.userSignal,
+          userId,
+          robotId
+        });
+      }
+
+      const exchangesAssets: {
+        exchange: string;
+        asset: string;
+      }[] = await this.broker.call(
+        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedAggr`,
+        {
+          userId
+        }
+      );
+      if (
+        !exchangesAssets ||
+        !Array.isArray(exchangesAssets) ||
+        exchangesAssets.length === 0
+      )
+        return;
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userSignalsAggr,
+        userId
+      });
+
+      const exchanges = [...new Set(exchangesAssets.map(e => e.exchange))];
+      for (const exchange of exchanges) {
+        await this.queueJob({
+          id: uuid(),
+          type: cpz.StatsCalcJobType.userSignalsAggr,
+          userId,
+          exchange
+        });
+      }
+
+      const assets = [...new Set(exchangesAssets.map(e => e.asset))];
+      for (const asset of assets) {
+        await this.queueJob({
+          id: uuid(),
+          type: cpz.StatsCalcJobType.userSignalsAggr,
+          userId,
+          asset
+        });
+      }
+
+      for (const { exchange, asset } of exchangesAssets) {
+        await this.queueJob({
+          id: uuid(),
+          type: cpz.StatsCalcJobType.userSignalsAggr,
+          userId,
+          exchange,
+          asset
+        });
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
   async handleStatsCalcRobotEvent(ctx: Context<cpz.StatsCalcRobotEvent>) {
     try {
       const { robotId, exchange, asset } = ctx.params;
@@ -78,12 +215,12 @@ class StatsCalcRunnerService extends Service {
         `New ${cpz.Event.STATS_CALC_ROBOT} event - ${robotId}, ${exchange}, ${asset}`
       );
       await this.queueJob({
-        id: robotId,
+        id: uuid(),
         type: cpz.StatsCalcJobType.robot,
         robotId
       });
       await this.queueJob({
-        id: robotId,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userSignals,
         robotId
       });
@@ -96,7 +233,7 @@ class StatsCalcRunnerService extends Service {
       );
       for (const { userId } of usersByRobotId) {
         await this.queueJob({
-          id: `${cpz.StatsCalcJobType.userSignalsAggr}-${userId}`,
+          id: uuid(),
           type: cpz.StatsCalcJobType.userSignalsAggr,
           userId
         });
@@ -110,7 +247,7 @@ class StatsCalcRunnerService extends Service {
       );
       for (const { userId } of usersByExchange) {
         await this.queueJob({
-          id: `${cpz.StatsCalcJobType.userSignalsAggr}-${exchange}-${userId}`,
+          id: uuid(),
           type: cpz.StatsCalcJobType.userSignalsAggr,
           userId,
           exchange
@@ -125,7 +262,7 @@ class StatsCalcRunnerService extends Service {
       );
       for (const { userId } of usersByAsset) {
         await this.queueJob({
-          id: `${cpz.StatsCalcJobType.userSignalsAggr}-${asset}-${userId}`,
+          id: uuid(),
           type: cpz.StatsCalcJobType.userSignalsAggr,
           userId,
           asset
@@ -141,7 +278,7 @@ class StatsCalcRunnerService extends Service {
       );
       for (const { userId } of usersByExchangeAsset) {
         await this.queueJob({
-          id: `${cpz.StatsCalcJobType.userSignalsAggr}-${exchange}-${asset}-${userId}`,
+          id: uuid(),
           type: cpz.StatsCalcJobType.userSignalsAggr,
           userId,
           exchange,
@@ -162,29 +299,29 @@ class StatsCalcRunnerService extends Service {
         `New ${cpz.Event.STATS_CALC_USER_ROBOT} event - ${userRobotId}, ${userId}, ${exchange}, ${asset}`
       );
       await this.queueJob({
-        id: userRobotId,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userRobot,
         userRobotId
       });
       await this.queueJob({
-        id: `${cpz.StatsCalcJobType.userRobotAggr}-${userId}`,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userRobotAggr,
         userId
       });
       await this.queueJob({
-        id: `${cpz.StatsCalcJobType.userRobotAggr}-${exchange}-${userId}`,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userRobotAggr,
         userId,
         exchange
       });
       await this.queueJob({
-        id: `${cpz.StatsCalcJobType.userRobotAggr}-${asset}-${userId}`,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userRobotAggr,
         userId,
         asset
       });
       await this.queueJob({
-        id: `${cpz.StatsCalcJobType.userRobotAggr}-${exchange}-${asset}-${userId}`,
+        id: uuid(),
         type: cpz.StatsCalcJobType.userRobotAggr,
         userId,
         exchange,

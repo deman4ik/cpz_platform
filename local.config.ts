@@ -22,7 +22,7 @@ const brokerConfig: any = {
   nodeID: "cpz-local",
 
   logger: {
-    type: "File",
+    type: "Console",
     options: {
       // Logging level
       level: "info",

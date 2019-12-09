@@ -50,6 +50,8 @@ class RobotsService extends Service {
           settings: Sequelize.JSONB,
           tradeSettings: { type: Sequelize.JSONB, field: "trade_settings" },
           available: Sequelize.INTEGER,
+          signals: Sequelize.BOOLEAN,
+          trading: Sequelize.BOOLEAN,
           status: Sequelize.STRING,
           startedAt: {
             type: Sequelize.DATE,
@@ -120,6 +122,9 @@ class RobotsService extends Service {
             mutation: "createRobots(entities: [RobotCreateEntity!]!): Response!"
           },
           roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.create
         },
         clear: {
@@ -144,6 +149,8 @@ class RobotsService extends Service {
         settings: cpz.RobotSettings;
         tradeSettings: cpz.RobotTradeSettings;
         available: number;
+        signals: boolean;
+        trading: boolean;
       }[];
     }>
   ) {
@@ -194,10 +201,12 @@ class RobotsService extends Service {
         mod,
         settings,
         tradeSettings,
-        available
+        available,
+        signals,
+        trading
       } of ctx.params.entities) {
         let mode = mod || 1;
-        const [robotEntity] = await this.adapter.find({
+        const [robotEntity] = await this._find(ctx, {
           fields: ["id", "mod", "settings"],
           sort: "-created_at",
           query: {
@@ -243,7 +252,9 @@ class RobotsService extends Service {
           mod: `${mode}`,
           settings: JSON.stringify(settings),
           tradeSettings: JSON.stringify(tradeSettings),
-          available
+          available,
+          signals,
+          trading
         });
         await this.adapter.db.query(query, {
           type: Sequelize.QueryTypes.INSERT,
@@ -262,7 +273,7 @@ class RobotsService extends Service {
   async getAvailableSignalAssets() {
     try {
       const query =
-        "select distinct asset, currency from robots where available >= 20 group by asset, currency";
+        "select distinct asset, currency from robots where available >= 15 and signals = true group by asset, currency";
       return await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT
       });
@@ -272,7 +283,7 @@ class RobotsService extends Service {
     }
   }
 
-  async getRobotInfo(ctx: Context<{ id: string }>) {
+  async getRobotInfo(ctx: Context<{ id: string }>): Promise<cpz.RobotInfo> {
     try {
       const { id } = ctx.params;
       const query = `select
@@ -284,16 +295,18 @@ class RobotsService extends Service {
       t.asset,
       t.currency,
       t.timeframe,
-      t.strategy,
+      t.strategy as strategy_name,
 	    s.code as strategy_code,
-	    s.name as strategy_name,
 	    s.description,
       t.settings,
       t.available,
+      t.signals,
+      t.trading,
       t.status,
       t.started_at,
       t.stopped_at,
       t.statistics,
+      t.equity,
       (
         select
           array_to_json(array_agg(pos)) 
@@ -355,7 +368,7 @@ class RobotsService extends Service {
           )
           pos 
       )
-      as signals 
+      as current_signals 
     from
       robots t 
 	  inner join strategies s on t.strategy = s.id  
@@ -366,25 +379,25 @@ class RobotsService extends Service {
       });
       const robotInfo: {
         [key: string]: any;
-        signals?: { code?: string; alerts?: { [key: string]: any }[] }[];
+        currentSignals?: { code?: string; alerts?: cpz.AlertInfo[] }[];
       } = underscoreToCamelCaseKeys(rawRobotInfo);
-      //TODO: TYPINGS!
+
       let robotSignals: { [key: string]: any }[] = [];
       if (
-        robotInfo.signals &&
-        Array.isArray(robotInfo.signals) &&
-        robotInfo.signals.length > 0
+        robotInfo.currentSignals &&
+        Array.isArray(robotInfo.currentSignals) &&
+        robotInfo.currentSignals.length > 0
       ) {
-        robotInfo.signals.forEach(pos => {
-          const signals = Object.values(pos.alerts).map(alert => ({
+        robotInfo.currentSignals.forEach(pos => {
+          const currentSignals = Object.values(pos.alerts).map(alert => ({
             code: pos.code,
             ...alert
           }));
-          robotSignals = [...robotSignals, ...signals];
+          robotSignals = [...robotSignals, ...currentSignals];
         });
       }
-      robotInfo.signals = robotSignals;
-      return robotInfo;
+      robotInfo.currentSignals = robotSignals;
+      return <cpz.RobotInfo>robotInfo;
     } catch (e) {
       this.logger.error(e);
       throw e;

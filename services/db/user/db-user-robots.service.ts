@@ -146,7 +146,7 @@ class UserRobotsService extends Service {
         );
       //TODO: check available
 
-      const [userRobotExists] = await this.adapter.find({
+      const [userRobotExists] = await this._find(ctx, {
         query: {
           robotId,
           userExAccId

@@ -347,7 +347,11 @@ class PublicConnectorService extends Service {
    * @returns
    * @memberof PublicConnectorService
    */
-  async getMarket(exchange: ExchangeName, asset: string, currency: string) {
+  async getMarket(
+    exchange: ExchangeName,
+    asset: string,
+    currency: string
+  ): Promise<cpz.Market> {
     await this.initConnector(exchange);
     const response: ccxt.Market = await this.connectors[exchange].market(
       this.getSymbol(asset, currency)
@@ -387,20 +391,8 @@ class PublicConnectorService extends Service {
       asset,
       currency,
       loadFrom,
-      amountLimits: {
-        min: response.limits.amount.min,
-        max: response.limits.amount.max
-      },
-      priceLimits: {
-        min: response.limits.price.min,
-        max: response.limits.price.max
-      },
-      costLimits: {
-        min: response.limits.cost.min,
-        max: response.limits.cost.max
-      },
-      pricePrecision: response.precision.price,
-      amountPrecision: response.precision.amount
+      limits: response.limits,
+      precision: response.precision
     };
   }
 
