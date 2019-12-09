@@ -9,9 +9,7 @@ describe("Test 'crypto' utils", () => {
       const data = "a56032f0-88ed-4193-8158-81432912517a";
 
       const encrypted = await encrypt(userId, data);
-      console.log(encrypted);
       const decrypted = await decrypt(userId, encrypted);
-      console.log(decrypted);
       expect(decrypted).toBe(data);
     });
   });
