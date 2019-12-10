@@ -1,4 +1,4 @@
-import { Service, ServiceBroker, Context } from "moleculer";
+import { Service, ServiceBroker, Context, Errors } from "moleculer";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -61,6 +61,21 @@ class UserExchangeAccsService extends Service {
           },
           handler: this.upsert
         },
+        changeName: {
+          params: {
+            id: "string",
+            name: "string"
+          },
+          graphql: {
+            mutation:
+              "userExchangeAccChangeName(id: ID!, name: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.changeName
+        },
         invalidate: {
           params: {
             id: "string",
@@ -97,10 +112,27 @@ class UserExchangeAccsService extends Service {
         existed = await this.adapter.findById(id);
         if (existed) {
           if (existed.userId !== userId)
-            throw new Error("Invalid exchange account user");
+            throw new Errors.MoleculerClientError("FORBIDDEN", 403);
           if (existed.exchange !== exchange)
             throw new Error("Invalid exchange");
-          //TODO: Check started user robots or invalid status
+
+          const startedUserRobots: cpz.UserRobotDB[] = await this.broker.call(
+            `${cpz.Service.DB_USER_ROBOTS}.find`,
+            {
+              query: {
+                userExAccId: existed.id,
+                status: cpz.Status.started
+              }
+            }
+          );
+
+          if (
+            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            startedUserRobots.length > 0
+          )
+            throw new Error(
+              "Failed to change User Exchange Account with started Robots"
+            );
         }
       }
 
@@ -160,6 +192,47 @@ class UserExchangeAccsService extends Service {
       return {
         success: false,
         error: err
+      };
+    }
+  }
+
+  async changeName(
+    ctx: Context<
+      {
+        id: string;
+        name: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      let { id, name } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+
+      let userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.findById(
+        id
+      );
+      if (!userExchangeAcc)
+        throw new Errors.MoleculerClientError(
+          "User Exchange Account not found",
+          404,
+          "ERR_NOT_FOUND",
+          { id }
+        );
+      if (userExchangeAcc.userId !== userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+      await this.adapter.updateById(id, {
+        $set: {
+          name
+        }
+      });
+      return { success: true };
+    } catch (err) {
+      this.logger.error(err);
+      return {
+        success: false,
+        error: err.message
       };
     }
   }

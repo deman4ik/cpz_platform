@@ -100,7 +100,7 @@ class BacktesterRunnerService extends Service {
             }
           },
           graphql: {
-            mutation: "backtesterCleanJobs(period: Int, status: String): JSON"
+            mutation: "backtestCleanJobs(period: Int, status: String): JSON"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -113,7 +113,7 @@ class BacktesterRunnerService extends Service {
             id: "string"
           },
           graphql: {
-            query: "backtesterJobStatus(id: ID!): JSON!"
+            query: "backtestJobStatus(id: ID!): JSON!"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {

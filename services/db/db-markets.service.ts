@@ -38,6 +38,7 @@ class MarketsService extends Service {
               "addMarket(exchange: String!, asset: String!, currency: String!): Response!"
           },
           params: { exchange: "string", asset: "string", currency: "string" },
+          roles: [cpz.UserRoles.admin],
           hooks: {
             before: "authAction"
           },

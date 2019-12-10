@@ -91,9 +91,12 @@ class UserRobotsService extends Service {
           },
           graphql: {
             mutation:
-              "createUserRobot(userExAccId: String!, robotId: String!, settings: UserRobotSettings!): Response!"
+              "userRobotCreate(userExAccId: String!, robotId: String!, settings: UserRobotSettings!): Response!"
           },
           roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.create
         },
         getState: {
@@ -118,7 +121,7 @@ class UserRobotsService extends Service {
   ) {
     try {
       const { userExAccId, robotId, settings } = ctx.params;
-      const { id } = ctx.meta.user;
+      const { id: userId } = ctx.meta.user;
       const userExAccExists: cpz.UserExchangeAccount = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         { id: userExAccId }
@@ -131,8 +134,8 @@ class UserRobotsService extends Service {
           { userExAccId }
         );
 
-      if (id && userExAccExists.userId !== id)
-        throw new Errors.MoleculerClientError("FORBIDDEN");
+      if (userExAccExists.userId !== userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
       const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "available"]
@@ -161,7 +164,7 @@ class UserRobotsService extends Service {
         id: userRobotId,
         robotId,
         userExAccId,
-        userId: id,
+        userId,
         status: cpz.Status.stopped,
         settings
       });

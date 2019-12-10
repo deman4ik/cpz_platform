@@ -170,7 +170,14 @@ class UserOrdersService extends Service {
 
   async getUserExAccsWithJobs(ctx: Context): Promise<string[]> {
     try {
-      const query = `select user_ex_acc_id from user_orders where next_job_at is not null and next_job_at <= now() group by user_ex_acc_id;`;
+      const query = `SELECT o.user_ex_acc_id
+      FROM user_orders o,
+           user_exchange_accs a
+      WHERE o.user_ex_acc_id = a.id
+        AND a.status = 'enabled'
+        AND o.next_job_at IS NOT NULL
+        AND o.next_job_at <= now()
+      GROUP BY o.user_ex_acc_id;`;
       const rawData = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT
       });

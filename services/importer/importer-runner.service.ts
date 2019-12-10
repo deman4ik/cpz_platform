@@ -58,7 +58,7 @@ class ImporterRunnerService extends Service {
           },
           graphql: {
             mutation:
-              "importerStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
+              "importCandlesStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -94,7 +94,7 @@ class ImporterRunnerService extends Service {
           },
           graphql: {
             mutation:
-              "importerStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
+              "importCandlesStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -120,7 +120,8 @@ class ImporterRunnerService extends Service {
             }
           },
           graphql: {
-            mutation: "importerCleanJobs(period: Int, status: String): JSON"
+            mutation:
+              "importCandlesCleanJobs(period: Int, status: String): JSON"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -133,7 +134,7 @@ class ImporterRunnerService extends Service {
             id: "string"
           },
           graphql: {
-            query: "importerJobStatus(id: ID!): JSON!"
+            query: "importCandlesJobStatus(id: ID!): JSON!"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {

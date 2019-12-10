@@ -215,20 +215,49 @@ class UserRobotRunnerService extends Service {
   }
 
   async start(
-    ctx: Context<{
-      id: string;
-      message?: string;
-    }>
+    ctx: Context<
+      {
+        id: string;
+        message?: string;
+      },
+      { user: cpz.User }
+    >
   ) {
     const { id, message } = ctx.params;
+    const { id: userId } = ctx.meta.user;
     try {
-      const { status } = await this.broker.call(
+      const userRobot: cpz.UserRobotDB = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
           id
         }
       );
-      if (status === cpz.Status.paused) {
+      if (!userRobot)
+        throw new Errors.MoleculerError(
+          "Failed to get user robot",
+          404,
+          "ERR_NOT_FOUND",
+          { id }
+        );
+      if (userId !== userRobot.userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+      const userExAcc: cpz.UserExchangeAccount = await this.broker.call(
+        `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
+        {
+          id: userRobot.userExAccId
+        }
+      );
+      if (!userExAcc)
+        throw new Errors.MoleculerError(
+          "Failed to get user exchange account",
+          404,
+          "ERR_NOT_FOUND",
+          { userExAccId: userRobot.userExAccId }
+        );
+      if (userExAcc.status !== cpz.UserExchangeAccStatus.enabled)
+        throw new Error(`User Exchange Account status is ${userExAcc.status}`);
+      if (userRobot.status === cpz.Status.paused) {
         const result = await this.broker.call(
           `${cpz.Service.ROBOT_RUNNER}.resume`,
           ctx.params
@@ -237,11 +266,11 @@ class UserRobotRunnerService extends Service {
           return { success: true, id, status: cpz.Status.started };
         else throw result.error;
       }
-      if (status === cpz.Status.started)
+      if (userRobot.status === cpz.Status.started)
         return {
           success: true,
           id,
-          status
+          status: userRobot.status
         };
 
       await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
@@ -263,29 +292,45 @@ class UserRobotRunnerService extends Service {
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id: ctx.params.id, error: e };
+      return { success: false, error: e.message };
     }
   }
 
   async stop(
-    ctx: Context<{
-      id: string;
-      message?: string;
-    }>
+    ctx: Context<
+      {
+        id: string;
+        message?: string;
+      },
+      { user: cpz.User }
+    >
   ) {
     const { id, message } = ctx.params;
+    const { id: userId } = ctx.meta.user;
     try {
-      const { status } = await this.broker.call(
+      const userRobot = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
           id
         }
       );
-      if (status === cpz.Status.stopping || status === cpz.Status.stopped)
+      if (!userRobot)
+        throw new Errors.MoleculerError(
+          "Failed to get user robot",
+          404,
+          "ERR_NOT_FOUND",
+          { id }
+        );
+      if (userId !== userRobot.userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+      if (
+        userRobot.status === cpz.Status.stopping ||
+        userRobot.status === cpz.Status.stopped
+      )
         return {
           success: true,
           id,
-          status
+          status: userRobot.status
         };
 
       await this.queueJob(
@@ -297,7 +342,7 @@ class UserRobotRunnerService extends Service {
             message
           }
         },
-        status
+        userRobot.status
       );
       return {
         success: true,
@@ -306,7 +351,7 @@ class UserRobotRunnerService extends Service {
       };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id: ctx.params.id, error: e };
+      return { success: false, error: e.message };
     }
   }
 
@@ -373,7 +418,7 @@ class UserRobotRunnerService extends Service {
       return { success: true, result: userRobotsToPause.length };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 
@@ -418,7 +463,7 @@ class UserRobotRunnerService extends Service {
       return { success: true, result: userRobotIds.length };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 
@@ -426,8 +471,6 @@ class UserRobotRunnerService extends Service {
     try {
       const signal = ctx.params;
       const { robotId } = signal;
-      /* const call = async (bail: (e: Error) => void) => {
-        try { */
       const userRobots: cpz.UserRobotDB[] = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.find`,
         {
@@ -465,12 +508,6 @@ class UserRobotRunnerService extends Service {
           }
         })
       );
-      /*   } catch (e) {
-          if (e instanceof Errors.ValidationError) throw e;
-          bail(e);
-        }
-      };
-      await retry(call, this.retryOptions); */
     } catch (e) {
       this.logger.error(e);
     }
@@ -482,8 +519,6 @@ class UserRobotRunnerService extends Service {
       this.logger.info(
         `New ${cpz.Event.ORDER_STATUS} event for User Robot #${order.userRobotId}`
       );
-      /*   const call = async (bail: (e: Error) => void) => {
-        try { */
       const { status }: cpz.UserRobotDB = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
@@ -500,12 +535,6 @@ class UserRobotRunnerService extends Service {
           },
           status
         );
-      /*    } catch (e) {
-          if (e instanceof Errors.ValidationError) throw e;
-          bail(e);
-        }
-      };
-      await retry(call, this.retryOptions); */
     } catch (e) {
       this.logger.error(e);
     }
