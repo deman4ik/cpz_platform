@@ -140,7 +140,7 @@ declare namespace cpz {
 
   const enum UserRoles {
     admin = "admin",
-    moderator = "moderator",
+    vip = "vip",
     user = "user",
     anonymous = "anonymous"
   }
@@ -845,8 +845,8 @@ declare namespace cpz {
   }
 
   interface UserRolesList {
-    allowedRoles: string[];
-    defaultRole: string;
+    allowedRoles: cpz.UserRoles[];
+    defaultRole: cpz.UserRoles;
   }
 
   interface UserSettings {

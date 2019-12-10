@@ -66,25 +66,6 @@ class ApiService extends Service {
       ],
       settings: {
         port: process.env.PORT || 3000,
-        routes: [
-          {
-            path: "/api",
-            aliases: {
-              "POST login": `${cpz.Service.AUTH}.login`,
-              "POST register": `${cpz.Service.AUTH}.register`,
-              "GET nodes": `${cpz.Service.API}.nodesList`
-            }
-          },
-          {
-            path: "/api/auth",
-            roles: [cpz.UserRoles.user, cpz.UserRoles.admin],
-            aliases: {
-              "GET me": `${cpz.Service.AUTH}.getCurrentUser`
-            },
-            authorization: true
-          }
-        ],
-
         // Serve assets from "public" folder
         assets: {
           folder: "public"
@@ -166,66 +147,6 @@ class ApiService extends Service {
       };
     }
     this.logger.info(ctx.meta.user);
-  }
-  /**
-   * Authorize the request
-   *
-   * @param {Context} ctx
-   * @param {Object} route
-   * @param {IncomingRequest} req
-   * @returns {Promise}
-   */
-  async authorize(
-    ctx: Context<
-      any,
-      {
-        user?: cpz.User | { roles: cpz.UserRolesList };
-      }
-    >,
-    route: any,
-    req: any
-  ) {
-    let authValue = req.headers["authorization"];
-    if (authValue && authValue.startsWith("Bearer ")) {
-      try {
-        let token = authValue.slice(7);
-        const decoded: {
-          userId: string;
-          defaultRole: string;
-          allowedRoles: string[];
-        } = await ctx.call(`${cpz.Service.AUTH}.verifyToken`, {
-          token
-        });
-        if (
-          route.opts.roles &&
-          Array.isArray(route.opts.roles) &&
-          !route.opts.roles.some((r: string) =>
-            decoded.allowedRoles.includes(r)
-          )
-        )
-          throw new ApiGateway.Errors.ForbiddenError("FORBIDDEN", null);
-
-        const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
-          id: decoded.userId
-        });
-        ctx.meta.user = user;
-        this.logger.info("Logged in user", user);
-      } catch (e) {
-        this.logger.error(e);
-        if (e instanceof ApiGateway.Errors.ForbiddenError) {
-          throw e;
-        }
-        throw new ApiGateway.Errors.UnAuthorizedError(
-          ApiGateway.Errors.ERR_INVALID_TOKEN,
-          e
-        );
-      }
-    } else {
-      throw new ApiGateway.Errors.UnAuthorizedError(
-        ApiGateway.Errors.ERR_NO_TOKEN,
-        null
-      );
-    }
   }
 }
 

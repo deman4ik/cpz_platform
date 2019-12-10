@@ -5,7 +5,11 @@ import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../@types";
 import dayjs from "../../../lib/dayjs";
-import { underscoreToCamelCaseKeys, round } from "../../../utils/helpers";
+import {
+  underscoreToCamelCaseKeys,
+  round,
+  getAccessValue
+} from "../../../utils";
 
 class UserSignalsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -170,21 +174,25 @@ class UserSignalsService extends Service {
   ) {
     try {
       const { id: user_id } = ctx.meta.user;
+      const available = getAccessValue(ctx.meta.user);
       const { exchange, asset, currency, userId } = ctx.params;
       const params: {
         user_id?: string;
         exchange?: string;
         asset?: string;
         currency?: string;
+        available: number;
       } = {
-        user_id
+        user_id,
+        available
       };
       const query = `
       SELECT t.id, t.name, s.user_id
       FROM  robots t  
       LEFT JOIN user_signals s 
       ON s.robot_id = t.id AND s.user_id = :user_id
-	    WHERE t.signals = true
+      WHERE t.signals = true
+      AND t.available = :available
       ${exchange ? "AND t.exchange = :exchange" : ""}
       ${asset ? "AND t.asset = :asset" : ""}
       ${currency ? "AND t.currency = :currency" : ""}
@@ -227,6 +235,9 @@ class UserSignalsService extends Service {
           id: robotId
         }
       );
+      const accessValue = getAccessValue(ctx.meta.user);
+      if (robotInfo.available < accessValue)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
       const [subscription]: cpz.UserSignals[] = await this._find(ctx, {
         query: {
           robotId,
@@ -374,7 +385,10 @@ class UserSignalsService extends Service {
           fields: ["exchange", "asset", "currency", "available"]
         }
       );
-      //TODO: check role
+      const accessValue = getAccessValue(ctx.meta.user);
+      if (available < accessValue)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
       const [market]: cpz.Market[] = await this.broker.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {

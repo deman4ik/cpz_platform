@@ -1,3 +1,4 @@
+export * from "./auth";
 export * from "./candles";
 export * from "./crypto";
 export * from "./fetch";

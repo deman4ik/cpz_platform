@@ -4,7 +4,7 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
-import { underscoreToCamelCaseKeys } from "../../../utils/helpers";
+import { underscoreToCamelCaseKeys, getAccessValue } from "../../../utils";
 import Auth from "../../../mixins/auth";
 
 class UserRobotsService extends Service {
@@ -147,7 +147,10 @@ class UserRobotsService extends Service {
           "ERR_NOT_FOUND",
           { robotId }
         );
-      //TODO: check available
+
+      const accessValue = getAccessValue(ctx.meta.user);
+      if (robot.available < accessValue)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
 
       const [userRobotExists] = await this._find(ctx, {
         query: {
@@ -159,7 +162,26 @@ class UserRobotsService extends Service {
         throw new Errors.MoleculerClientError("User Robot already exists");
       const userRobotId = uuid();
 
-      //TODO: check volume range
+      const [market]: cpz.Market[] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange: robot.exchange,
+            asset: robot.asset,
+            currency: robot.currency
+          }
+        }
+      );
+      if (settings.volume < market.limits.amount.min)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be more than ${market.limits.amount.min}`
+        );
+
+      if (settings.volume > market.limits.amount.max)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be less than ${market.limits.amount.max}`
+        );
+
       await this.adapter.insert({
         id: userRobotId,
         robotId,
