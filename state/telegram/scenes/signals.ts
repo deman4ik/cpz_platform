@@ -45,6 +45,7 @@ async function signalsEnter(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
@@ -56,6 +57,7 @@ async function signalsMySignals(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
@@ -67,6 +69,7 @@ async function signalsSearchSignals(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
@@ -84,7 +87,6 @@ async function signalsPerfSignals(ctx: any) {
 }
 
 async function signalsLeave(ctx: any) {
-  this.logger.info("signalsLeave", ctx.scene.state);
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }

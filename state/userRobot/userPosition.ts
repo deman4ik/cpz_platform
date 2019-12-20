@@ -20,6 +20,7 @@ class UserPosition implements cpz.UserPosition {
   _status: cpz.UserPositionStatus;
   _parentId?: string;
   _direction: cpz.PositionDirection;
+  _entryAction?: cpz.TradeAction;
   _entryStatus?: cpz.UserPositionOrderStatus;
   _entrySignalPrice?: number;
   _entryPrice?: number;
@@ -27,6 +28,7 @@ class UserPosition implements cpz.UserPosition {
   _entryVolume?: number;
   _entryExecuted?: number;
   _entryRemaining?: number;
+  _exitAction?: cpz.TradeAction;
   _exitStatus?: cpz.UserPositionOrderStatus;
   _exitSignalPrice?: number;
   _exitPrice?: number;
@@ -69,6 +71,7 @@ class UserPosition implements cpz.UserPosition {
     this._status = state.status;
     this._parentId = state.parentId;
     this._direction = state.direction;
+    this._entryAction = state.entryAction;
     this._entryStatus = state.entryStatus;
     this._entrySignalPrice = state.entrySignalPrice;
     this._entryPrice = state.entryPrice;
@@ -76,6 +79,7 @@ class UserPosition implements cpz.UserPosition {
     this._entryVolume = state.entryVolume;
     this._entryExecuted = state.entryExecuted;
     this._entryRemaining = state.entryRemaining;
+    this._exitAction = state.exitAction;
     this._exitStatus = state.exitStatus;
     this._exitSignalPrice = state.exitSignalPrice;
     this._exitPrice = state.exitPrice;
@@ -274,7 +278,7 @@ class UserPosition implements cpz.UserPosition {
       );
   }
 
-  get state() {
+  get state(): cpz.UserPositionDB {
     return {
       id: this._id,
       prefix: this._prefix,
@@ -289,6 +293,7 @@ class UserPosition implements cpz.UserPosition {
       status: this._status,
       parentId: this._parentId,
       direction: this._direction,
+      entryAction: this._entryAction,
       entryStatus: this._entryStatus,
       entrySignalPrice: this._entrySignalPrice,
       entryPrice: this._entryPrice,
@@ -296,6 +301,7 @@ class UserPosition implements cpz.UserPosition {
       entryVolume: this._entryVolume,
       entryExecuted: this._entryExecuted,
       entryRemaining: this._entryRemaining,
+      exitAction: this._exitAction,
       exitStatus: this._exitStatus,
       exitSignalPrice: this._exitSignalPrice,
       exitPrice: this._exitPrice,
@@ -516,6 +522,7 @@ class UserPosition implements cpz.UserPosition {
     this._ordersToCreate.push(order);
     this._entryOrders.push(order);
     this._entryVolume = this._userRobot.settings.volume;
+    this._entryAction = trade.action;
     this._updateEntry();
     this._setStatus();
   }
@@ -526,6 +533,7 @@ class UserPosition implements cpz.UserPosition {
     this._exitOrders.push(order);
     if (!this._exitVolume || this._exitVolume === 0)
       this._exitVolume = this._entryExecuted;
+    this._exitAction = trade.action;
     this._updateExit();
     this._setStatus();
   }

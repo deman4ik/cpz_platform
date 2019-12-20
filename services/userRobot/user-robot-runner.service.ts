@@ -224,7 +224,10 @@ class UserRobotRunnerService extends Service {
     >
   ) {
     const { id, message } = ctx.params;
-    const { id: userId } = ctx.meta.user;
+    const {
+      id: userId,
+      roles: { allowedRoles }
+    } = ctx.meta.user;
     try {
       const userRobot: cpz.UserRobotDB = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
@@ -239,7 +242,10 @@ class UserRobotRunnerService extends Service {
           "ERR_NOT_FOUND",
           { id }
         );
-      if (userId !== userRobot.userId)
+      if (
+        !allowedRoles.includes(cpz.UserRoles.admin) &&
+        userId !== userRobot.userId
+      )
         throw new Errors.MoleculerClientError("FORBIDDEN", 403);
 
       const userExAcc: cpz.UserExchangeAccount = await this.broker.call(
@@ -306,7 +312,10 @@ class UserRobotRunnerService extends Service {
     >
   ) {
     const { id, message } = ctx.params;
-    const { id: userId } = ctx.meta.user;
+    const {
+      id: userId,
+      roles: { allowedRoles }
+    } = ctx.meta.user;
     try {
       const userRobot = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
@@ -321,7 +330,10 @@ class UserRobotRunnerService extends Service {
           "ERR_NOT_FOUND",
           { id }
         );
-      if (userId !== userRobot.userId)
+      if (
+        !allowedRoles.includes(cpz.UserRoles.admin) &&
+        userId !== userRobot.userId
+      )
         throw new Errors.MoleculerClientError("FORBIDDEN", 403);
       if (
         userRobot.status === cpz.Status.stopping ||

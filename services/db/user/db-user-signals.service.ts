@@ -10,15 +10,16 @@ import {
   round,
   getAccessValue
 } from "../../../utils";
+import Auth from "../../../mixins/auth";
 
 class UserSignalsService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_SIGNALS,
-      mixins: [DbService],
+      mixins: [Auth, DbService],
       adapter: SqlAdapter,
-      dependencies: [`${cpz.Service.DB_ROBOTS}`],
+      dependencies: [cpz.Service.DB_ROBOTS],
       model: {
         name: "user_signals",
         define: {
@@ -86,11 +87,26 @@ class UserSignalsService extends Service {
             robotId: "string",
             volume: "number"
           },
+          graphql: {
+            mutation:
+              "userSignalSusbcribe(robotId: String!, volume: Float!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
           handler: this.subscribe
         },
         unsubscribe: {
           params: {
             robotId: "string"
+          },
+          graphql: {
+            mutation: "userSignalUnsusbcribe(robotId: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
           },
           handler: this.unsubscribe
         }
@@ -192,7 +208,7 @@ class UserSignalsService extends Service {
       LEFT JOIN user_signals s 
       ON s.robot_id = t.id AND s.user_id = :user_id
       WHERE t.signals = true
-      AND t.available = :available
+      AND t.available >= :available
       ${exchange ? "AND t.exchange = :exchange" : ""}
       ${asset ? "AND t.asset = :asset" : ""}
       ${currency ? "AND t.currency = :currency" : ""}
@@ -233,6 +249,11 @@ class UserSignalsService extends Service {
         `${cpz.Service.DB_ROBOTS}.getRobotInfo`,
         {
           id: robotId
+        },
+        {
+          meta: {
+            user: ctx.meta.user
+          }
         }
       );
       const accessValue = getAccessValue(ctx.meta.user);
@@ -244,7 +265,7 @@ class UserSignalsService extends Service {
           userId
         }
       });
-      this.logger.info(subscription);
+
       let userSignalsInfo: cpz.UserSignalsInfo;
       if (subscription) {
         let openPositions: cpz.RobotPositionState[] = [];
@@ -438,9 +459,10 @@ class UserSignalsService extends Service {
           robotId
         }
       );
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
-      throw e;
+      return { success: false, error: e.message };
     }
   }
 
@@ -465,9 +487,10 @@ class UserSignalsService extends Service {
           }
         );
       }
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
-      throw e;
+      return { success: false, error: e.message };
     }
   }
 }

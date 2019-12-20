@@ -5,22 +5,14 @@ import { round, sortAsc } from "../../../utils/helpers";
 import { getStatisticsText } from "../helpers";
 import { getMainKeyboard } from "../keyboard";
 
-function getSignalRobotMenu(ctx: any) {
-  const subscribed = !!ctx.scene.state.selectedRobot.userSignalsInfo;
+function getUserRobotMenu(ctx: any) {
+  const added = !!ctx.scene.state.selectedRobot.userRobotInfo;
+  let status: cpz.Status = cpz.Status.stopped;
+  if (added) {
+    ({ status } = ctx.scene.state.selectedRobot.userRobotInfo);
+  }
 
   return Extra.HTML().markup((m: any) => {
-    const subscribeToggleButton = !subscribed
-      ? m.callbackButton(
-          ctx.i18n.t("scenes.robotSignal.subscribeSignals"),
-          JSON.stringify({ a: "subscribe" }),
-          false
-        )
-      : m.callbackButton(
-          ctx.i18n.t("scenes.robotSignal.unsubscribeSignals"),
-          JSON.stringify({ a: "unsubscribe" }),
-          false
-        );
-
     return m.inlineKeyboard([
       [
         m.callbackButton(
@@ -33,7 +25,7 @@ function getSignalRobotMenu(ctx: any) {
         m.callbackButton(
           ctx.i18n.t("robot.menuMyStats"),
           JSON.stringify({ a: "myStat" }),
-          !subscribed
+          !added
         )
       ],
       [
@@ -47,22 +39,54 @@ function getSignalRobotMenu(ctx: any) {
         m.callbackButton(
           ctx.i18n.t("robot.menuPositions"),
           JSON.stringify({ a: "pos" }),
-          false
+          !added
         )
       ],
       [
         m.callbackButton(
-          ctx.i18n.t("scenes.robotSignal.changeVolume"),
-          JSON.stringify({ a: "changeVolume" }),
-          !subscribed
+          ctx.i18n.t("scenes.userRobot.edit"),
+          JSON.stringify({ a: "edit" }),
+          !added || status !== cpz.Status.stopped
         )
       ],
-      [subscribeToggleButton]
+      [
+        m.callbackButton(
+          ctx.i18n.t("scenes.userRobot.start"),
+          JSON.stringify({ a: "start" }),
+          !added || status !== cpz.Status.stopped
+        )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("scenes.userRobot.stop"),
+          JSON.stringify({ a: "stop" }),
+          !added ||
+            ![
+              cpz.Status.started,
+              cpz.Status.starting,
+              cpz.Status.paused
+            ].includes(status)
+        )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("scenes.userRobot.add"),
+          JSON.stringify({ a: "add" }),
+          added
+        )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("scenes.userRobot.delete"),
+          JSON.stringify({ a: "delete" }),
+          !added || status !== cpz.Status.stopped
+        )
+      ]
     ]);
   });
 }
 
-async function robotSignalInfo(ctx: any) {
+async function userRobotInfo(ctx: any) {
   try {
     if (
       ctx.scene.state.reload &&
@@ -76,14 +100,13 @@ async function robotSignalInfo(ctx: any) {
     const { robotId } = ctx.scene.state;
 
     let robotInfo: cpz.RobotInfo;
-    let userSignalsInfo: cpz.UserSignalsInfo;
+    let userRobotInfo: cpz.UserRobotInfo;
     let market: cpz.Market;
-    let currentSignals: cpz.UserSignalInfo[];
     let equity: cpz.RobotEquity;
 
     if (!ctx.scene.state.selectedRobot || ctx.scene.state.reload) {
-      ({ robotInfo, userSignalsInfo, market } = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSignalRobot`,
+      ({ robotInfo, userRobotInfo, market } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
         {
           robotId
         },
@@ -95,23 +118,32 @@ async function robotSignalInfo(ctx: any) {
       ));
 
       ctx.scene.state.reload = false;
-      ctx.scene.state.selectedRobot = { robotInfo, userSignalsInfo, market };
+      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     } else {
-      ({ robotInfo, userSignalsInfo } = ctx.scene.state.selectedRobot);
+      ({ robotInfo, userRobotInfo } = ctx.scene.state.selectedRobot);
     }
 
-    let subscribedAtText = "";
+    let userExAccText = "";
+    if (userRobotInfo) {
+      const { userExAccName } = userRobotInfo;
+      userExAccText = ctx.i18n.t("robot.userExAcc", {
+        name: userExAccName
+      });
+    }
 
-    if (userSignalsInfo) {
-      const { subscribedAt } = userSignalsInfo;
-      subscribedAtText = ctx.i18n.t("robot.subscribedAt", {
-        subscribedAt
+    let statusText = "";
+    if (userRobotInfo) {
+      const { status } = userRobotInfo;
+      statusText = ctx.i18n.t("robot.status", {
+        status
       });
     }
 
     let volumeText = "";
-    if (userSignalsInfo) {
-      const { volume } = userSignalsInfo;
+    if (userRobotInfo) {
+      const {
+        settings: { volume }
+      } = userRobotInfo;
       volumeText = ctx.i18n.t("robot.volume", {
         volume,
         asset: robotInfo.asset
@@ -119,7 +151,7 @@ async function robotSignalInfo(ctx: any) {
     }
 
     let profitText = "";
-    if (userSignalsInfo) ({ equity } = userSignalsInfo);
+    if (userRobotInfo) ({ equity } = userRobotInfo);
     else ({ equity } = robotInfo);
 
     if (equity && equity.profit && equity.lastProfit) {
@@ -130,54 +162,32 @@ async function robotSignalInfo(ctx: any) {
       });
     }
 
-    let signalsText = "";
-    if (userSignalsInfo) ({ currentSignals } = userSignalsInfo);
-    else ({ currentSignals } = robotInfo);
-
-    if (currentSignals.length > 0) {
-      currentSignals.forEach(signal => {
-        const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
-        const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
-        const text = ctx.i18n.t("robot.signal", {
-          code: signal.code,
-          timestamp: dayjs
-            .utc(signal.candleTimestamp)
-            .format("YYYY-MM-DD HH:mm UTC"),
-          action: actionText,
-          orderType: orderTypeText,
-          price: +signal.price
-        });
-        signalsText = `${signalsText}\n${text}`;
-      });
-    }
-    if (signalsText !== "")
-      signalsText = ctx.i18n.t("robot.signals", { signals: signalsText });
     const message = `${ctx.i18n.t("robot.info", {
       ...robotInfo,
       signalsCount: round(1440 / robotInfo.timeframe),
-      subscribed: userSignalsInfo ? "✅" : ""
-    })}${subscribedAtText}${profitText}${volumeText}${signalsText}`;
+      subscribed: userRobotInfo ? "✅" : ""
+    })}${userExAccText}${statusText}${profitText}${volumeText}`;
 
-    if (ctx.scene.state.reply)
-      return ctx.reply(message, getSignalRobotMenu(ctx));
-    else return ctx.editMessageText(message, getSignalRobotMenu(ctx));
+    if (ctx.scene.state.reply) return ctx.reply(message, getUserRobotMenu(ctx));
+    else return ctx.editMessageText(message, getUserRobotMenu(ctx));
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalPublicStats(ctx: any) {
+async function userRobotPublicStats(ctx: any) {
   try {
     if (ctx.scene.state.page && ctx.scene.state.page === "publStats") return;
     ctx.scene.state.page = "publStats";
     const {
       robotInfo,
-      userSignalsInfo
+      userRobotInfo
     }: {
       robotInfo: cpz.RobotInfo;
-      userSignalsInfo: cpz.UserSignalsInfo;
+      userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
     const { statistics } = robotInfo;
     let message;
@@ -188,31 +198,32 @@ async function robotSignalPublicStats(ctx: any) {
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
         name: robotInfo.name,
-        subscribed: userSignalsInfo ? "✅" : ""
+        subscribed: userRobotInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t("robot.menuPublStats")}\n\n` +
         message,
-      getSignalRobotMenu(ctx)
+      getUserRobotMenu(ctx)
     );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalMyStats(ctx: any) {
+async function userRobotMyStats(ctx: any) {
   try {
     if (ctx.scene.state.page && ctx.scene.state.page === "myStats") return;
     ctx.scene.state.page = "myStats";
     const {
       robotInfo,
-      userSignalsInfo
+      userRobotInfo
     }: {
       robotInfo: cpz.RobotInfo;
-      userSignalsInfo: cpz.UserSignalsInfo;
+      userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
-    const { statistics } = userSignalsInfo;
+    const { statistics } = userRobotInfo;
     let message;
     if (statistics && Object.keys(statistics).length > 0)
       message = getStatisticsText(ctx, statistics);
@@ -220,38 +231,33 @@ async function robotSignalMyStats(ctx: any) {
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
         name: robotInfo.name,
-        subscribed: userSignalsInfo ? "✅" : ""
+        subscribed: userRobotInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t("robot.menuMyStats")}\n\n` +
         message,
-      getSignalRobotMenu(ctx)
+      getUserRobotMenu(ctx)
     );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalPositions(ctx: any) {
+async function userRobotPositions(ctx: any) {
   try {
     if (ctx.scene.state.page && ctx.scene.state.page === "pos") return;
     ctx.scene.state.page = "pos";
     const {
       robotInfo,
-      userSignalsInfo
+      userRobotInfo
     }: {
       robotInfo: cpz.RobotInfo;
-      userSignalsInfo: cpz.UserSignalsInfo;
+      userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
-    const subscribed = !!userSignalsInfo;
-    let openPositions: cpz.RobotPositionState[] = [];
-    let closedPositions: cpz.RobotPositionState[] = [];
-    if (subscribed) {
-      ({ openPositions, closedPositions } = userSignalsInfo);
-    } else {
-      ({ openPositions, closedPositions } = robotInfo);
-    }
+
+    const { openPositions, closedPositions } = userRobotInfo;
 
     let openPositionsText = "";
     if (
@@ -259,33 +265,13 @@ async function robotSignalPositions(ctx: any) {
       Array.isArray(openPositions) &&
       openPositions.length > 0
     ) {
-      openPositions.forEach((pos: cpz.RobotPositionState) => {
+      openPositions.forEach((pos: cpz.UserPositionDB) => {
         const posText = ctx.i18n.t("robot.positionOpen", {
           ...pos,
           entryAction: ctx.i18n.t(`tradeAction.${pos.entryAction}`),
           entryDate: dayjs.utc(pos.entryDate).format("YYYY-MM-DD HH:mm UTC")
         });
-        let signalsText = "";
-        if (pos.alerts && Object.keys(pos.alerts).length > 0) {
-          Object.values(pos.alerts).forEach(signal => {
-            const actionText = ctx.i18n.t(`tradeAction.${signal.action}`);
-            const orderTypeText = ctx.i18n.t(`orderType.${signal.orderType}`);
-            const text = ctx.i18n.t("robot.signal", {
-              code: pos.code,
-              timestamp: dayjs
-                .utc(signal.candleTimestamp)
-                .format("YYYY-MM-DD HH:mm UTC"),
-              action: actionText,
-              orderType: orderTypeText,
-              price: +signal.price
-            });
-            signalsText = `${signalsText}\n${text}`;
-          });
-          signalsText = ctx.i18n.t("robot.positionSignals", {
-            signals: signalsText
-          });
-        }
-        openPositionsText = `${openPositionsText}\n\n${posText}\n${signalsText}`;
+        openPositionsText = `${openPositionsText}\n\n${posText}\n`;
       });
       openPositionsText = ctx.i18n.t("robot.positionsOpen", {
         openPositions: openPositionsText
@@ -305,7 +291,7 @@ async function robotSignalPositions(ctx: any) {
             dayjs.utc(b.entryDate).valueOf()
           )
         )
-        .forEach((pos: cpz.RobotPositionState) => {
+        .forEach((pos: cpz.UserPositionDB) => {
           const posText = ctx.i18n.t("robot.positionClosed", {
             ...pos,
             entryDate: dayjs.utc(pos.entryDate).format("YYYY-MM-DD HH:mm UTC"),
@@ -327,21 +313,22 @@ async function robotSignalPositions(ctx: any) {
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
         name: robotInfo.name,
-        subscribed: userSignalsInfo ? "✅" : ""
+        subscribed: userRobotInfo ? "✅" : ""
       }) + message,
-      getSignalRobotMenu(ctx)
+      getUserRobotMenu(ctx)
     );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalSubscribe(ctx: any) {
+async function userRobotAdd(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.SUBSCRIBE_SIGNALS, {
+    await ctx.scene.enter(cpz.TelegramScene.ADD_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
       reply: true,
       prevState: { ...ctx.scene.state, silent: false, reload: true }
@@ -349,57 +336,82 @@ async function robotSignalSubscribe(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalUnsubscribe(ctx: any) {
+async function userRobotDelete(ctx: any) {
   try {
-    const {
-      robotInfo
-    }: {
-      robotInfo: cpz.RobotInfo;
-    } = ctx.scene.state.selectedRobot;
-    const { success, error } = await this.broker.call(
-      `${cpz.Service.DB_USER_SIGNALS}.unsubscribe`,
-      { robotId: robotInfo.id },
-      {
-        meta: {
-          user: ctx.session.user
-        }
-      }
-    );
-    if (success) {
-      await ctx.reply(
-        ctx.i18n.t("scenes.robotSignal.unsubscribedSignals", {
-          name: robotInfo.name
-        }),
-        Extra.HTML()
-      );
-    } else {
-      await ctx.reply(
-        ctx.i18n.t("scenes.robotSignal.unsubscribedFailed", {
-          name: robotInfo.name,
-          error
-        }),
-        Extra.HTML()
-      );
-    }
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
-      ...ctx.scene.state,
-      reload: true,
-      silent: false
+    await ctx.scene.enter(cpz.TelegramScene.DELETE_USER_ROBOT, {
+      selectedRobot: ctx.scene.state.selectedRobot,
+      reply: true,
+      prevState: { ...ctx.scene.state, silent: false, reload: true }
     });
   } catch (e) {
     this.logger.error(e);
-
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function robotSignalBack(ctx: any) {
+async function userRobotEdit(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+
+    await ctx.scene.enter(cpz.TelegramScene.EDIT_USER_ROBOT, {
+      selectedRobot: ctx.scene.state.selectedRobot,
+      reply: true,
+      prevState: {
+        ...ctx.scene.state,
+        silent: false,
+        reload: true,
+        reply: true
+      }
+    });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function userRobotStart(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.START_USER_ROBOT, {
+      selectedRobot: ctx.scene.state.selectedRobot,
+      reply: true,
+      prevState: { ...ctx.scene.state, silent: false, reload: true }
+    });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function userRobotStop(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.STOP_USER_ROBOT, {
+      selectedRobot: ctx.scene.state.selectedRobot,
+      reply: true,
+      prevState: { ...ctx.scene.state, silent: false, reload: true }
+    });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function userRobotBack(ctx: any) {
   try {
     if (!ctx.scene.state.prevScene) {
       ctx.scene.state.silent = false;
@@ -415,18 +427,21 @@ async function robotSignalBack(ctx: any) {
   }
 }
 
-async function robotSignalLeave(ctx: any) {
+async function userRobotLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
 export {
-  robotSignalInfo,
-  robotSignalPublicStats,
-  robotSignalMyStats,
-  robotSignalPositions,
-  robotSignalSubscribe,
-  robotSignalUnsubscribe,
-  robotSignalBack,
-  robotSignalLeave
+  userRobotInfo,
+  userRobotPublicStats,
+  userRobotMyStats,
+  userRobotPositions,
+  userRobotAdd,
+  userRobotDelete,
+  userRobotEdit,
+  userRobotStart,
+  userRobotStop,
+  userRobotBack,
+  userRobotLeave
 };

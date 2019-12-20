@@ -54,13 +54,13 @@ function getAssetsMenu(ctx: any) {
   });
 }
 
-function getSignalsListMenu(ctx: any) {
-  const robots: { id: string; name: string; subscribed: boolean }[] =
+function getRobotsListMenu(ctx: any) {
+  const robots: { id: string; name: string; status: cpz.Status }[] =
     ctx.scene.state.robots;
   return Extra.HTML().markup((m: any) => {
-    const buttons = robots.map(({ name, id, subscribed }) => [
+    const buttons = robots.map(({ name, id, status }) => [
       m.callbackButton(
-        `${name} ${subscribed === true ? "✅" : ""}`,
+        `${name} ${status ? "✅" : ""}`,
         JSON.stringify({ a: "robot", p: id }),
         false
       )
@@ -79,12 +79,12 @@ function getSignalsListMenu(ctx: any) {
   });
 }
 
-async function searchSignalsEnter(ctx: any) {
+async function searchRobotsEnter(ctx: any) {
   try {
     if (ctx.scene.state.stage === "selectAsset")
-      return searchSignalsSelectAsset(ctx);
+      return searchRobotsSelectAsset(ctx);
     if (ctx.scene.state.stage === "selectRobot")
-      return searchSignalsSelectRobot(ctx);
+      return searchRobotsSelectRobot(ctx);
     let exchanges: { exchange: string }[];
     if (ctx.scene.state.exchanges && !ctx.scene.state.reload)
       exchanges = ctx.scene.state.exchanges;
@@ -92,7 +92,7 @@ async function searchSignalsEnter(ctx: any) {
       exchanges = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.getAvailableExchanges`,
         {
-          signals: true
+          trading: true
         },
         {
           meta: {
@@ -109,12 +109,12 @@ async function searchSignalsEnter(ctx: any) {
     if (ctx.scene.state.reply) {
       ctx.scene.state.reply = false;
       return ctx.reply(
-        ctx.i18n.t("scenes.searchSignals.selectExchange"),
+        ctx.i18n.t("scenes.searchRobots.selectExchange"),
         getExchangesMenu(ctx)
       );
     }
     return ctx.editMessageText(
-      ctx.i18n.t("scenes.searchSignals.selectExchange"),
+      ctx.i18n.t("scenes.searchRobots.selectExchange"),
       getExchangesMenu(ctx)
     );
   } catch (e) {
@@ -125,7 +125,7 @@ async function searchSignalsEnter(ctx: any) {
   }
 }
 
-async function searchSignalsSelectAsset(ctx: any) {
+async function searchRobotsSelectAsset(ctx: any) {
   try {
     let assets: {
       asset: string;
@@ -141,7 +141,7 @@ async function searchSignalsSelectAsset(ctx: any) {
       assets = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.getAvailableAssets`,
         {
-          signals: true,
+          trading: true,
           exchange: ctx.scene.state.exchange
         },
         {
@@ -153,12 +153,12 @@ async function searchSignalsSelectAsset(ctx: any) {
       ctx.scene.state.assets = assets;
     }
     if (!assets || !Array.isArray(assets) || assets.length < 0) {
-      throw new Error("Failed to load signal assets");
+      throw new Error("Failed to load trading assets");
     }
     ctx.scene.state.selectedAsset = null;
 
     return ctx.editMessageText(
-      ctx.i18n.t("scenes.searchSignals.selectAsset", {
+      ctx.i18n.t("scenes.searchRobots.selectAsset", {
         exchange: ctx.scene.state.exchange
       }),
       getAssetsMenu(ctx)
@@ -171,18 +171,19 @@ async function searchSignalsSelectAsset(ctx: any) {
   }
 }
 
-async function searchSignalsSelectRobot(ctx: any) {
+async function searchRobotsSelectRobot(ctx: any) {
   try {
     if (!ctx.scene.state.robots || ctx.scene.state.reload) {
       if (!ctx.scene.state.selectedAsset) {
         const { p: selectedAsset } = JSON.parse(ctx.callbackQuery.data);
         ctx.scene.state.selectedAsset = selectedAsset;
       }
+      const { exchange } = ctx.scene.state;
       const [asset, currency] = ctx.scene.state.selectedAsset.split("/");
       ctx.scene.state.robots = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSignalRobots`,
+        `${cpz.Service.DB_USER_ROBOTS}.getRobots`,
         {
-          exchange: ctx.scene.state.exchange,
+          exchange,
           asset,
           currency
         },
@@ -192,7 +193,6 @@ async function searchSignalsSelectRobot(ctx: any) {
           }
         }
       );
-      this.logger.info(ctx.scene.state.robots);
       if (
         !ctx.scene.state.robots ||
         !Array.isArray(ctx.scene.state.robots) ||
@@ -201,24 +201,22 @@ async function searchSignalsSelectRobot(ctx: any) {
         throw new Error("Failed to load signal robots");
       }
     }
-
     if (ctx.scene.state.reply) {
       ctx.scene.state.reply = false;
       return ctx.reply(
-        ctx.i18n.t("scenes.searchSignals.selectRobot", {
+        ctx.i18n.t("scenes.searchRobots.selectRobot", {
           exchange: ctx.scene.state.exchange,
           asset: ctx.scene.state.selectedAsset
         }),
-        getSignalsListMenu(ctx)
+        getRobotsListMenu(ctx)
       );
     }
-
     return ctx.editMessageText(
-      ctx.i18n.t("scenes.searchSignals.selectRobot", {
+      ctx.i18n.t("scenes.searchRobots.selectRobot", {
         exchange: ctx.scene.state.exchange,
         asset: ctx.scene.state.selectedAsset
       }),
-      getSignalsListMenu(ctx)
+      getRobotsListMenu(ctx)
     );
   } catch (e) {
     this.logger.error(e);
@@ -228,13 +226,13 @@ async function searchSignalsSelectRobot(ctx: any) {
   }
 }
 
-async function searchSignalsOpenRobot(ctx: any) {
+async function searchRobotsOpenRobot(ctx: any) {
   try {
     const { p: robotId } = JSON.parse(ctx.callbackQuery.data);
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
+    await ctx.scene.enter(cpz.TelegramScene.USER_ROBOT, {
       robotId,
-      prevScene: cpz.TelegramScene.SEARCH_SIGNALS,
+      prevScene: cpz.TelegramScene.SEARCH_ROBOTS,
       prevState: { ...ctx.scene.state, reply: true, stage: "selectRobot" }
     });
   } catch (e) {
@@ -245,17 +243,17 @@ async function searchSignalsOpenRobot(ctx: any) {
   }
 }
 
-async function searchSignalsBack(ctx: any) {
+async function searchRobotsBack(ctx: any) {
   try {
     if (ctx.callbackQuery && ctx.callbackQuery.data) {
       const data = JSON.parse(ctx.callbackQuery.data);
       if (data && data.p) {
         ctx.scene.state.stage = data.p;
-        return await searchSignalsEnter(ctx);
+        return await searchRobotsEnter(ctx);
       }
     }
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.SIGNALS);
+    await ctx.scene.enter(cpz.TelegramScene.ROBOTS);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -264,16 +262,16 @@ async function searchSignalsBack(ctx: any) {
   }
 }
 
-async function searchSignalsLeave(ctx: any) {
+async function searchRobotsLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
 export {
-  searchSignalsEnter,
-  searchSignalsSelectAsset,
-  searchSignalsSelectRobot,
-  searchSignalsOpenRobot,
-  searchSignalsBack,
-  searchSignalsLeave
+  searchRobotsEnter,
+  searchRobotsSelectAsset,
+  searchRobotsSelectRobot,
+  searchRobotsOpenRobot,
+  searchRobotsBack,
+  searchRobotsLeave
 };

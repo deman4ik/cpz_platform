@@ -6,6 +6,7 @@ export interface GenericObject<T> {
 
 declare namespace cpz {
   const enum Service {
+    DB_EXCHANGES = "db-exchanges",
     DB_IMPORTERS = "db-importers",
     DB_CANDLES = "db-candles",
     DB_CANDLES_CURRENT = "db-candles-current",
@@ -113,6 +114,21 @@ declare namespace cpz {
     ROBOT_SIGNAL = "robotSignal",
     SUBSCRIBE_SIGNALS = "subscribeSignals",
     PERFOMANCE_SIGNALS = "perfSignals",
+    ROBOTS = "robots",
+    SEARCH_ROBOTS = "searchRobots",
+    MY_ROBOTS = "myRobots",
+    USER_ROBOT = "userRobot",
+    ADD_USER_ROBOT = "addUserRobot",
+    START_USER_ROBOT = "startUserRobot",
+    STOP_USER_ROBOT = "stopUserRobot",
+    EDIT_USER_ROBOT = "editUserRobot",
+    DELETE_USER_ROBOT = "deleteUserRobot",
+    PERFOMANCE_ROBOTS = "perfRobots",
+    SETTINGS = "settings",
+    USER_EXCHANGE_ACCS = "userExAccs",
+    USER_EXCHANGE_ACC = "userExAcc",
+    ADD_USER_EX_ACC = "addUserExAcc",
+    EDIT_USER_EX_ACC = "editUserExAcc",
     FAQ = "faq"
   }
 
@@ -295,6 +311,16 @@ declare namespace cpz {
   interface MinMax {
     min: number;
     max: number | undefined;
+  }
+
+  interface Exchange {
+    code: string;
+    name: string;
+    timeframes?: Timeframe[];
+    countries?: string[];
+    options?: any;
+    available: number;
+    type?: string;
   }
 
   interface Market {
@@ -770,6 +796,25 @@ declare namespace cpz {
     code: string;
   }
 
+  interface RobotBaseInfo extends RobotHead {
+    exchange: string;
+    asset: string;
+    currency: string;
+    timeframe: Timeframe;
+    strategyCode: string;
+    strategyName: string;
+    description: string;
+    settings: RobotSettings;
+    available: number;
+    signals: boolean;
+    trading: boolean;
+    status: Status;
+    startedAt?: string;
+    stoppedAt?: string;
+    statistics?: RobotStats;
+    equity?: RobotEquity;
+  }
+
   interface RobotInfo extends RobotHead {
     exchange: string;
     asset: string;
@@ -901,7 +946,7 @@ declare namespace cpz {
     id: string;
     userId: string;
     exchange: string;
-    name?: string;
+    name: string;
     keys: UserExchangeKeys;
     status: UserExchangeAccStatus;
     ordersCache: GenericObject<any>;
@@ -951,6 +996,12 @@ declare namespace cpz {
     positions: UserPositionState[];
   }
 
+  interface UserRobotInfo extends UserRobotDB {
+    userExAccName: string;
+    openPositions: cpz.UserPositionDB[];
+    closedPositions: cpz.UserPositionDB[];
+  }
+
   class UserRobot {
     constructor(state: UserRobotState);
     state: {
@@ -992,6 +1043,7 @@ declare namespace cpz {
     status: UserPositionStatus;
     parentId?: string;
     direction: PositionDirection;
+    entryAction?: TradeAction;
     entryStatus?: UserPositionOrderStatus;
     entrySignalPrice?: number;
     entryPrice?: number;
@@ -999,6 +1051,7 @@ declare namespace cpz {
     entryVolume?: number;
     entryExecuted?: number;
     entryRemaining?: number;
+    exitAction?: TradeAction;
     exitStatus?: UserPositionOrderStatus;
     exitSignalPrice?: number;
     exitPrice?: number;
@@ -1013,7 +1066,6 @@ declare namespace cpz {
     nextJobAt?: string;
     nextJob?: UserPositionJob;
   }
-
   interface UserSignalPosition extends UserPositionDB {
     exchange: string;
     asset: string;
@@ -1021,7 +1073,6 @@ declare namespace cpz {
     userId: string;
     userSignalVolume: number;
   }
-
   interface UserPositionState extends UserPositionDB {
     robot: {
       timeframe: Timeframe;

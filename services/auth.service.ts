@@ -164,14 +164,14 @@ class AuthService extends Service {
   ) {
     this.logger.info("Register Telegram", ctx.params);
     const { telegramId, telegramUsername, name } = ctx.params;
-    //TODO: check password
+
     const [userExists]: cpz.User[] = await this.broker.call(
       `${cpz.Service.DB_USERS}.find`,
       {
         query: { telegramId }
       }
     );
-    if (userExists) return { id: userExists.id };
+    if (userExists) return userExists;
     const newUser: cpz.User = {
       id: uuid(),
       telegramId,
@@ -198,7 +198,7 @@ class AuthService extends Service {
     await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
       entity: newUser
     });
-    return { id: newUser.id };
+    return newUser;
   }
 
   me(ctx: Context<null, { user: cpz.User }>) {

@@ -3,7 +3,7 @@ import { cpz } from "../../../@types";
 import { Errors } from "moleculer";
 import { getMainKeyboard } from "../keyboard";
 
-async function signalsSubscribeEnter(ctx: any) {
+async function subscribeSignalsEnter(ctx: any) {
   try {
     const {
       robotInfo,
@@ -12,8 +12,18 @@ async function signalsSubscribeEnter(ctx: any) {
       robotInfo: cpz.RobotInfo;
       market: cpz.Market;
     } = ctx.scene.state.selectedRobot;
-    await ctx.editMessageText(
+    if (ctx.scene.state.reply)
+      return ctx.reply(
+        ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
+          name: robotInfo.name,
+          asset: robotInfo.asset,
+          minVolume: market.limits.amount.min
+        }),
+        Extra.HTML()
+      );
+    return ctx.editMessageText(
       ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
+        name: robotInfo.name,
         asset: robotInfo.asset,
         minVolume: market.limits.amount.min
       }),
@@ -22,21 +32,27 @@ async function signalsSubscribeEnter(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function signalsSubscribeConfirm(ctx: any) {
+async function subscribeSignalsConfirm(ctx: any) {
   try {
     this.logger.info(ctx.message);
 
     const { id: robotId } = ctx.scene.state.selectedRobot.robotInfo;
     let volume: number;
+    let error: string;
     try {
       volume = parseFloat(ctx.message.text);
-      if (isNaN(volume))
-        throw new Errors.ValidationError("Volume is not a number");
-      await this.broker.call(
+      if (isNaN(volume)) error = "Volume is not a number";
+    } catch (e) {
+      error = e.message;
+    }
+
+    if (!error) {
+      ({ error } = await this.broker.call(
         `${cpz.Service.DB_USER_SIGNALS}.subscribe`,
         { robotId, telegram: true, volume },
         {
@@ -44,29 +60,29 @@ async function signalsSubscribeConfirm(ctx: any) {
             user: ctx.session.user
           }
         }
-      );
-    } catch (e) {
-      if (e instanceof Errors.ValidationError) {
-        const {
-          robotInfo,
-          market
-        }: {
-          robotInfo: cpz.RobotInfo;
-          market: cpz.Market;
-        } = ctx.scene.state.selectedRobot;
-        await ctx.reply(
-          ctx.i18n.t("scenes.subscribeSignals.wrongVolume", {
-            asset: robotInfo.asset,
-            minVolume: market.limits.amount.min
-          }),
-          Extra.HTML()
-        );
-        await ctx.scene.reenter();
-        return;
-      }
-      this.logger.error(e);
-      throw e;
+      ));
     }
+
+    if (error) {
+      const {
+        robotInfo,
+        market
+      }: {
+        robotInfo: cpz.RobotInfo;
+        market: cpz.Market;
+      } = ctx.scene.state.selectedRobot;
+      await ctx.reply(
+        ctx.i18n.t("scenes.subscribeSignals.wrongVolume", {
+          name: robotInfo.name,
+          asset: robotInfo.asset,
+          minVolume: market.limits.amount.min
+        }),
+        Extra.HTML()
+      );
+      ctx.scene.state.reply = true;
+      return subscribeSignalsEnter(ctx);
+    }
+
     await ctx.reply(
       ctx.i18n.t("scenes.subscribeSignals.subscribedSignals", {
         name: ctx.scene.state.selectedRobot.robotInfo.name,
@@ -84,11 +100,12 @@ async function signalsSubscribeConfirm(ctx: any) {
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
     await ctx.scene.leave();
   }
 }
 
-async function signalsSubscribeBack(ctx: any) {
+async function subscribeSignalsBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(
@@ -103,14 +120,14 @@ async function signalsSubscribeBack(ctx: any) {
   }
 }
 
-async function signalsSubscribeLeave(ctx: any) {
+async function subscribeSignalsLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
 export {
-  signalsSubscribeEnter,
-  signalsSubscribeConfirm,
-  signalsSubscribeBack,
-  signalsSubscribeLeave
+  subscribeSignalsEnter,
+  subscribeSignalsConfirm,
+  subscribeSignalsBack,
+  subscribeSignalsLeave
 };

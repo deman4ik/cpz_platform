@@ -3,8 +3,13 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
-import { underscoreToCamelCaseKeys, equals } from "../../../utils/helpers";
-import { createRobotCode, createRobotName } from "../../../utils/naming";
+import {
+  underscoreToCamelCaseKeys,
+  equals,
+  createRobotCode,
+  createRobotName,
+  getAccessValue
+} from "../../../utils";
 import Auth from "../../../mixins/auth";
 
 class RobotsService extends Service {
@@ -89,14 +94,32 @@ class RobotsService extends Service {
         }
       },
       actions: {
-        getAvailableSignalAssets: {
-          handler: this.getAvailableSignalAssets
+        getAvailableExchanges: {
+          params: {
+            signals: { type: "boolean", optional: true },
+            trading: { type: "boolean", optional: true }
+          },
+          handler: this.getAvailableExchanges
+        },
+        getAvailableAssets: {
+          params: {
+            exchange: { type: "string", optional: true },
+            signals: { type: "boolean", optional: true },
+            trading: { type: "boolean", optional: true }
+          },
+          handler: this.getAvailableAssets
         },
         getRobotInfo: {
           params: {
             id: "string"
           },
           handler: this.getRobotInfo
+        },
+        getRobotBaseInfo: {
+          params: {
+            id: "string"
+          },
+          handler: this.getRobotBaseInfo
         },
         create: {
           params: {
@@ -270,12 +293,36 @@ class RobotsService extends Service {
     }
   }
 
-  async getAvailableSignalAssets() {
+  async getAvailableExchanges(
+    ctx: Context<
+      {
+        signals?: boolean;
+        trading?: boolean;
+      },
+      { user: cpz.User }
+    >
+  ) {
     try {
-      const query =
-        "select distinct asset, currency from robots where available >= 15 and signals = true group by asset, currency";
+      const { signals, trading } = ctx.params;
+      const signalsDefined = signals === true || signals === false;
+      const tradingDefined = trading === true || trading === false;
+      const available = getAccessValue(ctx.meta.user);
+      const params: {
+        signals?: boolean;
+        trading?: boolean;
+        available: number;
+      } = {
+        available
+      };
+      const query = `select distinct exchange from robots where available >= :available
+        ${signalsDefined ? "AND signals = :signals" : ""}
+        ${tradingDefined ? "AND trading = :trading" : ""}
+         group by exchange`;
+      if (signalsDefined) params.signals = signals;
+      if (tradingDefined) params.trading = trading;
       return await this.adapter.db.query(query, {
-        type: Sequelize.QueryTypes.SELECT
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: params
       });
     } catch (e) {
       this.logger.error(e);
@@ -283,7 +330,50 @@ class RobotsService extends Service {
     }
   }
 
-  async getRobotInfo(ctx: Context<{ id: string }>): Promise<cpz.RobotInfo> {
+  async getAvailableAssets(
+    ctx: Context<
+      {
+        exchange?: string;
+        signals?: boolean;
+        trading?: boolean;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      const { exchange, signals, trading } = ctx.params;
+      const signalsDefined = signals === true || signals === false;
+      const tradingDefined = trading === true || trading === false;
+      const available = getAccessValue(ctx.meta.user);
+      const params: {
+        exchange?: string;
+        signals?: boolean;
+        trading?: boolean;
+        available: number;
+      } = {
+        available
+      };
+      const query = `select distinct asset, currency from robots where available >= :available
+        ${exchange ? "AND exchange = :exchange" : ""}
+        ${signalsDefined ? "AND signals = :signals" : ""}
+        ${tradingDefined ? "AND trading = :trading" : ""}
+         group by asset, currency`;
+      if (exchange) params.exchange = exchange;
+      if (signalsDefined) params.signals = signals;
+      if (tradingDefined) params.trading = trading;
+      return await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: params
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getRobotInfo(
+    ctx: Context<{ id: string }, { user: cpz.User }>
+  ): Promise<cpz.RobotInfo> {
     try {
       const { id } = ctx.params;
       const query = `select
@@ -381,7 +471,9 @@ class RobotsService extends Service {
         [key: string]: any;
         currentSignals?: { code?: string; alerts?: cpz.AlertInfo[] }[];
       } = underscoreToCamelCaseKeys(rawRobotInfo);
-
+      const available = getAccessValue(ctx.meta.user);
+      if (robotInfo.available < available)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
       let robotSignals: { [key: string]: any }[] = [];
       if (
         robotInfo.currentSignals &&
@@ -398,6 +490,52 @@ class RobotsService extends Service {
       }
       robotInfo.currentSignals = robotSignals;
       return <cpz.RobotInfo>robotInfo;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getRobotBaseInfo(
+    ctx: Context<{ id: string }, { user: cpz.User }>
+  ): Promise<cpz.RobotBaseInfo> {
+    try {
+      const { id } = ctx.params;
+      const query = `select
+      t.id,
+      t.code,
+      t.name,
+      t.mod,
+      t.exchange,
+      t.asset,
+      t.currency,
+      t.timeframe,
+      t.strategy as strategy_name,
+	    s.code as strategy_code,
+	    s.description,
+      t.settings,
+      t.available,
+      t.signals,
+      t.trading,
+      t.status,
+      t.started_at,
+      t.stopped_at,
+      t.statistics,
+      t.equity
+    from
+      robots t, strategies s 
+    where t.strategy = s.id 
+    and t.id = :id;`;
+      const [rawRobotInfo] = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: { id }
+      });
+      const robotInfo = <cpz.RobotInfo>underscoreToCamelCaseKeys(rawRobotInfo);
+      const available = getAccessValue(ctx.meta.user);
+      if (robotInfo.available < available)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+      return robotInfo;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -24,6 +24,7 @@ class UserRobotsService extends Service {
       },
       mixins: [Auth, DbService],
       adapter: SqlAdapter,
+      dependencies: [cpz.Service.DB_ROBOTS],
       model: {
         name: "user_robots",
         define: {
@@ -99,11 +100,70 @@ class UserRobotsService extends Service {
           },
           handler: this.create
         },
+        delete: {
+          params: {
+            id: "string"
+          },
+          graphql: {
+            mutation: "userRobotDelete(id: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.delete
+        },
+        edit: {
+          params: {
+            id: "string",
+            settings: {
+              type: "object",
+              props: {
+                volume: { type: "number", positive: true },
+                kraken: {
+                  type: "object",
+                  optional: true,
+                  props: {
+                    leverage: {
+                      type: "number",
+                      enum: [2, 3, 4, 5],
+                      optional: true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          graphql: {
+            mutation:
+              "userRobotEdit(id: String!, settings: UserRobotSettings!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.edit
+        },
+        getRobots: {
+          params: {
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optional: true },
+            currency: { type: "string", optional: true },
+            userId: { type: "string", optional: true }
+          },
+          handler: this.getRobots
+        },
         getState: {
           params: {
             id: "string"
           },
           handler: this.getState
+        },
+        getUserRobot: {
+          params: {
+            robotId: "string"
+          },
+          handler: this.getUserRobot
         }
       }
     });
@@ -124,7 +184,7 @@ class UserRobotsService extends Service {
       const { id: userId } = ctx.meta.user;
       const userExAccExists: cpz.UserExchangeAccount = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
-        { id: userExAccId }
+        { id: userExAccId, fields: ["id", "status", "exchange", "userId"] }
       );
       if (!userExAccExists)
         throw new Errors.MoleculerClientError(
@@ -136,9 +196,15 @@ class UserRobotsService extends Service {
 
       if (userExAccExists.userId !== userId)
         throw new Errors.MoleculerClientError("FORBIDDEN", 403);
-      const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      const robot: {
+        id: string;
+        exchange: string;
+        asset: string;
+        currency: string;
+        available: number;
+      } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
-        fields: ["id", "available"]
+        fields: ["id", "available", "exchange", "asset", "currency"]
       });
       if (!robot)
         throw new Errors.MoleculerClientError(
@@ -147,6 +213,9 @@ class UserRobotsService extends Service {
           "ERR_NOT_FOUND",
           { robotId }
         );
+
+      if (userExAccExists.exchange !== robot.exchange)
+        throw new Errors.MoleculerClientError("Wrong exchange");
 
       const accessValue = getAccessValue(ctx.meta.user);
       if (robot.available < accessValue)
@@ -194,6 +263,158 @@ class UserRobotsService extends Service {
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };
+    }
+  }
+
+  async delete(ctx: Context<{ id: string }, { user: cpz.User }>) {
+    try {
+      const { id } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const userRobotExists: cpz.UserRobotDB = await this._get(ctx, {
+        id
+      });
+      if (!userRobotExists)
+        throw new Errors.MoleculerClientError(
+          "User Robot not found",
+          404,
+          "ERR_NOT_FOUND",
+          { id }
+        );
+      if (userRobotExists.userId !== userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+      if (userRobotExists.status !== cpz.Status.stopped)
+        throw new Errors.ValidationError("User Robot is not stopped");
+
+      await this._remove(ctx, { id });
+      //TODO: send recalc USER ROBOTS stats event
+      return { success: true };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async edit(
+    ctx: Context<
+      { id: string; settings: cpz.UserRobotSettings },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      const { id, settings } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const userRobotExists: cpz.UserRobotDB = await this._get(ctx, {
+        id
+      });
+      if (!userRobotExists)
+        throw new Errors.MoleculerClientError(
+          "User Robot not found",
+          404,
+          "ERR_NOT_FOUND",
+          { id }
+        );
+      if (userRobotExists.userId !== userId)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+      if (userRobotExists.status !== cpz.Status.stopped)
+        throw new Errors.MoleculerClientError("User Robot is not stopped");
+
+      const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+        id: userRobotExists.robotId,
+        fields: ["id", "exchange", "asset", "currency"]
+      });
+
+      if (!robot)
+        throw new Errors.MoleculerClientError(
+          "Robot not found",
+          404,
+          "ERR_NOT_FOUND",
+          { robotId: userRobotExists.robotId }
+        );
+
+      const [market]: cpz.Market[] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange: robot.exchange,
+            asset: robot.asset,
+            currency: robot.currency
+          }
+        }
+      );
+
+      if (settings.volume < market.limits.amount.min)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be more than ${market.limits.amount.min}`
+        );
+
+      if (settings.volume > market.limits.amount.max)
+        throw new Errors.ValidationError(
+          `Wrong volume value must be less than ${market.limits.amount.max}`
+        );
+
+      await this.adapter.updateById(id, {
+        $set: {
+          settings
+        }
+      });
+      return { success: true };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async getRobots(
+    ctx: Context<
+      {
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+        userId?: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      const { id: user_id } = ctx.meta.user;
+      const available = getAccessValue(ctx.meta.user);
+      const { exchange, asset, currency, userId } = ctx.params;
+      const params: {
+        user_id?: string;
+        exchange?: string;
+        asset?: string;
+        currency?: string;
+        available: number;
+      } = {
+        user_id,
+        available
+      };
+      const query = `
+      SELECT t.id, t.name, s.status
+      FROM  robots t  
+      LEFT JOIN user_robots s 
+      ON s.robot_id = t.id AND s.user_id = :user_id
+      WHERE t.trading = true
+      AND t.available >= :available
+      ${exchange ? "AND t.exchange = :exchange" : ""}
+      ${asset ? "AND t.asset = :asset" : ""}
+      ${currency ? "AND t.currency = :currency" : ""}
+      ${userId ? "AND s.user_id = :user_id" : ""}
+      `;
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (currency) params.currency = currency;
+      const data = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: params
+      });
+      if (!data || !Array.isArray(data) || data.length === 0) return [];
+      return data;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
   }
 
@@ -252,6 +473,110 @@ class UserRobotsService extends Service {
         rawUserRobotState.updated_at.toISOString();
       const userRobotState = underscoreToCamelCaseKeys(rawUserRobotState);
       return userRobotState;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getUserRobot(
+    ctx: Context<{ robotId: string }, { user: cpz.User }>
+  ): Promise<{
+    robotInfo: cpz.RobotInfo;
+    userRobotInfo?: cpz.UserRobotInfo;
+    market: cpz.Market;
+  }> {
+    try {
+      const { robotId } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const robotInfo: cpz.RobotInfo = await this.broker.call(
+        `${cpz.Service.DB_ROBOTS}.getRobotBaseInfo`,
+        {
+          id: robotId
+        },
+        {
+          meta: {
+            user: ctx.meta.user
+          }
+        }
+      );
+      const accessValue = getAccessValue(ctx.meta.user);
+      if (robotInfo.available < accessValue)
+        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+      const [userRobot]: cpz.UserRobotDB[] = await this._find(ctx, {
+        query: { robotId, userId }
+      });
+
+      let userRobotInfo: cpz.UserRobotInfo;
+      if (userRobot) {
+        let openPositions: cpz.UserPositionDB[] = [];
+        let closedPositions: cpz.UserPositionDB[] = [];
+        let userExAccName: string = "";
+
+        ({ name: userExAccName } = await this.broker.call(
+          `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
+          {
+            fields: ["name"],
+            id: userRobot.userExAccId
+          }
+        ));
+
+        const positions: cpz.UserPositionDB[] = await this.broker.call(
+          `${cpz.Service.DB_USER_POSITIONS}.find`,
+          {
+            limit: 10,
+            sort: "-created_at",
+            query: {
+              userRobotId: userRobot.id,
+              $or: [
+                {
+                  status: cpz.UserPositionStatus.open
+                },
+                {
+                  status: cpz.UserPositionStatus.closed
+                },
+                {
+                  status: cpz.UserPositionStatus.closedAuto
+                }
+              ]
+            }
+          }
+        );
+        if (positions && Array.isArray(positions) && positions.length > 0) {
+          openPositions = positions.filter(
+            pos => pos.status === cpz.UserPositionStatus.open
+          );
+          closedPositions = positions.filter(
+            pos =>
+              pos.status === cpz.UserPositionStatus.closed ||
+              pos.status === cpz.UserPositionStatus.closedAuto
+          );
+        }
+
+        userRobotInfo = {
+          ...userRobot,
+          userExAccName,
+          openPositions,
+          closedPositions
+        };
+      }
+
+      const [market] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange: robotInfo.exchange,
+            asset: robotInfo.asset,
+            currency: robotInfo.currency
+          }
+        }
+      );
+
+      return {
+        robotInfo,
+        userRobotInfo,
+        market
+      };
     } catch (e) {
       this.logger.error(e);
       throw e;

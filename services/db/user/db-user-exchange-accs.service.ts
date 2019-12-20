@@ -82,6 +82,19 @@ class UserExchangeAccsService extends Service {
             error: "object"
           },
           handler: this.invalidate
+        },
+        delete: {
+          params: {
+            id: "string"
+          },
+          graphql: {
+            mutation: "userExchangeAccDelete(id: ID!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.delete
         }
       }
     });
@@ -175,9 +188,10 @@ class UserExchangeAccsService extends Service {
       };
 
       if (existed) {
+        name = name || existed.name;
         await this.adapter.updateById(id, {
           $set: {
-            name: name || existed.name,
+            name,
             keys: exchangeAcc.keys,
             status: exchangeAcc.status,
             error: null
@@ -186,12 +200,12 @@ class UserExchangeAccsService extends Service {
       } else {
         await this.adapter.insert(exchangeAcc);
       }
-      return { success: true };
+      return { success: true, result: name };
     } catch (err) {
       this.logger.error(err);
       return {
         success: false,
-        error: err
+        error: err.message
       };
     }
   }
@@ -263,6 +277,57 @@ class UserExchangeAccsService extends Service {
     } catch (e) {
       this.logger.error(e);
       throw e;
+    }
+  }
+
+  async delete(
+    ctx: Context<
+      {
+        id: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      let { id } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+
+      let existed: cpz.UserExchangeAccount;
+      if (id) {
+        existed = await this.adapter.findById(id);
+        if (existed) {
+          if (existed.userId !== userId)
+            throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+
+          const startedUserRobots: cpz.UserRobotDB[] = await this.broker.call(
+            `${cpz.Service.DB_USER_ROBOTS}.find`,
+            {
+              query: {
+                userExAccId: existed.id,
+                status: cpz.Status.started
+              }
+            }
+          );
+
+          if (
+            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            startedUserRobots.length > 0
+          )
+            throw new Error(
+              "Failed to delete User Exchange Account with started Robots"
+            );
+
+          await this._remove(ctx, { id });
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      this.logger.error(err);
+      return {
+        success: false,
+        error: err.message
+      };
     }
   }
 }

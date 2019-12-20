@@ -7,6 +7,7 @@ import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 import dayjs from "../../lib/dayjs";
 import Auth from "../../mixins/auth";
+import { ISO_DATE_REGEX } from "../../utils";
 
 class ImporterRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -85,10 +86,12 @@ class ImporterRunnerService extends Service {
             },
             dateFrom: {
               type: "string",
+              pattern: ISO_DATE_REGEX,
               optional: true
             },
             dateTo: {
               type: "string",
+              pattern: ISO_DATE_REGEX,
               optional: true
             }
           },
