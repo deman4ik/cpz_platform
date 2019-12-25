@@ -36,6 +36,11 @@ class UserPositionsService extends Service {
             field: "entry_status",
             allowNull: true
           },
+          entryAction: {
+            type: Sequelize.STRING,
+            field: "entry_action",
+            allowNull: true
+          },
           entrySignalPrice: {
             type: Sequelize.NUMBER,
             field: "entry_signal_price",
@@ -93,6 +98,11 @@ class UserPositionsService extends Service {
           exitStatus: {
             type: Sequelize.STRING,
             field: "exit_status",
+            allowNull: true
+          },
+          exitAction: {
+            type: Sequelize.STRING,
+            field: "exit_action",
             allowNull: true
           },
           exitSignalPrice: {
@@ -243,6 +253,7 @@ class UserPositionsService extends Service {
           parentId,
           direction,
           entryStatus,
+          entryAction,
           entrySignalPrice,
           entryPrice,
           entryDate,
@@ -250,6 +261,7 @@ class UserPositionsService extends Service {
           entryExecuted,
           entryRemaining,
           exitStatus,
+          exitAction,
           exitSignalPrice,
           exitPrice,
           exitDate,
@@ -278,6 +290,7 @@ class UserPositionsService extends Service {
             parentId,
             direction,
             entryStatus,
+            entryAction,
             entrySignalPrice,
             entryPrice,
             entryDate,
@@ -285,6 +298,7 @@ class UserPositionsService extends Service {
             entryExecuted,
             entryRemaining,
             exitStatus,
+            exitAction,
             exitSignalPrice,
             exitPrice,
             exitDate,
@@ -308,13 +322,14 @@ class UserPositionsService extends Service {
         position_id,
         user_robot_id,
         user_id,
-          exchange,
-          asset,
-          currency,
+        exchange,
+        asset,
+        currency,
         status,
         parent_id,
         direction,
         entry_status,
+        entry_action,
         entry_signal_price,
         entry_price,
         entry_date,
@@ -322,6 +337,7 @@ class UserPositionsService extends Service {
         entry_executed,
         entry_remaining,
         exit_status,
+        exit_action,
         exit_signal_price,
         exit_price,
         exit_date,
@@ -344,6 +360,7 @@ class UserPositionsService extends Service {
           DO UPDATE SET updated_at = now(),
           status = excluded.status,
           entry_status = excluded.entry_status,
+          entry_action = excluded.entry_action,
           entry_signal_price = excluded.entry_signal_price,
           entry_price = excluded.entry_price,
           entry_date = excluded.entry_date,
@@ -351,6 +368,7 @@ class UserPositionsService extends Service {
           entry_executed = excluded.entry_executed,
           entry_remaining = excluded.entry_remaining,
           exit_status = excluded.exit_status,
+          exit_action = excluded.exit_action,
           exit_signal_price = excluded.exit_signal_price,
           exit_price = excluded.exit_price,
           exit_date = excluded.exit_date,
