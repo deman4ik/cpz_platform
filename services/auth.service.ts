@@ -34,7 +34,9 @@ class AuthService extends Service {
       },
       actions: {
         login: {
-          graphql: "login(email: String!, password: String!):AuthResponse!",
+          graphql: {
+            mutation: "login(email: String!, password: String!):AuthResponse!"
+          },
           params: {
             email: { type: "email" },
             password: { type: "string" }
@@ -42,7 +44,9 @@ class AuthService extends Service {
           handler: this.login
         },
         register: {
-          graphql: "register(email: String!, password: String!):Response!",
+          graphql: {
+            mutation: "register(email: String!, password: String!):Response!"
+          },
           params: {
             email: { type: "email" },
             password: { type: "string" }
@@ -58,7 +62,7 @@ class AuthService extends Service {
           handler: this.registerTg
         },
         me: {
-          graphql: "me:UserResponse!",
+          graphql: { query: "me:UserResponse!" },
           roles: [cpz.UserRoles.user],
           hooks: {
             before: "authAction"
