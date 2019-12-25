@@ -23,7 +23,7 @@ module.exports = {
       name: "backtester-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/backtester/backtester-worker.service.js",
+        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "backtester-worker"
@@ -53,7 +53,7 @@ module.exports = {
       name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/connector/private-connector-worker.service.js",
+        "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "private-connector-worker"
@@ -102,7 +102,7 @@ module.exports = {
       name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/robot/robot-worker.service.js",
+        "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "robot-worker"
@@ -122,7 +122,7 @@ module.exports = {
       name: "user-robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
+        "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "user-robot-worker"
@@ -142,7 +142,7 @@ module.exports = {
       name: "stats-calc-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/statsCalc/stats-calc-worker.service.js",
+        "--env --config prod.config.js dist/services/statsCalc/stats-calc-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "stats-calc-worker"
