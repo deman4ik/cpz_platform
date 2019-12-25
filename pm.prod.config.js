@@ -33,7 +33,7 @@ module.exports = {
       name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config prod.config.js dist/services/connector/public-connector.service.js",
+        "--env --config prod.config.js dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "public-connector"
