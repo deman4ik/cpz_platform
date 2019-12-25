@@ -12,7 +12,14 @@ class PublisherService extends Service {
 
     this.parseServiceSchema({
       name: cpz.Service.PUBLISHER,
-      dependencies: [cpz.Service.TELEGRAM_BOT],
+      dependencies: [
+        cpz.Service.TELEGRAM_BOT,
+        cpz.Service.DB_USERS,
+        cpz.Service.DB_USER_ROBOTS,
+        cpz.Service.DB_ROBOTS,
+        cpz.Service.DB_ROBOT_POSITIONS,
+        cpz.Service.DB_USER_SIGNALS
+      ],
       mixins: [Auth],
       created: this.createdService,
       actions: {

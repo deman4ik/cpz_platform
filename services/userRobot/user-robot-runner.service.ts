@@ -1,4 +1,5 @@
-import { Service, ServiceBroker, Context, Errors } from "moleculer";
+import { Service, ServiceBroker, Context } from "moleculer";
+import { Errors } from "moleculer-web";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import { JobId } from "bull";
@@ -236,17 +237,14 @@ class UserRobotRunnerService extends Service {
         }
       );
       if (!userRobot)
-        throw new Errors.MoleculerError(
-          "Failed to get user robot",
-          404,
-          "ERR_NOT_FOUND",
-          { id }
-        );
+        throw new Errors.NotFoundError("Failed to get user robot", {
+          userRobotId: id
+        });
       if (
         !allowedRoles.includes(cpz.UserRoles.admin) &&
         userId !== userRobot.userId
       )
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
 
       const userExAcc: cpz.UserExchangeAccount = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
@@ -255,12 +253,9 @@ class UserRobotRunnerService extends Service {
         }
       );
       if (!userExAcc)
-        throw new Errors.MoleculerError(
-          "Failed to get user exchange account",
-          404,
-          "ERR_NOT_FOUND",
-          { userExAccId: userRobot.userExAccId }
-        );
+        throw new Errors.NotFoundError("Failed to get user exchange account", {
+          userExAccId: userRobot.userExAccId
+        });
       if (userExAcc.status !== cpz.UserExchangeAccStatus.enabled)
         throw new Error(`User Exchange Account status is ${userExAcc.status}`);
       if (userRobot.status === cpz.Status.paused) {
@@ -324,17 +319,14 @@ class UserRobotRunnerService extends Service {
         }
       );
       if (!userRobot)
-        throw new Errors.MoleculerError(
-          "Failed to get user robot",
-          404,
-          "ERR_NOT_FOUND",
-          { id }
-        );
+        throw new Errors.NotFoundError("Failed to get user robot", {
+          userRobotId: id
+        });
       if (
         !allowedRoles.includes(cpz.UserRoles.admin) &&
         userId !== userRobot.userId
       )
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
       if (
         userRobot.status === cpz.Status.stopping ||
         userRobot.status === cpz.Status.stopped

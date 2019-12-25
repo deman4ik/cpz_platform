@@ -1,4 +1,5 @@
-import { Service, ServiceBroker, Errors, Context } from "moleculer";
+import { Service, ServiceBroker, Context } from "moleculer";
+import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -17,10 +18,6 @@ class RobotsService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_ROBOTS,
-      dependencies: [
-        cpz.Service.DB_ROBOT_POSITIONS,
-        cpz.Service.DB_ROBOT_SIGNALS
-      ],
       settings: {
         graphql: {
           type: `
@@ -473,7 +470,9 @@ class RobotsService extends Service {
       } = underscoreToCamelCaseKeys(rawRobotInfo);
       const available = getAccessValue(ctx.meta.user);
       if (robotInfo.available < available)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", {
+          robotId: robotInfo.id
+        });
       let robotSignals: { [key: string]: any }[] = [];
       if (
         robotInfo.currentSignals &&
@@ -533,7 +532,9 @@ class RobotsService extends Service {
       const robotInfo = <cpz.RobotInfo>underscoreToCamelCaseKeys(rawRobotInfo);
       const available = getAccessValue(ctx.meta.user);
       if (robotInfo.available < available)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", {
+          robotId: robotInfo.id
+        });
 
       return robotInfo;
     } catch (e) {

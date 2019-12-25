@@ -1,5 +1,5 @@
-import { ServiceSchema, Errors } from "moleculer";
-
+import { ServiceSchema } from "moleculer";
+import { Errors } from "moleculer-web";
 const Auth: ServiceSchema = {
   name: "",
   methods: {
@@ -18,11 +18,9 @@ const Auth: ServiceSchema = {
             ctx.meta.user.roles.allowedRoles.includes(r)
           )
         )
-          throw new Errors.MoleculerClientError(
-            "Invalid role",
-            403,
-            "ERR_INVALID_ROLE"
-          );
+          throw new Errors.ForbiddenError("Invalid role", {
+            ...ctx.meta.user
+          });
       }
     }
   }

@@ -17,7 +17,6 @@ class RobotRunnerService extends Service {
       dependencies: [
         cpz.Service.DB_ROBOTS,
         cpz.Service.DB_ROBOT_JOBS,
-        cpz.Service.ROBOT_WORKER,
         `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,

@@ -1,4 +1,10 @@
-import { Service, ServiceBroker, Errors, Context } from "moleculer";
+import {
+  Service,
+  ServiceBroker,
+  Context,
+  Errors as ErrorsBase
+} from "moleculer";
+import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -24,7 +30,6 @@ class UserRobotsService extends Service {
       },
       mixins: [Auth, DbService],
       adapter: SqlAdapter,
-      dependencies: [cpz.Service.DB_ROBOTS],
       model: {
         name: "user_robots",
         define: {
@@ -193,15 +198,14 @@ class UserRobotsService extends Service {
         { id: userExAccId, fields: ["id", "status", "exchange", "userId"] }
       );
       if (!userExAccExists)
-        throw new Errors.MoleculerClientError(
-          "User Exchange Account not found",
-          404,
-          "ERR_NOT_FOUND",
-          { userExAccId }
-        );
+        throw new Errors.NotFoundError("User Exchange Account not found", {
+          userExAccId
+        });
 
       if (userExAccExists.userId !== userId)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", {
+          userExAccId: userExAccExists.id
+        });
       const robot: {
         id: string;
         exchange: string;
@@ -213,19 +217,14 @@ class UserRobotsService extends Service {
         fields: ["id", "available", "exchange", "asset", "currency"]
       });
       if (!robot)
-        throw new Errors.MoleculerClientError(
-          "Robot not found",
-          404,
-          "ERR_NOT_FOUND",
-          { robotId }
-        );
+        throw new Errors.NotFoundError("Robot not found", { robotId });
 
       if (userExAccExists.exchange !== robot.exchange)
-        throw new Errors.MoleculerClientError("Wrong exchange");
+        throw new Error("Wrong exchange");
 
       const accessValue = getAccessValue(ctx.meta.user);
       if (robot.available < accessValue)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { robotId: robot.id });
 
       const [userRobotExists] = await this._find(ctx, {
         query: {
@@ -233,8 +232,7 @@ class UserRobotsService extends Service {
           userExAccId
         }
       });
-      if (userRobotExists)
-        throw new Errors.MoleculerClientError("User Robot already exists");
+      if (userRobotExists) throw new Error("User Robot already exists");
       const userRobotId = uuid();
 
       const [market]: cpz.Market[] = await this.broker.call(
@@ -248,12 +246,12 @@ class UserRobotsService extends Service {
         }
       );
       if (settings.volume < market.limits.amount.min)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be more than ${market.limits.amount.min}`
         );
 
       if (settings.volume > market.limits.amount.max)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be less than ${market.limits.amount.max}`
         );
 
@@ -280,17 +278,14 @@ class UserRobotsService extends Service {
         id
       });
       if (!userRobotExists)
-        throw new Errors.MoleculerClientError(
-          "User Robot not found",
-          404,
-          "ERR_NOT_FOUND",
-          { id }
-        );
+        throw new Errors.NotFoundError("User Robot not found", {
+          userRobotId: id
+        });
       if (userRobotExists.userId !== userId)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
 
       if (userRobotExists.status !== cpz.Status.stopped)
-        throw new Errors.ValidationError("User Robot is not stopped");
+        throw new ErrorsBase.ValidationError("User Robot is not stopped");
 
       await this._remove(ctx, { id });
       //TODO: send recalc USER ROBOTS stats event
@@ -314,17 +309,16 @@ class UserRobotsService extends Service {
         id
       });
       if (!userRobotExists)
-        throw new Errors.MoleculerClientError(
+        throw new Errors.NotFoundError(
           "User Robot not found",
-          404,
-          "ERR_NOT_FOUND",
-          { id }
+
+          { userRobotId: id }
         );
       if (userRobotExists.userId !== userId)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
 
       if (userRobotExists.status !== cpz.Status.stopped)
-        throw new Errors.MoleculerClientError("User Robot is not stopped");
+        throw new Error("User Robot is not stopped");
 
       const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: userRobotExists.robotId,
@@ -332,10 +326,9 @@ class UserRobotsService extends Service {
       });
 
       if (!robot)
-        throw new Errors.MoleculerClientError(
+        throw new Errors.NotFoundError(
           "Robot not found",
-          404,
-          "ERR_NOT_FOUND",
+
           { robotId: userRobotExists.robotId }
         );
 
@@ -351,12 +344,12 @@ class UserRobotsService extends Service {
       );
 
       if (settings.volume < market.limits.amount.min)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be more than ${market.limits.amount.min}`
         );
 
       if (settings.volume > market.limits.amount.max)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be less than ${market.limits.amount.max}`
         );
 
@@ -508,7 +501,7 @@ class UserRobotsService extends Service {
       );
       const accessValue = getAccessValue(ctx.meta.user);
       if (robotInfo.available < accessValue)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
       const [userRobot]: cpz.UserRobotDB[] = await this._find(ctx, {
         query: { robotId, userId }
       });

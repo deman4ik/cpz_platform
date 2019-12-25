@@ -1,4 +1,5 @@
-import { Service, ServiceBroker, Context, Errors } from "moleculer";
+import { Service, ServiceBroker, Context } from "moleculer";
+import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -125,7 +126,9 @@ class UserExchangeAccsService extends Service {
         existed = await this.adapter.findById(id);
         if (existed) {
           if (existed.userId !== userId)
-            throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+            throw new Errors.ForbiddenError("FORBIDDEN", {
+              userExAccId: existed.id
+            });
           if (existed.exchange !== exchange)
             throw new Error("Invalid exchange");
 
@@ -227,14 +230,13 @@ class UserExchangeAccsService extends Service {
         id
       );
       if (!userExchangeAcc)
-        throw new Errors.MoleculerClientError(
-          "User Exchange Account not found",
-          404,
-          "ERR_NOT_FOUND",
-          { id }
-        );
+        throw new Errors.NotFoundError("User Exchange Account not found", {
+          id
+        });
       if (userExchangeAcc.userId !== userId)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", {
+          userExAccId: userExchangeAcc.id
+        });
 
       await this.adapter.updateById(id, {
         $set: {
@@ -298,7 +300,9 @@ class UserExchangeAccsService extends Service {
         existed = await this.adapter.findById(id);
         if (existed) {
           if (existed.userId !== userId)
-            throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+            throw new Errors.ForbiddenError("FORBIDDEN", {
+              userExAccId: existed.id
+            });
 
           const startedUserRobots: cpz.UserRobotDB[] = await this.broker.call(
             `${cpz.Service.DB_USER_ROBOTS}.find`,

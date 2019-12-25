@@ -304,7 +304,7 @@ class BotService extends Service {
     myRobotsScene.leave(myRobotsLeave.bind(this));
     myRobotsScene.hears(
       match("keyboards.backKeyboard.back"),
-      mySignalsBack.bind(this)
+      myRobotsBack.bind(this)
     );
     myRobotsScene.command("back", leave());
     myRobotsScene.command("exit", leave());

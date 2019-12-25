@@ -1,4 +1,10 @@
-import { Service, ServiceBroker, Errors, Context } from "moleculer";
+import {
+  Service,
+  ServiceBroker,
+  Context,
+  Errors as ErrorsBase
+} from "moleculer";
+import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
@@ -19,7 +25,6 @@ class UserSignalsService extends Service {
       name: cpz.Service.DB_USER_SIGNALS,
       mixins: [Auth, DbService],
       adapter: SqlAdapter,
-      dependencies: [cpz.Service.DB_ROBOTS],
       model: {
         name: "user_signals",
         define: {
@@ -258,7 +263,7 @@ class UserSignalsService extends Service {
       );
       const accessValue = getAccessValue(ctx.meta.user);
       if (robotInfo.available < accessValue)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
       const [subscription]: cpz.UserSignals[] = await this._find(ctx, {
         query: {
           robotId,
@@ -408,7 +413,7 @@ class UserSignalsService extends Service {
       );
       const accessValue = getAccessValue(ctx.meta.user);
       if (available < accessValue)
-        throw new Errors.MoleculerClientError("FORBIDDEN", 403);
+        throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
 
       const [market]: cpz.Market[] = await this.broker.call(
         `${cpz.Service.DB_MARKETS}.find`,
@@ -421,12 +426,12 @@ class UserSignalsService extends Service {
         }
       );
       if (volume < market.limits.amount.min)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be more than ${market.limits.amount.min}`
         );
 
       if (volume > market.limits.amount.max)
-        throw new Errors.ValidationError(
+        throw new ErrorsBase.ValidationError(
           `Wrong volume value must be less than ${market.limits.amount.max}`
         );
       const { id: userId } = ctx.meta.user;

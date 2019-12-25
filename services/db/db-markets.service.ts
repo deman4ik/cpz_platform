@@ -12,7 +12,6 @@ class MarketsService extends Service {
       name: cpz.Service.DB_MARKETS,
       mixins: [Auth, DbService],
       adapter: SqlAdapter,
-      dependencies: [cpz.Service.PUBLIC_CONNECTOR],
       model: {
         name: "markets",
         define: {
