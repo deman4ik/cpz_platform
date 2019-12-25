@@ -513,6 +513,8 @@ class BotService extends Service {
       searchSignalsScene,
       settingsScene,
       signalsScene,
+      startUserRobotScene,
+      stopUserRobotScene,
       subscribeSignalsScene,
       userExAccScene,
       userExAccsScene,
