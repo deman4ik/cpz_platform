@@ -10,13 +10,23 @@ module.exports = {
       }
     },
     {
-      name: "backtester",
+      name: "backtester-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=2 --config prod.config.js dist/services/backtester",
+        "--env --config prod.config.js dist/services/backtester-runner.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "backtester"
+        NODEID: "backtester-runner"
+      }
+    },
+    {
+      name: "backtester-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --instances=3 --config prod.config.js dist/services/backtester/backtester-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "backtester-worker"
       }
     },
     {
@@ -91,7 +101,7 @@ module.exports = {
       name: "user-robot-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config dev.config.js dist/services/userRobot/user-robot-runner.service.js",
+        "--env --config prod.config.js dist/services/userRobot/user-robot-runner.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "user-robot-runner"
@@ -101,7 +111,7 @@ module.exports = {
       name: "user-robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config dev.config.js dist/services/robot/user-robot-worker.service.js",
+        "--env --instances=3 --config prod.config.js dist/services/robot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "user-robot-worker"
@@ -111,7 +121,7 @@ module.exports = {
       name: "stats-calc-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config dev.config.js dist/services/userRobot/stats-calc-runner.service.js",
+        "--env --config prod.config.js dist/services/userRobot/stats-calc-runner.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "stats-calc-runner"
@@ -121,10 +131,19 @@ module.exports = {
       name: "stats-calc-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config dev.config.js dist/services/robot/stats-calc-worker.service.js",
+        "--env --instances=3 --config prod.config.js dist/services/robot/stats-calc-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "stats-calc-worker"
+      }
+    },
+    {
+      name: "publisher",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args: "--env --config prod.config.js dist/services/publisher.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "publisher"
       }
     },
     {

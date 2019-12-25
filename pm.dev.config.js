@@ -10,12 +10,23 @@ module.exports = {
       }
     },
     {
-      name: "backtester",
+      name: "backtester-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config dev.config.js dist/services/backtester",
+      args:
+        "--env --config dev.config.js dist/services/backtester-runner.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "backtester"
+        NODEID: "backtester-runner"
+      }
+    },
+    {
+      name: "backtester-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config dev.config.js dist/services/backtester/backtester-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "backtester-worker"
       }
     },
     {
@@ -124,6 +135,15 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         NODEID: "stats-calc-worker"
+      }
+    },
+    {
+      name: "publisher",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args: "--env --config dev.config.js dist/services/publisher.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "publisher"
       }
     },
     {

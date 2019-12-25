@@ -1,4 +1,5 @@
-const { Errors } = require("moleculer");
+const { ValidationError, NotFoundError } = require("moleculer").Errors;
+const { ForbiddenError, UnAuthorizedError } = require("moleculer-web").Errors;
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -77,7 +78,11 @@ const brokerConfig = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err => !(err instanceof Errors.ValidationError)
+    check: err =>
+      !(err instanceof ValidationError) ||
+      !(err instanceof ForbiddenError) ||
+      !(err instanceof UnAuthorizedError) ||
+      !(err instanceof NotFoundError)
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
