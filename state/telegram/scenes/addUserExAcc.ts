@@ -125,7 +125,7 @@ async function addUserExAccSubmited(ctx: any) {
       await addUserExAccBack(ctx);
     } else {
       await ctx.reply(
-        ctx.i18n.t("scenes.addUserExAcc.success", {
+        ctx.i18n.t("scenes.addUserExAcc.failed", {
           exchange,
           error: error || ctx.i18n.t("unknownError")
         }),

@@ -98,6 +98,7 @@ async function userExAccDelete(ctx: any) {
         }),
         Extra.HTML()
       );
+      ctx.scene.state.reply = true;
       await userExAccBack(ctx);
     } else {
       await ctx.reply(
@@ -121,7 +122,9 @@ async function userExAccDelete(ctx: any) {
 async function userExAccBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.USER_EXCHANGE_ACCS);
+    await ctx.scene.enter(cpz.TelegramScene.USER_EXCHANGE_ACCS, {
+      silent: false
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

@@ -389,6 +389,7 @@ async function robotSignalUnsubscribe(ctx: any) {
     await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
       ...ctx.scene.state,
       reload: true,
+      reply: true,
       silent: false
     });
   } catch (e) {
