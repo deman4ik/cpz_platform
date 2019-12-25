@@ -507,6 +507,7 @@ class BotService extends Service {
       myRobotsScene,
       mySignalsScene,
       perfSignalsScene,
+      perfRobotsScene,
       robotsScene,
       robotSignalScene,
       searchRobotsScene,
