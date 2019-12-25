@@ -33,7 +33,7 @@ module.exports = {
       name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config dev.config.js dist/services/connector/public-connector.service.js",
+        "--env --instances=3 --config prod.config.js dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "public-connector"
@@ -43,7 +43,7 @@ module.exports = {
       name: "private-connector-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config dev.config.js dist/services/connector/private-connector-runner.service.js",
+        "--env --config prod.config.js dist/services/connector/private-connector-runner.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "private-connector-runner"
@@ -53,7 +53,7 @@ module.exports = {
       name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --instances=3 --config dev.config.js dist/services/connector/private-connector-worker.service.js",
+        "--env --instances=3 --config prod.config.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "private-connector-worker"
