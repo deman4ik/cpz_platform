@@ -49,7 +49,7 @@ class PublisherService extends Service {
     });
   }
 
-  created() {
+  createdService() {
     this.i18n = new TelegrafI18n({
       defaultLanguage: "en",
       useSession: true,
