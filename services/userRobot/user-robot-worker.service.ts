@@ -195,7 +195,7 @@ class UserRobotWorkerService extends Service {
       await this.broker.emit(cpz.Event.USER_ROBOT_FAILED, {
         userRobotId,
         jobType: type,
-        error: e
+        error: e.message
       });
     }
   }

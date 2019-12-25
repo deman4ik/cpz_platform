@@ -213,6 +213,13 @@
     "limit": "Limit ✴️",
     "stop": "Stop ⛔"
   },
+  "userExAcc": {
+    "error": "❌ Your API Key 🔐 ${name} is invalid!\n\n ${error}\n\nPlease update your API Key information in settings."
+  },
+  "userRobot": {
+    "error": "❌ Error occurred while processing 🤖 <b>${name}</b>(${id}) robots job ${jobType}.\n\n ${error} \n\nPlease contact support.",
+    "status": "🤖 Robot <b>${name}</b> is ${status} now!\n\n${message}"
+  },
   "unknownError": "Unknown error",
   "menu": "Please use Menu in Telegram keyboard section ↘️",
   "signalsMenu": "🚦 Signals\nPlease use Signals Menu in Telegram keyboard section ↘️",

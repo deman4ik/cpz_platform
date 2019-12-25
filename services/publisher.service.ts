@@ -30,7 +30,14 @@ class PublisherService extends Service {
       },
       events: {
         [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
-        [cpz.Event.SIGNAL_TRADE]: this.handleSignal
+        [cpz.Event.SIGNAL_TRADE]: this.handleSignal,
+        [cpz.Event.USER_EX_ACC_ERROR]: this.handleUserExAccError,
+        [cpz.Event.USER_ROBOT_FAILED]: this.handleUserRobotFailed,
+        [cpz.Event.USER_ROBOT_STARTED]: this.handleUserRobotStatus,
+        [cpz.Event.USER_ROBOT_STOPPED]: this.handleUserRobotStatus,
+        [cpz.Event.USER_ROBOT_PAUSED]: this.handleUserRobotStatus,
+        [cpz.Event.USER_ROBOT_RESUMED]: this.handleUserRobotStatus,
+        [cpz.Event.ORDER_ERROR]: this.handleOrderError
       }
     });
   }
@@ -44,9 +51,53 @@ class PublisherService extends Service {
     });
   }
 
-  async handleSignal(ctx: Context) {
+  async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
     try {
-      const signal = <cpz.SignalEvent>ctx.params;
+      const users = [];
+      if (ctx.params.userId) {
+        const { telegramId } = await this.broker.call(
+          `${cpz.Service.DB_USERS}.get`,
+          {
+            id: ctx.params.userId
+          }
+        );
+        if (telegramId) users.push(telegramId);
+      } else {
+        const userslist = await this.broker.call(
+          `${cpz.Service.DB_USERS}.find`,
+          {
+            fields: ["id", "telegramId"],
+            query: {
+              status: { $gt: 0 },
+              telegramId: { $ne: null }
+            }
+          }
+        );
+        userslist.forEach(({ telegramId }: cpz.User) => {
+          users.push(telegramId);
+        });
+      }
+
+      const entities = users.map(id => ({
+        telegramId: id,
+        message: ctx.params.message
+      }));
+
+      await this.broker.call<cpz.TelegramMessage>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entities
+        }
+      );
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async handleSignal(ctx: Context<cpz.SignalEvent>) {
+    try {
+      const signal = ctx.params;
 
       const { robotId, type, action } = signal;
       const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
@@ -195,47 +246,112 @@ class PublisherService extends Service {
     }
   }
 
-  async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
+  async handleUserExAccError(ctx: Context<cpz.UserExchangeAccountErrorEvent>) {
     try {
-      const users = [];
-      if (ctx.params.userId) {
-        const { telegramId } = await this.broker.call(
-          `${cpz.Service.DB_USERS}.get`,
-          {
-            id: ctx.params.userId
-          }
-        );
-        if (telegramId) users.push(telegramId);
-      } else {
-        const userslist = await this.broker.call(
-          `${cpz.Service.DB_USERS}.find`,
-          {
-            fields: ["id", "telegramId"],
-            query: {
-              status: { $gt: 0 },
-              telegramId: { $ne: null }
-            }
-          }
-        );
-        userslist.forEach(({ telegramId }: cpz.User) => {
-          users.push(telegramId);
-        });
-      }
-
-      const entities = users.map(id => ({
-        telegramId: id,
-        message: ctx.params.message
-      }));
-
-      await this.broker.call<cpz.TelegramMessage>(
+      const { userId, name, error } = ctx.params;
+      const user: cpz.User = await this.broker.call(
+        `${cpz.Service.DB_USERS}.get`,
+        {
+          fields: ["id", "telegramId", "settings"],
+          id: userId
+        }
+      );
+      const LANG = "en";
+      await this.broker.call<{ entity: cpz.TelegramMessage }>(
         `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
         {
-          entities
+          entity: {
+            telegramId: user.telegramId,
+            message: this.i18n.t(LANG, `userExAcc.error`, {
+              name,
+              error
+            })
+          }
         }
       );
     } catch (e) {
       this.logger.error(e);
-      throw e;
+    }
+  }
+
+  async handleUserRobotFailed(
+    ctx: Context<{
+      userRobotId: string;
+      jobType: cpz.UserRobotJobType;
+      error: string;
+    }>
+  ) {
+    try {
+      const { userRobotId, jobType, error } = ctx.params;
+
+      const { name, telegramId } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
+        {
+          id: userRobotId
+        }
+      );
+
+      const LANG = "en";
+      await this.broker.call<{ entity: cpz.TelegramMessage }>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entity: {
+            telegramId,
+            message: this.i18n.t(LANG, `userRobot.error`, {
+              id: userRobotId,
+              name: name,
+              jobType,
+              error
+            })
+          }
+        }
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleUserRobotStatus(
+    ctx: Context<{
+      userRobotId: string;
+      message?: string;
+    }>
+  ) {
+    try {
+      const { userRobotId, message } = ctx.params;
+      let status: cpz.Status;
+      if (ctx.eventName === cpz.Event.USER_ROBOT_STARTED)
+        status = cpz.Status.started;
+      else if (ctx.eventName === cpz.Event.USER_ROBOT_STOPPED)
+        status = cpz.Status.stopped;
+      else if (ctx.eventName === cpz.Event.USER_ROBOT_PAUSED)
+        status = cpz.Status.paused;
+      else if (ctx.eventName === cpz.Event.USER_ROBOT_RESUMED)
+        status = cpz.Status.started;
+      else throw new Error("Unknown Event Name");
+
+      const { name, telegramId } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
+        {
+          id: userRobotId
+        }
+      );
+      const LANG = "en";
+      await this.broker.call<{ entity: cpz.TelegramMessage }>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entity: {
+            telegramId,
+            message: this.i18n.t(LANG, `userRobot.status`, {
+              name,
+              message: message || "",
+              status
+            })
+          }
+        }
+      );
+    } catch (e) {
+      this.logger.error(e);
     }
   }
 }

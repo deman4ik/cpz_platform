@@ -268,9 +268,10 @@ class UserExchangeAccsService extends Service {
           cpz.Event.USER_EX_ACC_ERROR,
           {
             id,
+            userId: userExchangeAcc.userId,
             name: userExchangeAcc.name,
             exchange: userExchangeAcc.exchange,
-            errorMessage: error.message
+            error: error.message
           }
         );
       }

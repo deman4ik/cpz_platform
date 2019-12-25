@@ -164,6 +164,12 @@ class UserRobotsService extends Service {
             robotId: "string"
           },
           handler: this.getUserRobot
+        },
+        getUserRobotEventInfo: {
+          params: {
+            id: "string"
+          },
+          handler: this.getUserRobotEventInfo
         }
       }
     });
@@ -577,6 +583,34 @@ class UserRobotsService extends Service {
         userRobotInfo,
         market
       };
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getUserRobotEventInfo(ctx: Context<{ id: string }>) {
+    try {
+      const query = `SELECT ur.id AS user_robot_id,
+     r.id AS robot_id,
+     r.name,
+     ur.status,
+     u.id AS user_id,
+     u.telegram_id,
+     u.email,
+     u.settings
+    FROM user_robots ur, robots r, users u
+    WHERE ur.robot_id = r.id
+    AND ur.user_id = u.id
+    AND ur.id = :id`;
+
+      const rawData = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: { id: ctx.params.id }
+      });
+
+      const data = underscoreToCamelCaseKeys(rawData);
+      return data;
     } catch (e) {
       this.logger.error(e);
       throw e;

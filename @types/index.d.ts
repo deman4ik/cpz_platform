@@ -151,7 +151,7 @@ declare namespace cpz {
     by_admin = "by admin",
     order_error = "order error",
     invalid_exchange_account = "invalid exchange account",
-    exchange_error = "excahnge error"
+    exchange_error = "exchange error"
   }
 
   const enum UserRoles {
@@ -955,9 +955,10 @@ declare namespace cpz {
 
   interface UserExchangeAccountErrorEvent {
     id: string;
+    userId: string;
     name: string;
     exchange: string;
-    errorMessage: string;
+    error: string;
   }
   interface UserRobotSettings {
     volume: number;
