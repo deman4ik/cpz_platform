@@ -69,12 +69,23 @@ module.exports = {
       }
     },
     {
-      name: "importer",
+      name: "importer-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/importer",
+      args:
+        "--env --config prod.config.js dist/services/importer/importer-runner.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "importer"
+        NODEID: "importer-runner"
+      }
+    },
+    {
+      name: "importer-worker",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "importer-worker"
       }
     },
     {
