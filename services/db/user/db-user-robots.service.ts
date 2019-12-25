@@ -597,7 +597,7 @@ class UserRobotsService extends Service {
     AND ur.user_id = u.id
     AND ur.id = :id`;
 
-      const rawData = await this.adapter.db.query(query, {
+      const [rawData] = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id: ctx.params.id }
       });
