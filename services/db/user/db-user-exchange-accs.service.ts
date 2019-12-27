@@ -304,23 +304,20 @@ class UserExchangeAccsService extends Service {
               userExAccId: existed.id
             });
 
-          const startedUserRobots: cpz.UserRobotDB[] = await this.broker.call(
+          const userRobots: cpz.UserRobotDB[] = await this.broker.call(
             `${cpz.Service.DB_USER_ROBOTS}.find`,
             {
               query: {
-                userExAccId: existed.id,
-                status: cpz.Status.started
+                userExAccId: existed.id
               }
             }
           );
 
           if (
             existed.status !== cpz.UserExchangeAccStatus.disabled &&
-            startedUserRobots.length > 0
+            userRobots.length > 0
           )
-            throw new Error(
-              "Failed to delete User Exchange Account with started Robots"
-            );
+            throw new Error("Can't delete API Keys with with existed Robots");
 
           await this._remove(ctx, { id });
         }
