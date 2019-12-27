@@ -14,7 +14,8 @@ import dayjs from "../../../lib/dayjs";
 import {
   underscoreToCamelCaseKeys,
   round,
-  getAccessValue
+  getAccessValue,
+  datesToISOString
 } from "../../../utils";
 import Auth from "../../../mixins/auth";
 
@@ -128,11 +129,10 @@ class UserSignalsService extends Service {
     and u.user_id = :user_id
   group by r.exchange, r.asset`;
 
-      const rawData = await this.adapter.db.query(query, {
+      return await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { user_id }
       });
-      return rawData;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -172,10 +172,8 @@ class UserSignalsService extends Service {
         type: Sequelize.QueryTypes.SELECT,
         replacements: params
       });
-      if (!rawUserIds || !Array.isArray(rawUserIds) || rawUserIds.length === 0)
-        return [];
-      const userIds = rawUserIds.map(u => underscoreToCamelCaseKeys(u));
-      return userIds;
+
+      return underscoreToCamelCaseKeys(datesToISOString(rawUserIds));
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -386,13 +384,7 @@ class UserSignalsService extends Service {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { robot_id }
       });
-      if (
-        !subscribtionsRaw ||
-        !Array.isArray(subscribtionsRaw) ||
-        subscribtionsRaw.length === 0
-      )
-        return [];
-      return subscribtionsRaw.map(sub => underscoreToCamelCaseKeys(sub));
+      return underscoreToCamelCaseKeys(datesToISOString(subscribtionsRaw));
     } catch (e) {
       this.logger.error(e);
       throw e;

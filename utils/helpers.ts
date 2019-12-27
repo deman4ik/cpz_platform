@@ -217,6 +217,16 @@ function underscoreToCamelCaseKeys(obj: {
   return deepMapKeys(obj, key => underscoreToCamelCase(key));
 }
 
+function datesToISOString(data: { [key: string]: any } | any[]) {
+  return JSON.parse(JSON.stringify(data), (key, value) => {
+    if (value instanceof Date) {
+      return value.toISOString();
+    } else {
+      return value;
+    }
+  });
+}
+
 /**
  * Performs a deep comparison between two values to determine if they are equivalent.
  *
@@ -275,6 +285,7 @@ export {
   averageRound,
   divideRound,
   underscoreToCamelCaseKeys,
+  datesToISOString,
   equals,
   sum,
   average,

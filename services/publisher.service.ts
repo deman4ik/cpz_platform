@@ -169,7 +169,7 @@ class PublisherService extends Service {
             action === cpz.TradeAction.closeLong ||
             action === cpz.TradeAction.closeShort
           ) {
-            const position = await this.broker.call(
+            const position: cpz.RobotPositionState = await this.broker.call(
               `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
               {
                 id: signal.positionId

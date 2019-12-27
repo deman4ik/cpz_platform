@@ -10,7 +10,11 @@ import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
-import { underscoreToCamelCaseKeys, getAccessValue } from "../../../utils";
+import {
+  underscoreToCamelCaseKeys,
+  getAccessValue,
+  datesToISOString
+} from "../../../utils";
 import Auth from "../../../mixins/auth";
 
 class UserRobotsService extends Service {
@@ -405,12 +409,10 @@ class UserRobotsService extends Service {
       if (exchange) params.exchange = exchange;
       if (asset) params.asset = asset;
       if (currency) params.currency = currency;
-      const data = await this.adapter.db.query(query, {
+      return await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
         replacements: params
       });
-      if (!data || !Array.isArray(data) || data.length === 0) return [];
-      return data;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -458,19 +460,10 @@ class UserRobotsService extends Service {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id }
       });
-      rawUserRobotState.started_at =
-        rawUserRobotState.started_at &&
-        rawUserRobotState.started_at.toISOString();
-      rawUserRobotState.stopped_at =
-        rawUserRobotState.stopped_at &&
-        rawUserRobotState.stopped_at.toISOString();
-      rawUserRobotState.created_at =
-        rawUserRobotState.created_at &&
-        rawUserRobotState.created_at.toISOString();
-      rawUserRobotState.updated_at =
-        rawUserRobotState.updated_at &&
-        rawUserRobotState.updated_at.toISOString();
-      const userRobotState = underscoreToCamelCaseKeys(rawUserRobotState);
+
+      const userRobotState = underscoreToCamelCaseKeys(
+        datesToISOString(rawUserRobotState)
+      );
       return userRobotState;
     } catch (e) {
       this.logger.error(e);

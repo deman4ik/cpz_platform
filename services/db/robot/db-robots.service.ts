@@ -9,7 +9,8 @@ import {
   equals,
   createRobotCode,
   createRobotName,
-  getAccessValue
+  getAccessValue,
+  datesToISOString
 } from "../../../utils";
 import Auth from "../../../mixins/auth";
 
@@ -467,7 +468,7 @@ class RobotsService extends Service {
       const robotInfo: {
         [key: string]: any;
         currentSignals?: { code?: string; alerts?: cpz.AlertInfo[] }[];
-      } = underscoreToCamelCaseKeys(rawRobotInfo);
+      } = underscoreToCamelCaseKeys(datesToISOString(rawRobotInfo));
       const available = getAccessValue(ctx.meta.user);
       if (robotInfo.available < available)
         throw new Errors.ForbiddenError("FORBIDDEN", {
@@ -529,7 +530,9 @@ class RobotsService extends Service {
         type: Sequelize.QueryTypes.SELECT,
         replacements: { id }
       });
-      const robotInfo = <cpz.RobotInfo>underscoreToCamelCaseKeys(rawRobotInfo);
+      const robotInfo = <cpz.RobotInfo>(
+        underscoreToCamelCaseKeys(datesToISOString(rawRobotInfo))
+      );
       const available = getAccessValue(ctx.meta.user);
       if (robotInfo.available < available)
         throw new Errors.ForbiddenError("FORBIDDEN", {

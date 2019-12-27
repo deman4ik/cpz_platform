@@ -3,7 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
-import { underscoreToCamelCaseKeys } from "../../../utils";
+import { underscoreToCamelCaseKeys, datesToISOString } from "../../../utils";
 
 class RobotPositionsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -417,8 +417,8 @@ WHERE p.robot_id = r.id
         rawSignalPositions.length === 0
       )
         return [];
-      const signalPositions = rawSignalPositions.map(p =>
-        underscoreToCamelCaseKeys(p)
+      const signalPositions = underscoreToCamelCaseKeys(
+        datesToISOString(rawSignalPositions)
       );
       return signalPositions;
     } catch (e) {
