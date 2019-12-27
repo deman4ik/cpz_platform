@@ -716,6 +716,9 @@ class UserPosition implements cpz.UserPosition {
               nextJobAt: dayjs.utc().toISOString()
             });
           });
+        } else if (!this.hasOpenEntryOrders) {
+          this._entryStatus = cpz.UserPositionOrderStatus.canceled;
+          this._status = cpz.UserPositionStatus.canceled;
         }
       } else if (this._entryStatus === cpz.UserPositionOrderStatus.partial) {
         // Entry already executed

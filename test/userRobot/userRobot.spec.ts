@@ -1042,6 +1042,124 @@ describe("Test User Robot", () => {
     );
   });
 
+  it("Should cancel position with canceled order in history", () => {
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      }
+    });
+    const signalOpen: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:05:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_1",
+      candleTimestamp: dayjs.utc("2019-10-26T00:05:00.000Z").toISOString(),
+      action: cpz.TradeAction.short,
+      orderType: cpz.OrderType.market,
+      price: 6500
+    };
+
+    userRobot.handleSignal(signalOpen);
+    const openOrder = {
+      ...userRobot.state.ordersToCreate[0],
+      status: cpz.OrderStatus.open,
+      exId: uuid(),
+      exTimestamp: dayjs.utc().toISOString(),
+      exLastTradeAt: null,
+      executed: 0,
+      remaining: 0,
+      nextJob: {
+        type: cpz.OrderJobType.check
+      }
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrder]
+        }
+      ]
+    });
+
+    const signalOpen2: cpz.SignalEvent = {
+      id: uuid(),
+      robotId,
+      exchange: "kraken",
+      asset: "BTC",
+      currency: "USD",
+      timeframe: 5,
+      timestamp: dayjs.utc("2019-10-26T00:10:01.000Z").toISOString(),
+      type: cpz.SignalType.trade,
+      positionId: uuid(),
+      positionPrefix: "p",
+      positionCode: "p_2",
+      candleTimestamp: dayjs.utc("2019-10-26T00:10:00.000Z").toISOString(),
+      action: cpz.TradeAction.long,
+      orderType: cpz.OrderType.market,
+      price: 6000
+    };
+    userRobot.handleSignal(signalOpen2);
+
+    expect(userRobot.state.ordersWithJobs[0].nextJob.type).toBe(
+      cpz.OrderJobType.cancel
+    );
+    const openOrderCanceled = {
+      ...openOrder,
+      status: cpz.OrderStatus.canceled,
+      nextJob: null
+    };
+    userRobot = new UserRobot({
+      ...userRobot.state.userRobot,
+      robot: {
+        exchange: "kraken",
+        asset: "BTC",
+        currency: "USD",
+        timeframe: 5,
+        tradeSettings: {
+          orderTimeout: 120
+        }
+      },
+      positions: [
+        {
+          ...userRobot.state.positions[0],
+          entryOrders: [openOrderCanceled]
+        },
+        {
+          ...userRobot.state.positions[1]
+        }
+      ]
+    });
+    userRobot.handleOrder(openOrderCanceled);
+
+    expect(userRobot.state.positions[0].status).toBe(
+      cpz.UserPositionStatus.canceled
+    );
+  });
+
   it("Should close position with exit canceled order in history", () => {
     userRobot = new UserRobot({
       ...userRobot.state.userRobot,
