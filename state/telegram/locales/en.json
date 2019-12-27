@@ -229,7 +229,7 @@
     "error": "❌ Your API Key 🔐 ${name} is invalid!\n\n ${error}\n\nPlease update your API Key information in settings."
   },
   "userRobot": {
-    "error": "❌ Error occurred while processing 🤖 <b>${name}</b>(${id}) robots job ${jobType}.\n\n ${error} \n\nPlease contact support.",
+    "error": "❌ Error occurred while processing robot job <b>${jobType}</b>.\n\n${error} \n\n🤖 <b>${name}</b> (${id})\n\n Please contact support.",
     "status": "🤖 Robot <b>${name}</b> is ${status} now!\n\n${message}"
   },
   "unknownError": "Unknown error",
