@@ -105,7 +105,7 @@ async function robotSignalInfo(ctx: any) {
     if (userSignalsInfo) {
       const { subscribedAt } = userSignalsInfo;
       subscribedAtText = ctx.i18n.t("robot.subscribedAt", {
-        subscribedAt
+        subscribedAt: dayjs.utc(subscribedAt).format("YYYY-MM-DD HH:mm UTC")
       });
     }
 

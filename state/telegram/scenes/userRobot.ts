@@ -135,7 +135,7 @@ async function userRobotInfo(ctx: any) {
     if (userRobotInfo) {
       const { status } = userRobotInfo;
       statusText = ctx.i18n.t("robot.status", {
-        status
+        status: ctx.i18n.t(`status.${status}`)
       });
     }
 
