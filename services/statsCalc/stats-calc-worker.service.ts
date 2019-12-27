@@ -49,7 +49,7 @@ class StatsCalcWorkerService extends Service {
   async run(job: cpz.StatsCalcJob) {
     try {
       const { type, robotId, userRobotId, userId, exchange, asset } = job;
-      this.logger.info(`Calculating`, job);
+
       if (type === cpz.StatsCalcJobType.robot) {
         await this.calcRobot(robotId);
       } else if (type === cpz.StatsCalcJobType.userRobot) {
@@ -105,7 +105,7 @@ class StatsCalcWorkerService extends Service {
             robotId,
             status: cpz.RobotPositionStatus.closed,
             entryDate: {
-              $lte: userSignal.subscribedAt
+              $gte: userSignal.subscribedAt
             }
           }
         }
@@ -160,6 +160,7 @@ class StatsCalcWorkerService extends Service {
         }
       }
     );
+
     if (userSignals && Array.isArray(userSignals) && userSignals.length > 0) {
       const minSubscriptionDate = dayjs
         .utc(
@@ -176,11 +177,12 @@ class StatsCalcWorkerService extends Service {
             robotId,
             status: cpz.RobotPositionStatus.closed,
             entryDate: {
-              $lte: minSubscriptionDate
+              $gte: minSubscriptionDate
             }
           }
         }
       );
+
       if (
         allPositions &&
         Array.isArray(allPositions) &&
@@ -192,6 +194,7 @@ class StatsCalcWorkerService extends Service {
               dayjs.utc(pos.entryDate).valueOf() >=
               dayjs.utc(userSignal.subscribedAt).valueOf()
           );
+
           if (positions.length > 0) {
             const signalPositions = positions.map(pos => {
               let profit: number = 0;
@@ -213,6 +216,7 @@ class StatsCalcWorkerService extends Service {
               };
             });
             const { statistics, equity } = calcStatistics(signalPositions);
+
             await this.broker.call(`${cpz.Service.DB_USER_SIGNALS}.update`, {
               id: userSignal.id,
               statistics,
