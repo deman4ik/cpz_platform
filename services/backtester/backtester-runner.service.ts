@@ -177,8 +177,10 @@ class BacktesterRunnerService extends Service {
           error: new Error("Wrong Backtester ID for history populating")
         };
       const lastJob = await this.getQueue(cpz.Queue.backtest).getJob(id);
-      if (lastJob && lastJob.isStuck()) {
-        await lastJob.remove();
+
+      if (lastJob) {
+        const lastJobStuck = await lastJob.isStuck();
+        if (lastJobStuck) await lastJob.remove();
       }
       await this.createJob(
         cpz.Queue.backtest,

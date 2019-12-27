@@ -116,8 +116,9 @@ class PricateConnectorRunnerService extends Service {
       const lastJob = await this.getQueue(cpz.Queue.connector).getJob(
         userExAccId
       );
-      if (lastJob && lastJob.isStuck()) {
-        await lastJob.remove();
+      if (lastJob) {
+        const lastJobStuck = await lastJob.isStuck();
+        if (lastJobStuck) await lastJob.remove();
       }
       await this.createJob(cpz.Queue.connector, job, {
         jobId: userExAccId,

@@ -151,8 +151,9 @@ class UserRobotRunnerService extends Service {
           const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
             job.userRobotId
           );
-          if (lastJob && lastJob.isStuck()) {
-            await lastJob.remove();
+          if (lastJob) {
+            const lastJobStuck = await lastJob.isStuck();
+            if (lastJobStuck) await lastJob.remove();
           }
           await this.createJob(cpz.Queue.runUserRobot, job, {
             jobId: job.userRobotId,
@@ -203,8 +204,9 @@ class UserRobotRunnerService extends Service {
       const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
         userRobotId
       );
-      if (lastJob && lastJob.isStuck()) {
-        await lastJob.remove();
+      if (lastJob) {
+        const lastJobStuck = await lastJob.isStuck();
+        if (lastJobStuck) await lastJob.remove();
       }
       await this.createJob(cpz.Queue.runUserRobot, job, {
         jobId: userRobotId,

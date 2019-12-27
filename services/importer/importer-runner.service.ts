@@ -206,8 +206,9 @@ class ImporterRunnerService extends Service {
         entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
-      if (lastJob && lastJob.isStuck()) {
-        await lastJob.remove();
+      if (lastJob) {
+        const lastJobStuck = await lastJob.isStuck();
+        if (lastJobStuck) await lastJob.remove();
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
@@ -272,8 +273,9 @@ class ImporterRunnerService extends Service {
         entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
-      if (lastJob && lastJob.isStuck()) {
-        await lastJob.remove();
+      if (lastJob) {
+        const lastJobStuck = await lastJob.isStuck();
+        if (lastJobStuck) await lastJob.remove();
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,

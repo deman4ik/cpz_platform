@@ -11,7 +11,6 @@ import { ORDER_CHECK_TIMEOUT } from "../../config";
  * Available exchanges
  */
 type ExchangeName = "kraken" | "bitfinex";
-//TODO: invalidate user exwatcher account on error
 
 /**
  * Private Exchange Connector Worker Service

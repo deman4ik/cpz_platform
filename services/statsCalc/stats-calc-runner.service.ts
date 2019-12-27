@@ -65,8 +65,9 @@ class StatsCalcRunnerService extends Service {
 
   async queueJob(job: cpz.StatsCalcJob) {
     const lastJob = await this.getQueue(cpz.Queue.statsCalc).getJob(job.id);
-    if (lastJob && lastJob.isStuck()) {
-      await lastJob.remove();
+    if (lastJob) {
+      const lastJobStuck = await lastJob.isStuck();
+      if (lastJobStuck) await lastJob.remove();
     }
     await this.createJob(cpz.Queue.statsCalc, job, {
       jobId: job.id,
