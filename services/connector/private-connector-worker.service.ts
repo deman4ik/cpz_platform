@@ -174,7 +174,11 @@ class PrivateConnectorWorkerService extends Service {
         try {
           return await connector.fetchBalance();
         } catch (e) {
-          if (e instanceof ccxt.NetworkError) throw e;
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
           bail(e);
         }
       };
@@ -254,7 +258,8 @@ class PrivateConnectorWorkerService extends Service {
     } catch (e) {
       if (
         e instanceof ccxt.AuthenticationError ||
-        e instanceof ccxt.InsufficientFunds
+        e instanceof ccxt.InsufficientFunds ||
+        e instanceof ccxt.InvalidNonce
       ) {
         await this.broker.call(
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.invalidate`,
@@ -523,7 +528,11 @@ class PrivateConnectorWorkerService extends Service {
             orderParams
           );
         } catch (e) {
-          if (e instanceof ccxt.NetworkError) throw e;
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
           bail(e);
         }
       };
@@ -567,7 +576,8 @@ class PrivateConnectorWorkerService extends Service {
       this.logger.error(err);
       if (
         err instanceof ccxt.AuthenticationError ||
-        err instanceof ccxt.InsufficientFunds
+        err instanceof ccxt.InsufficientFunds ||
+        err instanceof ccxt.InvalidNonce
       ) {
         throw err;
       }
@@ -607,7 +617,11 @@ class PrivateConnectorWorkerService extends Service {
             this.getSymbol(asset, currency)
           );
         } catch (e) {
-          if (e instanceof ccxt.NetworkError) throw e;
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
           bail(e);
         }
       };
@@ -654,7 +668,8 @@ class PrivateConnectorWorkerService extends Service {
       this.logger.error(err);
       if (
         err instanceof ccxt.AuthenticationError ||
-        err instanceof ccxt.InsufficientFunds
+        err instanceof ccxt.InsufficientFunds ||
+        err instanceof ccxt.InvalidNonce
       ) {
         throw err;
       }
@@ -688,7 +703,11 @@ class PrivateConnectorWorkerService extends Service {
             this.getSymbol(asset, currency)
           );
         } catch (e) {
-          if (e instanceof ccxt.NetworkError) throw e;
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
           bail(e);
         }
       };
@@ -698,7 +717,8 @@ class PrivateConnectorWorkerService extends Service {
       this.logger.error(err);
       if (
         err instanceof ccxt.AuthenticationError ||
-        err instanceof ccxt.InsufficientFunds
+        err instanceof ccxt.InsufficientFunds ||
+        err instanceof ccxt.InvalidNonce
       ) {
         throw err;
       }
