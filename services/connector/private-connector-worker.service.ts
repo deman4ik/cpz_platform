@@ -183,7 +183,7 @@ class PrivateConnectorWorkerService extends Service {
         }
       };
       const response = await retry(call, this.retryOptions);
-      if (response && response.info) return true;
+      if (response && response.info) return { success: true };
       else
         throw new Errors.MoleculerError(
           "Wrong response from exchange",
@@ -193,7 +193,7 @@ class PrivateConnectorWorkerService extends Service {
         );
     } catch (err) {
       this.logger.error(err);
-      throw err;
+      return { success: false, error: err.message };
     }
   }
 

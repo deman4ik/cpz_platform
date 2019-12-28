@@ -152,7 +152,7 @@ class UserExchangeAccsService extends Service {
         }
       }
 
-      await this.broker.call(
+      const check = await this.broker.call(
         `${cpz.Service.PRIVATE_CONNECTOR_WORKER}.checkAPIKeys`,
         {
           exchange,
@@ -161,7 +161,7 @@ class UserExchangeAccsService extends Service {
           pass
         }
       );
-
+      if (!check.success) return check;
       const encryptedKeys: cpz.UserExchangeKeys = {
         key: await encrypt(userId, key),
         secret: await encrypt(userId, secret),
