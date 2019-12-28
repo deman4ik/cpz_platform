@@ -113,21 +113,27 @@ class UserRobotWorkerService extends Service {
         throw new Error(`Unknown type "${type}"`);
       }
 
-      const state = userRobot.state;
+      if (
+        userRobot.status === cpz.Status.stopping &&
+        !userRobot.hasActivePositions
+      ) {
+        userRobot.setStop();
+        this.logger.info(`User Robot #${userRobot.id} stopped!`);
+      }
 
       // Saving  user robot positions
       if (
-        state.positions &&
-        Array.isArray(state.positions) &&
-        state.positions.length > 0
+        userRobot.state.positions &&
+        Array.isArray(userRobot.state.positions) &&
+        userRobot.state.positions.length > 0
       ) {
         await this.broker.call(`${cpz.Service.DB_USER_POSITIONS}.upsert`, {
-          entities: state.positions
+          entities: userRobot.state.positions
         });
 
         if (userRobot.hasClosedPositions) {
           this.logger.info(
-            `User Robot #${state.userRobot.id} has closed positions, sending ${cpz.Event.STATS_CALC_USER_ROBOT} event.`
+            `User Robot #${userRobot.state.userRobot.id} has closed positions, sending ${cpz.Event.STATS_CALC_USER_ROBOT} event.`
           );
           const { id, userId } = userRobot.state.userRobot;
           const { exchange, asset } = userRobot.state.robot;
@@ -144,47 +150,40 @@ class UserRobotWorkerService extends Service {
       }
 
       if (
-        state.ordersToCreate &&
-        Array.isArray(state.ordersToCreate) &&
-        state.ordersToCreate.length > 0
+        userRobot.state.ordersToCreate &&
+        Array.isArray(userRobot.state.ordersToCreate) &&
+        userRobot.state.ordersToCreate.length > 0
       ) {
         await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.insert`, {
-          entities: state.ordersToCreate
+          entities: userRobot.state.ordersToCreate
         });
       }
 
       if (
-        state.ordersWithJobs &&
-        Array.isArray(state.ordersWithJobs) &&
-        state.ordersWithJobs.length > 0
+        userRobot.state.ordersWithJobs &&
+        Array.isArray(userRobot.state.ordersWithJobs) &&
+        userRobot.state.ordersWithJobs.length > 0
       ) {
-        for (const order of state.ordersWithJobs) {
+        for (const order of userRobot.state.ordersWithJobs) {
           await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, order);
           await this.broker.call(
             `${cpz.Service.PRIVATE_CONNECTOR_RUNNER}.addJob`,
             {
-              userExAccId: state.userRobot.userExAccId,
+              userExAccId: userRobot.state.userRobot.userExAccId,
               type: cpz.ConnectorJobType.order
             }
           );
         }
       }
 
-      if (
-        userRobot.status === cpz.Status.stopping &&
-        !userRobot.hasActivePositions
-      ) {
-        userRobot.setStop();
-        this.logger.info(`User Robot #${userRobot.id} stopped!`);
-      }
       // Saving robot state
       await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.update`,
-        state.userRobot
+        userRobot.state.userRobot
       );
       // Sending robot events
-      if (state.eventsToSend.length > 0) {
-        for (const { type, data } of state.eventsToSend) {
+      if (userRobot.state.eventsToSend.length > 0) {
+        for (const { type, data } of userRobot.state.eventsToSend) {
           await this.broker.emit(type, data);
         }
       }
