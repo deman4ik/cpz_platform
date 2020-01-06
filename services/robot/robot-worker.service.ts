@@ -270,13 +270,11 @@ class RobotWorkerService extends Service {
           this.logger.info(
             `Robot #${robot.id} has closed positions, sending ${cpz.Event.STATS_CALC_ROBOT} event.`
           );
-          const { id, exchange, asset } = robot.state;
+          const { id } = robot.state;
           await this.broker.emit<cpz.StatsCalcRobotEvent>(
             cpz.Event.STATS_CALC_ROBOT,
             {
-              robotId: id,
-              exchange,
-              asset
+              robotId: id
             }
           );
         }

@@ -90,7 +90,9 @@ declare namespace cpz {
     ORDER_ERROR = "order.error",
     USER_EX_ACC_ERROR = "user_ex_acc.error",
     STATS_CALC_ROBOT = "stats-calc.robot",
+    STATS_CALC_ROBOTS = "stats-calc.robots",
     STATS_CALC_USER_ROBOT = "stats-calc.user-robot",
+    STATS_CALC_USER_ROBOTS = "stats-calc.user-robots",
     STATS_CALC_USER_SIGNAL = "stats-calc.user-signal",
     STATS_CALC_USER_SIGNALS = "stats-calc.user-signals"
   }
@@ -462,12 +464,13 @@ declare namespace cpz {
 
   interface StatsCalcRobotEvent {
     robotId: string;
-    exchange: string;
-    asset: string;
   }
 
   interface StatsCalcUserRobotEvent {
     userRobotId: string;
+  }
+
+  interface StatsCalcUserRobotsEvent {
     userId: string;
     exchange: string;
     asset: string;

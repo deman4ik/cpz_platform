@@ -27,13 +27,40 @@ class StatsCalcRunnerService extends Service {
           }
         })
       ],
+      actions: {
+        calcRobot: {
+          params: {
+            robotId: "string",
+            exchange: "string",
+            asset: "string"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.handleStatsCalcRobotEvent
+        },
+        calcUserRobot: {
+          params: {
+            userRobotId: "string",
+            userId: "string",
+            exchange: "string",
+            asset: "string"
+          },
+          roles: [cpz.UserRoles.admin],
+          hooks: {
+            before: "authAction"
+          },
+          handler: this.handleStatsCalcUserRobotEvent
+        }
+      },
       events: {
         [cpz.Event.STATS_CALC_USER_SIGNAL]: this.handleCalcUserSignalEvent,
         [cpz.Event.STATS_CALC_USER_SIGNALS]: this.handleCalcUserSignalsEvent,
         [cpz.Event.STATS_CALC_ROBOT]: this.handleStatsCalcRobotEvent,
-        [cpz.Event.STATS_CALC_USER_ROBOT]: this.handleStatsCalcUserRobotEvent
-        //TODO: CALC ROBOTS
-        //TODO: CALC USER ROBOTS
+        [cpz.Event.STATS_CALC_ROBOTS]: this.handleStatsCalcRobotsEvent,
+        [cpz.Event.STATS_CALC_USER_ROBOT]: this.handleStatsCalcUserRobotEvent,
+        [cpz.Event.STATS_CALC_USER_ROBOTS]: this.handleStatsCalcUserRobotsEvent
       },
       started: this.startedService,
       stopped: this.stoppedService
@@ -205,9 +232,17 @@ class StatsCalcRunnerService extends Service {
 
   async handleStatsCalcRobotEvent(ctx: Context<cpz.StatsCalcRobotEvent>) {
     try {
-      const { robotId, exchange, asset } = ctx.params;
-      this.logger.info(
-        `New ${cpz.Event.STATS_CALC_ROBOT} event - ${robotId}, ${exchange}, ${asset}`
+      const { robotId } = ctx.params;
+      this.logger.info(`New ${cpz.Event.STATS_CALC_ROBOT} event - ${robotId}`);
+      const {
+        exchange,
+        asset
+      }: { exchange: string; asset: string } = await ctx.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id: robotId,
+          fields: ["exchange", "asset"]
+        }
       );
       await this.queueJob({
         id: uuid(),
@@ -285,19 +320,94 @@ class StatsCalcRunnerService extends Service {
     }
   }
 
+  async handleStatsCalcRobotsEvent(ctx: Context) {
+    try {
+      const startedRobots: {
+        id: string;
+        exchange: string;
+        asset: string;
+      }[] = await ctx.call(`${cpz.Service.DB_ROBOTS}.find`, {
+        query: {
+          status: cpz.Status.started
+        },
+        fields: ["id", "exchange", "asset"]
+      });
+      for (const { id: robotId, exchange, asset } of startedRobots) {
+        await ctx.call(`${cpz.Service.STATS_CALC_RUNNER}.calcRobot`, {
+          robotId,
+          exchange,
+          asset
+        });
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
   async handleStatsCalcUserRobotEvent(
     ctx: Context<cpz.StatsCalcUserRobotEvent>
   ) {
     try {
-      const { userRobotId, userId, exchange, asset } = ctx.params;
+      const { userRobotId } = ctx.params;
       this.logger.info(
-        `New ${cpz.Event.STATS_CALC_USER_ROBOT} event - ${userRobotId}, ${userId}, ${exchange}, ${asset}`
+        `New ${cpz.Event.STATS_CALC_USER_ROBOT} event - ${userRobotId}`
+      );
+      const { userId, robotId } = await ctx.call(
+        `${cpz.Service.DB_USER_ROBOTS}.get`,
+        {
+          id: userRobotId,
+          fields: ["userId", "robotId"]
+        }
+      );
+      const { exchange, asset } = await ctx.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id: robotId,
+          fields: ["exchange", "asset"]
+        }
       );
       await this.queueJob({
         id: uuid(),
         type: cpz.StatsCalcJobType.userRobot,
         userRobotId
       });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userRobotAggr,
+        userId
+      });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userRobotAggr,
+        userId,
+        exchange
+      });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userRobotAggr,
+        userId,
+        asset
+      });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userRobotAggr,
+        userId,
+        exchange,
+        asset
+      });
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleStatsCalcUserRobotsEvent(
+    ctx: Context<cpz.StatsCalcUserRobotsEvent>
+  ) {
+    try {
+      const { userId, exchange, asset } = ctx.params;
+      this.logger.info(
+        `New ${cpz.Event.STATS_CALC_USER_ROBOTS} event - ${userId}, ${exchange}, ${asset}`
+      );
       await this.queueJob({
         id: uuid(),
         type: cpz.StatsCalcJobType.userRobotAggr,

@@ -290,9 +290,23 @@ class UserRobotsService extends Service {
 
       if (userRobotExists.status !== cpz.Status.stopped)
         throw new ErrorsBase.ValidationError("User Robot is not stopped");
-
+      const { exchange, asset } = await ctx.call(
+        `${cpz.Service.DB_ROBOTS}.get`,
+        {
+          id: userRobotExists.robotId,
+          fields: ["exchange", "asset"]
+        }
+      );
       await this._remove(ctx, { id });
-      //TODO: send recalc USER ROBOTS stats event
+      await ctx.emit<cpz.StatsCalcUserRobotsEvent>(
+        cpz.Event.STATS_CALC_USER_ROBOTS,
+        {
+          userId,
+          exchange,
+          asset
+        }
+      );
+
       return { success: true };
     } catch (e) {
       this.logger.error(e);

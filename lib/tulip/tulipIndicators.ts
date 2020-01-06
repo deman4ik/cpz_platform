@@ -2,7 +2,6 @@ import BaseIndicator from "../../state/robot/robotIndicator";
 import tulip from "./create";
 import { cpz } from "../../@types";
 
-// TODO: объявить тип для класса
 class Tulip extends BaseIndicator {
   calculate: (props: {
     open: number[];

@@ -5,8 +5,6 @@ import { v4 as uuid } from "uuid";
 import { validate, sortAsc } from "../../utils";
 import Position from "./robotPosition";
 
-// TODO: объявить тип для класса
-
 class BaseStrategy implements cpz.Strategy {
   [key: string]: any;
   _initialized: boolean;
