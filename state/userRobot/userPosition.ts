@@ -554,12 +554,7 @@ class UserPosition implements cpz.UserPosition {
       this._open(signal);
     } else if (this._isActionExit(signal.action)) {
       if (this._exitStatus || this._nextJob === cpz.UserPositionJob.close)
-        throw new Errors.MoleculerError(
-          "Position already closed",
-          409,
-          "ERR_CONFLICT",
-          { userPositionId: this._id }
-        );
+        return;
 
       this._barsHeld = signal.positionBarsHeld;
       if (this._entryStatus !== cpz.UserPositionOrderStatus.closed) {
