@@ -172,7 +172,12 @@
   },
   "signal": {
     "alert": "🚨 New Signal!\n\n🤖 Robot: <b>${name}</b>\n\n",
-    "trade": "💸 New Trade!\n\n🤖 Robot: <b>${name}</b>\n\n"
+    "trade": "🚨✅ New Signal Trade!\n\n🤖 Robot: <b>${name}</b>\n\n"
+  },
+  "userTrade": {
+    "new": "🤖✅ New Robot Trade!\n\n🤖 Robot: <b>${name}</b>\n\n",
+    "open": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n<b>Volume:</b> ${volume} ${asset}",
+    "closed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Volume:</b> ${volume} ${asset}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n"
   },
   "robot": {
     "menuInfo": "ℹ️ Robot Info",

@@ -44,6 +44,7 @@ class PublisherService extends Service {
         [cpz.Event.USER_ROBOT_STOPPED]: this.handleUserRobotStatus,
         [cpz.Event.USER_ROBOT_PAUSED]: this.handleUserRobotStatus,
         [cpz.Event.USER_ROBOT_RESUMED]: this.handleUserRobotStatus,
+        [cpz.Event.USER_ROBOT_TRADE]: this.handleUserRobotTrade,
         [cpz.Event.ORDER_ERROR]: this.handleOrderError
       }
     });
@@ -205,16 +206,11 @@ class PublisherService extends Service {
                     LANG,
                     `tradeAction.${position.entryAction}`
                   ),
-                  entryOrderType: this.i18n.t(
-                    LANG,
-                    `orderType.${position.entryOrderType}`
-                  ),
                   entryPrice: position.entryPrice,
                   entryDate: dayjs
                     .utc(position.entryDate)
                     .format("YYYY-MM-DD HH:mm UTC"),
                   exitAction: actionText,
-                  exitOrderType: orderTypeText,
                   exitPrice: +signal.price,
                   exitDate: dayjs
                     .utc(signal.timestamp)
@@ -231,7 +227,6 @@ class PublisherService extends Service {
             tradeText = this.i18n.t(LANG, "robot.positionOpen", {
               code: signal.positionCode,
               entryAction: actionText,
-              entryOrderType: orderTypeText,
               entryPrice: +signal.price,
               entryDate: dayjs
                 .utc(signal.timestamp)
@@ -361,6 +356,74 @@ class PublisherService extends Service {
               message: message || "",
               status
             })
+          }
+        }
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleUserRobotTrade(ctx: Context<cpz.UserTradeEventData>) {
+    try {
+      const {
+        status,
+        userRobotId,
+        code,
+        asset,
+        entryAction,
+        entryPrice,
+        entryDate,
+        entryExecuted,
+        exitAction,
+        exitPrice,
+        exitDate,
+        exitExecuted,
+        barsHeld,
+        profit
+      } = ctx.params;
+      const { name, telegramId } = await ctx.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
+        {
+          id: userRobotId
+        }
+      );
+      const LANG = "en";
+      const info = this.i18n.t(LANG, "userTrade.new", {
+        name
+      });
+      let tradeText;
+      if (status === cpz.UserPositionStatus.open) {
+        tradeText = this.i18n.t(LANG, "userTrade.open", {
+          code,
+          entryAction: this.i18n.t(LANG, `tradeAction.${entryAction}`),
+          entryPrice: +entryPrice,
+          entryDate: dayjs.utc(entryDate).format("YYYY-MM-DD HH:mm UTC"),
+          volume: entryExecuted,
+          asset
+        });
+      } else {
+        tradeText = this.i18n.t(LANG, "userTrade.closed", {
+          code,
+          volume: entryExecuted,
+          asset,
+          entryAction: this.i18n.t(LANG, `tradeAction.${entryAction}`),
+          entryPrice: +entryPrice,
+          entryDate: dayjs.utc(entryDate).format("YYYY-MM-DD HH:mm UTC"),
+          exitAction: this.i18n.t(LANG, `tradeAction.${exitAction}`),
+          exitPrice: +exitPrice,
+          exitDate: dayjs.utc(exitDate).format("YYYY-MM-DD HH:mm UTC"),
+          barsHeld,
+          profit
+        });
+      }
+
+      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entity: {
+            telegramId,
+            message: `${info}${tradeText}`
           }
         }
       );

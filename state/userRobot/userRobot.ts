@@ -70,6 +70,9 @@ class UserRobot implements cpz.UserRobot {
       positions: positions.map(pos => pos.state),
       ordersToCreate: flattenArray(positions.map(pos => pos.ordersToCreate)),
       ordersWithJobs: flattenArray(positions.map(pos => pos.orderWithJobs)),
+      recentTrades: positions
+        .filter(pos => pos.hasRecentTrade)
+        .map(pos => pos.tradeEvent),
       eventsToSend: this._eventsToSend
     };
   }

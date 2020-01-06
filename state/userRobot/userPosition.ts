@@ -56,6 +56,7 @@ class UserPosition implements cpz.UserPosition {
 
   _ordersToCreate: cpz.Order[];
   _orderWithJobs: cpz.OrderWithJob[];
+  _hasRecentTrade: boolean;
 
   constructor(state: cpz.UserPositionState) {
     this._id = state.id;
@@ -102,6 +103,7 @@ class UserPosition implements cpz.UserPosition {
     this._exitOrders = state.exitOrders || [];
     this._ordersToCreate = [];
     this._orderWithJobs = [];
+    this._hasRecentTrade = false;
   }
 
   get id() {
@@ -142,6 +144,10 @@ class UserPosition implements cpz.UserPosition {
       this._status !== cpz.UserPositionStatus.closedAuto &&
       this._status !== cpz.UserPositionStatus.canceled
     );
+  }
+
+  get hasRecentTrade() {
+    return this._hasRecentTrade;
   }
 
   cancel() {
@@ -214,6 +220,7 @@ class UserPosition implements cpz.UserPosition {
         this._entryStatus = cpz.UserPositionOrderStatus.partial;
       } else if (this._entryExecuted === this._entryVolume) {
         this._entryStatus = cpz.UserPositionOrderStatus.closed;
+        this._hasRecentTrade = true;
       }
     }
   }
@@ -242,6 +249,7 @@ class UserPosition implements cpz.UserPosition {
         this._exitStatus = cpz.UserPositionOrderStatus.partial;
       } else if (this._exitExecuted === this._exitVolume) {
         this._exitStatus = cpz.UserPositionOrderStatus.closed;
+        this._hasRecentTrade = true;
       }
     }
   }
@@ -276,6 +284,32 @@ class UserPosition implements cpz.UserPosition {
           .diff(dayjs.utc(this._entryDate), cpz.TimeUnit.minute) /
           this._robot.timeframe
       );
+  }
+
+  get tradeEvent(): cpz.UserTradeEventData {
+    return {
+      id: this._id,
+      code: this._code,
+      exchange: this._exchange,
+      asset: this._asset,
+      currency: this._currency,
+      userRobotId: this._userRobotId,
+      userId: this._userId,
+      status: this._status,
+      entryAction: this._entryAction,
+      entryStatus: this._entryStatus,
+      entryPrice: this._entryPrice,
+      entryDate: this._entryDate,
+      entryExecuted: this._entryExecuted,
+      exitAction: this._exitAction,
+      exitStatus: this._exitStatus,
+      exitPrice: this._exitPrice,
+      exitDate: this._exitDate,
+      exitExecuted: this._exitExecuted,
+      reason: this._reason,
+      profit: this._profit,
+      barsHeld: this._barsHeld
+    };
   }
 
   get state(): cpz.UserPositionDB {

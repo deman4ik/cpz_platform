@@ -143,6 +143,19 @@ class UserRobotWorkerService extends Service {
             }
           );
         }
+
+        if (
+          userRobot.state.recentTrades &&
+          Array.isArray(userRobot.state.recentTrades) &&
+          userRobot.state.recentTrades.length > 0
+        ) {
+          for (const trade of userRobot.state.recentTrades) {
+            await this.broker.emit<cpz.UserTradeEventData>(
+              cpz.Event.USER_ROBOT_TRADE,
+              trade
+            );
+          }
+        }
       }
 
       if (

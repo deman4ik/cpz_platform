@@ -82,6 +82,7 @@ declare namespace cpz {
     USER_ROBOT_PAUSED = "user-robot.paused",
     USER_ROBOT_RESUMED = "user-robot.resumed",
     USER_ROBOT_FAILED = "user-robot.failed",
+    USER_ROBOT_TRADE = "user-robot.trade",
     CANDLE_NEW = "candle.new",
     TICK_NEW = "tick.new",
     SIGNAL_ALERT = "signal.alert",
@@ -431,6 +432,31 @@ declare namespace cpz {
 
   interface UserRobotEventData extends GenericObject<any> {
     userRobotId: string;
+  }
+
+  interface UserTradeEventData extends UserRobotEventData {
+    id: string;
+    code: string;
+    exchange: string;
+    asset: string;
+    currency: string;
+    userRobotId: string;
+    userId: string;
+    status: UserPositionStatus;
+    entryAction?: TradeAction;
+    entryStatus?: UserPositionOrderStatus;
+    entrySignalPrice?: number;
+    entryPrice?: number;
+    entryDate?: string;
+    entryExecuted?: number;
+    exitAction?: TradeAction;
+    exitStatus?: UserPositionOrderStatus;
+    exitPrice?: number;
+    exitDate?: string;
+    exitExecuted?: number;
+    reason?: string; //TODO ENUM
+    profit?: number;
+    barsHeld?: number;
   }
 
   interface TradeInfo {
