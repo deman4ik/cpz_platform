@@ -202,7 +202,7 @@ class ImporterRunnerService extends Service {
         },
         status: cpz.Status.queued
       };
-      await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+      await ctx.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
@@ -237,7 +237,7 @@ class ImporterRunnerService extends Service {
     try {
       let dateFrom;
       if (!ctx.params.dateFrom) {
-        const [{ loadFrom }]: cpz.Market[] = await this.broker.call(
+        const [{ loadFrom }]: cpz.Market[] = await ctx.call(
           `${cpz.Service.DB_MARKETS}.find`,
           {
             fields: ["loadFrom"],
@@ -269,7 +269,7 @@ class ImporterRunnerService extends Service {
         },
         status: cpz.Status.queued
       };
-      await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
+      await ctx.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
         entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);

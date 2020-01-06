@@ -173,7 +173,7 @@ class UserSignalsService extends Service {
         replacements: params
       });
 
-      return underscoreToCamelCaseKeys(datesToISOString(rawUserIds));
+      return underscoreToCamelCaseKeys(rawUserIds);
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -248,7 +248,7 @@ class UserSignalsService extends Service {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const robotInfo: cpz.RobotInfo = await this.broker.call(
+      const robotInfo: cpz.RobotInfo = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.getRobotInfo`,
         {
           id: robotId
@@ -347,16 +347,13 @@ class UserSignalsService extends Service {
         };
       }
 
-      const [market] = await this.broker.call(
-        `${cpz.Service.DB_MARKETS}.find`,
-        {
-          query: {
-            exchange: robotInfo.exchange,
-            asset: robotInfo.asset,
-            currency: robotInfo.currency
-          }
+      const [market] = await ctx.call(`${cpz.Service.DB_MARKETS}.find`, {
+        query: {
+          exchange: robotInfo.exchange,
+          asset: robotInfo.asset,
+          currency: robotInfo.currency
         }
-      );
+      });
       return {
         robotInfo,
         userSignalsInfo,
@@ -396,7 +393,7 @@ class UserSignalsService extends Service {
   ) {
     try {
       const { robotId, volume } = ctx.params;
-      const { exchange, asset, currency, available } = await this.broker.call(
+      const { exchange, asset, currency, available } = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.get`,
         {
           id: robotId,
@@ -407,7 +404,7 @@ class UserSignalsService extends Service {
       if (available < accessValue)
         throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
 
-      const [market]: cpz.Market[] = await this.broker.call(
+      const [market]: cpz.Market[] = await ctx.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {
           query: {
@@ -449,7 +446,7 @@ class UserSignalsService extends Service {
           subscribedAt: dayjs.utc().toISOString()
         });
       }
-      await this.broker.emit<{ userId: string; robotId: string }>(
+      await ctx.emit<{ userId: string; robotId: string }>(
         cpz.Event.STATS_CALC_USER_SIGNAL,
         {
           userId,
@@ -476,7 +473,7 @@ class UserSignalsService extends Service {
       });
       if (subscribed) {
         await this.adapter.removeById(subscribed.id);
-        await this.broker.emit<{ userId: string; robotId: string }>(
+        await ctx.emit<{ userId: string; robotId: string }>(
           cpz.Event.STATS_CALC_USER_SIGNAL,
           {
             userId,

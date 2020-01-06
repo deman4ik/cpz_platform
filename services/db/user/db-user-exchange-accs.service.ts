@@ -132,7 +132,7 @@ class UserExchangeAccsService extends Service {
           if (existed.exchange !== exchange)
             throw new Error("Invalid exchange");
 
-          const startedUserRobots: cpz.UserRobotDB[] = await this.broker.call(
+          const startedUserRobots: cpz.UserRobotDB[] = await ctx.call(
             `${cpz.Service.DB_USER_ROBOTS}.find`,
             {
               query: {
@@ -152,7 +152,10 @@ class UserExchangeAccsService extends Service {
         }
       }
 
-      const check = await this.broker.call(
+      const check: {
+        success: boolean;
+        error?: string;
+      } = await ctx.call(
         `${cpz.Service.PRIVATE_CONNECTOR_WORKER}.checkAPIKeys`,
         {
           exchange,
@@ -162,6 +165,7 @@ class UserExchangeAccsService extends Service {
         }
       );
       if (!check.success) return check;
+      //TODO: offload encryption to worker thread
       const encryptedKeys: cpz.UserExchangeKeys = {
         key: await encrypt(userId, key),
         secret: await encrypt(userId, secret),
@@ -266,7 +270,7 @@ class UserExchangeAccsService extends Service {
             error
           }
         });
-        await this.broker.emit<cpz.UserExchangeAccountErrorEvent>(
+        await ctx.emit<cpz.UserExchangeAccountErrorEvent>(
           cpz.Event.USER_EX_ACC_ERROR,
           {
             id,
@@ -304,7 +308,7 @@ class UserExchangeAccsService extends Service {
               userExAccId: existed.id
             });
 
-          const userRobots: cpz.UserRobotDB[] = await this.broker.call(
+          const userRobots: cpz.UserRobotDB[] = await ctx.call(
             `${cpz.Service.DB_USER_ROBOTS}.find`,
             {
               query: {

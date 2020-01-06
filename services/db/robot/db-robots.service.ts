@@ -176,7 +176,7 @@ class RobotsService extends Service {
     }>
   ) {
     try {
-      const strategiesList = await this.broker.call(
+      const strategiesList: { id: string; code: string }[] = await ctx.call(
         `${cpz.Service.DB_STRATEGIES}.find`,
         {
           fields: ["id", "code"]

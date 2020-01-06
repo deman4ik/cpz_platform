@@ -198,7 +198,7 @@ class BacktesterRunnerService extends Service {
       return { success: true, id, status: cpz.Status.queued };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id, error: e };
+      return { success: false, id, error: e.message };
     }
   }
 

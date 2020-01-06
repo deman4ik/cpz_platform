@@ -60,27 +60,27 @@ class PublisherService extends Service {
 
   async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
     try {
-      const users = [];
+      const users: number[] = [];
       if (ctx.params.userId) {
-        const { telegramId } = await this.broker.call(
-          `${cpz.Service.DB_USERS}.get`,
-          {
-            id: ctx.params.userId
-          }
-        );
+        const { telegramId } = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+          id: ctx.params.userId
+        });
         if (telegramId) users.push(telegramId);
       } else {
-        const userslist = await this.broker.call(
-          `${cpz.Service.DB_USERS}.find`,
+        const userslist = await ctx.call<
+          { id: string; telegramId: number }[],
           {
-            fields: ["id", "telegramId"],
-            query: {
-              status: { $gt: 0 },
-              telegramId: { $ne: null }
-            }
+            fields: string[];
+            query: { [key: string]: any };
           }
-        );
-        userslist.forEach(({ telegramId }: cpz.User) => {
+        >(`${cpz.Service.DB_USERS}.find`, {
+          fields: ["id", "telegramId"],
+          query: {
+            status: { $gt: 0 },
+            telegramId: { $ne: null }
+          }
+        });
+        userslist.forEach(({ telegramId }) => {
           users.push(telegramId);
         });
       }
@@ -90,12 +90,17 @@ class PublisherService extends Service {
         message: ctx.params.message
       }));
 
-      await this.broker.call<cpz.TelegramMessage>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+      await ctx.call<
+        cpz.TelegramMessage,
         {
-          entities
+          entities: {
+            telegramId: number;
+            message: string;
+          }[];
         }
-      );
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        entities
+      });
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -107,7 +112,7 @@ class PublisherService extends Service {
       const signal = ctx.params;
 
       const { robotId, type, action } = signal;
-      const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      const { name } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "name"]
       });
@@ -117,7 +122,7 @@ class PublisherService extends Service {
         userId: string;
         volume: number;
         subscribedAt: string;
-      }[] = await this.broker.call(
+      }[] = await ctx.call(
         `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
         {
           robotId
@@ -169,7 +174,7 @@ class PublisherService extends Service {
             action === cpz.TradeAction.closeLong ||
             action === cpz.TradeAction.closeShort
           ) {
-            const position: cpz.RobotPositionState = await this.broker.call(
+            const position: cpz.RobotPositionState = await ctx.call(
               `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
               {
                 id: signal.positionId
@@ -241,12 +246,17 @@ class PublisherService extends Service {
         }
 
         if (entities.length > 0)
-          await this.broker.call<cpz.TelegramMessage>(
-            `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+          await ctx.call<
+            cpz.TelegramMessage,
             {
-              entities
+              entities: {
+                telegramId: number;
+                message: string;
+              }[];
             }
-          );
+          >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+            entities
+          });
       }
     } catch (e) {
       this.logger.error(e);
@@ -256,15 +266,12 @@ class PublisherService extends Service {
   async handleUserExAccError(ctx: Context<cpz.UserExchangeAccountErrorEvent>) {
     try {
       const { userId, name, error } = ctx.params;
-      const user: cpz.User = await this.broker.call(
-        `${cpz.Service.DB_USERS}.get`,
-        {
-          fields: ["id", "telegramId", "settings"],
-          id: userId
-        }
-      );
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        fields: ["id", "telegramId", "settings"],
+        id: userId
+      });
       const LANG = "en";
-      await this.broker.call<{ entity: cpz.TelegramMessage }>(
+      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
         `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
         {
           entity: {
@@ -291,7 +298,7 @@ class PublisherService extends Service {
     try {
       const { userRobotId, jobType, error } = ctx.params;
 
-      const { name, telegramId } = await this.broker.call(
+      const { name, telegramId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -299,7 +306,7 @@ class PublisherService extends Service {
       );
 
       const LANG = "en";
-      await this.broker.call<{ entity: cpz.TelegramMessage }>(
+      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
         `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
         {
           entity: {
@@ -337,14 +344,14 @@ class PublisherService extends Service {
         status = cpz.Status.started;
       else throw new Error("Unknown Event Name");
 
-      const { name, telegramId } = await this.broker.call(
+      const { name, telegramId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
         }
       );
       const LANG = "en";
-      await this.broker.call<{ entity: cpz.TelegramMessage }>(
+      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
         `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
         {
           entity: {

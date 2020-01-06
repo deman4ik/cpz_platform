@@ -97,11 +97,11 @@ class ApiService extends Service {
   }
 
   async getNodesList(ctx: Context) {
-    return await this.broker.call("$node.list");
+    return await ctx.call("$node.list");
   }
 
   async getServicesList(ctx: Context) {
-    return await this.broker.call("$node.services");
+    return await ctx.call("$node.services");
   }
 
   async checkAuth(

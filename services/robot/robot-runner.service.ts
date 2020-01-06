@@ -185,7 +185,7 @@ class RobotRunnerService extends Service {
         currency,
         timeframe,
         settings: { requiredHistoryMaxBars }
-      } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id
       });
       if (status === cpz.Status.paused) {
@@ -205,7 +205,7 @@ class RobotRunnerService extends Service {
           status
         };
 
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+      await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
         status: cpz.Status.starting,
         startedAt: null,
@@ -223,11 +223,11 @@ class RobotRunnerService extends Service {
           initialized: false
         }
       });
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.clear`, {
+      await ctx.call(`${cpz.Service.DB_ROBOTS}.clear`, {
         robotId: id
       });
 
-      const [firstCandle] = await this.broker.call(
+      const [firstCandle] = await ctx.call(
         `${cpz.Service.DB_CANDLES}${timeframe}.find`,
         {
           limit: 1,
@@ -258,19 +258,21 @@ class RobotRunnerService extends Service {
         .utc()
         .startOf(unit)
         .toISOString();
-      const backtesterStatus = await this.broker.call(
-        `${cpz.Service.BACKTESTER_RUNNER}.start`,
-        {
-          id,
-          robotId: id,
-          dateFrom: historyDateFrom,
-          dateTo,
-          settings: {
-            local: false,
-            populateHistory: true
-          }
+      const backtesterStatus: {
+        success: boolean;
+        id: string;
+        status?: string;
+        error?: string;
+      } = await ctx.call(`${cpz.Service.BACKTESTER_RUNNER}.start`, {
+        id,
+        robotId: id,
+        dateFrom: historyDateFrom,
+        dateTo,
+        settings: {
+          local: false,
+          populateHistory: true
         }
-      );
+      });
       if (backtesterStatus.success === false) return backtesterStatus;
       return { success: true, id, status: cpz.Status.starting };
     } catch (e) {
@@ -286,12 +288,9 @@ class RobotRunnerService extends Service {
   ) {
     const { id } = ctx.params;
     try {
-      const { status } = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.get`,
-        {
-          id
-        }
-      );
+      const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
+        id
+      });
       if (status === cpz.Status.paused) {
         const result = await this.resume(ctx);
         if (result && result.success)
@@ -309,8 +308,8 @@ class RobotRunnerService extends Service {
           status
         };
 
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.clear`, { robotId: id });
-      await this.broker.call(`${cpz.Service.ROBOT_WORKER}.startUp`, {
+      await ctx.call(`${cpz.Service.DB_ROBOTS}.clear`, { robotId: id });
+      await ctx.call(`${cpz.Service.ROBOT_WORKER}.startUp`, {
         id
       });
       return { success: true, id, status: cpz.Status.started };
@@ -327,12 +326,9 @@ class RobotRunnerService extends Service {
   ) {
     const { id } = ctx.params;
     try {
-      const { status } = await this.broker.call(
-        `${cpz.Service.DB_ROBOTS}.get`,
-        {
-          id
-        }
-      );
+      const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
+        id
+      });
       if (status === cpz.Status.stopping || status === cpz.Status.stopped)
         return {
           success: true,
@@ -369,12 +365,12 @@ class RobotRunnerService extends Service {
       const { id, exchange } = ctx.params;
       let robotsToPause: { id: string; status: string }[] = [];
       if (id) {
-        const {
-          status
-        } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, { id });
+        const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
+          id
+        });
         if (status === cpz.Status.started) robotsToPause.push({ id, status });
         else if (exchange) {
-          const robots: cpz.RobotState[] = await this.broker.call(
+          const robots: cpz.RobotState[] = await ctx.call(
             `${cpz.Service.DB_ROBOTS}.find`,
             {
               query: { status: cpz.Status.started, exchange }
@@ -383,7 +379,7 @@ class RobotRunnerService extends Service {
           robotsToPause = robots.map(({ id, status }) => ({ id, status }));
         }
       } else {
-        const robots: cpz.RobotState[] = await this.broker.call(
+        const robots: cpz.RobotState[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
             query: { status: cpz.Status.started }
@@ -422,12 +418,12 @@ class RobotRunnerService extends Service {
       const { id } = ctx.params;
       let robotIds: string[] = [];
       if (id) {
-        const {
-          status
-        } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, { id });
+        const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
+          id
+        });
         if (status === cpz.Status.paused) robotIds.push(id);
       } else {
-        const robots: cpz.RobotState[] = await this.broker.call(
+        const robots: cpz.RobotState[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
             query: { status: cpz.Status.paused }
@@ -439,11 +435,11 @@ class RobotRunnerService extends Service {
       if (robotIds.length > 0)
         await Promise.all(
           robotIds.map(async robotId => {
-            await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+            await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
               id: robotId,
               status: cpz.Status.started
             });
-            await this.broker.emit(`${cpz.Event.ROBOT_RESUMED}`, { robotId });
+            await ctx.emit(`${cpz.Event.ROBOT_RESUMED}`, { robotId });
           })
         );
 
@@ -461,7 +457,7 @@ class RobotRunnerService extends Service {
       const { exchange, asset, currency, timeframe, timestamp } = candle;
       /*  const call = async (bail: (e: Error) => void) => {
         try {*/
-      const robots: cpz.RobotState[] = await this.broker.call(
+      const robots: cpz.RobotState[] = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.find`,
         {
           query: {
@@ -517,7 +513,7 @@ class RobotRunnerService extends Service {
       const { exchange, asset, currency, timestamp, price } = tick;
       /* const call = async (bail: (e: Error) => void) => {
         try { */
-      const robots: cpz.RobotState[] = await this.broker.call(
+      const robots: cpz.RobotState[] = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.find`,
         {
           query: {
@@ -576,11 +572,11 @@ class RobotRunnerService extends Service {
       const { id } = ctx.params;
       /*  const call = async (bail: (e: Error) => void) => {
         try { */
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+      await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
         status: cpz.Status.started
       });
-      await this.broker.emit(`${cpz.Event.ROBOT_STARTED}`, {
+      await ctx.emit(`${cpz.Event.ROBOT_STARTED}`, {
         robotId: id,
         eventType: cpz.Event.ROBOT_STARTED
       });
@@ -607,12 +603,12 @@ class RobotRunnerService extends Service {
       const { id, error } = ctx.params;
       /*  const call = async (bail: (e: Error) => void) => {
         try { */
-      await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
+      await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
         status: cpz.Status.failed,
         error
       });
-      await this.broker.emit(`${cpz.Event.ROBOT_FAILED}`, {
+      await ctx.emit(`${cpz.Event.ROBOT_FAILED}`, {
         robotId: id,
         eventType: cpz.Event.ROBOT_FAILED,
         error

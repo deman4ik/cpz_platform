@@ -197,7 +197,7 @@ class UserRobotsService extends Service {
     try {
       const { userExAccId, robotId, settings } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const userExAccExists: cpz.UserExchangeAccount = await this.broker.call(
+      const userExAccExists: cpz.UserExchangeAccount = await ctx.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         { id: userExAccId, fields: ["id", "status", "exchange", "userId"] }
       );
@@ -216,7 +216,7 @@ class UserRobotsService extends Service {
         asset: string;
         currency: string;
         available: number;
-      } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "available", "exchange", "asset", "currency"]
       });
@@ -239,7 +239,7 @@ class UserRobotsService extends Service {
       if (userRobotExists) throw new Error("User Robot already exists");
       const userRobotId = uuid();
 
-      const [market]: cpz.Market[] = await this.broker.call(
+      const [market]: cpz.Market[] = await ctx.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {
           query: {
@@ -324,7 +324,15 @@ class UserRobotsService extends Service {
       if (userRobotExists.status !== cpz.Status.stopped)
         throw new Error("User Robot is not stopped");
 
-      const robot = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      const robot = await ctx.call<
+        {
+          id: string;
+          exchange: string;
+          asset: string;
+          currency: string;
+        },
+        { id: string; fields: string[] }
+      >(`${cpz.Service.DB_ROBOTS}.get`, {
         id: userRobotExists.robotId,
         fields: ["id", "exchange", "asset", "currency"]
       });
@@ -336,7 +344,7 @@ class UserRobotsService extends Service {
           { robotId: userRobotExists.robotId }
         );
 
-      const [market]: cpz.Market[] = await this.broker.call(
+      const [market]: cpz.Market[] = await ctx.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {
           query: {
@@ -481,7 +489,7 @@ class UserRobotsService extends Service {
     try {
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const robotInfo: cpz.RobotInfo = await this.broker.call(
+      const robotInfo: cpz.RobotInfo = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.getRobotBaseInfo`,
         {
           id: robotId
@@ -505,7 +513,7 @@ class UserRobotsService extends Service {
         let closedPositions: cpz.UserPositionDB[] = [];
         let userExAccName: string = "";
 
-        ({ name: userExAccName } = await this.broker.call(
+        ({ name: userExAccName } = await ctx.call(
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
           {
             fields: ["name"],
@@ -513,7 +521,7 @@ class UserRobotsService extends Service {
           }
         ));
 
-        const positions: cpz.UserPositionDB[] = await this.broker.call(
+        const positions: cpz.UserPositionDB[] = await ctx.call(
           `${cpz.Service.DB_USER_POSITIONS}.find`,
           {
             limit: 10,
@@ -553,16 +561,13 @@ class UserRobotsService extends Service {
         };
       }
 
-      const [market] = await this.broker.call(
-        `${cpz.Service.DB_MARKETS}.find`,
-        {
-          query: {
-            exchange: robotInfo.exchange,
-            asset: robotInfo.asset,
-            currency: robotInfo.currency
-          }
+      const [market] = await ctx.call(`${cpz.Service.DB_MARKETS}.find`, {
+        query: {
+          exchange: robotInfo.exchange,
+          asset: robotInfo.asset,
+          currency: robotInfo.currency
         }
-      );
+      });
 
       return {
         robotInfo,

@@ -138,7 +138,7 @@ class PricateConnectorRunnerService extends Service {
   ) {
     try {
       const { userExAccId, type, data } = ctx.params;
-      const { status } = await this.broker.call(
+      const { status } = await ctx.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         {
           id: userExAccId

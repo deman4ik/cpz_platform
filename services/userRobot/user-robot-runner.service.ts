@@ -232,7 +232,7 @@ class UserRobotRunnerService extends Service {
       roles: { allowedRoles }
     } = ctx.meta.user;
     try {
-      const userRobot: cpz.UserRobotDB = await this.broker.call(
+      const userRobot: cpz.UserRobotDB = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
           id
@@ -248,7 +248,7 @@ class UserRobotRunnerService extends Service {
       )
         throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
 
-      const userExAcc: cpz.UserExchangeAccount = await this.broker.call(
+      const userExAcc: cpz.UserExchangeAccount = await ctx.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         {
           id: userRobot.userExAccId
@@ -261,13 +261,15 @@ class UserRobotRunnerService extends Service {
       if (userExAcc.status !== cpz.UserExchangeAccStatus.enabled)
         throw new Error(`User Exchange Account status is ${userExAcc.status}`);
       if (userRobot.status === cpz.Status.paused) {
-        const result = await this.broker.call(
-          `${cpz.Service.ROBOT_RUNNER}.resume`,
-          ctx.params
-        );
+        const result: {
+          success: boolean;
+          id: string;
+          status?: string;
+          error?: string;
+        } = await ctx.call(`${cpz.Service.ROBOT_RUNNER}.resume`, ctx.params);
         if (result && result.success)
           return { success: true, id, status: cpz.Status.started };
-        else throw result.error;
+        else return result;
       }
       if (userRobot.status === cpz.Status.started)
         return {
@@ -276,7 +278,7 @@ class UserRobotRunnerService extends Service {
           status: userRobot.status
         };
 
-      await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
+      await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
         id,
         status: cpz.Status.started,
         message,
@@ -288,7 +290,7 @@ class UserRobotRunnerService extends Service {
         equity: {}
       });
 
-      await this.broker.emit(cpz.Event.USER_ROBOT_STARTED, {
+      await ctx.emit(cpz.Event.USER_ROBOT_STARTED, {
         userRobotId: id,
         message
       });
@@ -314,12 +316,14 @@ class UserRobotRunnerService extends Service {
       roles: { allowedRoles }
     } = ctx.meta.user;
     try {
-      const userRobot = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOTS}.get`,
-        {
-          id
-        }
-      );
+      const userRobot: {
+        id: string;
+        status: string;
+        userId: string;
+      } = await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.get`, {
+        id,
+        fields: ["id", "status", "userId"]
+      });
       if (!userRobot)
         throw new Errors.NotFoundError("Failed to get user robot", {
           userRobotId: id
@@ -373,13 +377,13 @@ class UserRobotRunnerService extends Service {
       const { id, userExAccId, exchange, message } = ctx.params;
       let userRobotsToPause: { id: string; status: string }[] = [];
       if (id) {
-        const {
-          status
-        } = await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.get`, { id });
+        const { status } = await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.get`, {
+          id
+        });
         if (status === cpz.Status.started)
           userRobotsToPause.push({ id, status });
       } else if (userExAccId) {
-        const robots: cpz.UserRobotDB[] = await this.broker.call(
+        const robots: cpz.UserRobotDB[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
             query: { status: cpz.Status.started, userExAccId }
@@ -387,7 +391,7 @@ class UserRobotRunnerService extends Service {
         );
         userRobotsToPause = robots.map(({ id, status }) => ({ id, status }));
       } else if (exchange) {
-        const robots: cpz.UserRobotDB[] = await this.broker.call(
+        const robots: cpz.UserRobotDB[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
             query: { status: cpz.Status.started, exchange }
@@ -395,7 +399,7 @@ class UserRobotRunnerService extends Service {
         );
         userRobotsToPause = robots.map(({ id, status }) => ({ id, status }));
       } else {
-        const robots: cpz.UserRobotDB[] = await this.broker.call(
+        const robots: cpz.UserRobotDB[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
             query: { status: cpz.Status.started }
@@ -438,12 +442,12 @@ class UserRobotRunnerService extends Service {
       const { id, message } = ctx.params;
       let userRobotIds: string[] = [];
       if (id) {
-        const {
-          status
-        } = await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.get`, { id });
+        const { status } = await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.get`, {
+          id
+        });
         if (status === cpz.Status.paused) userRobotIds.push(id);
       } else {
-        const robots: cpz.RobotState[] = await this.broker.call(
+        const robots: cpz.RobotState[] = await ctx.call(
           `${cpz.Service.DB_USER_ROBOTS}.find`,
           {
             query: { status: cpz.Status.paused }
@@ -455,11 +459,11 @@ class UserRobotRunnerService extends Service {
       if (userRobotIds.length > 0)
         await Promise.all(
           userRobotIds.map(async userRobotId => {
-            await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
+            await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
               id: userRobotId,
               status: cpz.Status.started
             });
-            await this.broker.emit(cpz.Event.USER_ROBOT_RESUMED, {
+            await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
               userRobotId,
               message
             });
@@ -477,7 +481,7 @@ class UserRobotRunnerService extends Service {
     try {
       const signal = ctx.params;
       const { robotId } = signal;
-      const userRobots: cpz.UserRobotDB[] = await this.broker.call(
+      const userRobots: cpz.UserRobotDB[] = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.find`,
         {
           query: {
@@ -525,7 +529,7 @@ class UserRobotRunnerService extends Service {
       this.logger.info(
         `New ${cpz.Event.ORDER_STATUS} event for User Robot #${order.userRobotId}`
       );
-      const { status }: cpz.UserRobotDB = await this.broker.call(
+      const { status }: cpz.UserRobotDB = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
           id: order.userRobotId
@@ -558,7 +562,7 @@ class UserRobotRunnerService extends Service {
       if (errorMessage) {
         message = `${message} (${errorMessage})`;
       }
-      await this.broker.call(`${cpz.Service.USER_ROBOT_RUNNER}.pause`, {
+      await ctx.call(`${cpz.Service.USER_ROBOT_RUNNER}.pause`, {
         userExAccId: id,
         message
       });

@@ -31,31 +31,51 @@ class MarketsService extends Service {
         }
       },
       actions: {
-        add: {
+        upsert: {
           graphql: {
             mutation:
-              "addMarket(exchange: String!, asset: String!, currency: String!): Response!"
+              "upsertMarket(exchange: String!, asset: String!, currency: String!): Response!"
           },
           params: { exchange: "string", asset: "string", currency: "string" },
           roles: [cpz.UserRoles.admin],
           hooks: {
             before: "authAction"
           },
-          handler: this.add
+          handler: this.upsert
         }
       }
     });
   }
 
-  async add(ctx: Context) {
+  async upsert(
+    ctx: Context<{
+      exchange: string;
+      asset: string;
+      currency: string;
+    }>
+  ) {
     try {
-      const market: cpz.Market = await this.broker.call(
-        `${cpz.Service.PUBLIC_CONNECTOR}.getMarket`,
-        ctx.params
-      );
+      const market = await ctx.call<
+        cpz.Market,
+        {
+          exchange: string;
+          asset: string;
+          currency: string;
+        }
+      >(`${cpz.Service.PUBLIC_CONNECTOR}.getMarket`, ctx.params);
 
-      await this.adapter.insert({ ...market, available: 5 });
-      return { success: true, result: { ...market, available: 5 } };
+      const exists = await this.adapter.find({
+        query: ctx.params
+      });
+      let result;
+      if (exists) {
+        result = { ...exists, ...market };
+        await this.adapter.updateMany(ctx.params, result);
+      } else {
+        result = { ...market, available: 5 };
+        await this.adapter.insert(result);
+      }
+      return { success: true, result };
     } catch (e) {
       this.logger.error(e);
       return { success: false, result: e };

@@ -83,7 +83,7 @@ class AuthService extends Service {
     this.logger.info("Login", ctx.params);
     try {
       const { email, password } = ctx.params;
-      const [user]: cpz.User[] = await this.broker.call(
+      const [user]: cpz.User[] = await ctx.call(
         `${cpz.Service.DB_USERS}.find`,
         {
           query: { email }
@@ -119,7 +119,7 @@ class AuthService extends Service {
     try {
       const { email, password } = ctx.params;
       //TODO: check password
-      const [userExists]: cpz.User[] = await this.broker.call(
+      const [userExists]: cpz.User[] = await ctx.call(
         `${cpz.Service.DB_USERS}.find`,
         {
           query: { email }
@@ -150,7 +150,7 @@ class AuthService extends Service {
           }
         }
       };
-      await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
+      await ctx.call(`${cpz.Service.DB_USERS}.insert`, {
         entity: newUser
       });
       return { success: true, result: newUser.id };
@@ -169,7 +169,7 @@ class AuthService extends Service {
     this.logger.info("Register Telegram", ctx.params);
     const { telegramId, telegramUsername, name } = ctx.params;
 
-    const [userExists]: cpz.User[] = await this.broker.call(
+    const [userExists]: cpz.User[] = await ctx.call(
       `${cpz.Service.DB_USERS}.find`,
       {
         query: { telegramId }
@@ -199,7 +199,7 @@ class AuthService extends Service {
         }
       }
     };
-    await this.broker.call(`${cpz.Service.DB_USERS}.insert`, {
+    await ctx.call(`${cpz.Service.DB_USERS}.insert`, {
       entity: newUser
     });
     return newUser;

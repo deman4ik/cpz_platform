@@ -81,21 +81,18 @@ class StatsCalcRunnerService extends Service {
   ) {
     try {
       const { userId, robotId } = ctx.params;
-      const { exchange, asset } = await this.broker.call(
+      const { exchange, asset } = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.get`,
         {
           id: robotId
         }
       );
-      const userSignal = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.find`,
-        {
-          query: {
-            userId,
-            robotId
-          }
+      const userSignal = await ctx.call(`${cpz.Service.DB_USER_SIGNALS}.find`, {
+        query: {
+          userId,
+          robotId
         }
-      );
+      });
       if (userSignal)
         await this.queueJob({
           id: uuid(),
@@ -130,7 +127,7 @@ class StatsCalcRunnerService extends Service {
   async handleCalcUserSignalsEvent(ctx: Context<{ userId: string }>) {
     try {
       const { userId } = ctx.params;
-      const userSignals = await this.broker.call(
+      const userSignals = await ctx.call(
         `${cpz.Service.DB_USER_SIGNALS}.find`,
         {
           query: {
@@ -157,12 +154,9 @@ class StatsCalcRunnerService extends Service {
       const exchangesAssets: {
         exchange: string;
         asset: string;
-      }[] = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedAggr`,
-        {
-          userId
-        }
-      );
+      }[] = await ctx.call(`${cpz.Service.DB_USER_SIGNALS}.getSubscribedAggr`, {
+        userId
+      });
       if (
         !exchangesAssets ||
         !Array.isArray(exchangesAssets) ||
@@ -226,12 +220,12 @@ class StatsCalcRunnerService extends Service {
         robotId
       });
 
-      const usersByRobotId = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
-        {
-          robotId
-        }
-      );
+      const usersByRobotId = await ctx.call<
+        { userId: string }[],
+        { robotId: string }
+      >(`${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`, {
+        robotId
+      });
       for (const { userId } of usersByRobotId) {
         await this.queueJob({
           id: uuid(),
@@ -240,12 +234,12 @@ class StatsCalcRunnerService extends Service {
         });
       }
 
-      const usersByExchange = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
-        {
-          exchange
-        }
-      );
+      const usersByExchange = await ctx.call<
+        { userId: string }[],
+        { exchange: string }
+      >(`${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`, {
+        exchange
+      });
       for (const { userId } of usersByExchange) {
         await this.queueJob({
           id: uuid(),
@@ -255,12 +249,12 @@ class StatsCalcRunnerService extends Service {
         });
       }
 
-      const usersByAsset = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
-        {
-          asset
-        }
-      );
+      const usersByAsset = await ctx.call<
+        { userId: string }[],
+        { asset: string }
+      >(`${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`, {
+        asset
+      });
       for (const { userId } of usersByAsset) {
         await this.queueJob({
           id: uuid(),
@@ -270,13 +264,13 @@ class StatsCalcRunnerService extends Service {
         });
       }
 
-      const usersByExchangeAsset = await this.broker.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`,
-        {
-          exchange,
-          asset
-        }
-      );
+      const usersByExchangeAsset = await ctx.call<
+        { userId: string }[],
+        { exchange: string; asset: string }
+      >(`${cpz.Service.DB_USER_SIGNALS}.getSubscribedUserIds`, {
+        exchange,
+        asset
+      });
       for (const { userId } of usersByExchangeAsset) {
         await this.queueJob({
           id: uuid(),
