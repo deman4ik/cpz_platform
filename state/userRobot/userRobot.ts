@@ -1,6 +1,6 @@
 import { cpz, GenericObject } from "../../@types";
 import UserPosition from "./userPosition";
-import { flatten } from "../../utils";
+import { flattenArray } from "../../utils";
 import { Errors } from "moleculer";
 import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
@@ -68,8 +68,8 @@ class UserRobot implements cpz.UserRobot {
       },
       robot: this._robot,
       positions: positions.map(pos => pos.state),
-      ordersToCreate: flatten(positions.map(pos => pos.ordersToCreate)),
-      ordersWithJobs: flatten(positions.map(pos => pos.orderWithJobs)),
+      ordersToCreate: flattenArray(positions.map(pos => pos.ordersToCreate)),
+      ordersWithJobs: flattenArray(positions.map(pos => pos.orderWithJobs)),
       eventsToSend: this._eventsToSend
     };
   }

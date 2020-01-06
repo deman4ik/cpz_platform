@@ -247,6 +247,27 @@ const equals = (a: any, b: any): boolean => {
   return keys.every(k => equals(a[k], b[k]));
 };
 
+function flatten(
+  source: any,
+  flattened: { [key: string]: any } = {},
+  keySoFar: string = ""
+) {
+  const getNextKey = (key: string) => `${keySoFar}${keySoFar ? "." : ""}${key}`;
+
+  if (typeof source === "object") {
+    for (const key in source) {
+      flatten(source[key], flattened, getNextKey(key));
+    }
+  } else {
+    flattened[keySoFar] = source;
+  }
+  return flattened;
+}
+
+function valuesString(source: any, delim: string = " ") {
+  return Object.values(flatten(source)).join(delim);
+}
+
 /**
  * Flattens an array up to the specified depth.
  *
@@ -254,11 +275,11 @@ const equals = (a: any, b: any): boolean => {
  * @param {number} [depth=1]
  * @returns {any[]}
  */
-function flatten(arr: any[], depth = 1): any[] {
+function flattenArray(arr: any[], depth = 1): any[] {
   if (!arr || !Array.isArray(arr) || arr.length === 0) return arr;
   return arr.reduce(
     (a, v) =>
-      a.concat(depth > 1 && Array.isArray(v) ? flatten(v, depth - 1) : v),
+      a.concat(depth > 1 && Array.isArray(v) ? flattenArray(v, depth - 1) : v),
     []
   );
 }
@@ -290,5 +311,7 @@ export {
   sum,
   average,
   flatten,
+  valuesString,
+  flattenArray,
   addPercent
 };

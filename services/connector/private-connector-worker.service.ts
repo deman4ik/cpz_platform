@@ -5,7 +5,7 @@ import { Job } from "bull";
 import retry from "async-retry";
 import { cpz, GenericObject } from "../../@types";
 import dayjs from "../../lib/dayjs";
-import { createFetchMethod, decrypt } from "../../utils";
+import { createFetchMethod, decrypt, valuesString } from "../../utils";
 import { ORDER_CHECK_TIMEOUT } from "../../config";
 /**
  * Available exchanges
@@ -70,6 +70,10 @@ class PrivateConnectorWorkerService extends Service {
             secret: "string",
             pass: { type: "string", optional: true }
           },
+          graphql: {
+            mutation:
+              "checkAPIKeys(exchange: String!, key: String!, secret: String!, pass: String): Response!"
+          },
           handler: this.checkAPIKeys
         }
       }
@@ -101,6 +105,23 @@ class PrivateConnectorWorkerService extends Service {
    * @memberof PrivateConnectorWorkerService
    */
   _fetch = createFetchMethod(process.env.PROXY_ENDPOINT);
+
+  getErrorMessage(error: Error) {
+    let message = error.message;
+    if (error instanceof ccxt.BaseError) {
+      try {
+        message = valuesString(
+          JSON.parse(message.substring(message.indexOf("{")))
+        );
+        if (!message) message = error.message;
+      } catch (e) {
+        message = error.message;
+      }
+    } else {
+      message = error.message;
+    }
+    return message
+  }
 
   /**
    * Format currency pair symbol
@@ -170,7 +191,7 @@ class PrivateConnectorWorkerService extends Service {
         password: pass,
         fetchImplementation: this._fetch
       });
-      const call = async (bail: (e: Error) => void) => {
+      const getBalanceCall = async (bail: (e: Error) => void) => {
         try {
           return await connector.fetchBalance();
         } catch (e) {
@@ -182,18 +203,111 @@ class PrivateConnectorWorkerService extends Service {
           bail(e);
         }
       };
-      const response = await retry(call, this.retryOptions);
-      if (response && response.info) return { success: true };
-      else
-        throw new Errors.MoleculerError(
-          "Wrong response from exchange",
-          520,
-          "ERR_WRONG_RESPONSE",
-          response
+      try {
+        const balances: ccxt.Balances = await retry(
+          getBalanceCall,
+          this.retryOptions
         );
+        if (!balances && !balances.info)
+          throw new Errors.MoleculerError(
+            "Wrong response from exchange while checking balance",
+            520,
+            "ERR_WRONG_RESPONSE",
+            balances
+          );
+      } catch (err) {
+        throw Error(`Failed to check balance. ${this.getErrorMessage(err)}`);
+      }
+      const asset = "BTC";
+      const currency = "USD";
+      const [market]: cpz.Market[] = await this.broker.call(
+        `${cpz.Service.DB_MARKETS}.find`,
+        {
+          query: {
+            exchange,
+            asset,
+            currency
+          }
+        }
+      );
+
+      const type = cpz.OrderType.limit;
+      const orderParams = this.getOrderParams(<ExchangeName>exchange, {}, type);
+
+      const createOrderCall = async (bail: (e: Error) => void) => {
+        try {
+          return await connector.createOrder(
+            this.getSymbol(asset, currency),
+            type,
+            cpz.OrderDirection.buy,
+            market.limits.amount.min,
+            market.limits.price.min,
+            orderParams
+          );
+        } catch (e) {
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
+          bail(e);
+        }
+      };
+      let order: Order;
+      try {
+        order = await retry(createOrderCall, this.retryOptions);
+        this.logger.info("Created order", order);
+        if (!order)
+          throw new Errors.MoleculerError(
+            "Wrong response from exchange while creating test order",
+            520,
+            "ERR_WRONG_RESPONSE",
+            order
+          );
+      } catch (err) {
+        throw Error(
+          `Failed to create test order. ${this.getErrorMessage(err)}`
+        );
+      }
+
+      const cancelOrderCall = async (bail: (e: Error) => void) => {
+        try {
+          return await connector.cancelOrder(
+            order.id,
+            this.getSymbol(asset, currency)
+          );
+        } catch (e) {
+          if (
+            e instanceof ccxt.NetworkError &&
+            !(e instanceof ccxt.InvalidNonce)
+          )
+            throw e;
+          bail(e);
+        }
+      };
+      try {
+        const canceled = await retry(cancelOrderCall, this.retryOptions);
+
+        this.logger.info("Canceled order", canceled);
+        if (!order)
+          throw new Errors.MoleculerError(
+            "Wrong response from exchange while canceling test order",
+            520,
+            "ERR_WRONG_RESPONSE",
+            canceled
+          );
+      } catch (err) {
+        throw Error(
+          `Failed to cancel test order. ${this.getErrorMessage(
+            err
+          )} Please cancel ${order.id} order manualy.`
+        );
+      }
+      return { success: true };
     } catch (err) {
       this.logger.error(err);
-      return { success: false, error: err.message };
+
+      return { success: false, error: this.getErrorMessage(err) };
     }
   }
 
@@ -265,7 +379,7 @@ class PrivateConnectorWorkerService extends Service {
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.invalidate`,
           {
             id: userExAccId,
-            error: e
+            error: this.getErrorMessage(e)
           }
         );
       }
@@ -377,7 +491,7 @@ class PrivateConnectorWorkerService extends Service {
               const failedOrder = {
                 ...order,
                 lastCheckedAt: dayjs.utc().toISOString(),
-                error: err,
+                error: this.getErrorMessage(err),
                 nextJob: null,
                 nextJobAt: null
               };
@@ -584,7 +698,7 @@ class PrivateConnectorWorkerService extends Service {
       if (err instanceof ccxt.InvalidOrder) {
         return {
           ...order,
-          error: err,
+          error: this.getErrorMessage(err),
           status: cpz.OrderStatus.canceled,
           nextJob: null,
           nextJobAt: null
@@ -596,7 +710,7 @@ class PrivateConnectorWorkerService extends Service {
       ) {
         return {
           ...order,
-          error: err,
+          error: this.getErrorMessage(err),
           nextJobAt: dayjs
             .utc()
             .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
@@ -682,7 +796,7 @@ class PrivateConnectorWorkerService extends Service {
       ) {
         return {
           ...order,
-          error: err,
+          error: this.getErrorMessage(err),
           nextJobAt: dayjs
             .utc()
             .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
@@ -731,7 +845,7 @@ class PrivateConnectorWorkerService extends Service {
       ) {
         return {
           ...order,
-          error: err,
+          error: this.getErrorMessage(err),
           nextJobAt: dayjs
             .utc()
             .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
