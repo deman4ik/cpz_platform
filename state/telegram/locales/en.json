@@ -122,6 +122,7 @@
       "chooseExchange": "🔑 Adding New Exchange API Key\n\n<b>Choose one of available exchanges:</b>",
       "enterAPIKey": "🔑 Adding New Exchange API Key\n\nEnter your ${exchange} <b>API KEY</b>",
       "enterAPISecret": "🔑 Adding New Exchange API Key\n\nEnter your ${exchange} <b>API Key Secret (Private Key)</b>",
+      "check": "🔑 Adding New Exchange API Key\n\n🌀 Checking your ${exchange} API Key...\n\n⏳ Please wait...",
       "success": "🔑 New ${name} API Key succesfully added!",
       "failed": "❌ Failed to add new ${exchange} API Key.\n\n<b>${error}</b>\n\nPlease try again!"
     },

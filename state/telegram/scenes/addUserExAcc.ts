@@ -97,6 +97,11 @@ async function addUserExAccSubmited(ctx: any) {
       return addUserExAccSelectedExchange(ctx);
     }
 
+    await ctx.reply(
+      ctx.i18n.t("scenes.addUserExAcc.check", { exchange }),
+      Extra.HTML()
+    );
+
     const {
       key,
       secret
