@@ -120,7 +120,7 @@ class PrivateConnectorWorkerService extends Service {
     } else {
       message = error.message;
     }
-    return message
+    return message;
   }
 
   /**
@@ -492,6 +492,10 @@ class PrivateConnectorWorkerService extends Service {
                 ...order,
                 lastCheckedAt: dayjs.utc().toISOString(),
                 error: this.getErrorMessage(err),
+                status:
+                  order.nextJob.type === cpz.OrderJobType.create
+                    ? cpz.OrderStatus.canceled
+                    : order.status,
                 nextJob: null,
                 nextJobAt: null
               };
@@ -529,6 +533,7 @@ class PrivateConnectorWorkerService extends Service {
         order.nextJobAt = dayjs.utc().toISOString();
         return order;
       }
+
       order = await this.createOrder(order);
     } else if (orderJobType === cpz.OrderJobType.recreate) {
       this.logger.info(
@@ -691,18 +696,10 @@ class PrivateConnectorWorkerService extends Service {
       if (
         err instanceof ccxt.AuthenticationError ||
         err instanceof ccxt.InsufficientFunds ||
-        err instanceof ccxt.InvalidNonce
+        err instanceof ccxt.InvalidNonce ||
+        err instanceof ccxt.InvalidOrder
       ) {
         throw err;
-      }
-      if (err instanceof ccxt.InvalidOrder) {
-        return {
-          ...order,
-          error: this.getErrorMessage(err),
-          status: cpz.OrderStatus.canceled,
-          nextJob: null,
-          nextJobAt: null
-        };
       }
       if (
         err instanceof ccxt.ExchangeError ||
@@ -783,11 +780,9 @@ class PrivateConnectorWorkerService extends Service {
       if (
         err instanceof ccxt.AuthenticationError ||
         err instanceof ccxt.InsufficientFunds ||
-        err instanceof ccxt.InvalidNonce
+        err instanceof ccxt.InvalidNonce ||
+        err instanceof ccxt.InvalidOrder
       ) {
-        throw err;
-      }
-      if (err instanceof ccxt.InvalidOrder) {
         throw err;
       }
       if (

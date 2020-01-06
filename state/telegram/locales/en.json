@@ -230,6 +230,7 @@
   },
   "userRobot": {
     "error": "❌ Error occurred while processing robot job <b>${jobType}</b>.\n\n${error} \n\n🤖 <b>${name}</b> (${id})\n\n Please contact support.",
+    "orderError": "❌ Error occurred while processing order <b>${exId}</b>.\n\n${error} \n\n🤖 <b>${name}</b> (${id})\n\n Please check your API Keys and Robot settings or contact support.",
     "status": "🤖 Robot <b>${name}</b> is ${status} now!\n\n${message}"
   },
   "unknownError": "Unknown error",

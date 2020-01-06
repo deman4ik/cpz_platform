@@ -368,6 +368,34 @@ class PublisherService extends Service {
       this.logger.error(e);
     }
   }
+
+  async handleOrderError(ctx: Context<cpz.Order>) {
+    try {
+      const { userRobotId, error } = ctx.params;
+      const { name, telegramId } = await ctx.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
+        {
+          id: userRobotId
+        }
+      );
+      const LANG = "en";
+      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
+        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
+        {
+          entity: {
+            telegramId,
+            message: this.i18n.t(LANG, `userRobot.orderError`, {
+              id: userRobotId,
+              name: name,
+              error
+            })
+          }
+        }
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
 }
 
 export = PublisherService;
