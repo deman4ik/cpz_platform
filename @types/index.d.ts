@@ -51,7 +51,8 @@ declare namespace cpz {
     AUTH = "auth",
     API = "api",
     TELEGRAM_BOT = "telegram-bot",
-    PUBLISHER = "publisher"
+    PUBLISHER = "publisher",
+    MAIL = "mail"
   }
 
   const enum Event {
