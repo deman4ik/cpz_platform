@@ -152,7 +152,7 @@ async function userRobotInfo(ctx: any) {
       }
       if (status === cpz.Status.stopped && stoppedAt) {
         statusText = `${statusText}${ctx.i18n.t("robot.stoppedAt", {
-          startedAt: dayjs.utc(stoppedAt).format("YYYY-MM-DD HH:mm UTC")
+          stoppedAt: dayjs.utc(stoppedAt).format("YYYY-MM-DD HH:mm UTC")
         })}`;
       }
     }
