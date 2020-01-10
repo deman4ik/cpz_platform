@@ -30,7 +30,8 @@ function getUserExAccsMenu(ctx: any) {
 
 async function addUserRobotEnter(ctx: any) {
   try {
-    if (ctx.scene.state.userExAccId) return addUserRobotSelectedAcc(ctx);
+    if (ctx.scene.state.userExAccId)
+      return addUserRobotSelectedAcc.call(this, ctx);
     const {
       robotInfo: { exchange, name }
     }: {
@@ -134,7 +135,7 @@ async function addUserRobotSelectedAcc(ctx: any) {
 
 async function addUserRobotConfirm(ctx: any) {
   try {
-    if (!ctx.scene.state.userExAccId) return addUserRobotEnter(ctx);
+    if (!ctx.scene.state.userExAccId) return addUserRobotEnter.call(this, ctx);
 
     const { id: robotId } = ctx.scene.state.selectedRobot.robotInfo;
     let volume: number;
@@ -181,7 +182,7 @@ async function addUserRobotConfirm(ctx: any) {
         Extra.HTML()
       );
       ctx.scene.state.reply = true;
-      return addUserRobotSelectedAcc(ctx);
+      return addUserRobotSelectedAcc.call(this, ctx);
     }
 
     await ctx.reply(

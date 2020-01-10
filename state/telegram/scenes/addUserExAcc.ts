@@ -29,7 +29,7 @@ function getExchangesMenu(ctx: any) {
 async function addUserExAccEnter(ctx: any) {
   try {
     if (ctx.scene.state.selectedExchange)
-      return addUserExAccSelectedExchange(ctx);
+      return addUserExAccSelectedExchange.call(this, ctx);
     if (!ctx.scene.state.exchanges)
       ctx.scene.state.exchanges = await this.broker.call(
         `${cpz.Service.DB_EXCHANGES}.find`,
@@ -101,7 +101,7 @@ async function addUserExAccSubmited(ctx: any) {
     } else if (ctx.scene.state.stage === "secret") {
       ctx.scene.state.secret = ctx.message.text;
     } else {
-      return addUserExAccSelectedExchange(ctx);
+      return addUserExAccSelectedExchange.call(this, ctx);
     }
 
     await ctx.reply(
@@ -134,7 +134,7 @@ async function addUserExAccSubmited(ctx: any) {
         ctx.i18n.t("scenes.addUserExAcc.success", { name: result }),
         Extra.HTML()
       );
-      await addUserExAccBack(ctx);
+      await addUserExAccBack.call(this, ctx);
     } else {
       await ctx.reply(
         ctx.i18n.t("scenes.addUserExAcc.failed", {
@@ -146,7 +146,7 @@ async function addUserExAccSubmited(ctx: any) {
       ctx.scene.state.key = null;
       ctx.scene.state.secret = null;
       ctx.scene.state.stage = null;
-      await addUserExAccSelectedExchange(ctx);
+      await addUserExAccSelectedExchange.call(this, ctx);
     }
   } catch (e) {
     this.logger.error(e);

@@ -215,6 +215,7 @@ async function searchSignalsOpenRobot(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
       robotId,
+      edit: true,
       prevScene: cpz.TelegramScene.SEARCH_SIGNALS,
       prevState: { ...ctx.scene.state, stage: "selectRobot" }
     });
@@ -233,9 +234,9 @@ async function searchSignalsBack(ctx: any) {
       if (data && data.p) {
         ctx.scene.state.stage = data.p;
         if (ctx.scene.state.stage === "selectAsset")
-          return searchSignalsSelectAsset(ctx);
+          return searchSignalsSelectAsset.call(this, ctx);
         if (ctx.scene.state.stage === "selectRobot") {
-          return searchSignalsSelectRobot(ctx);
+          return searchSignalsSelectRobot.call(this, ctx);
         }
       }
     }
@@ -257,9 +258,9 @@ async function searchSignalsBackEdit(ctx: any) {
         ctx.scene.state.stage = data.p;
         ctx.scene.state.edit = true;
         if (ctx.scene.state.stage === "selectAsset")
-          return searchSignalsSelectAsset(ctx);
+          return searchSignalsSelectAsset.call(this, ctx);
         if (ctx.scene.state.stage === "selectRobot") {
-          return searchSignalsSelectRobot(ctx);
+          return searchSignalsSelectRobot.call(this, ctx);
         }
       }
     }

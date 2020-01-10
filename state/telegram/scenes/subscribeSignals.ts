@@ -80,7 +80,7 @@ async function subscribeSignalsConfirm(ctx: any) {
         }),
         Extra.HTML()
       );
-      return subscribeSignalsEnter(ctx);
+      return subscribeSignalsEnter.call(this, ctx);
     }
 
     await ctx.reply(
@@ -91,7 +91,7 @@ async function subscribeSignalsConfirm(ctx: any) {
       }),
       Extra.HTML()
     );
-    return subscribeSignalsBack(ctx);
+    return subscribeSignalsBack.call(this, ctx);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

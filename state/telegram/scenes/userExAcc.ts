@@ -101,7 +101,7 @@ async function userExAccDelete(ctx: any) {
         Extra.HTML()
       );
 
-      await userExAccBack(ctx);
+      await userExAccBack.call(this, ctx);
     } else {
       await ctx.reply(
         ctx.i18n.t("scenes.userExAcc.deleteFailed", {
@@ -111,7 +111,7 @@ async function userExAccDelete(ctx: any) {
         Extra.HTML()
       );
 
-      await userExAccEnter(ctx);
+      await userExAccEnter.call(this, ctx);
     }
   } catch (e) {
     this.logger.error(e);

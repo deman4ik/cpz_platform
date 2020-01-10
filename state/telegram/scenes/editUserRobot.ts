@@ -84,7 +84,7 @@ async function editUserRobotConfirm(ctx: any) {
         Extra.HTML()
       );
       ctx.scene.state.reply = true;
-      return editUserRobotEnter(ctx);
+      return editUserRobotEnter.call(this, ctx);
     }
 
     await ctx.reply(

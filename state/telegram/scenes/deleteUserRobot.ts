@@ -68,7 +68,7 @@ async function deleteUserRobotYes(ctx: any) {
         Extra.HTML()
       );
       ctx.scene.state.reply = true;
-      return deleteUserRobotBack(ctx);
+      return deleteUserRobotBack.call(this, ctx);
     }
 
     await ctx.reply(

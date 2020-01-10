@@ -45,7 +45,7 @@ async function editUserExAccSubmited(ctx: any) {
     } else if (ctx.scene.state.stage === "secret") {
       ctx.scene.state.secret = ctx.message.text;
     } else {
-      await editUserExAccEnter(ctx);
+      await editUserExAccEnter.call(this, ctx);
     }
 
     const {
@@ -74,7 +74,7 @@ async function editUserExAccSubmited(ctx: any) {
         ctx.i18n.t("scenes.editUserExAcc.success", { name: result }),
         Extra.HTML()
       );
-      await editUserExAccBack(ctx);
+      await editUserExAccBack.call(this, ctx);
     } else {
       await ctx.reply(
         ctx.i18n.t("scenes.editUserExAcc.failed", {
@@ -86,7 +86,7 @@ async function editUserExAccSubmited(ctx: any) {
       ctx.scene.state.key = null;
       ctx.scene.state.secret = null;
       ctx.scene.state.stage = null;
-      await editUserExAccEnter(ctx);
+      await editUserExAccEnter.call(this, ctx);
     }
   } catch (e) {
     this.logger.error(e);
