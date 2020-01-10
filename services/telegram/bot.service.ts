@@ -592,21 +592,26 @@ class BotService extends Service {
    *****************************/
 
   async startedService() {
-    if (process.env.NODE_ENV === "production") {
-      await this.bot.telegram.setWebhook(process.env.BOT_HOST);
-      await this.bot.startWebhook("/", null, 5000);
-      this.cronJobs.start();
-      this.logger.warn("Bot in production mode!");
-    } else if (
-      process.env.NODE_ENV === "dev" ||
-      process.env.NODE_ENV === "development"
-    ) {
-      await this.bot.telegram.deleteWebhook();
-      await this.bot.startPolling();
-      this.cronJobs.start();
-      this.logger.warn("Bot in development mode!");
-    } else {
-      this.logger.warn("Bot not started!");
+    try {
+      if (process.env.NODE_ENV === "production") {
+        await this.bot.telegram.setWebhook(process.env.BOT_HOST);
+        await this.bot.startWebhook("/", null, 5000);
+        this.cronJobs.start();
+        this.logger.warn("Bot in production mode!");
+      } else if (
+        process.env.NODE_ENV === "dev" ||
+        process.env.NODE_ENV === "development"
+      ) {
+        await this.bot.telegram.deleteWebhook();
+        await this.bot.startPolling();
+        this.cronJobs.start();
+        this.logger.warn("Bot in development mode!");
+      } else {
+        this.logger.warn("Bot not started!");
+      }
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
   }
 
