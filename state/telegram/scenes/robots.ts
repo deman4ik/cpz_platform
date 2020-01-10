@@ -25,6 +25,13 @@ function getRobotsMenu(ctx: any) {
           JSON.stringify({ a: "perfRobots" }),
           false
         )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
       ]
     ];
 
@@ -34,6 +41,13 @@ function getRobotsMenu(ctx: any) {
 
 async function robotsEnter(ctx: any) {
   try {
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
+        ctx.i18n.t("keyboards.mainKeyboard.robots"),
+        getRobotsMenu(ctx)
+      );
+    }
     await ctx.reply(
       ctx.i18n.t("keyboards.mainKeyboard.robots"),
       getBackKeyboard(ctx)
@@ -53,7 +67,7 @@ async function robotsEnter(ctx: any) {
 async function robotsMyRobots(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.MY_ROBOTS);
+    await ctx.scene.enter(cpz.TelegramScene.MY_ROBOTS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -65,7 +79,7 @@ async function robotsMyRobots(ctx: any) {
 async function robotsSearchRobots(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.SEARCH_ROBOTS);
+    await ctx.scene.enter(cpz.TelegramScene.SEARCH_ROBOTS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -77,7 +91,7 @@ async function robotsSearchRobots(ctx: any) {
 async function robotsPerfRobots(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.PERFOMANCE_ROBOTS);
+    await ctx.scene.enter(cpz.TelegramScene.PERFOMANCE_ROBOTS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

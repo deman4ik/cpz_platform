@@ -36,8 +36,10 @@ async function userExAccEnter(ctx: any) {
   try {
     const { name, status }: cpz.UserExchangeAccount = ctx.scene.state.userExAcc;
 
-    if (ctx.scene.state.reply) {
-      return ctx.reply(
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+
+      return ctx.editMessageText(
         ctx.i18n.t("scenes.userExAcc.info", {
           name,
           status
@@ -45,7 +47,7 @@ async function userExAccEnter(ctx: any) {
         getUserExAccMenu(ctx)
       );
     }
-    return ctx.editMessageText(
+    return ctx.reply(
       ctx.i18n.t("scenes.userExAcc.info", {
         name,
         status
@@ -98,7 +100,7 @@ async function userExAccDelete(ctx: any) {
         }),
         Extra.HTML()
       );
-      ctx.scene.state.reply = true;
+
       await userExAccBack(ctx);
     } else {
       await ctx.reply(
@@ -108,7 +110,7 @@ async function userExAccDelete(ctx: any) {
         }),
         Extra.HTML()
       );
-      ctx.scene.state.reply = true;
+
       await userExAccEnter(ctx);
     }
   } catch (e) {
@@ -133,6 +135,21 @@ async function userExAccBack(ctx: any) {
   }
 }
 
+async function userExAccBackEdit(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.USER_EXCHANGE_ACCS, {
+      silent: false,
+      edit: true
+    });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function userExAccLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
@@ -143,5 +160,6 @@ export {
   userExAccEdit,
   userExAccDelete,
   userExAccBack,
+  userExAccBackEdit,
   userExAccLeave
 };

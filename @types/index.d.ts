@@ -133,7 +133,7 @@ declare namespace cpz {
     USER_EXCHANGE_ACC = "userExAcc",
     ADD_USER_EX_ACC = "addUserExAcc",
     EDIT_USER_EX_ACC = "editUserExAcc",
-    FAQ = "faq"
+    SUPPORT = "support"
   }
 
   const enum ExwatcherStatus {

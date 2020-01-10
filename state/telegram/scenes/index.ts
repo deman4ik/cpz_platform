@@ -3,7 +3,6 @@ export * from "./addUserRobot";
 export * from "./deleteUserRobot";
 export * from "./editUserExAcc";
 export * from "./editUserRobot";
-export * from "./faq";
 export * from "./myRobots";
 export * from "./mySignals";
 export * from "./perfRobots";

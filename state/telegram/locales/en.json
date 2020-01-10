@@ -3,14 +3,14 @@
   "failed": "❌ Failed to process your request. Please try again later!",
   "keyboards": {
     "backKeyboard": {
-      "back": "◀️ Back"
+      "back": "◀️ Back",
+      "menu": "🏠 Main Menu"
     },
     "mainKeyboard": {
       "signals": "🚦 Signals",
       "robots": "🤖 Robots",
       "settings": "⚙️ Settings",
-      "contact": "✍️ Contact",
-      "faq": "❓ FAQ",
+      "support": "❓ Support",
       "donation": "💰 Donation"
     },
     "confirm": {
@@ -31,8 +31,9 @@
       "selectRobot": "Select available <b>${exchange}</b> <b>${asset}</b> robot"
     },
     "mySignals": {
-      "robotsList": "Robot signals you subscribed to:",
-      "robotsNone": "You are not subscribed to any signals."
+      "robotsList": "🚥 Robot signals you subscribed to:",
+      "robotsNone": "🚥 You are not subscribed to any signals.",
+      "add": "➕ Add Signals"
     },
     "perfSignals": {
       "info": "📊 My Signals Total Perfomance",
@@ -58,7 +59,8 @@
     },
     "myRobots": {
       "robotsList": "🤖 My Robots:",
-      "robotsNone": "🤖 You have not added any robots."
+      "robotsNone": "🤖 You have not added any robots.",
+      "add": "➕ Add Robots"
     },
     "perfRobots": {
       "info": "📊 My trading Robots Total Perfomance",
@@ -190,7 +192,10 @@
     "profit": "<b>Perfomance:</b> ${profit}$ / ${lastProfit}$\n\n",
     "volume": "<b>Volume:</b> ${volume} ${asset}\n\n",
     "subscribedAt": "<b>Subscribed at:</b> ${subscribedAt}\n\n",
-    "status": "<b>Status:</b> ${status}\n\n",
+    "startedAt": "<b>Started at:</b> ${startedAt}\n\n",
+    "stoppedAt": "<b>Stopped at:</b> ${stoppedAt}\n\n",
+    "lastInfoUpdatedAt": "Info updated: ${lastInfoUpdatedAt}\n",
+    "status": "<b>Status:</b> ${status}\n",
     "userExAcc": "<b>Exchange API Key:</b> ${name}\n\n",
     "signals": "<b>Latest signals:</b>\n${signals}",
     "currentSignals": "Robot <b>${name}</b> has active signals!\n${signals}",

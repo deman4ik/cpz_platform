@@ -8,7 +8,10 @@ import TelegrafI18n, { match, reply } from "telegraf-i18n";
 import Session from "telegraf-session-redis";
 import path from "path";
 import cron from "node-cron";
-import { getMainKeyboard } from "../../state/telegram/keyboard";
+import {
+  getMainKeyboard,
+  getBackKeyboard
+} from "../../state/telegram/keyboard";
 import { sleep } from "../../utils/helpers";
 
 import {
@@ -34,22 +37,25 @@ import {
   editUserRobotConfirm,
   editUserRobotBack,
   editUserRobotLeave,
-  faqEnter,
-  faqSelected,
-  faqLeave,
   myRobotsEnter,
   myRobotsSelectedRobot,
+  myRobotsAdd,
   myRobotsBack,
+  myRobotsBackEdit,
   myRobotsLeave,
   mySignalsEnter,
   mySignalsSelectedRobot,
+  mySignalsAdd,
   mySignalsBack,
+  mySignalsBackEdit,
   mySignalsLeave,
   perfSignalsEnter,
   perfSignalsBack,
+  perfSignalsBackEdit,
   perfSignalsLeave,
   perfRobotsEnter,
   perfRobotsBack,
+  perfRobotsBackEdit,
   perfRobotsLeave,
   robotsEnter,
   robotsMyRobots,
@@ -63,6 +69,7 @@ import {
   robotSignalSubscribe,
   robotSignalUnsubscribe,
   robotSignalBack,
+  robotSignalBackEdit,
   robotSignalLeave,
   searchRobotsEnter,
   searchRobotsSelectAsset,
@@ -116,14 +123,19 @@ import {
   userRobotStart,
   userRobotStop,
   userRobotBack,
-  userRobotLeave
+  userRobotLeave,
+  searchRobotsBackEdit,
+  userExAccsBackEdit,
+  userRobotBackEdit,
+  searchSignalsBackEdit,
+  userExAccBackEdit
 } from "../../state/telegram/scenes";
-import { subscribe } from "graphql";
 
 //TODO: Logging
 class BotService extends Service {
   bot: any;
   messages: cpz.TelegramMessage[] = [];
+
   constructor(broker: ServiceBroker) {
     super(broker);
 
@@ -237,12 +249,14 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       addUserExAccBack.bind(this)
     );
-    addUserExAccScene.command("back", leave());
-    addUserExAccScene.command("exit", leave());
+    addUserExAccScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    addUserExAccScene.command("back", addUserExAccBack.bind(this));
+    addUserExAccScene.command("menu", leave());
     addUserExAccScene.action(
       /exchange/,
       addUserExAccSelectedExchange.bind(this)
     );
+    addUserExAccScene.action(/back/, addUserExAccBack.bind(this));
     addUserExAccScene.hears(/(.*?)/, addUserExAccSubmited.bind(this));
 
     const addUserRobotScene = new Scene(cpz.TelegramScene.ADD_USER_ROBOT);
@@ -252,9 +266,11 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       addUserRobotBack.bind(this)
     );
-    addUserRobotScene.command("back", leave());
-    addUserRobotScene.command("exit", leave());
+    addUserRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    addUserRobotScene.command("back", addUserRobotBack.bind(this));
+    addUserRobotScene.command("menu", leave());
     addUserRobotScene.action(/userExAcc/, addUserRobotSelectedAcc.bind(this));
+    addUserRobotScene.action(/back/, addUserRobotBack.bind(this));
     addUserRobotScene.hears(/(.*?)/, addUserRobotConfirm.bind(this));
 
     const deleteUserRobotScene = new Scene(cpz.TelegramScene.DELETE_USER_ROBOT);
@@ -264,8 +280,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       deleteUserRobotBack.bind(this)
     );
-    deleteUserRobotScene.command("back", leave());
-    deleteUserRobotScene.command("exit", leave());
+    deleteUserRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    deleteUserRobotScene.command("back", deleteUserRobotBack.bind(this));
+    deleteUserRobotScene.command("menu", leave());
     deleteUserRobotScene.action(/yes/, deleteUserRobotYes.bind(this));
     deleteUserRobotScene.action(/no/, deleteUserRobotBack.bind(this));
 
@@ -276,8 +293,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       editUserExAccBack.bind(this)
     );
-    editUserExAccScene.command("back", leave());
-    editUserExAccScene.command("exit", leave());
+    editUserExAccScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    editUserExAccScene.command("back", editUserExAccBack.bind(this));
+    editUserExAccScene.command("menu", leave());
     editUserExAccScene.hears(/(.*?)/, editUserExAccSubmited.bind(this));
 
     const editUserRobotScene = new Scene(cpz.TelegramScene.EDIT_USER_ROBOT);
@@ -287,17 +305,10 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       editUserRobotBack.bind(this)
     );
-    editUserRobotScene.command("back", leave());
-    editUserRobotScene.command("exit", leave());
+    editUserRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    editUserRobotScene.command("back", editUserRobotBack.bind(this));
+    editUserRobotScene.command("menu", leave());
     editUserRobotScene.hears(/(.*?)/, editUserRobotConfirm.bind(this));
-
-    const faqScene = new Scene(cpz.TelegramScene.FAQ);
-    faqScene.enter(faqEnter.bind(this));
-    faqScene.leave(faqLeave.bind(this));
-    faqScene.hears(match("keyboards.backKeyboard.back"), leave());
-    faqScene.command("back", leave());
-    faqScene.command("exit", leave());
-    faqScene.action(/q/, faqSelected.bind(this));
 
     const myRobotsScene = new Scene(cpz.TelegramScene.MY_ROBOTS);
     myRobotsScene.enter(myRobotsEnter.bind(this));
@@ -306,9 +317,12 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       myRobotsBack.bind(this)
     );
-    myRobotsScene.command("back", leave());
-    myRobotsScene.command("exit", leave());
+    myRobotsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    myRobotsScene.command("back", myRobotsBack.bind(this));
+    myRobotsScene.command("menu", leave());
     myRobotsScene.action(/robot/, myRobotsSelectedRobot.bind(this));
+    myRobotsScene.action(/add/, myRobotsAdd.bind(this));
+    myRobotsScene.action(/back/, myRobotsBackEdit.bind(this));
 
     const mySignalsScene = new Scene(cpz.TelegramScene.MY_SIGNALS);
     mySignalsScene.enter(mySignalsEnter.bind(this));
@@ -317,20 +331,12 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       mySignalsBack.bind(this)
     );
-    mySignalsScene.command("back", leave());
-    mySignalsScene.command("exit", leave());
+    mySignalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    mySignalsScene.command("back", mySignalsBack.bind(this));
+    mySignalsScene.command("menu", leave());
     mySignalsScene.action(/robot/, mySignalsSelectedRobot.bind(this));
-
-    const perfSignalsScene = new Scene(cpz.TelegramScene.PERFOMANCE_SIGNALS);
-    perfSignalsScene.enter(perfSignalsEnter.bind(this));
-    perfSignalsScene.leave(perfSignalsLeave.bind(this));
-    perfSignalsScene.hears(
-      match("keyboards.backKeyboard.back"),
-      perfSignalsBack.bind(this)
-    );
-    perfSignalsScene.command("back", leave());
-    perfSignalsScene.command("exit", leave());
-    perfSignalsScene.action(/back/, perfSignalsBack.bind(this));
+    mySignalsScene.action(/add/, mySignalsAdd.bind(this));
+    mySignalsScene.action(/back/, mySignalsBackEdit.bind(this));
 
     const perfRobotsScene = new Scene(cpz.TelegramScene.PERFOMANCE_ROBOTS);
     perfRobotsScene.enter(perfRobotsEnter.bind(this));
@@ -339,19 +345,34 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       perfRobotsBack.bind(this)
     );
-    perfRobotsScene.command("back", leave());
-    perfRobotsScene.command("exit", leave());
-    perfRobotsScene.action(/back/, perfRobotsBack.bind(this));
+    perfRobotsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    perfRobotsScene.command("back", perfRobotsBack.bind(this));
+    perfRobotsScene.command("menu", leave());
+    perfRobotsScene.action(/back/, perfRobotsBackEdit.bind(this));
+
+    const perfSignalsScene = new Scene(cpz.TelegramScene.PERFOMANCE_SIGNALS);
+    perfSignalsScene.enter(perfSignalsEnter.bind(this));
+    perfSignalsScene.leave(perfSignalsLeave.bind(this));
+    perfSignalsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      perfSignalsBack.bind(this)
+    );
+    perfSignalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    perfSignalsScene.command("back", perfSignalsBack.bind(this));
+    perfSignalsScene.command("menu", leave());
+    perfSignalsScene.action(/back/, perfSignalsBackEdit.bind(this));
 
     const robotsScene = new Scene(cpz.TelegramScene.ROBOTS);
     robotsScene.enter(robotsEnter.bind(this));
     robotsScene.leave(robotsLeave.bind(this));
     robotsScene.hears(match("keyboards.backKeyboard.back"), leave());
+    robotsScene.hears(match("keyboards.backKeyboard.menu"), leave());
     robotsScene.command("back", leave());
-    robotsScene.command("exit", leave());
+    robotsScene.command("menu", leave());
     robotsScene.action(/myRobots/, robotsMyRobots.bind(this));
     robotsScene.action(/searchRobots/, robotsSearchRobots.bind(this));
     robotsScene.action(/perfRobots/, robotsPerfRobots.bind(this));
+    robotsScene.action(/back/, leave());
 
     const robotSignalScene = new Scene(cpz.TelegramScene.ROBOT_SIGNAL);
     robotSignalScene.enter(robotSignalInfo.bind(this));
@@ -360,8 +381,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       robotSignalBack.bind(this)
     );
-    robotSignalScene.command("back", leave());
-    robotSignalScene.command("exit", leave());
+    robotSignalScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    robotSignalScene.command("back", robotSignalBack.bind(this));
+    robotSignalScene.command("menu", leave());
     robotSignalScene.action(/info/, robotSignalInfo.bind(this));
     robotSignalScene.action(/pStat/, robotSignalPublicStats.bind(this));
     robotSignalScene.action(/myStat/, robotSignalMyStats.bind(this));
@@ -369,6 +391,7 @@ class BotService extends Service {
     robotSignalScene.action(/unsubscribe/, robotSignalUnsubscribe.bind(this));
     robotSignalScene.action(/subscribe/, robotSignalSubscribe.bind(this));
     robotSignalScene.action(/changeVolume/, robotSignalSubscribe.bind(this));
+    robotSignalScene.action(/back/, robotSignalBackEdit.bind(this));
 
     const searchRobotsScene = new Scene(cpz.TelegramScene.SEARCH_ROBOTS);
     searchRobotsScene.enter(searchRobotsEnter.bind(this));
@@ -377,12 +400,13 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       searchRobotsBack.bind(this)
     );
-    searchRobotsScene.command("back", leave());
-    searchRobotsScene.command("exit", leave());
+    searchRobotsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    searchRobotsScene.command("back", searchRobotsBack.bind(this));
+    searchRobotsScene.command("menu", leave());
     searchRobotsScene.action(/exchange/, searchRobotsSelectAsset.bind(this));
     searchRobotsScene.action(/asset/, searchRobotsSelectRobot.bind(this));
     searchRobotsScene.action(/robot/, searchRobotsOpenRobot.bind(this));
-    searchRobotsScene.action(/back/, searchRobotsBack.bind(this));
+    searchRobotsScene.action(/back/, searchRobotsBackEdit.bind(this));
 
     const searchSignalsScene = new Scene(cpz.TelegramScene.SEARCH_SIGNALS);
     searchSignalsScene.enter(searchSignalsEnter.bind(this));
@@ -391,30 +415,35 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       searchSignalsBack.bind(this)
     );
-    searchSignalsScene.command("back", leave());
-    searchSignalsScene.command("exit", leave());
+    searchSignalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    searchSignalsScene.command("back", searchSignalsBack.bind(this));
+    searchSignalsScene.command("menu", leave());
     searchSignalsScene.action(/exchange/, searchSignalsSelectAsset.bind(this));
     searchSignalsScene.action(/asset/, searchSignalsSelectRobot.bind(this));
     searchSignalsScene.action(/robot/, searchSignalsOpenRobot.bind(this));
-    searchSignalsScene.action(/back/, searchSignalsBack.bind(this));
+    searchSignalsScene.action(/back/, searchSignalsBackEdit.bind(this));
 
     const settingsScene = new Scene(cpz.TelegramScene.SETTINGS);
     settingsScene.enter(settingsEnter.bind(this));
     settingsScene.leave(settingsLeave.bind(this));
     settingsScene.hears(match("keyboards.backKeyboard.back"), leave());
+    settingsScene.hears(match("keyboards.backKeyboard.menu"), leave());
     settingsScene.command("back", leave());
-    settingsScene.command("exit", leave());
+    settingsScene.command("menu", leave());
     settingsScene.action(/userExAccs/, settingsUserExAccs.bind(this));
+    settingsScene.action(/back/, leave());
 
     const signalsScene = new Scene(cpz.TelegramScene.SIGNALS);
     signalsScene.enter(signalsEnter.bind(this));
     signalsScene.leave(signalsLeave.bind(this));
     signalsScene.hears(match("keyboards.backKeyboard.back"), leave());
+    signalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
     signalsScene.command("back", leave());
-    signalsScene.command("exit", leave());
+    signalsScene.command("menu", leave());
     signalsScene.action(/mySignals/, signalsMySignals.bind(this));
     signalsScene.action(/searchSignals/, signalsSearchSignals.bind(this));
     signalsScene.action(/perfSignals/, signalsPerfSignals.bind(this));
+    signalsScene.action(/back/, leave());
 
     const startUserRobotScene = new Scene(cpz.TelegramScene.START_USER_ROBOT);
     startUserRobotScene.enter(startUserRobotEnter.bind(this));
@@ -423,8 +452,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       startUserRobotBack.bind(this)
     );
-    startUserRobotScene.command("back", leave());
-    startUserRobotScene.command("exit", leave());
+    startUserRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    startUserRobotScene.command("back", startUserRobotBack.bind(this));
+    startUserRobotScene.command("menu", leave());
     startUserRobotScene.action(/yes/, startUserRobotYes.bind(this));
     startUserRobotScene.action(/no/, startUserRobotBack.bind(this));
 
@@ -435,8 +465,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       stopUserRobotBack.bind(this)
     );
-    stopUserRobotScene.command("back", leave());
-    stopUserRobotScene.command("exit", leave());
+    stopUserRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    stopUserRobotScene.command("back", stopUserRobotBack.bind(this));
+    stopUserRobotScene.command("menu", leave());
     stopUserRobotScene.action(/yes/, stopUserRobotYes.bind(this));
     stopUserRobotScene.action(/no/, stopUserRobotBack.bind(this));
 
@@ -449,8 +480,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       subscribeSignalsBack.bind(this)
     );
-    subscribeSignalsScene.command("back", leave());
-    subscribeSignalsScene.command("exit", leave());
+    subscribeSignalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    subscribeSignalsScene.command("back", subscribeSignalsBack.bind(this));
+    subscribeSignalsScene.command("menu", leave());
     subscribeSignalsScene.hears(/(.*?)/, subscribeSignalsConfirm.bind(this));
 
     const userExAccScene = new Scene(cpz.TelegramScene.USER_EXCHANGE_ACC);
@@ -460,11 +492,12 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       userExAccBack.bind(this)
     );
-    userExAccScene.command("back", leave());
-    userExAccScene.command("exit", leave());
+    userExAccScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    userExAccScene.command("back", userExAccBack.bind(this));
+    userExAccScene.command("menu", leave());
     userExAccScene.action(/edit/, userExAccEdit.bind(this));
     userExAccScene.action(/delete/, userExAccDelete.bind(this));
-    userExAccScene.action(/back/, userExAccBack.bind(this));
+    userExAccScene.action(/back/, userExAccBackEdit.bind(this));
 
     const userExAccsScene = new Scene(cpz.TelegramScene.USER_EXCHANGE_ACCS);
     userExAccsScene.enter(userExAccsEnter.bind(this));
@@ -473,10 +506,12 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       userExAccsBack.bind(this)
     );
-    userExAccsScene.command("back", leave());
-    userExAccsScene.command("exit", leave());
+    userExAccsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    userExAccsScene.command("back", userExAccsBack.bind(this));
+    userExAccsScene.command("menu", leave());
     userExAccsScene.action(/addUserExAcc/, userExAccsAddAcc.bind(this));
     userExAccsScene.action(/userExAcc/, userExAccsSelectedAcc.bind(this));
+    userExAccsScene.action(/back/, userExAccsBackEdit.bind(this));
 
     const userRobotScene = new Scene(cpz.TelegramScene.USER_ROBOT);
     userRobotScene.enter(userRobotInfo.bind(this));
@@ -485,8 +520,9 @@ class BotService extends Service {
       match("keyboards.backKeyboard.back"),
       userRobotBack.bind(this)
     );
-    userRobotScene.command("back", leave());
-    userRobotScene.command("exit", leave());
+    userRobotScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    userRobotScene.command("back", userRobotBack.bind(this));
+    userRobotScene.command("menu", leave());
     userRobotScene.action(/info/, userRobotInfo.bind(this));
     userRobotScene.action(/pStat/, userRobotPublicStats.bind(this));
     userRobotScene.action(/myStat/, userRobotMyStats.bind(this));
@@ -496,6 +532,7 @@ class BotService extends Service {
     userRobotScene.action(/stop/, userRobotStop.bind(this));
     userRobotScene.action(/add/, userRobotAdd.bind(this));
     userRobotScene.action(/delete/, userRobotDelete.bind(this));
+    userRobotScene.action(/back/, userRobotBackEdit.bind(this));
 
     const stage = new Stage([
       addUserExAccScene,
@@ -503,7 +540,6 @@ class BotService extends Service {
       deleteUserRobotScene,
       editUserExAccScene,
       editUserRobotScene,
-      faqScene,
       myRobotsScene,
       mySignalsScene,
       perfSignalsScene,
@@ -526,7 +562,6 @@ class BotService extends Service {
     this.bot.use(stage.middleware());
     this.bot.start(this.start.bind(this));
     this.bot.command("menu", this.mainMenu.bind(this));
-    this.bot.command("exit", this.mainMenu.bind(this));
     // Main menu
     this.bot.hears(
       match("keyboards.mainKeyboard.signals"),
@@ -541,12 +576,8 @@ class BotService extends Service {
       enter(cpz.TelegramScene.SETTINGS)
     );
     this.bot.hears(
-      match("keyboards.mainKeyboard.faq"),
-      enter(cpz.TelegramScene.FAQ)
-    );
-    this.bot.hears(
-      match("keyboards.mainKeyboard.contact"),
-      reply("contact", Extra.HTML())
+      match("keyboards.mainKeyboard.support"),
+      enter(cpz.TelegramScene.SUPPORT)
     );
     this.bot.hears(
       match("keyboards.mainKeyboard.donation"),
@@ -629,11 +660,23 @@ class BotService extends Service {
       const params = ctx.update.message.text.replace("/start ", "");
       if (params && params !== "") {
         const [scene, robotId] = params.split("_");
-        if (scene && robotId && scene === cpz.TelegramScene.ROBOT_SIGNAL) {
-          //TODO: check access to robot
+        if (
+          scene &&
+          robotId &&
+          (scene === cpz.TelegramScene.ROBOT_SIGNAL ||
+            scene === cpz.TelegramScene.USER_ROBOT)
+        ) {
+          ctx.scene.state.silent = true;
+          await ctx.scene.leave();
+          await ctx.reply(
+            ctx.i18n.t("welcome", {
+              username: this.formatName(ctx)
+            }),
+            getBackKeyboard(ctx)
+          );
+          return ctx.scene.enter(scene, { robotId });
         }
       }
-      this.logger.info();
       return ctx.reply(
         ctx.i18n.t("welcome", {
           username: this.formatName(ctx)

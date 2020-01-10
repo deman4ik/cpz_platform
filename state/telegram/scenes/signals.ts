@@ -25,6 +25,13 @@ function getSignalsMenu(ctx: any) {
           JSON.stringify({ a: "perfSignals" }),
           false
         )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
       ]
     ];
 
@@ -34,11 +41,18 @@ function getSignalsMenu(ctx: any) {
 
 async function signalsEnter(ctx: any) {
   try {
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
+        ctx.i18n.t("keyboards.mainKeyboard.signals"),
+        getSignalsMenu(ctx)
+      );
+    }
     await ctx.reply(
       ctx.i18n.t("keyboards.mainKeyboard.signals"),
       getBackKeyboard(ctx)
     );
-    await ctx.reply(
+    return ctx.reply(
       ctx.i18n.t("keyboards.mainKeyboard.signals"),
       getSignalsMenu(ctx)
     );
@@ -53,7 +67,7 @@ async function signalsEnter(ctx: any) {
 async function signalsMySignals(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.MY_SIGNALS);
+    await ctx.scene.enter(cpz.TelegramScene.MY_SIGNALS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -65,7 +79,7 @@ async function signalsMySignals(ctx: any) {
 async function signalsSearchSignals(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.SEARCH_SIGNALS);
+    await ctx.scene.enter(cpz.TelegramScene.SEARCH_SIGNALS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -77,7 +91,7 @@ async function signalsSearchSignals(ctx: any) {
 async function signalsPerfSignals(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.PERFOMANCE_SIGNALS);
+    await ctx.scene.enter(cpz.TelegramScene.PERFOMANCE_SIGNALS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

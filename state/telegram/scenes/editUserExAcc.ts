@@ -86,7 +86,6 @@ async function editUserExAccSubmited(ctx: any) {
       ctx.scene.state.key = null;
       ctx.scene.state.secret = null;
       ctx.scene.state.stage = null;
-      ctx.scene.state.reply = true;
       await editUserExAccEnter(ctx);
     }
   } catch (e) {
@@ -100,10 +99,7 @@ async function editUserExAccSubmited(ctx: any) {
 async function editUserExAccBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(ctx.scene.state.prevScene, {
-      ...ctx.scene.state.prevState,
-      reply: true
-    });
+    await ctx.scene.enter(ctx.scene.state.prevScene, ctx.scene.state.prevState);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

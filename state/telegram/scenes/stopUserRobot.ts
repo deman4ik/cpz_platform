@@ -78,7 +78,7 @@ async function stopUserRobotYes(ctx: any) {
       Extra.HTML()
     );
     ctx.scene.state.silent = false;
-    await ctx.scene.leave();
+    return stopUserRobotBack(ctx);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

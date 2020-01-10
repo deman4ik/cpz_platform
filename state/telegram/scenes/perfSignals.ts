@@ -40,7 +40,14 @@ async function perfSignalsEnter(ctx: any) {
     )
       message = getStatisticsText(ctx, userAggrStats.statistics);
     else message = ctx.i18n.t("scenes.perfSignals.perfNone");
-    return ctx.editMessageText(
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
+        `${ctx.i18n.t("scenes.perfSignals.info")}\n\n` + message,
+        getPerfSignalsMenu(ctx)
+      );
+    }
+    return ctx.reply(
       `${ctx.i18n.t("scenes.perfSignals.info")}\n\n` + message,
       getPerfSignalsMenu(ctx)
     );
@@ -63,9 +70,26 @@ async function perfSignalsBack(ctx: any) {
   }
 }
 
+async function perfSignalsBackEdit(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.SIGNALS, { edit: true });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function perfSignalsLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
-export { perfSignalsEnter, perfSignalsBack, perfSignalsLeave };
+export {
+  perfSignalsEnter,
+  perfSignalsBack,
+  perfSignalsBackEdit,
+  perfSignalsLeave
+};

@@ -1,6 +1,5 @@
 import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
-import { Errors } from "moleculer";
 import { getMainKeyboard } from "../keyboard";
 
 async function subscribeSignalsEnter(ctx: any) {
@@ -12,8 +11,9 @@ async function subscribeSignalsEnter(ctx: any) {
       robotInfo: cpz.RobotInfo;
       market: cpz.Market;
     } = ctx.scene.state.selectedRobot;
-    if (ctx.scene.state.reply)
-      return ctx.reply(
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
         ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
           name: robotInfo.name,
           asset: robotInfo.asset,
@@ -21,7 +21,8 @@ async function subscribeSignalsEnter(ctx: any) {
         }),
         Extra.HTML()
       );
-    return ctx.editMessageText(
+    }
+    return ctx.reply(
       ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
         name: robotInfo.name,
         asset: robotInfo.asset,
@@ -79,7 +80,6 @@ async function subscribeSignalsConfirm(ctx: any) {
         }),
         Extra.HTML()
       );
-      ctx.scene.state.reply = true;
       return subscribeSignalsEnter(ctx);
     }
 
@@ -91,12 +91,7 @@ async function subscribeSignalsConfirm(ctx: any) {
       }),
       Extra.HTML()
     );
-    ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
-      ...ctx.scene.state.prevState,
-      reload: true,
-      reply: true
-    });
+    return subscribeSignalsBack(ctx);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

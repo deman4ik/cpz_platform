@@ -66,10 +66,17 @@ function getSettingsMenu(ctx: any) {
           JSON.stringify({ a: "userExAccs" }),
           false
         )
-      ]
+      ],
       //emailButton,
-      //notifSignalsTelegramButton,
-      //notifTradingTelegramButton
+      notifSignalsTelegramButton,
+      notifTradingTelegramButton,
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
+      ]
     ];
 
     return m.inlineKeyboard(buttons);
@@ -84,8 +91,9 @@ async function settingsEnter(ctx: any) {
       });
 
     const { email }: cpz.User = ctx.session.user;
-    this.logger.info(ctx.session.user);
-    if (ctx.scene.state.reply === false) {
+
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
       await ctx.editMessageText(
         ctx.i18n.t("scenes.settings.info", {
           email: email || ctx.i18n.t("scenes.settings.emailNotSet")
@@ -115,7 +123,7 @@ async function settingsEnter(ctx: any) {
 async function settingsUserExAccs(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.USER_EXCHANGE_ACCS);
+    await ctx.scene.enter(cpz.TelegramScene.USER_EXCHANGE_ACCS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

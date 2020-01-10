@@ -11,16 +11,8 @@ async function editUserRobotEnter(ctx: any) {
       robotInfo: cpz.RobotInfo;
       market: cpz.Market;
     } = ctx.scene.state.selectedRobot;
-    if (ctx.scene.state.reply)
-      return ctx.reply(
-        ctx.i18n.t("scenes.editUserRobot.enterVolume", {
-          name: robotInfo.name,
-          asset: robotInfo.asset,
-          minVolume: market.limits.amount.min
-        }),
-        Extra.HTML()
-      );
-    else
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
       return ctx.editMessageText(
         ctx.i18n.t("scenes.editUserRobot.enterVolume", {
           name: robotInfo.name,
@@ -29,6 +21,15 @@ async function editUserRobotEnter(ctx: any) {
         }),
         Extra.HTML()
       );
+    }
+    return ctx.reply(
+      ctx.i18n.t("scenes.editUserRobot.enterVolume", {
+        name: robotInfo.name,
+        asset: robotInfo.asset,
+        minVolume: market.limits.amount.min
+      }),
+      Extra.HTML()
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -95,11 +96,10 @@ async function editUserRobotConfirm(ctx: any) {
       Extra.HTML()
     );
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.USER_ROBOT, {
-      ...ctx.scene.state.prevState,
-      reload: true,
-      reply: true
-    });
+    await ctx.scene.enter(
+      cpz.TelegramScene.USER_ROBOT,
+      ctx.scene.state.prevState
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

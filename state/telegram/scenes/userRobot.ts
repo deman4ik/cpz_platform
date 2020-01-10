@@ -81,6 +81,13 @@ function getUserRobotMenu(ctx: any) {
           JSON.stringify({ a: "delete" }),
           !added || status !== cpz.Status.stopped
         )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
       ]
     ]);
   });
@@ -88,40 +95,40 @@ function getUserRobotMenu(ctx: any) {
 
 async function userRobotInfo(ctx: any) {
   try {
-    if (
-      ctx.scene.state.reload &&
-      ctx.scene.state.reload === false &&
-      ctx.scene.state.page &&
-      ctx.scene.state.page === "info"
-    )
-      return;
-    ctx.scene.state.page = "info";
-
-    const { robotId } = ctx.scene.state;
+    if (ctx.scene.state.page && ctx.scene.state.page === "info") {
+      if (
+        ctx.scene.state.lastInfoUpdatedAt &&
+        dayjs
+          .utc()
+          .diff(
+            dayjs.utc(ctx.scene.state.lastInfoUpdatedAt),
+            cpz.TimeUnit.second
+          ) < 5
+      )
+        return;
+      ctx.scene.state.edit = true;
+    }
 
     let robotInfo: cpz.RobotInfo;
     let userRobotInfo: cpz.UserRobotInfo;
-    let market: cpz.Market;
     let equity: cpz.RobotEquity;
+    let market: cpz.Market;
 
-    if (!ctx.scene.state.selectedRobot || ctx.scene.state.reload) {
-      ({ robotInfo, userRobotInfo, market } = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
-        {
-          robotId
-        },
-        {
-          meta: {
-            user: ctx.session.user
-          }
+    ({ robotInfo, userRobotInfo, market } = await this.broker.call(
+      `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
+      {
+        robotId: ctx.scene.state.robotId
+      },
+      {
+        meta: {
+          user: ctx.session.user
         }
-      ));
-
-      ctx.scene.state.reload = false;
-      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
-    } else {
-      ({ robotInfo, userRobotInfo } = ctx.scene.state.selectedRobot);
-    }
+      }
+    ));
+    ctx.scene.state.lastInfoUpdatedAt = dayjs
+      .utc()
+      .format("YYYY-MM-DD HH:mm UTC");
+    ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
 
     let userExAccText = "";
     if (userRobotInfo) {
@@ -133,10 +140,21 @@ async function userRobotInfo(ctx: any) {
 
     let statusText = "";
     if (userRobotInfo) {
-      const { status } = userRobotInfo;
+      const { status, startedAt, stoppedAt } = userRobotInfo;
+
       statusText = ctx.i18n.t("robot.status", {
         status: ctx.i18n.t(`status.${status}`)
       });
+      if (status === cpz.Status.started && startedAt) {
+        statusText = `${statusText}${ctx.i18n.t("robot.startedAt", {
+          startedAt: dayjs.utc(startedAt).format("YYYY-MM-DD HH:mm UTC")
+        })}`;
+      }
+      if (status === cpz.Status.stopped && stoppedAt) {
+        statusText = `${statusText}${ctx.i18n.t("robot.stoppedAt", {
+          startedAt: dayjs.utc(stoppedAt).format("YYYY-MM-DD HH:mm UTC")
+        })}`;
+      }
     }
 
     let volumeText = "";
@@ -162,14 +180,21 @@ async function userRobotInfo(ctx: any) {
       });
     }
 
+    const updatedAtText = ctx.i18n.t("robot.lastInfoUpdatedAt", {
+      lastInfoUpdatedAt: ctx.scene.state.lastInfoUpdatedAt
+    });
+
     const message = `${ctx.i18n.t("robot.info", {
       ...robotInfo,
       signalsCount: round(1440 / robotInfo.timeframe),
       subscribed: userRobotInfo ? "✅" : ""
-    })}${userExAccText}${statusText}${profitText}${volumeText}`;
+    })}${userExAccText}${statusText}${profitText}${volumeText}${updatedAtText}`;
 
-    if (ctx.scene.state.reply) return ctx.reply(message, getUserRobotMenu(ctx));
-    else return ctx.editMessageText(message, getUserRobotMenu(ctx));
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(message, getUserRobotMenu(ctx));
+    }
+    return ctx.reply(message, getUserRobotMenu(ctx));
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -180,7 +205,33 @@ async function userRobotInfo(ctx: any) {
 
 async function userRobotPublicStats(ctx: any) {
   try {
-    if (ctx.scene.state.page && ctx.scene.state.page === "publStats") return;
+    if (ctx.scene.state.page && ctx.scene.state.page === "publStats") {
+      if (
+        ctx.scene.state.lastInfoUpdatedAt &&
+        dayjs
+          .utc()
+          .diff(
+            dayjs.utc(ctx.scene.state.lastInfoUpdatedAt),
+            cpz.TimeUnit.second
+          ) < 5
+      )
+        return;
+      const { robotInfo, userRobotInfo, market } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
+        {
+          robotId: ctx.scene.state.robotId
+        },
+        {
+          meta: {
+            user: ctx.session.user
+          }
+        }
+      );
+      ctx.scene.state.lastInfoUpdatedAt = dayjs
+        .utc()
+        .format("YYYY-MM-DD HH:mm UTC");
+      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
+    }
     ctx.scene.state.page = "publStats";
     const {
       robotInfo,
@@ -190,6 +241,9 @@ async function userRobotPublicStats(ctx: any) {
       userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
     const { statistics } = robotInfo;
+    const updatedAtText = ctx.i18n.t("robot.lastInfoUpdatedAt", {
+      lastInfoUpdatedAt: ctx.scene.state.lastInfoUpdatedAt
+    });
     let message;
 
     if (statistics && Object.keys(statistics).length > 0)
@@ -200,8 +254,9 @@ async function userRobotPublicStats(ctx: any) {
         name: robotInfo.name,
         subscribed: userRobotInfo ? "✅" : ""
       }) +
-        `${ctx.i18n.t("robot.menuPublStats")}\n\n` +
-        message,
+        `${ctx.i18n.t(
+          "robot.menuPublStats"
+        )}\n\n${message}\n\n${updatedAtText}`,
       getUserRobotMenu(ctx)
     );
   } catch (e) {
@@ -214,7 +269,33 @@ async function userRobotPublicStats(ctx: any) {
 
 async function userRobotMyStats(ctx: any) {
   try {
-    if (ctx.scene.state.page && ctx.scene.state.page === "myStats") return;
+    if (ctx.scene.state.page && ctx.scene.state.page === "myStats") {
+      if (
+        ctx.scene.state.lastInfoUpdatedAt &&
+        dayjs
+          .utc()
+          .diff(
+            dayjs.utc(ctx.scene.state.lastInfoUpdatedAt),
+            cpz.TimeUnit.second
+          ) < 5
+      )
+        return;
+      const { robotInfo, userRobotInfo, market } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
+        {
+          robotId: ctx.scene.state.robotId
+        },
+        {
+          meta: {
+            user: ctx.session.user
+          }
+        }
+      );
+      ctx.scene.state.lastInfoUpdatedAt = dayjs
+        .utc()
+        .format("YYYY-MM-DD HH:mm UTC");
+      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
+    }
     ctx.scene.state.page = "myStats";
     const {
       robotInfo,
@@ -224,6 +305,11 @@ async function userRobotMyStats(ctx: any) {
       userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
     const { statistics } = userRobotInfo;
+
+    const updatedAtText = ctx.i18n.t("robot.lastInfoUpdatedAt", {
+      lastInfoUpdatedAt: ctx.scene.state.lastInfoUpdatedAt
+    });
+
     let message;
     if (statistics && Object.keys(statistics).length > 0)
       message = getStatisticsText(ctx, statistics);
@@ -233,8 +319,7 @@ async function userRobotMyStats(ctx: any) {
         name: robotInfo.name,
         subscribed: userRobotInfo ? "✅" : ""
       }) +
-        `${ctx.i18n.t("robot.menuMyStats")}\n\n` +
-        message,
+        `${ctx.i18n.t("robot.menuMyStats")}\n\n${message}\n\n${updatedAtText}`,
       getUserRobotMenu(ctx)
     );
   } catch (e) {
@@ -247,7 +332,33 @@ async function userRobotMyStats(ctx: any) {
 
 async function userRobotPositions(ctx: any) {
   try {
-    if (ctx.scene.state.page && ctx.scene.state.page === "pos") return;
+    if (ctx.scene.state.page && ctx.scene.state.page === "pos") {
+      if (
+        ctx.scene.state.lastInfoUpdatedAt &&
+        dayjs
+          .utc()
+          .diff(
+            dayjs.utc(ctx.scene.state.lastInfoUpdatedAt),
+            cpz.TimeUnit.second
+          ) < 5
+      )
+        return;
+      const { robotInfo, userRobotInfo, market } = await this.broker.call(
+        `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
+        {
+          robotId: ctx.scene.state.robotId
+        },
+        {
+          meta: {
+            user: ctx.session.user
+          }
+        }
+      );
+      ctx.scene.state.lastInfoUpdatedAt = dayjs
+        .utc()
+        .format("YYYY-MM-DD HH:mm UTC");
+      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
+    }
     ctx.scene.state.page = "pos";
     const {
       robotInfo,
@@ -306,15 +417,19 @@ async function userRobotPositions(ctx: any) {
       });
     }
 
+    const updatedAtText = ctx.i18n.t("robot.lastInfoUpdatedAt", {
+      lastInfoUpdatedAt: ctx.scene.state.lastInfoUpdatedAt
+    });
+
     const message =
       openPositionsText !== "" || closedPositionsText !== ""
         ? `${closedPositionsText}${openPositionsText}`
         : ctx.i18n.t("robot.positionsNone");
     return ctx.editMessageText(
-      ctx.i18n.t("robot.name", {
+      `${ctx.i18n.t("robot.name", {
         name: robotInfo.name,
         subscribed: userRobotInfo ? "✅" : ""
-      }) + message,
+      })}${message}\n\n${updatedAtText}`,
       getUserRobotMenu(ctx)
     );
   } catch (e) {
@@ -330,8 +445,7 @@ async function userRobotAdd(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.ADD_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      reply: true,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: { ...ctx.scene.state, silent: false }
     });
   } catch (e) {
     this.logger.error(e);
@@ -346,8 +460,7 @@ async function userRobotDelete(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.DELETE_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      reply: true,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: { ...ctx.scene.state, silent: false }
     });
   } catch (e) {
     this.logger.error(e);
@@ -363,12 +476,9 @@ async function userRobotEdit(ctx: any) {
 
     await ctx.scene.enter(cpz.TelegramScene.EDIT_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      reply: true,
       prevState: {
         ...ctx.scene.state,
-        silent: false,
-        reload: true,
-        reply: true
+        silent: false
       }
     });
   } catch (e) {
@@ -384,8 +494,7 @@ async function userRobotStart(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.START_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      reply: true,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: { ...ctx.scene.state, silent: false }
     });
   } catch (e) {
     this.logger.error(e);
@@ -400,8 +509,7 @@ async function userRobotStop(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.STOP_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      reply: true,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: { ...ctx.scene.state, silent: false }
     });
   } catch (e) {
     this.logger.error(e);
@@ -427,6 +535,25 @@ async function userRobotBack(ctx: any) {
   }
 }
 
+async function userRobotBackEdit(ctx: any) {
+  try {
+    if (!ctx.scene.state.prevScene) {
+      ctx.scene.state.silent = false;
+      return ctx.scene.leave();
+    }
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(ctx.scene.state.prevScene, {
+      ...ctx.scene.state.prevState,
+      edit: true
+    });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function userRobotLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
@@ -443,5 +570,6 @@ export {
   userRobotStart,
   userRobotStop,
   userRobotBack,
+  userRobotBackEdit,
   userRobotLeave
 };

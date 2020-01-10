@@ -13,7 +13,16 @@ function getExchangesMenu(ctx: any) {
       )
     ]);
 
-    return m.inlineKeyboard(buttons);
+    return m.inlineKeyboard([
+      ...buttons,
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
+      ]
+    ]);
   });
 }
 
@@ -31,18 +40,16 @@ async function addUserExAccEnter(ctx: any) {
           }
         }
       );
-    if (ctx.scene.state.reply) {
-      ctx.scene.state.reply = false;
-      await ctx.reply(
-        ctx.i18n.t("scenes.addUserExAcc.chooseExchange"),
-        getExchangesMenu(ctx)
-      );
-    } else {
-      await ctx.editMessageText(
+    if (ctx.scene.state.edit) {
+      return ctx.editMessageText(
         ctx.i18n.t("scenes.addUserExAcc.chooseExchange"),
         getExchangesMenu(ctx)
       );
     }
+    return ctx.reply(
+      ctx.i18n.t("scenes.addUserExAcc.chooseExchange"),
+      getExchangesMenu(ctx)
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -62,17 +69,17 @@ async function addUserExAccSelectedExchange(ctx: any) {
       ctx.scene.state.selectedExchange = exchange;
     }
     ctx.scene.state.stage = "key";
-    if (ctx.scene.state.reply) {
-      await ctx.reply(
-        ctx.i18n.t("scenes.addUserExAcc.enterAPIKey", { exchange }),
-        Extra.HTML()
-      );
-    } else {
-      await ctx.editMessageText(
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
         ctx.i18n.t("scenes.addUserExAcc.enterAPIKey", { exchange }),
         Extra.HTML()
       );
     }
+    return ctx.reply(
+      ctx.i18n.t("scenes.addUserExAcc.enterAPIKey", { exchange }),
+      Extra.HTML()
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -139,7 +146,6 @@ async function addUserExAccSubmited(ctx: any) {
       ctx.scene.state.key = null;
       ctx.scene.state.secret = null;
       ctx.scene.state.stage = null;
-      ctx.scene.state.reply = true;
       await addUserExAccSelectedExchange(ctx);
     }
   } catch (e) {
@@ -153,10 +159,7 @@ async function addUserExAccSubmited(ctx: any) {
 async function addUserExAccBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(ctx.scene.state.prevScene, {
-      ...ctx.scene.state.prevState,
-      reply: true
-    });
+    await ctx.scene.enter(ctx.scene.state.prevScene, ctx.scene.state.prevState);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

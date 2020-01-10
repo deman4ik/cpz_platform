@@ -22,6 +22,13 @@ function getUserExAccsMenu(ctx: any) {
           JSON.stringify({ a: "addUserExAcc" }),
           false
         )
+      ],
+      [
+        m.callbackButton(
+          ctx.i18n.t("keyboards.backKeyboard.back"),
+          JSON.stringify({ a: "back" }),
+          false
+        )
       ]
     ];
     return m.inlineKeyboard(buttons);
@@ -45,35 +52,36 @@ function getUserExAccsAddMenu(ctx: any) {
 
 async function userExAccsEnter(ctx: any) {
   try {
-    let userExAccs;
-    if (ctx.scene.state.userExAccs) userExAccs = ctx.scene.state.userExAccs;
-    else
-      userExAccs = await this.broker.call(
-        `${cpz.Service.DB_USER_EXCHANGE_ACCS}.find`,
-        {
-          query: {
-            userId: ctx.session.user.id
-          }
+    const userExAccs = await this.broker.call(
+      `${cpz.Service.DB_USER_EXCHANGE_ACCS}.find`,
+      {
+        query: {
+          userId: ctx.session.user.id
         }
-      );
+      }
+    );
     if (!userExAccs || !Array.isArray(userExAccs) || userExAccs.length === 0) {
-      if (ctx.scene.state.reply)
-        return ctx.reply(
+      if (ctx.scene.state.edit) {
+        ctx.scene.state.edit = false;
+        return ctx.editMessageText(
           ctx.i18n.t("scenes.userExAccs.none"),
           getUserExAccsAddMenu(ctx)
         );
-      return ctx.editMessageText(
+      }
+      return ctx.reply(
         ctx.i18n.t("scenes.userExAccs.none"),
         getUserExAccsAddMenu(ctx)
       );
     } else {
       ctx.scene.state.userExAccs = userExAccs;
-      if (ctx.scene.state.reply)
-        return ctx.reply(
+      if (ctx.scene.state.edit) {
+        ctx.scene.state.edit = false;
+        return ctx.editMessageText(
           ctx.i18n.t("scenes.settings.userExAccs"),
           getUserExAccsMenu(ctx)
         );
-      return ctx.editMessageText(
+      }
+      return ctx.reply(
         ctx.i18n.t("scenes.settings.userExAccs"),
         getUserExAccsMenu(ctx)
       );
@@ -94,8 +102,9 @@ async function userExAccsSelectedAcc(ctx: any) {
       userExAcc: ctx.scene.state.userExAccs.find(
         ({ id }: cpz.UserExchangeAccount) => id === userExAccId
       ),
+      edit: true,
       prevScene: cpz.TelegramScene.USER_EXCHANGE_ACCS,
-      prevState: { userExAccs: ctx.scene.state.userExAccs, reply: true }
+      prevState: { userExAccs: ctx.scene.state.userExAccs }
     });
   } catch (e) {
     this.logger.error(e);
@@ -109,8 +118,9 @@ async function userExAccsAddAcc(ctx: any) {
   try {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.ADD_USER_EX_ACC, {
+      edit: true,
       prevScene: cpz.TelegramScene.USER_EXCHANGE_ACCS,
-      prevState: { userExAccs: ctx.scene.state.userExAccs, reply: true }
+      prevState: { userExAccs: ctx.scene.state.userExAccs }
     });
   } catch (e) {
     this.logger.error(e);
@@ -123,7 +133,19 @@ async function userExAccsAddAcc(ctx: any) {
 async function userExAccsBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.SETTINGS, { reply: true });
+    await ctx.scene.enter(cpz.TelegramScene.SETTINGS);
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function userExAccsBackEdit(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.SETTINGS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -142,5 +164,6 @@ export {
   userExAccsSelectedAcc,
   userExAccsAddAcc,
   userExAccsBack,
+  userExAccsBackEdit,
   userExAccsLeave
 };

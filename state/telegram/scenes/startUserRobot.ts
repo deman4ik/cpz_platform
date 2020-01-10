@@ -67,7 +67,6 @@ async function startUserRobotYes(ctx: any) {
         }),
         Extra.HTML()
       );
-      ctx.scene.state.reply = true;
       return startUserRobotBack(ctx);
     }
 
@@ -78,7 +77,7 @@ async function startUserRobotYes(ctx: any) {
       Extra.HTML()
     );
     ctx.scene.state.silent = false;
-    await ctx.scene.leave();
+    await startUserRobotBack(ctx);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

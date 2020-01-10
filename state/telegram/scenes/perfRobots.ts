@@ -40,7 +40,14 @@ async function perfRobotsEnter(ctx: any) {
     )
       message = getStatisticsText(ctx, userAggrStats.statistics);
     else message = ctx.i18n.t("scenes.perfRobots.perfNone");
-    return ctx.editMessageText(
+    if (ctx.scene.state.edit) {
+      ctx.scene.state.edit = false;
+      return ctx.editMessageText(
+        `${ctx.i18n.t("scenes.perfRobots.info")}\n\n` + message,
+        getPerfRobotsMenu(ctx)
+      );
+    }
+    return ctx.reply(
       `${ctx.i18n.t("scenes.perfRobots.info")}\n\n` + message,
       getPerfRobotsMenu(ctx)
     );
@@ -63,9 +70,21 @@ async function perfRobotsBack(ctx: any) {
   }
 }
 
+async function perfRobotsBackEdit(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.ROBOTS, { edit: true });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function perfRobotsLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
-export { perfRobotsEnter, perfRobotsBack, perfRobotsLeave };
+export { perfRobotsEnter, perfRobotsBack, perfRobotsBackEdit, perfRobotsLeave };
