@@ -5,7 +5,7 @@ import Stage from "telegraf/stage";
 const { enter, leave } = Stage;
 import Scene from "telegraf/scenes/base";
 import TelegrafI18n, { match, reply } from "telegraf-i18n";
-import Session from "telegraf-session-redis";
+import Session from "../../lib/telegraf-session-redis";
 import path from "path";
 import cron from "node-cron";
 import {
@@ -223,9 +223,7 @@ class BotService extends Service {
   createdService() {
     const session = new Session({
       store: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD
+        url: process.env.REDIS_URL
       },
       getSessionKey: this.getSessionKey.bind(this)
     });
