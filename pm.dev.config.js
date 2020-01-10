@@ -147,6 +147,15 @@ module.exports = {
       }
     },
     {
+      name: "mail",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args: "--env --config prod.config.js dist/services/mail.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "mail"
+      }
+    },
+    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config dev.config.js dist/services/api.service.js",
