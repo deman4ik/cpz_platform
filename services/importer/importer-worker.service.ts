@@ -29,7 +29,7 @@ class ImporterWorkerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS
+            tls: process.env.REDIS_TLS && {}
           },
           settings: {
             lockDuration: 120000,

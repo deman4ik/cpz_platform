@@ -24,10 +24,10 @@ class BacktesterRunnerService extends Service {
         Auth,
         QueueService({
           redis: {
-            tls: process.env.REDIS_TLS,
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
-            password: process.env.REDIS_PASSWORD
+            password: process.env.REDIS_PASSWORD,
+            tls: process.env.REDIS_TLS && {}
           },
           settings: {
             lockDuration: 120000,

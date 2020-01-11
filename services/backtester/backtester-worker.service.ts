@@ -26,7 +26,7 @@ class BacktesterWorkerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS
+            tls: process.env.REDIS_TLS && {}
           },
           settings: {
             lockDuration: 120000,
@@ -107,11 +107,12 @@ class BacktesterWorkerService extends Service {
       this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
         id: backtesterState.id
       });
-      const [
-        existedBacktest
-      ] = await this.broker.call(`${cpz.Service.DB_BACKTESTS}.find`, {
-        query: { id }
-      });
+      const [existedBacktest] = await this.broker.call(
+        `${cpz.Service.DB_BACKTESTS}.find`,
+        {
+          query: { id }
+        }
+      );
 
       if (existedBacktest) {
         this.logger.info("Found previous backtest. Deleting...");
