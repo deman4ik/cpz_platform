@@ -127,7 +127,7 @@ async function userRobotInfo(ctx: any) {
     ));
     ctx.scene.state.lastInfoUpdatedAt = dayjs
       .utc()
-      .format("YYYY-MM-DD HH:mm UTC");
+      .format("YYYY-MM-DD HH:mm:ss UTC");
     ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
 
     let userExAccText = "";
@@ -229,7 +229,7 @@ async function userRobotPublicStats(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     }
     ctx.scene.state.page = "publStats";
@@ -293,7 +293,7 @@ async function userRobotMyStats(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     }
     ctx.scene.state.page = "myStats";
@@ -356,7 +356,7 @@ async function userRobotPositions(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     }
     ctx.scene.state.page = "pos";

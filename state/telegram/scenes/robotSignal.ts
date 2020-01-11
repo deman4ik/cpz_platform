@@ -106,7 +106,7 @@ async function robotSignalInfo(ctx: any) {
 
     ctx.scene.state.lastInfoUpdatedAt = dayjs
       .utc()
-      .format("YYYY-MM-DD HH:mm UTC");
+      .format("YYYY-MM-DD HH:mm:ss UTC");
 
     ctx.scene.state.selectedRobot = { robotInfo, userSignalsInfo, market };
 
@@ -211,7 +211,7 @@ async function robotSignalPublicStats(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userSignalsInfo, market };
     }
     ctx.scene.state.page = "publStats";
@@ -276,7 +276,7 @@ async function robotSignalMyStats(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userSignalsInfo, market };
     }
     ctx.scene.state.page = "myStats";
@@ -336,7 +336,7 @@ async function robotSignalPositions(ctx: any) {
       );
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
-        .format("YYYY-MM-DD HH:mm UTC");
+        .format("YYYY-MM-DD HH:mm:ss UTC");
       ctx.scene.state.selectedRobot = { robotInfo, userSignalsInfo, market };
     }
     ctx.scene.state.page = "pos";
