@@ -482,7 +482,15 @@ class PrivateConnectorWorkerService extends Service {
 
               await this.broker.emit(cpz.Event.ORDER_ERROR, order);
             }
-
+            try {
+              await this.broker.call(
+                `${cpz.Service.DB_USER_ORDERS}.update`,
+                order
+              );
+            } catch (e) {
+              this.logger.error("ORDERS UPDATE ERROR", order, e);
+              throw e;
+            }
             if (
               order.status === cpz.OrderStatus.closed ||
               order.status === cpz.OrderStatus.canceled
