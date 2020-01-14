@@ -434,7 +434,7 @@ class PublisherService extends Service {
 
   async handleOrderError(ctx: Context<cpz.Order>) {
     try {
-      const { userRobotId, error } = ctx.params;
+      const { userRobotId, error, exId } = ctx.params;
       const { name, telegramId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
@@ -450,6 +450,7 @@ class PublisherService extends Service {
             message: this.i18n.t(LANG, `userRobot.orderError`, {
               id: userRobotId,
               name: name,
+              exId,
               error
             })
           }
