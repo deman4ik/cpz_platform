@@ -465,30 +465,10 @@ class PrivateConnectorWorkerService extends Service {
 
             try {
               order = await this.processOrder(order);
-
-              try {
-                await this.broker.call(
-                  `${cpz.Service.DB_USER_ORDERS}.update`,
-                  order
-                );
-              } catch (e) {
-                this.logger.error("ORDERS UPDATE ERROR", order, e);
-                throw e;
-              }
-              if (
-                order.status === cpz.OrderStatus.closed ||
-                order.status === cpz.OrderStatus.canceled
-              )
-                await this.broker.emit(cpz.Event.ORDER_STATUS, order);
-              this.logger.info(
-                `UserExAcc #${order.userExAccId} processed order`,
-                order
-              );
-              order = await this.getNextOrder(userExAccId);
             } catch (err) {
               this.logger.error(err);
 
-              const failedOrder = {
+              order = {
                 ...order,
                 lastCheckedAt: dayjs.utc().toISOString(),
                 error: this.getErrorMessage(err),
@@ -499,12 +479,20 @@ class PrivateConnectorWorkerService extends Service {
                 nextJob: null,
                 nextJobAt: null
               };
-              await this.broker.call(
-                `${cpz.Service.DB_USER_ORDERS}.update`,
-                failedOrder
-              );
-              await this.broker.emit(cpz.Event.ORDER_ERROR, failedOrder);
+
+              await this.broker.emit(cpz.Event.ORDER_ERROR, order);
             }
+
+            if (
+              order.status === cpz.OrderStatus.closed ||
+              order.status === cpz.OrderStatus.canceled
+            )
+              await this.broker.emit(cpz.Event.ORDER_STATUS, order);
+            this.logger.info(
+              `UserExAcc #${order.userExAccId} processed order`,
+              order
+            );
+            order = await this.getNextOrder(userExAccId);
           }
         }
       }
