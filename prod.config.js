@@ -1,5 +1,7 @@
 const { ValidationError, NotFoundError } = require("moleculer").Errors;
 const { ForbiddenError, UnAuthorizedError } = require("moleculer-web").Errors;
+const logdnaWinston = require("logdna-winston");
+
 /**
  * Moleculer ServiceBroker configuration file
  *
@@ -21,24 +23,74 @@ const brokerConfig = {
   // Unique node identifier. Must be unique in a namespace.
   nodeID: "cpz",
 
-  logger: {
-    type: "File",
-    options: {
-      // Logging level
-      level: "info",
-      // Folder path to save files. You can use {nodeID} & {namespace} variables.
-      folder: "./logs",
-      // Filename template. You can use {date}, {nodeID} & {namespace} variables.
-      filename: "cpz-{namespace}-{nodeID}-{date}.log",
-      // Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
-      formatter: "full",
-      // Custom object printer. If not defined, it uses the `util.inspect` method.
-      objectPrinter: null,
-      // End of line. Default values comes from the OS settings.
-      eol: "\n",
-      // File appending interval in milliseconds.
-      interval: 1 * 1000
+  logger: [
+    {
+      type: "File",
+      options: {
+        // Logging level
+        level: "info",
+        // Folder path to save files. You can use {nodeID} & {namespace} variables.
+        folder: "./logs",
+        // Filename template. You can use {date}, {nodeID} & {namespace} variables.
+        filename: "cpz-{namespace}-{nodeID}-{date}.log",
+        // Line formatter. It can be "json", "short", "simple", "full", a `Function` or a template string like "{timestamp} {level} {nodeID}/{mod}: {msg}"
+        formatter: "full",
+        // Custom object printer. If not defined, it uses the `util.inspect` method.
+        objectPrinter: null,
+        // End of line. Default values comes from the OS settings.
+        eol: "\n",
+        // File appending interval in milliseconds.
+        interval: 1 * 1000
+      }
+    },
+    {
+      type: "Winston",
+      options: {
+        // Logging level
+        level: "info",
+        winston: {
+          // More settings: https://github.com/winstonjs/winston#creating-your-own-logger
+          transports: [
+            new logdnaWinston({
+              key: process.env.LOGDNA_KEY, // the only field required
+              app: process.env.NODEID,
+              env: process.env.NAMESPACE,
+              index_meta: true // Defaults to false, when true ensures meta object will be searchable
+            })
+          ]
+        }
+      }
     }
+  ],
+
+  tracing: {
+    enabled: true,
+    exporter: {
+      type: "Event",
+      options: {
+        // Name of event
+        eventName: "trace-logger.spans",
+        // Send event when a span started
+        sendStartSpan: false,
+        // Send event when a span finished
+        sendFinishSpan: true,
+        // Broadcast or emit event
+        broadcast: false,
+        // Event groups
+        groups: null,
+        // Sending time interval in seconds
+        interval: 5,
+        // Custom span object converter before sending
+        spanConverter: null,
+        // Default tags. They will be added into all span tags.
+        defaultTags: registry => ({
+          namespace: registry.broker.namespace,
+          nodeID: registry.broker.nodeID
+        })
+      }
+    },
+    events: true,
+    stackTrace: true
   },
 
   // Define transporter.
@@ -78,11 +130,7 @@ const brokerConfig = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err =>
-      !(err instanceof ValidationError) ||
-      !(err instanceof ForbiddenError) ||
-      !(err instanceof UnAuthorizedError) ||
-      !(err instanceof NotFoundError)
+    check: err => err && !!err.retryable
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -143,7 +191,34 @@ const brokerConfig = {
   validator: true,
 
   // Enable metrics function. More info: https://moleculer.services/docs/0.13/metrics.html
-  metrics: false,
+  metrics: {
+    enabled: true,
+    reporter: {
+      type: "Event",
+      options: {
+        includes: [
+          "moleculer.request.error.total",
+          "os.memory.free",
+          "process.eventloop.lag.avg"
+        ],
+        // Event name
+        eventName: "trace-logger.metrics",
+        // Broadcast or emit
+        broadcast: false,
+        // Event groups
+        groups: null,
+        // Send only changed metrics
+        onlyChanges: true,
+        // Sending interval in seconds
+        interval: 60 * 30,
+
+        defaultLabels: registry => ({
+          namespace: registry.broker.namespace,
+          nodeID: registry.broker.nodeID
+        })
+      }
+    }
+  },
 
   // Register internal services ("$node"). More info: https://moleculer.services/docs/0.13/services.html#Internal-services
   internalServices: true,

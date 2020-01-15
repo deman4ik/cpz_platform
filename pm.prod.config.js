@@ -167,6 +167,16 @@ module.exports = {
       }
     },
     {
+      name: "trace-logger",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config prod.config.js dist/services/trace-logger.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "trace-logger"
+      }
+    },
+    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/api.service.js",
