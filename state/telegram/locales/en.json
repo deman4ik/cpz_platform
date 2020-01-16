@@ -22,8 +22,8 @@
     "signals": {
       "my": "🚥 My Signals",
       "search": "🔎 Search Signals",
-      "top": "🏆 Top Signals",
-      "perfomance": "📊 Total Perfomance"
+      "top": "🏆 Top Perfomance Signals",
+      "perfomance": "📊 My Total Perfomance"
     },
     "searchSignals": {
       "selectExchange": "🔎 Searching Signal Robots\n\nSelect available <b>exchange</b>",
@@ -58,8 +58,8 @@
     "robots": {
       "my": "🤖 My Robots",
       "search": "🔎 Search Robots",
-      "top": "🏆 Top Robots",
-      "perfomance": "📈 Total Perfomance"
+      "top": "🏆 Top Perfomance Robots",
+      "perfomance": "📈 My Total Perfomance"
     },
     "myRobots": {
       "robotsList": "🤖 My Robots:",
