@@ -185,6 +185,26 @@ async function addUserRobotConfirm(ctx: any) {
       return addUserRobotSelectedAcc.call(this, ctx);
     }
 
+    const {
+      robotInfo,
+      userRobotInfo,
+      market
+    }: {
+      robotInfo: cpz.RobotInfo;
+      userRobotInfo: cpz.UserRobotInfo;
+      market: cpz.Market;
+    } = await this.broker.call(
+      `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
+      {
+        robotId: ctx.scene.state.selectedRobot.robotInfo.id
+      },
+      {
+        meta: {
+          user: ctx.session.user
+        }
+      }
+    );
+    ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     await ctx.reply(
       ctx.i18n.t("scenes.addUserRobot.success", {
         name: ctx.scene.state.selectedRobot.robotInfo.name,
@@ -194,10 +214,10 @@ async function addUserRobotConfirm(ctx: any) {
       Extra.HTML()
     );
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(
-      cpz.TelegramScene.USER_ROBOT,
-      ctx.scene.state.prevState
-    );
+    await ctx.scene.enter(cpz.TelegramScene.START_USER_ROBOT, {
+      selectedRobot: ctx.scene.state.selectedRobot,
+      prevState: ctx.scene.state.prevState
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

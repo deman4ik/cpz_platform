@@ -33,7 +33,7 @@
     "mySignals": {
       "robotsList": "🚥 Robot signals you subscribed to:",
       "robotsNone": "🚥 You are not subscribed to any signals.",
-      "add": "➕ Add Signals"
+      "add": "☑️ Add Signals"
     },
     "perfSignals": {
       "info": "📊 My Signals Total Perfomance",
@@ -60,7 +60,7 @@
     "myRobots": {
       "robotsList": "🤖 My Robots:",
       "robotsNone": "🤖 You have not added any robots.",
-      "add": "➕ Add Robots"
+      "add": "☑️ Add Robots"
     },
     "perfRobots": {
       "info": "📊 My trading Robots Total Perfomance",
@@ -72,18 +72,18 @@
       "selectRobot": "🔎 Searching Robots\n\nSelect available <b>${exchange}</b> <b>${asset}</b> robot"
     },
     "userRobot": {
-      "add": "➕ Add Robot",
+      "add": "☑️ Add Robot",
       "delete": "❌ Delete Robot",
       "edit": "⚙️ Edit Trading Volume",
       "start": "🟢 Start Robot",
       "stop": "⛔ Stop Robot"
     },
     "addUserRobot": {
-      "selectExAcc": "➕ Adding robot ${name}.\n\nSelect your ${exchange} API Key:",
-      "noneExAccs": "➕ Adding robot ${name}.\n\nYou have not registered any ${exchange} API Keys.",
-      "enterVolume": "➕ Adding robot ${name}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "➕ Adding robot ${name}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "➕ Succesfully added <b>${name}</b> robot with trading volume ${volume} ${asset}!"
+      "selectExAcc": "☑️ Adding robot ${name}.\n\nSelect your ${exchange} API Key:",
+      "noneExAccs": "☑️ Adding robot ${name}.\n\nYou have not registered any ${exchange} API Keys.",
+      "enterVolume": "☑️ Adding robot ${name}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "☑️ Adding robot ${name}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "☑️ Succesfully added <b>${name}</b> robot with trading volume ${volume} ${asset}!"
     },
     "editUserRobot": {
       "enterVolume": "⚙️ Editing robot ${name} settings.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
@@ -91,19 +91,19 @@
       "success": "⚙️ Succesfully edited <b>${name}</b> robot. New trading volume ${volume} ${asset}!"
     },
     "deleteUserRobot": {
-      "confirm": "⚠️ Are you sure you want to delete <b>${name}</b> robot?\n\n You will lost all your trading history for this robot.",
+      "confirm": "❌ Deleting <b>${name}</b> robot...\n\n⚠️ Are you sure you want to delete <b>${name}</b> robot?\n\n You will lost all your trading history for this robot.",
       "failed": "❌ Failed to delele robot ${name} - ${error}",
-      "success": "Succesfully deleted <b>${name}</b> robot."
+      "success": "✅ Succesfully deleted <b>${name}</b> robot."
     },
     "startUserRobot": {
-      "confirm": "⚠️ Are you sure you want to start <b>${name}</b> robot?\n\n It is a realtime trading mode using your exchange account.",
+      "confirm": "🟢 Starting <b>${name}</b> robot...\n\n⚠️ Are you sure you want to start <b>${name}</b> robot now?\n\n It is a realtime trading mode using your exchange account.",
       "failed": "❌ Failed to start robot ${name} - ${error}",
-      "success": "<b>${name}</b> robot is starting now..."
+      "success": "🟢 <b>${name}</b> robot is starting now..."
     },
     "stopUserRobot": {
-      "confirm": "⚠️ Are you sure you want to stop <b>${name}</b> robot?\n\n If there is any open positions created by this robot they will be canceled with current market prices and potentially may cause profit <b>losses</b>!",
+      "confirm": "⛔ Stopping <b>${name}</b> robot...\n\n⚠️ Are you sure you want to stop <b>${name}</b> robot now?\n\n If there is any <b>open positions</b> created by this robot they will be <b>canceled</b> (closed) with current market prices and potentially may cause profit <b>losses</b>!",
       "failed": "❌ Failed to stop robot ${name} - ${error}",
-      "success": "<b>${name}</b> robot is stopping now..."
+      "success": "⛔ <b>${name}</b> robot is stopping now..."
     },
     "settings": {
       "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}",
