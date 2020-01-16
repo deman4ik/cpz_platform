@@ -150,7 +150,9 @@ class RobotsService extends Service {
                   mod: { type: "string", optional: true },
                   settings: "object",
                   tradeSettings: "object",
-                  available: { type: "number", integer: true, optional: true }
+                  available: { type: "number", integer: true, optional: true },
+                  signals: { type: "boolean", default: false },
+                  trading: { type: "boolean", default: false }
                 }
               }
             }

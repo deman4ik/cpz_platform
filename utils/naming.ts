@@ -8,7 +8,10 @@ const createRobotCode = (
   timeframe: number,
   strategy: string,
   mod: string
-) => `${strategy}-${mod}-${exchange}-${asset}-${currency}-${timeframe}`;
+) =>
+  `${strategy}_${mod}_${capitalize(
+    exchange
+  )}_${asset}_${currency}_${Timeframe.toString(timeframe)}`;
 
 const createRobotName = (
   exchange: string,
