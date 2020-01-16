@@ -199,7 +199,7 @@ class UserRobotWorkerService extends Service {
 
       return userRobot.status;
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(e, job);
       await this.broker.emit(cpz.Event.USER_ROBOT_FAILED, {
         userRobotId,
         jobType: type,
