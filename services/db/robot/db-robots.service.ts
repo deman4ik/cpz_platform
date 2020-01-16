@@ -31,7 +31,9 @@ class RobotsService extends Service {
             mod: String, 
             settings: JSON!, 
             tradeSettings: JSON!,
-            available: Int
+            available: Int,
+            signals: Boolean,
+            trading: Boolean
           }
           `
         }
