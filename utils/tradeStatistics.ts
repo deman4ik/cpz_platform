@@ -43,7 +43,7 @@ function calcMaxDrawdown(positions: cpz.PositionDataForStats[]) {
 
     const drawdown = accum - localMax;
     if (maxDrawdown > drawdown) {
-      maxDrawdown = drawdown;
+      maxDrawdown = round(drawdown, 2);
       maxDrawdownPos = positions[i];
     }
   }
@@ -111,17 +111,34 @@ function calcStatistics(
 
   // Win trades / Number of trades
   statistics.winRate = {
-    all: divideRound(allWinningPositions.length, allPositions.length) * 100,
-    long: divideRound(longWinningPositions.length, longPositions.length) * 100,
-    short:
-      divideRound(shortWinningPositions.length, shortPositions.length) * 100
+    all: round(
+      divideRound(allWinningPositions.length, allPositions.length) * 100,
+      2
+    ),
+    long: round(
+      divideRound(longWinningPositions.length, longPositions.length) * 100,
+      2
+    ),
+    short: round(
+      divideRound(shortWinningPositions.length, shortPositions.length) * 100,
+      2
+    )
   };
 
   // Loss trades / Number of trades
   statistics.lossRate = {
-    all: divideRound(allLosingPositions.length, allPositions.length) * 100,
-    long: divideRound(longLosingPositions.length, longPositions.length) * 100,
-    short: divideRound(shortLosingPositions.length, shortPositions.length) * 100
+    all: round(
+      divideRound(allLosingPositions.length, allPositions.length) * 100,
+      2
+    ),
+    long: round(
+      divideRound(longLosingPositions.length, longPositions.length) * 100,
+      2
+    ),
+    short: round(
+      divideRound(shortLosingPositions.length, shortPositions.length) * 100,
+      2
+    )
   };
 
   const allAvgBarsHeld = averageRound(
@@ -173,19 +190,19 @@ function calcStatistics(
     allPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const longNetProfit = round(
     longPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const shortNetProfit = round(
     shortPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   statistics.netProfit = {
     all: allNetProfit,
@@ -208,19 +225,19 @@ function calcStatistics(
     allWinningPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const longGrossProfit = round(
     longWinningPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const shortGrossProfit = round(
     shortWinningPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   statistics.grossProfit = {
     all: allGrossProfit,
@@ -250,19 +267,19 @@ function calcStatistics(
     allLosingPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const longGrossLoss = round(
     longLosingPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   const shortGrossLoss = round(
     shortLosingPositions
       .map(({ profit }) => +profit)
       .reduce((acc, val) => acc + val, 0),
-    6
+    2
   );
   statistics.grossLoss = {
     all: allGrossLoss,

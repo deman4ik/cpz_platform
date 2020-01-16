@@ -187,7 +187,7 @@ const averageRound = (...nums: number[]) => +round(average(...nums));
 function divideRound(a: number, b: number): number | 0 {
   if (!a || !b || a === 0 || b === 0) return 0;
   const result = a / b;
-  return +round(result, 6);
+  return +round(result, 2);
 }
 
 function deepMapKeys(
