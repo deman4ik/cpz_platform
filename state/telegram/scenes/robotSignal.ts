@@ -509,7 +509,10 @@ async function robotSignalBack(ctx: any) {
       return ctx.scene.leave();
     }
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(ctx.scene.state.prevScene, ctx.scene.state.prevState);
+    await ctx.scene.enter(ctx.scene.state.prevScene, {
+      ...ctx.scene.state.prevState,
+      reload: true
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
