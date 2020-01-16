@@ -41,8 +41,8 @@ const brokerConfig: any = {
         // File appending interval in milliseconds.
         interval: 1 * 1000
       }
-    },
-    {
+    }
+    /* {
       type: "Winston",
       options: {
         // Logging level
@@ -59,11 +59,11 @@ const brokerConfig: any = {
           ]
         }
       }
-    }
+    }*/
   ],
 
   tracing: {
-    enabled: true,
+    enabled: false,
     exporter: {
       type: "Event",
       options: {
@@ -203,7 +203,7 @@ const brokerConfig: any = {
 
   // Enable metrics function. More info: https://moleculer.services/docs/0.13/metrics.html
   metrics: {
-    enabled: true,
+    enabled: false,
     reporter: {
       type: "Event",
       options: {
