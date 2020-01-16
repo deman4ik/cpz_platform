@@ -298,14 +298,21 @@ class StatsCalcWorkerService extends Service {
   }
 
   async calcUserRobotsAggr(userId: string, exchange?: string, asset?: string) {
+    let query: {
+      userId: string;
+      exchange?: string;
+      asset?: string;
+    } = {
+      userId
+    };
+
+    if (exchange) query.exchange = exchange;
+    if (asset) query.asset = asset;
+
     const positions = await this.broker.call(
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
-        query: {
-          userId,
-          exchange,
-          asset
-        }
+        query
       }
     );
     const { statistics, equity } = calcStatistics(positions);
