@@ -26,9 +26,13 @@
       "perfomance": "📊 Total Perfomance"
     },
     "searchSignals": {
-      "selectExchange": "Select available <b>exchange</b>",
-      "selectAsset": "Select available  <b>${exchange}</b> <b>cryptocurrency</b> pair",
-      "selectRobot": "Select available <b>${exchange}</b> <b>${asset}</b> robot"
+      "selectExchange": "🔎 Searching Signal Robots\n\nSelect available <b>exchange</b>",
+      "selectAsset": "🔎 Searching Signal Robots\n\nSelect available  <b>${exchange}</b> <b>cryptocurrency</b> pair",
+      "selectRobot": "🔎 Searching Signal Robots\n\nSelect available <b>${exchange}</b> <b>${asset}</b> robot"
+    },
+    "topSignals": {
+      "selectExchange": "🏆 Top Perfomance Signal Robots\n\nSelect available <b>exchange</b>",
+      "selectRobot": "🏆 Top Perfomance Signal Robots"
     },
     "mySignals": {
       "robotsList": "🚥 Robot signals you subscribed to:",
@@ -70,6 +74,10 @@
       "selectExchange": "🔎 Searching Robots\n\nSelect available <b>exchange</b>",
       "selectAsset": "🔎 Searching Robots\n\nSelect available  <b>${exchange}</b> <b>cryptocurrency</b> pair",
       "selectRobot": "🔎 Searching Robots\n\nSelect available <b>${exchange}</b> <b>${asset}</b> robot"
+    },
+    "topRobots": {
+      "selectExchange": "🏆 Top Perfomance Robots\n\nSelect available <b>exchange</b>",
+      "selectRobot": "🏆 Top Perfomance Robots"
     },
     "userRobot": {
       "add": "☑️ Add Robot",
@@ -140,37 +148,6 @@
       "delete": "❌ Delete",
       "deleteSuccess": "🔑 ${name} API Key deleted successfully",
       "deleteFailed": "❌ Failed to delete ${name} API Key.\n\n<b>${error}</b>\n\nPlease try again!"
-    },
-    "faq": {
-      "title": "<b>F</b>requently <b>A</b>sked <b>Q</b>uestions\n\n",
-      "q": {
-        "1": "What is signal?",
-        "2": "Why I need signals?",
-        "3": "How it works?",
-        "4": "How can I use it?",
-        "5": "Where can I trade using your signals?",
-        "6": "How often the signals appear?",
-        "7": "What is Long/Short?",
-        "8": "How to understand bot messages and what to do?",
-        "9": "What does stop order mean and how to use it?",
-        "10": "What is robot?",
-        "11": "What are the advantages of robot?",
-        "12": "When automated robots will be available?"
-      },
-      "a": {
-        "1": "Signal is a recommendation to buy or sell currency at determined price.\nWe will give you the signal when it is better to open and close position and what position to take. You just need to follow the recommendation of robots.\n\n",
-        "2": "You can use signals in 2 different ways:\nChoose the robots you want and follow the recommendations.\nUse the signals as additional filter to you own trading system.\n\n",
-        "3": "All signals based on algorithms that tested on history and work in real-time more than 2 years. You can study the results of each robot.\n\n",
-        "4": "The signals go out once a day at about the same time so it’s easy to follow manually. Just repeat the orders (buy, sell or stop/limit orders). It’s important to place an order in advance, because you can skip the necessary moment.\n\n",
-        "5": "Our signals are based on Bitfinex prices, but you can use signals at any exchange you want. Notice the possible difference in prices on different exchanges. You can find the list of exchanges here: https://coinmarketcap.com/rankings/exchanges/",
-        "6": "The robots with “8h” in name have maximum 3 signals a day (every 8 hours).\nThe robots with “1d” in name have maximum 1 signal per day.",
-        "7": "Long is when we buy cryptocurrency and hope that it’s price will rise. So we will sell it at higher price and get a profit.\nShort is when we sell cryptocurrency (and we didn’t buy it before) and hope that it’s price will fall. So we buy it back at lower price and realize a profit.",
-        "8": "There are 2 type of messages: '💸 New Trade!' and '🚨 New Signal!'.\n\n 💸 New Trade means the buy/sell market trade.\nExamples:\nIf you see in '💸 New Trade' only entry (Entry: 'SELL ⬇️ (Short 🔴)' or Entry: 'BUY ⬆️ (Long ✳️)' - it means that robot opened new position. For copy this action you just need to buy or sell at the same price.\nIf you also see in '💸 New Trade' exit (Exit: 'SELL ⬇️ (Close Long ✳️)' or Exit: 'BUY ⬆️ (Close Short 🔴)' - it means that robot closed the position. You should do the same.\n\n'🚨 New Signal' means the price at which you should make the trade in the future.\nThe signals can be both for opening and closing the position. You can just place the stop order at this price and wait for it execution or new next signal. When next signal is appeared and previous order is not executed - cancel previous order and create a new one.",
-        "9": "A stop order is used to trigger a market sell when the market drops to your trigger (stop) price, or used to trigger a market buy if the market rises to your trigger (stop) price.\n\nIt's better to read the FAQ on your exchange about order types and how to use them.\n\nExample for Bitfinex:\nWe have the signal:\nAction: BUY ⬆️ (Long ✳️)\nOrder type: Stop ⛔\nSignal time: 2019-10-16 08:00 UTC\nPrice: 3.0687\n\nWhat should you do:\n1. Open Bitfinex terminal.\n2. Choose the required cryptocurrency in Tickers window.\n3. Then under the Tickers window you have Order form.\n4. Choose margin, then stop order.\n5. In the field stop price place the price from the signal (3.0687). In the field amount choose the amount of cryptocurrency you want to trade.\n6. Click Margin Buy cause we have in signal “Action: BUY”.\nIn the middle you will have the window Orders where you will see this order. You can cancel or modify this orders with the buttons on the right.\n\nOn Kraken you should go to New order window, then choose advanced. The fields are the same. But on Kraken you need to choose the leverage for margin trading.\nEvery exchange has a bit different interface for creating orders and trading so you should learn the user manual of your exchange.",
-        "10": "Robot is a program that analyzes the current situation on the market without human participation according to a laid algoritm.\n\n",
-        "11": "Reacts to events much faster.\nDoesn’t get tired and works 24 hours and 7 days a week.\nNot experiencing emotions and strictly following the algorithm.\nCan make a large number of transactions with different instruments.\nCan wait weeks and make a deal at exactly the right moment.\nTrading is conducted on tested conditions with a predictable result.",
-        "12": "Automated robots will be available later this year.\n\nWe will notify you through this bot or in <a href='https://t.me/joinchat/ACVS-0zaWVBgAYm8gOKYHA'>Telegram Community Chat</a>, <a href='https://t.me/cryptuoso'>Telegram Channel</a> and <a href='https://www.instagram.com/cryptuoso/'>Instagram account</a>"
-      }
     }
   },
   "signal": {

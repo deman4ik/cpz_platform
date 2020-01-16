@@ -119,6 +119,22 @@ class RobotsService extends Service {
           },
           handler: this.getRobotBaseInfo
         },
+        getTopSignalRobots: {
+          params: {
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optional: true },
+            limit: { type: "number", integer: true, optional: true }
+          },
+          handler: this.getTopSignalRobots
+        },
+        getTopTradingRobots: {
+          params: {
+            exchange: { type: "string", optional: true },
+            asset: { type: "string", optional: true },
+            limit: { type: "number", integer: true, optional: true }
+          },
+          handler: this.getTopTradingRobots
+        },
         create: {
           params: {
             entities: {
@@ -540,6 +556,118 @@ class RobotsService extends Service {
         });
 
       return robotInfo;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getTopSignalRobots(
+    ctx: Context<
+      {
+        exchange?: string;
+        asset?: string;
+        limit?: number;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      const { id: user_id } = ctx.meta.user;
+      const available = getAccessValue(ctx.meta.user);
+      const { exchange, asset, limit } = ctx.params;
+      const params: {
+        user_id: string;
+        exchange?: string;
+        asset?: string;
+        limit?: number;
+        available: number;
+      } = {
+        user_id,
+        available
+      };
+      const query = `SELECT t.id,
+t.name,
+((t.statistics -> 'netProfit'::text) ->> 'all'::text)::numeric AS profit,
+CASE
+    WHEN s.user_id IS NOT NULL THEN TRUE
+    ELSE FALSE
+END AS susbcribed
+FROM robots t
+LEFT JOIN user_signals s ON s.robot_id = t.id
+AND s.user_id = :user_id
+WHERE t.statistics <> '{}'::JSONB
+AND t.signals = TRUE
+AND t.available >= :available
+${exchange ? "AND t.exchange = :exchange" : ""}
+${asset ? "AND t.asset = :asset" : ""}
+ORDER BY (((t.statistics -> 'recoveryFactor'::text) ->> 'all'::text)::numeric) DESC
+${limit ? "LIMIT :limit" : ""};`;
+
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (limit) params.limit = limit;
+
+      return this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: params
+      });
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async getTopTradingRobots(
+    ctx: Context<
+      {
+        exchange?: string;
+        asset?: string;
+        limit?: number;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      const { id: user_id } = ctx.meta.user;
+      const available = getAccessValue(ctx.meta.user);
+      const { exchange, asset, limit } = ctx.params;
+      const params: {
+        user_id: string;
+        exchange?: string;
+        asset?: string;
+        limit?: number;
+        available: number;
+      } = {
+        user_id,
+        available
+      };
+      const query = `SELECT t.id,
+t.name,
+((t.statistics -> 'netProfit'::text) ->> 'all'::text)::numeric AS profit,
+CASE
+    WHEN s.user_id IS NOT NULL THEN TRUE
+    ELSE FALSE
+END AS susbcribed
+FROM robots t
+LEFT JOIN user_robots s 
+ON s.robot_id = t.id AND s.user_id = :user_id
+WHERE t.statistics <> '{}'::JSONB
+AND t.trading = TRUE
+AND t.available >= :available
+${exchange ? "AND t.exchange = :exchange" : ""}
+${asset ? "AND t.asset = :asset" : ""}
+ORDER BY (((t.statistics -> 'recoveryFactor'::text) ->> 'all'::text)::numeric) DESC
+${limit ? "LIMIT :limit" : ""};`;
+
+      if (exchange) params.exchange = exchange;
+      if (asset) params.asset = asset;
+      if (limit) params.limit = limit;
+
+      return this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: params
+      });
     } catch (e) {
       this.logger.error(e);
       throw e;

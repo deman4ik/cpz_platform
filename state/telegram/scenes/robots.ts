@@ -21,6 +21,13 @@ function getRobotsMenu(ctx: any) {
       ],
       [
         m.callbackButton(
+          ctx.i18n.t("scenes.robots.top"),
+          JSON.stringify({ a: "topRobots" }),
+          false
+        )
+      ],
+      [
+        m.callbackButton(
           ctx.i18n.t("scenes.robots.perfomance"),
           JSON.stringify({ a: "perfRobots" }),
           false
@@ -88,6 +95,18 @@ async function robotsSearchRobots(ctx: any) {
   }
 }
 
+async function robotsTopRobots(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.TOP_ROBOTS, { edit: true });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function robotsPerfRobots(ctx: any) {
   try {
     ctx.scene.state.silent = true;
@@ -109,6 +128,7 @@ export {
   robotsEnter,
   robotsMyRobots,
   robotsSearchRobots,
+  robotsTopRobots,
   robotsPerfRobots,
   robotsLeave
 };

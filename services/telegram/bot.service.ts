@@ -60,6 +60,7 @@ import {
   robotsEnter,
   robotsMyRobots,
   robotsSearchRobots,
+  robotsTopRobots,
   robotsPerfRobots,
   robotsLeave,
   robotSignalInfo,
@@ -89,6 +90,7 @@ import {
   signalsEnter,
   signalsMySignals,
   signalsSearchSignals,
+  signalsTopSignals,
   signalsPerfSignals,
   signalsLeave,
   startUserRobotEnter,
@@ -103,6 +105,18 @@ import {
   subscribeSignalsConfirm,
   subscribeSignalsBack,
   subscribeSignalsLeave,
+  topSignalsEnter,
+  topSignalsSelectRobot,
+  topSignalsOpenRobot,
+  topSignalsBack,
+  topSignalsBackEdit,
+  topSignalsLeave,
+  topRobotsEnter,
+  topRobotsSelectRobot,
+  topRobotsOpenRobot,
+  topRobotsBack,
+  topRobotsBackEdit,
+  topRobotsLeave,
   userExAccEnter,
   userExAccEdit,
   userExAccDelete,
@@ -372,6 +386,7 @@ class BotService extends Service {
     robotsScene.command("menu", leave());
     robotsScene.action(/myRobots/, robotsMyRobots.bind(this));
     robotsScene.action(/searchRobots/, robotsSearchRobots.bind(this));
+    robotsScene.action(/topRobots/, robotsTopRobots.bind(this));
     robotsScene.action(/perfRobots/, robotsPerfRobots.bind(this));
     robotsScene.action(/back/, leave());
 
@@ -443,6 +458,7 @@ class BotService extends Service {
     signalsScene.command("menu", leave());
     signalsScene.action(/mySignals/, signalsMySignals.bind(this));
     signalsScene.action(/searchSignals/, signalsSearchSignals.bind(this));
+    signalsScene.action(/topSignals/, signalsTopSignals.bind(this));
     signalsScene.action(/perfSignals/, signalsPerfSignals.bind(this));
     signalsScene.action(/back/, leave());
 
@@ -485,6 +501,34 @@ class BotService extends Service {
     subscribeSignalsScene.command("back", subscribeSignalsBack.bind(this));
     subscribeSignalsScene.command("menu", leave());
     subscribeSignalsScene.hears(/(.*?)/, subscribeSignalsConfirm.bind(this));
+
+    const topRobotsScene = new Scene(cpz.TelegramScene.TOP_ROBOTS);
+    topRobotsScene.enter(topRobotsEnter.bind(this));
+    topRobotsScene.leave(topRobotsLeave.bind(this));
+    topRobotsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      topRobotsBack.bind(this)
+    );
+    topRobotsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    topRobotsScene.command("back", topRobotsBack.bind(this));
+    topRobotsScene.command("menu", leave());
+    topRobotsScene.action(/exchange/, topRobotsSelectRobot.bind(this));
+    topRobotsScene.action(/robot/, topRobotsOpenRobot.bind(this));
+    topRobotsScene.action(/back/, topRobotsBackEdit.bind(this));
+
+    const topSignalsScene = new Scene(cpz.TelegramScene.TOP_SIGNALS);
+    topSignalsScene.enter(topSignalsEnter.bind(this));
+    topSignalsScene.leave(topSignalsLeave.bind(this));
+    topSignalsScene.hears(
+      match("keyboards.backKeyboard.back"),
+      topSignalsBack.bind(this)
+    );
+    topSignalsScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    topSignalsScene.command("back", topSignalsBack.bind(this));
+    topSignalsScene.command("menu", leave());
+    topSignalsScene.action(/exchange/, topSignalsSelectRobot.bind(this));
+    topSignalsScene.action(/robot/, topSignalsOpenRobot.bind(this));
+    topSignalsScene.action(/back/, topSignalsBackEdit.bind(this));
 
     const userExAccScene = new Scene(cpz.TelegramScene.USER_EXCHANGE_ACC);
     userExAccScene.enter(userExAccEnter.bind(this));
@@ -554,6 +598,8 @@ class BotService extends Service {
       startUserRobotScene,
       stopUserRobotScene,
       subscribeSignalsScene,
+      topRobotsScene,
+      topSignalsScene,
       userExAccScene,
       userExAccsScene,
       userRobotScene

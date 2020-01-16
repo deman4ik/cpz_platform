@@ -21,6 +21,13 @@ function getSignalsMenu(ctx: any) {
       ],
       [
         m.callbackButton(
+          ctx.i18n.t("scenes.signals.top"),
+          JSON.stringify({ a: "topSignals" }),
+          false
+        )
+      ],
+      [
+        m.callbackButton(
           ctx.i18n.t("scenes.signals.perfomance"),
           JSON.stringify({ a: "perfSignals" }),
           false
@@ -88,6 +95,18 @@ async function signalsSearchSignals(ctx: any) {
   }
 }
 
+async function signalsTopSignals(ctx: any) {
+  try {
+    ctx.scene.state.silent = true;
+    await ctx.scene.enter(cpz.TelegramScene.TOP_SIGNALS, { edit: true });
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function signalsPerfSignals(ctx: any) {
   try {
     ctx.scene.state.silent = true;
@@ -109,6 +128,7 @@ export {
   signalsEnter,
   signalsMySignals,
   signalsSearchSignals,
+  signalsTopSignals,
   signalsPerfSignals,
   signalsLeave
 };
