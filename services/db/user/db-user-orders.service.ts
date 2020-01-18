@@ -122,17 +122,6 @@ class UserOrdersService extends Service {
               );
             }
           },
-          nextJobAt: {
-            type: Sequelize.DATE,
-            field: "next_job_at",
-            allowNull: true,
-            get: function() {
-              const value = this.getDataValue("nextJobAt");
-              return (
-                (value && value instanceof Date && value.toISOString()) || value
-              );
-            }
-          },
           nextJob: {
             type: Sequelize.JSONB,
             field: "next_job",
@@ -147,9 +136,6 @@ class UserOrdersService extends Service {
         }
       },
       actions: {
-        getUserExAccsWithJobs: {
-          handler: this.getUserExAccsWithJobs
-        },
         update: {
           handler: this.update
         }
@@ -166,28 +152,6 @@ class UserOrdersService extends Service {
       else set[key] = data[key];
     });
     await this.adapter.updateById(id, { $set: set });
-  }
-
-  async getUserExAccsWithJobs(ctx: Context): Promise<string[]> {
-    try {
-      const query = `SELECT o.user_ex_acc_id
-      FROM user_orders o,
-           user_exchange_accs a
-      WHERE o.user_ex_acc_id = a.id
-        AND a.status = 'enabled'
-        AND o.next_job_at IS NOT NULL
-        AND o.next_job_at <= now()
-      GROUP BY o.user_ex_acc_id;`;
-      const rawData = await this.adapter.db.query(query, {
-        type: Sequelize.QueryTypes.SELECT
-      });
-      if (rawData && Array.isArray(rawData) && rawData.length > 0)
-        return rawData.map((d: { user_ex_acc_id: string }) => d.user_ex_acc_id);
-      return [];
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
-    }
   }
 }
 

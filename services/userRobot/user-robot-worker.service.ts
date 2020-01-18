@@ -163,30 +163,29 @@ class UserRobotWorkerService extends Service {
         Array.isArray(userRobot.state.ordersToCreate) &&
         userRobot.state.ordersToCreate.length > 0
       ) {
-        await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.insert`, {
-          entities: userRobot.state.ordersToCreate
-        });
+        await this.broker.call<Promise<void>, { entities: cpz.Order[] }>(
+          `${cpz.Service.DB_USER_ORDERS}.insert`,
+          {
+            entities: userRobot.state.ordersToCreate
+          }
+        );
       }
 
       if (
-        userRobot.state.ordersWithJobs &&
-        Array.isArray(userRobot.state.ordersWithJobs) &&
-        userRobot.state.ordersWithJobs.length > 0
+        userRobot.state.connectorJobs &&
+        Array.isArray(userRobot.state.connectorJobs) &&
+        userRobot.state.connectorJobs.length > 0
       ) {
-        for (const order of userRobot.state.ordersWithJobs) {
-          await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, order);
-          await this.broker.call(
+        for (const job of userRobot.state.connectorJobs) {
+          await this.broker.call<Promise<void>, cpz.ConnectorJob>(
             `${cpz.Service.PRIVATE_CONNECTOR_RUNNER}.addJob`,
-            {
-              userExAccId: userRobot.state.userRobot.userExAccId,
-              type: cpz.ConnectorJobType.order
-            }
+            job
           );
         }
       }
 
       // Saving robot state
-      await this.broker.call(
+      await this.broker.call<Promise<void>, cpz.UserRobotDB>(
         `${cpz.Service.DB_USER_ROBOTS}.update`,
         userRobot.state.userRobot
       );

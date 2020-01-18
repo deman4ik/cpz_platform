@@ -57,21 +57,12 @@ class PricateConnectorRunnerService extends Service {
   async checkOrders() {
     try {
       const userExAccIds = await this.broker.call(
-        `${cpz.Service.DB_USER_ORDERS}.getUserExAccsWithJobs`
+        `${cpz.Service.DB_CONNECTOR_JOBS}.getUserExAccsWithJobs`
       );
       if (userExAccIds && Array.isArray(userExAccIds) && userExAccIds.length) {
         this.logger.info(`${userExAccIds.length} userExAccs has order jobs`);
         for (const userExAccId of userExAccIds) {
-          const { status } = await this.broker.call(
-            `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
-            {
-              id: userExAccId
-            }
-          );
-          await this.queueJob(
-            { id: uuid(), userExAccId, type: cpz.ConnectorJobType.order },
-            status
-          );
+          await this.queueJob(userExAccId);
         }
       }
     } catch (e) {
@@ -107,44 +98,54 @@ class PricateConnectorRunnerService extends Service {
     this.cronOrders.stop();
   }
 
-  async queueJob(job: cpz.ConnectorJob, status: string) {
-    await this.broker.call(`${cpz.Service.DB_CONNECTOR_JOBS}.upsert`, {
-      entity: job
-    });
-    const { userExAccId } = job;
-    if (status === cpz.UserExchangeAccStatus.enabled) {
-      const lastJob = await this.getQueue(cpz.Queue.connector).getJob(
-        userExAccId
-      );
-      if (lastJob) {
-        const lastJobStuck = await lastJob.isStuck();
-        if (lastJobStuck) await lastJob.remove();
-      }
-      await this.createJob(cpz.Queue.connector, job, {
-        jobId: userExAccId,
-        removeOnComplete: true,
-        removeOnFail: true
-      });
-    }
-    this.logger.info("Queued", job);
-  }
-
-  async addJob(
-    ctx: Context<{
-      userExAccId: string;
-      type: cpz.ConnectorJobType;
-      data?: any;
-    }>
-  ) {
+  async queueJob(userExAccId: string) {
     try {
-      const { userExAccId, type, data } = ctx.params;
-      const { status } = await ctx.call(
+      const { status } = await this.broker.call(
         `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
         {
           id: userExAccId
         }
       );
-      await this.queueJob({ id: uuid(), userExAccId, type, data }, status);
+
+      if (status === cpz.UserExchangeAccStatus.enabled) {
+        const lastJob = await this.getQueue(cpz.Queue.connector).getJob(
+          userExAccId
+        );
+        if (lastJob) {
+          const lastJobStuck = await lastJob.isStuck();
+          if (lastJobStuck) await lastJob.remove();
+        }
+        await this.createJob(
+          cpz.Queue.connector,
+          { userExAccId },
+          {
+            jobId: userExAccId,
+            removeOnComplete: true,
+            removeOnFail: true
+          }
+        );
+      }
+      this.logger.info(`Queued Connector Job ${userExAccId}`);
+    } catch (e) {
+      this.logger.error(
+        `Failed to queue connector job ${userExAccId} - ${e.message}`,
+        e
+      );
+    }
+  }
+
+  async addJob(ctx: Context<cpz.ConnectorJob>) {
+    try {
+      await ctx.call(`${cpz.Service.DB_CONNECTOR_JOBS}.upsert`, {
+        entity: ctx.params
+      });
+      this.logger.info(
+        `Added new Connector job ${ctx.params.userExAccId} ${ctx.params.type} order ${ctx.params.orderId}`,
+        ctx.params
+      );
+      const { userExAccId } = ctx.params;
+
+      await this.queueJob(userExAccId);
     } catch (err) {
       this.logger.error(err);
       throw err;

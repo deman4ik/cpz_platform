@@ -111,6 +111,12 @@ declare namespace cpz {
     failed = "failed"
   }
 
+  const enum Priority {
+    high = 1,
+    medium = 2,
+    low = 3
+  }
+
   const enum TelegramScene {
     SIGNALS = "signals",
     SEARCH_SIGNALS = "searchSignals",
@@ -308,10 +314,6 @@ declare namespace cpz {
     order = "order"
   }
 
-  const enum ConnectorJobType {
-    order = "order"
-  }
-
   type ImportType = "recent" | "history";
 
   interface MinMax {
@@ -338,12 +340,21 @@ declare namespace cpz {
     loadFrom: string;
   }
 
-  interface ConnectorJob {
+  interface OrderJob {
+    type: OrderJobType;
+    data?: {
+      price: number;
+    };
+  }
+
+  interface ConnectorJob extends OrderJob {
     id: string;
     userExAccId: string;
-    type: ConnectorJobType;
-    data?: any;
+    orderId: string;
+    nextJobAt: string;
+    priority: Priority;
   }
+
   interface ExchangeCandle {
     exchange: string;
     asset: string;
@@ -505,17 +516,6 @@ declare namespace cpz {
     asset: string;
   }
 
-  interface OrderJob {
-    type: OrderJobType;
-    data?: any;
-  }
-
-  interface OrderWithJob {
-    id: string;
-    nextJobAt: string;
-    nextJob: OrderJob;
-  }
-
   interface OrderParams {
     orderTimeout: number;
     kraken?: {
@@ -549,7 +549,6 @@ declare namespace cpz {
     executed?: number;
     lastCheckedAt?: string;
     error?: any;
-    nextJobAt?: string;
     nextJob?: OrderJob;
   }
   interface Importer {
@@ -1041,7 +1040,7 @@ declare namespace cpz {
       userRobot: UserRobotDB;
       positions?: UserPositionDB[];
       ordersToCreate?: Order[];
-      orderWithJobs?: OrderWithJob[];
+      connectorJobs?: ConnectorJob[];
       eventsToSend?: Events<UserRobotEventData>[];
     };
     _log(...args: any): void;
@@ -1129,7 +1128,7 @@ declare namespace cpz {
     parentId?: string;
     state: UserPositionDB;
     ordersToCreate: Order[];
-    orderWithJobs: OrderWithJob[];
+    connectorJobs: ConnectorJob[];
     _log(...args: any): void;
     handleSignal(signal: SignalEvent): void;
     handleOrder(order: Order): void;

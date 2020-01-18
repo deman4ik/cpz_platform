@@ -290,6 +290,17 @@ function addPercent(numb: number, perc: number) {
   return round(number + (number / 100) * percent, 6);
 }
 
+const groupBy = (
+  arr: { [key: string]: any }[],
+  fn: (...params: any[]) => any | string
+) =>
+  arr
+    .map(typeof fn === "function" ? fn : val => val[fn])
+    .reduce((acc, val, i) => {
+      acc[val] = (acc[val] || []).concat(arr[i]);
+      return acc;
+    }, {});
+
 export {
   sortAsc,
   sortDesc,
@@ -313,5 +324,6 @@ export {
   flatten,
   valuesString,
   flattenArray,
-  addPercent
+  addPercent,
+  groupBy
 };

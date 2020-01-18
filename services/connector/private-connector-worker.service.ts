@@ -5,8 +5,16 @@ import { Job } from "bull";
 import retry from "async-retry";
 import { cpz, GenericObject } from "../../@types";
 import dayjs from "../../lib/dayjs";
-import { createFetchMethod, decrypt, valuesString } from "../../utils";
+import {
+  createFetchMethod,
+  decrypt,
+  valuesString,
+  groupBy,
+  sortDesc
+} from "../../utils";
 import { ORDER_CHECK_TIMEOUT } from "../../config";
+import { v4 as uuid } from "uuid";
+
 /**
  * Available exchanges
  */
@@ -314,59 +322,75 @@ class PrivateConnectorWorkerService extends Service {
   async processJobs(userExAccId: string) {
     try {
       this.logger.info(`Connector #${userExAccId} started processing jobs`);
-      let [nextJob]: cpz.ConnectorJob[] = await this.broker.call(
+      let nextJobs: cpz.ConnectorJob[] = await this.broker.call(
         `${cpz.Service.DB_CONNECTOR_JOBS}.find`,
         {
-          limit: 1,
-          sort: "created_at",
+          sort: "priority -next_job_at",
           query: {
-            userExAccId
+            userExAccId,
+            nextJobAt: { $lte: dayjs.utc().toISOString() }
           }
         }
       );
-      if (nextJob) {
-        const exchangeAcc: cpz.UserExchangeAccount = await this.broker.call(
-          `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
-          { id: userExAccId }
-        );
-        if (!exchangeAcc)
-          throw new Errors.MoleculerError(
-            "Failed to get user exchange account",
-            404,
-            "ERR_NOT_FOUND",
-            { userExAccId }
-          );
-        if (exchangeAcc.status !== cpz.UserExchangeAccStatus.enabled)
-          throw new Errors.MoleculerError(
-            "User Excahnge Account is not enabled",
-            500,
-            "ERR_INVALID_STATUS",
-            { userExAccId }
-          );
-        await this.initConnector(exchangeAcc);
+      if (!nextJobs || !Array.isArray(nextJobs) || nextJobs.length === 0)
+        return;
 
-        while (nextJob) {
+      const exchangeAcc: cpz.UserExchangeAccount = await this.broker.call(
+        `${cpz.Service.DB_USER_EXCHANGE_ACCS}.get`,
+        { id: userExAccId }
+      );
+      if (!exchangeAcc)
+        throw new Errors.MoleculerError(
+          "Failed to get user exchange account",
+          404,
+          "ERR_NOT_FOUND",
+          { userExAccId }
+        );
+      if (exchangeAcc.status !== cpz.UserExchangeAccStatus.enabled)
+        throw new Errors.MoleculerError(
+          "User Excahnge Account is not enabled",
+          500,
+          "ERR_INVALID_STATUS",
+          { userExAccId }
+        );
+      await this.initConnector(exchangeAcc);
+
+      while (nextJobs.length > 0) {
+        const groupedJobs: {
+          [key: string]: cpz.ConnectorJob[];
+        } = groupBy(nextJobs, job => job.orderId);
+
+        for (const orderJobs of Object.values(groupedJobs)) {
+          const [nextJob] = orderJobs.sort((a, b) =>
+            sortDesc(
+              dayjs.utc(a.nextJobAt).valueOf(),
+              dayjs.utc(b.nextJobAt).valueOf()
+            )
+          );
           await this.run(exchangeAcc, nextJob);
-          await this.broker.call(`${cpz.Service.DB_CONNECTOR_JOBS}.remove`, {
-            id: nextJob.id
-          });
-          [nextJob] = await this.broker.call(
+          for (const { id } of orderJobs) {
+            await this.broker.call(`${cpz.Service.DB_CONNECTOR_JOBS}.remove`, {
+              id
+            });
+          }
+          nextJobs = await this.broker.call(
             `${cpz.Service.DB_CONNECTOR_JOBS}.find`,
             {
-              limit: 1,
-              sort: "created_at",
+              sort: "priority -next_job_at",
               query: {
-                userExAccId
+                userExAccId,
+                nextJobAt: { $lte: dayjs.utc().toISOString() }
               }
             }
           );
         }
-        await this.broker.call(`${cpz.Service.DB_USER_EXCHANGE_ACCS}.update`, {
-          id: userExAccId,
-          ordersCache: this.connectors[userExAccId].orders
-        });
-        delete this.connectors[userExAccId];
       }
+
+      await this.broker.call(`${cpz.Service.DB_USER_EXCHANGE_ACCS}.update`, {
+        id: userExAccId,
+        ordersCache: this.connectors[userExAccId].orders
+      });
+      delete this.connectors[userExAccId];
 
       this.logger.info(`Connector #${userExAccId} finished processing jobs`);
     } catch (e) {
@@ -427,82 +451,68 @@ class PrivateConnectorWorkerService extends Service {
     }
   }
 
-  async getNextOrder(userExAccId: string) {
-    try {
-      const [order] = await this.broker.call(
-        `${cpz.Service.DB_USER_ORDERS}.find`,
-        {
-          limit: 1,
-          sort: "last_checked_at next_job_at",
-          query: {
-            userExAccId,
-            nextJob: { $ne: null },
-            nextJobAt: { $lte: dayjs.utc().toISOString() }
-          }
-        }
-      );
-      return order;
-    } catch (err) {
-      throw err;
-    }
-  }
-
   async run(exAcc: cpz.UserExchangeAccount, job: cpz.ConnectorJob) {
     const { exchange } = exAcc;
-    const { userExAccId, type, data } = job;
+    const { userExAccId, orderId, type, data } = job;
     try {
-      if (type === cpz.ConnectorJobType.order) {
-        let order = await this.getNextOrder(userExAccId);
+      let order = await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.get`, {
+        id: orderId
+      });
+      if (order) {
+        let nextJob: {
+          type: cpz.OrderJobType;
+          priority: cpz.Priority;
+          nextJobAt: string;
+        };
+        if (order.exchange !== exchange)
+          throw new Errors.MoleculerError(
+            "Wrong exchange",
+            400,
+            "ERR_INVALID_PARAMS",
+            { exAcc, job, order }
+          );
 
-        if (order) {
-          while (order) {
-            if (order.exchange !== exchange)
-              throw new Errors.MoleculerError(
-                "Wrong exchange",
-                400,
-                "ERR_INVALID_PARAMS",
-                { exAcc, job, order }
-              );
+        try {
+          const result = await this.processOrder(order, job);
+          order = result.order;
+          nextJob = result.nextJob;
+        } catch (err) {
+          this.logger.error(err);
 
-            try {
-              order = await this.processOrder(order);
-            } catch (err) {
-              this.logger.error(err);
+          order = {
+            ...order,
+            lastCheckedAt: dayjs.utc().toISOString(),
+            error: this.getErrorMessage(err),
+            status:
+              order.nextJob.type === cpz.OrderJobType.create
+                ? cpz.OrderStatus.canceled
+                : order.status,
+            nextJob: null
+          };
 
-              order = {
-                ...order,
-                lastCheckedAt: dayjs.utc().toISOString(),
-                error: this.getErrorMessage(err),
-                status:
-                  order.nextJob.type === cpz.OrderJobType.create
-                    ? cpz.OrderStatus.canceled
-                    : order.status,
-                nextJob: null,
-                nextJobAt: null
-              };
+          await this.broker.emit(cpz.Event.ORDER_ERROR, order);
+        }
+        try {
+          await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.update`, order);
+        } catch (e) {
+          this.logger.error("ORDERS UPDATE ERROR", order, e);
+          throw e;
+        }
+        if (
+          order.status === cpz.OrderStatus.closed ||
+          order.status === cpz.OrderStatus.canceled
+        )
+          await this.broker.emit(cpz.Event.ORDER_STATUS, order);
+        this.logger.info(
+          `UserExAcc #${order.userExAccId} processed order ${order.id}`,
+          order
+        );
 
-              await this.broker.emit(cpz.Event.ORDER_ERROR, order);
-            }
-            try {
-              await this.broker.call(
-                `${cpz.Service.DB_USER_ORDERS}.update`,
-                order
-              );
-            } catch (e) {
-              this.logger.error("ORDERS UPDATE ERROR", order, e);
-              throw e;
-            }
-            if (
-              order.status === cpz.OrderStatus.closed ||
-              order.status === cpz.OrderStatus.canceled
-            )
-              await this.broker.emit(cpz.Event.ORDER_STATUS, order);
-            this.logger.info(
-              `UserExAcc #${order.userExAccId} processed order`,
-              order
-            );
-            order = await this.getNextOrder(userExAccId);
-          }
+        if (nextJob) {
+          await this.broker.call<Promise<void>, cpz.ConnectorJob>(
+            `${cpz.Service.PRIVATE_CONNECTOR_RUNNER}.addJob`,
+            { ...nextJob, id: uuid(), userExAccId, orderId }
+          );
         }
       }
     } catch (err) {
@@ -511,12 +521,24 @@ class PrivateConnectorWorkerService extends Service {
     }
   }
 
-  async processOrder(order: cpz.Order): Promise<cpz.Order> {
+  async processOrder(
+    order: cpz.Order,
+    job: cpz.ConnectorJob
+  ): Promise<{
+    order: cpz.Order;
+    nextJob?: {
+      type: cpz.OrderJobType;
+      priority: cpz.Priority;
+      nextJobAt: string;
+    };
+  }> {
     try {
-      const {
-        nextJob: { type: orderJobType, data: orderJobData }
-      } = order;
-
+      const { type: orderJobType, data: orderJobData } = job;
+      let nextJob: {
+        type: cpz.OrderJobType;
+        priority: cpz.Priority;
+        nextJobAt: string;
+      };
       if (orderJobType === cpz.OrderJobType.create) {
         this.logger.info(
           `UserExAcc #${order.userExAccId} creating order ${order.positionId}/${order.id}`
@@ -525,26 +547,31 @@ class PrivateConnectorWorkerService extends Service {
           this.logger.error(
             `Failed to create order #${order.id} - order already processed!`
           );
-          order.nextJob = {
-            type: cpz.OrderJobType.check
+
+          return {
+            order,
+            nextJob: {
+              type: cpz.OrderJobType.check,
+              priority: cpz.Priority.low,
+              nextJobAt: dayjs.utc().toISOString()
+            }
           };
-          order.nextJobAt = dayjs.utc().toISOString();
-          return order;
         }
 
-        order = await this.createOrder(order);
+        ({ order, nextJob } = await this.createOrder(order));
       } else if (orderJobType === cpz.OrderJobType.recreate) {
         this.logger.info(
           `UserExAcc #${order.userExAccId} recreating order ${order.positionId}/${order.id}`
         );
-        const checkedOrder = await this.checkOrder(order);
-        if (checkedOrder.status === cpz.OrderStatus.canceled) {
-          order = await this.createOrder({
-            ...checkedOrder,
-            price: orderJobData.prce
-          });
+        const response = await this.checkOrder(order);
+        if (response.order.status === cpz.OrderStatus.canceled) {
+          ({ order, nextJob } = await this.createOrder({
+            ...response.order,
+            price: orderJobData.price
+          }));
         } else {
-          order = checkedOrder;
+          order = response.order;
+          nextJob = response.nextJob;
         }
       } else if (orderJobType === cpz.OrderJobType.cancel) {
         this.logger.info(
@@ -552,19 +579,21 @@ class PrivateConnectorWorkerService extends Service {
         );
         if (!order.exId) {
           return {
-            ...order,
-            status: cpz.OrderStatus.canceled,
-            nextJob: null,
-            nextJobAt: null
+            order: {
+              ...order,
+              status: cpz.OrderStatus.canceled,
+              nextJob: null
+            },
+            nextJob: null
           };
         }
         if (
           order.status === cpz.OrderStatus.canceled ||
           order.status === cpz.OrderStatus.closed
         ) {
-          return { ...order, nextJob: null, nextJobAt: null };
+          return { order: { ...order, nextJob: null }, nextJob: null };
         }
-        order = await this.cancelOrder(order);
+        ({ order, nextJob } = await this.cancelOrder(order));
       } else if (orderJobType === cpz.OrderJobType.check) {
         this.logger.info(
           `UserExAcc #${order.userExAccId} checking order ${order.positionId}/${order.id}`
@@ -574,12 +603,17 @@ class PrivateConnectorWorkerService extends Service {
             `Failed to check order #${order.id} - no exchange id!`
           );
           return {
-            ...order,
-            error: new Error(`Failed to check order - no exchange id!`)
+            order: {
+              ...order,
+              error: new Error(`Failed to check order - no exchange id!`),
+              nextJob: null
+            },
+            nextJob: null
           };
         }
-        if (order.status === cpz.OrderStatus.closed) return order;
-        order = await this.checkOrder(order);
+        if (order.status === cpz.OrderStatus.closed)
+          return { order, nextJob: null };
+        ({ order, nextJob } = await this.checkOrder(order));
 
         if (
           order.status === cpz.OrderStatus.open &&
@@ -587,7 +621,7 @@ class PrivateConnectorWorkerService extends Service {
           dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
             order.params.orderTimeout
         ) {
-          order = await this.cancelOrder(order);
+          ({ order, nextJob } = await this.cancelOrder(order));
         }
       } else {
         throw new Errors.MoleculerError(
@@ -597,14 +631,23 @@ class PrivateConnectorWorkerService extends Service {
           { order }
         );
       }
-      return order;
+      return { order, nextJob };
     } catch (e) {
       this.logger.error(e, order);
       throw e;
     }
   }
 
-  async createOrder(order: cpz.Order): Promise<cpz.Order> {
+  async createOrder(
+    order: cpz.Order
+  ): Promise<{
+    order: cpz.Order;
+    nextJob?: {
+      type: cpz.OrderJobType;
+      priority: cpz.Priority;
+      nextJobAt: string;
+    };
+  }> {
     try {
       const { userExAccId, exchange, asset, currency, direction } = order;
 
@@ -669,29 +712,37 @@ class PrivateConnectorWorkerService extends Service {
       } = response;
 
       return {
-        ...order,
-        params: { ...order.params, exchangeParams: orderParams },
-        signalPrice,
-        exId,
-        exTimestamp,
-        exLastTradeAt: this.getCloseOrderDate(<ExchangeName>exchange, response),
-        status: <cpz.OrderStatus>status,
-        price: (price && +price) || signalPrice,
-        volume: volume && +volume,
-        remaining: remaining && +remaining,
-        executed:
-          (executed && +executed) ||
-          (volume && remaining && +volume - +remaining),
-        lastCheckedAt: dayjs.utc().toISOString(),
-        nextJob: {
-          type: cpz.OrderJobType.check
+        order: {
+          ...order,
+          params: { ...order.params, exchangeParams: orderParams },
+          signalPrice,
+          exId,
+          exTimestamp,
+          exLastTradeAt: this.getCloseOrderDate(
+            <ExchangeName>exchange,
+            response
+          ),
+          status: <cpz.OrderStatus>status,
+          price: (price && +price) || signalPrice,
+          volume: volume && +volume,
+          remaining: remaining && +remaining,
+          executed:
+            (executed && +executed) ||
+            (volume && remaining && +volume - +remaining),
+          lastCheckedAt: dayjs.utc().toISOString(),
+          nextJob: {
+            type: cpz.OrderJobType.check
+          },
+          error: null
         },
-        nextJobAt: dayjs
-          .utc()
-          .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-          .toISOString(),
-
-        error: null
+        nextJob: {
+          type: cpz.OrderJobType.check,
+          priority: cpz.Priority.low,
+          nextJobAt: dayjs
+            .utc()
+            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+            .toISOString()
+        }
       };
     } catch (err) {
       this.logger.error(err, order);
@@ -708,19 +759,34 @@ class PrivateConnectorWorkerService extends Service {
         err instanceof ccxt.NetworkError
       ) {
         return {
-          ...order,
-          error: this.getErrorMessage(err),
-          nextJobAt: dayjs
-            .utc()
-            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-            .toISOString()
+          order: {
+            ...order,
+            error: this.getErrorMessage(err)
+          },
+          nextJob: {
+            type: cpz.OrderJobType.create,
+            priority: cpz.Priority.high,
+            nextJobAt: dayjs
+              .utc()
+              .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+              .toISOString()
+          }
         };
       }
       throw err;
     }
   }
 
-  async checkOrder(order: cpz.Order): Promise<cpz.Order> {
+  async checkOrder(
+    order: cpz.Order
+  ): Promise<{
+    order: cpz.Order;
+    nextJob?: {
+      type: cpz.OrderJobType;
+      priority: cpz.Priority;
+      nextJobAt: string;
+    };
+  }> {
     try {
       const { userExAccId, exId, exchange, asset, currency } = order;
       const call = async (bail: (e: Error) => void) => {
@@ -748,34 +814,43 @@ class PrivateConnectorWorkerService extends Service {
         filled: executed
       } = response;
       return {
-        ...order,
-        exTimestamp,
-        exLastTradeAt: this.getCloseOrderDate(<ExchangeName>exchange, response),
-        status: <cpz.OrderStatus>status,
-        price: (price && +price) || order.signalPrice,
-        volume: volume && +volume,
-        remaining: remaining && +remaining,
-        executed:
-          (executed && +executed) ||
-          (volume && remaining && +volume - +remaining),
-        lastCheckedAt: dayjs.utc().toISOString(),
+        order: {
+          ...order,
+          exTimestamp,
+          exLastTradeAt: this.getCloseOrderDate(
+            <ExchangeName>exchange,
+            response
+          ),
+          status: <cpz.OrderStatus>status,
+          price: (price && +price) || order.signalPrice,
+          volume: volume && +volume,
+          remaining: remaining && +remaining,
+          executed:
+            (executed && +executed) ||
+            (volume && remaining && +volume - +remaining),
+          lastCheckedAt: dayjs.utc().toISOString(),
+          nextJob:
+            <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
+            <cpz.OrderStatus>status === cpz.OrderStatus.closed
+              ? null
+              : {
+                  type: cpz.OrderJobType.check
+                },
+
+          error: null
+        },
         nextJob:
           <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
           <cpz.OrderStatus>status === cpz.OrderStatus.closed
             ? null
             : {
-                type: cpz.OrderJobType.check
-              },
-        nextJobAt:
-          <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
-          <cpz.OrderStatus>status === cpz.OrderStatus.closed
-            ? null
-            : dayjs
-                .utc()
-                .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-                .toISOString(),
-
-        error: null
+                type: cpz.OrderJobType.check,
+                priority: cpz.Priority.low,
+                nextJobAt: dayjs
+                  .utc()
+                  .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                  .toISOString()
+              }
       };
     } catch (err) {
       this.logger.error(err, order);
@@ -792,19 +867,34 @@ class PrivateConnectorWorkerService extends Service {
         err instanceof ccxt.NetworkError
       ) {
         return {
-          ...order,
-          error: this.getErrorMessage(err),
-          nextJobAt: dayjs
-            .utc()
-            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-            .toISOString()
+          order: {
+            ...order,
+            error: this.getErrorMessage(err)
+          },
+          nextJob: {
+            type: cpz.OrderJobType.check,
+            priority: cpz.Priority.low,
+            nextJobAt: dayjs
+              .utc()
+              .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+              .toISOString()
+          }
         };
       }
       throw err;
     }
   }
 
-  async cancelOrder(order: cpz.Order): Promise<cpz.Order> {
+  async cancelOrder(
+    order: cpz.Order
+  ): Promise<{
+    order: cpz.Order;
+    nextJob?: {
+      type: cpz.OrderJobType;
+      priority: cpz.Priority;
+      nextJobAt: string;
+    };
+  }> {
     try {
       const { userExAccId, exId, asset, currency } = order;
       const call = async (bail: (e: Error) => void) => {
@@ -841,12 +931,18 @@ class PrivateConnectorWorkerService extends Service {
         err instanceof ccxt.NetworkError
       ) {
         return {
-          ...order,
-          error: this.getErrorMessage(err),
-          nextJobAt: dayjs
-            .utc()
-            .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-            .toISOString()
+          order: {
+            ...order,
+            error: this.getErrorMessage(err)
+          },
+          nextJob: {
+            type: cpz.OrderJobType.cancel,
+            priority: cpz.Priority.high,
+            nextJobAt: dayjs
+              .utc()
+              .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+              .toISOString()
+          }
         };
       }
       throw err;

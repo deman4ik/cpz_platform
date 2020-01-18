@@ -55,7 +55,7 @@ class UserPosition implements cpz.UserPosition {
   };
 
   _ordersToCreate: cpz.Order[];
-  _orderWithJobs: cpz.OrderWithJob[];
+  _connectorJobs: cpz.ConnectorJob[];
   _hasRecentTrade: boolean;
 
   constructor(state: cpz.UserPositionState) {
@@ -102,7 +102,7 @@ class UserPosition implements cpz.UserPosition {
     this._entryOrders = state.entryOrders || [];
     this._exitOrders = state.exitOrders || [];
     this._ordersToCreate = [];
-    this._orderWithJobs = [];
+    this._connectorJobs = [];
     this._hasRecentTrade = false;
   }
 
@@ -196,16 +196,15 @@ class UserPosition implements cpz.UserPosition {
 
   _updateEntry() {
     if (this._entryOrders && this._entryOrders.length > 0) {
-      this._entryPrice = round(
-        average(
-          ...this._entryOrders.map(o => +o.price || 0).filter(p => p > 0)
-        ),
-        6
-      );
-      this._entryExecuted = round(
-        sum(...this._entryOrders.map(o => +o.executed || 0)),
-        6
-      );
+      this._entryPrice =
+        round(
+          average(
+            ...this._entryOrders.map(o => +o.price || 0).filter(p => p > 0)
+          ),
+          6
+        ) || null;
+      this._entryExecuted =
+        round(sum(...this._entryOrders.map(o => +o.executed || 0)), 6) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
     }
     if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
@@ -227,14 +226,15 @@ class UserPosition implements cpz.UserPosition {
 
   _updateExit() {
     if (this._exitOrders && this._exitOrders.length > 0) {
-      this._exitPrice = round(
-        average(...this._exitOrders.map(o => +o.price || 0).filter(p => p > 0)),
-        6
-      );
-      this._exitExecuted = round(
-        sum(...this._exitOrders.map(o => +o.executed || 0)),
-        6
-      );
+      this._exitPrice =
+        round(
+          average(
+            ...this._exitOrders.map(o => +o.price || 0).filter(p => p > 0)
+          ),
+          6
+        ) || null;
+      this._exitExecuted =
+        round(sum(...this._exitOrders.map(o => +o.executed || 0)), 6) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
     }
     if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
@@ -356,8 +356,8 @@ class UserPosition implements cpz.UserPosition {
     return this._ordersToCreate;
   }
 
-  get orderWithJobs() {
-    return this._orderWithJobs;
+  get connectorJobs() {
+    return this._connectorJobs;
   }
 
   get hasOpenEntryOrders() {
@@ -531,8 +531,9 @@ class UserPosition implements cpz.UserPosition {
       },
       createdAt: dayjs.utc().toISOString(),
       status: cpz.OrderStatus.new,
-      nextJobAt: dayjs.utc().toISOString(),
-      nextJob: { type: cpz.OrderJobType.create }
+      nextJob: {
+        type: cpz.OrderJobType.create
+      }
     };
 
     order.remaining = order.volume;
@@ -554,6 +555,14 @@ class UserPosition implements cpz.UserPosition {
   _open(trade: cpz.TradeInfo) {
     const order = this._createOrder(trade);
     this._ordersToCreate.push(order);
+    this._connectorJobs.push({
+      id: uuid(),
+      type: cpz.OrderJobType.create,
+      priority: cpz.Priority.high,
+      userExAccId: this._userRobot.userExAccId,
+      orderId: order.id,
+      nextJobAt: dayjs.utc().toISOString()
+    });
     this._entryOrders.push(order);
     this._entryVolume = this._userRobot.settings.volume;
     this._entryAction = trade.action;
@@ -564,6 +573,14 @@ class UserPosition implements cpz.UserPosition {
   _close(trade: cpz.TradeInfo) {
     const order = this._createOrder(trade);
     this._ordersToCreate.push(order);
+    this._connectorJobs.push({
+      id: uuid(),
+      type: cpz.OrderJobType.create,
+      priority: cpz.Priority.high,
+      userExAccId: this._userRobot.userExAccId,
+      orderId: order.id,
+      nextJobAt: dayjs.utc().toISOString()
+    });
     this._exitOrders.push(order);
     if (!this._exitVolume || this._exitVolume === 0)
       this._exitVolume = this._entryExecuted;
@@ -637,19 +654,20 @@ class UserPosition implements cpz.UserPosition {
         this._robot.tradeSettings.slippage.entry.count
     ) {
       if (lastOrder.status === cpz.OrderStatus.canceled) {
-        this._orderWithJobs.push({
-          id: lastOrder.id,
-          nextJob: {
-            type: cpz.OrderJobType.recreate,
-            data: {
-              price: this._setPrice({
-                action: lastOrder.action,
-                orderType: lastOrder.type,
-                price: lastOrder.signalPrice
-              })
-            }
-          },
-          nextJobAt: dayjs.utc().toISOString()
+        this._connectorJobs.push({
+          id: uuid(),
+          type: cpz.OrderJobType.recreate,
+          priority: cpz.Priority.medium,
+          userExAccId: this._userRobot.userExAccId,
+          orderId: lastOrder.id,
+          nextJobAt: dayjs.utc().toISOString(),
+          data: {
+            price: this._setPrice({
+              action: lastOrder.action,
+              orderType: lastOrder.type,
+              price: lastOrder.signalPrice
+            })
+          }
         });
       } else if (lastOrder.status === cpz.OrderStatus.closed) {
         this._open({
@@ -685,19 +703,20 @@ class UserPosition implements cpz.UserPosition {
         this._robot.tradeSettings.slippage.exit.count
     ) {
       if (lastOrder.status === cpz.OrderStatus.canceled) {
-        this._orderWithJobs.push({
-          id: lastOrder.id,
-          nextJob: {
-            type: cpz.OrderJobType.recreate,
-            data: {
-              price: this._setPrice({
-                action: lastOrder.action,
-                orderType: lastOrder.type,
-                price: lastOrder.signalPrice
-              })
-            }
-          },
-          nextJobAt: dayjs.utc().toISOString()
+        this._connectorJobs.push({
+          id: uuid(),
+          type: cpz.OrderJobType.recreate,
+          priority: cpz.Priority.medium,
+          userExAccId: this._userRobot.userExAccId,
+          orderId: lastOrder.id,
+          nextJobAt: dayjs.utc().toISOString(),
+          data: {
+            price: this._setPrice({
+              action: lastOrder.action,
+              orderType: lastOrder.type,
+              price: lastOrder.signalPrice
+            })
+          }
         });
       } else if (lastOrder.status === cpz.OrderStatus.closed) {
         this._close({
@@ -737,11 +756,12 @@ class UserPosition implements cpz.UserPosition {
         if (orders && orders.length > 0) {
           // Cancel all open orders
           orders.forEach(o => {
-            this._orderWithJobs.push({
-              id: o.id,
-              nextJob: {
-                type: cpz.OrderJobType.cancel
-              },
+            this._connectorJobs.push({
+              id: uuid(),
+              type: cpz.OrderJobType.cancel,
+              priority: cpz.Priority.high,
+              userExAccId: this._userRobot.userExAccId,
+              orderId: o.id,
               nextJobAt: dayjs.utc().toISOString()
             });
           });
@@ -767,11 +787,12 @@ class UserPosition implements cpz.UserPosition {
         if (orders && orders.length > 0) {
           // Cancel all entry signal orders
           orders.forEach(o => {
-            this._orderWithJobs.push({
-              id: o.id,
-              nextJob: {
-                type: cpz.OrderJobType.cancel
-              },
+            this._connectorJobs.push({
+              id: uuid(),
+              type: cpz.OrderJobType.cancel,
+              priority: cpz.Priority.high,
+              userExAccId: this._userRobot.userExAccId,
+              orderId: o.id,
               nextJobAt: dayjs.utc().toISOString()
             });
           });
@@ -822,11 +843,12 @@ class UserPosition implements cpz.UserPosition {
       if (orders && orders.length > 0) {
         // Cancel all exit signal orders
         orders.forEach(o => {
-          this._orderWithJobs.push({
-            id: o.id,
-            nextJob: {
-              type: cpz.OrderJobType.cancel
-            },
+          this._connectorJobs.push({
+            id: uuid(),
+            type: cpz.OrderJobType.cancel,
+            priority: cpz.Priority.high,
+            userExAccId: this._userRobot.userExAccId,
+            orderId: o.id,
             nextJobAt: dayjs.utc().toISOString()
           });
         });
