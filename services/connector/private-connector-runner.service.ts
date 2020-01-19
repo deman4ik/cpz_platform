@@ -112,8 +112,9 @@ class PricateConnectorRunnerService extends Service {
           userExAccId
         );
         if (lastJob) {
-          const lastJobStuck = await lastJob.isStuck();
-          if (lastJobStuck) await lastJob.remove();
+          const lastJobState = await lastJob.getState();
+          if (["stuck", "completed", "failed"].includes(lastJobState))
+            await lastJob.remove();
         }
         await this.createJob(
           cpz.Queue.connector,

@@ -159,8 +159,9 @@ class RobotRunnerService extends Service {
     if (status === cpz.Status.started) {
       const lastJob = await this.getQueue(cpz.Queue.runRobot).getJob(robotId);
       if (lastJob) {
-        const lastJobStuck = await lastJob.isStuck();
-        if (lastJobStuck) await lastJob.remove();
+        const lastJobState = await lastJob.getState();
+        if (["stuck", "completed", "failed"].includes(lastJobState))
+          await lastJob.remove();
       }
       await this.createJob(cpz.Queue.runRobot, job, {
         jobId: robotId,

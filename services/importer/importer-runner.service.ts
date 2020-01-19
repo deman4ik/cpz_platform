@@ -207,8 +207,9 @@ class ImporterRunnerService extends Service {
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
       if (lastJob) {
-        const lastJobStuck = await lastJob.isStuck();
-        if (lastJobStuck) await lastJob.remove();
+        const lastJobState = await lastJob.getState();
+        if (["stuck", "completed", "failed"].includes(lastJobState))
+          await lastJob.remove();
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
@@ -274,8 +275,9 @@ class ImporterRunnerService extends Service {
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
       if (lastJob) {
-        const lastJobStuck = await lastJob.isStuck();
-        if (lastJobStuck) await lastJob.remove();
+        const lastJobState = await lastJob.getState();
+        if (["stuck", "completed", "failed"].includes(lastJobState))
+          await lastJob.remove();
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
