@@ -201,10 +201,8 @@ describe("Test User Robot", () => {
     };
     userRobot.handleSignal(signalClose);
 
-    expect(userRobot.state.ordersWithJobs.length).toBe(1);
-    expect(userRobot.state.ordersWithJobs[0].nextJob.type).toBe(
-      cpz.OrderJobType.cancel
-    );
+    expect(userRobot.state.connectorJobs.length).toBe(1);
+    expect(userRobot.state.connectorJobs[0].type).toBe(cpz.OrderJobType.cancel);
   });
 
   it("Should create order to close position", () => {
@@ -558,7 +556,7 @@ describe("Test User Robot", () => {
       cpz.UserPositionOrderStatus.closed
     );
     expect(userRobot.state.positions[0].entryExecuted).toBe(0.2);
-    expect(userRobot.state.ordersWithJobs.length).toBe(0);
+    expect(userRobot.state.connectorJobs.length).toBe(0);
   });
 
   it("Should handle exit partial order", () => {
@@ -829,7 +827,7 @@ describe("Test User Robot", () => {
     expect(userRobot.state.positions[0].status).toBe(
       cpz.UserPositionStatus.canceled
     );
-    expect(userRobot.state.ordersWithJobs.length).toBe(0);
+    expect(userRobot.state.connectorJobs.length).toBe(0);
   });
 
   it("Should handle entry canceled order and recreate order", () => {
@@ -875,11 +873,11 @@ describe("Test User Robot", () => {
     expect(userRobot.state.positions[0].status).toBe(
       cpz.UserPositionStatus.new
     );
-    expect(userRobot.state.ordersWithJobs.length).toBe(1);
-    expect(userRobot.state.ordersWithJobs[0].nextJob.type).toBe(
+    expect(userRobot.state.connectorJobs.length).toBe(1);
+    expect(userRobot.state.connectorJobs[0].type).toBe(
       cpz.OrderJobType.recreate
     );
-    expect(userRobot.state.ordersWithJobs[0].nextJob.data.price).toBe(5198);
+    expect(userRobot.state.connectorJobs[0].data.price).toBe(5198);
   });
 
   it("Should cancel position after all slippage steps", () => {
@@ -1124,9 +1122,7 @@ describe("Test User Robot", () => {
     };
     userRobot.handleSignal(signalOpen2);
 
-    expect(userRobot.state.ordersWithJobs[0].nextJob.type).toBe(
-      cpz.OrderJobType.cancel
-    );
+    expect(userRobot.state.connectorJobs[0].type).toBe(cpz.OrderJobType.cancel);
     const openOrderCanceled = {
       ...openOrder,
       status: cpz.OrderStatus.canceled,
