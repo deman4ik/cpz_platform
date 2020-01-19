@@ -1,5 +1,5 @@
 import { Service, ServiceBroker, Context } from "moleculer";
-import { v4 as uuid } from "uuid";
+import RedisLock from "../../mixins/redislock";
 import { cpz } from "../../@types";
 import { JobId } from "bull";
 import QueueService from "moleculer-bull";
@@ -29,7 +29,8 @@ class PricateConnectorRunnerService extends Service {
             stalledInterval: 30000,
             maxStalledCount: 1
           }
-        })
+        }),
+        RedisLock()
       ],
       actions: {
         addJob: {
@@ -56,6 +57,8 @@ class PricateConnectorRunnerService extends Service {
 
   async checkOrders() {
     try {
+      const lock = await this.createLock();
+      await lock.acquire(cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS);
       const userExAccIds = await this.broker.call(
         `${cpz.Service.DB_CONNECTOR_JOBS}.getUserExAccsWithJobs`
       );
@@ -65,7 +68,9 @@ class PricateConnectorRunnerService extends Service {
           await this.queueJob(userExAccId);
         }
       }
+      await lock.release(cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS);
     } catch (e) {
+      if (e instanceof this.LockAcquisitionError) return;
       this.logger.error(e);
     }
   }

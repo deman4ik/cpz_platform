@@ -131,6 +131,8 @@ class UserRobotRunnerService extends Service {
 
   async checkJobs() {
     try {
+      const lock = await this.createLock(12000);
+      await lock.acquire(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
       const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
         {
@@ -163,7 +165,9 @@ class UserRobotRunnerService extends Service {
           });
         });
       }
+      await lock.release(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
     } catch (e) {
+      if (e instanceof this.LockAcquisitionError) return;
       this.logger.error(e);
     }
   }

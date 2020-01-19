@@ -144,6 +144,11 @@ declare namespace cpz {
     SUPPORT = "support"
   }
 
+  const enum cronLock {
+    PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS = "cron:private-connector-runner:check-orders",
+    USER_ROBOT_RUNNER_CHECK_JOBS = "cron:user-robot-runner:check-jobs"
+  }
+
   const enum ExwatcherStatus {
     pending = "pending",
     importing = "importing",
