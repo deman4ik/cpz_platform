@@ -142,6 +142,7 @@ async function createCandlesFromTrades(
     if (trades.length > 0) {
       const { exchange, asset, currency } = trades[0];
 
+      //TODO: optimize with worker_threads
       await Promise.all(
         timeframes.map(async timeframe => {
           result[timeframe] = [];
