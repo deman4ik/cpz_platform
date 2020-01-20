@@ -414,7 +414,7 @@ function calcStatistics(
   const positionChunks = chunkArray(allPositions, chunkLength);
   equity.changes = positionChunks.map(chunk => ({
     x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
-    y: averageRound(...chunk.map(c => +c.profit))
+    y: round(average(...chunk.map(c => +c.profit)),2)
   }));
 
   return { statistics, equity };
