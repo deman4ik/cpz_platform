@@ -51,7 +51,7 @@ async function signalsEnter(ctx: any) {
     if (ctx.scene.state.edit) {
       ctx.scene.state.edit = false;
       return ctx.editMessageText(
-        ctx.i18n.t("keyboards.mainKeyboard.signals"),
+        ctx.i18n.t("scenes.signals.info"),
         getSignalsMenu(ctx)
       );
     }
@@ -59,10 +59,7 @@ async function signalsEnter(ctx: any) {
       ctx.i18n.t("keyboards.mainKeyboard.signals"),
       getBackKeyboard(ctx)
     );
-    return ctx.reply(
-      ctx.i18n.t("keyboards.mainKeyboard.signals"),
-      getSignalsMenu(ctx)
-    );
+    return ctx.reply(ctx.i18n.t("scenes.signals.info"), getSignalsMenu(ctx));
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

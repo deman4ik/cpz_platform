@@ -251,7 +251,7 @@ async function userRobotPublicStats(ctx: any) {
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         subscribed: userRobotInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t(
@@ -316,7 +316,7 @@ async function userRobotMyStats(ctx: any) {
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         subscribed: userRobotInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t("robot.menuMyStats")}\n\n${message}\n\n${updatedAtText}`,
@@ -427,7 +427,7 @@ async function userRobotPositions(ctx: any) {
         : ctx.i18n.t("robot.positionsNone");
     return ctx.editMessageText(
       `${ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         subscribed: userRobotInfo ? "✅" : ""
       })}${message}\n\n${updatedAtText}`,
       getUserRobotMenu(ctx)

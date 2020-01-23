@@ -51,7 +51,7 @@ async function robotsEnter(ctx: any) {
     if (ctx.scene.state.edit) {
       ctx.scene.state.edit = false;
       return ctx.editMessageText(
-        ctx.i18n.t("keyboards.mainKeyboard.robots"),
+        ctx.i18n.t("scenes.robots.info"),
         getRobotsMenu(ctx)
       );
     }
@@ -59,10 +59,7 @@ async function robotsEnter(ctx: any) {
       ctx.i18n.t("keyboards.mainKeyboard.robots"),
       getBackKeyboard(ctx)
     );
-    await ctx.reply(
-      ctx.i18n.t("keyboards.mainKeyboard.robots"),
-      getRobotsMenu(ctx)
-    );
+    await ctx.reply(ctx.i18n.t("scenes.robots.info"), getRobotsMenu(ctx));
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

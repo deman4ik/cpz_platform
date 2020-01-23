@@ -235,7 +235,7 @@ async function robotSignalPublicStats(ctx: any) {
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         subscribed: userSignalsInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t(
@@ -297,7 +297,7 @@ async function robotSignalMyStats(ctx: any) {
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         subscribed: userSignalsInfo ? "✅" : ""
       }) +
         `${ctx.i18n.t("robot.menuMyStats")}\n\n${message}\n\n${updatedAtText}`,
@@ -430,10 +430,10 @@ async function robotSignalPositions(ctx: any) {
         ? `${closedPositionsText}${openPositionsText}`
         : ctx.i18n.t("robot.positionsNone");
     return ctx.editMessageText(
-      `ctx.i18n.t("robot.name", {
-        name: robotInfo.name,
+      `${ctx.i18n.t("robot.name", {
+        code: robotInfo.code,
         subscribed: userSignalsInfo ? "✅" : ""
-      })${message}${updatedAtText}`,
+      })}${message}${updatedAtText}`,
       getSignalRobotMenu(ctx)
     );
   } catch (e) {
@@ -481,14 +481,14 @@ async function robotSignalUnsubscribe(ctx: any) {
     if (success) {
       await ctx.reply(
         ctx.i18n.t("scenes.robotSignal.unsubscribedSignals", {
-          name: robotInfo.name
+          code: robotInfo.code
         }),
         Extra.HTML()
       );
     } else {
       await ctx.reply(
         ctx.i18n.t("scenes.robotSignal.unsubscribedFailed", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           error
         }),
         Extra.HTML()

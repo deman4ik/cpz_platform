@@ -62,7 +62,7 @@ async function startUserRobotYes(ctx: any) {
     if (error) {
       await ctx.reply(
         ctx.i18n.t("scenes.startUserRobot.failed", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           error
         }),
         Extra.HTML()
@@ -72,7 +72,7 @@ async function startUserRobotYes(ctx: any) {
 
     await ctx.reply(
       ctx.i18n.t("scenes.startUserRobot.success", {
-        name: ctx.scene.state.selectedRobot.robotInfo.name
+        code: ctx.scene.state.selectedRobot.robotInfo.code
       }),
       Extra.HTML()
     );

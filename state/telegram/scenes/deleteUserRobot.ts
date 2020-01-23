@@ -31,7 +31,7 @@ async function deleteUserRobotEnter(ctx: any) {
 
     return ctx.reply(
       ctx.i18n.t("scenes.deleteUserRobot.confirm", {
-        name: robotInfo.name
+        code: robotInfo.code
       }),
       getConfirmMenu(ctx)
     );
@@ -62,7 +62,7 @@ async function deleteUserRobotYes(ctx: any) {
     if (error) {
       await ctx.reply(
         ctx.i18n.t("scenes.deleteUserRobot.failed", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           error
         }),
         Extra.HTML()
@@ -73,7 +73,7 @@ async function deleteUserRobotYes(ctx: any) {
 
     await ctx.reply(
       ctx.i18n.t("scenes.deleteUserRobot.success", {
-        name: ctx.scene.state.selectedRobot.robotInfo.name
+        code: ctx.scene.state.selectedRobot.robotInfo.code
       }),
       Extra.HTML()
     );

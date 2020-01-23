@@ -206,7 +206,7 @@ class UserSignalsService extends Service {
         available
       };
       const query = `
-      SELECT t.id, t.name, s.user_id
+      SELECT t.id, t.code, t.name, s.user_id
       FROM  robots t  
       LEFT JOIN user_signals s 
       ON s.robot_id = t.id AND s.user_id = :user_id

@@ -33,7 +33,7 @@ async function addUserRobotEnter(ctx: any) {
     if (ctx.scene.state.userExAccId)
       return addUserRobotSelectedAcc.call(this, ctx);
     const {
-      robotInfo: { exchange, name }
+      robotInfo: { exchange, code }
     }: {
       robotInfo: cpz.RobotInfo;
     } = ctx.scene.state.selectedRobot;
@@ -56,7 +56,7 @@ async function addUserRobotEnter(ctx: any) {
         return ctx.editMessageText(
           ctx.i18n.t("scenes.addUserRobot.selectExAcc", {
             exchange,
-            name
+            code
           }),
           getUserExAccsMenu(ctx)
         );
@@ -64,14 +64,14 @@ async function addUserRobotEnter(ctx: any) {
       return ctx.editMessageText(
         ctx.i18n.t("scenes.addUserRobot.selectExAcc", {
           exchange,
-          name
+          code
         }),
         getUserExAccsMenu(ctx)
       );
     } else {
       await ctx.reply(
         ctx.i18n.t("scenes.addUserRobot.noneExAccs", {
-          name,
+          code,
           exchange
         }),
         Extra.HTML()
@@ -109,7 +109,7 @@ async function addUserRobotSelectedAcc(ctx: any) {
       ctx.scene.state.edit = false;
       return ctx.editMessageText(
         ctx.i18n.t("scenes.addUserRobot.enterVolume", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           asset: robotInfo.asset,
           minVolume: market.limits.amount.min
         }),
@@ -119,7 +119,7 @@ async function addUserRobotSelectedAcc(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.addUserRobot.enterVolume", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         asset: robotInfo.asset,
         minVolume: market.limits.amount.min
       }),
@@ -175,7 +175,7 @@ async function addUserRobotConfirm(ctx: any) {
       } = ctx.scene.state.selectedRobot;
       await ctx.reply(
         ctx.i18n.t("scenes.addUserRobot.wrongVolume", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           asset: robotInfo.asset,
           minVolume: market.limits.amount.min
         }),
@@ -207,7 +207,7 @@ async function addUserRobotConfirm(ctx: any) {
     ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     await ctx.reply(
       ctx.i18n.t("scenes.addUserRobot.success", {
-        name: ctx.scene.state.selectedRobot.robotInfo.name,
+        code: ctx.scene.state.selectedRobot.robotInfo.code,
         volume,
         asset: ctx.scene.state.selectedRobot.robotInfo.asset
       }),

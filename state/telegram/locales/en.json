@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome ${username}, we advise to divide your trading capital between different robots to maximize the diversification effect and don't borrow margin (credit) money, because cryptocurrency markets are very volatile.\nAll trades you make are at you own risk!",
+  "welcome": "Welcome ${username} to <b>Cryptuoso Trading Bot!</b>\n\nYou can start <b>Manual trading</b> with our 🚦 Signals or <b>Automated Trading</b> with our 🤖 Robots.\n\nWe advise to divide your trading capital between different robots to maximize the diversification effect and don't borrow margin (credit) money, because cryptocurrency markets are very volatile.\n⚠️ Use all signals and robots at your own risk!",
   "failed": "❌ Failed to process your request. Please try again later!",
   "keyboards": {
     "backKeyboard": {
@@ -20,6 +20,7 @@
   },
   "scenes": {
     "signals": {
+      "info": "🚦 Signals - Manual Trading Mode",
       "my": "🚥 My Signals",
       "search": "🔎 Search Signals",
       "top": "🏆 Top Perfomance Signals",
@@ -45,17 +46,18 @@
     },
     "robotSignal": {
       "subscribeSignals": "🚥 Subscribe to Signals",
-      "unsubscribeSignals": "➖ Unsubscribe from Signals",
+      "unsubscribeSignals": "❌ Unsubscribe from Signals",
       "changeVolume": "⚙️ Change Volume",
-      "unsubscribedSignals": "You unsubsribed from <b>${name}</b> signals =(",
-      "unsubscribedFailed": "Failed to unsubscribe from <b>${name}</b> signals - ${error}"
+      "unsubscribedSignals": "You unsubsribed from <b>#${code}</b> signals =(",
+      "unsubscribedFailed": "Failed to unsubscribe from <b>#${code}</b> signals - ${error}"
     },
     "subscribeSignals": {
-      "enterVolume": "🚥 Subscribing to ${name} robot.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "🚥 Subscribing to ${name} robot.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "subscribedSignals": "🚥 Succesfully subsribed to <b>${name}</b> signals with volume ${volume} ${asset}!"
+      "enterVolume": "🚥 Subscribing to #${code} robot.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "🚥 Subscribing to #${code} robot.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "subscribedSignals": "🚥 Succesfully subsribed to <b>#${code}</b> signals with volume ${volume} ${asset}!\n\n⚠️ Use all signals at your own risk!"
     },
     "robots": {
+      "info": "🤖 Robots - Automated Trading Mode",
       "my": "🤖 My Robots",
       "search": "🔎 Search Robots",
       "top": "🏆 Top Perfomance Robots",
@@ -87,31 +89,31 @@
       "stop": "⛔ Stop Robot"
     },
     "addUserRobot": {
-      "selectExAcc": "✅ Adding robot ${name}.\n\nSelect your ${exchange} API Key:",
-      "noneExAccs": "✅ Adding robot ${name}.\n\nYou have not registered any ${exchange} API Keys.",
-      "enterVolume": "✅ Adding robot ${name}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "✅ Adding robot ${name}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "✅ Succesfully added <b>${name}</b> robot with trading volume ${volume} ${asset}!"
+      "selectExAcc": "✅ Adding robot #${code}.\n\nSelect your ${exchange} API Key:",
+      "noneExAccs": "✅ Adding robot #${code}.\n\nYou have not registered any ${exchange} API Keys.",
+      "enterVolume": "✅ Adding robot #${code}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "✅ Adding robot #${code}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "✅ Succesfully added <b>#${code}</b> robot with trading volume ${volume} ${asset}!"
     },
     "editUserRobot": {
-      "enterVolume": "⚙️ Editing robot ${name} settings.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "⚙️ Editing robot ${name} settings.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "⚙️ Succesfully edited <b>${name}</b> robot. New trading volume ${volume} ${asset}!"
+      "enterVolume": "⚙️ Editing robot #${code} settings.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "⚙️ Editing robot #${code} settings.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "⚙️ Succesfully edited <b>#${code}</b> robot. New trading volume ${volume} ${asset}!"
     },
     "deleteUserRobot": {
-      "confirm": "❌ Deleting <b>${name}</b> robot...\n\n⚠️ Are you sure you want to delete <b>${name}</b> robot?\n\n You will lost all your trading history for this robot.",
-      "failed": "❌ Failed to delele robot ${name} - ${error}",
-      "success": "✅ Succesfully deleted <b>${name}</b> robot."
+      "confirm": "❌ Deleting <b>#${code}</b> robot...\n\n⚠️ Are you sure you want to delete <b>#${code}</b> robot?\n\n You will lost all your trading history for this robot!",
+      "failed": "❌ Failed to delele robot #${code} - ${error}",
+      "success": "✅ Succesfully deleted <b>#${code}</b> robot."
     },
     "startUserRobot": {
-      "confirm": "🟢 Starting <b>${name}</b> robot...\n\n⚠️ Are you sure you want to start <b>${name}</b> robot now?\n\n It is a realtime trading mode using your exchange account.",
-      "failed": "❌ Failed to start robot ${name} - ${error}",
-      "success": "🟢 <b>${name}</b> robot is starting now..."
+      "confirm": "🟢 Starting <b>#${code}</b> robot...\n\n⚠️ Are you sure you want to start <b>#${code}</b> robot now?\n\n It is a realtime automated trading mode using your exchange account and you use it at your own risk!",
+      "failed": "❌ Failed to start robot #${code} - ${error}",
+      "success": "🟢 <b>#${code}</b> robot is starting now..."
     },
     "stopUserRobot": {
-      "confirm": "⛔ Stopping <b>${name}</b> robot...\n\n⚠️ Are you sure you want to stop <b>${name}</b> robot now?\n\n If there is any <b>open positions</b> created by this robot they will be <b>canceled</b> (closed) with current market prices and potentially may cause profit <b>losses</b>!",
-      "failed": "❌ Failed to stop robot ${name} - ${error}",
-      "success": "⛔ <b>${name}</b> robot is stopping now..."
+      "confirm": "⛔ Stopping <b>#${code}</b> robot...\n\n⚠️ Are you sure you want to stop <b>#${code}</b> robot now?\n\n If there is any <b>open positions</b> created by this robot they will be <b>canceled</b> (closed) with current market prices and potentially may cause profit <b>losses</b>!",
+      "failed": "❌ Failed to stop robot #${code} - ${error}",
+      "success": "⛔ <b>#${code}</b> robot is stopping now..."
     },
     "settings": {
       "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}\n\n${telegramSignalsNotif}\n${telegramTradingNotif}",
@@ -163,11 +165,11 @@
     }
   },
   "signal": {
-    "alert": "🚨 New Signal!\n\n🤖 Robot: <b>${name}</b>\n\n",
-    "trade": "🚨✅ New Signal Trade!\n\n🤖 Robot: <b>${name}</b>\n\n"
+    "alert": "🚨 New Signal!\n\n🤖 Robot: <b>#${code}</b>\n\n",
+    "trade": "🚨✅ New Signal Trade!\n\n🤖 Robot: <b>#${code}</b>\n\n"
   },
   "userTrade": {
-    "new": "🤖✅ New Robot Trade!\n\n🤖 Robot: <b>${name}</b>\n\n",
+    "new": "🤖✅ New Robot Trade!\n\n🤖 Robot: <b>#${code}</b>\n\n",
     "open": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n<b>Volume:</b> ${volume} ${asset}",
     "closed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Volume:</b> ${volume} ${asset}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n"
   },
@@ -176,8 +178,8 @@
     "menuPublStats": "📉 Public Statistics",
     "menuMyStats": "📈 My Statistics",
     "menuPositions": "🗃 Latest positions",
-    "name": "🤖\nRobot: <b>${name}</b> ${subscribed}\n\n",
-    "info": "🤖\nRobot: <b>${name}</b> ${subscribed}\n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
+    "name": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n\n",
+    "info": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
     "profit": "<b>Perfomance:</b> ${profit}$ / ${lastProfit}$\n\n",
     "volume": "<b>Volume:</b> ${volume} ${asset}\n\n",
     "subscribedAt": "<b>Subscribed at:</b> ${subscribedAt}\n\n",
@@ -187,7 +189,6 @@
     "status": "<b>Status:</b> ${status}\n",
     "userExAcc": "<b>Exchange API Key:</b> ${name}\n\n",
     "signals": "<b>Latest signals:</b>\n${signals}",
-    "currentSignals": "Robot <b>${name}</b> has active signals!\n${signals}",
     "signal": "<b>Position:</b> ${code}\n<b>Action:</b> ${action}\n<b>Order type:</b> ${orderType}\n<b>Signal time:</b> ${timestamp}\n<b>Price:</b> ${price}$\n",
     "signalsNone": "\n\nRobot hasn't current signals",
     "positionsOpen": "<b>📬 Open positions:</b> ${openPositions}",
@@ -196,7 +197,7 @@
     "positionsClosed": "<b>📪 Closed positions:</b> ${closedPositions}\n",
     "positionClosed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n",
     "positionsNone": "Robot has no positions yet...",
-    "statsLastUpdatedAt": "<b>Last updated at:</b> ${lastUpdatedAt}\n",
+    "statsLastUpdatedAt": "<b>Stats last updated at:</b> ${lastUpdatedAt}\n",
     "statsProfit": "<b>💰 Profit</b> \n\n<b>Net Profit:</b> ${netProfit.all} \n<b>Number of Trades:</b> ${tradesCount.all} \n<b>Average Profit:</b> ${avgNetProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeld.all} \n<b>Profit Factor:</b> ${profitFactor.all} \n<b>Recovery Factor:</b> ${recoveryFactor.all} \n<b>Payoff Ratio:</b> ${payoffRatio.all} \n<b>Maximum Drawdown:</b> ${maxDrawdown.all} \n<b>Maximum Drawdown Date:</b> ${maxDrawdownDate.all} \n\n",
     "statsWinners": "<b>🏆 Winners</b> \n\n<b>Win Rate:</b> ${winRate.all} \n<b>Gross Profit:</b> ${grossProfit.all} \n<b>Average Profit:</b> ${avgProfit.all} \n<b>Average Bars held:</b> ${avgBarsHeldWinning.all} \n<b>Max. Consecutive Winners:</b> ${maxConnsecWins.all} \n\n",
     "statsLosses": "<b>🌋 Losses</b> \n\n<b>Loss Rate:</b> ${lossRate.all} \n<b>Gross Loss:</b> ${grossLoss.all} \n<b>Average Loss:</b> ${avgLoss.all} \n<b>Average Bars held:</b> ${avgBarsHeldLosing.all} \n<b>Max. Consecutive Losses:</b> ${maxConsecLosses.all} \n\n",
@@ -229,9 +230,9 @@
     "error": "❌ Your API Key 🔐 ${name} is invalid!\n\n ${error}\n\nPlease update your API Key information in settings."
   },
   "userRobot": {
-    "error": "❌ Error occurred while processing robot job <b>${jobType}</b>.\n\n${error} \n\n🤖 <b>${name}</b> (${id})\n\n Please contact support.",
-    "orderError": "❌ Error occurred while processing order <b>${exId}</b>.\n\n${error} \n\n🤖 <b>${name}</b> (${id})\n\n Please check your API Keys and Robot settings or contact support.",
-    "status": "🤖 Robot <b>${name}</b> is ${status} now!\n\n${message}"
+    "error": "❌ Error occurred while processing robot job <b>${jobType}</b>.\n\n${error} \n\n🤖 <b>#${code}</b> (${id})\n\n Please contact support.",
+    "orderError": "❌ Error occurred while processing order <b>${exId}</b>.\n\n${error} \n\n🤖 <b>#${code}</b> (${id})\n\n Please check your API Keys and Robot settings or contact support.",
+    "status": "🤖 Robot <b>#${code}</b> is ${status} now!\n\n${message}"
   },
   "unknownError": "Unknown error",
   "menu": "Please use Menu in Telegram keyboard section ↘️",

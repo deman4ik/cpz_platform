@@ -598,6 +598,7 @@ class UserRobotsService extends Service {
     try {
       const query = `SELECT ur.id AS user_robot_id,
      r.id AS robot_id,
+     r.code,
      r.name,
      ur.status,
      u.id AS user_id,

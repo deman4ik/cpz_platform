@@ -191,15 +191,15 @@ class PublisherService extends Service {
       const signal: cpz.SignalEvent = <cpz.SignalEvent>notification.data;
 
       const { robotId, type, action } = signal;
-      const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      const { code } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
-        fields: ["id", "name"]
+        fields: ["id", "code"]
       });
 
       //TODO: Set lang from DB
       const LANG = "en";
       let message = "";
-      const robotInfo = this.i18n.t(LANG, `signal.${type}`, { name });
+      const robotInfo = this.i18n.t(LANG, `signal.${type}`, { code });
       const actionText = this.i18n.t(LANG, `tradeAction.${signal.action}`);
       const orderTypeText = this.i18n.t(LANG, `orderType.${signal.orderType}`);
 
@@ -292,7 +292,7 @@ class PublisherService extends Service {
     try {
       const { userRobotId, jobType, error } = notification.data;
 
-      const { name, telegramId } = await this.broker.call(
+      const { code, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -304,7 +304,7 @@ class PublisherService extends Service {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.error`, {
           id: userRobotId,
-          name: name,
+          code,
           jobType,
           error
         })
@@ -329,7 +329,7 @@ class PublisherService extends Service {
         status = cpz.Status.started;
       else throw new Error("Unknown Event Name");
 
-      const { name, telegramId } = await this.brokek.call(
+      const { code, telegramId } = await this.brokek.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -339,7 +339,7 @@ class PublisherService extends Service {
       return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.status`, {
-          name,
+          code,
           message: message || "",
           status
         })
@@ -368,7 +368,7 @@ class PublisherService extends Service {
         barsHeld,
         profit
       } = notification.data;
-      const { name, telegramId } = await this.broker.call(
+      const { code: robotCode, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -376,7 +376,7 @@ class PublisherService extends Service {
       );
       const LANG = "en";
       const info = this.i18n.t(LANG, "userTrade.new", {
-        name
+        code: robotCode
       });
       let tradeText;
       if (status === cpz.UserPositionStatus.open) {
@@ -417,7 +417,7 @@ class PublisherService extends Service {
   async handleOrderError(notification: cpz.Notification, user: cpz.User) {
     try {
       const { userRobotId, error, exId } = notification.data;
-      const { name, telegramId } = await this.broker.call(
+      const { code, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -428,7 +428,7 @@ class PublisherService extends Service {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.orderError`, {
           id: userRobotId,
-          name: name,
+          code,
           exId,
           error
         })

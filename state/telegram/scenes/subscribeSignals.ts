@@ -15,7 +15,7 @@ async function subscribeSignalsEnter(ctx: any) {
       ctx.scene.state.edit = false;
       return ctx.editMessageText(
         ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           asset: robotInfo.asset,
           minVolume: market.limits.amount.min
         }),
@@ -24,7 +24,7 @@ async function subscribeSignalsEnter(ctx: any) {
     }
     return ctx.reply(
       ctx.i18n.t("scenes.subscribeSignals.enterVolume", {
-        name: robotInfo.name,
+        code: robotInfo.code,
         asset: robotInfo.asset,
         minVolume: market.limits.amount.min
       }),
@@ -72,7 +72,7 @@ async function subscribeSignalsConfirm(ctx: any) {
       } = ctx.scene.state.selectedRobot;
       await ctx.reply(
         ctx.i18n.t("scenes.subscribeSignals.wrongVolume", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           asset: robotInfo.asset,
           minVolume: market.limits.amount.min
         }),
@@ -83,7 +83,7 @@ async function subscribeSignalsConfirm(ctx: any) {
 
     await ctx.reply(
       ctx.i18n.t("scenes.subscribeSignals.subscribedSignals", {
-        name: ctx.scene.state.selectedRobot.robotInfo.name,
+        code: ctx.scene.state.selectedRobot.robotInfo.code,
         volume,
         asset: ctx.scene.state.selectedRobot.robotInfo.asset
       }),

@@ -31,7 +31,7 @@ async function stopUserRobotEnter(ctx: any) {
 
     return ctx.reply(
       ctx.i18n.t("scenes.stopUserRobot.confirm", {
-        name: robotInfo.name
+        code: robotInfo.code
       }),
       getConfirmMenu(ctx)
     );
@@ -62,7 +62,7 @@ async function stopUserRobotYes(ctx: any) {
     if (error) {
       await ctx.reply(
         ctx.i18n.t("scenes.stopUserRobot.failed", {
-          name: robotInfo.name,
+          code: robotInfo.code,
           error
         }),
         Extra.HTML()
@@ -73,7 +73,7 @@ async function stopUserRobotYes(ctx: any) {
 
     await ctx.reply(
       ctx.i18n.t("scenes.stopUserRobot.success", {
-        name: ctx.scene.state.selectedRobot.robotInfo.name
+        code: ctx.scene.state.selectedRobot.robotInfo.code
       }),
       Extra.HTML()
     );
