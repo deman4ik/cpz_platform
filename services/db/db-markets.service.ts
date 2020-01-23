@@ -4,13 +4,15 @@ import SqlAdapter from "../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../@types";
 import Auth from "../../mixins/auth";
+import RedisLock from "../../mixins/redislock";
+import cron from "node-cron";
 
 class MarketsService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_MARKETS,
-      mixins: [Auth, DbService],
+      mixins: [Auth, DbService, RedisLock()],
       adapter: SqlAdapter,
       model: {
         name: "markets",
@@ -43,8 +45,55 @@ class MarketsService extends Service {
           },
           handler: this.upsert
         }
-      }
+      },
+      started: this.startedService,
+      stopped: this.stoppedService
     });
+  }
+
+  cronTask: cron.ScheduledTask = cron.schedule(
+    "0 0 * * * *",
+    this.updateMarkets.bind(this),
+    {
+      scheduled: false
+    }
+  );
+
+  async startedService() {
+    this.cronTask.start();
+  }
+
+  async stoppedService() {
+    this.cronTask.stop();
+  }
+
+  async updateMarkets() {
+    try {
+      this.logger.info("Updating Markets");
+      const lock = await this.createLock();
+      await lock.acquire(cpz.cronLock.MARKETS_UPDATE);
+
+      let timerId = setTimeout(async function tick() {
+        await lock.extend(10000);
+        timerId = setTimeout(tick, 9000);
+      }, 19000);
+      const markets: cpz.Market[] = await this.adapter.find({
+        query: {
+          available: { $gte: 5 }
+        }
+      });
+      for (const { exchange, asset, currency } of markets) {
+        this.logger.info(`Updating Market ${exchange} ${asset}/${currency}`);
+        await this.actions.upsert({ exchange, asset, currency });
+      }
+
+      clearInterval(timerId);
+      await lock.release();
+      this.logger.info("Markets updated!");
+    } catch (e) {
+      if (e instanceof this.LockAcquisitionError) return;
+      this.logger.error(e);
+    }
   }
 
   async upsert(
