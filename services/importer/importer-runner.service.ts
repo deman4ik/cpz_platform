@@ -197,7 +197,8 @@ class ImporterRunnerService extends Service {
         currency: ctx.params.currency,
         type: "recent",
         params: {
-          timeframes: ctx.params.timeframes || Timeframe.validArray,
+          timeframes:
+            ctx.params.timeframes || Timeframe.validArray.filter(t => t > 1),
           amount: ctx.params.amount || CANDLES_RECENT_AMOUNT
         },
         status: cpz.Status.queued
@@ -264,7 +265,8 @@ class ImporterRunnerService extends Service {
         currency: ctx.params.currency,
         type: "history",
         params: {
-          timeframes: ctx.params.timeframes || Timeframe.validArray,
+          timeframes:
+            ctx.params.timeframes || Timeframe.validArray.filter(t => t > 1),
           dateFrom,
           dateTo: ctx.params.dateTo
         },
