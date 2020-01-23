@@ -7,12 +7,10 @@ import Scene from "telegraf/scenes/base";
 import TelegrafI18n, { match, reply } from "telegraf-i18n";
 import Session from "telegraf-session-redis";
 import path from "path";
-import cron from "node-cron";
 import {
   getMainKeyboard,
   getBackKeyboard
 } from "../../state/telegram/keyboard";
-import { sleep } from "../../utils/helpers";
 
 import {
   addUserExAccEnter,
@@ -105,6 +103,9 @@ import {
   subscribeSignalsConfirm,
   subscribeSignalsBack,
   subscribeSignalsLeave,
+  supportEnter,
+  supportMessage,
+  supportLeave,
   topSignalsEnter,
   topSignalsSelectRobot,
   topSignalsOpenRobot,
@@ -170,25 +171,8 @@ class BotService extends Service {
       actions: {
         sendMessage: {
           params: {
-            entity: {
-              type: "object",
-              props: {
-                telegramId: "number",
-                message: "string"
-              },
-              optional: true
-            },
-            entities: {
-              type: "array",
-              items: {
-                type: "object",
-                props: {
-                  telegramId: "number",
-                  message: "string"
-                }
-              },
-              optional: true
-            }
+            telegramId: "number",
+            message: "string"
           },
           handler: this.sendMessage
         }
@@ -196,41 +180,16 @@ class BotService extends Service {
     });
   }
 
-  cronJobs: cron.ScheduledTask = cron.schedule(
-    "*/5 * * * * *",
-    this.sendMessages.bind(this),
-    {
-      scheduled: false
-    }
-  );
-
-  sendMessage(
-    ctx: Context<{
-      entity: cpz.TelegramMessage;
-      entities: cpz.TelegramMessage[];
-    }>
-  ) {
-    const { entity, entities } = ctx.params;
-    if (entity) this.messages.push(entity);
-    else if (entities && Array.isArray(entities) && entities.length > 0)
-      this.messages = [...this.messages, ...entities];
-  }
-
-  async sendMessages() {
-    if (this.messages.length > 0) {
-      const msgs = [...this.messages];
-      this.messages.splice(0, msgs.length);
-      for (const { telegramId, message } of msgs) {
-        try {
-          await this.bot.telegram.sendMessage(telegramId, message, {
-            parse_mode: "HTML"
-          });
-          await sleep(100);
-        } catch (err) {
-          this.logger.error(err);
-          this.blockHandler(telegramId, err.response);
-        }
-      }
+  async sendMessage(ctx: Context<cpz.TelegramMessage>) {
+    const { telegramId, message } = ctx.params;
+    try {
+      await this.bot.telegram.sendMessage(telegramId, message, {
+        parse_mode: "HTML"
+      });
+      return { success: true };
+    } catch (err) {
+      this.logger.error(err);
+      return this.blockHandler(telegramId, err.response);
     }
   }
 
@@ -503,6 +462,15 @@ class BotService extends Service {
     subscribeSignalsScene.command("menu", leave());
     subscribeSignalsScene.hears(/(.*?)/, subscribeSignalsConfirm.bind(this));
 
+    const supportScene = new Scene(cpz.TelegramScene.SUPPORT);
+    supportScene.enter(supportEnter.bind(this));
+    supportScene.leave(supportLeave.bind(this));
+    supportScene.hears(match("keyboards.backKeyboard.back"), leave());
+    supportScene.hears(match("keyboards.backKeyboard.menu"), leave());
+    supportScene.command("back", leave());
+    supportScene.command("menu", leave());
+    supportScene.hears(/(.*?)/, supportMessage.bind(this));
+
     const topRobotsScene = new Scene(cpz.TelegramScene.TOP_ROBOTS);
     topRobotsScene.enter(topRobotsEnter.bind(this));
     topRobotsScene.leave(topRobotsLeave.bind(this));
@@ -599,6 +567,7 @@ class BotService extends Service {
       startUserRobotScene,
       stopUserRobotScene,
       subscribeSignalsScene,
+      supportScene,
       topRobotsScene,
       topSignalsScene,
       userExAccScene,
@@ -644,7 +613,6 @@ class BotService extends Service {
       if (process.env.NODE_ENV === "production") {
         await this.bot.telegram.setWebhook(process.env.BOT_HOST);
         await this.bot.startWebhook("/", null, 5000);
-        this.cronJobs.start();
         this.logger.warn("Bot in production mode!");
       } else if (
         process.env.NODE_ENV === "dev" ||
@@ -652,7 +620,6 @@ class BotService extends Service {
       ) {
         await this.bot.telegram.deleteWebhook();
         await this.bot.startPolling();
-        this.cronJobs.start();
         this.logger.warn("Bot in development mode!");
       } else {
         this.logger.warn("Bot not started!");
@@ -664,7 +631,6 @@ class BotService extends Service {
   }
 
   async stoppedService() {
-    this.cronJobs.stop();
     this.bot.stop();
   }
 
@@ -769,10 +735,14 @@ class BotService extends Service {
               tradingTelegram: false
             }
           );
+          //TODO: set sentTelegram in notifications to false
         }
+        return { success: true };
       }
+      return { success: false };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 

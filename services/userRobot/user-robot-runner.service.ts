@@ -7,6 +7,7 @@ import QueueService from "moleculer-bull";
 import dayjs from "../../lib/dayjs";
 import Auth from "../../mixins/auth";
 import cron from "node-cron";
+import RedisLock from "../../mixins/redislock";
 //import retry from "async-retry";
 
 class UserRobotRunnerService extends Service {
@@ -23,6 +24,7 @@ class UserRobotRunnerService extends Service {
       ],
       mixins: [
         Auth,
+        RedisLock(),
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
@@ -165,7 +167,7 @@ class UserRobotRunnerService extends Service {
           });
         });
       }
-      await lock.release(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
+      await lock.release();
     } catch (e) {
       if (e instanceof this.LockAcquisitionError) return;
       this.logger.error(e);

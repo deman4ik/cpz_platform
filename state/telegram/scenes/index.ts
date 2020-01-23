@@ -16,6 +16,7 @@ export * from "./signals";
 export * from "./startUserRobot";
 export * from "./stopUserRobot";
 export * from "./subscribeSignals";
+export * from "./support";
 export * from "./topSignals";
 export * from "./topRobots";
 export * from "./userExAcc";

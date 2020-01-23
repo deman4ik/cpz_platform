@@ -2,9 +2,10 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import path from "path";
 import TelegrafI18n from "telegraf-i18n";
 import { cpz } from "../@types";
-import Auth from "../mixins/auth";
 import dayjs from "../lib/dayjs";
 import { round } from "../utils/helpers";
+import cron from "node-cron";
+import RedisLock from "../mixins/redislock";
 
 class PublisherService extends Service {
   constructor(broker: ServiceBroker) {
@@ -12,6 +13,7 @@ class PublisherService extends Service {
 
     this.parseServiceSchema({
       name: cpz.Service.PUBLISHER,
+      mixins: [RedisLock()],
       dependencies: [
         cpz.Service.TELEGRAM_BOT,
         cpz.Service.DB_USERS,
@@ -20,33 +22,9 @@ class PublisherService extends Service {
         cpz.Service.DB_ROBOT_POSITIONS,
         cpz.Service.DB_USER_SIGNALS
       ],
-      mixins: [Auth],
       created: this.createdService,
-      actions: {
-        broadcastMessage: {
-          params: {
-            userId: { type: "string", optional: true },
-            message: "string"
-          },
-          roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: "authAction"
-          },
-          handler: this.broadcastMessage
-        }
-      },
-      events: {
-        [cpz.Event.SIGNAL_ALERT]: this.handleSignal,
-        [cpz.Event.SIGNAL_TRADE]: this.handleSignal,
-        [cpz.Event.USER_EX_ACC_ERROR]: this.handleUserExAccError,
-        [cpz.Event.USER_ROBOT_FAILED]: this.handleUserRobotFailed,
-        [cpz.Event.USER_ROBOT_STARTED]: this.handleUserRobotStatus,
-        [cpz.Event.USER_ROBOT_STOPPED]: this.handleUserRobotStatus,
-        [cpz.Event.USER_ROBOT_PAUSED]: this.handleUserRobotStatus,
-        [cpz.Event.USER_ROBOT_RESUMED]: this.handleUserRobotStatus,
-        [cpz.Event.USER_ROBOT_TRADE]: this.handleUserRobotTrade,
-        [cpz.Event.ORDER_ERROR]: this.handleOrderError
-      }
+      started: this.startedService,
+      stopped: this.stoppedService
     });
   }
 
@@ -59,17 +37,44 @@ class PublisherService extends Service {
     });
   }
 
-  async broadcastMessage(ctx: Context<{ userId: string; message: string }>) {
+  async startedService() {
+    this.cronJobs.start();
+  }
+  async stoppedService() {
+    this.cronJobs.stop();
+  }
+
+  cronJobs: cron.ScheduledTask = cron.schedule(
+    "*/5 * * * * *",
+    this.checkTelegramNotifications.bind(this),
+    {
+      scheduled: false
+    }
+  );
+
+  async checkTelegramNotifications() {
     try {
-      const users: number[] = [];
-      if (ctx.params.userId) {
-        const { telegramId } = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
-          id: ctx.params.userId
-        });
-        if (telegramId) users.push(telegramId);
-      } else {
-        const userslist = await ctx.call<
-          { id: string; telegramId: number }[],
+      const lock = await this.createLock(4000);
+      await lock.acquire(cpz.cronLock.PUBLISHER_SEND_TELEGRAM);
+      let timerId = setTimeout(async function tick() {
+        await lock.extend(4000);
+        timerId = setTimeout(tick, 3000);
+      }, 3000);
+      const notifications: cpz.Notification[] = await this.broker.call(
+        `${cpz.Service.DB_NOTIFICATIONS}.find`,
+        {
+          query: {
+            sendTelegram: true
+          },
+          sort: "timestamp"
+        }
+      );
+
+      for (const notification of notifications) {
+        const { type, userId } = notification;
+
+        const [user] = await this.broker.call<
+          cpz.User[],
           {
             fields: string[];
             query: { [key: string]: any };
@@ -77,223 +82,216 @@ class PublisherService extends Service {
         >(`${cpz.Service.DB_USERS}.find`, {
           fields: ["id", "telegramId"],
           query: {
+            id: userId,
             status: { $gt: 0 },
             telegramId: { $ne: null }
           }
         });
-        userslist.forEach(({ telegramId }) => {
-          users.push(telegramId);
-        });
+
+        let result: { success: boolean; error?: string };
+        if (user && user.telegramId) {
+          switch (type) {
+            case cpz.Event.SIGNAL_ALERT:
+              result = await this.handleSignal(notification, user);
+              break;
+            case cpz.Event.SIGNAL_TRADE:
+              result = await this.handleSignal(notification, user);
+              break;
+            case cpz.Event.USER_EX_ACC_ERROR:
+              result = await this.handleUserExAccError(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_FAILED:
+              result = await this.handleUserRobotFailed(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_STARTED:
+              result = await this.handleUserRobotStatus(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_STOPPED:
+              result = await this.handleUserRobotStatus(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_PAUSED:
+              result = await this.handleUserRobotStatus(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_RESUMED:
+              result = await this.handleUserRobotStatus(notification, user);
+              break;
+            case cpz.Event.USER_ROBOT_TRADE:
+              result = await this.handleUserRobotTrade(notification, user);
+              break;
+            case cpz.Event.ORDER_ERROR:
+              result = await this.handleOrderError(notification, user);
+              break;
+            case cpz.Event.MESSAGE_SUPPORT_REPLY:
+              result = await this.handleMessageSupportReply(notification, user);
+              break;
+            case cpz.Event.MESSAGE_BROADCAST:
+              result = await this.handleBroadcastMessage(notification, user);
+              break;
+            default:
+              continue;
+          }
+        } else {
+          result = { success: true };
+        }
+        this.logger.info(result);
+        if (result && result.success) {
+          await this.broker.call(`${cpz.Service.DB_NOTIFICATIONS}.update`, {
+            id: notification.id,
+            sendTelegram: false
+          });
+        }
       }
 
-      const entities = users.map(id => ({
-        telegramId: id,
-        message: ctx.params.message
-      }));
-
-      await ctx.call<
-        cpz.TelegramMessage,
-        {
-          entities: {
-            telegramId: number;
-            message: string;
-          }[];
-        }
-      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
-        entities
-      });
+      clearInterval(timerId);
+      await lock.release();
     } catch (e) {
+      if (e instanceof this.LockAcquisitionError) return;
       this.logger.error(e);
-      throw e;
     }
   }
 
-  async handleSignal(ctx: Context<cpz.SignalEvent>) {
+  async handleBroadcastMessage(notification: cpz.Notification, user: cpz.User) {
     try {
-      const signal = ctx.params;
+      const {
+        data: { message }
+      } = notification;
+
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId: user.telegramId,
+        message
+      });
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async handleMessageSupportReply(
+    notification: cpz.Notification,
+    user: cpz.User
+  ) {
+    try {
+      const {
+        data: { message }
+      } = notification;
+      const LANG = "en";
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId: user.telegramId,
+        message: this.i18n.t(LANG, "scenes.support.reply", { message })
+      });
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async handleSignal(notification: cpz.Notification, user: cpz.User) {
+    try {
+      const signal: cpz.SignalEvent = <cpz.SignalEvent>notification.data;
 
       const { robotId, type, action } = signal;
-      const { name } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
+      const { name } = await this.broker.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id: robotId,
         fields: ["id", "name"]
       });
 
-      const subscriptions: {
-        telegramId: number;
-        userId: string;
-        volume: number;
-        subscribedAt: string;
-      }[] = await ctx.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
-        {
-          robotId
-        }
-      );
+      //TODO: Set lang from DB
+      const LANG = "en";
+      let message = "";
+      const robotInfo = this.i18n.t(LANG, `signal.${type}`, { name });
+      const actionText = this.i18n.t(LANG, `tradeAction.${signal.action}`);
+      const orderTypeText = this.i18n.t(LANG, `orderType.${signal.orderType}`);
 
-      if (
-        subscriptions &&
-        Array.isArray(subscriptions) &&
-        subscriptions.length > 0
-      ) {
-        //TODO: Set lang from DB
-        const LANG = "en";
-        let entities: { telegramId: number; message: string }[] = [];
-        let message = "";
-        const robotInfo = this.i18n.t(LANG, `signal.${type}`, { name });
-        const actionText = this.i18n.t(LANG, `tradeAction.${signal.action}`);
-        const orderTypeText = this.i18n.t(
-          LANG,
-          `orderType.${signal.orderType}`
-        );
+      if (type === cpz.SignalType.alert) {
+        const signalText = this.i18n.t(LANG, "robot.signal", {
+          code: signal.positionCode,
+          timestamp: dayjs.utc(signal.timestamp).format("YYYY-MM-DD HH:mm UTC"),
+          action: actionText,
+          orderType: orderTypeText,
+          price: +signal.price
+        });
 
-        if (type === cpz.SignalType.alert) {
-          const signalText = this.i18n.t(LANG, "robot.signal", {
+        message = `${robotInfo}${signalText}`;
+      } else {
+        let tradeText = "";
+
+        if (
+          action === cpz.TradeAction.closeLong ||
+          action === cpz.TradeAction.closeShort
+        ) {
+          const position: cpz.RobotPositionState = await this.broker.call(
+            `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
+            {
+              id: signal.positionId
+            }
+          );
+
+          tradeText = this.i18n.t(LANG, "robot.positionClosed", {
             code: signal.positionCode,
-            timestamp: dayjs
+            entryAction: this.i18n.t(
+              LANG,
+              `tradeAction.${position.entryAction}`
+            ),
+            entryPrice: position.entryPrice,
+            entryDate: dayjs
+              .utc(position.entryDate)
+              .format("YYYY-MM-DD HH:mm UTC"),
+            exitAction: actionText,
+            exitPrice: +signal.price,
+            exitDate: dayjs
               .utc(signal.timestamp)
               .format("YYYY-MM-DD HH:mm UTC"),
-            action: actionText,
-            orderType: orderTypeText,
-            price: +signal.price
+            barsHeld: position.barsHeld,
+            profit: signal.profit
           });
-
-          message = `${robotInfo}${signalText}`;
-          entities = subscriptions
-            .filter(
-              sub =>
-                dayjs.utc(signal.candleTimestamp).valueOf() >=
-                dayjs.utc(sub.subscribedAt).valueOf()
-            )
-            .map(sub => ({
-              telegramId: sub.telegramId,
-              message
-            }));
         } else {
-          let tradeText = "";
-
-          if (
-            action === cpz.TradeAction.closeLong ||
-            action === cpz.TradeAction.closeShort
-          ) {
-            const position: cpz.RobotPositionState = await ctx.call(
-              `${cpz.Service.DB_ROBOT_POSITIONS}.get`,
-              {
-                id: signal.positionId
-              }
-            );
-            entities = subscriptions
-              .filter(
-                sub =>
-                  dayjs.utc(position.entryDate).valueOf() >=
-                  dayjs.utc(sub.subscribedAt).valueOf()
-              )
-              .map(sub => {
-                let profit: number = 0;
-                if (position.direction === cpz.PositionDirection.long) {
-                  profit = +round(
-                    (position.exitPrice - position.entryPrice) * sub.volume,
-                    6
-                  );
-                } else {
-                  profit = +round(
-                    (position.entryPrice - position.exitPrice) * sub.volume,
-                    6
-                  );
-                }
-                tradeText = this.i18n.t(LANG, "robot.positionClosed", {
-                  code: signal.positionCode,
-                  entryAction: this.i18n.t(
-                    LANG,
-                    `tradeAction.${position.entryAction}`
-                  ),
-                  entryPrice: position.entryPrice,
-                  entryDate: dayjs
-                    .utc(position.entryDate)
-                    .format("YYYY-MM-DD HH:mm UTC"),
-                  exitAction: actionText,
-                  exitPrice: +signal.price,
-                  exitDate: dayjs
-                    .utc(signal.timestamp)
-                    .format("YYYY-MM-DD HH:mm UTC"),
-                  barsHeld: position.barsHeld,
-                  profit: profit
-                });
-                return {
-                  telegramId: sub.telegramId,
-                  message: `${robotInfo}${tradeText}`
-                };
-              });
-          } else {
-            tradeText = this.i18n.t(LANG, "robot.positionOpen", {
-              code: signal.positionCode,
-              entryAction: actionText,
-              entryPrice: +signal.price,
-              entryDate: dayjs
-                .utc(signal.timestamp)
-                .format("YYYY-MM-DD HH:mm UTC")
-            });
-            message = `${robotInfo}${tradeText}`;
-            entities = subscriptions.map(sub => ({
-              telegramId: sub.telegramId,
-              message
-            }));
-          }
-        }
-
-        if (entities.length > 0)
-          await ctx.call<
-            cpz.TelegramMessage,
-            {
-              entities: {
-                telegramId: number;
-                message: string;
-              }[];
-            }
-          >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
-            entities
+          tradeText = this.i18n.t(LANG, "robot.positionOpen", {
+            code: signal.positionCode,
+            entryAction: actionText,
+            entryPrice: +signal.price,
+            entryDate: dayjs
+              .utc(signal.timestamp)
+              .format("YYYY-MM-DD HH:mm UTC")
           });
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
-  }
-
-  async handleUserExAccError(ctx: Context<cpz.UserExchangeAccountErrorEvent>) {
-    try {
-      const { userId, name, error } = ctx.params;
-      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
-        fields: ["id", "telegramId", "settings"],
-        id: userId
-      });
-      const LANG = "en";
-      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-        {
-          entity: {
-            telegramId: user.telegramId,
-            message: this.i18n.t(LANG, `userExAcc.error`, {
-              name,
-              error
-            })
-          }
+          message = `${robotInfo}${tradeText}`;
         }
-      );
+      }
+
+      return await this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId: user.telegramId,
+        message
+      });
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
-  async handleUserRobotFailed(
-    ctx: Context<{
-      userRobotId: string;
-      jobType: cpz.UserRobotJobType;
-      error: string;
-    }>
-  ) {
+  async handleUserExAccError(notification: cpz.Notification, user: cpz.User) {
     try {
-      const { userRobotId, jobType, error } = ctx.params;
+      const { name, error } = <cpz.UserExchangeAccountErrorEvent>(
+        notification.data
+      );
 
-      const { name, telegramId } = await ctx.call(
+      const LANG = "en";
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId: user.telegramId,
+        message: this.i18n.t(LANG, `userExAcc.error`, {
+          name,
+          error
+        })
+      });
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async handleUserRobotFailed(notification: cpz.Notification, user: cpz.User) {
+    try {
+      const { userRobotId, jobType, error } = notification.data;
+
+      const { name, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -301,70 +299,57 @@ class PublisherService extends Service {
       );
 
       const LANG = "en";
-      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-        {
-          entity: {
-            telegramId,
-            message: this.i18n.t(LANG, `userRobot.error`, {
-              id: userRobotId,
-              name: name,
-              jobType,
-              error
-            })
-          }
-        }
-      );
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId,
+        message: this.i18n.t(LANG, `userRobot.error`, {
+          id: userRobotId,
+          name: name,
+          jobType,
+          error
+        })
+      });
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
-  async handleUserRobotStatus(
-    ctx: Context<{
-      userRobotId: string;
-      message?: string;
-    }>
-  ) {
+  async handleUserRobotStatus(notification: cpz.Notification, user: cpz.User) {
     try {
-      const { userRobotId, message } = ctx.params;
+      const { userRobotId, message } = notification.data;
       let status: cpz.Status;
-      if (ctx.eventName === cpz.Event.USER_ROBOT_STARTED)
+      if (notification.type === cpz.Event.USER_ROBOT_STARTED)
         status = cpz.Status.started;
-      else if (ctx.eventName === cpz.Event.USER_ROBOT_STOPPED)
+      else if (notification.type === cpz.Event.USER_ROBOT_STOPPED)
         status = cpz.Status.stopped;
-      else if (ctx.eventName === cpz.Event.USER_ROBOT_PAUSED)
+      else if (notification.type === cpz.Event.USER_ROBOT_PAUSED)
         status = cpz.Status.paused;
-      else if (ctx.eventName === cpz.Event.USER_ROBOT_RESUMED)
+      else if (notification.type === cpz.Event.USER_ROBOT_RESUMED)
         status = cpz.Status.started;
       else throw new Error("Unknown Event Name");
 
-      const { name, telegramId } = await ctx.call(
+      const { name, telegramId } = await this.brokek.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
         }
       );
       const LANG = "en";
-      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-        {
-          entity: {
-            telegramId,
-            message: this.i18n.t(LANG, `userRobot.status`, {
-              name,
-              message: message || "",
-              status
-            })
-          }
-        }
-      );
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId,
+        message: this.i18n.t(LANG, `userRobot.status`, {
+          name,
+          message: message || "",
+          status
+        })
+      });
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
-  async handleUserRobotTrade(ctx: Context<cpz.UserTradeEventData>) {
+  async handleUserRobotTrade(notification: cpz.Notification, user: cpz.User) {
     try {
       const {
         status,
@@ -381,8 +366,8 @@ class PublisherService extends Service {
         exitExecuted,
         barsHeld,
         profit
-      } = ctx.params;
-      const { name, telegramId } = await ctx.call(
+      } = notification.data;
+      const { name, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -418,46 +403,38 @@ class PublisherService extends Service {
         });
       }
 
-      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-        {
-          entity: {
-            telegramId,
-            message: `${info}${tradeText}`
-          }
-        }
-      );
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId,
+        message: `${info}${tradeText}`
+      });
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
-  async handleOrderError(ctx: Context<cpz.Order>) {
+  async handleOrderError(notification: cpz.Notification, user: cpz.User) {
     try {
-      const { userRobotId, error, exId } = ctx.params;
-      const { name, telegramId } = await ctx.call(
+      const { userRobotId, error, exId } = notification.data;
+      const { name, telegramId } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
         }
       );
       const LANG = "en";
-      await ctx.call<Promise<void>, { entity: cpz.TelegramMessage }>(
-        `${cpz.Service.TELEGRAM_BOT}.sendMessage`,
-        {
-          entity: {
-            telegramId,
-            message: this.i18n.t(LANG, `userRobot.orderError`, {
-              id: userRobotId,
-              name: name,
-              exId,
-              error
-            })
-          }
-        }
-      );
+      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+        telegramId,
+        message: this.i18n.t(LANG, `userRobot.orderError`, {
+          id: userRobotId,
+          name: name,
+          exId,
+          error
+        })
+      });
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 }

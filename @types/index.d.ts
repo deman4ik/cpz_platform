@@ -34,6 +34,8 @@ declare namespace cpz {
     DB_USER_AGGR_STATS = "db-user-aggr-stats",
     DB_CONNECTOR_JOBS = "db-connector-jobs",
     DB_MARKETS = "db-markets",
+    DB_MESSAGES = "db-messages",
+    DB_NOTIFICATIONS = "db-notifications",
     EXWATCHER = "exwatcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
@@ -96,7 +98,10 @@ declare namespace cpz {
     STATS_CALC_USER_ROBOT = "stats-calc.user-robot",
     STATS_CALC_USER_ROBOTS = "stats-calc.user-robots",
     STATS_CALC_USER_SIGNAL = "stats-calc.user-signal",
-    STATS_CALC_USER_SIGNALS = "stats-calc.user-signals"
+    STATS_CALC_USER_SIGNALS = "stats-calc.user-signals",
+    MESSAGE_SUPPORT = "message.support",
+    MESSAGE_SUPPORT_REPLY = "message.support-reply",
+    MESSAGE_BROADCAST = "message.broadcast"
   }
 
   const enum Status {
@@ -146,7 +151,8 @@ declare namespace cpz {
 
   const enum cronLock {
     PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS = "cron:private-connector-runner:check-orders",
-    USER_ROBOT_RUNNER_CHECK_JOBS = "cron:user-robot-runner:check-jobs"
+    USER_ROBOT_RUNNER_CHECK_JOBS = "cron:user-robot-runner:check-jobs",
+    PUBLISHER_SEND_TELEGRAM = "cron:publisher:send-telegram"
   }
 
   const enum ExwatcherStatus {
@@ -505,6 +511,7 @@ declare namespace cpz {
     currency: string;
     timeframe: Timeframe;
     timestamp: string;
+    profit?: number; //TODO: move to new event
   }
 
   interface StatsCalcRobotEvent {
@@ -1171,5 +1178,28 @@ declare namespace cpz {
   interface TelegramMessage {
     telegramId: number;
     message: string;
+  }
+
+  interface Message {
+    id: string;
+    timestamp: string;
+    from: string;
+    to?: string;
+    data: GenericObject<any>;
+  }
+
+  interface Notification {
+    id: string;
+    timestamp: string;
+    userId: string;
+    robotId?: string;
+    userRobotId?: string;
+    positionId?: string;
+    userPositionId?: string;
+    type: Event;
+    data: GenericObject<any>;
+    sendTelegram: boolean;
+    sendEmail: boolean;
+    readed: boolean;
   }
 }

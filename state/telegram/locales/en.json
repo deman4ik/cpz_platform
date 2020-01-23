@@ -37,7 +37,7 @@
     "mySignals": {
       "robotsList": "🚥 Robot signals you subscribed to:",
       "robotsNone": "🚥 You are not subscribed to any signals.",
-      "add": "☑️ Add Signals"
+      "add": "✅ Add Signals"
     },
     "perfSignals": {
       "info": "📊 My Signals Total Perfomance",
@@ -64,7 +64,7 @@
     "myRobots": {
       "robotsList": "🤖 My Robots:",
       "robotsNone": "🤖 You have not added any robots.",
-      "add": "☑️ Add Robots"
+      "add": "✅ Add Robots"
     },
     "perfRobots": {
       "info": "📊 My trading Robots Total Perfomance",
@@ -80,18 +80,18 @@
       "selectRobot": "🏆 Top Perfomance Robots"
     },
     "userRobot": {
-      "add": "☑️ Add Robot",
+      "add": "✅ Add Robot",
       "delete": "❌ Delete Robot",
       "edit": "⚙️ Edit Trading Volume",
       "start": "🟢 Start Robot",
       "stop": "⛔ Stop Robot"
     },
     "addUserRobot": {
-      "selectExAcc": "☑️ Adding robot ${name}.\n\nSelect your ${exchange} API Key:",
-      "noneExAccs": "☑️ Adding robot ${name}.\n\nYou have not registered any ${exchange} API Keys.",
-      "enterVolume": "☑️ Adding robot ${name}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "☑️ Adding robot ${name}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "☑️ Succesfully added <b>${name}</b> robot with trading volume ${volume} ${asset}!"
+      "selectExAcc": "✅ Adding robot ${name}.\n\nSelect your ${exchange} API Key:",
+      "noneExAccs": "✅ Adding robot ${name}.\n\nYou have not registered any ${exchange} API Keys.",
+      "enterVolume": "✅ Adding robot ${name}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "✅ Adding robot ${name}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "✅ Succesfully added <b>${name}</b> robot with trading volume ${volume} ${asset}!"
     },
     "editUserRobot": {
       "enterVolume": "⚙️ Editing robot ${name} settings.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
@@ -114,11 +114,15 @@
       "success": "⛔ <b>${name}</b> robot is stopping now..."
     },
     "settings": {
-      "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}",
+      "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}\n\n${telegramSignalsNotif}\n\n${telegramTradingNotif}",
       "emailNotSet": "Not set",
       "setEmail": "📨 Set Email",
       "changeEmail": "📨 Change Email",
       "userExAccs": "🔐 My Exchange API Keys",
+      "telegramSingalsNotifOn": "🚦 Telegram signals notifications is <b>ON</b> 🔔",
+      "telegramSingalsNotifOff": "🚦 Telegram signals notifications is <b>OFF</b> 🔕",
+      "TelegramTradingNotifOn": "🤖 Telegram trading notifications ON 🔔",
+      "TelegramTradingNotifOff": "🤖 Telegram trading notifications OFF 🔕",
       "turnTelegramSignalsNotifOff": "🚦 Turn Telegram signals notifications OFF 🔕",
       "turnTelegramSignalsNotifOn": "🚦 Turn Telegram signals notifications ON 🔔",
       "turnTelegramTradingNotifOff": "🤖 Turn Telegram trading notifications OFF 🔕",
@@ -148,6 +152,14 @@
       "delete": "❌ Delete",
       "deleteSuccess": "🔑 ${name} API Key deleted successfully",
       "deleteFailed": "❌ Failed to delete ${name} API Key.\n\n<b>${error}</b>\n\nPlease try again!"
+    },
+    "support": {
+      "info1": "❓Support\n\n📃 You can learn all about Cryptuoso Platform, how to use and configure signals, robots and exchange accounts in our <a href='https://support.cryptuoso.com'>Documentation site</a>.\n\n",
+      "info2": "❓Having common questions with signals or robots? Ask it in our <a href='https://t.me/joinchat/ACVS-0zaWVBgAYm8gOKYHA'>Telegram Community</a> and we will help you.\n\n",
+      "info3": "❗️Have a personal problem regarding connecting an exchange or billing? You can reach us at <a href='maulto:support@cruptuoso.com'>support@cruptuoso.com</a>.",
+      "info4": "Also you can <b>type and send your message right now ⬇️ to this bot</b>\n\n(works only while you in Support section)",
+      "success": "✅ Your support request have been received.\n\nIf you have any additional information regarding your issue\n\n you can use <b>❓Support</b> section again!",
+      "reply": "❓New Message from <b>Support Team</b>:\n\n${message}\n\nYou can reply to us in <b>❓Support</b> section."
     }
   },
   "signal": {

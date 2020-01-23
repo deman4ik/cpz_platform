@@ -1,6 +1,7 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import socketio from "socket.io-client";
 import cron from "node-cron";
+import RedisLock from "../mixins/redislock";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../@types";
 import dayjs from "../lib/dayjs";
@@ -24,7 +25,7 @@ class ExwatcherService extends Service {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.EXWATCHER,
-      mixins: [Auth],
+      mixins: [Auth, RedisLock()],
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
@@ -360,13 +361,14 @@ class ExwatcherService extends Service {
         this.socket.connect();
         return;
       }
-      const pendingSubscriptions = Object.values(this.subscriptions).filter(
-        ({ status }) =>
-          [
-            cpz.ExwatcherStatus.pending,
-            cpz.ExwatcherStatus.unsubscribed,
-            cpz.ExwatcherStatus.failed
-          ].includes(status)
+      const pendingSubscriptions = Object.values(
+        this.subscriptions
+      ).filter(({ status }) =>
+        [
+          cpz.ExwatcherStatus.pending,
+          cpz.ExwatcherStatus.unsubscribed,
+          cpz.ExwatcherStatus.failed
+        ].includes(status)
       );
       if (pendingSubscriptions.length > 0)
         await Promise.all(

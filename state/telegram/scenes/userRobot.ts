@@ -494,7 +494,7 @@ async function userRobotStart(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.START_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false }
+      prevState: { ...ctx.scene.state, silent: false, reload: true }
     });
   } catch (e) {
     this.logger.error(e);
@@ -509,7 +509,7 @@ async function userRobotStop(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.STOP_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false }
+      prevState: { ...ctx.scene.state, silent: false, reload: true }
     });
   } catch (e) {
     this.logger.error(e);

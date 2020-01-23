@@ -40,8 +40,6 @@ async function subscribeSignalsEnter(ctx: any) {
 
 async function subscribeSignalsConfirm(ctx: any) {
   try {
-    this.logger.info(ctx.message);
-
     const { id: robotId } = ctx.scene.state.selectedRobot.robotInfo;
     let volume: number;
     let error: string;

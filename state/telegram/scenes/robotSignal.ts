@@ -448,7 +448,12 @@ async function robotSignalSubscribe(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.SUBSCRIBE_SIGNALS, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false }
+      prevState: {
+        ...ctx.scene.state,
+        silent: false,
+        reload: true,
+        edit: false
+      }
     });
   } catch (e) {
     this.logger.error(e);
@@ -492,7 +497,9 @@ async function robotSignalUnsubscribe(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
       ...ctx.scene.state,
-      silent: false
+      silent: false,
+      reload: true,
+      edit: false
     });
   } catch (e) {
     this.logger.error(e);

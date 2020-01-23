@@ -68,7 +68,7 @@ class PricateConnectorRunnerService extends Service {
           await this.queueJob(userExAccId);
         }
       }
-      await lock.release(cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS);
+      await lock.release();
     } catch (e) {
       if (e instanceof this.LockAcquisitionError) return;
       this.logger.error(e);
