@@ -114,15 +114,15 @@
       "success": "⛔ <b>${name}</b> robot is stopping now..."
     },
     "settings": {
-      "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}\n\n${telegramSignalsNotif}\n\n${telegramTradingNotif}",
+      "info": "<b>👤 Account info</b>\n\n<b>📨 Email:</b> ${email}\n\n${telegramSignalsNotif}\n${telegramTradingNotif}",
       "emailNotSet": "Not set",
       "setEmail": "📨 Set Email",
       "changeEmail": "📨 Change Email",
       "userExAccs": "🔐 My Exchange API Keys",
       "telegramSingalsNotifOn": "🚦 Telegram signals notifications is <b>ON</b> 🔔",
       "telegramSingalsNotifOff": "🚦 Telegram signals notifications is <b>OFF</b> 🔕",
-      "TelegramTradingNotifOn": "🤖 Telegram trading notifications ON 🔔",
-      "TelegramTradingNotifOff": "🤖 Telegram trading notifications OFF 🔕",
+      "TelegramTradingNotifOn": "🤖 Telegram trading notifications is <b>ON</b> 🔔",
+      "TelegramTradingNotifOff": "🤖 Telegram trading notifications is <b>OFF</b> 🔕",
       "turnTelegramSignalsNotifOff": "🚦 Turn Telegram signals notifications OFF 🔕",
       "turnTelegramSignalsNotifOn": "🚦 Turn Telegram signals notifications ON 🔔",
       "turnTelegramTradingNotifOff": "🤖 Turn Telegram trading notifications OFF 🔕",

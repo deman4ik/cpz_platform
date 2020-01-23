@@ -3,13 +3,14 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import Auth from "../../../mixins/auth";
 
 class UsersService extends Service {
   constructor(broker: ServiceBroker) {
     super(broker);
     this.parseServiceSchema({
       name: cpz.Service.DB_USERS,
-      mixins: [DbService],
+      mixins: [DbService, Auth],
       adapter: SqlAdapter,
       model: {
         name: "users",
@@ -56,11 +57,18 @@ class UsersService extends Service {
       actions: {
         setNotificationSettings: {
           params: {
-            userId: "string",
             signalsTelegram: { type: "boolean", optional: true },
             signalsEmail: { type: "boolean", optional: true },
             tradingTelegram: { type: "boolean", optional: true },
             tradingEmail: { type: "boolean", optional: true }
+          },
+          graphql: {
+            mutation:
+              "setNotificationSettings(signalsTelegram: Boolean, tradingTelegram: Boolean, signalsEmail: Boolean, tradingEmail: Boolean): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          hooks: {
+            before: "authAction"
           },
           handler: this.setNotificationSettings
         }
@@ -68,55 +76,59 @@ class UsersService extends Service {
     });
   }
   async setNotificationSettings(
-    ctx: Context<{
-      userId: string;
-      signalsTelegram?: boolean;
-      signalsEmail?: boolean;
-      tradingTelegram?: boolean;
-      tradingEmail?: boolean;
-    }>
+    ctx: Context<
+      {
+        signalsTelegram?: boolean;
+        signalsEmail?: boolean;
+        tradingTelegram?: boolean;
+        tradingEmail?: boolean;
+      },
+      { user: cpz.User }
+    >
   ) {
     try {
       const {
-        userId,
         signalsEmail,
         signalsTelegram,
         tradingEmail,
         tradingTelegram
       } = ctx.params;
+      const { id: userId } = ctx.meta.user;
       const { settings }: cpz.User = await this.adapter.findById(userId);
-      await this.adapter.updateById(userId, {
-        $set: {
-          settings: {
-            ...settings,
-            notifications: {
-              signals: {
-                telegram:
-                  signalsTelegram === true || signalsTelegram === false
-                    ? signalsTelegram
-                    : settings.notifications.signals.telegram,
-                email:
-                  signalsEmail === true || signalsEmail === false
-                    ? signalsEmail
-                    : settings.notifications.signals.email
-              },
-              trading: {
-                telegram:
-                  tradingTelegram === true || tradingTelegram === false
-                    ? tradingTelegram
-                    : settings.notifications.trading.telegram,
-                email:
-                  tradingEmail === true || tradingEmail === false
-                    ? tradingEmail
-                    : settings.notifications.trading.email
-              }
-            }
+      const newSettings = {
+        ...settings,
+        notifications: {
+          signals: {
+            telegram:
+              signalsTelegram === true || signalsTelegram === false
+                ? signalsTelegram
+                : settings.notifications.signals.telegram,
+            email:
+              signalsEmail === true || signalsEmail === false
+                ? signalsEmail
+                : settings.notifications.signals.email
+          },
+          trading: {
+            telegram:
+              tradingTelegram === true || tradingTelegram === false
+                ? tradingTelegram
+                : settings.notifications.trading.telegram,
+            email:
+              tradingEmail === true || tradingEmail === false
+                ? tradingEmail
+                : settings.notifications.trading.email
           }
         }
+      };
+      await this.adapter.updateById(userId, {
+        $set: {
+          settings: newSettings
+        }
       });
+      return { success: true, result: newSettings };
     } catch (e) {
       this.logger.error(e);
-      throw e;
+      return { success: false, error: e.message };
     }
   }
 }

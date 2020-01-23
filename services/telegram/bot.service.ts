@@ -84,6 +84,10 @@ import {
   searchSignalsLeave,
   settingsEnter,
   settingsUserExAccs,
+  settingsTurnTelegramSignalsNotifOn,
+  settingsTurnTelegramSignalsNotifOff,
+  settingsTurnTelegramTradingNotifOn,
+  settingsTurnTelegramTradingNotifOff,
   settingsLeave,
   signalsEnter,
   signalsMySignals,
@@ -407,6 +411,22 @@ class BotService extends Service {
     settingsScene.command("back", leave());
     settingsScene.command("menu", leave());
     settingsScene.action(/userExAccs/, settingsUserExAccs.bind(this));
+    settingsScene.action(
+      /turnTelegramSignalsNotifOn/,
+      settingsTurnTelegramSignalsNotifOn.bind(this)
+    );
+    settingsScene.action(
+      /turnTelegramSignalsNotifOff/,
+      settingsTurnTelegramSignalsNotifOff.bind(this)
+    );
+    settingsScene.action(
+      /turnTelegramTradingNotifOn/,
+      settingsTurnTelegramTradingNotifOn.bind(this)
+    );
+    settingsScene.action(
+      /turnTelegramTradingNotifOff/,
+      settingsTurnTelegramTradingNotifOff.bind(this)
+    );
     settingsScene.action(/back/, leave());
 
     const signalsScene = new Scene(cpz.TelegramScene.SIGNALS);

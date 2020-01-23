@@ -86,17 +86,31 @@ function getSettingsMenu(ctx: any) {
 async function settingsEnter(ctx: any) {
   try {
     if (ctx.scene.state.reload)
-      ctx.session.user = await this.broket.call(`${cpz.Service.DB_USERS}.get`, {
+      ctx.session.user = await this.broker.call(`${cpz.Service.DB_USERS}.get`, {
         id: ctx.session.user.id
       });
 
-    const { email }: cpz.User = ctx.session.user;
+    const {
+      email,
+      settings: {
+        notifications: {
+          signals: { telegram: signalsTelegram },
+          trading: { telegram: tradingTelegram }
+        }
+      }
+    }: cpz.User = ctx.session.user;
 
     if (ctx.scene.state.edit) {
       ctx.scene.state.edit = false;
       await ctx.editMessageText(
         ctx.i18n.t("scenes.settings.info", {
-          email: email || ctx.i18n.t("scenes.settings.emailNotSet")
+          email: email || ctx.i18n.t("scenes.settings.emailNotSet"),
+          telegramSignalsNotif: signalsTelegram
+            ? ctx.i18n.t("scenes.settings.telegramSingalsNotifOn")
+            : ctx.i18n.t("scenes.settings.telegramSingalsNotifOff"),
+          telegramTradingNotif: tradingTelegram
+            ? ctx.i18n.t("scenes.settings.TelegramTradingNotifOn")
+            : ctx.i18n.t("scenes.settings.TelegramTradingNotifOff")
         }),
         getSettingsMenu(ctx)
       );
@@ -107,7 +121,13 @@ async function settingsEnter(ctx: any) {
       );
       await ctx.reply(
         ctx.i18n.t("scenes.settings.info", {
-          email: email || ctx.i18n.t("scenes.settings.emailNotSet")
+          email: email || ctx.i18n.t("scenes.settings.emailNotSet"),
+          telegramSignalsNotif: signalsTelegram
+            ? ctx.i18n.t("scenes.settings.telegramSingalsNotifOn")
+            : ctx.i18n.t("scenes.settings.telegramSingalsNotifOff"),
+          telegramTradingNotif: tradingTelegram
+            ? ctx.i18n.t("scenes.settings.TelegramTradingNotifOn")
+            : ctx.i18n.t("scenes.settings.TelegramTradingNotifOff")
         }),
         getSettingsMenu(ctx)
       );
@@ -132,9 +152,113 @@ async function settingsUserExAccs(ctx: any) {
   }
 }
 
+async function settingsTurnTelegramSignalsNotifOn(ctx: any) {
+  try {
+    await this.broker.call(
+      `${cpz.Service.DB_USERS}.setNotificationSettings`,
+      {
+        signalsTelegram: true
+      },
+      {
+        meta: {
+          user: ctx.session.user
+        }
+      }
+    );
+    ctx.scene.state.reload = true;
+    ctx.scene.state.edit = true;
+    return settingsEnter.call(this, ctx);
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function settingsTurnTelegramSignalsNotifOff(ctx: any) {
+  try {
+    await this.broker.call(
+      `${cpz.Service.DB_USERS}.setNotificationSettings`,
+      {
+        signalsTelegram: false
+      },
+      {
+        meta: {
+          user: ctx.session.user
+        }
+      }
+    );
+    ctx.scene.state.reload = true;
+    ctx.scene.state.edit = true;
+    return settingsEnter.call(this, ctx);
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function settingsTurnTelegramTradingNotifOn(ctx: any) {
+  try {
+    await this.broker.call(
+      `${cpz.Service.DB_USERS}.setNotificationSettings`,
+      {
+        tradingTelegram: true
+      },
+      {
+        meta: {
+          user: ctx.session.user
+        }
+      }
+    );
+    ctx.scene.state.reload = true;
+    ctx.scene.state.edit = true;
+    return settingsEnter.call(this, ctx);
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function settingsTurnTelegramTradingNotifOff(ctx: any) {
+  try {
+    await this.broker.call(
+      `${cpz.Service.DB_USERS}.setNotificationSettings`,
+      {
+        tradingTelegram: false
+      },
+      {
+        meta: {
+          user: ctx.session.user
+        }
+      }
+    );
+    ctx.scene.state.reload = true;
+    ctx.scene.state.edit = true;
+    return settingsEnter.call(this, ctx);
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
 async function settingsLeave(ctx: any) {
   if (ctx.scene.state.silent) return;
   await ctx.reply(ctx.i18n.t("menu"), getMainKeyboard(ctx));
 }
 
-export { settingsEnter, settingsUserExAccs, settingsLeave };
+export {
+  settingsEnter,
+  settingsUserExAccs,
+  settingsTurnTelegramSignalsNotifOn,
+  settingsTurnTelegramSignalsNotifOff,
+  settingsTurnTelegramTradingNotifOn,
+  settingsTurnTelegramTradingNotifOff,
+  settingsLeave
+};

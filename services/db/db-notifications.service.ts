@@ -332,13 +332,19 @@ class NotificationsService extends Service {
 
   async handleUserRobotTrade(ctx: Context<cpz.UserTradeEventData>) {
     try {
-      const { id, userRobotId } = ctx.params;
-      const { name, telegramId, userId } = await ctx.call(
-        `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
-        {
-          id: userRobotId
+      const { id, userId, userRobotId } = ctx.params;
+      const {
+        telegramId,
+        settings: {
+          notifications: {
+            trading: { telegram: tradingTelegram }
+          }
         }
-      );
+      }: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId,
+        fields: ["telegramId", "settings"]
+      });
+
       const notification: cpz.Notification = {
         id: uuid(),
         userId,
@@ -347,7 +353,7 @@ class NotificationsService extends Service {
         data: ctx.params,
         userRobotId,
         userPositionId: id,
-        sendTelegram: !!telegramId,
+        sendTelegram: telegramId && tradingTelegram,
         sendEmail: false,
         readed: true
       };
