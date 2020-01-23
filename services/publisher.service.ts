@@ -20,7 +20,8 @@ class PublisherService extends Service {
         cpz.Service.DB_USER_ROBOTS,
         cpz.Service.DB_ROBOTS,
         cpz.Service.DB_ROBOT_POSITIONS,
-        cpz.Service.DB_USER_SIGNALS
+        cpz.Service.DB_USER_SIGNALS,
+        cpz.Service.DB_NOTIFICATIONS
       ],
       created: this.createdService,
       started: this.startedService,
@@ -253,8 +254,8 @@ class PublisherService extends Service {
               .utc(signal.timestamp)
               .format("YYYY-MM-DD HH:mm UTC")
           });
-          message = `${robotInfo}${tradeText}`;
         }
+        message = `${robotInfo}${tradeText}`;
       }
 
       return await this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {

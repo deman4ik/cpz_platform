@@ -201,7 +201,7 @@ class BotService extends Service {
         password: process.env.REDIS_PASSWORD,
         tls: process.env.REDIS_TLS && {}
       },
-      ttl: 60 * 5,
+      ttl: 60 * 30,
       getSessionKey: this.getSessionKey.bind(this)
     });
     this.bot = new Telegraf(process.env.BOT_TOKEN);
