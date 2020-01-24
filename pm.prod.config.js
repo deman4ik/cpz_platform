@@ -1,30 +1,12 @@
 module.exports = {
   apps: [
     {
-      name: "db-1",
+      name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args: "--env --config prod.config.js dist/services/db",
       env: {
         NODE_ENV: "production",
-        NODEID: "db-1"
-      }
-    },
-    {
-      name: "db-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/db",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "db-2"
-      }
-    },
-    {
-      name: "db-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/db",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "db-3"
+        NODEID: "db"
       }
     },
     {
@@ -38,33 +20,13 @@ module.exports = {
       }
     },
     {
-      name: "backtester-worker-1",
+      name: "backtester-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "backtester-worker-1"
-      }
-    },
-    {
-      name: "backtester-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "backtester-worker-2"
-      }
-    },
-    {
-      name: "backtester-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "backtester-worker-3"
+        NODEID: "backtester-worker"
       }
     },
     {
@@ -88,33 +50,13 @@ module.exports = {
       }
     },
     {
-      name: "private-connector-worker-1",
+      name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "private-connector-worker-1"
-      }
-    },
-    {
-      name: "private-connector-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "private-connector-worker-2"
-      }
-    },
-    {
-      name: "private-connector-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "private-connector-worker-3"
+        NODEID: "private-connector-worker"
       }
     },
     {
@@ -137,33 +79,13 @@ module.exports = {
       }
     },
     {
-      name: "importer-worker-1",
+      name: "importer-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "importer-worker-1"
-      }
-    },
-    {
-      name: "importer-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "importer-worker-2"
-      }
-    },
-    {
-      name: "importer-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "importer-worker-3"
+        NODEID: "importer-worker"
       }
     },
     {
@@ -177,33 +99,13 @@ module.exports = {
       }
     },
     {
-      name: "robot-worker-1",
+      name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "robot-worker-1"
-      }
-    },
-    {
-      name: "robot-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "robot-worker-2"
-      }
-    },
-    {
-      name: "robot-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "robot-worker-3"
+        NODEID: "robot-worker"
       }
     },
     {
@@ -217,33 +119,13 @@ module.exports = {
       }
     },
     {
-      name: "user-robot-worker-1",
+      name: "user-robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "user-robot-worker-1"
-      }
-    },
-    {
-      name: "user-robot-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "user-robot-worker-2"
-      }
-    },
-    {
-      name: "user-robot-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "user-robot-worker-3"
+        NODEID: "user-robot-worker"
       }
     },
     {
@@ -257,23 +139,13 @@ module.exports = {
       }
     },
     {
-      name: "stats-calc-worker-1",
+      name: "stats-calc-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/statsCalc/stats-calc-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "stats-calc-worker-1"
-      }
-    },
-    {
-      name: "stats-calc-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/statsCalc/stats-calc-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "stats-calc-worker-2"
+        NODEID: "stats-calc-worker"
       }
     },
     {
