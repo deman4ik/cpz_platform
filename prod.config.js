@@ -64,7 +64,7 @@ const brokerConfig = {
   ],
 
   tracing: {
-    enabled: true,
+    enabled: false,
     exporter: {
       type: "Event",
       options: {
