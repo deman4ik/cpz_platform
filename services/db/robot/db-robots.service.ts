@@ -206,32 +206,7 @@ class RobotsService extends Service {
       strategiesList.forEach(({ id, code }: { id: string; code: string }) => {
         strategies[id] = code;
       });
-      const query = `INSERT INTO robots 
-        (   code,
-            name,
-            exchange,
-            asset,
-            currency,
-            timeframe,
-            strategy,
-            mod,
-            settings,
-            trade_settings,
-            available
-        ) 
-         VALUES (?)
-         ON CONFLICT ON CONSTRAINT robots_pkey 
-         DO UPDATE SET updated_at = now(),
-         status = excluded.status,
-         settings = excluded.settings,
-         trade_settings = excluded.trade_settings,
-         indicators = excluded.indicators,
-         state = excluded.state,
-         last_candle = excluded.last_candle,
-         has_alerts = excluded.has_alerts,
-         started_at = excluded.started_at,
-         stopped_at = excluded.stopped_at,
-         statistics = excluded.statistics;`;
+
       let importedCount = 0;
       for (const {
         exchange,
@@ -247,7 +222,7 @@ class RobotsService extends Service {
         trading
       } of ctx.params.entities) {
         let mode = mod || 1;
-        const [robotEntity] = await this._find(ctx, {
+        const [robotExists] = await this.adapter.find({
           fields: ["id", "mod", "settings"],
           sort: "-created_at",
           query: {
@@ -259,15 +234,39 @@ class RobotsService extends Service {
           }
         });
 
-        const robotExists =
-          robotEntity && this.adapter.entityToObject(robotEntity);
-
         if (robotExists) {
           if (equals(settings, robotExists.settings)) continue;
           const tryNumMod = +robotExists.mod;
           mode = (tryNumMod && tryNumMod + 1) || `${robotExists.mod}-1`;
         }
-
+        const query = `INSERT INTO robots 
+        (   code,
+            name,
+            exchange,
+            asset,
+            currency,
+            timeframe,
+            strategy,
+            mod,
+            settings,
+            trade_settings,
+            available,
+            signals,
+          trading
+        ) 
+         VALUES (?)
+         ON CONFLICT ON CONSTRAINT robots_pkey 
+         DO UPDATE SET updated_at = now(),
+         status = excluded.status,
+         settings = excluded.settings,
+         trade_settings = excluded.trade_settings,
+         indicators = excluded.indicators,
+         state = excluded.state,
+         last_candle = excluded.last_candle,
+         has_alerts = excluded.has_alerts,
+         started_at = excluded.started_at,
+         stopped_at = excluded.stopped_at,
+         statistics = excluded.statistics;`;
         const entity = Object.values({
           code: createRobotCode(
             exchange,
