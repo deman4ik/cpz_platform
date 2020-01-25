@@ -56,7 +56,7 @@ class UserAggrStatsService extends Service {
         equity
       }: cpz.UserAggrStatsDB = ctx.params;
 
-      const statsExists: cpz.UserAggrStatsDB = await this.adapter.find({
+      const [statsExists]: cpz.UserAggrStatsDB[] = await this.adapter.find({
         query: {
           userId,
           exchange: exchange || null,
