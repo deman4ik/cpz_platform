@@ -1,6 +1,7 @@
 import { Extra } from "telegraf";
 import { getMainKeyboard, getBackKeyboard } from "../keyboard";
 import { cpz } from "../../../@types";
+import { sleep } from "../../../utils/helpers";
 
 function getRobotsMenu(ctx: any) {
   return Extra.HTML().markup((m: any) => {
@@ -59,6 +60,7 @@ async function robotsEnter(ctx: any) {
       ctx.i18n.t("keyboards.mainKeyboard.robots"),
       getBackKeyboard(ctx)
     );
+    await sleep(100);
     await ctx.reply(ctx.i18n.t("scenes.robots.info"), getRobotsMenu(ctx));
   } catch (e) {
     this.logger.error(e);
