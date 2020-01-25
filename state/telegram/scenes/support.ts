@@ -11,7 +11,7 @@ async function supportEnter(ctx: any) {
       "scenes.support.info4"
     )}`;
     await ctx.reply(
-      ctx.i18n.t("keyboard.mainKeyboard.support"),
+      ctx.i18n.t("keyboards.mainKeyboard.support"),
       getBackKeyboard(ctx)
     );
     await sleep(100);

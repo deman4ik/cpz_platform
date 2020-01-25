@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome ${username} to <b>Cryptuoso Trading Bot!</b>\n\nYou can start <b>Manual trading</b> with our 🚦 Signals or <b>Automated Trading</b> with our 🤖 Robots.\n\nWe advise to divide your trading capital between different robots to maximize the diversification effect and don't borrow margin (credit) money, because cryptocurrency markets are very volatile.\n⚠️ Use all signals and robots at your own risk!",
+  "welcome": "Welcome ${username} to <b>Cryptuoso Trading Bot!</b>\n\nYou can start <b>Manual trading</b> with our 🚦 Signals or <b>Automated Trading</b> with our 🤖 Robots.\n\nWe advise to divide your trading capital between different robots to maximize the diversification effect and don't borrow margin (credit) money, because cryptocurrency markets are very volatile.\n\nBy starting this bot you confirm that you have read and accept our <a href='https://support.cryptuoso.com/terms-of-use'>terms of use</a>.\n\n⚠️ Use all signals and robots at your own risk!",
   "failed": "❌ Failed to process your request. Please try again later!",
   "keyboards": {
     "backKeyboard": {
@@ -135,12 +135,12 @@
       "none": "🔑 You hasn't any Exchange API Keys yet"
     },
     "addUserExAcc": {
-      "chooseExchange": "🔑 Adding New Exchange API Key\n\n<b>Choose one of available exchanges:</b>",
-      "enterAPIKey": "🔑 Adding New Exchange API Key\n\nEnter your ${exchange} <b>API KEY</b>",
-      "enterAPISecret": "🔑 Adding New Exchange API Key\n\nEnter your ${exchange} <b>API Key Secret (Private Key)</b>",
+      "chooseExchange": "🔑 Adding New Exchange API Key\n\nYou can learn how to configure keys in our <a href='https://support.cryptuoso.com/exchange-accounts'>docs</a>.\n\n<b>Choose one of available exchanges:</b>",
+      "enterAPIKey": "🔑 Adding New Exchange API Key\n\nYou can learn how to configure keys in our <a href='https://support.cryptuoso.com/exchange-accounts'>docs</a>.\n\nEnter your ${exchange} <b>API KEY</b>",
+      "enterAPISecret": "🔑 Adding New Exchange API Key\n\nYou can learn how to configure keys in our <a href='https://support.cryptuoso.com/exchange-accounts'>docs</a>.\n\nEnter your ${exchange} <b>API Key Secret (Private Key)</b>",
       "check": "🔑 Adding New Exchange API Key\n\n🌀 Checking your ${exchange} API Key...\n\n⏳ Please wait...",
       "success": "🔑 New ${name} API Key succesfully added!",
-      "failed": "❌ Failed to add new ${exchange} API Key.\n\n<b>${error}</b>\n\nPlease try again!"
+      "failed": "❌ Failed to add new ${exchange} API Key.\n\n<b>${error}</b>\n\nPlease try again!\n\nYou can learn how to configure keys in our <a href='https://support.cryptuoso.com/exchange-accounts'>docs</a>."
     },
     "editUserExAcc": {
       "enterAPIKey": "🔑 Editing ${name} API Key\n\n<b>Enter your ${exchange} API Key</b>",
