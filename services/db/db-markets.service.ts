@@ -72,19 +72,23 @@ class MarketsService extends Service {
       this.logger.info("Updating Markets");
       const lock = await this.createLock();
       await lock.acquire(cpz.cronLock.MARKETS_UPDATE);
-
       let timerId = setTimeout(async function tick() {
         await lock.extend(10000);
         timerId = setTimeout(tick, 9000);
       }, 19000);
-      const markets: cpz.Market[] = await this.adapter.find({
-        query: {
-          available: { $gte: 5 }
+
+      try {
+        const markets: cpz.Market[] = await this.adapter.find({
+          query: {
+            available: { $gte: 5 }
+          }
+        });
+        for (const { exchange, asset, currency } of markets) {
+          this.logger.info(`Updating Market ${exchange} ${asset}/${currency}`);
+          await this.actions.upsert({ exchange, asset, currency });
         }
-      });
-      for (const { exchange, asset, currency } of markets) {
-        this.logger.info(`Updating Market ${exchange} ${asset}/${currency}`);
-        await this.actions.upsert({ exchange, asset, currency });
+      } catch (e) {
+        this.logger.error(e);
       }
 
       clearInterval(timerId);
