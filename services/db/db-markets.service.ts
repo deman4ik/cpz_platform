@@ -52,7 +52,7 @@ class MarketsService extends Service {
   }
 
   cronTask: cron.ScheduledTask = cron.schedule(
-    "0 0 * * * *",
+    "12 0 0 * * *",
     this.updateMarkets.bind(this),
     {
       scheduled: false
