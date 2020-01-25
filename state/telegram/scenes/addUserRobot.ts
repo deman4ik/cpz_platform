@@ -229,10 +229,11 @@ async function addUserRobotConfirm(ctx: any) {
 async function addUserRobotBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(
-      cpz.TelegramScene.USER_ROBOT,
-      ctx.scene.state.prevState
-    );
+    await ctx.scene.enter(cpz.TelegramScene.USER_ROBOT, {
+      ...ctx.scene.state.prevState,
+      edit: false,
+      reload: true
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

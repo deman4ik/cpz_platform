@@ -89,6 +89,7 @@ async function subscribeSignalsConfirm(ctx: any) {
       }),
       Extra.HTML()
     );
+
     return subscribeSignalsBack.call(this, ctx);
   } catch (e) {
     this.logger.error(e);
@@ -101,10 +102,11 @@ async function subscribeSignalsConfirm(ctx: any) {
 async function subscribeSignalsBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(
-      cpz.TelegramScene.ROBOT_SIGNAL,
-      ctx.scene.state.prevState
-    );
+    await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
+      ...ctx.scene.state.prevState,
+      edit: false,
+      reload: true
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
