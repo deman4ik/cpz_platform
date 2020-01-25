@@ -113,7 +113,7 @@ class MarketsService extends Service {
         }
       >(`${cpz.Service.PUBLIC_CONNECTOR}.getMarket`, ctx.params);
 
-      const exists = await this.adapter.find({
+      const [exists] = await this.adapter.find({
         query: ctx.params
       });
       let result;
