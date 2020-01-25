@@ -3,6 +3,7 @@ import DbService from "moleculer-db";
 import SqlAdapter from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import { v4 as uuid } from "uuid";
 
 class UserAggrStatsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -74,7 +75,7 @@ class UserAggrStatsService extends Service {
           }
         });
       } else {
-        await this.adapter.insert(ctx.params);
+        await this.adapter.insert({ id: uuid(), ...ctx.params });
       }
     } catch (e) {
       this.logger.error(e);
