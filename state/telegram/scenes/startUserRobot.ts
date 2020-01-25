@@ -31,7 +31,7 @@ async function startUserRobotEnter(ctx: any) {
 
     return ctx.reply(
       ctx.i18n.t("scenes.startUserRobot.confirm", {
-        name: robotInfo.name
+        code: robotInfo.code
       }),
       getConfirmMenu(ctx)
     );
