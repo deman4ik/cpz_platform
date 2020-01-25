@@ -159,7 +159,11 @@ async function addUserExAccSubmited(ctx: any) {
 async function addUserExAccBack(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(ctx.scene.state.prevScene, ctx.scene.state.prevState);
+    await ctx.scene.enter(ctx.scene.state.prevScene, {
+      ...ctx.scene.state.prevState,
+      edit: false,
+      reload: true
+    });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
