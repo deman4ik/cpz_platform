@@ -71,7 +71,11 @@ function getSignalRobotMenu(ctx: any) {
 
 async function robotSignalInfo(ctx: any) {
   try {
-    if (ctx.scene.state.page && ctx.scene.state.page === "info") {
+    if (
+      ctx.scene.state.edit &&
+      ctx.scene.state.page &&
+      ctx.scene.state.page === "info"
+    ) {
       if (
         ctx.scene.state.lastInfoUpdatedAt &&
         dayjs
@@ -82,7 +86,6 @@ async function robotSignalInfo(ctx: any) {
           ) < 5
       )
         return;
-      ctx.scene.state.edit = true;
     }
     ctx.scene.state.page = "info";
 
@@ -450,6 +453,7 @@ async function robotSignalSubscribe(ctx: any) {
       selectedRobot: ctx.scene.state.selectedRobot,
       prevState: {
         ...ctx.scene.state,
+        page: null,
         silent: false,
         reload: true,
         edit: false
@@ -497,6 +501,7 @@ async function robotSignalUnsubscribe(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.ROBOT_SIGNAL, {
       ...ctx.scene.state,
+      page: null,
       silent: false,
       reload: true,
       edit: false

@@ -95,7 +95,11 @@ function getUserRobotMenu(ctx: any) {
 
 async function userRobotInfo(ctx: any) {
   try {
-    if (ctx.scene.state.page && ctx.scene.state.page === "info") {
+    if (
+      ctx.scene.state.edit &&
+      ctx.scene.state.page &&
+      ctx.scene.state.page === "info"
+    ) {
       if (
         ctx.scene.state.lastInfoUpdatedAt &&
         dayjs
@@ -106,7 +110,6 @@ async function userRobotInfo(ctx: any) {
           ) < 5
       )
         return;
-      ctx.scene.state.edit = true;
     }
 
     let robotInfo: cpz.RobotInfo;
@@ -460,7 +463,13 @@ async function userRobotDelete(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.DELETE_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false }
+      prevState: {
+        ...ctx.scene.state,
+        silent: false,
+        page: null,
+        edit: false,
+        reload: true
+      }
     });
   } catch (e) {
     this.logger.error(e);
@@ -478,7 +487,10 @@ async function userRobotEdit(ctx: any) {
       selectedRobot: ctx.scene.state.selectedRobot,
       prevState: {
         ...ctx.scene.state,
-        silent: false
+        silent: false,
+        page: null,
+        edit: false,
+        reload: true
       }
     });
   } catch (e) {
@@ -494,7 +506,13 @@ async function userRobotStart(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.START_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: {
+        ...ctx.scene.state,
+        silent: false,
+        page: null,
+        edit: false,
+        reload: true
+      }
     });
   } catch (e) {
     this.logger.error(e);
@@ -509,7 +527,13 @@ async function userRobotStop(ctx: any) {
     ctx.scene.state.silent = true;
     await ctx.scene.enter(cpz.TelegramScene.STOP_USER_ROBOT, {
       selectedRobot: ctx.scene.state.selectedRobot,
-      prevState: { ...ctx.scene.state, silent: false, reload: true }
+      prevState: {
+        ...ctx.scene.state,
+        silent: false,
+        page: null,
+        edit: false,
+        reload: true
+      }
     });
   } catch (e) {
     this.logger.error(e);

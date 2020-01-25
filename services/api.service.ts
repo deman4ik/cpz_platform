@@ -66,6 +66,12 @@ class ApiService extends Service {
       ],
       settings: {
         port: process.env.PORT || 3000,
+        routes: [
+          {
+            mappingPolicy: "restrict"
+          }
+        ],
+        whitelist: [],
         // Serve assets from "public" folder
         assets: {
           folder: "public"
