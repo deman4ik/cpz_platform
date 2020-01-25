@@ -1,6 +1,7 @@
 import { Extra } from "telegraf";
 import { getMainKeyboard, getBackKeyboard } from "../keyboard";
 import { cpz } from "../../../@types";
+import { sleep } from "../../../utils/helpers";
 
 function getSignalsMenu(ctx: any) {
   return Extra.HTML().markup((m: any) => {
@@ -59,6 +60,7 @@ async function signalsEnter(ctx: any) {
       ctx.i18n.t("keyboards.mainKeyboard.signals"),
       getBackKeyboard(ctx)
     );
+    await sleep(100);
     return ctx.reply(ctx.i18n.t("scenes.signals.info"), getSignalsMenu(ctx));
   } catch (e) {
     this.logger.error(e);

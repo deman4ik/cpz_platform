@@ -1,6 +1,7 @@
 import { Extra } from "telegraf";
 import { getMainKeyboard, getBackKeyboard } from "../keyboard";
 import { cpz } from "../../../@types";
+import { sleep } from "../../../utils/helpers";
 
 function getSettingsMenu(ctx: any) {
   const {
@@ -119,6 +120,7 @@ async function settingsEnter(ctx: any) {
         ctx.i18n.t("keyboards.mainKeyboard.settings"),
         getBackKeyboard(ctx)
       );
+      await sleep(100);
       await ctx.reply(
         ctx.i18n.t("scenes.settings.info", {
           email: email || ctx.i18n.t("scenes.settings.emailNotSet"),

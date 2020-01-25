@@ -1,14 +1,21 @@
 import { Extra } from "telegraf";
 import { getMainKeyboard, getBackKeyboard } from "../keyboard";
 import { cpz } from "../../../@types";
+import { sleep } from "../../../utils/helpers";
 
 async function supportEnter(ctx: any) {
   try {
     const message = `${ctx.i18n.t("scenes.support.info1")}${ctx.i18n.t(
       "scenes.support.info2"
-    )}${ctx.i18n.t("scenes.support.info3")}`;
-    await ctx.reply(message, getBackKeyboard(ctx));
-    await ctx.reply(ctx.i18n.t("scenes.support.info4"), Extra.HTML());
+    )}${ctx.i18n.t("scenes.support.info3")}${ctx.i18n.t(
+      "scenes.support.info4"
+    )}`;
+    await ctx.reply(
+      ctx.i18n.t("keyboard.mainKeyboard.support"),
+      getBackKeyboard(ctx)
+    );
+    await sleep(100);
+    await ctx.reply(message, Extra.HTML());
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
