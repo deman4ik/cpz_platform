@@ -143,20 +143,22 @@ class RobotWorkerService extends Service {
       if (nextJob) {
         while (nextJob) {
           let status = await this.run(nextJob);
-          await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
-            id: nextJob.id
-          });
-          if (status === cpz.Status.started) {
-            [nextJob] = await this.broker.call(
-              `${cpz.Service.DB_ROBOT_JOBS}.find`,
-              {
-                limit: 1,
-                sort: "created_at",
-                query: {
-                  robotId
+          if (status) {
+            await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
+              id: nextJob.id
+            });
+            if (status === cpz.Status.started) {
+              [nextJob] = await this.broker.call(
+                `${cpz.Service.DB_ROBOT_JOBS}.find`,
+                {
+                  limit: 1,
+                  sort: "created_at",
+                  query: {
+                    robotId
+                  }
                 }
-              }
-            );
+              );
+            }
           } else {
             nextJob = null;
           }
