@@ -70,7 +70,7 @@ class UserPosition implements cpz.UserPosition {
     this._asset = state.asset;
     this._currency = state.currency;
     this._status = state.status;
-    this._parentId = state.parentId;
+    this._parentId = state.parentId || null;
     this._direction = state.direction;
     this._entryAction = state.entryAction;
     this._entryStatus = state.entryStatus;
