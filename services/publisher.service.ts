@@ -73,77 +73,84 @@ class PublisherService extends Service {
         );
 
         for (const notification of notifications) {
-          const { type, userId } = notification;
+          try {
+            const { type, userId } = notification;
 
-          const [user] = await this.broker.call<
-            cpz.User[],
-            {
-              fields: string[];
-              query: { [key: string]: any };
-            }
-          >(`${cpz.Service.DB_USERS}.find`, {
-            fields: ["id", "telegramId"],
-            query: {
-              id: userId,
-              status: { $gt: 0 },
-              telegramId: { $ne: null }
-            }
-          });
-
-          let result: { success: boolean; error?: string };
-          if (user && user.telegramId) {
-            switch (type) {
-              case cpz.Event.SIGNAL_ALERT:
-                result = await this.handleSignal(notification, user);
-                break;
-              case cpz.Event.SIGNAL_TRADE:
-                result = await this.handleSignal(notification, user);
-                break;
-              case cpz.Event.USER_EX_ACC_ERROR:
-                result = await this.handleUserExAccError(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_FAILED:
-                result = await this.handleUserRobotFailed(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_STARTED:
-                result = await this.handleUserRobotStatus(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_STOPPED:
-                result = await this.handleUserRobotStatus(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_PAUSED:
-                result = await this.handleUserRobotStatus(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_RESUMED:
-                result = await this.handleUserRobotStatus(notification, user);
-                break;
-              case cpz.Event.USER_ROBOT_TRADE:
-                result = await this.handleUserRobotTrade(notification, user);
-                break;
-              case cpz.Event.ORDER_ERROR:
-                result = await this.handleOrderError(notification, user);
-                break;
-              case cpz.Event.MESSAGE_SUPPORT_REPLY:
-                result = await this.handleMessageSupportReply(
-                  notification,
-                  user
-                );
-                break;
-              case cpz.Event.MESSAGE_BROADCAST:
-                result = await this.handleBroadcastMessage(notification, user);
-                break;
-              default:
-                continue;
-            }
-          } else {
-            result = { success: true };
-          }
-          this.logger.info(result);
-          if (result && result.success) {
-            await this.broker.call(`${cpz.Service.DB_NOTIFICATIONS}.update`, {
-              id: notification.id,
-              sendTelegram: false
+            const [user] = await this.broker.call<
+              cpz.User[],
+              {
+                fields: string[];
+                query: { [key: string]: any };
+              }
+            >(`${cpz.Service.DB_USERS}.find`, {
+              fields: ["id", "telegramId"],
+              query: {
+                id: userId,
+                status: { $gt: 0 },
+                telegramId: { $ne: null }
+              }
             });
+
+            let result: { success: boolean; error?: string };
+            if (user && user.telegramId) {
+              switch (type) {
+                case cpz.Event.SIGNAL_ALERT:
+                  result = await this.handleSignal(notification, user);
+                  break;
+                case cpz.Event.SIGNAL_TRADE:
+                  result = await this.handleSignal(notification, user);
+                  break;
+                case cpz.Event.USER_EX_ACC_ERROR:
+                  result = await this.handleUserExAccError(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_FAILED:
+                  result = await this.handleUserRobotFailed(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_STARTED:
+                  result = await this.handleUserRobotStatus(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_STOPPED:
+                  result = await this.handleUserRobotStatus(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_PAUSED:
+                  result = await this.handleUserRobotStatus(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_RESUMED:
+                  result = await this.handleUserRobotStatus(notification, user);
+                  break;
+                case cpz.Event.USER_ROBOT_TRADE:
+                  result = await this.handleUserRobotTrade(notification, user);
+                  break;
+                case cpz.Event.ORDER_ERROR:
+                  result = await this.handleOrderError(notification, user);
+                  break;
+                case cpz.Event.MESSAGE_SUPPORT_REPLY:
+                  result = await this.handleMessageSupportReply(
+                    notification,
+                    user
+                  );
+                  break;
+                case cpz.Event.MESSAGE_BROADCAST:
+                  result = await this.handleBroadcastMessage(
+                    notification,
+                    user
+                  );
+                  break;
+                default:
+                  continue;
+              }
+            } else {
+              result = { success: true };
+            }
+            this.logger.info(result);
+            if (result && result.success) {
+              await this.broker.call(`${cpz.Service.DB_NOTIFICATIONS}.update`, {
+                id: notification.id,
+                sendTelegram: false
+              });
+            }
+          } catch (e) {
+            this.logger.error(e);
           }
         }
       } catch (e) {

@@ -736,20 +736,21 @@ class BotService extends Service {
       this.logger.warn(telegramId, error);
       if (error && error.ok === false && error.error_code === 403) {
         const [user] = await this.broker.call(`${cpz.Service.DB_USERS}.find`, {
-          fields: ["id"],
           query: { telegramId }
         });
 
         if (user) {
-          const { id: userId } = user;
           await this.broker.call(
             `${cpz.Service.DB_USERS}.setNotificationSettings`,
             {
-              userId,
               signalsTelegram: false,
               tradingTelegram: false
+            },
+            {
+              meta: { user }
             }
           );
+
           //TODO: set sentTelegram in notifications to false
         }
         return { success: true };
