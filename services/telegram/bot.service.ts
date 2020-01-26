@@ -734,12 +734,7 @@ class BotService extends Service {
   ) {
     try {
       this.logger.warn(telegramId, error);
-      if (
-        error &&
-        error.ok === false &&
-        error.error_code === 403 &&
-        error.description === "Forbidden: bot was blocked by the user"
-      ) {
+      if (error && error.ok === false && error.error_code === 403) {
         const [user] = await this.broker.call(`${cpz.Service.DB_USERS}.find`, {
           fields: ["id"],
           query: { telegramId }
