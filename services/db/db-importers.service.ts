@@ -27,7 +27,9 @@ class ImportersService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("startedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           endedAt: {
@@ -36,7 +38,9 @@ class ImportersService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("endedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           error: { type: Sequelize.JSONB, allowNull: true }

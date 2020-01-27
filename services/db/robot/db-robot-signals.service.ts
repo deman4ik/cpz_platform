@@ -33,14 +33,18 @@ class RobotSignalsService extends Service {
             field: "candle_timestamp",
             get: function() {
               const value = this.getDataValue("candleTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           timestamp: {
             type: Sequelize.DATE,
             get: function() {
               const value = this.getDataValue("timestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           }
         },

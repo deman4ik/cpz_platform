@@ -65,7 +65,9 @@ class UserPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           entryVolume: {
@@ -129,7 +131,9 @@ class UserPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exitVolume: {
@@ -184,7 +188,9 @@ class UserPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("nextJobAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           nextJob: {

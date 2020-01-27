@@ -37,7 +37,9 @@ class UserSignalsService extends Service {
             field: "subscribed_at",
             get: function() {
               const value = this.getDataValue("subscribedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           volume: { type: Sequelize.NUMBER },

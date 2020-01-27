@@ -23,7 +23,9 @@ class ConnectorJobsService extends Service {
             field: "next_job_at",
             get: function() {
               const value = this.getDataValue("nextJobAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           priority: Sequelize.INTEGER,

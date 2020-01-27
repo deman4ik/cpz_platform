@@ -24,7 +24,9 @@ class UserRobotJobsService extends Service {
             field: "created_at",
             get: function() {
               const value = this.getDataValue("createdAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           }
         },
