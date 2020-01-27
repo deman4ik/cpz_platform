@@ -53,7 +53,9 @@ class UserRobotsService extends Service {
             field: "started_at",
             get: function() {
               const value = this.getDataValue("startedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           stoppedAt: {
@@ -62,7 +64,9 @@ class UserRobotsService extends Service {
             field: "stopped_at",
             get: function() {
               const value = this.getDataValue("stoppedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           statistics: { type: Sequelize.JSONB, allowNull: true },

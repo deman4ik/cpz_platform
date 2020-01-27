@@ -26,7 +26,9 @@ class BacktestsService extends Service {
             field: "date_from",
             get: function() {
               const value = this.getDataValue("dateFrom");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           dateTo: {
@@ -34,7 +36,9 @@ class BacktestsService extends Service {
             field: "date_to",
             get: function() {
               const value = this.getDataValue("dateTo");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           settings: Sequelize.JSONB,
@@ -77,7 +81,9 @@ class BacktestsService extends Service {
             field: "started_at",
             get: function() {
               const value = this.getDataValue("startedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           finishedAt: {
@@ -86,7 +92,9 @@ class BacktestsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("finishedAt");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           error: { type: Sequelize.JSONB, allowNull: true }

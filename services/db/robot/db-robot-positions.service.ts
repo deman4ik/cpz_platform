@@ -54,7 +54,9 @@ class RobotPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           entryOrderType: {
@@ -73,7 +75,9 @@ class RobotPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryCandleTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exitStatus: {
@@ -96,7 +100,9 @@ class RobotPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exitOrderType: {
@@ -115,7 +121,9 @@ class RobotPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitCandleTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },

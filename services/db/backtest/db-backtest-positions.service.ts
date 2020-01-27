@@ -53,7 +53,9 @@ class BacktestPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           entryOrderType: {
@@ -72,7 +74,9 @@ class BacktestPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("entryCandleTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exitStatus: {
@@ -95,7 +99,9 @@ class BacktestPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitDate");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           exitOrderType: {
@@ -114,7 +120,9 @@ class BacktestPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitCandleTimestamp");
-              return (value && value.toISOString()) || value;
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
             }
           },
           alerts: { type: Sequelize.JSONB, allowNull: true },
@@ -348,7 +356,7 @@ class BacktestPositionsService extends Service {
       return true;
     } catch (e) {
       this.logger.error(e);
-      throw e
+      throw e;
     }
   }
 }
