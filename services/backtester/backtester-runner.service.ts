@@ -78,7 +78,7 @@ class BacktesterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.start
         },
@@ -104,7 +104,7 @@ class BacktesterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.clean
         },
@@ -117,7 +117,7 @@ class BacktesterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.getStatus
         }

@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/db",
+      args: "--env --config prod.config.js --instances=3 dist/services/db",
       env: {
         NODE_ENV: "production",
         NODEID: "db"
@@ -23,7 +23,7 @@ module.exports = {
       name: "backtester-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
+        "--env --config prod.config.js --instances=3 dist/services/backtester/backtester-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "backtester-worker"
@@ -33,7 +33,7 @@ module.exports = {
       name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/connector/public-connector.service.js",
+        "--env --config prod.config.js  --instances=3 dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "public-connector"
@@ -53,7 +53,7 @@ module.exports = {
       name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
+        "--env  --config prod.config.js  --instances=3 dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "private-connector-worker"
@@ -82,7 +82,7 @@ module.exports = {
       name: "importer-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
+        "--env --config prod.config.js  --instances=3 dist/services/importer/importer-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "importer-worker"
@@ -102,7 +102,7 @@ module.exports = {
       name: "robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
+        "--env --config prod.config.js  --instances=3 dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "robot-worker"
@@ -122,7 +122,7 @@ module.exports = {
       name: "user-robot-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
+        "--env --config prod.config.js  --instances=3 dist/services/userRobot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "user-robot-worker"

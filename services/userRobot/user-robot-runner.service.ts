@@ -51,7 +51,7 @@ class UserRobotRunnerService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.start
         },
@@ -65,7 +65,7 @@ class UserRobotRunnerService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.stop
         },
@@ -82,7 +82,7 @@ class UserRobotRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.pause
         },
@@ -96,7 +96,7 @@ class UserRobotRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.resume
         }

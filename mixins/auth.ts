@@ -1,5 +1,6 @@
 import { ServiceSchema } from "moleculer";
 import { Errors } from "moleculer-web";
+
 const Auth: ServiceSchema = {
   name: "",
   methods: {

@@ -4,11 +4,11 @@ import Timeframe from "./timeframe";
 import { createDatesList, createDatesListWithRange } from "./time";
 import { arraysDiff, sortAsc, uniqueElementsBy, sortDesc } from "./helpers";
 
-async function handleCandleGaps(
+function handleCandleGaps(
   dateFromInput: string,
   dateTo: string,
   inputCandles: cpz.ExchangeCandle[]
-): Promise<cpz.ExchangeCandle[]> {
+): cpz.ExchangeCandle[] {
   if (
     !inputCandles ||
     !Array.isArray(inputCandles) ||
@@ -131,76 +131,73 @@ async function batchCandles(
   return timeframeCandles;
 }
 
-async function createCandlesFromTrades(
+function createCandlesFromTrades(
   dateFrom: string,
   dateTo: string,
   timeframes: cpz.Timeframe[],
   trades: cpz.ExchangeTrade[]
-): Promise<cpz.ExchangeCandlesInTimeframes> {
+): cpz.ExchangeCandlesInTimeframes {
   try {
     const result: cpz.ExchangeCandlesInTimeframes = {};
     if (trades.length > 0) {
       const { exchange, asset, currency } = trades[0];
 
-      //TODO: optimize with worker_threads
-      await Promise.all(
-        timeframes.map(async timeframe => {
-          result[timeframe] = [];
-          let currentTrades = [...trades];
-          const duration = Timeframe.durationTimeframe(
+      timeframes.map(async timeframe => {
+        result[timeframe] = [];
+        let currentTrades = [...trades];
+        const duration = Timeframe.durationTimeframe(
+          dateFrom,
+          dateTo,
+          timeframe
+        );
+        if (duration > 0) {
+          const { unit, amountInUnit } = Timeframe.get(timeframe);
+          const dates = createDatesListWithRange(
             dateFrom,
             dateTo,
-            timeframe
+            unit,
+            amountInUnit,
+            duration
           );
-          if (duration > 0) {
-            const { unit, amountInUnit } = Timeframe.get(timeframe);
-            const dates = createDatesListWithRange(
-              dateFrom,
-              dateTo,
-              unit,
-              amountInUnit,
-              duration
-            );
 
-            await Promise.all(
-              dates.map(async date => {
-                const dateTrades = currentTrades.filter(
-                  trade =>
-                    trade.time >= date.dateFrom && trade.time <= date.dateTo
-                );
+          await Promise.all(
+            dates.map(async date => {
+              const dateTrades = currentTrades.filter(
+                trade =>
+                  trade.time >= date.dateFrom && trade.time <= date.dateTo
+              );
 
-                if (dateTrades && dateTrades.length > 0) {
-                  currentTrades = currentTrades.slice(dateTrades.length);
-                  const volume =
-                    +dateTrades.map(t => t.amount).reduce((a, b) => a + b, 0) ||
-                    0;
-                  const prices = dateTrades.map(t => +t.price);
-                  result[timeframe].push({
-                    exchange,
-                    asset,
-                    currency,
-                    timeframe: timeframe,
-                    time: +date.dateFrom, // время в милисекундах
-                    timestamp: dayjs.utc(date.dateFrom).toISOString(), // время в ISO UTC
-                    open: +dateTrades[0].price, // цена открытия - цена первого тика
-                    high: +Math.max(...prices), // максимальная цена тиков
-                    low: +Math.min(...prices), // минимальная цена тиков
-                    close: +dateTrades[dateTrades.length - 1].price, // цена закрытия - цена последнего тика
-                    volume, // объем - сумма объема всех тиков
-                    type:
-                      volume === 0
-                        ? cpz.CandleType.previous
-                        : cpz.CandleType.created // признак - свеча сформирована
-                  });
-                }
-              })
-            );
-            result[timeframe] = result[timeframe].sort((a, b) =>
-              sortAsc(a.time, b.time)
-            );
-          }
-        })
-      );
+              if (dateTrades && dateTrades.length > 0) {
+                currentTrades = currentTrades.slice(dateTrades.length);
+                const volume =
+                  +dateTrades.map(t => t.amount).reduce((a, b) => a + b, 0) ||
+                  0;
+                const prices = dateTrades.map(t => +t.price);
+                result[timeframe].push({
+                  exchange,
+                  asset,
+                  currency,
+                  timeframe: timeframe,
+                  time: +date.dateFrom, // время в милисекундах
+                  timestamp: dayjs.utc(date.dateFrom).toISOString(), // время в ISO UTC
+                  open: +dateTrades[0].price, // цена открытия - цена первого тика
+                  high: +Math.max(...prices), // максимальная цена тиков
+                  low: +Math.min(...prices), // минимальная цена тиков
+                  close: +dateTrades[dateTrades.length - 1].price, // цена закрытия - цена последнего тика
+                  volume, // объем - сумма объема всех тиков
+                  type:
+                    volume === 0
+                      ? cpz.CandleType.previous
+                      : cpz.CandleType.created // признак - свеча сформирована
+                });
+              }
+            })
+          );
+          result[timeframe] = result[timeframe].sort((a, b) =>
+            sortAsc(a.time, b.time)
+          );
+        }
+      });
     }
     return result;
   } catch (e) {

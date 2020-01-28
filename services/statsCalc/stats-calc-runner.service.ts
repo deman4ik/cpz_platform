@@ -36,7 +36,7 @@ class StatsCalcRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.handleStatsCalcRobotEvent
         },
@@ -49,7 +49,7 @@ class StatsCalcRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.handleStatsCalcUserRobotEvent
         }

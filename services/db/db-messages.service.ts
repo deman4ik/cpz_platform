@@ -45,7 +45,7 @@ class MessagesService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.supportMessage
         },
@@ -60,7 +60,7 @@ class MessagesService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.replySupportMessage
         }

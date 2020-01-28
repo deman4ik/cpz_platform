@@ -65,7 +65,7 @@ class AuthService extends Service {
           graphql: { query: "me:UserResponse!" },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.me
         },

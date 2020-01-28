@@ -52,7 +52,7 @@ class PublicConnectorService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           retryPolicy: {
             retries: 20,
