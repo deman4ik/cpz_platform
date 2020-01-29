@@ -43,7 +43,7 @@ class ImportersService extends Service {
               );
             }
           },
-          error: { type: Sequelize.JSONB, allowNull: true }
+          error: { type: Sequelize.STRING, allowNull: true }
         },
         options: {
           freezeTableName: true,

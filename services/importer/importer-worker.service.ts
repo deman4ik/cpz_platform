@@ -70,7 +70,7 @@ class ImporterWorkerService extends Service {
               progress: 0
             };
             try {
-              const currentState = await this.broker.call(
+              const currentState: cpz.Importer = await this.broker.call(
                 `${cpz.Service.DB_IMPORTERS}.get`,
                 { id: state.id }
               );
