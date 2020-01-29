@@ -25,7 +25,7 @@ class ExwatchersService extends Service {
             field: "importer_id",
             allowNull: true
           },
-          error: { type: Sequelize.JSONB, allowNull: true }
+          error: { type: Sequelize.STRING, allowNull: true }
         },
         options: {
           freezeTableName: true,
@@ -48,7 +48,7 @@ class ExwatchersService extends Service {
                 nodeID: "string",
                 importerId: { type: "string", optional: true },
                 error: {
-                  type: "object",
+                  type: "string",
                   optional: true
                 }
               }
@@ -84,7 +84,7 @@ class ExwatchersService extends Service {
         status,
         nodeID,
         importerId,
-        error: JSON.stringify(error)
+        error
       });
       const query = `INSERT INTO exwatchers 
         ( id, 
