@@ -575,7 +575,7 @@ declare namespace cpz {
     progress?: number;
     startedAt?: string;
     endedAt?: string;
-    error?: any;
+    error?: string;
   }
 
   interface Exwatcher {

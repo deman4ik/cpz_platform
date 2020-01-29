@@ -23,7 +23,7 @@ module.exports = {
       name: "backtester-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
+        "--env --config prod.config.js --instances=3 dist/services/backtester/backtester-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "backtester-worker"

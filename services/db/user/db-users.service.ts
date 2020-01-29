@@ -68,7 +68,7 @@ class UsersService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.setNotificationSettings
         }

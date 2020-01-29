@@ -58,7 +58,7 @@ class UserExchangeAccsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.upsert
         },
@@ -73,7 +73,7 @@ class UserExchangeAccsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.changeName
         },
@@ -93,7 +93,7 @@ class UserExchangeAccsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.delete
         }

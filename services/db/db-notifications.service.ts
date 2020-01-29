@@ -56,7 +56,7 @@ class NotificationsService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.broadcastMessage
         }

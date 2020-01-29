@@ -41,7 +41,7 @@ class MarketsService extends Service {
           params: { exchange: "string", asset: "string", currency: "string" },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.upsert
         }

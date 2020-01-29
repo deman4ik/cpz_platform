@@ -76,7 +76,7 @@ class ExwatcherService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           async handler(
             ctx: Context<{
@@ -117,7 +117,7 @@ class ExwatcherService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           async handler(
             ctx: Context<{
@@ -165,7 +165,7 @@ class ExwatcherService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           async handler(
             ctx: Context<{
@@ -206,7 +206,7 @@ class ExwatcherService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           async handler(
             ctx: Context<{

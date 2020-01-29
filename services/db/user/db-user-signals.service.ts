@@ -101,7 +101,7 @@ class UserSignalsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.subscribe
         },
@@ -114,7 +114,7 @@ class UserSignalsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.unsubscribe
         }

@@ -8,15 +8,14 @@ import {
   chunkDates,
   loadLimit,
   getValidDate,
-  handleCandleGaps,
-  createCandlesFromTrades,
   chunkArray,
-  uniqueElementsBy,
   round
 } from "../../utils";
 import { cpz } from "../../@types";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
+import { spawn, Pool, Worker } from "threads";
+import { ImporterUtils } from "../../workers/importer";
 
 class ImporterWorkerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -53,6 +52,8 @@ class ImporterWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`
       ],
+      started: this.startedService,
+      stopped: this.stoppedService,
       queues: {
         [cpz.Queue.importCandles]: {
           concurrency: 3,
@@ -69,7 +70,7 @@ class ImporterWorkerService extends Service {
               progress: 0
             };
             try {
-              const currentState = await this.broker.call(
+              const currentState: cpz.Importer = await this.broker.call(
                 `${cpz.Service.DB_IMPORTERS}.get`,
                 { id: state.id }
               );
@@ -127,6 +128,62 @@ class ImporterWorkerService extends Service {
       }
     });
   }
+
+  async startedService() {
+    this.pool = Pool(
+      () => spawn<ImporterUtils>(new Worker("../../workers/importer")),
+      {
+        concurrency: 2,
+        name: "importer"
+      }
+    );
+  }
+
+  async stoppedService() {
+    this.pool.terminate(true);
+  }
+
+  async uniqueCandles(
+    arr: cpz.Candle[],
+    dateStart: string,
+    dateStop: string
+  ): Promise<cpz.Candle[]> {
+    return this.pool.queue(async (utils: ImporterUtils) =>
+      utils.uniqueCandles(arr, dateStart, dateStop)
+    );
+  }
+
+  async uniqueTrades(
+    trades: cpz.ExchangeTrade[],
+    dateFrom: string,
+    dateTo: string
+  ): Promise<cpz.ExchangeTrade[]> {
+    return this.pool.queue(async (utils: ImporterUtils) =>
+      utils.uniqueTrades(trades, dateFrom, dateTo)
+    );
+  }
+
+  async createCandlesFromTrades(
+    dateFrom: string,
+    dateTo: string,
+    timeframes: cpz.Timeframe[],
+    trades: cpz.ExchangeTrade[]
+  ): Promise<cpz.ExchangeCandlesInTimeframes> {
+    return this.pool.queue(async (utils: ImporterUtils) =>
+      utils.createCandlesFromTrades(dateFrom, dateTo, timeframes, trades)
+    );
+  }
+
+  async handleCandleGaps(
+    dateFromInput: string,
+    dateTo: string,
+    inputCandles: cpz.ExchangeCandle[]
+  ): Promise<cpz.ExchangeCandle[]> {
+    return this.pool.queue(async (utils: ImporterUtils) =>
+      utils.handleCandleGaps(dateFromInput, dateTo, inputCandles)
+    );
+  }
+
   async importerRecent(job: Job, state: cpz.Importer) {
     try {
       const {
@@ -205,7 +262,7 @@ class ImporterWorkerService extends Service {
               .toISOString(),
             dateTo: loadDateTo
           });
-          const candlesInTimeframes = await createCandlesFromTrades(
+          const candlesInTimeframes = await this.createCandlesFromTrades(
             loadDateFrom,
             loadDateTo,
             timeframes,
@@ -213,7 +270,7 @@ class ImporterWorkerService extends Service {
           );
           if (candlesInTimeframes) {
             for (const timeframe of Object.keys(candlesInTimeframes)) {
-              candlesInTimeframes[+timeframe] = await handleCandleGaps(
+              candlesInTimeframes[+timeframe] = await this.handleCandleGaps(
                 paramsDateFrom,
                 dateTo,
                 candlesInTimeframes[+timeframe]
@@ -381,16 +438,11 @@ class ImporterWorkerService extends Service {
           })
         );
 
-        result[timeframe] = uniqueElementsBy(
+        result[timeframe] = await this.uniqueCandles(
           [].concat(...loadResults),
-          (a, b) => a.time === b.time
-        )
-          .filter(
-            candle =>
-              candle.time >= dayjs.utc(dateStart).valueOf() &&
-              candle.time <= dayjs.utc(dateStop).valueOf()
-          )
-          .sort((a, b) => sortAsc(a.time, b.time));
+          dateStart,
+          dateStop
+        );
       })
     );
     return result;
@@ -427,7 +479,7 @@ class ImporterWorkerService extends Service {
     dateFrom: string;
     dateTo: string;
   }): Promise<cpz.ExchangeTrade[]> {
-    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.day, 30, 1);
+    const { chunks } = chunkDates(dateFrom, dateTo, cpz.TimeUnit.hour, 6, 1);
 
     const loadedChunks = await Promise.all(
       chunks.map(async ({ dateFrom: loadDateFrom, dateTo: loadDateTo }) => {
@@ -435,7 +487,7 @@ class ImporterWorkerService extends Service {
         let dateNext = dayjs.utc(loadDateFrom);
         while (dateNext.valueOf() <= dayjs.utc(loadDateTo).valueOf()) {
           try {
-            const response = await this.broker.call(
+            const response: cpz.ExchangeTrade[] = await this.broker.call(
               `${cpz.Service.PUBLIC_CONNECTOR}.getTrades`,
               {
                 exchange,
@@ -451,20 +503,11 @@ class ImporterWorkerService extends Service {
               throw new Error("Wrong connector response");
             dateNext = dayjs.utc(loadDateTo);
             if (response.length > 0) {
-              loadedTrades = uniqueElementsBy(
+              loadedTrades = await this.uniqueTrades(
                 [...loadedTrades, ...response],
-                (a, b) =>
-                  a.time === b.time &&
-                  a.price === b.price &&
-                  a.amount === b.amount &&
-                  a.side === b.side
-              )
-                .filter(
-                  trade =>
-                    trade.time >= dayjs.utc(dateFrom).valueOf() &&
-                    trade.time <= dayjs.utc(dateTo).valueOf()
-                )
-                .sort((a, b) => sortAsc(a.time, b.time));
+                dateFrom,
+                dateTo
+              );
 
               dateNext = dayjs.utc(response[response.length - 1].timestamp);
             }

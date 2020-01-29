@@ -63,7 +63,7 @@ class ImporterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.startRecent
         },
@@ -101,7 +101,7 @@ class ImporterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.startHistory
         },
@@ -128,7 +128,7 @@ class ImporterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.clean
         },
@@ -141,7 +141,7 @@ class ImporterRunnerService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.getStatus
         }

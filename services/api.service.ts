@@ -84,7 +84,7 @@ class ApiService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.getNodesList
         },
@@ -94,7 +94,7 @@ class ApiService extends Service {
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.getServicesList
         }

@@ -109,7 +109,7 @@ class UserRobotsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.create
         },
@@ -122,7 +122,7 @@ class UserRobotsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.delete
         },
@@ -153,7 +153,7 @@ class UserRobotsService extends Service {
           },
           roles: [cpz.UserRoles.user],
           hooks: {
-            before: "authAction"
+            before: this.authAction
           },
           handler: this.edit
         },
