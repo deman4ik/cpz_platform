@@ -75,7 +75,7 @@ class ImportersService extends Service {
                   optional: true
                 },
                 error: {
-                  type: "object",
+                  type: "string",
                   optional: true
                 }
               }
@@ -113,7 +113,7 @@ class ImportersService extends Service {
         progress,
         startedAt,
         endedAt,
-        error: JSON.stringify(error)
+        error
       });
       const query = `INSERT INTO importers 
     (id, exchange, asset, currency, type, params, status, progress, started_at, ended_at, error) 
