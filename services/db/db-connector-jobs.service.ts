@@ -40,69 +40,11 @@ class ConnectorJobsService extends Service {
         }
       },
       actions: {
-        upsert: {
-          params: {
-            entity: {
-              type: "object",
-              props: {
-                id: "string",
-                userExAccId: "string",
-                orderId: "string",
-                type: "string",
-                priority: { type: "number", integer: true },
-                nextJobAt: "string",
-                data: { type: "object", optional: true }
-              }
-            }
-          },
-          handler: this.upsert
-        },
         getUserExAccsWithJobs: {
           handler: this.getUserExAccsWithJobs
         }
       }
     });
-  }
-
-  async upsert(ctx: Context<{ entity: cpz.ConnectorJob }>) {
-    try {
-      const {
-        userExAccId,
-        type,
-        orderId,
-        priority,
-        nextJobAt,
-        data
-      } = ctx.params.entity;
-      const value = Object.values({
-        userExAccId,
-        orderId,
-        type,
-        priority,
-        nextJobAt,
-        data: JSON.stringify(data)
-      });
-      const query = `INSERT INTO connector_jobs
-     (  
-        user_ex_acc_id,
-        order_id,
-        type,
-        priority,
-        next_job_at,
-        data
-        ) 
-        VALUES (?)
-         ON CONFLICT ON CONSTRAINT connector_jobs_order_id_type_key 
-         DO NOTHING`;
-
-      await this.adapter.db.query(query, {
-        type: Sequelize.QueryTypes.INSERT,
-        replacements: [value]
-      });
-    } catch (e) {
-      this.logger.error(e);
-      throw new Errors.MoleculerError(e.message, 500, `ERR_${this.name}`, e);
-    }
   }
 
   async getUserExAccsWithJobs(ctx: Context): Promise<string[]> {
