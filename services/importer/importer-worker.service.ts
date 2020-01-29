@@ -134,8 +134,7 @@ class ImporterWorkerService extends Service {
       () => spawn<ImporterUtils>(new Worker("../../workers/importer")),
       {
         concurrency: 2,
-        name: "importer",
-        size: 8
+        name: "importer"
       }
     );
   }
