@@ -142,7 +142,7 @@ class PricateConnectorRunnerService extends Service {
 
   async addJob(ctx: Context<cpz.ConnectorJob>) {
     try {
-      await ctx.call(`${cpz.Service.DB_CONNECTOR_JOBS}.upsert`, {
+      await ctx.call(`${cpz.Service.DB_CONNECTOR_JOBS}.insert`, {
         entity: ctx.params
       });
       this.logger.info(
