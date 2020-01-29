@@ -79,33 +79,13 @@ module.exports = {
       }
     },
     {
-      name: "importer-worker-1",
+      name: "importer-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
         "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "importer-worker-1"
-      }
-    },
-    {
-      name: "importer-worker-2",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "importer-worker-2"
-      }
-    },
-    {
-      name: "importer-worker-3",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "importer-worker-3"
+        NODEID: "importer-worker"
       }
     },
     {
