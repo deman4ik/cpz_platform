@@ -109,7 +109,7 @@ class AuthService extends Service {
       this.logger.error(e);
       return {
         success: false,
-        error: e
+        error: e.message
       };
     }
   }
@@ -158,7 +158,7 @@ class AuthService extends Service {
       this.logger.error(e);
       return {
         success: false,
-        error: e
+        error: e.message
       };
     }
   }

@@ -113,7 +113,7 @@ class ImporterWorkerService extends Service {
               if (e instanceof Errors.ValidationError) {
                 return {
                   success: false,
-                  state: { id: job.id, error: e }
+                  state: { id: job.id, error: e.message }
                 };
               }
               throw new Errors.MoleculerError(
