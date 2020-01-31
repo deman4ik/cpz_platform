@@ -34,6 +34,10 @@ class StatsCalcRunnerService extends Service {
             exchange: "string",
             asset: "string"
           },
+          graphql: {
+            mutation:
+              "statsCalcRobot(robotId:String!, exchange:String!, asset:String!):Response!"
+          },
           roles: [cpz.UserRoles.admin],
           hooks: {
             before: this.authAction
@@ -46,6 +50,10 @@ class StatsCalcRunnerService extends Service {
             userId: "string",
             exchange: "string",
             asset: "string"
+          },
+          graphql: {
+            mutation:
+              "statsCalcUserRobot(userRobotId:String!, userId:String!, exchange:String!, asset:String!):Response!"
           },
           roles: [cpz.UserRoles.admin],
           hooks: {
@@ -147,8 +155,10 @@ class StatsCalcRunnerService extends Service {
         exchange,
         asset
       });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -226,8 +236,10 @@ class StatsCalcRunnerService extends Service {
           asset
         });
       }
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -316,8 +328,10 @@ class StatsCalcRunnerService extends Service {
           asset
         });
       }
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -340,8 +354,10 @@ class StatsCalcRunnerService extends Service {
           asset
         });
       }
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -396,8 +412,10 @@ class StatsCalcRunnerService extends Service {
         exchange,
         asset
       });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -433,8 +451,10 @@ class StatsCalcRunnerService extends Service {
         exchange,
         asset
       });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 }
