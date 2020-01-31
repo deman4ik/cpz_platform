@@ -278,7 +278,7 @@ class RobotRunnerService extends Service {
       return { success: true, id, status: cpz.Status.starting };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id: ctx.params.id, error: e };
+      return { success: false, id: ctx.params.id, error: e.message };
     }
   }
 
@@ -316,7 +316,7 @@ class RobotRunnerService extends Service {
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id: ctx.params.id, error: e };
+      return { success: false, id: ctx.params.id, error: e.message };
     }
   }
 
@@ -352,7 +352,7 @@ class RobotRunnerService extends Service {
       };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id: ctx.params.id, error: e };
+      return { success: false, id: ctx.params.id, error: e.message };
     }
   }
 
@@ -406,7 +406,7 @@ class RobotRunnerService extends Service {
       return { success: true, result: robotsToPause.length };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 
@@ -447,7 +447,7 @@ class RobotRunnerService extends Service {
       return { success: true, result: robotIds.length };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 

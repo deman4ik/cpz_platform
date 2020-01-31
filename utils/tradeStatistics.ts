@@ -53,6 +53,14 @@ function calcMaxDrawdown(positions: cpz.PositionDataForStats[]) {
   };
 }
 
+const cumulativeProfit = (sum => ({
+  exitDate,
+  profit
+}: cpz.PositionDataForStats) => ({
+  exitDate,
+  profit: sum += profit
+}))(0);
+
 function calcStatistics(
   positions: cpz.PositionDataForStats[]
 ): {
@@ -84,6 +92,7 @@ function calcStatistics(
     long: longPositions.length,
     short: shortPositions.length
   };
+  equity.tradesCount = allPositions.length;
 
   const allWinningPositions = allPositions.filter(({ profit }) => +profit > 0);
   const longWinningPositions = longPositions.filter(
@@ -124,6 +133,7 @@ function calcStatistics(
       2
     )
   };
+  equity.winRate = statistics.winRate.all;
 
   // Loss trades / Number of trades
   statistics.lossRate = {
@@ -375,6 +385,7 @@ function calcStatistics(
     long: longMaxDrawdown,
     short: shortMaxDrawdown
   };
+  equity.maxDrawdown = statistics.maxDrawdown.all;
 
   statistics.maxDrawdownDate = {
     all: allMaxDrawdownPos && allMaxDrawdownPos.exitDate,
@@ -401,20 +412,27 @@ function calcStatistics(
   const maxEquityLength = 50;
   let chunkLength;
 
-  if (allPositions.length < maxEquityLength) {
+  const equityChart = allPositions.map(cumulativeProfit);
+
+  statistics.perfomance = equityChart.map(({ exitDate, profit }) => ({
+    x: dayjs.utc(exitDate).valueOf(),
+    y: profit
+  }));
+
+  if (equityChart.length < maxEquityLength) {
     chunkLength = 1;
   } else if (
-    allPositions.length > maxEquityLength &&
-    allPositions.length < maxEquityLength * 2
+    equityChart.length > maxEquityLength &&
+    equityChart.length < maxEquityLength * 2
   ) {
     chunkLength = 1.5;
   } else {
-    chunkLength = allPositions.length / maxEquityLength;
+    chunkLength = equityChart.length / maxEquityLength;
   }
-  const positionChunks = chunkArray(allPositions, chunkLength);
-  equity.changes = positionChunks.map(chunk => ({
+  const equityChunks = chunkArray(equityChart, chunkLength);
+  equity.changes = equityChunks.map(chunk => ({
     x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
-    y: round(average(...chunk.map(c => +c.profit)),2)
+    y: round(average(...chunk.map(c => +c.profit)), 2)
   }));
 
   return { statistics, equity };

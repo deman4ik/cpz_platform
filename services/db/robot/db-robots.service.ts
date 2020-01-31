@@ -310,7 +310,7 @@ class RobotsService extends Service {
       return { success: true, result: `Imported ${importedCount} robots` };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 

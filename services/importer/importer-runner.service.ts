@@ -221,7 +221,7 @@ class ImporterRunnerService extends Service {
       return { success: true, id, status: state.status };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id, error: e };
+      return { success: false, id, error: e.message };
     }
   }
 
@@ -290,7 +290,7 @@ class ImporterRunnerService extends Service {
       return { success: true, id, status: state.status };
     } catch (e) {
       this.logger.error(e);
-      return { success: false, id, error: e };
+      return { success: false, id, error: e.message };
     }
   }
 

@@ -142,7 +142,7 @@ class ExwatcherService extends Service {
               return { success: true };
             } catch (e) {
               this.logger.error(e);
-              return { success: false, error: e };
+              return { success: false, error: e.message };
             }
           }
         },
@@ -235,7 +235,7 @@ class ExwatcherService extends Service {
               return { success: true };
             } catch (e) {
               this.logger.error(e);
-              return { success: false, error: e };
+              return { success: false, error: e.message };
             }
           }
         }

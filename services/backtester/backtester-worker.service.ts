@@ -479,7 +479,7 @@ class BacktesterWorkerService extends Service {
           id: backtesterState.id,
           error: e
         });
-      return { success: false, error: e };
+      return { success: false, error: e.message };
     }
   }
 }
