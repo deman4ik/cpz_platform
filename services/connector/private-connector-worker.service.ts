@@ -18,7 +18,7 @@ import { v4 as uuid } from "uuid";
 /**
  * Available exchanges
  */
-type ExchangeName = "kraken" | "bitfinex";
+type ExchangeName = "kraken" | "bitfinex" | "binance";
 
 /**
  * Private Exchange Connector Worker Service
@@ -193,12 +193,20 @@ class PrivateConnectorWorkerService extends Service {
   ) {
     try {
       const { exchange, key, secret, pass } = ctx.params;
-      const connector = new ccxt[exchange]({
+      const config: { [key: string]: any } = {
         apiKey: key,
         secret,
         password: pass,
         fetchImplementation: this._fetch
-      });
+      };
+      let connector: ccxt.Exchange;
+      if (exchange === "bitfinex" || exchange === "kraken") {
+        connector = new ccxt[exchange](config);
+      } else if (exchange === "binance") {
+        config.options = { defaultType: "futures" };
+        connector = new ccxt.binance(config);
+      } else throw new Error("Unsupported exchange");
+
       const getBalanceCall = async (bail: (e: Error) => void) => {
         try {
           return await connector.fetchBalance();
@@ -437,7 +445,7 @@ class PrivateConnectorWorkerService extends Service {
       const apiKey = await decrypt(userId, encryptedKey);
       const secret = await decrypt(userId, encryptedSecret);
       const password = encryptedPass && (await decrypt(userId, encryptedPass));
-      this.connectors[id] = new ccxt[<ExchangeName>exchange]({
+      const config: { [key: string]: any } = {
         apiKey,
         secret,
         password,
@@ -447,7 +455,14 @@ class PrivateConnectorWorkerService extends Service {
         nonce() {
           return this.milliseconds();
         }
-      });
+      };
+
+      if (exchange === "bitfinex" || exchange === "kraken") {
+        this.connectors[id] = new ccxt[<ExchangeName>exchange](config);
+      } else if (exchange === "binance") {
+        config.options = { defaultType: "futures" };
+        this.connectors[id] = new ccxt.binance(config);
+      } else throw new Error("Unsupported exchange");
     }
   }
 

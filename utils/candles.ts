@@ -322,6 +322,8 @@ function loadLimit(exchange: string) {
       return 950;
     case "kraken":
       return 450;
+    case "binance":
+      return 1000;
     default:
       return 250;
   }

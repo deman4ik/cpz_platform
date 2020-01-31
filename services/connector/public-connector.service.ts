@@ -17,7 +17,7 @@ import Timeframe from "../../utils/timeframe";
 /**
  * Available exchanges
  */
-type ExchangeName = "kraken" | "bitfinex";
+type ExchangeName = "kraken" | "bitfinex" | "binance";
 
 /**
  * Public Exchange Connector Service
@@ -287,10 +287,8 @@ class PublicConnectorService extends Service {
     minTimeout: 0,
     maxTimeout: 0,
     onRetry: (err: any, i: number) => {
-      //this.logger.info("Retry", i);
       if (err) {
-        // eslint-disable-next-line no-console
-        //this.logger.warn("Retry error : ", err);
+        this.logger.warn(`Retry ${i}error : `, err);
       }
     }
   };
@@ -311,9 +309,16 @@ class PublicConnectorService extends Service {
    */
   async initConnector(exchange: ExchangeName): Promise<void> {
     if (!(exchange in this.connectors)) {
-      this.connectors[exchange] = new ccxt[exchange]({
+      const config: { [key: string]: any } = {
         fetchImplementation: this._fetch
-      });
+      };
+      if (exchange === "bitfinex" || exchange === "kraken") {
+        this.connectors[exchange] = new ccxt[exchange](config);
+      } else if (exchange === "binance") {
+        config.options = { defaultType: "futures" };
+        this.connectors[exchange] = new ccxt.binance(config);
+      } else throw new Error("Unsupported exchange");
+
       const call = async (bail: (e: Error) => void) => {
         try {
           return await this.connectors[exchange].loadMarkets();
@@ -370,7 +375,7 @@ class PublicConnectorService extends Service {
           .add(1, cpz.TimeUnit.day)
           .startOf(cpz.TimeUnit.day)
           .toISOString();
-    } else if (exchange === "bitfinex") {
+    } else {
       const [firstCandle] = await this.getRawCandles(
         exchange,
         asset,
