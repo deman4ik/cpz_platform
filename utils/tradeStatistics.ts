@@ -416,7 +416,7 @@ function calcStatistics(
 
   statistics.perfomance = equityChart.map(({ exitDate, profit }) => ({
     x: dayjs.utc(exitDate).valueOf(),
-    y: profit
+    y: round(profit, 2)
   }));
 
   if (equityChart.length < maxEquityLength) {
@@ -432,7 +432,7 @@ function calcStatistics(
   const equityChunks = chunkArray(equityChart, chunkLength);
   equity.changes = equityChunks.map(chunk => ({
     x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
-    y: round(chunk[chunk.length - 1].profit, 2)
+    y: round(average(...chunk.map(c => +c.profit)), 2)
   }));
 
   return { statistics, equity };
