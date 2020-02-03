@@ -55,9 +55,9 @@ const adapter = new SqlAdapter(
     },
     logging: false,
     pool: {
-      max: 6,
+      max: 5,
       min: 1,
-      acquire: 25000,
+      acquire: 20000,
       idle: 20000
     }
   }
