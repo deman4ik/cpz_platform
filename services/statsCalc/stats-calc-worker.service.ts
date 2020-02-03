@@ -2,8 +2,10 @@ import { Service, ServiceBroker, Context } from "moleculer";
 import QueueService from "moleculer-bull";
 import { Job } from "bull";
 import { cpz } from "../../@types";
-import { calcStatistics, round } from "../../utils";
+import { round } from "../../utils";
 import dayjs from "../../lib/dayjs";
+import { spawn, Pool, Worker } from "threads";
+import { StatisticUtils } from "../../workers/statistic";
 
 class StatsCalcWorkerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -42,8 +44,30 @@ class StatsCalcWorkerService extends Service {
             return { success: true, id: job.id };
           }
         }
-      }
+      },
+      started: this.startedService,
+      stopped: this.stoppedService
     });
+  }
+
+  async startedService() {
+    this.pool = Pool(
+      () => spawn<StatisticUtils>(new Worker("../../workers/statistic")),
+      {
+        concurrency: 5,
+        name: "statistic"
+      }
+    );
+  }
+
+  async stoppedService() {
+    this.pool.terminate(true);
+  }
+
+  async calcStatistics(positions: cpz.PositionDataForStats[]) {
+    return this.pool.queue(async (utils: StatisticUtils) =>
+      utils.calcStatistics(positions)
+    );
   }
 
   async run(job: cpz.StatsCalcJob) {
@@ -79,7 +103,7 @@ class StatsCalcWorkerService extends Service {
         }
       }
     );
-    const { statistics, equity } = calcStatistics(positions);
+    const { statistics, equity } = await this.calcStatistics(positions);
     await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
       id: robotId,
       statistics,
@@ -140,7 +164,9 @@ class StatsCalcWorkerService extends Service {
               profit
             };
           });
-          const { statistics, equity } = calcStatistics(signalPositions);
+          const { statistics, equity } = await this.calcStatistics(
+            signalPositions
+          );
           await this.broker.call(`${cpz.Service.DB_USER_SIGNALS}.update`, {
             id: userSignal.id,
             statistics,
@@ -215,7 +241,9 @@ class StatsCalcWorkerService extends Service {
                 profit
               };
             });
-            const { statistics, equity } = calcStatistics(signalPositions);
+            const { statistics, equity } = await this.calcStatistics(
+              signalPositions
+            );
 
             await this.broker.call(`${cpz.Service.DB_USER_SIGNALS}.update`, {
               id: userSignal.id,
@@ -262,7 +290,7 @@ class StatsCalcWorkerService extends Service {
           profit
         };
       });
-      const { statistics, equity } = calcStatistics(signalPositions);
+      const { statistics, equity } = await this.calcStatistics(signalPositions);
       await this.broker.call(`${cpz.Service.DB_USER_AGGR_STATS}.upsert`, {
         userId,
         exchange,
@@ -289,7 +317,7 @@ class StatsCalcWorkerService extends Service {
         }
       }
     );
-    const { statistics, equity } = calcStatistics(positions);
+    const { statistics, equity } = await this.calcStatistics(positions);
     await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
       id: userRobotId,
       statistics,
@@ -315,7 +343,7 @@ class StatsCalcWorkerService extends Service {
         query
       }
     );
-    const { statistics, equity } = calcStatistics(positions);
+    const { statistics, equity } = await this.calcStatistics(positions);
     await this.broker.call(`${cpz.Service.DB_USER_AGGR_STATS}.upsert`, {
       userId,
       exchange,
