@@ -414,7 +414,7 @@ function calcStatistics(
 
   const equityChart = allPositions.map(cumulativeProfit);
 
-  statistics.perfomance = equityChart.map(({ exitDate, profit }) => ({
+  statistics.performance = equityChart.map(({ exitDate, profit }) => ({
     x: dayjs.utc(exitDate).valueOf(),
     y: round(profit, 2)
   }));

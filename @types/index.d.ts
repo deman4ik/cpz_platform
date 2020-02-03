@@ -780,7 +780,7 @@ declare namespace cpz {
 
   interface RobotStats {
     lastUpdatedAt?: string;
-    perfomance?: { x: number; y: number }[];
+    performance?: { x: number; y: number }[];
     tradesCount?: RobotStatVals<number>;
     tradesWinning?: RobotStatVals<number>;
     tradesLosing?: RobotStatVals<number>;
