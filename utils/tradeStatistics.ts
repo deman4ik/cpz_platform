@@ -85,7 +85,7 @@ function calcStatistics(
     ({ direction }) => direction === cpz.PositionDirection.short
   );
   const lastPosition = allPositions[allPositions.length - 1];
-  equity.lastProfit = lastPosition.profit;
+  equity.lastProfit = round(lastPosition.profit, 2);
 
   statistics.tradesCount = {
     all: allPositions.length,
