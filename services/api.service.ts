@@ -120,7 +120,7 @@ class ApiService extends Service {
 
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
-        httpOnly: true
+        httpOnly: false
       });
       res.end(
         JSON.stringify({
@@ -173,7 +173,7 @@ class ApiService extends Service {
       });
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
-        httpOnly: true
+        httpOnly: false
       });
       res.end(
         JSON.stringify({
