@@ -68,7 +68,8 @@ class ApiService extends Service {
       settings: {
         port: process.env.PORT || 3000,
         cors: {
-          origin: "*"
+          origin: "*",
+          credentials: true
         },
         routes: [
           {
