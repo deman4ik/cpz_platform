@@ -108,9 +108,6 @@ class UserRobotsService extends Service {
               "userRobotCreate(userExAccId: String!, robotId: String!, settings: UserRobotSettings!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.create
         },
         delete: {
@@ -121,9 +118,6 @@ class UserRobotsService extends Service {
             mutation: "userRobotDelete(id: String!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.delete
         },
         edit: {
@@ -152,9 +146,6 @@ class UserRobotsService extends Service {
               "userRobotEdit(id: String!, settings: UserRobotSettings!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.edit
         },
         getRobots: {
@@ -199,6 +190,7 @@ class UserRobotsService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       const { userExAccId, robotId, settings } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const userExAccExists: cpz.UserExchangeAccount = await ctx.call(
@@ -280,6 +272,7 @@ class UserRobotsService extends Service {
 
   async delete(ctx: Context<{ id: string }, { user: cpz.User }>) {
     try {
+      this.authAction(ctx);
       const { id } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const userRobotExists: cpz.UserRobotDB = await this._get(ctx, {
@@ -325,6 +318,7 @@ class UserRobotsService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       const { id, settings } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const userRobotExists: cpz.UserRobotDB = await this._get(ctx, {

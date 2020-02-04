@@ -211,7 +211,7 @@ const brokerConfig = {
 
   // Enable metrics function. More info: https://moleculer.services/docs/0.13/metrics.html
   metrics: {
-    enabled: true,
+    enabled: false,
     reporter: {
       type: "Event",
       options: {

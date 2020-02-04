@@ -77,9 +77,6 @@ class BacktesterRunnerService extends Service {
               "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: BacktestSettings, robotSettings: JSON): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.start
         },
         clean: {
@@ -100,12 +97,10 @@ class BacktesterRunnerService extends Service {
             }
           },
           graphql: {
-            mutation: "backtestCleanJobs(period: Int, status: String): JSON"
+            mutation:
+              "backtestCleanJobs(period: Int, status: String): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.clean
         },
         getStatus: {
@@ -113,12 +108,9 @@ class BacktesterRunnerService extends Service {
             id: "string"
           },
           graphql: {
-            query: "backtestJobStatus(id: ID!): JSON!"
+            query: "backtestJobStatus(id: ID!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getStatus
         }
       },
@@ -167,6 +159,7 @@ class BacktesterRunnerService extends Service {
   ) {
     const id = ctx.params.id || uuid();
     try {
+      this.authAction(ctx);
       const { robotId, dateFrom, dateTo, settings, robotSettings } = ctx.params;
 
       if (settings && settings.populateHistory && id !== robotId)
@@ -209,16 +202,29 @@ class BacktesterRunnerService extends Service {
       status?: string;
     }>
   ) {
-    return await this.getQueue(cpz.Queue.backtest).clean(
-      ctx.params.period || 5000,
-      ctx.params.status || "completed"
-    );
+    try {
+      this.authAction(ctx);
+      const result = await this.getQueue(cpz.Queue.backtest).clean(
+        ctx.params.period || 5000,
+        ctx.params.status || "completed"
+      );
+      return { success: true, result };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
   }
 
   async getStatus(ctx: Context<{ id: string }>) {
-    const job = await this.getQueue(cpz.Queue.backtest).getJob(ctx.params.id);
-    const status = await job.getState();
-    return { id: ctx.params.id, status };
+    try {
+      this.authAction(ctx);
+      const job = await this.getQueue(cpz.Queue.backtest).getJob(ctx.params.id);
+      const status = await job.getState();
+      return { success: true, result: { id: ctx.params.id, status } };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
   }
 }
 

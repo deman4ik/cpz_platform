@@ -55,9 +55,6 @@ class NotificationsService extends Service {
             mutation: "broadcastMessage(message: String!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.broadcastMessage
         }
       },
@@ -79,6 +76,7 @@ class NotificationsService extends Service {
 
   async broadcastMessage(ctx: Context<{ message: string }>) {
     try {
+      this.authAction(ctx);
       const userslist = await ctx.call<
         { id: string; telegramId: number }[],
         {

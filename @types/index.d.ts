@@ -963,8 +963,10 @@ declare namespace cpz {
     telegramUsername?: string;
     status: UserStatus;
     passwordHash?: string;
-    registrationCode?: string;
+    secretCode?: string;
+    secretCodeExpireAt?: string;
     refreshToken?: string;
+    refreshTokenExpireAt?: string;
     roles: UserRolesList;
     settings: UserSettings;
   }

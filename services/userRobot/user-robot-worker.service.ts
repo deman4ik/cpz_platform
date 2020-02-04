@@ -107,9 +107,19 @@ class UserRobotWorkerService extends Service {
         userRobot.handleOrder(<cpz.Order>data);
       } else if (type === cpz.UserRobotJobType.stop) {
         // Stop robot
+        if (
+          userRobot.status === cpz.Status.stopping ||
+          userRobot.status === cpz.Status.stopped
+        )
+          return userRobot.status;
         userRobot.stop(<{ message?: string }>data);
       } else if (type === cpz.UserRobotJobType.pause) {
         // Pause robot
+        if (
+          userRobot.status === cpz.Status.paused ||
+          userRobot.status === cpz.Status.stopped
+        )
+          return userRobot.status;
         userRobot.pause(<{ message?: string }>data);
       } else {
         throw new Error(`Unknown type "${type}"`);

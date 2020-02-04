@@ -48,12 +48,9 @@ class PublicConnectorService extends Service {
           },
           graphql: {
             query:
-              "getMarket(exchange: String!, asset: String!, currency: String!): JSON!"
+              "getMarket(exchange: String!, asset: String!, currency: String!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           retryPolicy: {
             retries: 20,
             delay: 100,
@@ -65,11 +62,18 @@ class PublicConnectorService extends Service {
           async handler(
             ctx: Context<{ exchange: string; asset: string; currency: string }>
           ) {
-            return this.getMarket(
-              ctx.params.exchange,
-              ctx.params.asset,
-              ctx.params.currency
-            );
+            try {
+              this.authAction(ctx);
+              const result = this.getMarket(
+                ctx.params.exchange,
+                ctx.params.asset,
+                ctx.params.currency
+              );
+              return { success: true, result };
+            } catch (e) {
+              this.logger.warn(e);
+              return { success: false, error: e.message };
+            }
           }
         },
         getTimeframes: {

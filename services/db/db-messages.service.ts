@@ -44,9 +44,6 @@ class MessagesService extends Service {
             message: "string"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.supportMessage
         },
         replySupportMessage: {
@@ -59,9 +56,6 @@ class MessagesService extends Service {
               "replySupportMessage(to: String!, message: String!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.replySupportMessage
         }
       }
@@ -70,6 +64,7 @@ class MessagesService extends Service {
 
   async supportMessage(ctx: Context<{ message: string }, { user: cpz.User }>) {
     try {
+      this.authAction(ctx);
       const { message } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const newMessage: cpz.Message = {
@@ -102,6 +97,7 @@ class MessagesService extends Service {
     ctx: Context<{ to: string; message: string }, { user: cpz.User }>
   ) {
     try {
+      this.authAction(ctx);
       const { to, message } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const userTo = await ctx.call(`${cpz.Service.DB_USERS}.get`, {

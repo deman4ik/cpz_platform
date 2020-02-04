@@ -3,6 +3,7 @@ import ApiGateway from "moleculer-web";
 import { ApolloService } from "moleculer-apollo-server";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLDateTime } from "graphql-iso-date";
+import Cookies from "cookies";
 import { cpz } from "../@types";
 import Auth from "../mixins/auth";
 class ApiService extends Service {
@@ -66,9 +67,18 @@ class ApiService extends Service {
       ],
       settings: {
         port: process.env.PORT || 3000,
+        cors: {
+          origin: "*",
+          credentials: true
+        },
         routes: [
           {
-            mappingPolicy: "restrict"
+            mappingPolicy: "restrict",
+            aliases: {
+              "POST /auth/login": this.login,
+              "POST /auth/register": this.register,
+              "POST /auth/refresh-token": this.refreshToken
+            }
           }
         ],
         whitelist: [],
@@ -83,9 +93,6 @@ class ApiService extends Service {
             query: `nodesList: JSON!`
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getNodesList
         },
         servicesList: {
@@ -93,21 +100,111 @@ class ApiService extends Service {
             query: `servicesList: JSON!`
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getServicesList
         }
       }
     });
   }
 
+  async login(req: any, res: any) {
+    try {
+      const {
+        accessToken,
+        accessTokenExpireAt,
+        refreshToken,
+        refreshTokenExpireAt,
+        userId
+      } = await req.$service.broker.call(`${cpz.Service.AUTH}.login`, req.body);
+
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken,
+          accessTokenExpireAt,
+          userId
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async register(req: any, res: any) {
+    try {
+      const userId = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.register`,
+        req.body
+      );
+      res.end(JSON.stringify({ success: true, userId }));
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async registerTelegram(req: any, res: any) {
+    try {
+      res.end(JSON.stringify({ success: true }));
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async refreshToken(req: any, res: any) {
+    try {
+      const cookies = new Cookies(req, res);
+      const oldRefreshToken = cookies.get("refresh_token");
+      const {
+        accessToken,
+        accessTokenExpireAt,
+        refreshToken,
+        refreshTokenExpireAt,
+        userId
+      } = await req.$service.broker.call(`${cpz.Service.AUTH}.refreshToken`, {
+        refreshToken: oldRefreshToken
+      });
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken,
+          accessTokenExpireAt,
+          userId
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
   async getNodesList(ctx: Context) {
-    return await ctx.call("$node.list");
+    try {
+      this.authAction(ctx);
+      return await ctx.call("$node.list");
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 
   async getServicesList(ctx: Context) {
-    return await ctx.call("$node.services");
+    try {
+      this.authAction(ctx);
+      return await ctx.call("$node.services");
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 
   async checkAuth(

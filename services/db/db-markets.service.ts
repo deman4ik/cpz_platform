@@ -40,9 +40,6 @@ class MarketsService extends Service {
           },
           params: { exchange: "string", asset: "string", currency: "string" },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.upsert
         }
       },
@@ -108,14 +105,16 @@ class MarketsService extends Service {
     }>
   ) {
     try {
-      const market = await ctx.call<
-        cpz.Market,
+      this.authAction(ctx);
+      const { result: market, error } = await ctx.call<
+        { success: boolean; result?: cpz.Market; error?: string },
         {
           exchange: string;
           asset: string;
           currency: string;
         }
       >(`${cpz.Service.PUBLIC_CONNECTOR}.getMarket`, ctx.params);
+      if (error) throw new Error(error);
 
       const [exists] = await this.adapter.find({
         query: ctx.params

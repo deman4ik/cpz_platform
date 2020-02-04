@@ -57,9 +57,6 @@ class UserExchangeAccsService extends Service {
               "userExchangeAccUpsert(id: ID, exchange: String!, name: String, keys:ExchangeKeys!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.upsert
         },
         changeName: {
@@ -72,9 +69,6 @@ class UserExchangeAccsService extends Service {
               "userExchangeAccChangeName(id: ID!, name: String!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.changeName
         },
         invalidate: {
@@ -92,9 +86,6 @@ class UserExchangeAccsService extends Service {
             mutation: "userExchangeAccDelete(id: ID!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.delete
         }
       }
@@ -113,6 +104,7 @@ class UserExchangeAccsService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       let {
         id,
         exchange,
@@ -227,6 +219,7 @@ class UserExchangeAccsService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       let { id, name } = ctx.params;
       const { id: userId } = ctx.meta.user;
 
@@ -296,6 +289,7 @@ class UserExchangeAccsService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       let { id } = ctx.params;
       const { id: userId } = ctx.meta.user;
 

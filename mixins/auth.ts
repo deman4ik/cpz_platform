@@ -4,9 +4,11 @@ import { Errors } from "moleculer-web";
 const Auth: ServiceSchema = {
   name: "",
   methods: {
-    async authAction(ctx: any) {
+    authAction(ctx: any) {
       if (
+        ctx.meta &&
         ctx.meta.user &&
+        ctx.action &&
         ctx.action.roles &&
         Array.isArray(ctx.action.roles) &&
         ctx.action.roles.length > 0

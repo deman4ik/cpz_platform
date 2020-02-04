@@ -34,15 +34,37 @@ class UsersService extends Service {
             allowNull: true,
             field: "password_hash"
           },
-          registrationCode: {
+          secretCode: {
             type: Sequelize.STRING,
             allowNull: true,
-            field: "registration_code"
+            field: "secret_code"
+          },
+          secretCodeExpireAt: {
+            type: Sequelize.DATE,
+            allowNull: true,
+            field: "secret_code_expire_at",
+            get: function() {
+              const value = this.getDataValue("secretCodeExpireAt");
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
+            }
           },
           refreshToken: {
             type: Sequelize.STRING,
             allowNull: true,
             field: "refresh_token"
+          },
+          refreshTokenExpireAt: {
+            type: Sequelize.DATE,
+            allowNull: true,
+            field: "refresh_token_expire_at",
+            get: function() {
+              const value = this.getDataValue("refreshTokenExpireAt");
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
+            }
           },
           roles: { type: Sequelize.JSONB },
           settings: { type: Sequelize.JSONB }
@@ -67,9 +89,6 @@ class UsersService extends Service {
               "setNotificationSettings(signalsTelegram: Boolean, tradingTelegram: Boolean, signalsEmail: Boolean, tradingEmail: Boolean): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.setNotificationSettings
         }
       }
@@ -87,6 +106,7 @@ class UsersService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       const {
         signalsEmail,
         signalsTelegram,

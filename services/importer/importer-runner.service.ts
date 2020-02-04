@@ -62,9 +62,6 @@ class ImporterRunnerService extends Service {
               "importCandlesStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.startRecent
         },
         startHistory: {
@@ -100,9 +97,6 @@ class ImporterRunnerService extends Service {
               "importCandlesStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.startHistory
         },
         clean: {
@@ -124,12 +118,9 @@ class ImporterRunnerService extends Service {
           },
           graphql: {
             mutation:
-              "importCandlesCleanJobs(period: Int, status: String): JSON"
+              "importCandlesCleanJobs(period: Int, status: String): Response"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.clean
         },
         getStatus: {
@@ -137,12 +128,9 @@ class ImporterRunnerService extends Service {
             id: "string"
           },
           graphql: {
-            query: "importCandlesJobStatus(id: ID!): JSON!"
+            query: "importCandlesJobStatus(id: ID!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getStatus
         }
       },
@@ -190,6 +178,7 @@ class ImporterRunnerService extends Service {
   ) {
     const id = uuid();
     try {
+      this.authAction(ctx);
       const state: cpz.Importer = {
         id,
         exchange: ctx.params.exchange,
@@ -237,6 +226,7 @@ class ImporterRunnerService extends Service {
   ) {
     const id = uuid();
     try {
+      this.authAction(ctx);
       let dateFrom;
       if (!ctx.params.dateFrom) {
         const [{ loadFrom }]: cpz.Market[] = await ctx.call(
@@ -300,10 +290,17 @@ class ImporterRunnerService extends Service {
       status?: string;
     }>
   ) {
-    return await this.getQueue(cpz.Queue.importCandles).clean(
-      ctx.params.period || 5000,
-      ctx.params.status || "completed"
-    );
+    try {
+      this.authAction(ctx);
+      const result = await this.getQueue(cpz.Queue.importCandles).clean(
+        ctx.params.period || 5000,
+        ctx.params.status || "completed"
+      );
+      return { success: true, result };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
   }
 
   async getStatus(
@@ -311,11 +308,17 @@ class ImporterRunnerService extends Service {
       id: string;
     }>
   ) {
-    const job = await this.getQueue(cpz.Queue.importCandles).getJob(
-      ctx.params.id
-    );
-    const status = await job.getState();
-    return { id: ctx.params.id, status };
+    try {
+      this.authAction(ctx);
+      const job = await this.getQueue(cpz.Queue.importCandles).getJob(
+        ctx.params.id
+      );
+      const status = await job.getState();
+      return { success: true, result: { id: ctx.params.id, status } };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
   }
 }
 
