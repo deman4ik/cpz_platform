@@ -17,18 +17,14 @@ class AuthService extends Service {
       settings: {
         graphql: {
           type: `
-          type AuthResponse {
-            success: Boolean!
-            accessToken: String
-            refreshToken: String
-            error: JSON
-          }
           type UserResponse {
-            id: String!
-            name: String!
-            email: String!
+            success: Boolean!
+            error: String
+            id: String
+            name: String
+            email: String
             telegramId: Int
-            settings: JSON!
+            settings: JSON
           }
           `
         }
@@ -63,7 +59,7 @@ class AuthService extends Service {
           handler: this.refreshToken
         },
         me: {
-          graphql: { query: "me:UserResponse!" },
+          graphql: { query: "me:UserResponse" },
           roles: [cpz.UserRoles.user],
           hooks: {
             before: this.authAction
@@ -100,12 +96,16 @@ class AuthService extends Service {
       if (
         !user.refreshToken ||
         !user.refreshTokenExpireAt ||
-        dayjs.utc(user.refreshTokenExpireAt).valueOf() < dayjs.utc().valueOf()
+        dayjs.utc(user.refreshTokenExpireAt).valueOf() <
+          dayjs
+            .utc()
+            .add(-1, cpz.TimeUnit.day)
+            .valueOf()
       ) {
         refreshToken = uuid();
         refreshTokenExpireAt = dayjs
           .utc()
-          .add(+process.env.REFRESH_TOKEN_EXPIRES, cpz.TimeUnit.minute)
+          .add(+process.env.REFRESH_TOKEN_EXPIRES, cpz.TimeUnit.day)
           .toISOString();
         await ctx.call(`${cpz.Service.DB_USERS}.update`, {
           id: user.id,
@@ -254,14 +254,21 @@ class AuthService extends Service {
   }
 
   me(ctx: Context<null, { user: cpz.User }>) {
-    const { id, name, email, telegramId, settings, roles } = ctx.meta.user;
-    return {
-      id,
-      name,
-      email,
-      telegramId,
-      settings
-    };
+    try {
+      if (!ctx.meta.user || !ctx.meta.user.id) throw new Error("Unauthorized");
+      const { id, name, email, telegramId, settings } = ctx.meta.user;
+      return {
+        success: true,
+        id,
+        name,
+        email,
+        telegramId,
+        settings
+      };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
   }
 
   verifyToken(
