@@ -189,6 +189,7 @@ async function userRobotInfo(ctx: any) {
 
     const message = `${ctx.i18n.t("robot.info", {
       ...robotInfo,
+      description: ctx.i18n.t("userRobot.description"),
       signalsCount: round(1440 / robotInfo.timeframe),
       subscribed: userRobotInfo ? "✅" : ""
     })}${userExAccText}${statusText}${profitText}${volumeText}${updatedAtText}`;
@@ -219,6 +220,7 @@ async function userRobotPublicStats(ctx: any) {
           ) < 5
       )
         return;
+
       const { robotInfo, userRobotInfo, market } = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobot`,
         {
@@ -230,12 +232,16 @@ async function userRobotPublicStats(ctx: any) {
           }
         }
       );
+
+      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
+
       ctx.scene.state.lastInfoUpdatedAt = dayjs
         .utc()
         .format("YYYY-MM-DD HH:mm:ss UTC");
-      ctx.scene.state.selectedRobot = { robotInfo, userRobotInfo, market };
     }
+
     ctx.scene.state.page = "publStats";
+
     const {
       robotInfo,
       userRobotInfo
@@ -243,15 +249,19 @@ async function userRobotPublicStats(ctx: any) {
       robotInfo: cpz.RobotInfo;
       userRobotInfo: cpz.UserRobotInfo;
     } = ctx.scene.state.selectedRobot;
+
     const { statistics } = robotInfo;
+
     const updatedAtText = ctx.i18n.t("robot.lastInfoUpdatedAt", {
       lastInfoUpdatedAt: ctx.scene.state.lastInfoUpdatedAt
     });
+
     let message;
 
     if (statistics && Object.keys(statistics).length > 0)
       message = getStatisticsText(ctx, statistics);
     else message = ctx.i18n.t("robot.statsNone");
+
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
         code: robotInfo.code,

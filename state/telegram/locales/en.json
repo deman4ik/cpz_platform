@@ -230,6 +230,7 @@
     "error": "❌ Your API Key 🔐 ${name} is invalid!\n\n ${error}\n\nPlease update your API Key information in settings."
   },
   "userRobot": {
+    "description": "The trend is your friend. Breakout trading is used by active investors to take a position within a trend's early stages. This strategy can be the starting point for major price moves, expansions in volatility and, when managed properly, can offer limited downside risk.",
     "error": "❌ Error occurred while processing robot job <b>${jobType}</b>.\n\n${error} \n\n🤖 <b>#${code}</b> (${id})\n\n Please contact support.",
     "orderError": "❌ Error occurred while processing order <b>${exId}</b>.\n\n${error} \n\n🤖 <b>#${code}</b> (${id})\n\n Please check your API Keys and Robot settings or contact support.",
     "status": "🤖 Robot <b>#${code}</b> is ${status} now!\n\n${message}"
