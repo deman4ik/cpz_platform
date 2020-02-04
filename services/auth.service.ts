@@ -14,21 +14,6 @@ class AuthService extends Service {
       name: cpz.Service.AUTH,
       dependencies: [`${cpz.Service.DB_USERS}`],
       mixins: [Auth],
-      settings: {
-        graphql: {
-          type: `
-          type UserResponse {
-            success: Boolean!
-            error: String
-            id: String
-            name: String
-            email: String
-            telegramId: Int
-            settings: JSON
-          }
-          `
-        }
-      },
       actions: {
         login: {
           params: {
@@ -59,11 +44,8 @@ class AuthService extends Service {
           handler: this.refreshToken
         },
         me: {
-          graphql: { query: "me:UserResponse" },
+          graphql: { query: "me:Response!" },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.me
         },
         verifyToken: {
@@ -255,15 +237,17 @@ class AuthService extends Service {
 
   me(ctx: Context<null, { user: cpz.User }>) {
     try {
-      if (!ctx.meta.user || !ctx.meta.user.id) throw new Error("Unauthorized");
+      this.authAction(ctx);
       const { id, name, email, telegramId, settings } = ctx.meta.user;
       return {
         success: true,
-        id,
-        name,
-        email,
-        telegramId,
-        settings
+        result: {
+          id,
+          name,
+          email,
+          telegramId,
+          settings
+        }
       };
     } catch (e) {
       this.logger.warn(e);

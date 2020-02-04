@@ -50,9 +50,6 @@ class UserRobotRunnerService extends Service {
             message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.start
         },
         stop: {
@@ -64,9 +61,6 @@ class UserRobotRunnerService extends Service {
             message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.stop
         },
         pause: {
@@ -81,9 +75,6 @@ class UserRobotRunnerService extends Service {
             message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.pause
         },
         resume: {
@@ -95,9 +86,6 @@ class UserRobotRunnerService extends Service {
             message: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.resume
         }
       },
@@ -234,12 +222,13 @@ class UserRobotRunnerService extends Service {
       { user: cpz.User }
     >
   ) {
-    const { id, message } = ctx.params;
-    const {
-      id: userId,
-      roles: { allowedRoles }
-    } = ctx.meta.user;
     try {
+      this.authAction(ctx);
+      const { id, message } = ctx.params;
+      const {
+        id: userId,
+        roles: { allowedRoles }
+      } = ctx.meta.user;
       const userRobot: cpz.UserRobotDB = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.get`,
         {
@@ -318,12 +307,13 @@ class UserRobotRunnerService extends Service {
       { user: cpz.User }
     >
   ) {
-    const { id, message } = ctx.params;
-    const {
-      id: userId,
-      roles: { allowedRoles }
-    } = ctx.meta.user;
     try {
+      this.authAction(ctx);
+      const { id, message } = ctx.params;
+      const {
+        id: userId,
+        roles: { allowedRoles }
+      } = ctx.meta.user;
       const userRobot: {
         id: string;
         status: string;
@@ -341,6 +331,7 @@ class UserRobotRunnerService extends Service {
         userId !== userRobot.userId
       )
         throw new Errors.ForbiddenError("FORBIDDEN", { userRobotId: id });
+
       if (
         userRobot.status === cpz.Status.stopping ||
         userRobot.status === cpz.Status.stopped
@@ -350,6 +341,22 @@ class UserRobotRunnerService extends Service {
           id,
           status: userRobot.status
         };
+      const [jobExists] = await ctx.call(
+        `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
+        {
+          fields: ["id"],
+          query: {
+            userRobotId: id,
+            type: cpz.UserRobotJobType.stop
+          }
+        }
+      );
+      if (jobExists)
+        return {
+          success: true,
+          id,
+          status: cpz.Status.stopping
+        };
 
       await this.queueJob(
         {
@@ -357,6 +364,7 @@ class UserRobotRunnerService extends Service {
           userRobotId: id,
           type: cpz.UserRobotJobType.stop,
           data: {
+            userRobotId: id,
             message
           }
         },
@@ -382,6 +390,7 @@ class UserRobotRunnerService extends Service {
     }>
   ) {
     try {
+      this.authAction(ctx);
       const { id, userExAccId, exchange, message } = ctx.params;
       let userRobotsToPause: { id: string; status: string }[] = [];
       if (id) {
@@ -447,6 +456,7 @@ class UserRobotRunnerService extends Service {
     }>
   ) {
     try {
+      this.authAction(ctx);
       const { id, message } = ctx.params;
       let userRobotIds: string[] = [];
       if (id) {

@@ -55,9 +55,6 @@ class RobotRunnerService extends Service {
             mutation: "robotStartup(id: ID!): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.startUp
         },
         start: {
@@ -72,9 +69,6 @@ class RobotRunnerService extends Service {
             mutation: "robotStart(id: ID!, dateFrom: String): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.start
         },
         stop: {
@@ -85,9 +79,6 @@ class RobotRunnerService extends Service {
             mutation: "robotStop(id: ID!): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.stop
         },
         pause: {
@@ -99,9 +90,6 @@ class RobotRunnerService extends Service {
             exchange: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.pause
         },
         resume: {
@@ -112,9 +100,6 @@ class RobotRunnerService extends Service {
             id: { type: "string", optional: true }
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.resume
         }
       },
@@ -179,6 +164,7 @@ class RobotRunnerService extends Service {
   ) {
     const { id, dateFrom } = ctx.params;
     try {
+      this.authAction(ctx);
       const {
         status,
         exchange,
@@ -289,6 +275,7 @@ class RobotRunnerService extends Service {
   ) {
     const { id } = ctx.params;
     try {
+      this.authAction(ctx);
       const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id
       });
@@ -327,6 +314,7 @@ class RobotRunnerService extends Service {
   ) {
     const { id } = ctx.params;
     try {
+      this.authAction(ctx);
       const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
         id
       });
@@ -363,6 +351,7 @@ class RobotRunnerService extends Service {
     }>
   ) {
     try {
+      this.authAction(ctx);
       const { id, exchange } = ctx.params;
       let robotsToPause: { id: string; status: string }[] = [];
       if (id) {
@@ -416,6 +405,7 @@ class RobotRunnerService extends Service {
     }>
   ) {
     try {
+      this.authAction(ctx);
       const { id } = ctx.params;
       let robotIds: string[] = [];
       if (id) {

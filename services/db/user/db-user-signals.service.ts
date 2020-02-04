@@ -100,9 +100,6 @@ class UserSignalsService extends Service {
               "userSignalSusbcribe(robotId: String!, volume: Float!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.subscribe
         },
         unsubscribe: {
@@ -113,9 +110,6 @@ class UserSignalsService extends Service {
             mutation: "userSignalUnsusbcribe(robotId: String!): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.unsubscribe
         }
       }
@@ -394,6 +388,7 @@ class UserSignalsService extends Service {
     ctx: Context<{ robotId: string; volume: number }, { user: cpz.User }>
   ) {
     try {
+      this.authAction(ctx);
       const { robotId, volume } = ctx.params;
       const { exchange, asset, currency, available } = await ctx.call(
         `${cpz.Service.DB_ROBOTS}.get`,
@@ -464,6 +459,7 @@ class UserSignalsService extends Service {
 
   async unsubscribe(ctx: Context<{ robotId: string }, { user: cpz.User }>) {
     try {
+      this.authAction(ctx);
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
       const [subscribed] = await this._find(ctx, {

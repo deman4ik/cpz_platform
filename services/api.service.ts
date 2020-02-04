@@ -92,9 +92,6 @@ class ApiService extends Service {
             query: `nodesList: JSON!`
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getNodesList
         },
         servicesList: {
@@ -102,9 +99,6 @@ class ApiService extends Service {
             query: `servicesList: JSON!`
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.getServicesList
         }
       }
@@ -195,11 +189,21 @@ class ApiService extends Service {
   }
 
   async getNodesList(ctx: Context) {
-    return await ctx.call("$node.list");
+    try {
+      this.authAction(ctx);
+      return await ctx.call("$node.list");
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 
   async getServicesList(ctx: Context) {
-    return await ctx.call("$node.services");
+    try {
+      this.authAction(ctx);
+      return await ctx.call("$node.services");
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 
   async checkAuth(

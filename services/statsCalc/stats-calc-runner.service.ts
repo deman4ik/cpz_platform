@@ -39,9 +39,6 @@ class StatsCalcRunnerService extends Service {
               "statsCalcRobot(robotId:String!, exchange:String!, asset:String!):Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.handleStatsCalcRobotEvent
         },
         calcUserRobot: {
@@ -56,9 +53,6 @@ class StatsCalcRunnerService extends Service {
               "statsCalcUserRobot(userRobotId:String!, userId:String!, exchange:String!, asset:String!):Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.handleStatsCalcUserRobotEvent
         }
       },
@@ -245,6 +239,7 @@ class StatsCalcRunnerService extends Service {
 
   async handleStatsCalcRobotEvent(ctx: Context<cpz.StatsCalcRobotEvent>) {
     try {
+      this.authAction(ctx);
       const { robotId } = ctx.params;
       this.logger.info(`New ${cpz.Event.STATS_CALC_ROBOT} event - ${robotId}`);
       const {
@@ -365,6 +360,7 @@ class StatsCalcRunnerService extends Service {
     ctx: Context<cpz.StatsCalcUserRobotEvent>
   ) {
     try {
+      this.authAction(ctx);
       const { userRobotId } = ctx.params;
       this.logger.info(
         `New ${cpz.Event.STATS_CALC_USER_ROBOT} event - ${userRobotId}`

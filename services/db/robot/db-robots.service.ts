@@ -167,9 +167,6 @@ class RobotsService extends Service {
             mutation: "createRobots(entities: [RobotCreateEntity!]!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.create
         },
         clear: {
@@ -200,6 +197,7 @@ class RobotsService extends Service {
     }>
   ) {
     try {
+      this.authAction(ctx);
       const strategiesList: { id: string; code: string }[] = await ctx.call(
         `${cpz.Service.DB_STRATEGIES}.find`,
         {

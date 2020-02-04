@@ -89,9 +89,6 @@ class UsersService extends Service {
               "setNotificationSettings(signalsTelegram: Boolean, tradingTelegram: Boolean, signalsEmail: Boolean, tradingEmail: Boolean): Response!"
           },
           roles: [cpz.UserRoles.user],
-          hooks: {
-            before: this.authAction
-          },
           handler: this.setNotificationSettings
         }
       }
@@ -109,6 +106,7 @@ class UsersService extends Service {
     >
   ) {
     try {
+      this.authAction(ctx);
       const {
         signalsEmail,
         signalsTelegram,

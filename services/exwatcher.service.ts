@@ -75,9 +75,6 @@ class ExwatcherService extends Service {
               "exwatcherSubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           async handler(
             ctx: Context<{
               exchange: string;
@@ -85,11 +82,17 @@ class ExwatcherService extends Service {
               currency: string;
             }>
           ) {
-            return await this.addSubscription(
-              ctx.params.exchange,
-              ctx.params.asset,
-              ctx.params.currency
-            );
+            try {
+              this.authAction(ctx);
+              return await this.addSubscription(
+                ctx.params.exchange,
+                ctx.params.asset,
+                ctx.params.currency
+              );
+            } catch (e) {
+              this.logger.warn(e);
+              return { success: false, error: e.message };
+            }
           }
         },
         /**
@@ -116,9 +119,6 @@ class ExwatcherService extends Service {
               "exwatcherSubscribeMany(subscriptions: [Market!]!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           async handler(
             ctx: Context<{
               subscriptions: {
@@ -129,6 +129,7 @@ class ExwatcherService extends Service {
             }>
           ) {
             try {
+              this.authAction(ctx);
               await Promise.all(
                 ctx.params.subscriptions.map(
                   async (sub: {
@@ -164,9 +165,6 @@ class ExwatcherService extends Service {
               "exwatcherUnsubscribe(exchange: String!, asset: String!, currency: String!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           async handler(
             ctx: Context<{
               exchange: string;
@@ -174,11 +172,17 @@ class ExwatcherService extends Service {
               currency: string;
             }>
           ) {
-            return await this.removeSubscription(
-              ctx.params.exchange,
-              ctx.params.asset,
-              ctx.params.currency
-            );
+            try {
+              this.authAction(ctx);
+              return await this.removeSubscription(
+                ctx.params.exchange,
+                ctx.params.asset,
+                ctx.params.currency
+              );
+            } catch (e) {
+              this.logger.warn(e);
+              return { success: false, error: e.message };
+            }
           }
         },
         /**
@@ -205,9 +209,6 @@ class ExwatcherService extends Service {
               "exwatcherUnsubscribeMany(subscriptions: [Market!]!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          hooks: {
-            before: this.authAction
-          },
           async handler(
             ctx: Context<{
               subscriptions: {
@@ -218,6 +219,7 @@ class ExwatcherService extends Service {
             }>
           ) {
             try {
+              this.authAction(ctx);
               await Promise.all(
                 ctx.params.subscriptions.map(
                   async (sub: {
