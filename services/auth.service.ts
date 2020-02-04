@@ -5,6 +5,7 @@ import { cpz } from "../@types";
 import { v4 as uuid } from "uuid";
 import Auth from "../mixins/auth";
 import { getAccessValue } from "../utils";
+import dayjs from "../lib/dayjs";
 
 class AuthService extends Service {
   constructor(broker: ServiceBroker) {
@@ -34,9 +35,6 @@ class AuthService extends Service {
       },
       actions: {
         login: {
-          graphql: {
-            mutation: "login(email: String!, password: String!):AuthResponse!"
-          },
           params: {
             email: { type: "email" },
             password: { type: "string" }
@@ -44,9 +42,6 @@ class AuthService extends Service {
           handler: this.login
         },
         register: {
-          graphql: {
-            mutation: "register(email: String!, password: String!):Response!"
-          },
           params: {
             email: { type: "email" },
             password: { type: "string" }
@@ -60,6 +55,12 @@ class AuthService extends Service {
             name: { type: "string", optional: true }
           },
           handler: this.registerTg
+        },
+        refreshToken: {
+          params: {
+            refreshToken: "string"
+          },
+          handler: this.refreshToken
         },
         me: {
           graphql: { query: "me:UserResponse!" },
@@ -80,7 +81,6 @@ class AuthService extends Service {
   }
 
   async login(ctx: Context<{ email: string; password: string }>) {
-    this.logger.info("Login", ctx.params);
     try {
       const { email, password } = ctx.params;
       const [user]: cpz.User[] = await ctx.call(
@@ -89,44 +89,95 @@ class AuthService extends Service {
           query: { email }
         }
       );
-      this.logger.info(user);
-      if (!user) throw new Errors.MoleculerClientError("User not found");
+      if (!user) throw new Error("User not found");
       if (user.status === cpz.UserStatus.blocked)
-        throw new Errors.MoleculerClientError("User is blocked");
+        throw new Error("User is blocked");
       const passwordChecked = bcrypt.compareSync(password, user.passwordHash);
+      if (!passwordChecked) throw new Error("Invalid password");
 
-      if (!passwordChecked)
-        throw new Errors.MoleculerClientError("Invalid password", 401);
-      const accessToken = this.generateToken(user);
-      //TODO: refreashtoken
-      const refreshToken = "NOT IMPLEMENTED";
+      let refreshToken;
+      let refreshTokenExpireAt;
+      if (
+        !user.refreshToken ||
+        !user.refreshTokenExpireAt ||
+        dayjs.utc(user.refreshTokenExpireAt).valueOf() < dayjs.utc().valueOf()
+      ) {
+        refreshToken = uuid();
+        refreshTokenExpireAt = dayjs
+          .utc()
+          .add(+process.env.REFRESH_TOKEN_EXPIRES, cpz.TimeUnit.minute)
+          .toISOString();
+        await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+          id: user.id,
+          refreshToken,
+          refreshTokenExpireAt
+        });
+      } else {
+        refreshToken = user.refreshToken;
+        refreshTokenExpireAt = user.refreshTokenExpireAt;
+      }
+
       return {
-        success: true,
-        accessToken,
-        refreshToken
+        accessToken: this.generateAccessToken(user),
+        accessTokenExpireAt: dayjs
+          .utc()
+          .add(+process.env.JWT_TOKEN_EXPIRES, cpz.TimeUnit.minute)
+          .toISOString(),
+        refreshToken,
+        refreshTokenExpireAt,
+        userId: user.id
       };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
+      throw e;
+    }
+  }
+
+  async refreshToken(ctx: Context<{ refreshToken: string }>) {
+    try {
+      const { refreshToken } = ctx.params;
+      const [user]: cpz.User[] = await ctx.call(
+        `${cpz.Service.DB_USERS}.find`,
+        {
+          query: {
+            refreshToken,
+            refreshTokenExpireAt: {
+              $gt: dayjs.utc().toISOString()
+            }
+          }
+        }
+      );
+      if (!user) throw new Error("Refresh token expired or user not found");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User is blocked");
+
       return {
-        success: false,
-        error: e.message
+        accessToken: this.generateAccessToken(user),
+        accessTokenExpireAt: dayjs
+          .utc()
+          .add(+process.env.JWT_TOKEN_EXPIRES, cpz.TimeUnit.minute)
+          .toISOString(),
+        refreshToken: user.refreshToken,
+        refreshTokenExpireAt: user.refreshTokenExpireAt,
+        userId: user.id
       };
+    } catch (e) {
+      this.logger.warn(e);
+      throw e;
     }
   }
 
   async register(ctx: Context<{ email: string; password: string }>) {
-    this.logger.info("Register", ctx.params);
     try {
       const { email, password } = ctx.params;
-      //TODO: check password
+
       const [userExists]: cpz.User[] = await ctx.call(
         `${cpz.Service.DB_USERS}.find`,
         {
           query: { email }
         }
       );
-      if (userExists)
-        throw new Errors.MoleculerClientError("User already exists");
+      if (userExists) throw new Error("User already exists");
       const passwordHash = bcrypt.hashSync(password, 10);
       const newUser: cpz.User = {
         id: uuid(),
@@ -153,13 +204,10 @@ class AuthService extends Service {
       await ctx.call(`${cpz.Service.DB_USERS}.insert`, {
         entity: newUser
       });
-      return { success: true, result: newUser.id };
+      return newUser.id;
     } catch (e) {
-      this.logger.error(e);
-      return {
-        success: false,
-        error: e.message
-      };
+      this.logger.warn(e);
+      throw e;
     }
   }
 
@@ -224,7 +272,7 @@ class AuthService extends Service {
     return jwt.verify(ctx.params.token, process.env.JWT_SECRET);
   }
 
-  generateToken(user: cpz.User) {
+  generateAccessToken(user: cpz.User) {
     const {
       id,
       roles: { defaultRole, allowedRoles }
@@ -243,7 +291,11 @@ class AuthService extends Service {
           "x-hasura-access": access
         }
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      {
+        algorithm: "HS256",
+        expiresIn: `${process.env.JWT_TOKEN_EXPIRES}m`
+      }
     );
   }
 }
