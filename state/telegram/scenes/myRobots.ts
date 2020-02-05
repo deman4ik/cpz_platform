@@ -2,14 +2,20 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { getMainKeyboard } from "../keyboard";
 
+const PAGE_SIZE = 7;
+
 function getRobotsListMenu(ctx: any) {
   const {
-    myRobots
+    currentRobots,
+    hasNextPage,
+    hasPrevPage
   }: {
-    myRobots: { id: string; name: string; status: cpz.Status }[];
+    currentRobots: { id: string; name: string; status: cpz.Status }[];
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   } = ctx.scene.state;
   return Extra.HTML().markup((m: any) => {
-    const buttons = myRobots.map(({ name, id, status }) => [
+    const buttons = currentRobots.map(({ name, id, status }) => [
       m.callbackButton(
         `${name} ${
           status === cpz.Status.started ||
@@ -27,15 +33,25 @@ function getRobotsListMenu(ctx: any) {
       ...buttons,
       [
         m.callbackButton(
-          ctx.i18n.t("scenes.myRobots.add"),
-          JSON.stringify({ a: "add" }),
-          false
+          "⬅️ Previous Page",
+          JSON.stringify({ a: "prev" }),
+          !hasPrevPage
+        ),
+        m.callbackButton(
+          "Next Page ➡️",
+          JSON.stringify({ a: "next" }),
+          !hasNextPage
         )
       ],
       [
         m.callbackButton(
           ctx.i18n.t("keyboards.backKeyboard.back"),
           JSON.stringify({ a: "back" }),
+          false
+        ),
+        m.callbackButton(
+          ctx.i18n.t("scenes.myRobots.add"),
+          JSON.stringify({ a: "add" }),
           false
         )
       ]
@@ -66,6 +82,17 @@ async function myRobotsEnter(ctx: any) {
       await ctx.scene.enter(cpz.TelegramScene.SEARCH_ROBOTS);
     } else {
       ctx.scene.state.myRobots = myRobots;
+      ctx.scene.state.pages = Math.ceil(
+        ctx.scene.state.myRobots.length / PAGE_SIZE
+      );
+      ctx.scene.state.currentPage = 1;
+      ctx.scene.state.hasNextPage =
+        ctx.scene.state.currentPage < ctx.scene.state.pages;
+      ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+      ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+        (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+        ctx.scene.state.currentPage * PAGE_SIZE
+      );
       if (ctx.scene.state.edit) {
         ctx.scene.state.edit = false;
         return ctx.editMessageText(
@@ -78,6 +105,52 @@ async function myRobotsEnter(ctx: any) {
         getRobotsListMenu(ctx)
       );
     }
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function myRobotsNextPage(ctx: any) {
+  try {
+    ctx.scene.state.currentPage += 1;
+    if (ctx.scene.state.currentPage > ctx.scene.state.pages) return;
+    ctx.scene.state.hasNextPage =
+      ctx.scene.state.currentPage < ctx.scene.state.pages;
+    ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+    ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+      (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+      ctx.scene.state.currentPage * PAGE_SIZE
+    );
+    return ctx.editMessageText(
+      ctx.i18n.t("scenes.myRobots.robotsList"),
+      getRobotsListMenu(ctx)
+    );
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function myRobotsPrevPage(ctx: any) {
+  try {
+    ctx.scene.state.currentPage += 1;
+    if (ctx.scene.state.currentPage < 1) return;
+    ctx.scene.state.hasNextPage =
+      ctx.scene.state.currentPage < ctx.scene.state.pages;
+    ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+    ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+      (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+      ctx.scene.state.currentPage * PAGE_SIZE
+    );
+    return ctx.editMessageText(
+      ctx.i18n.t("scenes.myRobots.robotsList"),
+      getRobotsListMenu(ctx)
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -147,6 +220,8 @@ async function myRobotsLeave(ctx: any) {
 
 export {
   myRobotsEnter,
+  myRobotsNextPage,
+  myRobotsPrevPage,
   myRobotsSelectedRobot,
   myRobotsAdd,
   myRobotsBack,

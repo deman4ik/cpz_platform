@@ -36,12 +36,16 @@ import {
   editUserRobotBack,
   editUserRobotLeave,
   myRobotsEnter,
+  myRobotsNextPage,
+  myRobotsPrevPage,
   myRobotsSelectedRobot,
   myRobotsAdd,
   myRobotsBack,
   myRobotsBackEdit,
   myRobotsLeave,
   mySignalsEnter,
+  mySingalsNextPage,
+  mySingalsPrevPage,
   mySignalsSelectedRobot,
   mySignalsAdd,
   mySignalsBack,
@@ -301,6 +305,8 @@ class BotService extends Service {
     myRobotsScene.command("menu", leave());
     myRobotsScene.action(/robot/, myRobotsSelectedRobot.bind(this));
     myRobotsScene.action(/add/, myRobotsAdd.bind(this));
+    myRobotsScene.action(/next/, myRobotsNextPage.bind(this));
+    myRobotsScene.action(/prev/, myRobotsPrevPage.bind(this));
     myRobotsScene.action(/back/, myRobotsBackEdit.bind(this));
 
     const mySignalsScene = new Scene(cpz.TelegramScene.MY_SIGNALS);
@@ -315,6 +321,8 @@ class BotService extends Service {
     mySignalsScene.command("menu", leave());
     mySignalsScene.action(/robot/, mySignalsSelectedRobot.bind(this));
     mySignalsScene.action(/add/, mySignalsAdd.bind(this));
+    mySignalsScene.action(/next/, mySingalsNextPage.bind(this));
+    mySignalsScene.action(/prev/, mySingalsPrevPage.bind(this));
     mySignalsScene.action(/back/, mySignalsBackEdit.bind(this));
 
     const perfRobotsScene = new Scene(cpz.TelegramScene.PERFOMANCE_ROBOTS);
