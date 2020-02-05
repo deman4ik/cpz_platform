@@ -3,7 +3,8 @@ import {
   round,
   chunkArray,
   average,
-  averageRound
+  averageRound,
+  sortAsc
 } from "./helpers";
 import dayjs from "../lib/dayjs";
 import { cpz } from "../@types";
@@ -73,11 +74,16 @@ function calcStatistics(
   if (!positions || !Array.isArray(positions) || positions.length === 0)
     return { statistics, equity };
 
-  const allPositions = positions.map(pos => ({
-    ...pos,
-    profit: +pos.profit,
-    barsHeld: +pos.barsHeld
-  }));
+  const allPositions = positions
+    .map(pos => ({
+      ...pos,
+      profit: +pos.profit,
+      barsHeld: +pos.barsHeld
+    }))
+    .sort((a: cpz.PositionDataForStats, b: cpz.PositionDataForStats) =>
+      sortAsc(a.exitDate, b.exitDate)
+    );
+
   const longPositions = allPositions.filter(
     ({ direction }) => direction === cpz.PositionDirection.long
   );
