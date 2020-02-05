@@ -67,13 +67,21 @@ class ApiService extends Service {
       ],
       settings: {
         port: process.env.PORT || 3000,
-        cors: {
-          origin: "*",
-          credentials: true
-        },
         routes: [
           {
             mappingPolicy: "restrict",
+            cors: {
+              origin: [
+                "*.cryptuoso.com",
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://0.0.0.0:3000",
+                "http://0.0.0.0:3001",
+                "localhost"
+              ],
+              methods: ["POST"],
+              credentials: true
+            },
             aliases: {
               "POST /auth/login": this.login,
               "POST /auth/register": this.register,
@@ -120,7 +128,9 @@ class ApiService extends Service {
 
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
-        httpOnly: true
+        httpOnly: true,
+        sameSite: true,
+        overwrite: true
       });
       res.end(
         JSON.stringify({
@@ -162,6 +172,8 @@ class ApiService extends Service {
     try {
       const cookies = new Cookies(req, res);
       const oldRefreshToken = cookies.get("refresh_token");
+      this.logger.info(req.headers);
+      this.logger.info(oldRefreshToken);
       const {
         accessToken,
         accessTokenExpireAt,
@@ -173,7 +185,9 @@ class ApiService extends Service {
       });
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
-        httpOnly: true
+        httpOnly: true,
+        sameSite: true,
+        overwrite: true
       });
       res.end(
         JSON.stringify({
@@ -184,7 +198,12 @@ class ApiService extends Service {
         })
       );
     } catch (e) {
-      this.logger.warn(e);
+      this.logger.warn(e.message, {
+        code: e.code,
+        type: e.type,
+        data: e.data,
+        retryable: e.retryable
+      });
       res.end(JSON.stringify({ success: false, error: e.message }));
     }
   }
