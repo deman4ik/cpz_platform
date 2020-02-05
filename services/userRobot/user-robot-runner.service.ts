@@ -210,7 +210,9 @@ class UserRobotRunnerService extends Service {
         removeOnFail: true
       });
     }
-    this.logger.info("Queued", job);
+    this.logger.info(
+      `Queue UserRobot ${job.userRobotId} job ${job.type} (${job.id})`
+    );
   }
 
   async start(
