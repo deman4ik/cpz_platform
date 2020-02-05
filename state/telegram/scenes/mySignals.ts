@@ -128,7 +128,7 @@ async function mySingalsNextPage(ctx: any) {
 
 async function mySingalsPrevPage(ctx: any) {
   try {
-    ctx.scene.state.currentPage += 1;
+    ctx.scene.state.currentPage -= 1;
     if (ctx.scene.state.currentPage < 1) return;
     ctx.scene.state.hasNextPage =
       ctx.scene.state.currentPage < ctx.scene.state.pages;

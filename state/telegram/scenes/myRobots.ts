@@ -138,7 +138,7 @@ async function myRobotsNextPage(ctx: any) {
 
 async function myRobotsPrevPage(ctx: any) {
   try {
-    ctx.scene.state.currentPage += 1;
+    ctx.scene.state.currentPage -= 1;
     if (ctx.scene.state.currentPage < 1) return;
     ctx.scene.state.hasNextPage =
       ctx.scene.state.currentPage < ctx.scene.state.pages;
