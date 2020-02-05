@@ -72,7 +72,7 @@ class UserRobotWorkerService extends Service {
             } catch (e) {
               this.logger.error("Failed to delete job", nextJob, e);
             }
-            if (status === cpz.Status.started) {
+            if (status !== cpz.Status.stopped && status !== cpz.Status.paused) {
               [nextJob] = await this.broker.call(
                 `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
                 {
@@ -83,6 +83,8 @@ class UserRobotWorkerService extends Service {
                   }
                 }
               );
+            } else {
+              nextJob = null;
             }
           } else {
             nextJob = null;

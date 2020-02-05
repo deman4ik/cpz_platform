@@ -147,7 +147,7 @@ class RobotWorkerService extends Service {
             await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
               id: nextJob.id
             });
-            if (status === cpz.Status.started) {
+            if (status !== cpz.Status.stopped && status !== cpz.Status.paused) {
               [nextJob] = await this.broker.call(
                 `${cpz.Service.DB_ROBOT_JOBS}.find`,
                 {
@@ -158,6 +158,8 @@ class RobotWorkerService extends Service {
                   }
                 }
               );
+            } else {
+              nextJob = null;
             }
           } else {
             nextJob = null;
