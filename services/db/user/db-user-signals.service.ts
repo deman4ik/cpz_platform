@@ -212,6 +212,7 @@ class UserSignalsService extends Service {
       ${asset ? "AND t.asset = :asset" : ""}
       ${currency ? "AND t.currency = :currency" : ""}
       ${userId ? "AND s.user_id = :user_id" : ""}
+      order by t.exchange, t.asset, t.timeframe, t.strategy, t.mod
       ;`;
 
       if (exchange) params.exchange = exchange;
