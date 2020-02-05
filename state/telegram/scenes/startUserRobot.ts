@@ -77,7 +77,7 @@ async function startUserRobotYes(ctx: any) {
       Extra.HTML()
     );
     ctx.scene.state.silent = false;
-    await startUserRobotBack.call(this, ctx);
+    await startUserRobotLeave.call(this, ctx);
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));

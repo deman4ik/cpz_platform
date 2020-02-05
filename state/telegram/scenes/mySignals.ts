@@ -2,12 +2,20 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { getMainKeyboard } from "../keyboard";
 
+const PAGE_SIZE = 7;
+
 function getSignalsListMenu(ctx: any) {
   const {
-    myRobots
-  }: { myRobots: { id: string; name: string }[] } = ctx.scene.state;
+    currentRobots,
+    hasNextPage,
+    hasPrevPage
+  }: {
+    currentRobots: { id: string; name: string }[];
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } = ctx.scene.state;
   return Extra.HTML().markup((m: any) => {
-    const buttons = myRobots.map(({ name, id }) => [
+    const buttons = currentRobots.map(({ name, id }) => [
       m.callbackButton(`${name}`, JSON.stringify({ a: "robot", p: id }), false)
     ]);
 
@@ -15,15 +23,25 @@ function getSignalsListMenu(ctx: any) {
       ...buttons,
       [
         m.callbackButton(
-          ctx.i18n.t("scenes.mySignals.add"),
-          JSON.stringify({ a: "add" }),
-          false
+          "⬅️ Previous Page",
+          JSON.stringify({ a: "prev" }),
+          !hasPrevPage
+        ),
+        m.callbackButton(
+          "Next Page ➡️",
+          JSON.stringify({ a: "next" }),
+          !hasNextPage
         )
       ],
       [
         m.callbackButton(
           ctx.i18n.t("keyboards.backKeyboard.back"),
           JSON.stringify({ a: "back" }),
+          false
+        ),
+        m.callbackButton(
+          ctx.i18n.t("scenes.mySignals.add"),
+          JSON.stringify({ a: "add" }),
           false
         )
       ]
@@ -54,6 +72,17 @@ async function mySignalsEnter(ctx: any) {
       await ctx.scene.enter(cpz.TelegramScene.SEARCH_SIGNALS);
     } else {
       ctx.scene.state.myRobots = myRobots;
+      ctx.scene.state.pages = Math.ceil(
+        ctx.scene.state.myRobots.length / PAGE_SIZE
+      );
+      ctx.scene.state.currentPage = 1;
+      ctx.scene.state.hasNextPage =
+        ctx.scene.state.currentPage < ctx.scene.state.pages;
+      ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+      ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+        (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+        ctx.scene.state.currentPage * PAGE_SIZE
+      );
       if (ctx.scene.state.edit) {
         ctx.scene.state.edit = false;
         return ctx.editMessageText(
@@ -66,6 +95,52 @@ async function mySignalsEnter(ctx: any) {
         getSignalsListMenu(ctx)
       );
     }
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function mySingalsNextPage(ctx: any) {
+  try {
+    ctx.scene.state.currentPage += 1;
+    if (ctx.scene.state.currentPage > ctx.scene.state.pages) return;
+    ctx.scene.state.hasNextPage =
+      ctx.scene.state.currentPage < ctx.scene.state.pages;
+    ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+    ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+      (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+      ctx.scene.state.currentPage * PAGE_SIZE
+    );
+    return ctx.editMessageText(
+      ctx.i18n.t("scenes.mySignals.robotsList"),
+      getSignalsListMenu(ctx)
+    );
+  } catch (e) {
+    this.logger.error(e);
+    await ctx.reply(ctx.i18n.t("failed"));
+    ctx.scene.state.silent = false;
+    await ctx.scene.leave();
+  }
+}
+
+async function mySingalsPrevPage(ctx: any) {
+  try {
+    ctx.scene.state.currentPage += 1;
+    if (ctx.scene.state.currentPage < 1) return;
+    ctx.scene.state.hasNextPage =
+      ctx.scene.state.currentPage < ctx.scene.state.pages;
+    ctx.scene.state.hasPrevPage = ctx.scene.state.currentPage > 1;
+    ctx.scene.state.currentRobots = ctx.scene.state.myRobots.slice(
+      (ctx.scene.state.currentPage - 1) * PAGE_SIZE,
+      ctx.scene.state.currentPage * PAGE_SIZE
+    );
+    return ctx.editMessageText(
+      ctx.i18n.t("scenes.mySignals.robotsList"),
+      getSignalsListMenu(ctx)
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -135,6 +210,8 @@ async function mySignalsLeave(ctx: any) {
 
 export {
   mySignalsEnter,
+  mySingalsNextPage,
+  mySingalsPrevPage,
   mySignalsSelectedRobot,
   mySignalsAdd,
   mySignalsBack,
