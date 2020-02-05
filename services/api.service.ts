@@ -118,10 +118,8 @@ class ApiService extends Service {
     try {
       const {
         accessToken,
-        accessTokenExpireAt,
         refreshToken,
-        refreshTokenExpireAt,
-        userId
+        refreshTokenExpireAt
       } = await req.$service.broker.call(`${cpz.Service.AUTH}.login`, req.body);
 
       const cookies = new Cookies(req, res);
@@ -130,15 +128,15 @@ class ApiService extends Service {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
         sameSite: false,
-        domain: "cryptuoso.com",
+        domain: ".cryptuoso.com",
         overwrite: true
       });
       res.end(
         JSON.stringify({
           success: true,
           accessToken,
-          accessTokenExpireAt,
-          userId
+          refreshToken,
+          refreshTokenExpireAt
         })
       );
     } catch (e) {
@@ -172,9 +170,10 @@ class ApiService extends Service {
   async refreshToken(req: any, res: any) {
     try {
       const cookies = new Cookies(req, res);
-      const oldRefreshToken = cookies.get("refresh_token");
-      this.logger.info(req.headers);
-      this.logger.info(oldRefreshToken);
+      let oldRefreshToken = cookies.get("refresh_token");
+      if (!oldRefreshToken) {
+        oldRefreshToken = req.headers["x-refresh-token"];
+      }
       const {
         accessToken,
         accessTokenExpireAt,
@@ -188,7 +187,7 @@ class ApiService extends Service {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
         sameSite: false,
-        domain: "cryptuoso.com",
+        domain: ".cryptuoso.com",
         overwrite: true
       });
       res.end(
