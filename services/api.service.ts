@@ -129,7 +129,8 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: true,
+        sameSite: false,
+        domain: "cryptuoso.com",
         overwrite: true
       });
       res.end(
@@ -186,7 +187,8 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: true,
+        sameSite: false,
+        domain: "cryptuoso.com",
         overwrite: true
       });
       res.end(
