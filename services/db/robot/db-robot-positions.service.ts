@@ -407,6 +407,7 @@ WHERE p.robot_id = r.id
   ${exchange ? "AND r.exchange = :exchange" : ""}
   ${asset ? "AND r.asset = :asset" : ""}
   ${currency ? "AND r.currency = :currency" : ""}
+  order by p.exit_date
   ;`;
 
       if (userId) params.user_id = userId;
