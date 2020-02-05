@@ -194,8 +194,8 @@ class ApiService extends Service {
         JSON.stringify({
           success: true,
           accessToken,
-          accessTokenExpireAt,
-          userId
+          refreshToken,
+          refreshTokenExpireAt
         })
       );
     } catch (e) {
