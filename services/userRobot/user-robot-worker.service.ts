@@ -62,9 +62,16 @@ class UserRobotWorkerService extends Service {
         while (nextJob) {
           let status = await this.run(nextJob);
           if (status) {
-            await this.broker.call(`${cpz.Service.DB_USER_ROBOT_JOBS}.remove`, {
-              id: nextJob.id
-            });
+            try {
+              await this.broker.call(
+                `${cpz.Service.DB_USER_ROBOT_JOBS}.remove`,
+                {
+                  id: nextJob.id
+                }
+              );
+            } catch (e) {
+              this.logger.error("Failed to delete job", nextJob, e);
+            }
             if (status === cpz.Status.started) {
               [nextJob] = await this.broker.call(
                 `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
@@ -91,7 +98,9 @@ class UserRobotWorkerService extends Service {
 
   async run(job: cpz.UserRobotJob) {
     const { type, userRobotId, data } = job;
-    this.logger.info(`User robot #${userRobotId} processing '${type}' job`);
+    this.logger.info(
+      `User robot #${userRobotId} processing '${type}' job (${job.id})`
+    );
     try {
       const userRobotState: cpz.UserRobotState = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOTS}.getState`,
