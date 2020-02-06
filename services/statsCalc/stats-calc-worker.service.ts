@@ -54,7 +54,7 @@ class StatsCalcWorkerService extends Service {
     this.pool = Pool(
       () => spawn<StatisticUtils>(new Worker("../../workers/statistic")),
       {
-        concurrency: 1,
+        concurrency: 5,
         name: "statistic"
       }
     );
@@ -105,10 +105,7 @@ class StatsCalcWorkerService extends Service {
         }
       }
     );
-    this.logger.info(robotId, positions);
     const { statistics, equity } = await this.calcStatistics(positions);
-    this.logger.info(robotId, statistics.performance);
-    this.logger.info(robotId, equity.changes);
     await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
       id: robotId,
       statistics,

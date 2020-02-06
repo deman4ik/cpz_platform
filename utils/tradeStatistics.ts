@@ -54,14 +54,6 @@ function calcMaxDrawdown(positions: cpz.PositionDataForStats[]) {
   };
 }
 
-const cumulativeProfit = (sum => ({
-  exitDate,
-  profit
-}: cpz.PositionDataForStats) => ({
-  exitDate,
-  profit: round((sum += profit), 2)
-}))(0);
-
 function calcStatistics(
   positions: cpz.PositionDataForStats[]
 ): {
