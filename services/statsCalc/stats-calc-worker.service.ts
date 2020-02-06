@@ -98,13 +98,17 @@ class StatsCalcWorkerService extends Service {
       `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
       {
         sort: "exit_date",
+        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query: {
           robotId,
           status: cpz.RobotPositionStatus.closed
         }
       }
     );
+    this.logger.info(positions);
     const { statistics, equity } = await this.calcStatistics(positions);
+    this.logger.info(statistics.performance);
+    this.logger.info(equity.changes);
     await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
       id: robotId,
       statistics,
@@ -127,6 +131,7 @@ class StatsCalcWorkerService extends Service {
         `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
         {
           sort: "exit_date",
+          fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
           query: {
             robotId,
             status: cpz.RobotPositionStatus.closed,
@@ -202,6 +207,7 @@ class StatsCalcWorkerService extends Service {
         `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
         {
           sort: "exit_date",
+          fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
           query: {
             robotId,
             status: cpz.RobotPositionStatus.closed,
@@ -309,6 +315,8 @@ class StatsCalcWorkerService extends Service {
     const positions = await this.broker.call(
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
+        sort: "exit_date",
+        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query: {
           userRobotId,
           status: {
@@ -343,6 +351,8 @@ class StatsCalcWorkerService extends Service {
     const positions = await this.broker.call(
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
+        sort: "exit_date",
+        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query
       }
     );
