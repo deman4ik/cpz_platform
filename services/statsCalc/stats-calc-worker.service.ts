@@ -98,7 +98,6 @@ class StatsCalcWorkerService extends Service {
       `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
       {
         sort: "exit_date",
-        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query: {
           robotId,
           status: cpz.RobotPositionStatus.closed
@@ -128,7 +127,6 @@ class StatsCalcWorkerService extends Service {
         `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
         {
           sort: "exit_date",
-          fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
           query: {
             robotId,
             status: cpz.RobotPositionStatus.closed,
@@ -204,7 +202,6 @@ class StatsCalcWorkerService extends Service {
         `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
         {
           sort: "exit_date",
-          fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
           query: {
             robotId,
             status: cpz.RobotPositionStatus.closed,
@@ -313,7 +310,6 @@ class StatsCalcWorkerService extends Service {
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
         sort: "exit_date",
-        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query: {
           userRobotId,
           status: {
@@ -349,7 +345,6 @@ class StatsCalcWorkerService extends Service {
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
         sort: "exit_date",
-        fields: ["id", "direction", "exitDate", "profit", "barsHeld"],
         query
       }
     );
