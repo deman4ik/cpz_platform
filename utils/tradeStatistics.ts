@@ -59,7 +59,7 @@ const cumulativeProfit = (sum => ({
   profit
 }: cpz.PositionDataForStats) => ({
   exitDate,
-  profit: sum += profit
+  profit: round((sum += profit), 2)
 }))(0);
 
 function calcStatistics(
@@ -422,7 +422,7 @@ function calcStatistics(
 
   statistics.performance = equityChart.map(({ exitDate, profit }) => ({
     x: dayjs.utc(exitDate).valueOf(),
-    y: round(profit, 2)
+    y: profit
   }));
 
   if (equityChart.length < maxEquityLength) {
@@ -438,7 +438,7 @@ function calcStatistics(
   const equityChunks = chunkArray(equityChart, chunkLength);
   equity.changes = equityChunks.map(chunk => ({
     x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
-    y: round(+chunk[chunk.length - 1].profit, 2)
+    y: chunk[chunk.length - 1].profit
   }));
 
   return { statistics, equity };
