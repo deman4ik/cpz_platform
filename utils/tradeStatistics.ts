@@ -54,14 +54,6 @@ function calcMaxDrawdown(positions: cpz.PositionDataForStats[]) {
   };
 }
 
-const cumulativeProfit = (sum => ({
-  exitDate,
-  profit
-}: cpz.PositionDataForStats) => ({
-  exitDate,
-  profit: sum += profit
-}))(0);
-
 function calcStatistics(
   positions: cpz.PositionDataForStats[]
 ): {
@@ -418,12 +410,21 @@ function calcStatistics(
   const maxEquityLength = 50;
   let chunkLength;
 
-  const equityChart = allPositions.map(cumulativeProfit);
+  let sum = 0;
+  const equityChart: { x: number; y: number }[] = [];
+  for (let i = 0; i < allPositions.length; i += 1) {
+    const profit = allPositions[i].profit;
+    if (isNaN(profit)) {
+      continue;
+    }
+    sum = round(sum + profit, 2);
+    equityChart.push({
+      x: dayjs.utc(allPositions[i].exitDate).valueOf(),
+      y: sum
+    });
+  }
 
-  statistics.performance = equityChart.map(({ exitDate, profit }) => ({
-    x: dayjs.utc(exitDate).valueOf(),
-    y: round(profit, 2)
-  }));
+  statistics.performance = equityChart;
 
   if (equityChart.length < maxEquityLength) {
     chunkLength = 1;
@@ -437,8 +438,8 @@ function calcStatistics(
   }
   const equityChunks = chunkArray(equityChart, chunkLength);
   equity.changes = equityChunks.map(chunk => ({
-    x: dayjs.utc(chunk[chunk.length - 1].exitDate).valueOf(),
-    y: round(+chunk[chunk.length - 1].profit, 2)
+    x: chunk[chunk.length - 1].x,
+    y: chunk[chunk.length - 1].y
   }));
 
   return { statistics, equity };
