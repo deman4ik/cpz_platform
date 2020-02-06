@@ -54,7 +54,7 @@ class StatsCalcWorkerService extends Service {
     this.pool = Pool(
       () => spawn<StatisticUtils>(new Worker("../../workers/statistic")),
       {
-        concurrency: 5,
+        concurrency: 1,
         name: "statistic"
       }
     );
