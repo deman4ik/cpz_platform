@@ -17,17 +17,39 @@ class AuthService extends Service {
       actions: {
         login: {
           params: {
-            email: { type: "email" },
+            email: "email",
             password: { type: "string" }
           },
           handler: this.login
         },
         register: {
           params: {
-            email: { type: "email" },
-            password: { type: "string" }
+            email: "email",
+            password: { type: "string", min: 6, max: 100, alphanum: true },
+            name: { type: "string", optional: true, min: 3 }
           },
           handler: this.register
+        },
+        activateAccount: {
+          params: {
+            userId: "string",
+            secretCode: "string"
+          },
+          handler: this.activateAccount
+        },
+        passwordReset: {
+          params: {
+            email: "email"
+          },
+          handler: this.passwordReset
+        },
+        confirmPasswordReset: {
+          params: {
+            userId: "string",
+            secretCode: "string",
+            password: { type: "string", min: 6, max: 100, alphanum: true }
+          },
+          handler: this.confirmPasswordReset
         },
         registerTg: {
           params: {
@@ -67,11 +89,13 @@ class AuthService extends Service {
           query: { email }
         }
       );
-      if (!user) throw new Error("User not found");
+      if (!user) throw new Error("User account is not found.");
       if (user.status === cpz.UserStatus.blocked)
-        throw new Error("User is blocked");
+        throw new Error("User account is blocked.");
+      if (user.status === cpz.UserStatus.new)
+        throw new Error("User account is not activated.");
       const passwordChecked = bcrypt.compareSync(password, user.passwordHash);
-      if (!passwordChecked) throw new Error("Invalid password");
+      if (!passwordChecked) throw new Error("Invalid password.");
 
       let refreshToken;
       let refreshTokenExpireAt;
@@ -101,13 +125,8 @@ class AuthService extends Service {
 
       return {
         accessToken: this.generateAccessToken(user),
-        accessTokenExpireAt: dayjs
-          .utc()
-          .add(+process.env.JWT_TOKEN_EXPIRES, cpz.TimeUnit.minute)
-          .toISOString(),
         refreshToken,
-        refreshTokenExpireAt,
-        userId: user.id
+        refreshTokenExpireAt
       };
     } catch (e) {
       this.logger.warn(e);
@@ -129,19 +148,17 @@ class AuthService extends Service {
           }
         }
       );
-      if (!user) throw new Error("Refresh token expired or user not found");
+      if (!user)
+        throw new Error("Refresh token expired or user account is not found.");
+      if (user.status === cpz.UserStatus.new)
+        throw new Error("User account is not activated.");
       if (user.status === cpz.UserStatus.blocked)
-        throw new Error("User is blocked");
+        throw new Error("User account is blocked.");
 
       return {
         accessToken: this.generateAccessToken(user),
-        accessTokenExpireAt: dayjs
-          .utc()
-          .add(+process.env.JWT_TOKEN_EXPIRES, cpz.TimeUnit.minute)
-          .toISOString(),
         refreshToken: user.refreshToken,
-        refreshTokenExpireAt: user.refreshTokenExpireAt,
-        userId: user.id
+        refreshTokenExpireAt: user.refreshTokenExpireAt
       };
     } catch (e) {
       this.logger.warn(e);
@@ -149,9 +166,11 @@ class AuthService extends Service {
     }
   }
 
-  async register(ctx: Context<{ email: string; password: string }>) {
+  async register(
+    ctx: Context<{ email: string; password: string; name?: string }>
+  ) {
     try {
-      const { email, password } = ctx.params;
+      const { email, password, name } = ctx.params;
 
       const [userExists]: cpz.User[] = await ctx.call(
         `${cpz.Service.DB_USERS}.find`,
@@ -159,13 +178,14 @@ class AuthService extends Service {
           query: { email }
         }
       );
-      if (userExists) throw new Error("User already exists");
-      const passwordHash = bcrypt.hashSync(password, 10);
+      if (userExists) throw new Error("User account already exists");
       const newUser: cpz.User = {
         id: uuid(),
+        name,
         email,
-        status: cpz.UserStatus.enabled,
-        passwordHash,
+        status: cpz.UserStatus.new,
+        passwordHash: bcrypt.hashSync(password, 10),
+        secretCode: this.generateCode(),
         roles: {
           allowedRoles: [cpz.UserRoles.user],
           defaultRole: cpz.UserRoles.user
@@ -186,7 +206,194 @@ class AuthService extends Service {
       await ctx.call(`${cpz.Service.DB_USERS}.insert`, {
         entity: newUser
       });
+
+      const urlData = this.encodeData({
+        userId: newUser.id,
+        secretCode: newUser.secretCode
+      });
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: email,
+        subject:
+          "🚀 Welcome to Cryptuoso Platform - Please confirm your email.",
+        variables: {
+          body: `<p>Greetings!</p>
+            <p>Your user account is successfully created!</p>
+            <p>Activate your account by confirming your email please click <b><a href="https://cryptuoso.com/auth/activate-account/${urlData}">this link</a></b></p>
+            <p>or enter this code <b>${newUser.secretCode}</b> manually on confirmation page.</p>`
+        },
+        tags: ["auth"]
+      });
       return newUser.id;
+    } catch (e) {
+      this.logger.warn(e);
+      throw e;
+    }
+  }
+
+  async activateAccount(ctx: Context<{ userId: string; secretCode: string }>) {
+    try {
+      const { userId, secretCode } = ctx.params;
+
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+
+      if (!user) throw new Error("User account not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      if (user.status === cpz.UserStatus.enabled)
+        throw new Error("User account is already activated.");
+      if (!user.secretCode) throw new Error("Confirmation code is not set.");
+      if (user.secretCode !== secretCode)
+        throw new Error("Wrong confirmation code.");
+
+      const refreshToken = uuid();
+      const refreshTokenExpireAt = dayjs
+        .utc()
+        .add(+process.env.REFRESH_TOKEN_EXPIRES, cpz.TimeUnit.day)
+        .toISOString();
+
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        secretCode: null,
+        secretCodeExpireAt: null,
+        status: cpz.UserStatus.enabled,
+        refreshToken,
+        refreshTokenExpireAt
+      });
+      await ctx.call(
+        `${cpz.Service.MAIL}.subscribeToList`,
+        {
+          list: "cpz-beta@mg.cryptuoso.com",
+          email: user.email
+        },
+        { parentCtx: ctx }
+      );
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: user.email,
+        subject: "🚀 Welcome to Cryptuoso Platform - User Account Activated.",
+        variables: {
+          body: `<p>Congratulations!</p>
+            <p>Your user account is successfully activated!</p>
+            <p>Now you can login to <b><a href="https://cryptuoso.com/auth/login">your account</a></b> using your email and password.</p>
+            <p>Please check out our <b><a href="https://support.cryptuoso.com">Documentation Site</a></b> to get started!</p>`
+        },
+        tags: ["auth"]
+      });
+      return {
+        accessToken: this.generateAccessToken(user),
+        refreshToken,
+        refreshTokenExpireAt
+      };
+    } catch (e) {
+      this.logger.warn(e);
+      throw e;
+    }
+  }
+
+  async passwordReset(ctx: Context<{ email: string }>) {
+    try {
+      const { email } = ctx.params;
+
+      const [user]: cpz.User[] = await ctx.call(
+        `${cpz.Service.DB_USERS}.find`,
+        {
+          query: { email }
+        }
+      );
+
+      if (!user) throw new Error("User account not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+
+      let secretCode;
+      let secretCodeExpireAt;
+      if (user.status === cpz.UserStatus.new) {
+        secretCode = user.secretCode;
+        secretCodeExpireAt = user.secretCodeExpireAt;
+      } else {
+        secretCode = this.generateCode();
+        secretCodeExpireAt = dayjs
+          .utc()
+          .add(1, cpz.TimeUnit.hour)
+          .toISOString();
+        await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+          id: user.id,
+          secretCode,
+          secretCodeExpireAt
+        });
+      }
+
+      const urlData = this.encodeData({
+        userId: user.id,
+        secretCode
+      });
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: user.email,
+        subject: "🔐 Cryptuoso - Password Reset Request.",
+        variables: {
+          body: `
+            <p>We received a request to reset your password. Please create a new password by clicking <a href="https://cryptuoso.com/auth/confirm-password-reset/${urlData}">this link</a></p>
+            <p>or enter this code <b>${secretCode}</b> manually on reset password confirmation page.</p>
+            <p>This request will expire in 1 hour.</p>
+            <p>If you did not request this change, no changes have been made to your user account.</p>`
+        },
+        tags: ["auth"]
+      });
+      return user.id;
+    } catch (e) {
+      this.logger.warn(e);
+      throw e;
+    }
+  }
+
+  async confirmPasswordReset(
+    ctx: Context<{ userId: string; secretCode: string; password: string }>
+  ) {
+    try {
+      const { userId, secretCode, password } = ctx.params;
+
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+
+      if (!user) throw new Error("User account not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      if (!user.secretCode) throw new Error("Confirmation code is not set.");
+      if (user.secretCode !== secretCode)
+        throw new Error("Wrong confirmation code.");
+
+      let newSecretCode = null;
+      let newSecretCodeExpireAt = null;
+      if (user.status === cpz.UserStatus.new) {
+        newSecretCode = user.secretCode;
+        newSecretCodeExpireAt = user.secretCodeExpireAt;
+      }
+
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        passwordHash: bcrypt.hashSync(password, 10),
+        secretCode: newSecretCode,
+        secretCodeExpireAt: newSecretCodeExpireAt
+      });
+
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: user.email,
+        subject: "🔐 Cryptuoso - Reset Password Confirmation.",
+        variables: {
+          body: `
+            <p>Your password successfully changed!</p>
+            <p>If you did not request this change, please contact support <a href="mailto:support@cryptuoso.com">support@cryptuoso.com</a></p>`
+        },
+        tags: ["auth"]
+      });
+
+      return {
+        accessToken: this.generateAccessToken(user),
+        refreshToken: user.refreshToken,
+        refreshTokenExpireAt: user.refreshTokenExpireAt
+      };
     } catch (e) {
       this.logger.warn(e);
       throw e;
@@ -288,6 +495,14 @@ class AuthService extends Service {
         expiresIn: `${process.env.JWT_TOKEN_EXPIRES}m`
       }
     );
+  }
+
+  generateCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  encodeData(data: any): string {
+    return Buffer.from(JSON.stringify(data)).toString("base64");
   }
 }
 

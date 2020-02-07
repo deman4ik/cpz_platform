@@ -12,7 +12,7 @@
     "backtester": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/backtester/*.service.ts services/db/**/*.service.ts services/db/*.service.ts services/api.service.ts services/auth.service.ts",
     "robot": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/robot/*.service.ts",
     "tg": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/api.service.ts services/auth.service.ts services/db/user/*.service.ts services/db/robot/*.service.ts services/db/db-markets.service.ts services/connector/*.service.ts services/userRobot/*.service.ts services/exwatcher.service.ts services/db-connector-jobs.service services/telegram/*.service.ts",
-    "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/api.service.ts services/auth.service.ts services/db/user/db-users.service.ts",
+    "auth": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/api.service.ts services/auth.service.ts services/db/user/db-users.service.ts services/mail.service.ts",
     "mail": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/mail.service.ts",
     "worker": "node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dist/local.config.js dist/services/job-runner.service.js",
     "cli": "moleculer connect",
