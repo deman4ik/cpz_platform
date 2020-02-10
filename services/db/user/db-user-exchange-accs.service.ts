@@ -6,6 +6,7 @@ import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 import { encrypt, capitalize } from "../../../utils";
+import Auth from "../../../mixins/auth";
 
 class UserExchangeAccsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -23,7 +24,7 @@ class UserExchangeAccsService extends Service {
           `
         }
       },
-      mixins: [DbService],
+      mixins: [Auth, DbService],
       adapter: SqlAdapter,
       model: {
         name: "user_exchange_accs",

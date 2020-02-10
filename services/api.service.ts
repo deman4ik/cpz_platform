@@ -66,6 +66,10 @@ class ApiService extends Service {
         })
       ],
       settings: {
+        rateLimit: {
+          limit: 100,
+          headers: true
+        },
         port: process.env.PORT || 3000,
         routes: [
           {
@@ -84,8 +88,12 @@ class ApiService extends Service {
             },
             aliases: {
               "POST /auth/login": this.login,
+              "POST /auth/logout": this.logout,
               "POST /auth/register": this.register,
-              "POST /auth/refresh-token": this.refreshToken
+              "POST /auth/refresh-token": this.refreshToken,
+              "POST /auth/activate-account": this.activateAccount,
+              "POST /auth/password-reset": this.passwordReset,
+              "POST /auth/confirm-password-reset": this.confirmPasswordReset
             }
           }
         ],
@@ -127,16 +135,14 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
       res.end(
         JSON.stringify({
           success: true,
-          accessToken,
-          refreshToken,
-          refreshTokenExpireAt
+          accessToken
         })
       );
     } catch (e) {
@@ -145,8 +151,36 @@ class ApiService extends Service {
     }
   }
 
+  async logout(req: any, res: any) {
+    try {
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", "", {
+        expires: new Date(0),
+        httpOnly: true,
+        sameSite: "lax",
+        domain: ".cryptuoso.com",
+        overwrite: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e.message, {
+        code: e.code,
+        type: e.type,
+        data: e.data,
+        retryable: e.retryable
+      });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
   async register(req: any, res: any) {
     try {
+      this.logger.info(req.body);
       const userId = await req.$service.broker.call(
         `${cpz.Service.AUTH}.register`,
         req.body
@@ -176,17 +210,15 @@ class ApiService extends Service {
       }
       const {
         accessToken,
-        accessTokenExpireAt,
         refreshToken,
-        refreshTokenExpireAt,
-        userId
+        refreshTokenExpireAt
       } = await req.$service.broker.call(`${cpz.Service.AUTH}.refreshToken`, {
         refreshToken: oldRefreshToken
       });
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
@@ -205,6 +237,83 @@ class ApiService extends Service {
         data: e.data,
         retryable: e.retryable
       });
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async activateAccount(req: any, res: any) {
+    try {
+      const {
+        accessToken,
+        refreshToken,
+        refreshTokenExpireAt
+      } = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.activateAccount`,
+        req.body
+      );
+
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true,
+        sameSite: "lax",
+        domain: ".cryptuoso.com",
+        overwrite: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async passwordReset(req: any, res: any) {
+    try {
+      const userId = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.passwordReset`,
+        req.body
+      );
+      res.end(JSON.stringify({ success: true, userId }));
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async confirmPasswordReset(req: any, res: any) {
+    try {
+      const {
+        accessToken,
+        refreshToken,
+        refreshTokenExpireAt
+      } = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.confirmPasswordReset`,
+        req.body
+      );
+
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true,
+        sameSite: "lax",
+        domain: ".cryptuoso.com",
+        overwrite: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
       res.end(JSON.stringify({ success: false, error: e.message }));
     }
   }
