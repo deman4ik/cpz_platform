@@ -135,7 +135,7 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
@@ -158,7 +158,7 @@ class ApiService extends Service {
       cookies.set("refresh_token", "", {
         expires: new Date(0),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
@@ -218,7 +218,7 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
@@ -257,7 +257,7 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });
@@ -302,7 +302,7 @@ class ApiService extends Service {
       cookies.set("refresh_token", refreshToken, {
         expires: new Date(refreshTokenExpireAt),
         httpOnly: true,
-        sameSite: false,
+        sameSite: "lax",
         domain: ".cryptuoso.com",
         overwrite: true
       });

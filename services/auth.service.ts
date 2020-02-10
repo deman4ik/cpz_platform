@@ -486,7 +486,7 @@ class AuthService extends Service {
           "x-hasura-default-role": defaultRole,
           "x-hasura-allowed-roles": allowedRoles,
           "x-hasura-user-id": id,
-          "x-hasura-access": access
+          "x-hasura-access": `${access}`
         }
       },
       process.env.JWT_SECRET,
