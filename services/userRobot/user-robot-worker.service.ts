@@ -112,28 +112,36 @@ class UserRobotWorkerService extends Service {
         throw new Error(`User robot ${userRobotId} not found.`);
       const userRobot = new UserRobot(userRobotState);
       userRobot._log = this.logger.info.bind(this);
-      if (type === cpz.UserRobotJobType.signal) {
-        userRobot.handleSignal(<cpz.SignalEvent>data);
-      } else if (type === cpz.UserRobotJobType.order) {
-        userRobot.handleOrder(<cpz.Order>data);
-      } else if (type === cpz.UserRobotJobType.stop) {
-        // Stop robot
-        if (
-          userRobot.status === cpz.Status.stopping ||
-          userRobot.status === cpz.Status.stopped
-        )
-          return userRobot.status;
-        userRobot.stop(<{ message?: string }>data);
-      } else if (type === cpz.UserRobotJobType.pause) {
-        // Pause robot
-        if (
-          userRobot.status === cpz.Status.paused ||
-          userRobot.status === cpz.Status.stopped
-        )
-          return userRobot.status;
-        userRobot.pause(<{ message?: string }>data);
-      } else {
-        throw new Error(`Unknown type "${type}"`);
+      try {
+        if (type === cpz.UserRobotJobType.signal) {
+          userRobot.handleSignal(<cpz.SignalEvent>data);
+        } else if (type === cpz.UserRobotJobType.order) {
+          userRobot.handleOrder(<cpz.Order>data);
+        } else if (type === cpz.UserRobotJobType.stop) {
+          // Stop robot
+          if (
+            userRobot.status === cpz.Status.stopping ||
+            userRobot.status === cpz.Status.stopped
+          )
+            return userRobot.status;
+          userRobot.stop(<{ message?: string }>data);
+        } else if (type === cpz.UserRobotJobType.pause) {
+          // Pause robot
+          if (
+            userRobot.status === cpz.Status.paused ||
+            userRobot.status === cpz.Status.stopped
+          )
+            return userRobot.status;
+          userRobot.pause(<{ message?: string }>data);
+        } else {
+          throw new Error(`Unknown type "${type}"`);
+        }
+      } catch (err) {
+        this.logger.error(
+          `Failed to run user robot #${userRobotId} job`,
+          err,
+          job
+        );
       }
 
       if (
