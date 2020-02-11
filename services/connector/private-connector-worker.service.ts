@@ -562,14 +562,10 @@ class PrivateConnectorWorkerService extends Service {
           this.logger.error(
             `Failed to create order #${order.id} - order already processed!`
           );
-
+          ({ order, nextJob } = await this.checkOrder(order));
           return {
             order,
-            nextJob: {
-              type: cpz.OrderJobType.check,
-              priority: cpz.Priority.low,
-              nextJobAt: dayjs.utc().toISOString()
-            }
+            nextJob
           };
         }
 
@@ -626,7 +622,10 @@ class PrivateConnectorWorkerService extends Service {
             nextJob: null
           };
         }
-        if (order.status === cpz.OrderStatus.closed)
+        if (
+          order.status === cpz.OrderStatus.closed ||
+          order.status === cpz.OrderStatus.canceled
+        )
           return { order, nextJob: null };
         ({ order, nextJob } = await this.checkOrder(order));
 
@@ -636,6 +635,9 @@ class PrivateConnectorWorkerService extends Service {
           dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
             order.params.orderTimeout
         ) {
+          this.logger.info(
+            `UserExAcc #${order.userExAccId} canceling order ${order.positionId}/${order.id} by timeout`
+          );
           ({ order, nextJob } = await this.cancelOrder(order));
         }
       } else {
@@ -776,6 +778,9 @@ class PrivateConnectorWorkerService extends Service {
         return {
           order: {
             ...order,
+            exId: null,
+            exTimestamp: null,
+            status: cpz.OrderStatus.new,
             error: this.getErrorMessage(err)
           },
           nextJob: {
