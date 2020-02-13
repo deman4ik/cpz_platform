@@ -15,11 +15,6 @@ import {
 import Timeframe from "../../utils/timeframe";
 
 /**
- * Available exchanges
- */
-type ExchangeName = "kraken" | "bitfinex" | "binance";
-
-/**
  * Public Exchange Connector Service
  *
  * @class PublicConnectorService
@@ -108,7 +103,7 @@ class PublicConnectorService extends Service {
           },
           async handler(
             ctx: Context<{
-              exchange: ExchangeName;
+              exchange: string;
               asset: string;
               currency: string;
             }>
@@ -141,7 +136,7 @@ class PublicConnectorService extends Service {
           },
           async handler(
             ctx: Context<{
-              exchange: ExchangeName;
+              exchange: string;
               asset: string;
               currency: string;
               timeframe: cpz.Timeframe;
@@ -178,7 +173,7 @@ class PublicConnectorService extends Service {
           },
           async handler(
             ctx: Context<{
-              exchange: ExchangeName;
+              exchange: string;
               asset: string;
               currency: string;
               timeframe: cpz.Timeframe;
@@ -219,7 +214,7 @@ class PublicConnectorService extends Service {
           },
           async handler(
             ctx: Context<{
-              exchange: ExchangeName;
+              exchange: string;
               asset: string;
               currency: string;
               timeframe: cpz.Timeframe;
@@ -254,7 +249,7 @@ class PublicConnectorService extends Service {
           },
           async handler(
             ctx: Context<{
-              exchange: ExchangeName;
+              exchange: string;
               asset: string;
               currency: string;
               timeframe: cpz.Timeframe;
@@ -307,18 +302,21 @@ class PublicConnectorService extends Service {
   /**
    * Initialize public CCXT instance
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @returns {Promise<void>}
    * @memberof PublicConnectorService
    */
-  async initConnector(exchange: ExchangeName): Promise<void> {
+  async initConnector(exchange: string): Promise<void> {
     if (!(exchange in this.connectors)) {
       const config: { [key: string]: any } = {
         fetchImplementation: this._fetch
       };
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[exchange] = new ccxt[exchange](config);
-      } else if (exchange === "binance") {
+      } else if (exchange === "binance_futures") {
+        config.options = { defaultType: "futures" };
+        this.connectors[exchange] = new ccxt.binance(config);
+      } else if (exchange === "binance_spot") {
         config.options = { defaultType: "futures" };
         this.connectors[exchange] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
@@ -350,14 +348,14 @@ class PublicConnectorService extends Service {
   /**
    * Get currency market properties
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @returns
    * @memberof PublicConnectorService
    */
   async getMarket(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string
   ): Promise<cpz.Market> {
@@ -408,11 +406,11 @@ class PublicConnectorService extends Service {
   /**
    * Get exchange timeframes
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @returns {Promise<cpz.ExchangeTimeframes>}
    * @memberof PublicConnectorService
    */
-  async getTimeframes(exchange: ExchangeName): Promise<cpz.ExchangeTimeframes> {
+  async getTimeframes(exchange: string): Promise<cpz.ExchangeTimeframes> {
     await this.initConnector(exchange);
     const timeframes: cpz.ExchangeTimeframes = {};
 
@@ -426,14 +424,14 @@ class PublicConnectorService extends Service {
   /**
    * Get Current Price
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @returns {Promise<cpz.ExchangePrice>}
    * @memberof PublicConnectorService
    */
   async getCurrentPrice(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string
   ): Promise<cpz.ExchangePrice> {
@@ -464,7 +462,7 @@ class PublicConnectorService extends Service {
   /**
    * Get current open candle
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @param {cpz.Timeframe} timeframe
@@ -472,7 +470,7 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   async getCurrentCandle(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string,
     timeframe: cpz.Timeframe
@@ -569,7 +567,7 @@ class PublicConnectorService extends Service {
   /**
    * Get raw exchange candles
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @param {cpz.Timeframe} timeframe
@@ -579,7 +577,7 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   async getRawCandles(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string,
     timeframe: cpz.Timeframe,
@@ -638,7 +636,7 @@ class PublicConnectorService extends Service {
   /**
    * Get candles in timeframes
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @param {cpz.Timeframe} timeframe
@@ -648,7 +646,7 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   async getCandles(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string,
     timeframe: cpz.Timeframe,
@@ -717,7 +715,7 @@ class PublicConnectorService extends Service {
   /**
    * Get trades
    *
-   * @param {ExchangeName} exchange
+   * @param {string} exchange
    * @param {string} asset
    * @param {string} currency
    * @param {string} dateFrom
@@ -725,7 +723,7 @@ class PublicConnectorService extends Service {
    * @memberof PublicConnectorService
    */
   async getTrades(
-    exchange: ExchangeName,
+    exchange: string,
     asset: string,
     currency: string,
     dateFrom: string

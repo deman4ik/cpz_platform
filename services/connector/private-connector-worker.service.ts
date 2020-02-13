@@ -16,11 +16,6 @@ import { ORDER_CHECK_TIMEOUT } from "../../config";
 import { v4 as uuid } from "uuid";
 
 /**
- * Available exchanges
- */
-type ExchangeName = "kraken" | "bitfinex" | "binance";
-
-/**
  * Private Exchange Connector Worker Service
  *
  * @class PrivateConnectorWorkerService
@@ -144,7 +139,7 @@ class PrivateConnectorWorkerService extends Service {
   }
 
   getOrderParams(
-    exchange: ExchangeName,
+    exchange: string,
     params: GenericObject<any>,
     type: cpz.OrderType
   ) {
@@ -166,7 +161,7 @@ class PrivateConnectorWorkerService extends Service {
     return {};
   }
 
-  getCloseOrderDate(exchange: ExchangeName, orderResponse: Order) {
+  getCloseOrderDate(exchange: string, orderResponse: Order) {
     if (exchange === "kraken") {
       return (
         orderResponse &&
@@ -185,7 +180,7 @@ class PrivateConnectorWorkerService extends Service {
 
   async checkAPIKeys(
     ctx: Context<{
-      exchange: ExchangeName;
+      exchange: string;
       key: string;
       secret: string;
       pass?: string;
@@ -248,7 +243,7 @@ class PrivateConnectorWorkerService extends Service {
       );
 
       const type = cpz.OrderType.limit;
-      const orderParams = this.getOrderParams(<ExchangeName>exchange, {}, type);
+      const orderParams = this.getOrderParams(<string>exchange, {}, type);
 
       const createOrderCall = async (bail: (e: Error) => void) => {
         try {
@@ -458,9 +453,11 @@ class PrivateConnectorWorkerService extends Service {
       };
 
       if (exchange === "bitfinex" || exchange === "kraken") {
-        this.connectors[id] = new ccxt[<ExchangeName>exchange](config);
-      } else if (exchange === "binance") {
+        this.connectors[id] = new ccxt[exchange](config);
+      } else if (exchange === "binance_futures") {
         config.options = { defaultType: "futures" };
+        this.connectors[id] = new ccxt.binance(config);
+      } else if (exchange === "binance_spot") {
         this.connectors[id] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
     }
@@ -693,7 +690,7 @@ class PrivateConnectorWorkerService extends Service {
       }
 
       const orderParams = this.getOrderParams(
-        <ExchangeName>exchange,
+        <string>exchange,
         order.params,
         type
       );
@@ -735,10 +732,7 @@ class PrivateConnectorWorkerService extends Service {
           signalPrice,
           exId,
           exTimestamp,
-          exLastTradeAt: this.getCloseOrderDate(
-            <ExchangeName>exchange,
-            response
-          ),
+          exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status: <cpz.OrderStatus>status,
           price: (price && +price) || signalPrice,
           volume: volume && +volume,
@@ -837,10 +831,7 @@ class PrivateConnectorWorkerService extends Service {
         order: {
           ...order,
           exTimestamp,
-          exLastTradeAt: this.getCloseOrderDate(
-            <ExchangeName>exchange,
-            response
-          ),
+          exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status: <cpz.OrderStatus>status,
           price: (price && +price) || order.signalPrice,
           volume: volume && +volume,
