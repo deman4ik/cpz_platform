@@ -23,8 +23,8 @@
       "info": "🚦 Signals - Manual Trading Mode",
       "my": "🚥 My Signals",
       "search": "🔎 Search Signals",
-      "top": "🏆 Top Perfomance Signals",
-      "perfomance": "📊 My Total Perfomance"
+      "top": "🏆 Top Performance Signals",
+      "performance": "📊 My Total Performance"
     },
     "searchSignals": {
       "selectExchange": "🔎 Searching Signal Robots\n\nSelect available <b>exchange</b>",
@@ -32,8 +32,8 @@
       "selectRobot": "🔎 Searching Signal Robots\n\nSelect available <b>${exchange}</b> <b>${asset}</b> robot"
     },
     "topSignals": {
-      "selectExchange": "🏆 Top Perfomance Signal Robots\n\nSelect available <b>exchange</b>",
-      "selectRobot": "🏆 Top Perfomance Signal Robots"
+      "selectExchange": "🏆 Top Performance Signal Robots\n\nSelect available <b>exchange</b>",
+      "selectRobot": "🏆 Top Performance Signal Robots"
     },
     "mySignals": {
       "robotsList": "🚥 Robot signals you subscribed to:",
@@ -41,8 +41,8 @@
       "add": "✅ Add Signals"
     },
     "perfSignals": {
-      "info": "📊 My Signals Total Perfomance",
-      "perfNone": "No enough data to calculate Signals perfomance yet..."
+      "info": "📊 My Signals Total Performance",
+      "perfNone": "No enough data to calculate Signals Performance yet..."
     },
     "robotSignal": {
       "subscribeSignals": "🚥 Subscribe to Signals",
@@ -60,8 +60,8 @@
       "info": "🤖 Robots - Automated Trading Mode",
       "my": "🤖 My Robots",
       "search": "🔎 Search Robots",
-      "top": "🏆 Top Perfomance Robots",
-      "perfomance": "📈 My Total Perfomance"
+      "top": "🏆 Top Performance Robots",
+      "performance": "📈 My Total Performance"
     },
     "myRobots": {
       "robotsList": "🤖 My Robots:",
@@ -69,8 +69,8 @@
       "add": "✅ Add Robots"
     },
     "perfRobots": {
-      "info": "📊 My trading Robots Total Perfomance",
-      "perfNone": "No enough data to calculate trading Robots perfomance yet..."
+      "info": "📊 My trading Robots Total Performance",
+      "perfNone": "No enough data to calculate trading Robots Performance yet..."
     },
     "searchRobots": {
       "selectExchange": "🔎 Searching Robots\n\nSelect available <b>exchange</b>",
@@ -78,8 +78,8 @@
       "selectRobot": "🔎 Searching Robots\n\nSelect available <b>${exchange}</b> <b>${asset}</b> robot"
     },
     "topRobots": {
-      "selectExchange": "🏆 Top Perfomance Robots\n\nSelect available <b>exchange</b>",
-      "selectRobot": "🏆 Top Perfomance Robots"
+      "selectExchange": "🏆 Top Performance Robots\n\nSelect available <b>exchange</b>",
+      "selectRobot": "🏆 Top Performance Robots"
     },
     "userRobot": {
       "add": "✅ Add Robot",
@@ -180,7 +180,7 @@
     "menuPositions": "🗃 Latest positions",
     "name": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n\n",
     "info": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
-    "profit": "<b>Perfomance:</b> ${profit}$ / ${lastProfit}$\n\n",
+    "profit": "<b>Performance:</b> ${profit}$ / ${lastProfit}$\n\n",
     "volume": "<b>Volume:</b> ${volume} ${asset}\n\n",
     "subscribedAt": "<b>Subscribed at:</b> ${subscribedAt}\n\n",
     "startedAt": "<b>Started at:</b> ${startedAt}\n\n",

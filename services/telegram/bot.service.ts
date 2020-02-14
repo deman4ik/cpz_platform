@@ -325,7 +325,7 @@ class BotService extends Service {
     mySignalsScene.action(/prev/, mySingalsPrevPage.bind(this));
     mySignalsScene.action(/back/, mySignalsBackEdit.bind(this));
 
-    const perfRobotsScene = new Scene(cpz.TelegramScene.PERFOMANCE_ROBOTS);
+    const perfRobotsScene = new Scene(cpz.TelegramScene.PERFORMANCE_ROBOTS);
     perfRobotsScene.enter(perfRobotsEnter.bind(this));
     perfRobotsScene.leave(perfRobotsLeave.bind(this));
     perfRobotsScene.hears(
@@ -337,7 +337,7 @@ class BotService extends Service {
     perfRobotsScene.command("menu", leave());
     perfRobotsScene.action(/back/, perfRobotsBackEdit.bind(this));
 
-    const perfSignalsScene = new Scene(cpz.TelegramScene.PERFOMANCE_SIGNALS);
+    const perfSignalsScene = new Scene(cpz.TelegramScene.PERFORMANCE_SIGNALS);
     perfSignalsScene.enter(perfSignalsEnter.bind(this));
     perfSignalsScene.leave(perfSignalsLeave.bind(this));
     perfSignalsScene.hears(

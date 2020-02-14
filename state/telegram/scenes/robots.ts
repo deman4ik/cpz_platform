@@ -29,7 +29,7 @@ function getRobotsMenu(ctx: any) {
       ],
       [
         m.callbackButton(
-          ctx.i18n.t("scenes.robots.perfomance"),
+          ctx.i18n.t("scenes.robots.performance"),
           JSON.stringify({ a: "perfRobots" }),
           false
         )
@@ -109,7 +109,7 @@ async function robotsTopRobots(ctx: any) {
 async function robotsPerfRobots(ctx: any) {
   try {
     ctx.scene.state.silent = true;
-    await ctx.scene.enter(cpz.TelegramScene.PERFOMANCE_ROBOTS, { edit: true });
+    await ctx.scene.enter(cpz.TelegramScene.PERFORMANCE_ROBOTS, { edit: true });
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
