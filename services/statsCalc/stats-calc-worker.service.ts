@@ -94,7 +94,7 @@ class StatsCalcWorkerService extends Service {
   }
 
   async calcRobot(robotId: string) {
-    const positions = await this.broker.call(
+    const positions: cpz.RobotPositionState[] = await this.broker.call(
       `${cpz.Service.DB_ROBOT_POSITIONS}.find`,
       {
         sort: "exit_date",
@@ -306,7 +306,7 @@ class StatsCalcWorkerService extends Service {
   }
 
   async calcUserRobot(userRobotId: string) {
-    const positions = await this.broker.call(
+    const positions: cpz.UserPositionDB[] = await this.broker.call(
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
         sort: "exit_date",
@@ -341,7 +341,7 @@ class StatsCalcWorkerService extends Service {
     if (exchange) query.exchange = exchange;
     if (asset) query.asset = asset;
 
-    const positions = await this.broker.call(
+    const positions: cpz.UserPositionDB[] = await this.broker.call(
       `${cpz.Service.DB_USER_POSITIONS}.find`,
       {
         sort: "exit_date",

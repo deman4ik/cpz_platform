@@ -654,7 +654,7 @@ class ExwatcherService extends Service {
       this.candlesCurrent[id] = {};
     await Promise.all(
       Timeframe.validArray.map(async timeframe => {
-        const candle = await this.broker.call(
+        const candle: cpz.Candle = await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentCandle`,
           {
             exchange,

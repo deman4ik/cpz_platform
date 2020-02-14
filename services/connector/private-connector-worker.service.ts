@@ -467,9 +467,12 @@ class PrivateConnectorWorkerService extends Service {
     const { exchange } = exAcc;
     const { userExAccId, orderId, type, data } = job;
     try {
-      let order = await this.broker.call(`${cpz.Service.DB_USER_ORDERS}.get`, {
-        id: orderId
-      });
+      let order: cpz.Order = await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.get`,
+        {
+          id: orderId
+        }
+      );
       if (order) {
         let nextJob: {
           type: cpz.OrderJobType;
