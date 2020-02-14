@@ -118,7 +118,7 @@ class BacktesterWorkerService extends Service {
         this.logger.info("Found previous backtest. Deleting...");
         await this.broker.call(`${cpz.Service.DB_BACKTESTS}.remove`, { id });
       }
-      const robotState = await this.broker.call(
+      const robotState: cpz.RobotState = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.get`,
         { id: robotId }
       );

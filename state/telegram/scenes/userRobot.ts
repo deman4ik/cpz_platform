@@ -257,9 +257,11 @@ async function userRobotPublicStats(ctx: any) {
     });
 
     let message;
-
+    const volume =
+      (userRobotInfo && userRobotInfo.settings.volume) ||
+      robotInfo.settings.volume;
     if (statistics && Object.keys(statistics).length > 0)
-      message = getStatisticsText(ctx, statistics);
+      message = getStatisticsText(ctx, statistics, volume, robotInfo.asset);
     else message = ctx.i18n.t("robot.statsNone");
 
     return ctx.editMessageText(
@@ -325,7 +327,12 @@ async function userRobotMyStats(ctx: any) {
 
     let message;
     if (statistics && Object.keys(statistics).length > 0)
-      message = getStatisticsText(ctx, statistics);
+      message = getStatisticsText(
+        ctx,
+        statistics,
+        userRobotInfo.settings.volume,
+        robotInfo.asset
+      );
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {

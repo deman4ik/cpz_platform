@@ -171,7 +171,10 @@ class PublisherService extends Service {
         data: { message }
       } = notification;
 
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId: user.telegramId,
         message
       });
@@ -190,7 +193,10 @@ class PublisherService extends Service {
         data: { message }
       } = notification;
       const LANG = "en";
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId: user.telegramId,
         message: this.i18n.t(LANG, "scenes.support.reply", { message })
       });
@@ -272,7 +278,10 @@ class PublisherService extends Service {
         message = `${robotInfo}${tradeText}`;
       }
 
-      return await this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return await this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId: user.telegramId,
         message
       });
@@ -289,7 +298,10 @@ class PublisherService extends Service {
       );
 
       const LANG = "en";
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId: user.telegramId,
         message: this.i18n.t(LANG, `userExAcc.error`, {
           name,
@@ -314,7 +326,10 @@ class PublisherService extends Service {
       );
 
       const LANG = "en";
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.error`, {
           id: userRobotId,
@@ -350,7 +365,10 @@ class PublisherService extends Service {
         }
       );
       const LANG = "en";
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.status`, {
           code,
@@ -418,7 +436,10 @@ class PublisherService extends Service {
         });
       }
 
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId,
         message: `${info}${tradeText}`
       });
@@ -438,7 +459,10 @@ class PublisherService extends Service {
         }
       );
       const LANG = "en";
-      return this.broker.call(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
+      return this.broker.call<
+        { success: boolean; error?: string },
+        { telegramId: number; message: string }
+      >(`${cpz.Service.TELEGRAM_BOT}.sendMessage`, {
         telegramId,
         message: this.i18n.t(LANG, `userRobot.orderError`, {
           id: userRobotId,

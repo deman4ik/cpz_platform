@@ -123,13 +123,17 @@ async function robotSignalInfo(ctx: any) {
     }
 
     let volumeText = "";
+
+    let volume;
     if (userSignalsInfo) {
-      const { volume } = userSignalsInfo;
-      volumeText = ctx.i18n.t("robot.volume", {
-        volume,
-        asset: robotInfo.asset
-      });
+      ({ volume } = userSignalsInfo);
+    } else {
+      ({ volume } = robotInfo.settings);
     }
+    volumeText = ctx.i18n.t("robot.volume", {
+      volume,
+      asset: robotInfo.asset
+    });
 
     let profitText = "";
     if (userSignalsInfo) ({ equity } = userSignalsInfo);
@@ -232,9 +236,10 @@ async function robotSignalPublicStats(ctx: any) {
     });
 
     let message;
-
+    const volume =
+      (userSignalsInfo && userSignalsInfo.volume) || robotInfo.settings.volume;
     if (statistics && Object.keys(statistics).length > 0)
-      message = getStatisticsText(ctx, statistics);
+      message = getStatisticsText(ctx, statistics, volume, robotInfo.asset);
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
@@ -296,7 +301,12 @@ async function robotSignalMyStats(ctx: any) {
     });
     let message;
     if (statistics && Object.keys(statistics).length > 0)
-      message = getStatisticsText(ctx, statistics);
+      message = getStatisticsText(
+        ctx,
+        statistics,
+        userSignalsInfo.volume,
+        robotInfo.asset
+      );
     else message = ctx.i18n.t("robot.statsNone");
     return ctx.editMessageText(
       ctx.i18n.t("robot.name", {
