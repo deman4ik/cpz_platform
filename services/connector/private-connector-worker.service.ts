@@ -821,11 +821,30 @@ class PrivateConnectorWorkerService extends Service {
           bail(e);
         }
       };
-      const response: Order = await retry(call, this.retryOptions);
+      const response: {
+        id: string;
+        datetime: string;
+        timestamp: number;
+        lastTradeTimestamp: number;
+        status: "open" | "closed" | "canceled";
+        symbol: string;
+        type: "market" | "limit";
+        side: "buy" | "sell";
+        price: number;
+        average?: number;
+        amount: number;
+        filled: number;
+        remaining: number;
+        cost: number;
+        trades: ccxt.Trade[];
+        fee: ccxt.Fee;
+        info: any;
+      } = await retry(call, this.retryOptions);
       const {
         datetime: exTimestamp,
         status,
         price,
+        average,
         amount: volume,
         remaining,
         filled: executed
@@ -836,7 +855,7 @@ class PrivateConnectorWorkerService extends Service {
           exTimestamp,
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status: <cpz.OrderStatus>status,
-          price: (price && +price) || order.signalPrice,
+          price: (average && +average) || (price && +price),
           volume: volume && +volume,
           remaining: remaining && +remaining,
           executed:

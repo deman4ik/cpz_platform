@@ -479,8 +479,10 @@ class UserSignalsService extends Service {
             robotId
           }
         );
+        return { success: true };
+      } else {
+        return { success: false, error: "Subscription not found" };
       }
-      return { success: true };
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };
