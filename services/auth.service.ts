@@ -54,7 +54,7 @@ class AuthService extends Service {
         registerTg: {
           params: {
             telegramId: "number",
-            telegramUsername: "string",
+            telegramUsername: { type: "string", optional: true },
             name: { type: "string", optional: true }
           },
           handler: this.registerTg
@@ -401,7 +401,11 @@ class AuthService extends Service {
   }
 
   async registerTg(
-    ctx: Context<{ telegramId: number; telegramUsername: string; name: string }>
+    ctx: Context<{
+      telegramId: number;
+      telegramUsername?: string;
+      name?: string;
+    }>
   ) {
     this.logger.info("Register Telegram", ctx.params);
     const { telegramId, telegramUsername, name } = ctx.params;
