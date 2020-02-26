@@ -166,14 +166,21 @@ class UserExchangeAccsService extends Service {
       };
 
       if (!existed && (!name || name === "")) {
-        const exchangeAccsCount: number = await this._count(ctx, {
+        const [sameExchange] = await this.adapter.find({
+          fields: ["name"],
+          limit: 1,
+          sort: "-created_at",
           query: {
-            exchange,
-            userId
+            exchange
           }
         });
+        const number =
+          (sameExchange &&
+            sameExchange.name &&
+            +sameExchange.name.split("#")[1]) ||
+          0;
 
-        name = `${capitalize(exchange)} #${exchangeAccsCount + 1}`;
+        name = `${capitalize(exchange)} #${number + 1}`;
       }
 
       const exchangeAcc: cpz.UserExchangeAccount = {
