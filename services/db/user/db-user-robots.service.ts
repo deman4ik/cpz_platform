@@ -382,6 +382,7 @@ class UserRobotsService extends Service {
           settings
         }
       });
+      await ctx.emit(cpz.Event.USER_ROBOT_UPDATED, { userRobotId: id });
       return { success: true };
     } catch (e) {
       this.logger.error(e);

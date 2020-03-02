@@ -676,9 +676,11 @@ class BotService extends Service {
   }
 
   formatName(ctx: any) {
-    return ctx.from.first_name || ctx.from.last_name
-      ? `${ctx.from.first_name || ""} ${ctx.from.last_name || ""}`.trim()
-      : ctx.from.username;
+    let name = "";
+    if (ctx.from.first_name || ctx.from.last_name)
+      name = `${ctx.from.first_name || ""} ${ctx.from.last_name || ""}`.trim();
+    else if (ctx.from.username) name = ctx.from.username;
+    return name;
   }
 
   /*****************************
