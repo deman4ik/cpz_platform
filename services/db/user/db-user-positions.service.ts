@@ -70,6 +70,17 @@ class UserPositionsService extends Service {
               );
             }
           },
+          entryCandleTimestamp: {
+            type: Sequelize.DATE,
+            field: "entry_candle_timestamp",
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("entryCandleTimestamp");
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
+            }
+          },
           entryVolume: {
             type: Sequelize.NUMBER,
             field: "entry_volume",
@@ -131,6 +142,17 @@ class UserPositionsService extends Service {
             allowNull: true,
             get: function() {
               const value = this.getDataValue("exitDate");
+              return (
+                (value && value instanceof Date && value.toISOString()) || value
+              );
+            }
+          },
+          exitCandleTimestamp: {
+            type: Sequelize.DATE,
+            field: "exit_candle_timestamp",
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("exitCandleTimestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
               );
@@ -263,6 +285,7 @@ class UserPositionsService extends Service {
           entrySignalPrice,
           entryPrice,
           entryDate,
+          entryCandleTimestamp,
           entryVolume,
           entryExecuted,
           entryRemaining,
@@ -271,6 +294,7 @@ class UserPositionsService extends Service {
           exitSignalPrice,
           exitPrice,
           exitDate,
+          exitCandleTimestamp,
           exitVolume,
           exitExecuted,
           exitRemaining,
@@ -300,23 +324,25 @@ class UserPositionsService extends Service {
             entrySignalPrice: entrySignalPrice || null,
             entryPrice: entryPrice || null,
             entryDate: entryDate || null,
+            entryCandleTimestamp: entryCandleTimestamp || null,
             entryVolume: entryVolume || null,
             entryExecuted: entryExecuted || null,
             entryRemaining: entryRemaining || null,
             exitStatus: exitStatus || null,
             exitAction: exitAction || null,
             exitSignalPrice: exitSignalPrice || null,
-            exitPrice: exitPrice||null,
-            exitDate: exitDate||null,
-            exitVolume: exitVolume||null,
-            exitExecuted: exitExecuted||null,
-            exitRemaining: exitRemaining||null,
+            exitPrice: exitPrice || null,
+            exitDate: exitDate || null,
+            exitCandleTimestamp: exitCandleTimestamp || null,
+            exitVolume: exitVolume || null,
+            exitExecuted: exitExecuted || null,
+            exitRemaining: exitRemaining || null,
             internalState: JSON.stringify(internalState),
-            reason:reason||null,
-            profit: profit||null,
-            barsHeld: barsHeld||null,
-            nextJobAt: nextJobAt||null,
-            nextJob: nextJob||null
+            reason: reason || null,
+            profit: profit || null,
+            barsHeld: barsHeld || null,
+            nextJobAt: nextJobAt || null,
+            nextJob: nextJob || null
           })
       );
 
@@ -339,6 +365,7 @@ class UserPositionsService extends Service {
         entry_signal_price,
         entry_price,
         entry_date,
+        entry_candle_timestamp,
         entry_volume,
         entry_executed,
         entry_remaining,
@@ -347,6 +374,7 @@ class UserPositionsService extends Service {
         exit_signal_price,
         exit_price,
         exit_date,
+        exit_candle_timestamp,
         exit_volume,
         exit_executed,
         exit_remaining,
@@ -370,6 +398,7 @@ class UserPositionsService extends Service {
           entry_signal_price = excluded.entry_signal_price,
           entry_price = excluded.entry_price,
           entry_date = excluded.entry_date,
+          entry_candle_timestamp = excluded.entry_candle_timestamp,
           entry_volume = excluded.entry_volume,
           entry_executed = excluded.entry_executed,
           entry_remaining = excluded.entry_remaining,
@@ -378,6 +407,7 @@ class UserPositionsService extends Service {
           exit_signal_price = excluded.exit_signal_price,
           exit_price = excluded.exit_price,
           exit_date = excluded.exit_date,
+          exit_candle_timestamp = excluded.exit_candle_timestamp,
           exit_volume = excluded.exit_volume,
           exit_executed = excluded.exit_executed,
           exit_remaining = excluded.exit_remaining,

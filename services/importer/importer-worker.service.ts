@@ -382,10 +382,13 @@ class ImporterWorkerService extends Service {
           amount && loadLimit(exchange) > amount ? amount : loadLimit(exchange);
 
         let dateStart =
-          dateFrom && Timeframe.validTimeframeDate(dateFrom, timeframe);
+          dateFrom && Timeframe.validTimeframeDateNext(dateFrom, timeframe);
         let dateStop = dayjs
           .utc(
-            Timeframe.validTimeframeDate(getValidDate(dateTo, unit), timeframe)
+            Timeframe.validTimeframeDateNext(
+              getValidDate(dateTo, unit),
+              timeframe
+            )
           )
           .add(-amountInUnit, unit)
           .toISOString();

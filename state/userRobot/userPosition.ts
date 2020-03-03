@@ -4,6 +4,7 @@ import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
 import { addPercent, sum, average, round } from "../../utils";
 import { ORDER_OPEN_TIMEOUT } from "../../config/settings";
+import Timeframe from "../../utils/timeframe";
 
 class UserPosition implements cpz.UserPosition {
   _log = console.log;
@@ -25,6 +26,7 @@ class UserPosition implements cpz.UserPosition {
   _entrySignalPrice?: number;
   _entryPrice?: number;
   _entryDate?: string;
+  _entryCandleTimestamp?: string;
   _entryVolume?: number;
   _entryExecuted?: number;
   _entryRemaining?: number;
@@ -33,6 +35,7 @@ class UserPosition implements cpz.UserPosition {
   _exitSignalPrice?: number;
   _exitPrice?: number;
   _exitDate?: string;
+  _exitCandleTimestamp?: string;
   _exitVolume?: number;
   _exitExecuted?: number;
   _exitRemaining?: number;
@@ -77,6 +80,7 @@ class UserPosition implements cpz.UserPosition {
     this._entrySignalPrice = state.entrySignalPrice;
     this._entryPrice = state.entryPrice;
     this._entryDate = state.entryDate;
+    this._entryCandleTimestamp = state.entryCandleTimestamp;
     this._entryVolume = state.entryVolume;
     this._entryExecuted = state.entryExecuted;
     this._entryRemaining = state.entryRemaining;
@@ -85,6 +89,7 @@ class UserPosition implements cpz.UserPosition {
     this._exitSignalPrice = state.exitSignalPrice;
     this._exitPrice = state.exitPrice;
     this._exitDate = state.exitDate;
+    this._exitCandleTimestamp = state.exitCandleTimestamp;
     this._exitVolume = state.exitVolume;
     this._exitExecuted = state.exitExecuted;
     this._exitRemaining = state.exitRemaining;
@@ -280,8 +285,8 @@ class UserPosition implements cpz.UserPosition {
     if (!this._barsHeld)
       this._barsHeld = +round(
         dayjs
-          .utc(this._exitDate)
-          .diff(dayjs.utc(this._entryDate), cpz.TimeUnit.minute) /
+          .utc(this._exitCandleTimestamp)
+          .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
           this._robot.timeframe
       );
   }
@@ -300,11 +305,13 @@ class UserPosition implements cpz.UserPosition {
       entryStatus: this._entryStatus,
       entryPrice: this._entryPrice,
       entryDate: this._entryDate,
+      entryCandleTimestamp: this._entryCandleTimestamp,
       entryExecuted: this._entryExecuted,
       exitAction: this._exitAction,
       exitStatus: this._exitStatus,
       exitPrice: this._exitPrice,
       exitDate: this._exitDate,
+      exitCandleTimestamp: this._exitCandleTimestamp,
       exitExecuted: this._exitExecuted,
       reason: this._reason,
       profit: this._profit,
@@ -332,6 +339,7 @@ class UserPosition implements cpz.UserPosition {
       entrySignalPrice: this._entrySignalPrice,
       entryPrice: this._entryPrice,
       entryDate: this._entryDate,
+      entryCandleTimestamp: this._entryCandleTimestamp,
       entryVolume: this._entryVolume,
       entryExecuted: this._entryExecuted,
       entryRemaining: this._entryRemaining,
@@ -340,6 +348,7 @@ class UserPosition implements cpz.UserPosition {
       exitSignalPrice: this._exitSignalPrice,
       exitPrice: this._exitPrice,
       exitDate: this._exitDate,
+      exitCandleTimestamp: this._exitCandleTimestamp,
       exitVolume: this._exitVolume,
       exitExecuted: this._exitExecuted,
       exitRemaining: this._exitRemaining,
@@ -629,9 +638,17 @@ class UserPosition implements cpz.UserPosition {
   handleOrder(order: cpz.Order) {
     if (this._isActionEntry(order.action)) {
       this._entryDate = order.exLastTradeAt || order.exTimestamp;
+      this._entryCandleTimestamp = Timeframe.validTimeframeDatePrev(
+        this._entryDate,
+        this._robot.timeframe
+      );
       this._updateEntry();
     } else {
       this._exitDate = order.exLastTradeAt || order.exTimestamp;
+      this._exitCandleTimestamp = Timeframe.validTimeframeDatePrev(
+        this._exitDate,
+        this._robot.timeframe
+      );
       this._updateExit();
     }
 

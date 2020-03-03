@@ -474,11 +474,13 @@ declare namespace cpz {
     entrySignalPrice?: number;
     entryPrice?: number;
     entryDate?: string;
+    entryCandleTimestamp?: string;
     entryExecuted?: number;
     exitAction?: TradeAction;
     exitStatus?: UserPositionOrderStatus;
     exitPrice?: number;
     exitDate?: string;
+    exitCandleTimestamp?: string;
     exitExecuted?: number;
     reason?: string; //TODO ENUM
     profit?: number;
@@ -1099,6 +1101,7 @@ declare namespace cpz {
     entrySignalPrice?: number;
     entryPrice?: number;
     entryDate?: string;
+    entryCandleTimestamp?: string;
     entryVolume?: number;
     entryExecuted?: number;
     entryRemaining?: number;
@@ -1107,6 +1110,7 @@ declare namespace cpz {
     exitSignalPrice?: number;
     exitPrice?: number;
     exitDate?: string;
+    exitCandleTimestamp?: string;
     exitVolume?: number;
     exitExecuted?: number;
     exitRemaining?: number;
