@@ -123,17 +123,14 @@ class UserRobotRunnerService extends Service {
     try {
       const lock = await this.createLock(12000);
       await lock.acquire(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
+      //  TODO: started or stopping
       const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
+        `${cpz.Service.DB_USER_ROBOT_JOBS}.getIdled`,
         {
-          query: {
-            createdAt: {
-              $lte: dayjs
-                .utc()
-                .add(-30, cpz.TimeUnit.second)
-                .toISOString()
-            }
-          }
+          date: dayjs
+            .utc()
+            .add(-30, cpz.TimeUnit.second)
+            .toISOString()
         }
       );
 
