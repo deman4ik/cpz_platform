@@ -35,7 +35,7 @@ class UserExchangeAccsService extends Service {
           name: { type: Sequelize.STRING, allowNull: true },
           keys: { type: Sequelize.JSONB },
           status: { type: Sequelize.STRING },
-          error: { type: Sequelize.JSONB },
+          error: { type: Sequelize.STRING, allowNull: true },
           ordersCache: { type: Sequelize.JSONB, field: "orders_cache" }
         },
         options: {
@@ -75,7 +75,7 @@ class UserExchangeAccsService extends Service {
         invalidate: {
           params: {
             id: "string",
-            error: "object"
+            error: "string"
           },
           handler: this.invalidate
         },
@@ -258,7 +258,7 @@ class UserExchangeAccsService extends Service {
     }
   }
 
-  async invalidate(ctx: Context<{ id: string; error: any }>) {
+  async invalidate(ctx: Context<{ id: string; error: string }>) {
     try {
       const { id, error } = ctx.params;
       const userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.getById(
@@ -278,7 +278,7 @@ class UserExchangeAccsService extends Service {
             userId: userExchangeAcc.userId,
             name: userExchangeAcc.name,
             exchange: userExchangeAcc.exchange,
-            error: error.message
+            error: error
           }
         );
       }
