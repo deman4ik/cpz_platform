@@ -53,6 +53,7 @@ class AuthService extends Service {
           graphql: {
             mutation: "setTelegram(data: JSON!): Response!"
           },
+          roles: [cpz.UserRoles.user],
           handler: this.setTg
         },
         changeEmail: {
@@ -62,6 +63,7 @@ class AuthService extends Service {
           graphql: {
             mutation: "changeEmail(email: String!): Response!"
           },
+          roles: [cpz.UserRoles.user],
           handler: this.changeEmail
         },
         confirmChangeEmail: {
@@ -71,6 +73,7 @@ class AuthService extends Service {
           graphql: {
             mutation: "confirmChangeEmail(secretCode: String!): Response!"
           },
+          roles: [cpz.UserRoles.user],
           handler: this.confirmChangeEmail
         },
         changePassword: {
@@ -82,13 +85,14 @@ class AuthService extends Service {
             mutation:
               "changePassword(password: String!, oldPassword: String): Response!"
           },
+          roles: [cpz.UserRoles.user],
           handler: this.changePassword
         },
         register: {
           params: {
             email: "email",
             password: { type: "string", min: 6, max: 100, alphanum: true },
-            name: { type: "string", optional: true, min: 3 }
+            name: { type: "string", optional: true, empty: false }
           },
           handler: this.register
         },

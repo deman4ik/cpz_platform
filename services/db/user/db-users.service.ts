@@ -100,6 +100,16 @@ class UsersService extends Service {
           },
           roles: [cpz.UserRoles.user],
           handler: this.setNotificationSettings
+        },
+        changeName: {
+          params: {
+            name: { type: "string", empty: false }
+          },
+          graphql: {
+            mutation: "changeName(name: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.changeName
         }
       }
     });
@@ -124,7 +134,11 @@ class UsersService extends Service {
         tradingTelegram
       } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const { settings }: cpz.User = await this.adapter.findById(userId);
+      const user: cpz.User = await this.adapter.findById(userId);
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      const { settings } = user;
       const newSettings = {
         ...settings,
         notifications: {
@@ -156,6 +170,34 @@ class UsersService extends Service {
         }
       });
       return { success: true, result: newSettings };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async changeName(
+    ctx: Context<
+      {
+        name: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      this.authAction(ctx);
+      const { name } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const user: cpz.User = await this.adapter.findById(userId);
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      await this.adapter.updateById(userId, {
+        $set: {
+          name
+        }
+      });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };
