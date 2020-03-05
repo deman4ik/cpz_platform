@@ -13,10 +13,26 @@ function getStatisticsText(
       volume,
       asset
     });
-  return `${volumeText}${ctx.i18n.t(
-    "robot.statsProfit",
-    statistics
-  )}${ctx.i18n.t("robot.statsWinners", statistics)}${ctx.i18n.t(
+  return `${volumeText}${ctx.i18n.t("robot.statsProfit", {
+    ...statistics,
+    maxDrawdownDate: {
+      all:
+        statistics.maxDrawdownDate.all &&
+        dayjs
+          .utc(statistics.maxDrawdownDate.all)
+          .format("YYYY-MM-DD HH:mm UTC"),
+      long:
+        statistics.maxDrawdownDate.long &&
+        dayjs
+          .utc(statistics.maxDrawdownDate.long)
+          .format("YYYY-MM-DD HH:mm UTC"),
+      short:
+        statistics.maxDrawdownDate.short &&
+        dayjs
+          .utc(statistics.maxDrawdownDate.short)
+          .format("YYYY-MM-DD HH:mm UTC")
+    }
+  })}${ctx.i18n.t("robot.statsWinners", statistics)}${ctx.i18n.t(
     "robot.statsLosses",
     statistics
   )}${ctx.i18n.t("robot.statsLastUpdatedAt", {
