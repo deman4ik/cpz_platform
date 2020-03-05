@@ -11,7 +11,7 @@ import {
   getMainKeyboard,
   getBackKeyboard
 } from "../../state/telegram/keyboard";
-
+import { formatTgName } from "../../utils/auth";
 import {
   addUserExAccEnter,
   addUserExAccSelectedExchange,
@@ -676,11 +676,11 @@ class BotService extends Service {
   }
 
   formatName(ctx: any) {
-    let name = "";
-    if (ctx.from.first_name || ctx.from.last_name)
-      name = `${ctx.from.first_name || ""} ${ctx.from.last_name || ""}`.trim();
-    else if (ctx.from.username) name = ctx.from.username;
-    return name;
+    return formatTgName(
+      ctx.from.username,
+      ctx.from.first_name,
+      ctx.from.last_name
+    );
   }
 
   /*****************************

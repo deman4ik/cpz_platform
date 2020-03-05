@@ -961,10 +961,12 @@ declare namespace cpz {
     id: string;
     name?: string;
     email?: string;
+    emailNew?: string;
     telegramId?: number;
     telegramUsername?: string;
     status: UserStatus;
     passwordHash?: string;
+    passwordHashNew?: string;
     secretCode?: string;
     secretCodeExpireAt?: string;
     refreshToken?: string;

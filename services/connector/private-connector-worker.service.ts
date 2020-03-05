@@ -632,7 +632,7 @@ class PrivateConnectorWorkerService extends Service {
         if (
           order.status === cpz.OrderStatus.open &&
           order.exTimestamp &&
-          dayjs.utc().diff(dayjs(order.exTimestamp), cpz.TimeUnit.second) >
+          dayjs.utc().diff(dayjs.utc(order.exTimestamp), cpz.TimeUnit.second) >
             order.params.orderTimeout
         ) {
           this.logger.info(

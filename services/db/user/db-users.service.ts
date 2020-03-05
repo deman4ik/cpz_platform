@@ -18,6 +18,11 @@ class UsersService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           name: { type: Sequelize.STRING, allowNull: true },
           email: { type: Sequelize.STRING, allowNull: true },
+          emailNew: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            field: "email_new"
+          },
           telegramId: {
             type: Sequelize.INTEGER,
             allowNull: true,
@@ -33,6 +38,11 @@ class UsersService extends Service {
             type: Sequelize.STRING,
             allowNull: true,
             field: "password_hash"
+          },
+          passwordHashNew: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            field: "password_hash_new"
           },
           secretCode: {
             type: Sequelize.STRING,

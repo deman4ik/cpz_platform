@@ -88,6 +88,7 @@ class ApiService extends Service {
             },
             aliases: {
               "POST /auth/login": this.login,
+              "POST /auth/loginTg": this.loginTg,
               "POST /auth/logout": this.logout,
               "POST /auth/register": this.register,
               "POST /auth/refresh-token": this.refreshToken,
@@ -129,6 +130,38 @@ class ApiService extends Service {
         refreshToken,
         refreshTokenExpireAt
       } = await req.$service.broker.call(`${cpz.Service.AUTH}.login`, req.body);
+
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true,
+        sameSite: "lax",
+        domain: ".cryptuoso.com",
+        overwrite: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async loginTg(req: any, res: any) {
+    try {
+      const {
+        accessToken,
+        refreshToken,
+        refreshTokenExpireAt
+      } = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.loginTg`,
+        req.body
+      );
 
       const cookies = new Cookies(req, res);
 
