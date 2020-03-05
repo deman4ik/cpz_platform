@@ -38,13 +38,16 @@ class AuthService extends Service {
         setTg: {
           params: {
             data: {
-              id: "number",
-              first_name: { type: "string", optional: true },
-              last_name: { type: "string", optional: true },
-              username: { type: "string", optional: true },
-              photo_url: { type: "string", optional: true },
-              auth_date: "number",
-              hash: "string"
+              type: "object",
+              props: {
+                id: "number",
+                first_name: { type: "string", optional: true },
+                last_name: { type: "string", optional: true },
+                username: { type: "string", optional: true },
+                photo_url: { type: "string", optional: true },
+                auth_date: "number",
+                hash: "string"
+              }
             }
           },
           graphql: {
