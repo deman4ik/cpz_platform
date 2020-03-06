@@ -168,11 +168,10 @@ class AuthService extends Service {
       if (
         !user.refreshToken ||
         !user.refreshTokenExpireAt ||
-        dayjs.utc(user.refreshTokenExpireAt).valueOf() <
-          dayjs
-            .utc()
-            .add(-1, cpz.TimeUnit.day)
-            .valueOf()
+        dayjs
+          .utc(user.refreshTokenExpireAt)
+          .add(-1, cpz.TimeUnit.day)
+          .valueOf() < dayjs.utc().valueOf()
       ) {
         refreshToken = uuid();
         refreshTokenExpireAt = dayjs
@@ -242,11 +241,10 @@ class AuthService extends Service {
       if (
         !user.refreshToken ||
         !user.refreshTokenExpireAt ||
-        dayjs.utc(user.refreshTokenExpireAt).valueOf() <
-          dayjs
-            .utc()
-            .add(-1, cpz.TimeUnit.day)
-            .valueOf()
+        dayjs
+          .utc(user.refreshTokenExpireAt)
+          .add(-1, cpz.TimeUnit.day)
+          .valueOf() < dayjs.utc().valueOf()
       ) {
         refreshToken = uuid();
         refreshTokenExpireAt = dayjs
