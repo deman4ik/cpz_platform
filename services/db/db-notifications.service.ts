@@ -35,9 +35,17 @@ class NotificationsService extends Service {
           userPositionId: { type: Sequelize.UUID, field: "user_position_id" },
           type: Sequelize.STRING,
           data: Sequelize.JSONB,
-          sendTelegram: { type: Sequelize.BOOLEAN, field: "send_telegram" },
-          sendEmail: { type: Sequelize.BOOLEAN, field: "send_email" },
-          readed: Sequelize.BOOLEAN
+          sendTelegram: {
+            type: Sequelize.BOOLEAN,
+            field: "send_telegram",
+            allowNull: true
+          },
+          sendEmail: {
+            type: Sequelize.BOOLEAN,
+            field: "send_email",
+            allowNull: true
+          },
+          readed: { type: Sequelize.BOOLEAN, allowNull: true }
         },
         options: {
           freezeTableName: true,
