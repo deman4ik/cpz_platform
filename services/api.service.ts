@@ -28,7 +28,7 @@ class ApiService extends Service {
             ` 
     type ServiceStatus {
       success: Boolean!
-      id: ID!
+      id: ID
       status: String
       error: JSON
     }`
