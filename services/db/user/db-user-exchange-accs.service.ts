@@ -142,7 +142,7 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             startedUserRobots.length > 0
           )
             throw new Error(
@@ -326,7 +326,7 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             userRobots.length > 0
           )
             throw new Error("Can't delete API Keys with with existed Robots");
