@@ -1,12 +1,13 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 import { encrypt, capitalize } from "../../../utils";
 import Auth from "../../../mixins/auth";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UserExchangeAccsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -25,7 +26,12 @@ class UserExchangeAccsService extends Service {
         }
       },
       mixins: [Auth, DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "user_exchange_accs",
         define: {

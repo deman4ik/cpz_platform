@@ -1,11 +1,12 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../lib/sql";
+import adapterOptions from "../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../@types";
 import Auth from "../../mixins/auth";
 import RedisLock from "../../mixins/redislock";
 import cron from "node-cron";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class MarketsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -13,7 +14,12 @@ class MarketsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_MARKETS,
       mixins: [Auth, DbService, RedisLock()],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "markets",
         define: {

@@ -1,12 +1,13 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../lib/sql";
+import adapterOptions from "../../lib/sql";
 import Sequelize from "sequelize";
 import Auth from "../../mixins/auth";
 import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import { v4 as uuid } from "uuid";
 import { round } from "../../utils";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class NotificationsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -14,7 +15,12 @@ class NotificationsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_NOTIFICATIONS,
       mixins: [DbService, Auth],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "notifications",
         define: {

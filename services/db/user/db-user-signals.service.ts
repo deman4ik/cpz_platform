@@ -6,7 +6,7 @@ import {
 } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../@types";
@@ -18,6 +18,7 @@ import {
   datesToISOString
 } from "../../../utils";
 import Auth from "../../../mixins/auth";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UserSignalsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -25,7 +26,12 @@ class UserSignalsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_SIGNALS,
       mixins: [Auth, DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "user_signals",
         define: {
