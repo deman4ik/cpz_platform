@@ -53,13 +53,13 @@ const adapter = new SqlAdapter(
       ssl: true,
       useUTC: true
     },
-    logging: false,
-    pool: {
+    logging: false
+    /* pool: {
       max: 20,
       min: 2,
       acquire: 600000,
       idle: 1200000
-    }
+    }*/
   }
 );
 
