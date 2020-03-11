@@ -432,7 +432,7 @@ class AuthService extends Service {
       });
 
       await ctx.call(`${cpz.Service.MAIL}.send`, {
-        to: user.email,
+        to: user.email || user.emailNew,
         subject: "🔐 Cryptuoso - Email Change Confirmation.",
         variables: {
           body: `
