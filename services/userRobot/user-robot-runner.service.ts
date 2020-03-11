@@ -262,7 +262,7 @@ class UserRobotRunnerService extends Service {
           id: string;
           status?: string;
           error?: string;
-        } = await ctx.call(`${cpz.Service.ROBOT_RUNNER}.resume`, ctx.params);
+        } = await this.actions.resume(ctx.params, { parentCtx: ctx });
         if (result && result.success)
           return { success: true, id, status: cpz.Status.started };
         else return result;
@@ -281,9 +281,7 @@ class UserRobotRunnerService extends Service {
         startedAt: dayjs.utc().toISOString(),
         error: null,
         stoppedAt: null,
-        latestSignal: null,
-        statistics: {},
-        equity: {}
+        latestSignal: null
       });
 
       await ctx.emit(cpz.Event.USER_ROBOT_STARTED, {
