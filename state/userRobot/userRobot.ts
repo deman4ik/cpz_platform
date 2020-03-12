@@ -134,7 +134,7 @@ class UserRobot implements cpz.UserRobot {
 
   stop({ message }: { message?: string } = { message: null }) {
     this._status = cpz.Status.stopping;
-    this._message = message;
+    this._message = message || null;
     if (this.hasActivePositions)
       Object.keys(this._positions).forEach(key => {
         this._positions[key].cancel();
@@ -167,12 +167,12 @@ class UserRobot implements cpz.UserRobot {
 
   pause({ message }: { message?: string } = { message: null }) {
     this._status = cpz.Status.paused;
-    this._message = message;
+    this._message = message || null;
     this._eventsToSend.push({
       type: cpz.Event.USER_ROBOT_PAUSED,
       data: {
         userRobotId: this._id,
-        message
+        message: this._message
       }
     });
   }

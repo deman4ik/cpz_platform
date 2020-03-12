@@ -277,7 +277,7 @@ class UserRobotRunnerService extends Service {
       await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
         id,
         status: cpz.Status.started,
-        message,
+        message: message || null,
         startedAt: dayjs.utc().toISOString(),
         error: null,
         stoppedAt: null,
@@ -362,7 +362,7 @@ class UserRobotRunnerService extends Service {
           type: cpz.UserRobotJobType.stop,
           data: {
             userRobotId: id,
-            message
+            message: message || null
           }
         },
         userRobot.status
@@ -476,6 +476,7 @@ class UserRobotRunnerService extends Service {
           userRobotIds.map(async userRobotId => {
             await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
               id: userRobotId,
+              message: message || null,
               status: cpz.Status.started
             });
             await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
