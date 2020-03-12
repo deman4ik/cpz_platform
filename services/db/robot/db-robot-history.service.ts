@@ -1,9 +1,10 @@
 import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class RobotHistoryService extends Service {
   constructor(broker: ServiceBroker) {
@@ -11,7 +12,12 @@ class RobotHistoryService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_ROBOT_HISTORY,
       mixins: [DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "robot_history",
         define: {

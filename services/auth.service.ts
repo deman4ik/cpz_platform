@@ -6,6 +6,7 @@ import { v4 as uuid } from "uuid";
 import Auth from "../mixins/auth";
 import { getAccessValue } from "../utils";
 import dayjs from "../lib/dayjs";
+import { formatTgName, checkTgLogin } from "../utils/auth";
 
 class AuthService extends Service {
   constructor(broker: ServiceBroker) {
@@ -22,11 +23,76 @@ class AuthService extends Service {
           },
           handler: this.login
         },
+        loginTg: {
+          params: {
+            id: "number",
+            first_name: { type: "string", optional: true },
+            last_name: { type: "string", optional: true },
+            username: { type: "string", optional: true },
+            photo_url: { type: "string", optional: true },
+            auth_date: "number",
+            hash: "string"
+          },
+          handler: this.loginTg
+        },
+        setTg: {
+          params: {
+            data: {
+              type: "object",
+              props: {
+                id: "number",
+                first_name: { type: "string", optional: true },
+                last_name: { type: "string", optional: true },
+                username: { type: "string", optional: true },
+                photo_url: { type: "string", optional: true },
+                auth_date: "number",
+                hash: "string"
+              }
+            }
+          },
+          graphql: {
+            mutation: "setTelegram(data: JSON!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.setTg
+        },
+        changeEmail: {
+          params: {
+            email: "email"
+          },
+          graphql: {
+            mutation: "changeEmail(email: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.changeEmail
+        },
+        confirmChangeEmail: {
+          params: {
+            secretCode: "string"
+          },
+          graphql: {
+            mutation: "confirmChangeEmail(secretCode: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.confirmChangeEmail
+        },
+        changePassword: {
+          params: {
+            password: { type: "string", min: 6, max: 100, alphanum: true },
+            oldPassword: { type: "string", optional: true }
+          },
+          graphql: {
+            mutation:
+              "changePassword(password: String!, oldPassword: String): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.changePassword
+        },
         register: {
           params: {
             email: "email",
             password: { type: "string", min: 6, max: 100, alphanum: true },
-            name: { type: "string", optional: true, min: 3 }
+            name: { type: "string", optional: true, empty: false }
           },
           handler: this.register
         },
@@ -94,7 +160,7 @@ class AuthService extends Service {
         throw new Error("User account is blocked.");
       if (user.status === cpz.UserStatus.new)
         throw new Error("User account is not activated.");
-      const passwordChecked = bcrypt.compareSync(password, user.passwordHash);
+      const passwordChecked = await bcrypt.compare(password, user.passwordHash);
       if (!passwordChecked) throw new Error("Invalid password.");
 
       let refreshToken;
@@ -102,11 +168,10 @@ class AuthService extends Service {
       if (
         !user.refreshToken ||
         !user.refreshTokenExpireAt ||
-        dayjs.utc(user.refreshTokenExpireAt).valueOf() <
-          dayjs
-            .utc()
-            .add(-1, cpz.TimeUnit.day)
-            .valueOf()
+        dayjs
+          .utc(user.refreshTokenExpireAt)
+          .add(-1, cpz.TimeUnit.day)
+          .valueOf() < dayjs.utc().valueOf()
       ) {
         refreshToken = uuid();
         refreshTokenExpireAt = dayjs
@@ -131,6 +196,306 @@ class AuthService extends Service {
     } catch (e) {
       this.logger.warn(e);
       throw e;
+    }
+  }
+
+  async loginTg(
+    ctx: Context<{
+      id: number;
+      first_name?: string;
+      last_name?: string;
+      username?: string;
+      photo_url?: string;
+      auth_date: number;
+      hash: string;
+    }>
+  ) {
+    try {
+      const loginData = await checkTgLogin(ctx.params, process.env.BOT_TOKEN);
+      if (!loginData) throw new Error("Invalid login data.");
+
+      const {
+        id: telegramId,
+        first_name: firstName,
+        last_name: lastName,
+        username: telegramUsername
+      } = loginData;
+      const name = formatTgName(telegramUsername, firstName, lastName);
+
+      const user: cpz.User = await this.actions.registerTg(
+        {
+          telegramId,
+          telegramUsername,
+          name
+        },
+        { parentCtx: ctx }
+      );
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      if (user.status === cpz.UserStatus.new)
+        throw new Error("User account is not activated.");
+
+      let refreshToken;
+      let refreshTokenExpireAt;
+      if (
+        !user.refreshToken ||
+        !user.refreshTokenExpireAt ||
+        dayjs
+          .utc(user.refreshTokenExpireAt)
+          .add(-1, cpz.TimeUnit.day)
+          .valueOf() < dayjs.utc().valueOf()
+      ) {
+        refreshToken = uuid();
+        refreshTokenExpireAt = dayjs
+          .utc()
+          .add(+process.env.REFRESH_TOKEN_EXPIRES, cpz.TimeUnit.day)
+          .toISOString();
+        await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+          id: user.id,
+          refreshToken,
+          refreshTokenExpireAt
+        });
+      } else {
+        refreshToken = user.refreshToken;
+        refreshTokenExpireAt = user.refreshTokenExpireAt;
+      }
+
+      return {
+        accessToken: this.generateAccessToken(user),
+        refreshToken,
+        refreshTokenExpireAt
+      };
+    } catch (e) {
+      this.logger.warn(e);
+      throw e;
+    }
+  }
+
+  async setTg(
+    ctx: Context<
+      {
+        data: {
+          id: number;
+          first_name?: string;
+          last_name?: string;
+          username?: string;
+          photo_url?: string;
+          auth_date: number;
+          hash: string;
+        };
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      this.authAction(ctx);
+
+      const loginData = await checkTgLogin(
+        ctx.params.data,
+        process.env.BOT_TOKEN
+      );
+      if (!loginData) throw new Error("Invalid login data.");
+
+      const { id: telegramId, username: telegramUsername } = loginData;
+
+      const [userExists]: cpz.User[] = await ctx.call(
+        `${cpz.Service.DB_USERS}.find`,
+        {
+          query: { telegramId }
+        }
+      );
+      if (userExists)
+        throw new Error("User already exists. Try to login with Telegram.");
+      const { id: userId } = ctx.meta.user;
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        telegramId,
+        telegramUsername,
+        status: cpz.UserStatus.enabled
+      });
+
+      await ctx.call(`${cpz.Service.DB_USERS}.setNotificationSettings`, {
+        signalsTelegram: true,
+        tradingTelegram: true
+      });
+
+      return { success: true };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async changeEmail(
+    ctx: Context<
+      {
+        email: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      this.authAction(ctx);
+      const { email } = ctx.params;
+      const [userExists]: cpz.User[] = await ctx.call(
+        `${cpz.Service.DB_USERS}.find`,
+        {
+          query: { email }
+        }
+      );
+      if (userExists) throw new Error("User already exists.");
+      const { id: userId } = ctx.meta.user;
+
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+
+      let secretCode;
+      let secretCodeExpireAt;
+      if (
+        secretCode &&
+        secretCodeExpireAt &&
+        dayjs.utc().valueOf() < dayjs.utc(secretCodeExpireAt).valueOf()
+      ) {
+        secretCode = user.secretCode;
+        secretCodeExpireAt = user.secretCodeExpireAt;
+      } else {
+        secretCode = this.generateCode();
+        secretCodeExpireAt = dayjs
+          .utc()
+          .add(1, cpz.TimeUnit.hour)
+          .toISOString();
+      }
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        emailNew: email,
+        secretCode,
+        secretCodeExpireAt
+      });
+
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: email,
+        subject: "🔐 Cryptuoso - Change Email Request.",
+        variables: {
+          body: `<p>We received a request to change your email.</p>
+          <p>Please enter this code <b>${secretCode}</b> to confirm.</p>
+          <p>This request will expire in 1 hour.</p>
+          <p>If you did not request this change, no changes have been made to your user account.</p>`
+        },
+        tags: ["auth"]
+      });
+
+      return { success: true };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async confirmChangeEmail(
+    ctx: Context<{ secretCode: string }, { user: cpz.User }>
+  ) {
+    try {
+      this.authAction(ctx);
+      const { secretCode } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+
+      if (!user) throw new Error("User account not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      if (!user.emailNew) throw new Error("New email is not set.");
+      if (!user.secretCode) throw new Error("Confirmation code is not set.");
+      if (user.secretCode !== secretCode)
+        throw new Error("Wrong confirmation code.");
+
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        email: user.emailNew,
+        emailNew: null,
+        secretCode: null,
+        secretCodeExpireAt: null,
+        status: cpz.UserStatus.enabled
+      });
+
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: user.email || user.emailNew,
+        subject: "🔐 Cryptuoso - Email Change Confirmation.",
+        variables: {
+          body: `
+            <p>Your email successfully changed to ${user.emailNew}!</p>
+            <p>If you did not request this change, please contact support <a href="mailto:support@cryptuoso.com">support@cryptuoso.com</a></p>`
+        },
+        tags: ["auth"]
+      });
+
+      return { success: true };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async changePassword(
+    ctx: Context<
+      {
+        password: string;
+        oldPassword?: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      this.authAction(ctx);
+      const { password, oldPassword } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+
+      const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
+        id: userId
+      });
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+
+      if (user.passwordHash) {
+        if (!oldPassword) throw new Error("Old password is required.");
+        const oldChecked = await bcrypt.compare(oldPassword, user.passwordHash);
+        if (!oldChecked) throw new Error("Wrong old password.");
+      }
+      await ctx.call(`${cpz.Service.DB_USERS}.update`, {
+        id: userId,
+        passwordHash: await bcrypt.hash(password, 10),
+        oldPassword: null
+      });
+
+      await ctx.call(`${cpz.Service.MAIL}.send`, {
+        to: user.email,
+        subject: "🔐 Cryptuoso - Change Password Confirmation.",
+        variables: {
+          body: `
+            <p>Your password successfully changed!</p>
+            <p>If you did not request this change, please contact support <a href="mailto:support@cryptuoso.com">support@cryptuoso.com</a></p>`
+        },
+        tags: ["auth"]
+      });
+
+      return { success: true };
+    } catch (e) {
+      this.logger.warn(e);
+      return { success: false, error: e.message };
     }
   }
 
@@ -184,7 +549,7 @@ class AuthService extends Service {
         name,
         email,
         status: cpz.UserStatus.new,
-        passwordHash: bcrypt.hashSync(password, 10),
+        passwordHash: await bcrypt.hash(password, 10),
         secretCode: this.generateCode(),
         roles: {
           allowedRoles: [cpz.UserRoles.user],
@@ -373,7 +738,7 @@ class AuthService extends Service {
 
       await ctx.call(`${cpz.Service.DB_USERS}.update`, {
         id: userId,
-        passwordHash: bcrypt.hashSync(password, 10),
+        passwordHash: await bcrypt.hash(password, 10),
         secretCode: newSecretCode,
         secretCodeExpireAt: newSecretCodeExpireAt
       });

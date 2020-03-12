@@ -1,8 +1,13 @@
 import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import {
+  underscoreToCamelCaseKeys,
+  datesToISOString
+} from "../../../utils/helpers";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UserRobotJobsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -10,7 +15,12 @@ class UserRobotJobsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_ROBOT_JOBS,
       mixins: [DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "user_robot_jobs",
         define: {
@@ -38,6 +48,12 @@ class UserRobotJobsService extends Service {
         }
       },
       actions: {
+        getIdled: {
+          params: {
+            date: "string"
+          },
+          handler: this.getIdled
+        },
         upsert: {
           params: {
             entity: {
@@ -54,6 +70,37 @@ class UserRobotJobsService extends Service {
         }
       }
     });
+  }
+
+  async getIdled(
+    ctx: Context<{
+      date: string;
+    }>
+  ) {
+    try {
+      const query = `
+      SELECT j.*
+      FROM user_robot_jobs j,
+           user_robots ur
+      WHERE j.user_robot_id = ur.id
+        AND ur.status NOT IN ('stopped',
+                              'paused')
+        AND j.created_at <= :date
+      ORDER BY created_at;
+  ;`;
+
+      const rawData = await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.SELECT,
+        replacements: ctx.params
+      });
+      if (!rawData || !Array.isArray(rawData) || rawData.length === 0)
+        return [];
+      const data = underscoreToCamelCaseKeys(rawData);
+      return data;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
   }
 
   async upsert(ctx: Context<{ entity: cpz.UserRobotJob }>) {

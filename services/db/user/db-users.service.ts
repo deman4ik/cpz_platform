@@ -1,9 +1,10 @@
 import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import Auth from "../../../mixins/auth";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UsersService extends Service {
   constructor(broker: ServiceBroker) {
@@ -11,13 +12,23 @@ class UsersService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USERS,
       mixins: [DbService, Auth],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "users",
         define: {
           id: { type: Sequelize.UUID, primaryKey: true },
           name: { type: Sequelize.STRING, allowNull: true },
           email: { type: Sequelize.STRING, allowNull: true },
+          emailNew: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            field: "email_new"
+          },
           telegramId: {
             type: Sequelize.INTEGER,
             allowNull: true,
@@ -33,6 +44,11 @@ class UsersService extends Service {
             type: Sequelize.STRING,
             allowNull: true,
             field: "password_hash"
+          },
+          passwordHashNew: {
+            type: Sequelize.STRING,
+            allowNull: true,
+            field: "password_hash_new"
           },
           secretCode: {
             type: Sequelize.STRING,
@@ -90,6 +106,16 @@ class UsersService extends Service {
           },
           roles: [cpz.UserRoles.user],
           handler: this.setNotificationSettings
+        },
+        changeName: {
+          params: {
+            name: { type: "string", empty: false }
+          },
+          graphql: {
+            mutation: "changeName(name: String!): Response!"
+          },
+          roles: [cpz.UserRoles.user],
+          handler: this.changeName
         }
       }
     });
@@ -114,7 +140,11 @@ class UsersService extends Service {
         tradingTelegram
       } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const { settings }: cpz.User = await this.adapter.findById(userId);
+      const user: cpz.User = await this.adapter.findById(userId);
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      const { settings } = user;
       const newSettings = {
         ...settings,
         notifications: {
@@ -146,6 +176,34 @@ class UsersService extends Service {
         }
       });
       return { success: true, result: newSettings };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async changeName(
+    ctx: Context<
+      {
+        name: string;
+      },
+      { user: cpz.User }
+    >
+  ) {
+    try {
+      this.authAction(ctx);
+      const { name } = ctx.params;
+      const { id: userId } = ctx.meta.user;
+      const user: cpz.User = await this.adapter.findById(userId);
+      if (!user) throw new Error("User account is not found.");
+      if (user.status === cpz.UserStatus.blocked)
+        throw new Error("User account is blocked.");
+      await this.adapter.updateById(userId, {
+        $set: {
+          name
+        }
+      });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };

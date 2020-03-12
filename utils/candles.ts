@@ -19,7 +19,7 @@ function handleCandleGaps(
 
   const { exchange, asset, currency, timeframe } = inputCandles[0];
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
-  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateFrom = Timeframe.validTimeframeDateNext(dateFromInput, timeframe);
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
   const fullDatesList = createDatesList(dateFrom, dateTo, unit, 1, duration);
 
@@ -84,7 +84,7 @@ async function batchCandles(
   let candles = [...inputCandles];
   const { exchange, asset, currency } = inputCandles[0];
   const { unit, amountInUnit } = Timeframe.timeframes[timeframe];
-  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateFrom = Timeframe.validTimeframeDateNext(dateFromInput, timeframe);
   const duration = Timeframe.durationTimeframe(dateFrom, dateTo, timeframe);
 
   const fullDatesList = createDatesList(
@@ -287,11 +287,11 @@ function getCandlesParams(
     limit,
     currentTimeframe.value
   );
-  const validCurrentTimeframeDate = Timeframe.validTimeframeDate(
+  const validCurrentTimeframeDate = Timeframe.validTimeframeDateNext(
     dayjs.utc().toISOString(),
     timeframe
   );
-  const dateFrom = Timeframe.validTimeframeDate(dateFromInput, timeframe);
+  const dateFrom = Timeframe.validTimeframeDateNext(dateFromInput, timeframe);
   const dateToCalc = dayjs
     .utc(dateFrom)
     .add(amount, unit)

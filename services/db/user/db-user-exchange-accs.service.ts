@@ -1,12 +1,13 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 import { encrypt, capitalize } from "../../../utils";
 import Auth from "../../../mixins/auth";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UserExchangeAccsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -25,7 +26,12 @@ class UserExchangeAccsService extends Service {
         }
       },
       mixins: [Auth, DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "user_exchange_accs",
         define: {
@@ -35,7 +41,7 @@ class UserExchangeAccsService extends Service {
           name: { type: Sequelize.STRING, allowNull: true },
           keys: { type: Sequelize.JSONB },
           status: { type: Sequelize.STRING },
-          error: { type: Sequelize.JSONB },
+          error: { type: Sequelize.STRING, allowNull: true },
           ordersCache: { type: Sequelize.JSONB, field: "orders_cache" }
         },
         options: {
@@ -75,7 +81,7 @@ class UserExchangeAccsService extends Service {
         invalidate: {
           params: {
             id: "string",
-            error: "object"
+            error: "string"
           },
           handler: this.invalidate
         },
@@ -136,7 +142,7 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             startedUserRobots.length > 0
           )
             throw new Error(
@@ -258,7 +264,7 @@ class UserExchangeAccsService extends Service {
     }
   }
 
-  async invalidate(ctx: Context<{ id: string; error: any }>) {
+  async invalidate(ctx: Context<{ id: string; error: string }>) {
     try {
       const { id, error } = ctx.params;
       const userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.getById(
@@ -278,7 +284,7 @@ class UserExchangeAccsService extends Service {
             userId: userExchangeAcc.userId,
             name: userExchangeAcc.name,
             exchange: userExchangeAcc.exchange,
-            error: error.message
+            error: error
           }
         );
       }
@@ -320,7 +326,7 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             userRobots.length > 0
           )
             throw new Error("Can't delete API Keys with with existed Robots");
