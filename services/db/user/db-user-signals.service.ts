@@ -90,11 +90,11 @@ class UserSignalsService extends Service {
           },
           handler: this.getSignalRobot
         },
-        getTelegramSubscriptions: {
+        getSubscriptions: {
           params: {
             robotId: "string"
           },
-          handler: this.getTelegramSubscriptions
+          handler: this.getSubscriptions
         },
         subscribe: {
           params: {
@@ -368,17 +368,17 @@ class UserSignalsService extends Service {
     }
   }
 
-  async getTelegramSubscriptions(ctx: Context<{ robotId: string }>) {
+  async getSubscriptions(ctx: Context<{ robotId: string }>) {
     try {
       const { robotId: robot_id } = ctx.params;
       const query = `SELECT u.telegram_id,
+                            u.email,
+                            u.settings,
                             s.user_id,
                             s.volume,
                             s.subscribed_at
                      FROM user_signals s, users u
                      WHERE s.user_id = u.id
-                     AND u.telegram_id IS NOT NULL
-                     AND u.settings -> 'notifications' -> 'signals' ->> 'telegram' = 'true'
                      AND s.robot_id = :robot_id ;`;
       const subscribtionsRaw = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,

@@ -1211,8 +1211,8 @@ declare namespace cpz {
     userPositionId?: string;
     type: Event;
     data: GenericObject<any>;
-    sendTelegram: boolean;
-    sendEmail: boolean;
-    readed: boolean;
+    sendTelegram?: boolean;
+    sendEmail?: boolean;
+    readed?: boolean;
   }
 }
