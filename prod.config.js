@@ -156,16 +156,16 @@ const brokerConfig = {
   maxCallLevel: 100,
 
   // Number of seconds to send heartbeat packet to other nodes.
-  heartbeatInterval: 5,
+  heartbeatInterval: 15,
   // Number of seconds to wait before setting node to unavailable status.
-  heartbeatTimeout: 15,
+  heartbeatTimeout: 60,
 
   // Tracking requests and waiting for running requests before shutdowning. More info: https://moleculer.services/docs/0.13/fault-tolerance.html
   tracking: {
     // Enable feature
     enabled: true,
     // Number of milliseconds to wait before shutdowning the process
-    shutdownTimeout: 5000
+    shutdownTimeout: 10000
   },
 
   // Disable built-in request & emit balancer. (Transporter must support it, as well.)
@@ -183,7 +183,7 @@ const brokerConfig = {
   // Settings of Circuit Breaker. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Circuit-Breaker
   circuitBreaker: {
     // Enable feature
-    enabled: true,
+    enabled: false,
     // Threshold value. 0.5 means that 50% should be failed for tripping.
     threshold: 0.5,
     // Minimum request count. Below it, CB does not trip.
