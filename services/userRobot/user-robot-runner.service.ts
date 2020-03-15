@@ -123,6 +123,10 @@ class UserRobotRunnerService extends Service {
     try {
       const lock = await this.createLock(12000);
       await lock.acquire(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
+      let timerId = setTimeout(async function tick() {
+        await lock.extend(4000);
+        timerId = setTimeout(tick, 3000);
+      }, 3000);
       //  TODO: started or stopping
       const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOT_JOBS}.getIdled`,
@@ -136,22 +140,28 @@ class UserRobotRunnerService extends Service {
 
       if (idledJobs && Array.isArray(idledJobs) && idledJobs.length > 0) {
         this.logger.info(`Requeue ${idledJobs.length} jobs`);
-        idledJobs.forEach(async job => {
-          const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
-            job.userRobotId
-          );
-          if (lastJob) {
-            const lastJobState = await lastJob.getState();
-            if (["stuck", "completed", "failed"].includes(lastJobState))
-              await lastJob.remove();
+        for (const job of idledJobs) {
+          try {
+            const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
+              job.userRobotId
+            );
+            if (lastJob) {
+              const lastJobState = await lastJob.getState();
+              if (["stuck", "completed", "failed"].includes(lastJobState))
+                await lastJob.remove();
+            }
+            await this.createJob(cpz.Queue.runUserRobot, job, {
+              jobId: job.userRobotId,
+              removeOnComplete: true,
+              removeOnFail: true
+            });
+          } catch (e) {
+            this.logger.error(e);
           }
-          await this.createJob(cpz.Queue.runUserRobot, job, {
-            jobId: job.userRobotId,
-            removeOnComplete: true,
-            removeOnFail: true
-          });
-        });
+        }
       }
+
+      clearInterval(timerId);
       await lock.release();
     } catch (e) {
       if (e instanceof this.LockAcquisitionError) return;
