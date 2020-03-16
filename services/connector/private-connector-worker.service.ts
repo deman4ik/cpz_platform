@@ -499,7 +499,7 @@ class PrivateConnectorWorkerService extends Service {
             lastCheckedAt: dayjs.utc().toISOString(),
             error: this.getErrorMessage(err),
             status:
-              order.nextJob.type === cpz.OrderJobType.create
+              order.nextJob && order.nextJob.type === cpz.OrderJobType.create
                 ? cpz.OrderStatus.canceled
                 : order.status,
             nextJob: null
