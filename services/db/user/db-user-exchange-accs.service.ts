@@ -171,22 +171,36 @@ class UserExchangeAccsService extends Service {
         pass: pass && (await encrypt(userId, pass))
       };
 
-      if (!existed && (!name || name === "")) {
-        const [sameExchange] = await this.adapter.find({
-          fields: ["name"],
-          limit: 1,
-          sort: "-created_at",
-          query: {
-            exchange
-          }
-        });
-        const number =
-          (sameExchange &&
-            sameExchange.name &&
-            +sameExchange.name.split("#")[1]) ||
-          0;
+      if (!existed) {
+        if (!name || name === "") {
+          const [sameExchange] = await this.adapter.find({
+            fields: ["name"],
+            limit: 1,
+            sort: "-created_at",
+            query: {
+              exchange
+            }
+          });
+          const number =
+            (sameExchange &&
+              sameExchange.name &&
+              +sameExchange.name.split("#")[1]) ||
+            0;
 
-        name = `${capitalize(exchange)} #${number + 1}`;
+          name = `${capitalize(exchange)} #${number + 1}`;
+        } else {
+          const [existsWithName] = await this.adapter.find({
+            fields: ["id"],
+            limit: 1,
+            query: {
+              name
+            }
+          });
+          if (existsWithName)
+            throw new Error(
+              `User Exchange Account already exists with name "${name}". Please try with another name.`
+            );
+        }
       }
 
       const exchangeAcc: cpz.UserExchangeAccount = {
@@ -248,6 +262,19 @@ class UserExchangeAccsService extends Service {
         throw new Errors.ForbiddenError("FORBIDDEN", {
           userExAccId: userExchangeAcc.id
         });
+
+      const [existsWithName] = await this.adapter.find({
+        fields: ["id"],
+        limit: 1,
+        query: {
+          name,
+          id: { $ne: id }
+        }
+      });
+      if (existsWithName)
+        throw new Error(
+          `User Exchange Account already exists with name "${name}". Please try with another name.`
+        );
 
       await this.adapter.updateById(id, {
         $set: {
