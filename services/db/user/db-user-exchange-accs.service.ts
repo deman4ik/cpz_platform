@@ -56,8 +56,20 @@ class UserExchangeAccsService extends Service {
           params: {
             id: { type: "string", optional: true },
             exchange: "string",
-            name: { type: "string", optional: true },
-            keys: { type: "object" }
+            name: { type: "string", empty: false, trim: true, optional: true },
+            keys: {
+              type: "object",
+              props: {
+                key: { type: "string", empty: false, trim: true },
+                secret: { type: "string", empty: false, trim: true },
+                pass: {
+                  type: "string",
+                  optional: true,
+                  empty: false,
+                  trim: true
+                }
+              }
+            }
           },
           graphql: {
             mutation:
@@ -69,7 +81,7 @@ class UserExchangeAccsService extends Service {
         changeName: {
           params: {
             id: "string",
-            name: "string"
+            name: { type: "string", empty: false, trim: true }
           },
           graphql: {
             mutation:
@@ -356,7 +368,7 @@ class UserExchangeAccsService extends Service {
             existed.status === cpz.UserExchangeAccStatus.enabled &&
             userRobots.length > 0
           )
-            throw new Error("Can't delete API Keys with with existed Robots");
+            throw new Error("You can't delete API Keys with added Robots");
 
           await this._remove(ctx, { id });
         }

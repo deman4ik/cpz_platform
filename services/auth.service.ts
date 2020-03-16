@@ -19,7 +19,7 @@ class AuthService extends Service {
         login: {
           params: {
             email: "email",
-            password: { type: "string" }
+            password: { type: "string", empty: false, trim: true }
           },
           handler: this.login
         },
@@ -68,7 +68,7 @@ class AuthService extends Service {
         },
         confirmChangeEmail: {
           params: {
-            secretCode: "string"
+            secretCode: { type: "string", empty: false, trim: true }
           },
           graphql: {
             mutation: "confirmChangeEmail(secretCode: String!): Response!"
@@ -78,8 +78,14 @@ class AuthService extends Service {
         },
         changePassword: {
           params: {
-            password: { type: "string", min: 6, max: 100, alphanum: true },
-            oldPassword: { type: "string", optional: true }
+            password: {
+              type: "string",
+              min: 6,
+              max: 100,
+              alphanum: true,
+              trim: true
+            },
+            oldPassword: { type: "string", optional: true, trim: true }
           },
           graphql: {
             mutation:
@@ -91,15 +97,21 @@ class AuthService extends Service {
         register: {
           params: {
             email: "email",
-            password: { type: "string", min: 6, max: 100, alphanum: true },
-            name: { type: "string", optional: true, empty: false }
+            password: {
+              type: "string",
+              min: 6,
+              max: 100,
+              alphanum: true,
+              trim: true
+            },
+            name: { type: "string", optional: true, empty: false, trim: true }
           },
           handler: this.register
         },
         activateAccount: {
           params: {
             userId: "string",
-            secretCode: "string"
+            secretCode: { type: "string", empty: false, trim: true }
           },
           handler: this.activateAccount
         },
@@ -112,8 +124,14 @@ class AuthService extends Service {
         confirmPasswordReset: {
           params: {
             userId: "string",
-            secretCode: "string",
-            password: { type: "string", min: 6, max: 100, alphanum: true }
+            secretCode: { type: "string", empty: false, trim: true },
+            password: {
+              type: "string",
+              min: 6,
+              max: 100,
+              alphanum: true,
+              trim: true
+            }
           },
           handler: this.confirmPasswordReset
         },
@@ -121,7 +139,7 @@ class AuthService extends Service {
           params: {
             telegramId: "number",
             telegramUsername: { type: "string", optional: true },
-            name: { type: "string", optional: true }
+            name: { type: "string", optional: true, empty: false, trim: true }
           },
           handler: this.registerTg
         },
