@@ -300,7 +300,7 @@ class UserRobotRunnerService extends Service {
       });
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
@@ -383,7 +383,7 @@ class UserRobotRunnerService extends Service {
         status: cpz.Status.stopping
       };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }

@@ -241,7 +241,7 @@ class UserExchangeAccsService extends Service {
       }
       return { success: true, result: name };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
@@ -295,7 +295,7 @@ class UserExchangeAccsService extends Service {
       });
       return { success: true };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
