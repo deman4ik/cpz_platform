@@ -343,7 +343,7 @@ function calcStatistics(
   const {
     maxConsecWin: allMaxConsecWin,
     maxConsecLoss: allMaxConsecLoss
-  } = calcConsec(positions.map(({ profit }) => +profit));
+  } = calcConsec(allPositions.map(({ profit }) => +profit));
   const {
     maxConsecWin: longMaxConsecWin,
     maxConsecLoss: longMaxConsecLoss
@@ -368,7 +368,7 @@ function calcStatistics(
   const {
     maxDrawdown: allMaxDrawdown,
     maxDrawdownPos: allMaxDrawdownPos
-  } = calcMaxDrawdown(positions);
+  } = calcMaxDrawdown(allPositions);
   const {
     maxDrawdown: longMaxDrawdown,
     maxDrawdownPos: longMaxDrawdownPos
