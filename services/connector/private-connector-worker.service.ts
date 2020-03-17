@@ -499,7 +499,7 @@ class PrivateConnectorWorkerService extends Service {
             lastCheckedAt: dayjs.utc().toISOString(),
             error: this.getErrorMessage(err),
             status:
-              order.nextJob.type === cpz.OrderJobType.create
+              order.nextJob && order.nextJob.type === cpz.OrderJobType.create
                 ? cpz.OrderStatus.canceled
                 : order.status,
             nextJob: null
@@ -721,13 +721,18 @@ class PrivateConnectorWorkerService extends Service {
       const {
         id: exId,
         datetime: exTimestamp,
-        status,
+        status: orderStatus,
         price,
         amount: volume,
         remaining,
-        filled: executed
+        filled
       } = response;
-
+      const executed =
+        (filled && +filled) || (volume && remaining && +volume - +remaining);
+      const status =
+        orderStatus === cpz.OrderStatus.canceled && executed && executed > 0
+          ? cpz.OrderStatus.closed
+          : <cpz.OrderStatus>orderStatus;
       return {
         order: {
           ...order,
@@ -736,13 +741,11 @@ class PrivateConnectorWorkerService extends Service {
           exId,
           exTimestamp,
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
-          status: <cpz.OrderStatus>status,
+          status,
           price: (price && +price) || signalPrice,
           volume: volume && +volume,
           remaining: remaining && +remaining,
-          executed:
-            (executed && +executed) ||
-            (volume && remaining && +volume - +remaining),
+          executed,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob: {
             type: cpz.OrderJobType.check
@@ -842,29 +845,33 @@ class PrivateConnectorWorkerService extends Service {
       } = await retry(call, this.retryOptions);
       const {
         datetime: exTimestamp,
-        status,
+        status: orderStatus,
         price,
         average,
         amount: volume,
         remaining,
-        filled: executed
+        filled
       } = response;
+      const executed =
+        (filled && +filled) || (volume && remaining && +volume - +remaining);
+      const status =
+        orderStatus === cpz.OrderStatus.canceled && executed && executed > 0
+          ? cpz.OrderStatus.closed
+          : <cpz.OrderStatus>orderStatus;
       return {
         order: {
           ...order,
           exTimestamp,
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
-          status: <cpz.OrderStatus>status,
+          status,
           price: (average && +average) || (price && +price),
           volume: volume && +volume,
           remaining: remaining && +remaining,
-          executed:
-            (executed && +executed) ||
-            (volume && remaining && +volume - +remaining),
+          executed,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob:
-            <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
-            <cpz.OrderStatus>status === cpz.OrderStatus.closed
+            status === cpz.OrderStatus.canceled ||
+            status === cpz.OrderStatus.closed
               ? null
               : {
                   type: cpz.OrderJobType.check
@@ -873,8 +880,8 @@ class PrivateConnectorWorkerService extends Service {
           error: null
         },
         nextJob:
-          <cpz.OrderStatus>status === cpz.OrderStatus.canceled ||
-          <cpz.OrderStatus>status === cpz.OrderStatus.closed
+          status === cpz.OrderStatus.canceled ||
+          status === cpz.OrderStatus.closed
             ? null
             : {
                 type: cpz.OrderJobType.check,

@@ -56,8 +56,20 @@ class UserExchangeAccsService extends Service {
           params: {
             id: { type: "string", optional: true },
             exchange: "string",
-            name: { type: "string", optional: true },
-            keys: { type: "object" }
+            name: { type: "string", empty: false, trim: true, optional: true },
+            keys: {
+              type: "object",
+              props: {
+                key: { type: "string", empty: false, trim: true },
+                secret: { type: "string", empty: false, trim: true },
+                pass: {
+                  type: "string",
+                  optional: true,
+                  empty: false,
+                  trim: true
+                }
+              }
+            }
           },
           graphql: {
             mutation:
@@ -69,7 +81,7 @@ class UserExchangeAccsService extends Service {
         changeName: {
           params: {
             id: "string",
-            name: "string"
+            name: { type: "string", empty: false, trim: true }
           },
           graphql: {
             mutation:
@@ -171,22 +183,36 @@ class UserExchangeAccsService extends Service {
         pass: pass && (await encrypt(userId, pass))
       };
 
-      if (!existed && (!name || name === "")) {
-        const [sameExchange] = await this.adapter.find({
-          fields: ["name"],
-          limit: 1,
-          sort: "-created_at",
-          query: {
-            exchange
-          }
-        });
-        const number =
-          (sameExchange &&
-            sameExchange.name &&
-            +sameExchange.name.split("#")[1]) ||
-          0;
+      if (!existed) {
+        if (!name || name === "") {
+          const [sameExchange] = await this.adapter.find({
+            fields: ["name"],
+            limit: 1,
+            sort: "-created_at",
+            query: {
+              exchange
+            }
+          });
+          const number =
+            (sameExchange &&
+              sameExchange.name &&
+              +sameExchange.name.split("#")[1]) ||
+            0;
 
-        name = `${capitalize(exchange)} #${number + 1}`;
+          name = `${capitalize(exchange)} #${number + 1}`;
+        } else {
+          const [existsWithName] = await this.adapter.find({
+            fields: ["id"],
+            limit: 1,
+            query: {
+              name
+            }
+          });
+          if (existsWithName)
+            throw new Error(
+              `User Exchange Account already exists with name "${name}". Please try with another name.`
+            );
+        }
       }
 
       const exchangeAcc: cpz.UserExchangeAccount = {
@@ -215,7 +241,7 @@ class UserExchangeAccsService extends Service {
       }
       return { success: true, result: name };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
@@ -249,6 +275,19 @@ class UserExchangeAccsService extends Service {
           userExAccId: userExchangeAcc.id
         });
 
+      const [existsWithName] = await this.adapter.find({
+        fields: ["id"],
+        limit: 1,
+        query: {
+          name,
+          id: { $ne: id }
+        }
+      });
+      if (existsWithName)
+        throw new Error(
+          `User Exchange Account already exists with name "${name}". Please try with another name.`
+        );
+
       await this.adapter.updateById(id, {
         $set: {
           name
@@ -256,7 +295,7 @@ class UserExchangeAccsService extends Service {
       });
       return { success: true };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
@@ -329,7 +368,7 @@ class UserExchangeAccsService extends Service {
             existed.status === cpz.UserExchangeAccStatus.enabled &&
             userRobots.length > 0
           )
-            throw new Error("Can't delete API Keys with with existed Robots");
+            throw new Error("You can't delete API Keys with added Robots");
 
           await this._remove(ctx, { id });
         }

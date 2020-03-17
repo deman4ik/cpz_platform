@@ -271,7 +271,7 @@ class UserRobotsService extends Service {
       });
       return { success: true, result: userRobotId };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
@@ -312,7 +312,7 @@ class UserRobotsService extends Service {
 
       return { success: true };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
@@ -391,7 +391,7 @@ class UserRobotsService extends Service {
       await ctx.emit(cpz.Event.USER_ROBOT_UPDATED, { userRobotId: id });
       return { success: true };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
