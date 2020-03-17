@@ -1,12 +1,13 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../lib/sql";
+import adapterOptions from "../../lib/sql";
 import Sequelize from "sequelize";
 import Auth from "../../mixins/auth";
 import { cpz } from "../../@types";
 import dayjs from "../../lib/dayjs";
 import { v4 as uuid } from "uuid";
 import { round } from "../../utils";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class NotificationsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -14,7 +15,12 @@ class NotificationsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_NOTIFICATIONS,
       mixins: [DbService, Auth],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "notifications",
         define: {
@@ -35,9 +41,17 @@ class NotificationsService extends Service {
           userPositionId: { type: Sequelize.UUID, field: "user_position_id" },
           type: Sequelize.STRING,
           data: Sequelize.JSONB,
-          sendTelegram: { type: Sequelize.BOOLEAN, field: "send_telegram" },
-          sendEmail: { type: Sequelize.BOOLEAN, field: "send_email" },
-          readed: Sequelize.BOOLEAN
+          sendTelegram: {
+            type: Sequelize.BOOLEAN,
+            field: "send_telegram",
+            defaultValue: false
+          },
+          sendEmail: {
+            type: Sequelize.BOOLEAN,
+            field: "send_email",
+            defaultValue: false
+          },
+          readed: { type: Sequelize.BOOLEAN, defaultValue: false }
         },
         options: {
           freezeTableName: true,
@@ -78,29 +92,29 @@ class NotificationsService extends Service {
     try {
       this.authAction(ctx);
       const userslist = await ctx.call<
-        { id: string; telegramId: number }[],
+        { id: string; telegramId: number; email: string }[],
         {
           fields: string[];
           query: { [key: string]: any };
         }
       >(`${cpz.Service.DB_USERS}.find`, {
-        fields: ["id", "telegramId"],
+        fields: ["id", "telegramId", "email"],
         query: {
-          status: { $gt: 0 },
-          telegramId: { $ne: null }
+          status: { $gt: 0 }
         }
       });
 
-      const notifications: cpz.Notification[] = userslist.map(({ id }) => ({
-        id: uuid(),
-        userId: id,
-        timestamp: dayjs.utc().toISOString(),
-        type: cpz.Event.MESSAGE_BROADCAST,
-        data: ctx.params,
-        sendTelegram: true,
-        sendEmail: false,
-        readed: true
-      }));
+      const notifications: cpz.Notification[] = userslist.map(
+        ({ id, telegramId, email }) => ({
+          id: uuid(),
+          userId: id,
+          timestamp: dayjs.utc().toISOString(),
+          type: cpz.Event.MESSAGE_BROADCAST,
+          data: ctx.params,
+          sendTelegram: !!telegramId,
+          sendEmail: !!email
+        })
+      );
 
       if (notifications.length > 0) {
         await this._insert(ctx, { entities: notifications });
@@ -120,16 +134,15 @@ class NotificationsService extends Service {
 
       //TODO: email and web notifications
       const subscriptions: {
-        telegramId: number;
+        telegramId?: number;
+        email?: string;
+        settings: cpz.UserSettings;
         userId: string;
         volume: number;
         subscribedAt: string;
-      }[] = await ctx.call(
-        `${cpz.Service.DB_USER_SIGNALS}.getTelegramSubscriptions`,
-        {
-          robotId
-        }
-      );
+      }[] = await ctx.call(`${cpz.Service.DB_USER_SIGNALS}.getSubscriptions`, {
+        robotId
+      });
 
       let notifications: cpz.Notification[];
       if (
@@ -152,9 +165,9 @@ class NotificationsService extends Service {
               data: signal,
               robotId: signal.robotId,
               positionId: signal.positionId,
-              sendTelegram: true,
-              sendEmail: false,
-              readed: true
+              sendTelegram:
+                sub.telegramId && sub.settings.notifications.signals.telegram,
+              sendEmail: sub.email && sub.settings.notifications.signals.email
             }));
         } else {
           if (
@@ -194,9 +207,11 @@ class NotificationsService extends Service {
                   data: { ...signal, profit },
                   robotId: signal.robotId,
                   positionId: signal.positionId,
-                  sendTelegram: true,
-                  sendEmail: false,
-                  readed: true
+                  sendTelegram:
+                    sub.telegramId &&
+                    sub.settings.notifications.signals.telegram,
+                  sendEmail:
+                    sub.email && sub.settings.notifications.signals.email
                 };
               });
           } else {
@@ -208,9 +223,9 @@ class NotificationsService extends Service {
               data: signal,
               robotId: signal.robotId,
               positionId: signal.positionId,
-              sendTelegram: true,
-              sendEmail: false,
-              readed: true
+              sendTelegram:
+                sub.telegramId && sub.settings.notifications.signals.telegram,
+              sendEmail: sub.email && sub.settings.notifications.signals.email
             }));
           }
         }
@@ -228,7 +243,7 @@ class NotificationsService extends Service {
     try {
       const { userId } = ctx.params;
       const user: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
-        fields: ["id", "telegramId", "settings"],
+        fields: ["id", "telegramId", "email"],
         id: userId
       });
 
@@ -239,8 +254,7 @@ class NotificationsService extends Service {
         type: <cpz.Event>ctx.eventName,
         data: ctx.params,
         sendTelegram: !!user.telegramId,
-        sendEmail: false,
-        readed: true
+        sendEmail: !!user.email
       };
       await this._insert(ctx, {
         entity: notification
@@ -260,7 +274,7 @@ class NotificationsService extends Service {
     try {
       const { userRobotId } = ctx.params;
 
-      const { telegramId, userId } = await ctx.call(
+      const { telegramId, email, userId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -275,8 +289,7 @@ class NotificationsService extends Service {
         data: ctx.params,
         userRobotId,
         sendTelegram: !!telegramId,
-        sendEmail: false,
-        readed: true
+        sendEmail: !!email
       };
       await this._insert(ctx, {
         entity: notification
@@ -305,7 +318,7 @@ class NotificationsService extends Service {
         status = cpz.Status.started;
       else throw new Error("Unknown Event Name");
 
-      const { telegramId, userId } = await ctx.call(
+      const { telegramId, email, userId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -319,8 +332,7 @@ class NotificationsService extends Service {
         data: ctx.params,
         userRobotId,
         sendTelegram: !!telegramId,
-        sendEmail: false,
-        readed: true
+        sendEmail: !!email
       };
       await this._insert(ctx, {
         entity: notification
@@ -335,14 +347,15 @@ class NotificationsService extends Service {
       const { id, userId, userRobotId } = ctx.params;
       const {
         telegramId,
+        email,
         settings: {
           notifications: {
-            trading: { telegram: tradingTelegram }
+            trading: { telegram: tradingTelegram, email: tradingEmail }
           }
         }
       }: cpz.User = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
         id: userId,
-        fields: ["telegramId", "settings"]
+        fields: ["email", "telegramId", "settings"]
       });
 
       const notification: cpz.Notification = {
@@ -354,8 +367,7 @@ class NotificationsService extends Service {
         userRobotId,
         userPositionId: id,
         sendTelegram: telegramId && tradingTelegram,
-        sendEmail: false,
-        readed: true
+        sendEmail: email && tradingEmail
       };
 
       await this._insert(ctx, {
@@ -369,7 +381,7 @@ class NotificationsService extends Service {
   async handleOrderError(ctx: Context<cpz.Order>) {
     try {
       const { userRobotId, userPositionId } = ctx.params;
-      const { telegramId, userId } = await ctx.call(
+      const { telegramId, email, userId } = await ctx.call(
         `${cpz.Service.DB_USER_ROBOTS}.getUserRobotEventInfo`,
         {
           id: userRobotId
@@ -384,8 +396,7 @@ class NotificationsService extends Service {
         userRobotId,
         userPositionId,
         sendTelegram: !!telegramId,
-        sendEmail: false,
-        readed: true
+        sendEmail: !!email
       };
 
       await this._insert(ctx, {
@@ -401,10 +412,13 @@ class NotificationsService extends Service {
   ) {
     try {
       const { to, data } = ctx.params;
-      const { telegramId } = await ctx.call(`${cpz.Service.DB_USERS}.get`, {
-        id: to,
-        fields: ["id", "telegramId"]
-      });
+      const { telegramId, email } = await ctx.call(
+        `${cpz.Service.DB_USERS}.get`,
+        {
+          id: to,
+          fields: ["id", "telegramId", "email"]
+        }
+      );
       const notification: cpz.Notification = {
         id: uuid(),
         userId: to,
@@ -412,8 +426,7 @@ class NotificationsService extends Service {
         type: <cpz.Event>ctx.eventName,
         data: data,
         sendTelegram: !!telegramId,
-        sendEmail: false,
-        readed: true
+        sendEmail: !!email
       };
 
       await this._insert(ctx, {

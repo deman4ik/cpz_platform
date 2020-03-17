@@ -92,7 +92,8 @@ class UserRobotRunnerService extends Service {
       events: {
         [cpz.Event.ORDER_STATUS]: this.handleOrder,
         [cpz.Event.SIGNAL_TRADE]: this.handleSignalTrade,
-        [cpz.Event.USER_EX_ACC_ERROR]: this.handleUserExAccError
+        [cpz.Event.USER_EX_ACC_ERROR]: this.handleUserExAccError,
+        [cpz.Event.ORDER_ERROR]: this.handleOrderError
       },
       started: this.startedService,
       stopped: this.stoppedService
@@ -123,38 +124,45 @@ class UserRobotRunnerService extends Service {
     try {
       const lock = await this.createLock(12000);
       await lock.acquire(cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS);
+      let timerId = setTimeout(async function tick() {
+        await lock.extend(4000);
+        timerId = setTimeout(tick, 3000);
+      }, 3000);
+      //  TODO: started or stopping
       const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
-        `${cpz.Service.DB_USER_ROBOT_JOBS}.find`,
+        `${cpz.Service.DB_USER_ROBOT_JOBS}.getIdled`,
         {
-          query: {
-            createdAt: {
-              $lte: dayjs
-                .utc()
-                .add(-30, cpz.TimeUnit.second)
-                .toISOString()
-            }
-          }
+          date: dayjs
+            .utc()
+            .add(-30, cpz.TimeUnit.second)
+            .toISOString()
         }
       );
 
       if (idledJobs && Array.isArray(idledJobs) && idledJobs.length > 0) {
         this.logger.info(`Requeue ${idledJobs.length} jobs`);
-        idledJobs.forEach(async job => {
-          const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
-            job.userRobotId
-          );
-          if (lastJob) {
-            const lastJobState = await lastJob.getState();
-            if (["stuck", "completed", "failed"].includes(lastJobState))
-              await lastJob.remove();
+        for (const job of idledJobs) {
+          try {
+            const lastJob = await this.getQueue(cpz.Queue.runUserRobot).getJob(
+              job.userRobotId
+            );
+            if (lastJob) {
+              const lastJobState = await lastJob.getState();
+              if (["stuck", "completed", "failed"].includes(lastJobState))
+                await lastJob.remove();
+            }
+            await this.createJob(cpz.Queue.runUserRobot, job, {
+              jobId: job.userRobotId,
+              removeOnComplete: true,
+              removeOnFail: true
+            });
+          } catch (e) {
+            this.logger.error(e);
           }
-          await this.createJob(cpz.Queue.runUserRobot, job, {
-            jobId: job.userRobotId,
-            removeOnComplete: true,
-            removeOnFail: true
-          });
-        });
+        }
       }
+
+      clearInterval(timerId);
       await lock.release();
     } catch (e) {
       if (e instanceof this.LockAcquisitionError) return;
@@ -265,7 +273,7 @@ class UserRobotRunnerService extends Service {
           id: string;
           status?: string;
           error?: string;
-        } = await ctx.call(`${cpz.Service.ROBOT_RUNNER}.resume`, ctx.params);
+        } = await this.actions.resume(ctx.params, { parentCtx: ctx });
         if (result && result.success)
           return { success: true, id, status: cpz.Status.started };
         else return result;
@@ -280,13 +288,11 @@ class UserRobotRunnerService extends Service {
       await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
         id,
         status: cpz.Status.started,
-        message,
+        message: message || null,
         startedAt: dayjs.utc().toISOString(),
         error: null,
         stoppedAt: null,
-        latestSignal: null,
-        statistics: {},
-        equity: {}
+        latestSignal: null
       });
 
       await ctx.emit(cpz.Event.USER_ROBOT_STARTED, {
@@ -295,7 +301,7 @@ class UserRobotRunnerService extends Service {
       });
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
@@ -367,7 +373,7 @@ class UserRobotRunnerService extends Service {
           type: cpz.UserRobotJobType.stop,
           data: {
             userRobotId: id,
-            message
+            message: message || null
           }
         },
         userRobot.status
@@ -378,7 +384,7 @@ class UserRobotRunnerService extends Service {
         status: cpz.Status.stopping
       };
     } catch (e) {
-      this.logger.error(e);
+      this.logger.warn(e);
       return { success: false, error: e.message };
     }
   }
@@ -481,6 +487,7 @@ class UserRobotRunnerService extends Service {
           userRobotIds.map(async userRobotId => {
             await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
               id: userRobotId,
+              message: message || null,
               status: cpz.Status.started
             });
             await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
@@ -575,17 +582,42 @@ class UserRobotRunnerService extends Service {
   ) {
     try {
       const { id, errorMessage } = ctx.params;
-      this.logger.info(
+      this.logger.error(
         `New ${cpz.Event.USER_EX_ACC_ERROR} event. User exchange account #${id} is invalid. Pausing user robots...`
       );
       let message: string = cpz.UserMessages.invalid_exchange_account;
       if (errorMessage) {
         message = `${message} (${errorMessage})`;
       }
-      await ctx.call(`${cpz.Service.USER_ROBOT_RUNNER}.pause`, {
-        userExAccId: id,
-        message
-      });
+      await this.actions.pause(
+        {
+          userExAccId: id,
+          message
+        },
+        { parentCtx: ctx }
+      );
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async handleOrderError(ctx: Context<cpz.Order>) {
+    try {
+      const { id, userRobotId, error } = ctx.params;
+      this.logger.error(
+        `New ${cpz.Event.ORDER_ERROR} event. Order #${id} is invalid. Pausing user robot #${userRobotId}...`
+      );
+      let message: string = cpz.UserMessages.order_error;
+      if (error) {
+        message = `${message} (${error})`;
+      }
+      await this.actions.pause(
+        {
+          id: userRobotId,
+          message
+        },
+        { parentCtx: ctx }
+      );
     } catch (e) {
       this.logger.error(e);
     }

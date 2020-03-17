@@ -474,11 +474,13 @@ declare namespace cpz {
     entrySignalPrice?: number;
     entryPrice?: number;
     entryDate?: string;
+    entryCandleTimestamp?: string;
     entryExecuted?: number;
     exitAction?: TradeAction;
     exitStatus?: UserPositionOrderStatus;
     exitPrice?: number;
     exitDate?: string;
+    exitCandleTimestamp?: string;
     exitExecuted?: number;
     reason?: string; //TODO ENUM
     profit?: number;
@@ -959,10 +961,12 @@ declare namespace cpz {
     id: string;
     name?: string;
     email?: string;
+    emailNew?: string;
     telegramId?: number;
     telegramUsername?: string;
     status: UserStatus;
     passwordHash?: string;
+    passwordHashNew?: string;
     secretCode?: string;
     secretCodeExpireAt?: string;
     refreshToken?: string;
@@ -1099,6 +1103,7 @@ declare namespace cpz {
     entrySignalPrice?: number;
     entryPrice?: number;
     entryDate?: string;
+    entryCandleTimestamp?: string;
     entryVolume?: number;
     entryExecuted?: number;
     entryRemaining?: number;
@@ -1107,6 +1112,7 @@ declare namespace cpz {
     exitSignalPrice?: number;
     exitPrice?: number;
     exitDate?: string;
+    exitCandleTimestamp?: string;
     exitVolume?: number;
     exitExecuted?: number;
     exitRemaining?: number;
@@ -1205,8 +1211,8 @@ declare namespace cpz {
     userPositionId?: string;
     type: Event;
     data: GenericObject<any>;
-    sendTelegram: boolean;
-    sendEmail: boolean;
-    readed: boolean;
+    sendTelegram?: boolean;
+    sendEmail?: boolean;
+    readed?: boolean;
   }
 }

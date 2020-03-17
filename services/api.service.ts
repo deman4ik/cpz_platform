@@ -28,7 +28,7 @@ class ApiService extends Service {
             ` 
     type ServiceStatus {
       success: Boolean!
-      id: ID!
+      id: ID
       status: String
       error: JSON
     }`
@@ -77,8 +77,11 @@ class ApiService extends Service {
             cors: {
               origin: [
                 "*.cryptuoso.com",
+                "http://127.0.0.1:80",
+                "http://localhost:80",
                 "http://localhost:3000",
                 "http://localhost:3001",
+                "http://0.0.0.0:80",
                 "http://0.0.0.0:3000",
                 "http://0.0.0.0:3001",
                 "localhost"
@@ -88,6 +91,7 @@ class ApiService extends Service {
             },
             aliases: {
               "POST /auth/login": this.login,
+              "POST /auth/loginTg": this.loginTg,
               "POST /auth/logout": this.logout,
               "POST /auth/register": this.register,
               "POST /auth/refresh-token": this.refreshToken,
@@ -129,6 +133,38 @@ class ApiService extends Service {
         refreshToken,
         refreshTokenExpireAt
       } = await req.$service.broker.call(`${cpz.Service.AUTH}.login`, req.body);
+
+      const cookies = new Cookies(req, res);
+
+      cookies.set("refresh_token", refreshToken, {
+        expires: new Date(refreshTokenExpireAt),
+        httpOnly: true,
+        sameSite: "lax",
+        domain: ".cryptuoso.com",
+        overwrite: true
+      });
+      res.end(
+        JSON.stringify({
+          success: true,
+          accessToken
+        })
+      );
+    } catch (e) {
+      this.logger.warn(e);
+      res.end(JSON.stringify({ success: false, error: e.message }));
+    }
+  }
+
+  async loginTg(req: any, res: any) {
+    try {
+      const {
+        accessToken,
+        refreshToken,
+        refreshTokenExpireAt
+      } = await req.$service.broker.call(
+        `${cpz.Service.AUTH}.loginTg`,
+        req.body
+      );
 
       const cookies = new Cookies(req, res);
 

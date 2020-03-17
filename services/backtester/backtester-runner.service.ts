@@ -4,6 +4,7 @@ import { JobId } from "bull";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../@types";
 import Auth from "../../mixins/auth";
+import { ISO_DATE_REGEX } from "../../utils";
 
 class BacktesterRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -48,10 +49,12 @@ class BacktesterRunnerService extends Service {
               type: "string"
             },
             dateFrom: {
-              type: "string"
+              type: "string",
+              pattern: ISO_DATE_REGEX
             },
             dateTo: {
-              type: "string"
+              type: "string",
+              pattern: ISO_DATE_REGEX
             },
             settings: {
               type: "object",

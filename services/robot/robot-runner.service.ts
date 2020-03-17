@@ -8,6 +8,7 @@ import dayjs from "../../lib/dayjs";
 import Timeframe from "../../utils/timeframe";
 import { CANDLES_RECENT_AMOUNT } from "../../config";
 import Auth from "../../mixins/auth";
+import { ISO_DATE_REGEX } from "../../utils";
 
 class RobotRunnerService extends Service {
   constructor(broker: ServiceBroker) {
@@ -62,6 +63,7 @@ class RobotRunnerService extends Service {
             id: "string",
             dateFrom: {
               type: "string",
+              pattern: ISO_DATE_REGEX,
               optional: true
             }
           },

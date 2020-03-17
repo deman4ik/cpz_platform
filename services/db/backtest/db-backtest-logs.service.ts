@@ -1,8 +1,9 @@
 import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class BacktestLogsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -10,7 +11,12 @@ class BacktestLogsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_BACKTEST_LOGS,
       mixins: [DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "backtest_logs",
         define: {

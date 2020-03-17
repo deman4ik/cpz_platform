@@ -1,12 +1,13 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
 import { encrypt, capitalize } from "../../../utils";
 import Auth from "../../../mixins/auth";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 class UserExchangeAccsService extends Service {
   constructor(broker: ServiceBroker) {
@@ -25,7 +26,12 @@ class UserExchangeAccsService extends Service {
         }
       },
       mixins: [Auth, DbService],
-      adapter: SqlAdapter,
+      adapter: new SqlAdapter(
+        process.env.PG_DBNAME,
+        process.env.PG_USER,
+        process.env.PG_PWD,
+        adapterOptions
+      ),
       model: {
         name: "user_exchange_accs",
         define: {
@@ -35,7 +41,7 @@ class UserExchangeAccsService extends Service {
           name: { type: Sequelize.STRING, allowNull: true },
           keys: { type: Sequelize.JSONB },
           status: { type: Sequelize.STRING },
-          error: { type: Sequelize.JSONB },
+          error: { type: Sequelize.STRING, allowNull: true },
           ordersCache: { type: Sequelize.JSONB, field: "orders_cache" }
         },
         options: {
@@ -50,8 +56,20 @@ class UserExchangeAccsService extends Service {
           params: {
             id: { type: "string", optional: true },
             exchange: "string",
-            name: { type: "string", optional: true },
-            keys: { type: "object" }
+            name: { type: "string", empty: false, trim: true, optional: true },
+            keys: {
+              type: "object",
+              props: {
+                key: { type: "string", empty: false, trim: true },
+                secret: { type: "string", empty: false, trim: true },
+                pass: {
+                  type: "string",
+                  optional: true,
+                  empty: false,
+                  trim: true
+                }
+              }
+            }
           },
           graphql: {
             mutation:
@@ -63,7 +81,7 @@ class UserExchangeAccsService extends Service {
         changeName: {
           params: {
             id: "string",
-            name: "string"
+            name: { type: "string", empty: false, trim: true }
           },
           graphql: {
             mutation:
@@ -75,7 +93,7 @@ class UserExchangeAccsService extends Service {
         invalidate: {
           params: {
             id: "string",
-            error: "object"
+            error: "string"
           },
           handler: this.invalidate
         },
@@ -136,7 +154,7 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             startedUserRobots.length > 0
           )
             throw new Error(
@@ -165,15 +183,36 @@ class UserExchangeAccsService extends Service {
         pass: pass && (await encrypt(userId, pass))
       };
 
-      if (!existed && (!name || name === "")) {
-        const exchangeAccsCount: number = await this._count(ctx, {
-          query: {
-            exchange,
-            userId
-          }
-        });
+      if (!existed) {
+        if (!name || name === "") {
+          const [sameExchange] = await this.adapter.find({
+            fields: ["name"],
+            limit: 1,
+            sort: "-created_at",
+            query: {
+              exchange
+            }
+          });
+          const number =
+            (sameExchange &&
+              sameExchange.name &&
+              +sameExchange.name.split("#")[1]) ||
+            0;
 
-        name = `${capitalize(exchange)} #${exchangeAccsCount + 1}`;
+          name = `${capitalize(exchange)} #${number + 1}`;
+        } else {
+          const [existsWithName] = await this.adapter.find({
+            fields: ["id"],
+            limit: 1,
+            query: {
+              name
+            }
+          });
+          if (existsWithName)
+            throw new Error(
+              `User Exchange Account already exists with name "${name}". Please try with another name.`
+            );
+        }
       }
 
       const exchangeAcc: cpz.UserExchangeAccount = {
@@ -202,7 +241,7 @@ class UserExchangeAccsService extends Service {
       }
       return { success: true, result: name };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
@@ -236,6 +275,19 @@ class UserExchangeAccsService extends Service {
           userExAccId: userExchangeAcc.id
         });
 
+      const [existsWithName] = await this.adapter.find({
+        fields: ["id"],
+        limit: 1,
+        query: {
+          name,
+          id: { $ne: id }
+        }
+      });
+      if (existsWithName)
+        throw new Error(
+          `User Exchange Account already exists with name "${name}". Please try with another name.`
+        );
+
       await this.adapter.updateById(id, {
         $set: {
           name
@@ -243,7 +295,7 @@ class UserExchangeAccsService extends Service {
       });
       return { success: true };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
       return {
         success: false,
         error: err.message
@@ -251,7 +303,7 @@ class UserExchangeAccsService extends Service {
     }
   }
 
-  async invalidate(ctx: Context<{ id: string; error: any }>) {
+  async invalidate(ctx: Context<{ id: string; error: string }>) {
     try {
       const { id, error } = ctx.params;
       const userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.getById(
@@ -271,7 +323,7 @@ class UserExchangeAccsService extends Service {
             userId: userExchangeAcc.userId,
             name: userExchangeAcc.name,
             exchange: userExchangeAcc.exchange,
-            error: error.message
+            error: error
           }
         );
       }
@@ -313,10 +365,10 @@ class UserExchangeAccsService extends Service {
           );
 
           if (
-            existed.status !== cpz.UserExchangeAccStatus.disabled &&
+            existed.status === cpz.UserExchangeAccStatus.enabled &&
             userRobots.length > 0
           )
-            throw new Error("Can't delete API Keys with with existed Robots");
+            throw new Error("You can't delete API Keys with added Robots");
 
           await this._remove(ctx, { id });
         }

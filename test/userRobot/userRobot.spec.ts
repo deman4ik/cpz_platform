@@ -174,6 +174,7 @@ describe("Test User Robot", () => {
     };
     userRobot = new UserRobot({
       ...userRobot.state.userRobot,
+      robot,
       positions: [
         {
           ...userRobot.state.positions[0],

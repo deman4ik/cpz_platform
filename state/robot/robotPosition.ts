@@ -265,14 +265,15 @@ class Position implements cpz.RobotPosition {
     this._entryDate = dayjs.utc().toISOString();
     this._entryOrderType = orderType;
     this._entryAction = action;
-    this._entryCandleTimestamp = dayjs
-      .utc(this._candle.timestamp)
-      .toISOString();
+    this._entryCandleTimestamp = this._candle.timestamp;
     this._direction =
       action === cpz.TradeAction.long
         ? cpz.PositionDirection.long
         : cpz.PositionDirection.short;
-    this._createTradeSignal(alert);
+    this._createTradeSignal({
+      ...alert,
+      candleTimestamp: this._candle.timestamp
+    });
   }
 
   _close(alert: cpz.AlertInfo) {
@@ -286,7 +287,10 @@ class Position implements cpz.RobotPosition {
     this._exitAction = action;
     this._exitCandleTimestamp = this._candle.timestamp;
     this._calcStats();
-    this._createTradeSignal(alert);
+    this._createTradeSignal({
+      ...alert,
+      candleTimestamp: this._candle.timestamp
+    });
   }
 
   get _nextAlertNumb() {

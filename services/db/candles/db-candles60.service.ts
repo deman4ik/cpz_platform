@@ -1,13 +1,19 @@
 import { ServiceSchema, Context, Errors } from "moleculer";
 import DbService from "moleculer-db";
-import SqlAdapter from "../../../lib/sql";
+import adapterOptions from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 const CandlesService: ServiceSchema = {
   name: `${cpz.Service.DB_CANDLES}60`,
   mixins: [DbService],
-  adapter: SqlAdapter,
+  adapter: new SqlAdapter(
+    process.env.PG_DBNAME,
+    process.env.PG_USER,
+    process.env.PG_PWD,
+    adapterOptions
+  ),
   model: {
     name: "candles60",
     define: {
@@ -21,8 +27,8 @@ const CandlesService: ServiceSchema = {
         get: function() {
           const value = this.getDataValue("timestamp");
           return (
-                (value && value instanceof Date && value.toISOString()) || value
-              );
+            (value && value instanceof Date && value.toISOString()) || value
+          );
         }
       },
       open: Sequelize.DOUBLE,
