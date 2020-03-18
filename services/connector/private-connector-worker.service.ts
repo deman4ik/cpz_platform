@@ -669,7 +669,8 @@ class PrivateConnectorWorkerService extends Service {
       const { userExAccId, exchange, asset, currency, direction } = order;
 
       const type =
-        order.type === cpz.OrderType.market &&
+        (order.type === cpz.OrderType.market ||
+          order.type === cpz.OrderType.forceMarket) &&
         this.connectors[userExAccId].has.createMarketOrder
           ? cpz.OrderType.market
           : cpz.OrderType.limit;
