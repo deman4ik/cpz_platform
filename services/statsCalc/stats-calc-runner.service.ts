@@ -126,10 +126,15 @@ class StatsCalcRunnerService extends Service {
       if (userSignal)
         await this.queueJob({
           id: uuid(),
-          type: cpz.StatsCalcJobType.userSignal,
-          userId,
-          robotId
+          type: cpz.StatsCalcJobType.userSignalsAggr,
+          userId
         });
+      await this.queueJob({
+        id: uuid(),
+        type: cpz.StatsCalcJobType.userSignal,
+        userId,
+        robotId
+      });
       await this.queueJob({
         id: uuid(),
         type: cpz.StatsCalcJobType.userSignalsAggr,
