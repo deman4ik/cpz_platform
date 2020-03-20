@@ -18,7 +18,7 @@ class AuthService extends Service {
       actions: {
         login: {
           params: {
-            email: "email",
+            email: { type: "email", lowercase: true, empty: false, trim: true },
             password: { type: "string", empty: false, trim: true }
           },
           handler: this.login
@@ -58,7 +58,7 @@ class AuthService extends Service {
         },
         changeEmail: {
           params: {
-            email: "email"
+            email: { type: "email", lowercase: true, empty: false, trim: true }
           },
           graphql: {
             mutation: "changeEmail(email: String!): Response!"
@@ -96,7 +96,7 @@ class AuthService extends Service {
         },
         register: {
           params: {
-            email: "email",
+            email: { type: "email", lowercase: true, empty: false, trim: true },
             password: {
               type: "string",
               min: 6,
@@ -117,7 +117,7 @@ class AuthService extends Service {
         },
         passwordReset: {
           params: {
-            email: "email"
+            email: { type: "email", lowercase: true, empty: false, trim: true }
           },
           handler: this.passwordReset
         },
