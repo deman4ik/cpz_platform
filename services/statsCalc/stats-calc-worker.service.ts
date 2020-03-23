@@ -334,8 +334,12 @@ class StatsCalcWorkerService extends Service {
       userId: string;
       exchange?: string;
       asset?: string;
+      status: { [key: string]: any };
     } = {
-      userId
+      userId,
+      status: {
+        $or: [cpz.UserPositionStatus.closed, cpz.UserPositionStatus.closedAuto]
+      }
     };
 
     if (exchange) query.exchange = exchange;
