@@ -314,10 +314,9 @@ class PublicConnectorService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[exchange] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "futures" };
+        config.options = { defaultType: "future" };
         this.connectors[exchange] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
-        config.options = { defaultType: "futures" };
         this.connectors[exchange] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
 

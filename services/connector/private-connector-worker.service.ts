@@ -455,7 +455,7 @@ class PrivateConnectorWorkerService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[id] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "futures" };
+        config.options = { defaultType: "future" };
         this.connectors[id] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
         this.connectors[id] = new ccxt.binance(config);

@@ -77,7 +77,9 @@ class Timeframe {
   }
 
   public static get validArray(): cpz.Timeframe[] {
-    return Object.keys(this.timeframes).map(t => +t);
+    return Object.keys(this.timeframes)
+      .map(t => +t)
+      .filter(t => t > 1); // exclude 1 minute
   }
 
   static exists(timeframe: cpz.Timeframe | string): boolean {
