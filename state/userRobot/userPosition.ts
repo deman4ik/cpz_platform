@@ -698,6 +698,7 @@ class UserPosition implements cpz.UserPosition {
         this._entryStatus = cpz.UserPositionOrderStatus.closed;
         this._setStatus();
       } else {
+        this._reason = "Entry slippage exceeded";
         this._entryStatus = cpz.UserPositionOrderStatus.canceled;
         this._setStatus();
       }

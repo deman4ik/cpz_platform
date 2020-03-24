@@ -162,6 +162,12 @@ class UserRobotWorkerService extends Service {
           entities: userRobot.state.positions
         });
 
+        if (userRobot.hasCanceledPositions) {
+          this.logger.error(
+            `User Robot #${userRobot.state.userRobot.id} has canceled positions!`
+          );
+        }
+
         if (userRobot.hasClosedPositions) {
           this.logger.info(
             `User Robot #${userRobot.state.userRobot.id} has closed positions, sending ${cpz.Event.STATS_CALC_USER_ROBOT} event.`
