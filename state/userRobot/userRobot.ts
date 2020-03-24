@@ -91,6 +91,14 @@ class UserRobot implements cpz.UserRobot {
     );
   }
 
+  get hasCanceledPositions() {
+    return (
+      this.positions.filter(
+        pos => pos.status === cpz.UserPositionStatus.canceled
+      ).length > 0
+    );
+  }
+
   get hasClosedPositions() {
     return (
       this.positions.filter(
