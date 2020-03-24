@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import SqlAdapter from "moleculer-db-adapter-sequelize";
 
 require("pg").types.setTypeParser(1114, (stringValue: string) => {
   return new Date(stringValue + "+0000");
@@ -55,4 +56,12 @@ const adapterOptions = {
     min: 0
   }
 };
-export default adapterOptions;
+
+const adapter = new SqlAdapter(
+  process.env.PG_DBNAME,
+  process.env.PG_USER,
+  process.env.PG_PWD,
+  adapterOptions
+);
+
+export { adapterOptions, adapter };

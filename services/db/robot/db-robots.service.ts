@@ -1,7 +1,7 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import adapterOptions from "../../../lib/sql";
+import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import {
@@ -40,12 +40,15 @@ class RobotsService extends Service {
         }
       },
       mixins: [Auth, DbService],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "robots",
         define: {
