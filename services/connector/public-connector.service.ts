@@ -287,7 +287,7 @@ class PublicConnectorService extends Service {
     maxTimeout: 0,
     onRetry: (err: any, i: number) => {
       if (err) {
-        this.logger.warn(`Retry ${i}error : `, err);
+        this.logger.warn(`Retry ${i} - ${err.message}`);
       }
     }
   };

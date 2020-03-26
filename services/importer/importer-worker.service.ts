@@ -93,7 +93,9 @@ class ImporterWorkerService extends Service {
               await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
                 entity: state
               });
-              this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
+              this.broker.broadcast(cpz.Event.IMPORTER_FINISHED, {
+                id: state.id
+              });
               this.logger.info(`Job #${job.id} finished`);
               return {
                 success: true,
@@ -101,7 +103,7 @@ class ImporterWorkerService extends Service {
               };
             } catch (e) {
               this.logger.error(e);
-              this.broker.emit(cpz.Event.IMPORTER_FAILED, {
+              this.broker.broadcast(cpz.Event.IMPORTER_FAILED, {
                 id: job.id,
                 error: e.message
               });

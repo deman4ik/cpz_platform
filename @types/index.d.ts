@@ -38,7 +38,6 @@ declare namespace cpz {
     DB_NOTIFICATIONS = "db-notifications",
     EXWATCHER = "exwatcher",
     EXWATCHER_RUNNER = "exwatcher-runner",
-    BINANCE_FUTURES_WATCHER = "binance_futures_watcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
     PUBLIC_CONNECTOR = "public-connector",

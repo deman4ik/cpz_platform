@@ -15,10 +15,11 @@ interface Trade {
   timestamp: number; // Unix timestamp in milliseconds
 }
 class BaseExwatcher extends Service {
-  constructor(broker: ServiceBroker) {
+  constructor(exchange: string, broker: ServiceBroker) {
     super(broker);
+    this.exchange = exchange;
     this.parseServiceSchema({
-      name: cpz.Service.BINANCE_FUTURES_WATCHER,
+      name: `${this.exchange}_watcher`,
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
@@ -81,7 +82,7 @@ class BaseExwatcher extends Service {
       stopped: this.stoppedService
     });
   }
-  exchange: string = "";
+  exchange: string;
   subscriptions: { [key: string]: cpz.Exwatcher } = {};
   candlesCurrent: { [key: string]: { [key: string]: cpz.Candle } } = {};
   lastTick: { [key: string]: cpz.ExchangePrice } = {};
@@ -101,23 +102,11 @@ class BaseExwatcher extends Service {
   }
 
   async startedService() {
-    if (this.exchange === "binance_futures")
+    if (this.exchange === "binance_futures") {
       this.connector = new ccxtpro.binance({
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
         options: { defaultType: "future", OHLCVLimit: 100 }
       });
-    else if (this.exchange === "bitfinex")
-      this.connector = new ccxtpro.bitfinex({
-        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
-      });
-    else if (this.exchange === "kraken")
-      this.connector = new ccxtpro.kraken({
-        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
-        options: { OHLCVLimit: 100 }
-      });
-    else throw new Error("Unsupported exchange");
-
-    if (this.connector.has["watchOHLCV"]) {
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
         this.handleCandles.bind(this),
@@ -125,7 +114,10 @@ class BaseExwatcher extends Service {
           scheduled: false
         }
       );
-    } else if (this.connector.has["watchTrades"]) {
+    } else if (this.exchange === "bitfinex") {
+      this.connector = new ccxtpro.bitfinex({
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
+      });
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
         this.handleTrades.bind(this),
@@ -133,9 +125,18 @@ class BaseExwatcher extends Service {
           scheduled: false
         }
       );
-    } else {
-      throw new Error("Exchange is not supported");
-    }
+    } else if (this.exchange === "kraken") {
+      this.connector = new ccxtpro.kraken({
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
+      });
+      this.cronHandleChanges = cron.schedule(
+        "* * * * * *",
+        this.handleTrades.bind(this),
+        {
+          scheduled: false
+        }
+      );
+    } else throw new Error("Unsupported exchange");
 
     await this.resubscribe();
     this.cronHandleChanges.start();
@@ -155,11 +156,14 @@ class BaseExwatcher extends Service {
     }>
   ) {
     const { id: importerId } = ctx.params;
-    this.logger.info(`Importer ${importerId} finished!`);
+
     const subscription = Object.values(this.subscriptions).find(
       (sub: cpz.Exwatcher) => sub.importerId === importerId
     );
-    await this.subscribe(subscription);
+    if (subscription) {
+      this.logger.info(`Importer ${importerId} finished!`);
+      await this.subscribe(subscription);
+    }
   }
 
   async handleImporterFailedEvent(
@@ -169,13 +173,12 @@ class BaseExwatcher extends Service {
     }>
   ) {
     const { id: importerId, error } = ctx.params;
-    this.logger.warn(`Importer ${importerId} failed!`, error);
-
     const subscription = Object.values(this.subscriptions).find(
       (sub: cpz.Exwatcher) => sub.importerId === importerId
     );
 
     if (subscription && subscription.id) {
+      this.logger.warn(`Importer ${importerId} failed!`, error);
       this.subscriptions[subscription.id].status = cpz.ExwatcherStatus.failed;
       this.subscriptions[subscription.id].error = error;
       await this.saveSubscription(this.subscriptions[subscription.id]);
@@ -370,14 +373,14 @@ class BaseExwatcher extends Service {
       this.subscriptions[id].asset,
       this.subscriptions[id].currency
     );
-    if (this.connector.has["watchOHLCV"]) {
+    if (this.exchange === "binance_futures") {
       for (const timeframe of Timeframe.validArray) {
         await this.connector.watchOHLCV(
           symbol,
           Timeframe.timeframes[timeframe].str
         );
       }
-    } else if (this.connector.has["watchTrades"]) {
+    } else if (this.exchange === "bitfinex" || this.exchange === "kraken") {
       await this.connector.watchTrades(symbol);
       await this.loadCurrentCandles(this.subscriptions[id]);
     } else {
@@ -426,7 +429,6 @@ class BaseExwatcher extends Service {
   }
 
   async publishTick(tick: cpz.ExchangePrice): Promise<void> {
-    this.logger.info("New tick", tick);
     await this.broker.emit(cpz.Event.TICK_NEW, tick);
   }
 
@@ -451,7 +453,7 @@ class BaseExwatcher extends Service {
         .startOf(cpz.TimeUnit.second);
       // Есть ли подходящие по времени таймфреймы
       const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
-      let closedCandles: { [key: string]: cpz.Candle[] } = {};
+      const closedCandles: { [key: string]: cpz.Candle[] } = {};
 
       await Promise.all(
         this.activeSubscriptions.map(

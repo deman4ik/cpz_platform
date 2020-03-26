@@ -3,9 +3,8 @@ import BaseExwatcher from "../../mixins/base-exwatcher";
 
 class KrakenWatcherService extends BaseExwatcher {
   constructor(broker: ServiceBroker) {
-    super(broker);
+    super("kraken", broker);
   }
-  exchange: string = "kraken";
 }
 
 export = KrakenWatcherService;

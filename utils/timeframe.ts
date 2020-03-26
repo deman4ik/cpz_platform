@@ -5,12 +5,12 @@ import { getValidDate } from "./time";
 
 class Timeframe {
   private static _timeframes: cpz.Timeframes = {
-    1: {
+    /*  1: {
       str: "1m",
       value: 1,
       unit: cpz.TimeUnit.minute,
       amountInUnit: 1
-    },
+    },*/ // exclude 1 minute
     5: {
       str: "5m",
       value: 5,
@@ -77,9 +77,7 @@ class Timeframe {
   }
 
   public static get validArray(): cpz.Timeframe[] {
-    return Object.keys(this.timeframes)
-      .map(t => +t)
-      .filter(t => t > 1); // exclude 1 minute
+    return Object.keys(this.timeframes).map(t => +t);
   }
 
   static exists(timeframe: cpz.Timeframe | string): boolean {
