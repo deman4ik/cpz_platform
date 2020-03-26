@@ -266,6 +266,15 @@ class Timeframe {
     return Math.floor(duration / amountInUnit);
   }
 
+  static getPrevSince(inputDate: string, timeframe: cpz.Timeframe): number {
+    const currentDate = Timeframe.validTimeframeDatePrev(inputDate, timeframe);
+    const { amountInUnit, unit } = Timeframe.get(timeframe);
+    return dayjs
+      .utc(currentDate)
+      .add(-amountInUnit, unit)
+      .valueOf();
+  }
+
   static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {
     const currentDate = dayjs.utc();
     const { amountInUnit, unit } = this.get(timeframe);

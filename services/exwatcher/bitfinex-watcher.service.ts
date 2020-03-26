@@ -1,11 +1,11 @@
 import { ServiceBroker } from "moleculer";
 import BaseExwatcher from "../../mixins/base-exwatcher";
 
-class BinanceFuturesWatcherService extends BaseExwatcher {
+class BitfinexWatcherService extends BaseExwatcher {
   constructor(broker: ServiceBroker) {
     super(broker);
   }
-  exchange: string = "binance_futures";
+  exchange: string = "bitfinex";
 }
 
-export = BinanceFuturesWatcherService;
+export = BitfinexWatcherService;

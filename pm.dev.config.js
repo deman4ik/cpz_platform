@@ -40,158 +40,82 @@ module.exports = {
       }
     },
     {
-      name: "private-connector-runner",
+      name: "private-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/connector/private-connector-runner.service.js",
+        "--env --config prod.config.js dist/services/connector/private-connector-runner.service.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "private-connector-runner"
-      }
-    },
-    {
-      name: "private-connector-worker",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env  --config prod.config.js dist/services/connector/private-connector-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "private-connector-worker"
+        NODEID: "private-connector"
       }
     },
     {
       name: "exwatcher",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/exwatcher.service.js",
+      args: "--env --config prod.config.js dist/services/exwatcher",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher"
       }
     },
     {
-      name: "importer-runner",
+      name: "importer",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/importer/importer-runner.service.js",
+        "--env --config prod.config.js dist/services/importer/importer-runner.service.js dist/services/importer/importer-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "importer-runner"
+        NODEID: "importer"
       }
     },
     {
-      name: "importer-worker",
+      name: "robot",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/importer/importer-worker.service.js",
+        "--env --config prod.config.js dist/services/robot/robot-runner.service.js dist/services/robot/robot-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "importer-worker"
+        NODEID: "robot"
       }
     },
     {
-      name: "robot-runner",
+      name: "user-robot",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/robot/robot-runner.service.js",
+        "--env --config prod.config.js dist/services/userRobot/user-robot-runner.service.js dist/services/userRobot/user-robot-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "robot-runner"
+        NODEID: "user-robot"
       }
     },
     {
-      name: "robot-worker",
+      name: "stats-calc",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/robot/robot-worker.service.js",
+        "--env --config prod.config.js dist/services/statsCalc/stats-calc-runner.service.js dist/services/statsCalc/stats-calc-worker.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "robot-worker"
-      }
-    },
-    {
-      name: "user-robot-runner",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/userRobot/user-robot-runner.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "user-robot-runner"
-      }
-    },
-    {
-      name: "user-robot-worker",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/userRobot/user-robot-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "user-robot-worker"
-      }
-    },
-    {
-      name: "stats-calc-runner",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/statsCalc/stats-calc-runner.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "stats-calc-runner"
-      }
-    },
-    {
-      name: "stats-calc-worker",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/statsCalc/stats-calc-worker.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "stats-calc-worker"
+        NODEID: "stats-calc"
       }
     },
     {
       name: "publisher",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/publisher.service.js",
+      args:
+        "--env --config prod.config.js dist/services/publisher.service.js dist/services/mail.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "publisher"
       }
     },
     {
-      name: "mail",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/mail.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "mail"
-      }
-    },
-    {
-      name: "trace-logger",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/trace-logger.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "trace-logger"
-      }
-    },
-    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/api.service.js",
+      args:
+        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "api"
-      }
-    },
-    {
-      name: "auth",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/auth.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "auth"
       }
     },
     {

@@ -146,17 +146,17 @@ describe("Test 'Timeframe' class", () => {
   });
 
   describe("Test 'timeframesByDate", () => {
-    it("should return array with 1 minute timeframe", () => {
+    /*it("should return array with 1 minute timeframe", () => {
       const currentTimeframes = Timeframe.timeframesByDate(
         "2019-08-03T21:13:00.006Z"
       );
       expect(currentTimeframes).toStrictEqual([1]);
-    });
-    it("should return array with 1, 5, 15 minute timeframes", () => {
+    });*/
+    it("should return array with  5, 15,30 minute timeframes", () => {
       const currentTimeframes = Timeframe.timeframesByDate(
-        "2019-08-03T21:15:00.006Z"
+        "2019-08-03T21:30:00.006Z"
       );
-      expect(currentTimeframes).toStrictEqual([1, 5, 15]);
+      expect(currentTimeframes).toStrictEqual([5, 15, 30]);
     });
   });
 
@@ -263,6 +263,29 @@ describe("Test 'Timeframe' class", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDateNext(date, 1440);
       expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+  });
+
+  describe("Test 'getPrevSince", () => {
+    it("should return valid date for 1 minute timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:44.716Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 1);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T10:44:00.000Z");
+    });
+    it("should return valid date for 5 minute timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 5);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T10:40:00.000Z");
+    });
+    it("should return valid date for 1 hour timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 60);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T09:00:00.000Z");
+    });
+    it("should return valid date for 8 hour timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 480);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T00:00:00.000Z");
     });
   });
 });
