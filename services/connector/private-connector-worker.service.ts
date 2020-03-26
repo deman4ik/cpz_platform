@@ -230,7 +230,7 @@ class PrivateConnectorWorkerService extends Service {
         throw Error(`Failed to check balance. ${this.getErrorMessage(err)}`);
       }
       const asset = "BTC";
-      const currency = "USD";
+      const currency = exchange === "binance_futures" ? "USDT" : "USD";
       const [market]: cpz.Market[] = await this.broker.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {
