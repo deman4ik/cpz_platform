@@ -101,11 +101,22 @@ class BaseExwatcher extends Service {
   }
 
   async startedService() {
-    this.connector = new ccxtpro.binance({
-      enableRateLimit: true,
-      fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
-      options: { defaultType: "future", OHLCVLimit: 100 }
-    });
+    if (this.exchange === "binance_futures")
+      this.connector = new ccxtpro.binance({
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
+        options: { defaultType: "future", OHLCVLimit: 100 }
+      });
+    else if (this.exchange === "bitfinex")
+      this.connector = new ccxtpro.bitfinex({
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
+      });
+    else if (this.exchange === "kraken")
+      this.connector = new ccxtpro.kraken({
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
+        options: { OHLCVLimit: 100 }
+      });
+    else throw new Error("Unsupported exchange");
+
     if (this.connector.has["watchOHLCV"]) {
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
