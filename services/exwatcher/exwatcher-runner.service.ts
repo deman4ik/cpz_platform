@@ -72,7 +72,8 @@ class ExwatcherService extends Service {
             }
           },
           graphql: {
-            mutation: "exwatcherUnsubscribe(exchanges: [String!]!): Response!"
+            mutation:
+              "exwatcherUnsubscribeAll(exchanges: [String!]!): Response!"
           },
           roles: [cpz.UserRoles.admin],
           handler: this.unsubscribeall
