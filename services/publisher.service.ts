@@ -160,8 +160,13 @@ class PublisherService extends Service {
       clearInterval(timerId);
       await lock.release();
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError) return;
-      this.logger.error(e);
+      if (e instanceof this.LockAcquisitionError)
+        this.logger.warn("LockAcquisitionError", e);
+      else if (e instanceof this.LockReleaseError)
+        this.logger.warn("LockReleaseError", e);
+      else if (e instanceof this.LockExtendError)
+        this.logger.warn("LockExtendError", e);
+      else this.logger.error(e);
     }
   }
 
