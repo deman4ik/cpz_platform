@@ -243,14 +243,15 @@ class PrivateConnectorWorkerService extends Service {
       );
       let price = market.limits.price.min;
       if (exchange === "binance_futures") {
-        ({ price } = await this.broker.call(
+        const { price: currentPrice } = await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentPrice`,
           {
             exchange,
             asset,
             currency
           }
-        ));
+        );
+        price = currentPrice - 1500;
       }
 
       const type = cpz.OrderType.limit;
@@ -287,6 +288,7 @@ class PrivateConnectorWorkerService extends Service {
             order
           );
       } catch (err) {
+        this.logger.error(err);
         throw Error(
           `Failed to create test order. ${this.getErrorMessage(err)}`
         );
@@ -311,7 +313,7 @@ class PrivateConnectorWorkerService extends Service {
         const canceled = await retry(cancelOrderCall, this.retryOptions);
 
         this.logger.info("Canceled order", canceled);
-        if (!order)
+        if (!canceled)
           throw new Errors.MoleculerError(
             "Wrong response from exchange while canceling test order",
             520,
@@ -319,6 +321,7 @@ class PrivateConnectorWorkerService extends Service {
             canceled
           );
       } catch (err) {
+        this.logger.error(err);
         throw Error(
           `Failed to cancel test order. ${this.getErrorMessage(
             err
