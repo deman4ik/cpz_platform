@@ -641,7 +641,6 @@ class BaseExwatcher extends Service {
         .utc()
         .add(-1, cpz.TimeUnit.second)
         .startOf(cpz.TimeUnit.second);
-      this.logger.info(date.toISOString());
       // Есть ли подходящие по времени таймфреймы
       const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
       let closedCandles: { [key: string]: cpz.Candle[] } = {};
