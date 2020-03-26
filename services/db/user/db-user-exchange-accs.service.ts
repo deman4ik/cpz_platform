@@ -5,7 +5,7 @@ import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
-import { encrypt, capitalize } from "../../../utils";
+import { encrypt, formatExchange } from "../../../utils";
 import Auth from "../../../mixins/auth";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 
@@ -202,7 +202,7 @@ class UserExchangeAccsService extends Service {
               +sameExchange.name.split("#")[1]) ||
             0;
 
-          name = `${capitalize(exchange)} #${number + 1}`;
+          name = `${formatExchange(exchange)} #${number + 1}`;
         } else {
           const [existsWithName] = await this.adapter.find({
             fields: ["id"],
