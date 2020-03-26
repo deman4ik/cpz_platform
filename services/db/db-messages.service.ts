@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
-import adapterOptions from "../../lib/sql";
+import { adapterOptions, adapter } from "../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../@types";
 import Auth from "../../mixins/auth";
@@ -14,12 +14,15 @@ class MessagesService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_MESSAGES,
       mixins: [Auth, DbService],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "messages",
         define: {

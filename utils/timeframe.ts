@@ -77,7 +77,9 @@ class Timeframe {
   }
 
   public static get validArray(): cpz.Timeframe[] {
-    return Object.keys(this.timeframes).map(t => +t);
+    return Object.keys(this.timeframes)
+      .map(t => +t)
+      .filter(t => t > 1); // exclude 1 minute
   }
 
   static exists(timeframe: cpz.Timeframe | string): boolean {
@@ -262,6 +264,15 @@ class Timeframe {
       .add(1, "millisecond")
       .diff(dayjs.utc(dateFrom), unit);
     return Math.floor(duration / amountInUnit);
+  }
+
+  static getPrevSince(inputDate: string, timeframe: cpz.Timeframe): number {
+    const currentDate = Timeframe.validTimeframeDatePrev(inputDate, timeframe);
+    const { amountInUnit, unit } = Timeframe.get(timeframe);
+    return dayjs
+      .utc(currentDate)
+      .add(-amountInUnit, unit)
+      .valueOf();
   }
 
   static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {

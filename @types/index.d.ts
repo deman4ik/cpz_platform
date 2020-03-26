@@ -37,6 +37,8 @@ declare namespace cpz {
     DB_MESSAGES = "db-messages",
     DB_NOTIFICATIONS = "db-notifications",
     EXWATCHER = "exwatcher",
+    EXWATCHER_RUNNER = "exwatcher-runner",
+    BINANCE_FUTURES_WATCHER = "binance_futures_watcher",
     IMPORTER_RUNNER = "importer-runner",
     IMPORTER_WORKER = "importer-worker",
     PUBLIC_CONNECTOR = "public-connector",
@@ -588,7 +590,7 @@ declare namespace cpz {
     status: cpz.ExwatcherStatus;
     nodeID: string;
     importerId: string;
-    error?: any;
+    error?: string;
   }
 
   interface CodeFilesInDB {
@@ -897,7 +899,7 @@ declare namespace cpz {
     id: string;
     robotId: string;
     type: RobotJobType;
-    data?: Candle | ExwatcherTrade;
+    data?: Candle | ExchangePrice;
   }
 
   interface BacktesterSettings {

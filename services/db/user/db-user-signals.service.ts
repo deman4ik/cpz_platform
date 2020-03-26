@@ -6,7 +6,7 @@ import {
 } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import adapterOptions from "../../../lib/sql";
+import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../@types";
@@ -26,12 +26,15 @@ class UserSignalsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_SIGNALS,
       mixins: [Auth, DbService],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "user_signals",
         define: {
