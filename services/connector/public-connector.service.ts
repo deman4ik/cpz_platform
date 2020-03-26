@@ -59,7 +59,7 @@ class PublicConnectorService extends Service {
           ) {
             try {
               this.authAction(ctx);
-              const result = this.getMarket(
+              const result = await this.getMarket(
                 ctx.params.exchange,
                 ctx.params.asset,
                 ctx.params.currency
