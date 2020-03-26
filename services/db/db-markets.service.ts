@@ -101,8 +101,13 @@ class MarketsService extends Service {
       await lock.release();
       this.logger.info("Markets updated!");
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError) return;
-      this.logger.error(e);
+      if (e instanceof this.LockAcquisitionError)
+        this.logger.warn("LockAcquisitionError", e);
+      else if (e instanceof this.LockReleaseError)
+        this.logger.warn("LockReleaseError", e);
+      else if (e instanceof this.LockExtendError)
+        this.logger.warn("LockExtendError", e);
+      else this.logger.error(e);
     }
   }
 
