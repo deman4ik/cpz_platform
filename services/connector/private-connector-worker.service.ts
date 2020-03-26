@@ -150,9 +150,9 @@ class PrivateConnectorWorkerService extends Service {
       };
     }
     if (exchange === "bitfinex") {
-      if (type === cpz.OrderType.market)
+      if (type === cpz.OrderType.market || type === cpz.OrderType.forceMarket)
         return {
-          type
+          type: cpz.OrderType.market
         };
       return {
         type: "limit"
@@ -241,6 +241,17 @@ class PrivateConnectorWorkerService extends Service {
           }
         }
       );
+      let price = market.limits.price.min;
+      if (exchange === "binance_futures") {
+        ({ price } = await this.broker.call(
+          `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentPrice`,
+          {
+            exchange,
+            asset,
+            currency
+          }
+        ));
+      }
 
       const type = cpz.OrderType.limit;
       const orderParams = this.getOrderParams(<string>exchange, {}, type);
@@ -252,7 +263,7 @@ class PrivateConnectorWorkerService extends Service {
             type,
             cpz.OrderDirection.buy,
             market.limits.amount.min,
-            market.limits.price.min,
+            price,
             orderParams
           );
         } catch (e) {
