@@ -2,13 +2,14 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { getMainKeyboard } from "../keyboard";
 import { formatExchange } from "../../../utils/naming";
+import { getAccessValue } from "../../../utils/auth";
 
 function getExchangesMenu(ctx: any) {
   const { exchanges }: { exchanges: cpz.Exchange[] } = ctx.scene.state;
   return Extra.HTML().markup((m: any) => {
     const buttons = exchanges.map(({ code }) => [
       m.callbackButton(
-        `${formatExchange(code)}`,
+        formatExchange(code),
         JSON.stringify({ a: "exchange", p: code }),
         false
       )
@@ -37,7 +38,7 @@ async function addUserExAccEnter(ctx: any) {
         {
           fields: ["code"],
           query: {
-            available: { $gte: +ctx.session.user.available }
+            available: { $gte: getAccessValue(ctx.session.user.available) }
           }
         }
       );
