@@ -273,15 +273,17 @@ class UserRobotRunnerService extends Service {
       if (userExAcc.status !== cpz.UserExchangeAccStatus.enabled)
         throw new Error(`User Exchange Account status is ${userExAcc.status}`);
       if (userRobot.status === cpz.Status.paused) {
-        const result: {
-          success: boolean;
-          id: string;
-          status?: string;
-          error?: string;
-        } = await this.actions.resume(ctx.params, { parentCtx: ctx });
-        if (result && result.success)
-          return { success: true, id, status: cpz.Status.started };
-        else return result;
+        await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
+          id,
+          message: message || null,
+          status: cpz.Status.started
+        });
+        await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
+          id,
+          message
+        });
+
+        return { success: true, id, status: cpz.Status.started };
       }
       if (userRobot.status === cpz.Status.started)
         return {
