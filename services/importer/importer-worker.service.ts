@@ -386,12 +386,7 @@ class ImporterWorkerService extends Service {
         let dateStart =
           dateFrom && Timeframe.validTimeframeDateNext(dateFrom, timeframe);
         let dateStop = dayjs
-          .utc(
-            Timeframe.validTimeframeDateNext(
-              getValidDate(dateTo, unit),
-              timeframe
-            )
-          )
+          .utc(Timeframe.validTimeframeDateNext(dateTo, timeframe))
           .add(-amountInUnit, unit)
           .toISOString();
 
@@ -413,7 +408,7 @@ class ImporterWorkerService extends Service {
 
         const loadResults = await Promise.all(
           chunks.map(async ({ dateFrom: loadFrom }) => {
-            let candles;
+            let candles: any[];
             try {
               candles = await this.broker.call(
                 `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
@@ -442,7 +437,6 @@ class ImporterWorkerService extends Service {
             }
           })
         );
-
         result[timeframe] = await this.uniqueCandles(
           [].concat(...loadResults),
           dateStart,
