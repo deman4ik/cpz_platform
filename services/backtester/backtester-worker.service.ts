@@ -226,8 +226,8 @@ class BacktesterWorkerService extends Service {
           }
         );
         if (requiredCandles.length < robot.requiredHistoryMaxBars)
-          throw new Error(
-            `Failed to load history candles required: ${robot.requiredHistoryMaxBars} bars but loaded: ${requiredCandles.length} bars`
+          this.logger.warn(
+            `Not enough history candles! Required: ${robot.requiredHistoryMaxBars} bars but loaded: ${requiredCandles.length} bars`
           );
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))

@@ -137,7 +137,7 @@ async function searchSignalsSelectAsset(ctx: any) {
       `${cpz.Service.DB_ROBOTS}.getAvailableAssets`,
       {
         signals: true,
-        exchange: formatExchange(ctx.scene.state.exchange)
+        exchange: ctx.scene.state.exchange
       },
       {
         meta: {
@@ -176,7 +176,7 @@ async function searchSignalsSelectRobot(ctx: any) {
     ctx.scene.state.robots = await this.broker.call(
       `${cpz.Service.DB_USER_SIGNALS}.getSignalRobots`,
       {
-        exchange: formatExchange(ctx.scene.state.exchange),
+        exchange: ctx.scene.state.exchange,
         asset,
         currency
       },

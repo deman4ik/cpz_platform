@@ -110,7 +110,7 @@ async function topRobotsSelectRobot(ctx: any) {
     ctx.scene.state.robots = await this.broker.call(
       `${cpz.Service.DB_ROBOTS}.getTopTradingRobots`,
       {
-        exchange: formatExchange(ctx.scene.state.exchange),
+        exchange: ctx.scene.state.exchange,
         limit: 10
       },
       {
