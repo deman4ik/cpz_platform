@@ -583,14 +583,23 @@ class BaseExwatcher extends Service {
                   number,
                   number,
                   number
-                ] = this.connector.ohlcvs[symbol][
-                  Timeframe.get(timeframe).str
-                ].find((c: any) => c[0] === date.valueOf());
-                this.candlesCurrent[id][timeframe].open = candle[1];
-                this.candlesCurrent[id][timeframe].high = candle[2];
-                this.candlesCurrent[id][timeframe].low = candle[3];
-                this.candlesCurrent[id][timeframe].close = candle[4];
-                this.candlesCurrent[id][timeframe].volume = candle[5];
+                ] = this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str][
+                  this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
+                    .length - 1
+                ];
+                if (candle[0] === date.valueOf()) {
+                  this.candlesCurrent[id][timeframe].open = candle[1];
+                  this.candlesCurrent[id][timeframe].high = candle[2];
+                  this.candlesCurrent[id][timeframe].low = candle[3];
+                  this.candlesCurrent[id][timeframe].close = candle[4];
+                  this.candlesCurrent[id][timeframe].volume = candle[5];
+                } else {
+                  this.candlesCurrent[id][timeframe].open = candle[4];
+                  this.candlesCurrent[id][timeframe].high = candle[4];
+                  this.candlesCurrent[id][timeframe].low = candle[4];
+                  this.candlesCurrent[id][timeframe].close = candle[4];
+                  this.candlesCurrent[id][timeframe].volume = 0;
+                }
                 this.candlesCurrent[id][timeframe].type =
                   this.candlesCurrent[id][timeframe].volume === 0
                     ? cpz.CandleType.previous
