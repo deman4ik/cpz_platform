@@ -137,7 +137,7 @@ class UserExchangeAccsService extends Service {
 
       let existed: cpz.UserExchangeAccount;
       if (id) {
-        existed = await this.adapter.findById(id);
+        existed = await this.actions.get({ id }, { parentCtx: ctx });
         if (existed) {
           if (existed.userId !== userId)
             throw new Errors.ForbiddenError("FORBIDDEN", {
@@ -188,14 +188,17 @@ class UserExchangeAccsService extends Service {
 
       if (!existed) {
         if (!name || name === "") {
-          const [sameExchange] = await this.adapter.find({
-            fields: ["name"],
-            limit: 1,
-            sort: "-created_at",
-            query: {
-              exchange
-            }
-          });
+          const [sameExchange] = await this.actions.find(
+            {
+              fields: ["name"],
+              limit: 1,
+              sort: "-created_at",
+              query: {
+                exchange
+              }
+            },
+            { parentCtx: ctx }
+          );
           const number =
             (sameExchange &&
               sameExchange.name &&
@@ -204,13 +207,16 @@ class UserExchangeAccsService extends Service {
 
           name = `${formatExchange(exchange)} #${number + 1}`;
         } else {
-          const [existsWithName] = await this.adapter.find({
-            fields: ["id"],
-            limit: 1,
-            query: {
-              name
-            }
-          });
+          const [existsWithName] = await this.actions.find(
+            {
+              fields: ["id"],
+              limit: 1,
+              query: {
+                name
+              }
+            },
+            { parentCtx: ctx }
+          );
           if (existsWithName)
             throw new Error(
               `User Exchange Account already exists with name "${name}". Please try with another name.`
@@ -266,8 +272,9 @@ class UserExchangeAccsService extends Service {
       let { id, name } = ctx.params;
       const { id: userId } = ctx.meta.user;
 
-      let userExchangeAcc: cpz.UserExchangeAccount = await this.adapter.findById(
-        id
+      let userExchangeAcc: cpz.UserExchangeAccount = await this.actions.get(
+        { id },
+        { parentCtx: ctx }
       );
       if (!userExchangeAcc)
         throw new Errors.NotFoundError("User Exchange Account not found", {
@@ -278,7 +285,7 @@ class UserExchangeAccsService extends Service {
           userExAccId: userExchangeAcc.id
         });
 
-      const [existsWithName] = await this.adapter.find({
+      const [existsWithName] = await this.actions.find({
         fields: ["id"],
         limit: 1,
         query: {
@@ -351,7 +358,7 @@ class UserExchangeAccsService extends Service {
 
       let existed: cpz.UserExchangeAccount;
       if (id) {
-        existed = await this.adapter.findById(id);
+        existed = await this.actions.get({ id }, { parentCtx: ctx });
         if (existed) {
           if (existed.userId !== userId)
             throw new Errors.ForbiddenError("FORBIDDEN", {

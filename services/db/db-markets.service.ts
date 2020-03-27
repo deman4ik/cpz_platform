@@ -84,7 +84,7 @@ class MarketsService extends Service {
       }, 19000);
 
       try {
-        const markets: cpz.Market[] = await this.adapter.find({
+        const markets: cpz.Market[] = await this.actions.find({
           query: {
             available: { $gte: 5 }
           }
@@ -120,6 +120,7 @@ class MarketsService extends Service {
   ) {
     try {
       this.authAction(ctx);
+      const { exchange, asset, currency } = ctx.params;
       const { result: market, error } = await ctx.call<
         { success: boolean; result?: cpz.Market; error?: string },
         {
@@ -130,15 +131,19 @@ class MarketsService extends Service {
       >(`${cpz.Service.PUBLIC_CONNECTOR}.getMarket`, ctx.params);
       if (error) throw new Error(error);
 
-      const [exists] = await this.adapter.find({
-        query: ctx.params
-      });
+      const [exists] = await this.actions.find(
+        {
+          query: ctx.params
+        },
+        { parentCtx: ctx }
+      );
+
       let result;
       if (exists) {
         result = { ...exists, ...market };
-        await this.adapter.updateMany(ctx.params, result);
+        await this.adapter.updateMany({ exchange, asset, currency }, result);
       } else {
-        result = { ...market, available: 5 };
+        result = { ...market, available: 15 };
         await this.adapter.insert(result);
       }
       return { success: true, result };

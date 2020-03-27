@@ -143,7 +143,10 @@ class UsersService extends Service {
         tradingTelegram
       } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const user: cpz.User = await this.adapter.findById(userId);
+      const user: cpz.User = await this.actions.get(
+        { id: userId },
+        { parentCtx: ctx }
+      );
       if (!user) throw new Error("User account is not found.");
       if (user.status === cpz.UserStatus.blocked)
         throw new Error("User account is blocked.");
@@ -197,7 +200,10 @@ class UsersService extends Service {
       this.authAction(ctx);
       const { name } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const user: cpz.User = await this.adapter.findById(userId);
+      const user: cpz.User = await this.actions.get(
+        { id: userId },
+        { parentCtx: ctx }
+      );
       if (!user) throw new Error("User account is not found.");
       if (user.status === cpz.UserStatus.blocked)
         throw new Error("User account is blocked.");

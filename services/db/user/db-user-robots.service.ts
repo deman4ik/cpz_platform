@@ -235,12 +235,15 @@ class UserRobotsService extends Service {
       if (robot.available < accessValue)
         throw new Errors.ForbiddenError("FORBIDDEN", { robotId: robot.id });
 
-      const [userRobotExists] = await this._find(ctx, {
-        query: {
-          robotId,
-          userExAccId
-        }
-      });
+      const [userRobotExists] = await this.actions.find(
+        {
+          query: {
+            robotId,
+            userExAccId
+          }
+        },
+        { parentCtx: ctx }
+      );
       if (userRobotExists) throw new Error("User Robot already exists");
       const userRobotId = uuid();
 
@@ -526,9 +529,12 @@ class UserRobotsService extends Service {
       const accessValue = getAccessValue(ctx.meta.user);
       if (robotInfo.available < accessValue)
         throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
-      const [userRobot]: cpz.UserRobotDB[] = await this._find(ctx, {
-        query: { robotId, userId }
-      });
+      const [userRobot]: cpz.UserRobotDB[] = await this.actions.find(
+        {
+          query: { robotId, userId }
+        },
+        { parentCtx: ctx }
+      );
 
       let userRobotInfo: cpz.UserRobotInfo;
       if (userRobot) {

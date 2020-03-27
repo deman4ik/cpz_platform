@@ -10,7 +10,7 @@ function formatExchange(exchange: string) {
 
 function robotExchangeName(exchange: string, delim: string = " ") {
   const formated = formatExchange(exchange).split(" ");
-  return `${formated[0]}${delim}${formated[1].charAt(0)}`;
+  return `${formated[0]}${delim}${formated[1].substring(0, 3)}`;
 }
 
 function createRobotCode(

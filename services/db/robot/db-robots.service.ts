@@ -233,17 +233,20 @@ class RobotsService extends Service {
         trading
       } of ctx.params.entities) {
         let mode = mod || 1;
-        const [robotExists] = await this.adapter.find({
-          fields: ["id", "mod", "settings"],
-          sort: "-created_at",
-          query: {
-            exchange,
-            asset,
-            currency,
-            timeframe,
-            strategyName: strategy
-          }
-        });
+        const [robotExists] = await this.actions.find(
+          {
+            fields: ["id", "mod", "settings"],
+            sort: "-created_at",
+            query: {
+              exchange,
+              asset,
+              currency,
+              timeframe,
+              strategyName: strategy
+            }
+          },
+          { parentCtx: ctx }
+        );
 
         if (robotExists) {
           if (equals(settings, robotExists.settings)) continue;
