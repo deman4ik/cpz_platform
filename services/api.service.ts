@@ -75,17 +75,21 @@ class ApiService extends Service {
           {
             mappingPolicy: "restrict",
             cors: {
-              origin: [
-                "*.cryptuoso.com",
-                "http://127.0.0.1:80",
-                "http://localhost:80",
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://0.0.0.0:80",
-                "http://0.0.0.0:3000",
-                "http://0.0.0.0:3001",
-                "localhost"
-              ],
+              origin:
+                process.env.CPZ_ENV === "prod"
+                  ? ["cryptuoso.com", "*.cryptuoso.com"]
+                  : [
+                      "cryptuoso.com",
+                      "*.cryptuoso.com",
+                      "http://127.0.0.1:80",
+                      "http://localhost:80",
+                      "http://localhost:3000",
+                      "http://localhost:3001",
+                      "http://0.0.0.0:80",
+                      "http://0.0.0.0:3000",
+                      "http://0.0.0.0:3001",
+                      "localhost"
+                    ],
               methods: ["POST"],
               credentials: true
             },
