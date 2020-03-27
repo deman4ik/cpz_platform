@@ -19,7 +19,7 @@ class BaseExwatcher extends Service {
     super(broker);
     this.exchange = exchange;
     this.parseServiceSchema({
-      name: `${this.exchange}_watcher`,
+      name: `${this.exchange}-watcher`,
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
