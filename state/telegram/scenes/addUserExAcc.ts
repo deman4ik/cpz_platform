@@ -38,7 +38,7 @@ async function addUserExAccEnter(ctx: any) {
         {
           fields: ["code"],
           query: {
-            available: { $gte: getAccessValue(ctx.session.user.available) }
+            available: { $gte: getAccessValue(ctx.session.user) }
           }
         }
       );
