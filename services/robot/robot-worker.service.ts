@@ -29,8 +29,7 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}240`,
         `${cpz.Service.DB_CANDLES}480`,
         `${cpz.Service.DB_CANDLES}720`,
-        `${cpz.Service.DB_CANDLES}1440`,
-        cpz.Service.DB_CANDLES_CURRENT
+        `${cpz.Service.DB_CANDLES}1440`
       ],
       mixins: [
         QueueService({
@@ -187,13 +186,14 @@ class RobotWorkerService extends Service {
       if (type === cpz.RobotJobType.tick) {
         // New tick - checking alerts
         const [currentCandle]: cpz.Candle[] = await this.broker.call(
-          `${cpz.Service.DB_CANDLES_CURRENT}.find`,
+          `${cpz.Service.DB_CANDLES}${robot.timeframe}.find`,
           {
+            sort: "-time",
+            limit: 1,
             query: {
               exchange: robot.exchange,
               asset: robot.asset,
-              currency: robot.currency,
-              timeframe: robot.timeframe
+              currency: robot.currency
             }
           }
         );
@@ -219,6 +219,7 @@ class RobotWorkerService extends Service {
           {
             limit: robot.requiredHistoryMaxBars,
             sort: "-time",
+            offset: 1,
             query: {
               exchange: robot.exchange,
               asset: robot.asset,

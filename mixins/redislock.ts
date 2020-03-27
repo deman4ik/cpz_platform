@@ -7,6 +7,8 @@ export = function createService(options?: Redis.RedisOptions): ServiceSchema {
     name: "",
     created() {
       this.LockAcquisitionError = lock.LockAcquisitionError;
+      this.LockReleaseError = lock.LockReleaseError;
+      this.LockExtendError = lock.LockExtendError;
       this.redisClient = new Redis(
         options || {
           host: process.env.REDIS_HOST,

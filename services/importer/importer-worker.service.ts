@@ -93,7 +93,9 @@ class ImporterWorkerService extends Service {
               await this.broker.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
                 entity: state
               });
-              this.broker.emit(cpz.Event.IMPORTER_FINISHED, { id: state.id });
+              this.broker.broadcast(cpz.Event.IMPORTER_FINISHED, {
+                id: state.id
+              });
               this.logger.info(`Job #${job.id} finished`);
               return {
                 success: true,
@@ -101,7 +103,7 @@ class ImporterWorkerService extends Service {
               };
             } catch (e) {
               this.logger.error(e);
-              this.broker.emit(cpz.Event.IMPORTER_FAILED, {
+              this.broker.broadcast(cpz.Event.IMPORTER_FAILED, {
                 id: job.id,
                 error: e.message
               });
@@ -384,12 +386,7 @@ class ImporterWorkerService extends Service {
         let dateStart =
           dateFrom && Timeframe.validTimeframeDateNext(dateFrom, timeframe);
         let dateStop = dayjs
-          .utc(
-            Timeframe.validTimeframeDateNext(
-              getValidDate(dateTo, unit),
-              timeframe
-            )
-          )
+          .utc(Timeframe.validTimeframeDateNext(dateTo, timeframe))
           .add(-amountInUnit, unit)
           .toISOString();
 
@@ -411,7 +408,7 @@ class ImporterWorkerService extends Service {
 
         const loadResults = await Promise.all(
           chunks.map(async ({ dateFrom: loadFrom }) => {
-            let candles;
+            let candles: any[];
             try {
               candles = await this.broker.call(
                 `${cpz.Service.PUBLIC_CONNECTOR}.getCandles`,
@@ -440,7 +437,6 @@ class ImporterWorkerService extends Service {
             }
           })
         );
-
         result[timeframe] = await this.uniqueCandles(
           [].concat(...loadResults),
           dateStart,

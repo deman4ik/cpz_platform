@@ -500,9 +500,9 @@ class RobotRunnerService extends Service {
     }
   }
 
-  async handleNewTick(ctx: Context<cpz.ExwatcherTrade>) {
+  async handleNewTick(ctx: Context<cpz.ExchangePrice>) {
     try {
-      const tick: cpz.ExwatcherTrade = ctx.params;
+      const tick: cpz.ExchangePrice = ctx.params;
       const { exchange, asset, currency, timestamp, price } = tick;
       /* const call = async (bail: (e: Error) => void) => {
         try { */

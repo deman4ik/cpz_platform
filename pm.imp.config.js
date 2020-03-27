@@ -4,7 +4,7 @@ module.exports = {
       name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/db/candles dist/services/db/db-importers dist/services/db/db-markets dist/services/db/user/db-users",
+        "--env --config prod.config.js --instances=3 dist/services/db/candles dist/services/db/db-importers dist/services/db/db-markets dist/services/db/user/db-users dist/services/db/robot",
       env: {
         NODE_ENV: "production",
         NODEID: "db"
@@ -14,7 +14,7 @@ module.exports = {
       name: "public-connector",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/connector/public-connector.service.js",
+        "--env --config prod.config.js --instances=3 dist/services/connector/public-connector.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "public-connector"
@@ -43,19 +43,11 @@ module.exports = {
     {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/api.service.js",
+      args:
+        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "api"
-      }
-    },
-    {
-      name: "auth",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/auth.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "auth"
       }
     }
   ]

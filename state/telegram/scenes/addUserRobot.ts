@@ -1,6 +1,7 @@
 import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { getMainKeyboard } from "../keyboard";
+import { formatExchange } from "../../../utils/naming";
 
 function getUserExAccsMenu(ctx: any) {
   const {
@@ -78,7 +79,7 @@ async function addUserRobotEnter(ctx: any) {
       );
       ctx.scene.state.silent = true;
       return ctx.scene.enter(cpz.TelegramScene.ADD_USER_EX_ACC, {
-        selectedExchange: exchange,
+        selectedExchange: formatExchange(exchange),
         prevScene: cpz.TelegramScene.USER_ROBOT,
         prevState: ctx.scene.state.prevState
       });

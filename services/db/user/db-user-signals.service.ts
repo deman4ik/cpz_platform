@@ -6,7 +6,7 @@ import {
 } from "moleculer";
 import { Errors } from "moleculer-web";
 import DbService from "moleculer-db";
-import adapterOptions from "../../../lib/sql";
+import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
 import { cpz } from "../../../@types";
@@ -26,12 +26,15 @@ class UserSignalsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_SIGNALS,
       mixins: [Auth, DbService],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "user_signals",
         define: {
@@ -265,12 +268,15 @@ class UserSignalsService extends Service {
       const accessValue = getAccessValue(ctx.meta.user);
       if (robotInfo.available < accessValue)
         throw new Errors.ForbiddenError("FORBIDDEN", { robotId });
-      const [subscription]: cpz.UserSignals[] = await this._find(ctx, {
-        query: {
-          robotId,
-          userId
-        }
-      });
+      const [subscription]: cpz.UserSignals[] = await this.actions.find(
+        {
+          query: {
+            robotId,
+            userId
+          }
+        },
+        { parentCtx: ctx }
+      );
 
       let userSignalsInfo: cpz.UserSignalsInfo;
       if (subscription) {
@@ -428,13 +434,16 @@ class UserSignalsService extends Service {
           `Wrong volume value must be less than ${market.limits.amount.max}`
         );
       const { id: userId } = ctx.meta.user;
-      const [subscribed]: cpz.UserSignals[] = await this._find(ctx, {
-        fields: ["id"],
-        query: {
-          robotId,
-          userId
-        }
-      });
+      const [subscribed]: cpz.UserSignals[] = await this.actions.find(
+        {
+          fields: ["id"],
+          query: {
+            robotId,
+            userId
+          }
+        },
+        { parentCtx: ctx }
+      );
       if (subscribed) {
         await this.adapter.updateById(subscribed.id, {
           $set: {
@@ -469,13 +478,16 @@ class UserSignalsService extends Service {
       this.authAction(ctx);
       const { robotId } = ctx.params;
       const { id: userId } = ctx.meta.user;
-      const [subscribed] = await this._find(ctx, {
-        fields: ["id"],
-        query: {
-          robotId,
-          userId
-        }
-      });
+      const [subscribed] = await this.actions.find(
+        {
+          fields: ["id"],
+          query: {
+            robotId,
+            userId
+          }
+        },
+        { parentCtx: ctx }
+      );
       if (subscribed) {
         await this.adapter.removeById(subscribed.id);
         await ctx.emit<{ userId: string; robotId: string }>(

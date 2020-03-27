@@ -150,9 +150,9 @@ class PrivateConnectorWorkerService extends Service {
       };
     }
     if (exchange === "bitfinex") {
-      if (type === cpz.OrderType.market)
+      if (type === cpz.OrderType.market || type === cpz.OrderType.forceMarket)
         return {
-          type
+          type: cpz.OrderType.market
         };
       return {
         type: "limit"
@@ -197,7 +197,7 @@ class PrivateConnectorWorkerService extends Service {
       let connector: ccxt.Exchange;
       if (exchange === "bitfinex" || exchange === "kraken") {
         connector = new ccxt[exchange](config);
-      } else if (exchange === "binance") {
+      } else if (exchange === "binance_futures") {
         config.options = { defaultType: "futures" };
         connector = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
@@ -230,7 +230,7 @@ class PrivateConnectorWorkerService extends Service {
         throw Error(`Failed to check balance. ${this.getErrorMessage(err)}`);
       }
       const asset = "BTC";
-      const currency = "USD";
+      const currency = exchange === "binance_futures" ? "USDT" : "USD";
       const [market]: cpz.Market[] = await this.broker.call(
         `${cpz.Service.DB_MARKETS}.find`,
         {
@@ -241,6 +241,18 @@ class PrivateConnectorWorkerService extends Service {
           }
         }
       );
+      let price = market.limits.price.min;
+      if (exchange === "binance_futures") {
+        const { price: currentPrice } = await this.broker.call(
+          `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentPrice`,
+          {
+            exchange,
+            asset,
+            currency
+          }
+        );
+        price = currentPrice - 1500;
+      }
 
       const type = cpz.OrderType.limit;
       const orderParams = this.getOrderParams(<string>exchange, {}, type);
@@ -252,7 +264,7 @@ class PrivateConnectorWorkerService extends Service {
             type,
             cpz.OrderDirection.buy,
             market.limits.amount.min,
-            market.limits.price.min,
+            price,
             orderParams
           );
         } catch (e) {
@@ -276,6 +288,7 @@ class PrivateConnectorWorkerService extends Service {
             order
           );
       } catch (err) {
+        this.logger.error(err);
         throw Error(
           `Failed to create test order. ${this.getErrorMessage(err)}`
         );
@@ -300,7 +313,7 @@ class PrivateConnectorWorkerService extends Service {
         const canceled = await retry(cancelOrderCall, this.retryOptions);
 
         this.logger.info("Canceled order", canceled);
-        if (!order)
+        if (!canceled)
           throw new Errors.MoleculerError(
             "Wrong response from exchange while canceling test order",
             520,
@@ -308,6 +321,7 @@ class PrivateConnectorWorkerService extends Service {
             canceled
           );
       } catch (err) {
+        this.logger.error(err);
         throw Error(
           `Failed to cancel test order. ${this.getErrorMessage(
             err
@@ -455,7 +469,7 @@ class PrivateConnectorWorkerService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[id] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "futures" };
+        config.options = { defaultType: "future" };
         this.connectors[id] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
         this.connectors[id] = new ccxt.binance(config);
@@ -706,7 +720,7 @@ class PrivateConnectorWorkerService extends Service {
             type,
             direction,
             order.volume,
-            signalPrice,
+            type === cpz.OrderType.market ? undefined : signalPrice,
             orderParams
           );
         } catch (e) {

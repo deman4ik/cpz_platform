@@ -5,7 +5,6 @@ describe("Test 'tradeStatistics' utils", () => {
   describe("Test 'calcStatistics'", () => {
     it("Should calc stats", () => {
       const result = calcStatistics(positions);
-      console.log(result);
       expect(result).toBeTruthy();
     });
   });

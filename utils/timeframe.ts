@@ -5,12 +5,12 @@ import { getValidDate } from "./time";
 
 class Timeframe {
   private static _timeframes: cpz.Timeframes = {
-    1: {
+    /*  1: {
       str: "1m",
       value: 1,
       unit: cpz.TimeUnit.minute,
       amountInUnit: 1
-    },
+    },*/ // exclude 1 minute
     5: {
       str: "5m",
       value: 5,
@@ -262,6 +262,15 @@ class Timeframe {
       .add(1, "millisecond")
       .diff(dayjs.utc(dateFrom), unit);
     return Math.floor(duration / amountInUnit);
+  }
+
+  static getPrevSince(inputDate: string, timeframe: cpz.Timeframe): number {
+    const currentDate = Timeframe.validTimeframeDatePrev(inputDate, timeframe);
+    const { amountInUnit, unit } = Timeframe.get(timeframe);
+    return dayjs
+      .utc(currentDate)
+      .add(-amountInUnit, unit)
+      .valueOf();
   }
 
   static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {

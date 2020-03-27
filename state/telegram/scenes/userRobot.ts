@@ -53,7 +53,7 @@ function getUserRobotMenu(ctx: any) {
         m.callbackButton(
           ctx.i18n.t("scenes.userRobot.start"),
           JSON.stringify({ a: "start" }),
-          !added || status !== cpz.Status.stopped
+          !added || ![cpz.Status.stopped, cpz.Status.paused].includes(status)
         )
       ],
       [

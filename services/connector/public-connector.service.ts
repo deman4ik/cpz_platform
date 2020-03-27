@@ -59,7 +59,7 @@ class PublicConnectorService extends Service {
           ) {
             try {
               this.authAction(ctx);
-              const result = this.getMarket(
+              const result = await this.getMarket(
                 ctx.params.exchange,
                 ctx.params.asset,
                 ctx.params.currency
@@ -287,7 +287,7 @@ class PublicConnectorService extends Service {
     maxTimeout: 0,
     onRetry: (err: any, i: number) => {
       if (err) {
-        this.logger.warn(`Retry ${i}error : `, err);
+        this.logger.warn(`Retry ${i} - ${err.message}`);
       }
     }
   };
@@ -314,10 +314,9 @@ class PublicConnectorService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[exchange] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "futures" };
+        config.options = { defaultType: "future" };
         this.connectors[exchange] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
-        config.options = { defaultType: "futures" };
         this.connectors[exchange] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
 
@@ -382,7 +381,7 @@ class PublicConnectorService extends Service {
         exchange,
         asset,
         currency,
-        1,
+        5,
         dayjs.utc("01.01.2013").toISOString(),
         10
       );

@@ -2,13 +2,14 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { chunkArray } from "../../../utils/helpers";
 import { getMainKeyboard } from "../keyboard";
+import { formatExchange } from "../../../utils/naming";
 
 function getExchangesMenu(ctx: any) {
   const exchanges: { exchange: string }[] = ctx.scene.state.exchanges;
   return Extra.HTML().markup((m: any) => {
     const buttons = exchanges.map(({ exchange }) =>
       m.callbackButton(
-        exchange,
+        formatExchange(exchange),
         JSON.stringify({ a: "exchange", p: exchange }),
         false
       )
@@ -136,7 +137,7 @@ async function searchRobotsSelectAsset(ctx: any) {
       `${cpz.Service.DB_ROBOTS}.getAvailableAssets`,
       {
         trading: true,
-        exchange: ctx.scene.state.exchange
+        exchange: formatExchange(ctx.scene.state.exchange)
       },
       {
         meta: {
@@ -153,7 +154,7 @@ async function searchRobotsSelectAsset(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.searchRobots.selectAsset", {
-        exchange: ctx.scene.state.exchange
+        exchange: formatExchange(ctx.scene.state.exchange)
       }),
       getAssetsMenu(ctx)
     );
@@ -196,7 +197,7 @@ async function searchRobotsSelectRobot(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.searchRobots.selectRobot", {
-        exchange: ctx.scene.state.exchange,
+        exchange: formatExchange(ctx.scene.state.exchange),
         asset: ctx.scene.state.selectedAsset
       }),
       getRobotsListMenu(ctx)

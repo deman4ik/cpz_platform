@@ -1,6 +1,6 @@
 import { ServiceSchema, Context, Errors } from "moleculer";
 import DbService from "moleculer-db";
-import adapterOptions from "../../../lib/sql";
+import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import SqlAdapter from "moleculer-db-adapter-sequelize";

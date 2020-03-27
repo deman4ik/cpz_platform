@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import DbService from "moleculer-db";
-import adapterOptions from "../../lib/sql";
+import { adapterOptions, adapter } from "../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../@types";
 import Auth from "../../mixins/auth";
@@ -14,12 +14,15 @@ class MarketsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_MARKETS,
       mixins: [Auth, DbService, RedisLock()],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "markets",
         define: {
@@ -81,7 +84,7 @@ class MarketsService extends Service {
       }, 19000);
 
       try {
-        const markets: cpz.Market[] = await this.adapter.find({
+        const markets: cpz.Market[] = await this.actions.find({
           query: {
             available: { $gte: 5 }
           }
@@ -98,8 +101,13 @@ class MarketsService extends Service {
       await lock.release();
       this.logger.info("Markets updated!");
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError) return;
-      this.logger.error(e);
+      if (e instanceof this.LockAcquisitionError)
+        this.logger.warn("LockAcquisitionError", e);
+      else if (e instanceof this.LockReleaseError)
+        this.logger.warn("LockReleaseError", e);
+      else if (e instanceof this.LockExtendError)
+        this.logger.warn("LockExtendError", e);
+      else this.logger.error(e);
     }
   }
 
@@ -112,6 +120,7 @@ class MarketsService extends Service {
   ) {
     try {
       this.authAction(ctx);
+      const { exchange, asset, currency } = ctx.params;
       const { result: market, error } = await ctx.call<
         { success: boolean; result?: cpz.Market; error?: string },
         {
@@ -122,15 +131,19 @@ class MarketsService extends Service {
       >(`${cpz.Service.PUBLIC_CONNECTOR}.getMarket`, ctx.params);
       if (error) throw new Error(error);
 
-      const [exists] = await this.adapter.find({
-        query: ctx.params
-      });
+      const [exists] = await this.actions.find(
+        {
+          query: ctx.params
+        },
+        { parentCtx: ctx }
+      );
+
       let result;
       if (exists) {
         result = { ...exists, ...market };
-        await this.adapter.updateMany(ctx.params, result);
+        await this.adapter.updateMany({ exchange, asset, currency }, result);
       } else {
-        result = { ...market, available: 5 };
+        result = { ...market, available: 15 };
         await this.adapter.insert(result);
       }
       return { success: true, result };

@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Errors, Context } from "moleculer";
 import DbService from "moleculer-db";
-import adapterOptions from "../../../lib/sql";
+import { adapterOptions, adapter } from "../../../lib/sql";
 import Sequelize from "sequelize";
 import { cpz } from "../../../@types";
 import { v4 as uuid } from "uuid";
@@ -12,12 +12,15 @@ class UserAggrStatsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USER_AGGR_STATS,
       mixins: [DbService],
-      adapter: new SqlAdapter(
-        process.env.PG_DBNAME,
-        process.env.PG_USER,
-        process.env.PG_PWD,
-        adapterOptions
-      ),
+      adapter:
+        process.env.NODE_ENV === "production"
+          ? new SqlAdapter(
+              process.env.PG_DBNAME,
+              process.env.PG_USER,
+              process.env.PG_PWD,
+              adapterOptions
+            )
+          : adapter,
       model: {
         name: "user_aggr_stats",
         define: {
@@ -63,15 +66,18 @@ class UserAggrStatsService extends Service {
         equity
       }: cpz.UserAggrStatsDB = ctx.params;
 
-      const [statsExists]: cpz.UserAggrStatsDB[] = await this.adapter.find({
-        query: {
-          userId,
-          exchange: exchange || null,
-          asset: asset || null,
-          type: type || null
+      const [statsExists]: cpz.UserAggrStatsDB[] = await this.actions.find(
+        {
+          query: {
+            userId,
+            exchange: exchange || null,
+            asset: asset || null,
+            type: type || null
+          },
+          fields: ["id"]
         },
-        fields: ["id"]
-      });
+        { parentCtx: ctx }
+      );
 
       if (statsExists) {
         await this.adapter.updateById(statsExists.id, {

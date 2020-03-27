@@ -62,7 +62,7 @@ module.exports = {
     {
       name: "exwatcher",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/exwatcher.service.js",
+      args: "--env --config prod.config.js dist/services/exwatcher",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher"
@@ -151,47 +151,21 @@ module.exports = {
     {
       name: "publisher",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/publisher.service.js",
+      args:
+        "--env --config prod.config.js dist/services/publisher.service.js dist/services/mail.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "publisher"
       }
     },
     {
-      name: "mail",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/mail.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "mail"
-      }
-    },
-    {
-      name: "trace-logger",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/trace-logger.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "trace-logger"
-      }
-    },
-    {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/api.service.js",
+      args:
+        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "api"
-      }
-    },
-    {
-      name: "auth",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/auth.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "auth"
       }
     },
     {

@@ -4,9 +4,9 @@ import dayjs from "../../lib/dayjs";
 
 describe("Test 'Timeframe' class", () => {
   describe("Test 'get'", () => {
-    it("should return timeframes properies for timeframe 1", () => {
+    /* it("should return timeframes properies for timeframe 1", () => {
       expect(Timeframe.get(1)).toBeTruthy();
-    });
+    }); */
     it("should return timeframes properies for timeframe 5", () => {
       expect(Timeframe.get(5)).toBeTruthy();
     });
@@ -30,7 +30,7 @@ describe("Test 'Timeframe' class", () => {
     });
   });
   describe("Test 'durationTimeframe'", () => {
-    it("should return duration in minutes for timeframe 1", () => {
+    /* it("should return duration in minutes for timeframe 1", () => {
       expect(
         Timeframe.durationTimeframe(
           "2018-01-01T00:00:00.000Z",
@@ -38,7 +38,7 @@ describe("Test 'Timeframe' class", () => {
           1
         )
       ).toBe(10);
-    });
+    }); */
     it("should return duration in minutes for timeframe 5", () => {
       expect(
         Timeframe.durationTimeframe(
@@ -111,10 +111,10 @@ describe("Test 'Timeframe' class", () => {
     afterAll(() => {
       MockDate.reset();
     });
-    it("should return valid time for timeframe 1 and amount 1", () => {
+    /*  it("should return valid time for timeframe 1 and amount 1", () => {
       const validSince = dayjs.utc("2019-01-01T13:17:00.000Z").valueOf();
       expect(Timeframe.getCurrentSince(1, 1)).toBe(validSince);
-    });
+    }); */
     it("should return valid time for timeframe 5 and amount 1", () => {
       const validSince = dayjs.utc("2019-01-01T13:15:00.000Z").valueOf();
       expect(Timeframe.getCurrentSince(1, 5)).toBe(validSince);
@@ -146,26 +146,38 @@ describe("Test 'Timeframe' class", () => {
   });
 
   describe("Test 'timeframesByDate", () => {
-    it("should return array with 1 minute timeframe", () => {
+    /*it("should return array with 1 minute timeframe", () => {
       const currentTimeframes = Timeframe.timeframesByDate(
         "2019-08-03T21:13:00.006Z"
       );
       expect(currentTimeframes).toStrictEqual([1]);
-    });
-    it("should return array with 1, 5, 15 minute timeframes", () => {
+    });*/
+    it("should return empty array", () => {
       const currentTimeframes = Timeframe.timeframesByDate(
-        "2019-08-03T21:15:00.006Z"
+        "2020-03-27T09:00:01.000Z"
       );
-      expect(currentTimeframes).toStrictEqual([1, 5, 15]);
+      expect(currentTimeframes).toStrictEqual([]);
+    });
+    it("should return array with 5 minute timeframes", () => {
+      const currentTimeframes = Timeframe.timeframesByDate(
+        "2019-08-03T21:05:00.006Z"
+      );
+      expect(currentTimeframes).toStrictEqual([5]);
+    });
+    it("should return array with 5, 15,30 minute timeframes", () => {
+      const currentTimeframes = Timeframe.timeframesByDate(
+        "2019-08-03T21:30:00.006Z"
+      );
+      expect(currentTimeframes).toStrictEqual([5, 15, 30]);
     });
   });
 
   describe("Test 'validTimeframeDatePrev'", () => {
-    it("should return valid date for timeframe 1", () => {
+    /* it("should return valid date for timeframe 1", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDatePrev(date, 1);
       expect(result).toBe("2019-08-03T21:15:00.000Z");
-    });
+    }); */
     it("should return valid date for timeframe 5", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDatePrev(date, 5);
@@ -214,11 +226,11 @@ describe("Test 'Timeframe' class", () => {
   });
 
   describe("Test 'validTimeframeDateNext'", () => {
-    it("should return valid date for timeframe 1", () => {
+    /*  it("should return valid date for timeframe 1", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDateNext(date, 1);
       expect(result).toBe("2019-08-03T21:15:00.000Z");
-    });
+    }); */
     it("should return valid date for timeframe 5", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDateNext(date, 5);
@@ -263,6 +275,29 @@ describe("Test 'Timeframe' class", () => {
       const date = "2019-08-03T21:15:10.006Z";
       const result = Timeframe.validTimeframeDateNext(date, 1440);
       expect(result).toBe("2019-08-04T00:00:00.000Z");
+    });
+  });
+
+  describe("Test 'getPrevSince", () => {
+    /*it("should return valid date for 1 minute timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:44.716Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 1);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T10:44:00.000Z");
+    });*/
+    it("should return valid date for 5 minute timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 5);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T10:40:00.000Z");
+    });
+    it("should return valid date for 1 hour timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 60);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T09:00:00.000Z");
+    });
+    it("should return valid date for 8 hour timeframe", () => {
+      const date = dayjs.utc("2020-03-25T10:45:00.000Z").toISOString();
+      const result = Timeframe.getPrevSince(date, 480);
+      expect(dayjs.utc(result).toISOString()).toBe("2020-03-25T00:00:00.000Z");
     });
   });
 });
