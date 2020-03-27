@@ -2,13 +2,14 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { chunkArray, round } from "../../../utils/helpers";
 import { getMainKeyboard } from "../keyboard";
+import { formatExchange } from "../../../utils/naming";
 
 function getExchangesMenu(ctx: any) {
   const exchanges: { exchange: string }[] = ctx.scene.state.exchanges;
   return Extra.HTML().markup((m: any) => {
     const buttons = exchanges.map(({ exchange }) =>
       m.callbackButton(
-        exchange,
+        formatExchange(exchange),
         JSON.stringify({ a: "exchange", p: exchange }),
         false
       )
@@ -109,7 +110,7 @@ async function topRobotsSelectRobot(ctx: any) {
     ctx.scene.state.robots = await this.broker.call(
       `${cpz.Service.DB_ROBOTS}.getTopTradingRobots`,
       {
-        exchange: ctx.scene.state.exchange,
+        exchange: formatExchange(ctx.scene.state.exchange),
         limit: 10
       },
       {
@@ -129,7 +130,7 @@ async function topRobotsSelectRobot(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.topRobots.selectRobot", {
-        exchange: ctx.scene.state.exchange
+        exchange: formatExchange(ctx.scene.state.exchange)
       }),
       getRobotsListMenu(ctx)
     );

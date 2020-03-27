@@ -2,13 +2,14 @@ import { Extra } from "telegraf";
 import { cpz } from "../../../@types";
 import { chunkArray } from "../../../utils/helpers";
 import { getMainKeyboard } from "../keyboard";
+import { formatExchange } from "../../../utils/naming";
 
 function getExchangesMenu(ctx: any) {
   const exchanges: { exchange: string }[] = ctx.scene.state.exchanges;
   return Extra.HTML().markup((m: any) => {
     const buttons = exchanges.map(({ exchange }) =>
       m.callbackButton(
-        exchange,
+        formatExchange(exchange),
         JSON.stringify({ a: "exchange", p: exchange }),
         false
       )
@@ -136,7 +137,7 @@ async function searchSignalsSelectAsset(ctx: any) {
       `${cpz.Service.DB_ROBOTS}.getAvailableAssets`,
       {
         signals: true,
-        exchange: ctx.scene.state.exchange
+        exchange: formatExchange(ctx.scene.state.exchange)
       },
       {
         meta: {
@@ -153,7 +154,7 @@ async function searchSignalsSelectAsset(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.searchSignals.selectAsset", {
-        exchange: ctx.scene.state.exchange
+        exchange: formatExchange(ctx.scene.state.exchange)
       }),
       getAssetsMenu(ctx)
     );
@@ -175,7 +176,7 @@ async function searchSignalsSelectRobot(ctx: any) {
     ctx.scene.state.robots = await this.broker.call(
       `${cpz.Service.DB_USER_SIGNALS}.getSignalRobots`,
       {
-        exchange: ctx.scene.state.exchange,
+        exchange: formatExchange(ctx.scene.state.exchange),
         asset,
         currency
       },
@@ -196,7 +197,7 @@ async function searchSignalsSelectRobot(ctx: any) {
 
     return ctx.editMessageText(
       ctx.i18n.t("scenes.searchSignals.selectRobot", {
-        exchange: ctx.scene.state.exchange,
+        exchange: formatExchange(ctx.scene.state.exchange),
         asset: ctx.scene.state.selectedAsset
       }),
       getSignalsListMenu(ctx)
