@@ -79,7 +79,7 @@ async function addUserRobotEnter(ctx: any) {
       );
       ctx.scene.state.silent = true;
       return ctx.scene.enter(cpz.TelegramScene.ADD_USER_EX_ACC, {
-        selectedExchange: formatExchange(exchange),
+        selectedExchange: exchange,
         prevScene: cpz.TelegramScene.USER_ROBOT,
         prevState: ctx.scene.state.prevState
       });

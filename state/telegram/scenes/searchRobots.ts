@@ -137,7 +137,7 @@ async function searchRobotsSelectAsset(ctx: any) {
       `${cpz.Service.DB_ROBOTS}.getAvailableAssets`,
       {
         trading: true,
-        exchange: formatExchange(ctx.scene.state.exchange)
+        exchange: ctx.scene.state.exchange
       },
       {
         meta: {
