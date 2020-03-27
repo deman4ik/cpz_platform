@@ -230,6 +230,7 @@ class RobotRunnerService extends Service {
           }
         }
       );
+      if (!firstCandle) throw new Error("Not enough historical data");
       const { unit } = Timeframe.get(timeframe);
       let historyDateFrom = firstCandle.timestamp;
       if (dateFrom)
