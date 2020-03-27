@@ -720,7 +720,7 @@ class PrivateConnectorWorkerService extends Service {
             type,
             direction,
             order.volume,
-            signalPrice,
+            type === cpz.OrderType.market ? undefined : signalPrice,
             orderParams
           );
         } catch (e) {
