@@ -381,7 +381,7 @@ class PublicConnectorService extends Service {
         exchange,
         asset,
         currency,
-        1,
+        5,
         dayjs.utc("01.01.2013").toISOString(),
         10
       );

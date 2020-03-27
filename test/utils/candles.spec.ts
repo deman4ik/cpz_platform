@@ -15,7 +15,7 @@ import { trades } from "../testData/trades";
 
 describe("Test 'candles' utils", () => {
   describe("Test 'handleGaps'", () => {
-    it("Schould fill gaps in candles - timeframe 1", async () => {
+    /*  it("Schould fill gaps in candles - timeframe 1", async () => {
       const dateFrom = dayjs.utc("2019-07-03T15:40:00.000Z");
       const dateTo = dayjs.utc("2019-07-03T15:50:00.000Z");
       const result = await handleCandleGaps(
@@ -28,7 +28,7 @@ describe("Test 'candles' utils", () => {
       expect(result[result.length - 1].timestamp).toBe(
         "2019-07-03T15:49:00.000Z"
       );
-    });
+    });*/
     it("Schould fill gaps in candles - timeframe 60", async () => {
       const dateFrom = dayjs.utc("2019-07-03T15:00:00.000Z");
       const dateTo = dayjs.utc("2019-07-04T02:00:00.000Z");
@@ -88,10 +88,10 @@ describe("Test 'candles' utils", () => {
       const result = await createCandlesFromTrades(
         dateFrom,
         dateTo,
-        [1, 5, 15, 30, 60, 120, 240, 1440],
+        [5, 15, 30, 60, 120, 240, 1440],
         trades
       );
-      expect(result[1].length).toBe(60);
+      //   expect(result[1].length).toBe(60);
       expect(result[5].length).toBe(12);
       expect(result[15].length).toBe(4);
       expect(result[30].length).toBe(2);
@@ -99,9 +99,9 @@ describe("Test 'candles' utils", () => {
       expect(result[120].length).toBe(0);
       expect(result[240].length).toBe(0);
       expect(result[1440].length).toBe(0);
-      expect(result[1][0].timestamp).toBe(dateFrom);
-      expect(result[1][0].open).toBe(10749.4);
-      expect(result[1][0].close).toBe(10768.4);
+      // expect(result[1][0].timestamp).toBe(dateFrom);
+      // expect(result[1][0].open).toBe(10749.4);
+      // expect(result[1][0].close).toBe(10768.4);
       expect(result[60][0].timestamp).toBe(dateFrom);
       expect(result[60][0].open).toBe(10749.4);
       expect(result[60][0].close).toBe(11014.3);
@@ -111,7 +111,6 @@ describe("Test 'candles' utils", () => {
   describe("Test 'convertExchangeTimeframes", () => {
     it("Should convert kraken timeframes", () => {
       const exchangeTimeframes = {
-        "1m": "1",
         "5m": "5",
         "15m": "15",
         "30m": "30",
@@ -122,7 +121,7 @@ describe("Test 'candles' utils", () => {
         "2w": "21600"
       };
       const timeframes = convertExchangeTimeframes(exchangeTimeframes);
-      expect(Object.keys(timeframes).length).toBe(7);
+      expect(Object.keys(timeframes).length).toBe(6);
     });
   });
 });
