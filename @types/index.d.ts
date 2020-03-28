@@ -282,7 +282,8 @@ declare namespace cpz {
   const enum CandleType {
     loaded = "loaded",
     created = "created",
-    previous = "previous"
+    previous = "previous",
+    history = "history"
   }
 
   const enum TimeUnit {
