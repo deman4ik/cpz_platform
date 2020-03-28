@@ -77,10 +77,17 @@ class ApiService extends Service {
             cors: {
               origin:
                 process.env.CPZ_ENV === "prod"
-                  ? ["cryptuoso.com", "*.cryptuoso.com"]
+                  ? [
+                      "cryptuoso.com",
+                      "*.cryptuoso.com",
+                      "https://cryptuoso.com",
+                      "https://www.cryptuoso.com"
+                    ]
                   : [
                       "cryptuoso.com",
                       "*.cryptuoso.com",
+                      "https://cryptuoso.com",
+                      "https://www.cryptuoso.com",
                       "http://127.0.0.1:80",
                       "http://localhost:80",
                       "http://localhost:3000",
