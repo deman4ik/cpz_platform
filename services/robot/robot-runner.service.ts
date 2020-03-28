@@ -194,6 +194,41 @@ class RobotRunnerService extends Service {
           status
         };
 
+      const firstCandles: cpz.Candle[] = await ctx.call(
+        `${cpz.Service.DB_CANDLES}${timeframe}.find`,
+        {
+          limit: 1,
+          offset: CANDLES_RECENT_AMOUNT,
+          sort: "time",
+          query: {
+            exchange,
+            asset,
+            currency,
+            type: { $ne: cpz.CandleType.previous }
+          }
+        }
+      );
+      this.logger.info(firstCandles);
+      const firstCandle = firstCandles[0];
+      if (!firstCandle) throw new Error("Not enough historical data");
+      const { unit } = Timeframe.get(timeframe);
+      let historyDateFrom = firstCandle.timestamp;
+      if (dateFrom)
+        historyDateFrom =
+          dayjs.utc(historyDateFrom).valueOf() > dayjs.utc(dateFrom).valueOf()
+            ? historyDateFrom
+            : dateFrom;
+      historyDateFrom =
+        (dayjs.utc(historyDateFrom).valueOf() <
+          dayjs.utc("2017-01-01T00:00:00.000Z").valueOf() &&
+          dayjs.utc("2017-01-01T00:00:00.000Z").toISOString()) ||
+        historyDateFrom;
+
+      const dateTo = dayjs
+        .utc()
+        .startOf(unit)
+        .toISOString();
+
       await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
         status: cpz.Status.starting,
@@ -216,38 +251,6 @@ class RobotRunnerService extends Service {
         robotId: id
       });
 
-      const [firstCandle] = await ctx.call(
-        `${cpz.Service.DB_CANDLES}${timeframe}.find`,
-        {
-          limit: 1,
-          offset: CANDLES_RECENT_AMOUNT,
-          sort: "time",
-          query: {
-            exchange,
-            asset,
-            currency,
-            type: { $ne: cpz.CandleType.previous }
-          }
-        }
-      );
-      if (!firstCandle) throw new Error("Not enough historical data");
-      const { unit } = Timeframe.get(timeframe);
-      let historyDateFrom = firstCandle.timestamp;
-      if (dateFrom)
-        historyDateFrom =
-          dayjs.utc(historyDateFrom).valueOf() > dayjs.utc(dateFrom).valueOf()
-            ? historyDateFrom
-            : dateFrom;
-      historyDateFrom =
-        (dayjs.utc(historyDateFrom).valueOf() <
-          dayjs.utc("2017-01-01T00:00:00.000Z").valueOf() &&
-          dayjs.utc("2017-01-01T00:00:00.000Z").toISOString()) ||
-        historyDateFrom;
-
-      const dateTo = dayjs
-        .utc()
-        .startOf(unit)
-        .toISOString();
       const backtesterStatus: {
         success: boolean;
         id: string;

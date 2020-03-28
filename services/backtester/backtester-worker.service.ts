@@ -248,9 +248,7 @@ class BacktesterWorkerService extends Service {
               $gte: dayjs.utc(dateFrom).valueOf(),
               $lte: dayjs.utc(dateTo).valueOf()
             },
-            type: {
-              $ne: ["previous"]
-            }
+            type: { $ne: cpz.CandleType.previous }
           }
         }
       );
@@ -279,9 +277,7 @@ class BacktesterWorkerService extends Service {
                 $gte: dayjs.utc(dateFrom).valueOf(),
                 $lte: dayjs.utc(dateTo).valueOf()
               },
-              type: {
-                $ne: ["previous"]
-              }
+              type: { $ne: cpz.CandleType.previous }
             }
           }
         );
