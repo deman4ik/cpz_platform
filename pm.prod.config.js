@@ -60,12 +60,43 @@ module.exports = {
       }
     },
     {
-      name: "exwatcher",
+      name: "exwatcher-runner",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/exwatcher",
+      args:
+        "--env --config prod.config.js dist/services/exwatcher/exwatcher-runner.service.js",
       env: {
         NODE_ENV: "production",
-        NODEID: "exwatcher"
+        NODEID: "exwatcher-runner"
+      }
+    },
+    {
+      name: "exwatcher-binance_futures",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config prod.config.js dist/services/exwatcher/binance-futures-watcher.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "exwatcher-binance_futures"
+      }
+    },
+    {
+      name: "exwatcher-bitfinex",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config prod.config.js dist/services/exwatcher/bitfinex-watcher.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "exwatcher-bitfinex"
+      }
+    },
+    {
+      name: "exwatcher-kraken",
+      script: "./node_modules/moleculer/bin/moleculer-runner.js",
+      args:
+        "--env --config prod.config.js dist/services/exwatcher/kraken-watcher.service.js",
+      env: {
+        NODE_ENV: "production",
+        NODEID: "exwatcher-kraken"
       }
     },
     {
