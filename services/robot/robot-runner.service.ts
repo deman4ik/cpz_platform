@@ -532,9 +532,10 @@ class RobotRunnerService extends Service {
           }
         }
       );
-      this.logger.info(
-        `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${robots.length}`
-      );
+      if (robots.length > 0)
+        this.logger.info(
+          `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${robots.length}`
+        );
       await Promise.all(
         robots.map(
           async ({ id, status }) =>

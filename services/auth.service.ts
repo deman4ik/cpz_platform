@@ -178,6 +178,10 @@ class AuthService extends Service {
         throw new Error("User account is blocked.");
       if (user.status === cpz.UserStatus.new)
         throw new Error("User account is not activated.");
+      if (!user.passwordHash)
+        throw new Error(
+          "Password is not set. Login with Telegram and change password."
+        );
       const passwordChecked = await bcrypt.compare(password, user.passwordHash);
       if (!passwordChecked) throw new Error("Invalid password.");
 
