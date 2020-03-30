@@ -225,8 +225,7 @@ class RobotRunnerService extends Service {
         historyDateFrom;
 
       const dateTo = dayjs
-        .utc()
-        .startOf(unit)
+        .utc(Timeframe.getPrevSince(dayjs.utc().toISOString(), timeframe))
         .toISOString();
 
       await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
