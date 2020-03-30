@@ -259,6 +259,20 @@ class BaseIndicator implements cpz.Indicator {
     candles: cpz.Candle[],
     candlesProps: cpz.CandleProps
   ) {
+    if (
+      !candle ||
+      !candles ||
+      !candlesProps ||
+      !Array.isArray(candles) ||
+      candles.length === 0 ||
+      Object.keys(candlesProps).length === 0
+    ) {
+      this.log(`Indicator ${this._name} wrong input candles`);
+      this.log(candle);
+      this.log(candles);
+      this.log(candlesProps);
+      throw new Error(`Indicator ${this._name} wrong input candles`);
+    }
     this._candle = candle;
     this._candles = candles;
     this._candlesProps = candlesProps;
