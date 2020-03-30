@@ -219,6 +219,7 @@ class RobotWorkerService extends Service {
           {
             limit: robot.requiredHistoryMaxBars,
             sort: "-time",
+            offset: 1,
             query: {
               exchange: robot.exchange,
               asset: robot.asset,
@@ -237,9 +238,7 @@ class RobotWorkerService extends Service {
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
           .map(candle => ({ ...candle, timeframe: robot.timeframe }));
         robot.handleHistoryCandles(historyCandles);
-        const { success, error } = robot.handleCandle(
-          historyCandles[historyCandles.length - 1]
-        );
+        const { success, error } = robot.handleCandle(<cpz.Candle>data);
         if (success) {
           await robot.calcIndicators();
           robot.runStrategy();

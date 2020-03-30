@@ -3,8 +3,6 @@ name: Node CI
 on:
   push:
     branches: [master, dev]
-  pull_request:
-    branches: [master, dev]
 
 jobs:
   build:
@@ -20,6 +18,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - uses: oleksiyrudenko/gha-git-credentials@v1
+        with:
+          name: 'Dmitry Shatalov'
+          email: 'deman4ik@gmail.com'
+          actor: 'deman4ik'
+          token: '${{ secrets.GH_PAT_WEB_CENTRAL }}'
       - run: |
           npm ci
           npm run build --if-present
