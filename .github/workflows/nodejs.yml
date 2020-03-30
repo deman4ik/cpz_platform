@@ -23,7 +23,7 @@ jobs:
           name: 'Dmitry Shatalov'
           email: 'deman4ik@gmail.com'
           actor: 'deman4ik'
-          token: '${{ secrets.GH_PAT_WEB_CENTRAL }}'
+          token: '${{ secrets.GITHUB_PAT }}'
       - run: |
           npm ci
           npm run build --if-present
