@@ -565,7 +565,12 @@ class Robot {
   }
 
   handleCandle(candle: cpz.Candle) {
-    if (this._lastCandle && candle.id === this._lastCandle.id) return;
+    if (this._lastCandle && candle.id === this._lastCandle.id) {
+      return {
+        success: false,
+        error: `Robot #${this._id} candle already processed`
+      };
+    }
     if (this._candles.filter(({ time }) => time === candle.time).length === 0) {
       this._candles = [...this._candles, candle];
     }
@@ -581,15 +586,13 @@ class Robot {
       !Array.isArray(this._candles) ||
       this._candles.length === 0 ||
       Object.keys(this._candlesProps).length === 0
-    ) {
-      {
-        this.log(`Robot ${this._id} wrong input candles`);
-        this.log(this._candle);
-        this.log(this._candles);
-        this.log(this._candlesProps);
-        throw new Error(`Robot ${this._id} wrong input candles`);
-      }
-    }
+    )
+      return {
+        success: false,
+        error: `Robot #${this._id} wrong input candles`
+      };
+
+    return { success: true };
   }
 
   handleCurrentCandle(candle: cpz.Candle) {
