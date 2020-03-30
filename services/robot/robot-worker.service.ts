@@ -244,8 +244,9 @@ class RobotWorkerService extends Service {
           await robot.calcIndicators();
           robot.runStrategy();
           robot.finalize();
+        } else {
+          this.logger.error(error);
         }
-        this.logger.error(error);
       } else if (type === cpz.RobotJobType.start) {
         // Start robot - init strategy and indicators
         robot.clear();
