@@ -227,6 +227,13 @@ class RobotWorkerService extends Service {
             }
           }
         );
+        if (
+          !requiredCandles ||
+          !Array.isArray(requiredCandles) ||
+          requiredCandles.length === 0
+        ) {
+          throw new Error("Failed to load candles");
+        }
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
           .map(candle => ({ ...candle, timeframe: robot.timeframe }));

@@ -100,9 +100,11 @@ class Robot {
   }
 
   get hasClosedPositions() {
-    return this._postionsToSave.filter(
-      ({ status }) => status === cpz.RobotPositionStatus.closed
-    ).length > 0
+    return (
+      this._postionsToSave.filter(
+        ({ status }) => status === cpz.RobotPositionStatus.closed
+      ).length > 0
+    );
   }
 
   get alertEventsToSend(): cpz.Events<cpz.SignalEvent>[] {
@@ -572,6 +574,22 @@ class Robot {
     if (!this._lastCandle && this._candles.length > 1)
       this._lastCandle = this._candles[this._candles.length - 2];
     this._prepareCandles();
+    if (
+      !this._candle ||
+      !this._candles ||
+      !this._candlesProps ||
+      !Array.isArray(this._candles) ||
+      this._candles.length === 0 ||
+      Object.keys(this._candlesProps).length === 0
+    ) {
+      {
+        this.log(`Robot ${this._id} wrong input candles`);
+        this.log(this._candle);
+        this.log(this._candles);
+        this.log(this._candlesProps);
+        throw new Error(`Robot ${this._id} wrong input candles`);
+      }
+    }
   }
 
   handleCurrentCandle(candle: cpz.Candle) {
