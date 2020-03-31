@@ -41,7 +41,6 @@ class ImporterWorkerService extends Service {
       dependencies: [
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_IMPORTERS,
-        `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
         `${cpz.Service.DB_CANDLES}30`,

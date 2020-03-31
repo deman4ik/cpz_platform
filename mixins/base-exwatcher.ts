@@ -24,7 +24,6 @@ class BaseExwatcher extends Service {
         cpz.Service.PUBLIC_CONNECTOR,
         cpz.Service.DB_EXWATCHERS,
         cpz.Service.IMPORTER_RUNNER,
-        `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
         `${cpz.Service.DB_CANDLES}30`,
