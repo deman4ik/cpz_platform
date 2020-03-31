@@ -10,20 +10,10 @@ module.exports = {
       }
     },
     {
-      name: "backtester-runner",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/backtester/backtester-runner.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "backtester-runner"
-      }
-    },
-    {
       name: "backtester-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js --instances=3 dist/services/backtester/backtester-worker.service.js",
+        "--env --config prod.config.js dist/services/backtester/backtester-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "backtester-worker"
@@ -50,20 +40,10 @@ module.exports = {
       }
     },
     {
-      name: "exwatcher-runner",
-      script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args:
-        "--env --config prod.config.js dist/services/exwatcher/exwatcher-runner.service.js",
-      env: {
-        NODE_ENV: "production",
-        NODEID: "exwatcher-runner"
-      }
-    },
-    {
       name: "exwatcher-binance_futures",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/exwatcher/binance-futures-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/binance-futures-watcher.service.js dist/services/db/candles dist/services/db/db-exwatchers.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-binance_futures"
@@ -73,7 +53,7 @@ module.exports = {
       name: "exwatcher-bitfinex",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/exwatcher/bitfinex-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/bitfinex-watcher.service.js dist/services/db/candles dist/services/db/db-exwatchers.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-bitfinex"
@@ -83,7 +63,7 @@ module.exports = {
       name: "exwatcher-kraken",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/exwatcher/kraken-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/kraken-watcher.service.js dist/services/db/candles dist/services/db/db-exwatchers.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-kraken"
@@ -143,7 +123,7 @@ module.exports = {
       name: "api",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js",
+        "--env --config prod.config.js dist/services/api.service.js dist/services/auth.service.js dist/services/backtester/backtester-runner.service.js dist/services/exwatcher/exwatcher-runner.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "api"
