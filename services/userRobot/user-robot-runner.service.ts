@@ -273,15 +273,7 @@ class UserRobotRunnerService extends Service {
       if (userExAcc.status !== cpz.UserExchangeAccStatus.enabled)
         throw new Error(`User Exchange Account status is ${userExAcc.status}`);
       if (userRobot.status === cpz.Status.paused) {
-        await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
-          id,
-          message: message || null,
-          status: cpz.Status.started
-        });
-        await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
-          id,
-          message
-        });
+        await this.resumeRobot(id, message);
 
         return { success: true, id, status: cpz.Status.started };
       }
@@ -492,19 +484,53 @@ class UserRobotRunnerService extends Service {
       if (userRobotIds.length > 0)
         await Promise.all(
           userRobotIds.map(async userRobotId => {
-            await ctx.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
-              id: userRobotId,
-              message: message || null,
-              status: cpz.Status.started
-            });
-            await ctx.emit(cpz.Event.USER_ROBOT_RESUMED, {
-              userRobotId,
-              message
-            });
+            await this.resumeRobot(userRobotId, message);
           })
         );
 
       return { success: true, result: userRobotIds.length };
+    } catch (e) {
+      this.logger.error(e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  async resumeRobot(id: string, message?: string) {
+    try {
+      const ordersWithJobs: cpz.Order[] = await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.find`,
+        {
+          query: {
+            userRobotId: id,
+            nextJob: { $ne: null }
+          }
+        }
+      );
+
+      for (const order of ordersWithJobs) {
+        const job = {
+          id: uuid(),
+          type: order.nextJob.type,
+          priority: cpz.Priority.high,
+          userExAccId: order.userExAccId,
+          orderId: order.id,
+          nextJobAt: dayjs.utc().toISOString()
+        };
+
+        await this.broker.call<Promise<void>, cpz.ConnectorJob>(
+          `${cpz.Service.PRIVATE_CONNECTOR_RUNNER}.addJob`,
+          job
+        );
+      }
+      await this.broker.call(`${cpz.Service.DB_USER_ROBOTS}.update`, {
+        id,
+        message: message || null,
+        status: cpz.Status.started
+      });
+      await this.broker.emit(cpz.Event.USER_ROBOT_RESUMED, {
+        userRobotId: id,
+        message
+      });
     } catch (e) {
       this.logger.error(e);
       return { success: false, error: e.message };
