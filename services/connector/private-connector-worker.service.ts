@@ -912,14 +912,14 @@ class PrivateConnectorWorkerService extends Service {
       if (
         err instanceof ccxt.AuthenticationError ||
         err instanceof ccxt.InsufficientFunds ||
-        err instanceof ccxt.InvalidNonce ||
-        err instanceof ccxt.InvalidOrder
+        err instanceof ccxt.InvalidNonce
       ) {
         throw err;
       }
       if (
         err instanceof ccxt.ExchangeError ||
-        err instanceof ccxt.NetworkError
+        err instanceof ccxt.NetworkError ||
+        err instanceof ccxt.InvalidOrder
       ) {
         return {
           order: {
@@ -931,7 +931,7 @@ class PrivateConnectorWorkerService extends Service {
             priority: cpz.Priority.low,
             nextJobAt: dayjs
               .utc()
-              .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+              .add(ORDER_CHECK_TIMEOUT * 5, cpz.TimeUnit.second)
               .toISOString()
           }
         };
