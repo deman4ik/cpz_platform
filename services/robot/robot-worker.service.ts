@@ -20,7 +20,6 @@ class RobotWorkerService extends Service {
         cpz.Service.DB_ROBOTS,
         cpz.Service.DB_ROBOT_JOBS,
         cpz.Service.DB_ROBOT_POSITIONS,
-        `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
         `${cpz.Service.DB_CANDLES}30`,

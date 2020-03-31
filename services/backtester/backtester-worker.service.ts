@@ -41,7 +41,6 @@ class BacktesterWorkerService extends Service {
         `${cpz.Service.DB_BACKTEST_POSITIONS}`,
         `${cpz.Service.DB_BACKTEST_SIGNALS}`,
         `${cpz.Service.DB_BACKTEST_LOGS}`,
-        `${cpz.Service.DB_CANDLES}1`,
         `${cpz.Service.DB_CANDLES}5`,
         `${cpz.Service.DB_CANDLES}15`,
         `${cpz.Service.DB_CANDLES}30`,
