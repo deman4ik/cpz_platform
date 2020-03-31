@@ -25,7 +25,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.GITHUB_SSH_KEY }}"
+          ssh-add - <<< "${{ secrets.GITHUB_SSH_PUBKEY }}"
       - run: |
           npm ci
           npm run build --if-present
