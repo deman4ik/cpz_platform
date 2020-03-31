@@ -135,7 +135,6 @@ class NotificationsService extends Service {
 
       const { robotId, action } = signal;
 
-      //TODO: email and web notifications
       const subscriptions: {
         telegramId?: number;
         email?: string;
