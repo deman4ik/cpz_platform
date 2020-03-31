@@ -18,12 +18,14 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: oleksiyrudenko/gha-git-credentials@v1
-        with:
-          name: 'Dmitry Shatalov'
-          email: 'deman4ik@gmail.com'
-          actor: 'deman4ik'
-          token: '${{ secrets.GITHUB_PAT }}'
+      - name: Setup SSH Keys and known_hosts
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.GITHUB_SSH_KEY }}"
       - run: |
           npm ci
           npm run build --if-present
