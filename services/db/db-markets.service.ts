@@ -14,15 +14,7 @@ class MarketsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_MARKETS,
       mixins: [Auth, DbService, RedisLock()],
-      adapter:
-        process.env.NODE_ENV === "production"
-          ? new SqlAdapter(
-              process.env.PG_DBNAME,
-              process.env.PG_USER,
-              process.env.PG_PWD,
-              adapterOptions
-            )
-          : adapter,
+      adapter,
       model: {
         name: "markets",
         define: {

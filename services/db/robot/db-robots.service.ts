@@ -40,15 +40,7 @@ class RobotsService extends Service {
         }
       },
       mixins: [Auth, DbService],
-      adapter:
-        process.env.NODE_ENV === "production"
-          ? new SqlAdapter(
-              process.env.PG_DBNAME,
-              process.env.PG_USER,
-              process.env.PG_PWD,
-              adapterOptions
-            )
-          : adapter,
+      adapter,
       model: {
         name: "robots",
         define: {

@@ -8,12 +8,7 @@ import SqlAdapter from "moleculer-db-adapter-sequelize";
 const CandlesService: ServiceSchema = {
   name: `${cpz.Service.DB_CANDLES}720`,
   mixins: [DbService],
-  adapter: new SqlAdapter(
-    process.env.PG_DBNAME,
-    process.env.PG_USER,
-    process.env.PG_PWD,
-    adapterOptions
-  ),
+  adapter,
   model: {
     name: "candles720",
     define: {
