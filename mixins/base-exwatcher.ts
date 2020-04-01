@@ -820,14 +820,19 @@ class BaseExwatcher extends Service {
 
   async saveCurrentCandles(candles: cpz.Candle[]): Promise<void> {
     try {
-      await this.broker.mcall(
-        candles.map(candle => ({
-          action: `${cpz.Service.DB_CANDLES}${candle.timeframe}.upsert`,
-          params: {
-            entities: [candle]
-          }
-        }))
-      );
+      for (const candle of candles) {
+        try {
+          const result = await this.broker.call(
+            `${cpz.Service.DB_CANDLES}${candle.timeframe}.upsert`,
+            {
+              entities: [candle]
+            }
+          );
+          if (!result) this.logger.error("Failed to save candle", candle);
+        } catch (e) {
+          this.logger.error(e);
+        }
+      }
     } catch (e) {
       this.logger.error(e);
     }
