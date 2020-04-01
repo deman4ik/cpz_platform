@@ -93,6 +93,7 @@ class BaseExwatcher extends Service {
       scheduled: false
     }
   );
+  cronHandleChanges: cron.ScheduledTask;
 
   get activeSubscriptions() {
     return Object.values(this.subscriptions).filter(
@@ -143,10 +144,14 @@ class BaseExwatcher extends Service {
   }
 
   async stoppedService() {
-    this.cronHandleChanges.stop();
-    this.cronCheck.stop();
-    await this.unsubscribeAll();
-    await this.connector.close();
+    try {
+      this.cronHandleChanges.stop();
+      this.cronCheck.stop();
+      await this.unsubscribeAll();
+      await this.connector.close();
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   async handleImporterFinishedEvent(
