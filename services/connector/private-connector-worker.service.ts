@@ -10,7 +10,8 @@ import {
   decrypt,
   valuesString,
   groupBy,
-  sortDesc
+  sortDesc,
+  sortAsc
 } from "../../utils";
 import { ORDER_CHECK_TIMEOUT } from "../../config";
 import { v4 as uuid } from "uuid";
@@ -679,6 +680,7 @@ class PrivateConnectorWorkerService extends Service {
       nextJobAt: string;
     };
   }> {
+    const creationDate = dayjs.utc().valueOf();
     try {
       const { userExAccId, exchange, asset, currency, direction } = order;
 
@@ -712,27 +714,56 @@ class PrivateConnectorWorkerService extends Service {
         order.params,
         type
       );
-
-      const call = async (bail: (e: Error) => void) => {
-        try {
-          return await this.connectors[userExAccId].createOrder(
-            this.getSymbol(asset, currency),
-            type,
-            direction,
-            order.volume,
-            type === cpz.OrderType.market ? undefined : signalPrice,
-            orderParams
-          );
-        } catch (e) {
-          if (
-            e instanceof ccxt.NetworkError &&
-            !(e instanceof ccxt.InvalidNonce)
-          )
-            throw e;
-          bail(e);
+      let response: Order;
+      try {
+        response = await this.connectors[userExAccId].createOrder(
+          this.getSymbol(asset, currency),
+          type,
+          direction,
+          order.volume,
+          type === cpz.OrderType.market ? undefined : signalPrice,
+          orderParams
+        );
+      } catch (err) {
+        this.logger.error(err, order);
+        if (
+          err instanceof ccxt.AuthenticationError ||
+          err instanceof ccxt.InsufficientFunds ||
+          err instanceof ccxt.InvalidNonce ||
+          err instanceof ccxt.InvalidOrder
+        ) {
+          throw err;
         }
-      };
-      const response: Order = await retry(call, this.retryOptions);
+        if (
+          err instanceof ccxt.ExchangeError ||
+          err instanceof ccxt.NetworkError
+        ) {
+          const existedOrder = await this.checkIfOrderExists(
+            order,
+            creationDate
+          );
+          if (existedOrder) response = existedOrder;
+          else
+            return {
+              order: {
+                ...order,
+                exId: null,
+                exTimestamp: null,
+                status: cpz.OrderStatus.new,
+                error: this.getErrorMessage(err)
+              },
+              nextJob: {
+                type: cpz.OrderJobType.create,
+                priority: cpz.Priority.high,
+                nextJobAt: dayjs
+                  .utc()
+                  .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                  .toISOString()
+              }
+            };
+        }
+        throw err;
+      }
       const {
         id: exId,
         datetime: exTimestamp,
@@ -778,37 +809,130 @@ class PrivateConnectorWorkerService extends Service {
       };
     } catch (err) {
       this.logger.error(err, order);
-      if (
-        err instanceof ccxt.AuthenticationError ||
-        err instanceof ccxt.InsufficientFunds ||
-        err instanceof ccxt.InvalidNonce ||
-        err instanceof ccxt.InvalidOrder
-      ) {
-        throw err;
-      }
-      if (
-        err instanceof ccxt.ExchangeError ||
-        err instanceof ccxt.NetworkError
-      ) {
-        return {
-          order: {
-            ...order,
-            exId: null,
-            exTimestamp: null,
-            status: cpz.OrderStatus.new,
-            error: this.getErrorMessage(err)
-          },
-          nextJob: {
-            type: cpz.OrderJobType.create,
-            priority: cpz.Priority.high,
-            nextJobAt: dayjs
-              .utc()
-              .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-              .toISOString()
+      throw err;
+    }
+  }
+
+  async checkIfOrderExists(order: cpz.Order, creationDate: number) {
+    try {
+      const {
+        userExAccId,
+        exchange,
+        asset,
+        currency,
+        direction,
+        exId,
+        volume,
+        type
+      } = order;
+      if (exId) return null;
+      let orders: Order[] = [];
+      if (this.connectors[order.userExAccId].has["fetchOrders"]) {
+        const call = async (bail: (e: Error) => void) => {
+          try {
+            return await this.connectors[userExAccId].fetchOrders(
+              this.getSymbol(asset, currency),
+              creationDate
+            );
+          } catch (e) {
+            if (
+              e instanceof ccxt.NetworkError &&
+              !(e instanceof ccxt.InvalidNonce)
+            )
+              throw e;
+            bail(e);
           }
         };
+        orders = await retry(call, this.retryOptions);
+      } else if (
+        this.connectors[order.userExAccId].has["fetchOpenOrders"] &&
+        this.connectors[order.userExAccId].has["fetchClosedOrders"]
+      ) {
+        const callOpen = async (bail: (e: Error) => void) => {
+          try {
+            return await this.connectors[userExAccId].fetchOpenOrders(
+              this.getSymbol(asset, currency),
+              creationDate
+            );
+          } catch (e) {
+            if (
+              e instanceof ccxt.NetworkError &&
+              !(e instanceof ccxt.InvalidNonce)
+            )
+              throw e;
+            bail(e);
+          }
+        };
+        const callClosed = async (bail: (e: Error) => void) => {
+          try {
+            return await this.connectors[userExAccId].fetchClosedOrders(
+              this.getSymbol(asset, currency),
+              creationDate
+            );
+          } catch (e) {
+            if (
+              e instanceof ccxt.NetworkError &&
+              !(e instanceof ccxt.InvalidNonce)
+            )
+              throw e;
+            bail(e);
+          }
+        };
+        const openOrders = await retry(callOpen, this.retryOptions);
+        const closedOrders = await retry(callClosed, this.retryOptions);
+        orders = [...closedOrders, ...openOrders];
+      } else {
+        this.logger.error(`Can't fetch orders from ${exchange}`);
+        return null;
       }
-      throw err;
+
+      if (!orders || !Array.isArray(orders) || orders.length === 0) return null;
+
+      const similarOrders = orders
+        .filter(
+          o =>
+            o.side === direction &&
+            o.timestamp >= creationDate &&
+            o.symbol === this.getSymbol(asset, currency) &&
+            o.amount === volume &&
+            o.type === type
+        )
+        .sort((a, b) => sortAsc(a.timestamp, b.timestamp));
+      if (
+        !similarOrders ||
+        !Array.isArray(similarOrders) ||
+        similarOrders.length === 0
+      )
+        return null;
+      let unknownOrders: Order[] = [];
+      for (const similarOrder of similarOrders) {
+        const ordersInDB = await this.broker.call(
+          `${cpz.Service.DB_USER_ORDERS}.find`,
+          {
+            query: {
+              userExAccId,
+              exId: similarOrder.id
+            }
+          }
+        );
+        if (
+          !ordersInDB ||
+          !Array.isArray(ordersInDB) ||
+          ordersInDB.length === 0
+        ) {
+          unknownOrders.push(similarOrder);
+        }
+      }
+      if (unknownOrders.length === 0) return null;
+
+      const existedOrder = unknownOrders.sort((a, b) =>
+        sortAsc(a.timestamp, b.timestamp)
+      )[0];
+
+      return existedOrder;
+    } catch (e) {
+      this.logger.error(e);
+      return null;
     }
   }
 

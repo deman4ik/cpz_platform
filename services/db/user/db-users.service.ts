@@ -12,15 +12,7 @@ class UsersService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_USERS,
       mixins: [DbService, Auth],
-      adapter:
-        process.env.NODE_ENV === "production"
-          ? new SqlAdapter(
-              process.env.PG_DBNAME,
-              process.env.PG_USER,
-              process.env.PG_PWD,
-              adapterOptions
-            )
-          : adapter,
+      adapter,
       model: {
         name: "users",
         define: {

@@ -11,15 +11,7 @@ class ConnectorJobsService extends Service {
     this.parseServiceSchema({
       name: cpz.Service.DB_CONNECTOR_JOBS,
       mixins: [DbService],
-      adapter:
-        process.env.NODE_ENV === "production"
-          ? new SqlAdapter(
-              process.env.PG_DBNAME,
-              process.env.PG_USER,
-              process.env.PG_PWD,
-              adapterOptions
-            )
-          : adapter,
+      adapter,
       model: {
         name: "connector_jobs",
         define: {
