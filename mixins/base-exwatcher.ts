@@ -631,7 +631,7 @@ class BaseExwatcher extends Service {
                     `${exchange}.${asset}.${currency}.${timeframe}`
                 )} candles`
               );
-
+              await this.saveCurrentCandles(candles);
               await Promise.all(
                 candles.map(async candle => {
                   if (candle.type !== cpz.CandleType.previous)
@@ -800,7 +800,7 @@ class BaseExwatcher extends Service {
                     `${exchange}.${asset}.${currency}.${timeframe}`
                 )} candles`
               );
-
+              await this.saveCurrentCandles(candles);
               await Promise.all(
                 candles.map(async candle => {
                   if (candle.type !== cpz.CandleType.previous)
