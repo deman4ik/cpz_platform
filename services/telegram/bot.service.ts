@@ -744,7 +744,11 @@ class BotService extends Service {
   ) {
     try {
       this.logger.warn(telegramId, error);
-      if (error && error.ok === false && error.error_code === 403) {
+      if (
+        error &&
+        error.ok === false &&
+        (error.error_code === 403 || error.error_code === 400)
+      ) {
         const [user] = await this.broker.call(`${cpz.Service.DB_USERS}.find`, {
           query: { telegramId }
         });
