@@ -523,9 +523,10 @@ class RobotsService extends Service {
       ) {
         robotInfo.closedPositions = robotInfo.closedPositions.map(pos => ({
           ...pos,
-          profit: pos.fee
-            ? +round(pos.profit - pos.profit * pos.fee, 6)
-            : pos.profit
+          profit:
+            pos.fee && +pos.fee > 0
+              ? +round(pos.profit - pos.profit * +pos.fee, 6)
+              : pos.profit
         }));
       }
       return <cpz.RobotInfo>robotInfo;

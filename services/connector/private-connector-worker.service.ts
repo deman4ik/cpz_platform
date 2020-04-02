@@ -794,7 +794,7 @@ class PrivateConnectorWorkerService extends Service {
           volume: volume && +volume,
           remaining: remaining && +remaining,
           executed,
-          fee: fee && fee.cost,
+          fee: (fee && fee.cost) || 0,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob: {
             type: cpz.OrderJobType.check
@@ -1012,7 +1012,7 @@ class PrivateConnectorWorkerService extends Service {
           volume: volume && +volume,
           remaining: remaining && +remaining,
           executed,
-          fee: fee && fee.cost,
+          fee: (fee && fee.cost) || 0,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob:
             status === cpz.OrderStatus.canceled ||

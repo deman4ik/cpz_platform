@@ -310,7 +310,10 @@ class UserSignalsService extends Service {
                   6
                 );
               }
-              profit = pos.fee ? +round(profit - profit * pos.fee, 6) : profit;
+              profit =
+                pos.fee && +pos.fee > 0
+                  ? +round(profit - profit * pos.fee, 6)
+                  : profit;
               return {
                 ...pos,
                 volume: subscription.volume,
