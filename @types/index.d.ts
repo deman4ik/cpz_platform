@@ -1128,7 +1128,7 @@ declare namespace cpz {
     nextJobAt?: string;
     nextJob?: UserPositionJob;
   }
-  interface UserSignalPosition extends UserPositionDB {
+  interface UserSignalPosition extends RobotPositionState {
     exchange: string;
     asset: string;
     currency: string;
