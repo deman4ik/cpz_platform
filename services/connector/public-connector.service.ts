@@ -398,7 +398,8 @@ class PublicConnectorService extends Service {
       currency,
       loadFrom,
       limits: response.limits,
-      precision: response.precision
+      precision: response.precision,
+      averageFee: response.taker
     };
   }
 

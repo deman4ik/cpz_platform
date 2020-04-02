@@ -273,10 +273,31 @@ class RobotWorkerService extends Service {
 
       // Saving robot positions
       if (robot.positionsToSave.length > 0) {
+        let averageFee: number;
+        if (robot.hasClosedPositions) {
+          const [market]: cpz.Market[] = await this.broker.call(
+            `${cpz.Service.DB_MARKETS}.find`,
+            {
+              fields: ["averageFee"],
+              query: {
+                exchange: robot.exchange,
+                asset: robot.asset,
+                currency: robot.currency
+              }
+            }
+          );
+          averageFee = market.averageFee;
+        }
+
         await Promise.all(
           robot.positionsToSave.map(async position => {
             await this.broker.call(`${cpz.Service.DB_ROBOT_POSITIONS}.upsert`, {
-              entity: position
+              entity: {
+                ...position,
+                fee:
+                  position.status === cpz.RobotPositionStatus.closed &&
+                  averageFee
+              }
             });
           })
         );

@@ -93,6 +93,15 @@ class UserOrdersService extends Service {
               return (value && +value) || value;
             }
           },
+          fee: {
+            type: Sequelize.NUMBER,
+            field: "fee",
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("fee");
+              return (value && +value) || value;
+            }
+          },
           lastCheckedAt: {
             type: Sequelize.DATE,
             allowNull: true,

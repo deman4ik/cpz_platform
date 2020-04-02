@@ -264,7 +264,7 @@ class UserPosition implements cpz.UserPosition {
       sum(
         ...this._entryOrders
           .filter(o => o.status === cpz.OrderStatus.closed)
-          .map(o => +o.price * +o.executed)
+          .map(o => +o.price * +o.executed - +o.fee)
       ),
       6
     );
@@ -272,7 +272,7 @@ class UserPosition implements cpz.UserPosition {
       sum(
         ...this._exitOrders
           .filter(o => o.status === cpz.OrderStatus.closed)
-          .map(o => +o.price * +o.executed)
+          .map(o => +o.price * +o.executed - +o.fee)
       ),
       6
     );

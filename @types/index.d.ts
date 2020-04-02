@@ -351,6 +351,7 @@ declare namespace cpz {
     currency: string;
     precision: { base: number; quote: number; amount: number; price: number };
     limits: { amount: MinMax; price: MinMax; cost?: MinMax };
+    averageFee: number;
     loadFrom: string;
   }
 
@@ -564,6 +565,7 @@ declare namespace cpz {
     exLastTradeAt?: string;
     remaining?: number;
     executed?: number;
+    fee?: number;
     lastCheckedAt?: string;
     error?: any;
     nextJob?: OrderJob;
@@ -725,6 +727,7 @@ declare namespace cpz {
     alerts?: { [key: string]: cpz.AlertInfo };
     profit?: number;
     barsHeld?: number;
+    fee?: number;
   }
 
   class RobotPosition {

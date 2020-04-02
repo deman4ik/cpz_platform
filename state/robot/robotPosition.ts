@@ -32,6 +32,7 @@ class Position implements cpz.RobotPosition {
   private _alerts?: { [key: string]: cpz.AlertInfo };
   private _profit: number;
   private _barsHeld: number;
+  private _fee: number;
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
   private _tradeToPublish: cpz.SignalInfo;
@@ -62,6 +63,7 @@ class Position implements cpz.RobotPosition {
     this._alerts = state.alerts || {};
     this._profit = state.profit || 0;
     this._barsHeld = state.barsHeld || 0;
+    this._fee = state.fee;
     this._alertsToPublish = [];
     this._tradeToPublish = null;
     this._candle = null;

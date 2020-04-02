@@ -769,9 +769,11 @@ class PrivateConnectorWorkerService extends Service {
         datetime: exTimestamp,
         status: orderStatus,
         price,
+        average,
         amount: volume,
         remaining,
-        filled
+        filled,
+        fee
       } = response;
       const executed =
         (filled && +filled) || (volume && remaining && +volume - +remaining);
@@ -788,10 +790,11 @@ class PrivateConnectorWorkerService extends Service {
           exTimestamp,
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status,
-          price: (price && +price) || signalPrice,
+          price: (average && +average) || (price && +price) || signalPrice,
           volume: volume && +volume,
           remaining: remaining && +remaining,
           executed,
+          fee: fee && fee.cost,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob: {
             type: cpz.OrderJobType.check
@@ -982,6 +985,7 @@ class PrivateConnectorWorkerService extends Service {
         fee: ccxt.Fee;
         info: any;
       } = await retry(call, this.retryOptions);
+      this.logger.info(response);
       const {
         datetime: exTimestamp,
         status: orderStatus,
@@ -989,7 +993,8 @@ class PrivateConnectorWorkerService extends Service {
         average,
         amount: volume,
         remaining,
-        filled
+        filled,
+        fee
       } = response;
       const executed =
         (filled && +filled) || (volume && remaining && +volume - +remaining);
@@ -1007,6 +1012,7 @@ class PrivateConnectorWorkerService extends Service {
           volume: volume && +volume,
           remaining: remaining && +remaining,
           executed,
+          fee: fee && fee.cost,
           lastCheckedAt: dayjs.utc().toISOString(),
           nextJob:
             status === cpz.OrderStatus.canceled ||
