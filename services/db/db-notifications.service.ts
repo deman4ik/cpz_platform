@@ -193,6 +193,10 @@ class NotificationsService extends Service {
                     6
                   );
                 }
+                profit =
+                  position.fee && position.fee > 0
+                    ? profit - profit * position.fee
+                    : profit;
                 return {
                   id: uuid(),
                   userId: sub.userId,
