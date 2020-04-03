@@ -297,8 +297,9 @@ class RobotWorkerService extends Service {
                 ...position,
                 fee:
                   position.status === cpz.RobotPositionStatus.closed &&
-                  averageFee &&
-                  +averageFee
+                  averageFee
+                    ? +averageFee
+                    : null
               }
             });
           })
