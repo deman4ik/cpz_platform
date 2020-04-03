@@ -286,6 +286,7 @@ class RobotWorkerService extends Service {
               }
             }
           );
+          this.logger.info(market);
           averageFee = market.averageFee;
         }
 
@@ -296,7 +297,8 @@ class RobotWorkerService extends Service {
                 ...position,
                 fee:
                   position.status === cpz.RobotPositionStatus.closed &&
-                  averageFee
+                  averageFee &&
+                  +averageFee
               }
             });
           })
