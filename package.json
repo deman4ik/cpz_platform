@@ -15,6 +15,7 @@
     "mail": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/mail.service.ts",
     "worker": "node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dist/local.config.js dist/services/job-runner.service.js",
     "exwatcher": "node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config dist/local.config.js dist/services/importer/importer-runner.service.js dist/services/importer/importer-worker.service.js dist/services/exwatcher/exwatcher-runner.service.js dist/services/exwatcher/kraken-watcher.service.js dist/services/connector/public-connector.service.js dist/services/db/*.service.js dist/services/db/candles/*.service.js",
+    "markets": "ts-node ./node_modules/moleculer/bin/moleculer-runner.js --hot --repl --env --config local.config.ts services/db/db-markets.service.ts services/connector/public-connector.service.ts",
     "cli": "moleculer connect",
     "start": "node ./node_modules/moleculer/bin/moleculer-runner --env --config dist/local.config.js dist/services",
     "startPM": "pm2 start pm.prod.config.js",

@@ -47,7 +47,8 @@ class MarketsService extends Service {
           params: { exchange: "string", asset: "string", currency: "string" },
           roles: [cpz.UserRoles.admin],
           handler: this.upsert
-        }
+        },
+        updateMarkets: this.updateMarkets
       },
       started: this.startedService,
       stopped: this.stoppedService
