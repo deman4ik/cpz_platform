@@ -147,7 +147,8 @@ class PrivateConnectorWorkerService extends Service {
     if (exchange === "kraken") {
       const { kraken } = params;
       return {
-        leverage: (kraken && kraken.leverage) || 3
+        leverage: (kraken && kraken.leverage) || 3,
+        trading_agreement: "agree"
       };
     }
     if (exchange === "bitfinex") {
