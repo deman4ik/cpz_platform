@@ -136,6 +136,14 @@ class RobotPositionsService extends Service {
               return (value && +value) || value;
             }
           },
+          fee: {
+            type: Sequelize.NUMBER,
+            allowNull: true,
+            get: function() {
+              const value = this.getDataValue("fee");
+              return (value && +value) || value;
+            }
+          },
           barsHeld: {
             type: Sequelize.INTEGER,
             field: "bars_held",
@@ -192,6 +200,7 @@ class RobotPositionsService extends Service {
                 exitCandleTimestamp: { type: "string", optional: true },
                 alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
+                fee: { type: "number", optional: true },
                 barsHeld: { type: "number", integer: true, optional: true }
               },
               optional: true
@@ -224,6 +233,7 @@ class RobotPositionsService extends Service {
                   exitCandleTimestamp: { type: "string", optional: true },
                   alerts: { type: "object", optional: true },
                   profit: { type: "number", optional: true },
+                  fee: { type: "number", optional: true },
                   barsHeld: { type: "number", integer: true, optional: true }
                 }
               },
@@ -280,6 +290,7 @@ class RobotPositionsService extends Service {
           exitCandleTimestamp,
           alerts,
           profit,
+          fee,
           barsHeld
         }: cpz.RobotPositionState) =>
           Object.values({
@@ -306,6 +317,7 @@ class RobotPositionsService extends Service {
             exitCandleTimestamp,
             alerts: JSON.stringify(alerts),
             profit,
+            fee,
             barsHeld
           })
       );
@@ -333,6 +345,7 @@ class RobotPositionsService extends Service {
         exit_candle_timestamp,
         alerts,
         profit,
+        fee,
         bars_held
         ) 
         VALUES ${entities
@@ -358,6 +371,7 @@ class RobotPositionsService extends Service {
          exit_candle_timestamp = excluded.exit_candle_timestamp,
          alerts = excluded.alerts,
          profit = excluded.profit,
+         fee = excluded.fee,
          bars_held = excluded.bars_held;`;
 
       await this.adapter.db.query(query, {

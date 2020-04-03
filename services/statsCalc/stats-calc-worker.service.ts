@@ -104,7 +104,15 @@ class StatsCalcWorkerService extends Service {
         }
       }
     );
-    const { statistics, equity } = await this.calcStatistics(positions);
+    const { statistics, equity } = await this.calcStatistics(
+      positions.map(pos => ({
+        ...pos,
+        profit:
+          pos.fee && +pos.fee > 0
+            ? +round(pos.profit - pos.profit * pos.fee, 6)
+            : pos.profit
+      }))
+    );
     await this.broker.call(`${cpz.Service.DB_ROBOTS}.update`, {
       id: robotId,
       statistics,
@@ -160,6 +168,10 @@ class StatsCalcWorkerService extends Service {
                 6
               );
             }
+            profit =
+              pos.fee && +pos.fee > 0
+                ? +round(profit - profit * pos.fee, 6)
+                : profit;
             return {
               ...pos,
               volume: userSignal.volume,
@@ -238,6 +250,10 @@ class StatsCalcWorkerService extends Service {
                   6
                 );
               }
+              profit =
+                pos.fee && +pos.fee > 0
+                  ? +round(profit - profit * pos.fee, 6)
+                  : profit;
               return {
                 ...pos,
                 volume: userSignal.volume,
@@ -287,6 +303,10 @@ class StatsCalcWorkerService extends Service {
             6
           );
         }
+        profit =
+          pos.fee && +pos.fee > 0
+            ? +round(profit - profit * pos.fee, 6)
+            : profit;
         return {
           ...pos,
           volume: pos.userSignalVolume,

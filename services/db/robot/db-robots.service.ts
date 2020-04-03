@@ -10,7 +10,8 @@ import {
   createRobotCode,
   createRobotName,
   getAccessValue,
-  datesToISOString
+  datesToISOString,
+  round
 } from "../../../utils";
 import Auth from "../../../mixins/auth";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
@@ -493,6 +494,7 @@ class RobotsService extends Service {
       const robotInfo: {
         [key: string]: any;
         currentSignals?: { code?: string; alerts?: cpz.AlertInfo[] }[];
+        closedPositions?: cpz.RobotPositionState[];
       } = underscoreToCamelCaseKeys(datesToISOString(rawRobotInfo));
       const available = getAccessValue(ctx.meta.user);
       if (robotInfo.available < available)
@@ -514,6 +516,19 @@ class RobotsService extends Service {
         });
       }
       robotInfo.currentSignals = robotSignals;
+      if (
+        robotInfo.closedPositions &&
+        Array.isArray(robotInfo.closedPositions) &&
+        robotInfo.closedPositions.length > 0
+      ) {
+        robotInfo.closedPositions = robotInfo.closedPositions.map(pos => ({
+          ...pos,
+          profit:
+            pos.fee && +pos.fee > 0
+              ? +round(pos.profit - pos.profit * +pos.fee, 6)
+              : pos.profit
+        }));
+      }
       return <cpz.RobotInfo>robotInfo;
     } catch (e) {
       this.logger.error(e);

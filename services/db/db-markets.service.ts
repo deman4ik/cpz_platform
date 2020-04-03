@@ -23,6 +23,11 @@ class MarketsService extends Service {
           currency: { type: Sequelize.STRING, primaryKey: true },
           precision: { type: Sequelize.JSONB },
           limits: { type: Sequelize.JSONB },
+          averageFee: {
+            type: Sequelize.NUMBER,
+            allowNull: true,
+            field: "average_fee"
+          },
           available: Sequelize.NUMBER,
           loadFrom: { type: Sequelize.STRING, field: "load_from" }
         },
@@ -42,7 +47,8 @@ class MarketsService extends Service {
           params: { exchange: "string", asset: "string", currency: "string" },
           roles: [cpz.UserRoles.admin],
           handler: this.upsert
-        }
+        },
+        updateMarkets: this.updateMarkets
       },
       started: this.startedService,
       stopped: this.stoppedService
