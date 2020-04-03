@@ -20,10 +20,11 @@ export = function createService(options?: Redis.RedisOptions): ServiceSchema {
     },
     methods: {
       async createLock(timeout?: number, retries?: number, delay?: number) {
+        const lockTimeout = timeout || 20000;
         return lock.createLock(this.redisClient, {
-          timeout: timeout || 20000,
-          retries: retries || 0,
-          delay: delay || 0
+          timeout: lockTimeout,
+          retries: retries || 3,
+          delay: delay || lockTimeout / 2
         });
       }
     }
