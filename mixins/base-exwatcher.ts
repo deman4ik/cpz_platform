@@ -85,7 +85,6 @@ class BaseExwatcher extends Service {
   subscriptions: { [key: string]: cpz.Exwatcher } = {};
   candlesCurrent: { [key: string]: { [key: string]: cpz.Candle } } = {};
   lastTick: { [key: string]: cpz.ExchangePrice } = {};
-
   cronCheck: cron.ScheduledTask = cron.schedule(
     "*/30 * * * * *",
     this.check.bind(this),
@@ -463,56 +462,65 @@ class BaseExwatcher extends Service {
         this.activeSubscriptions.map(
           async ({ id, asset, currency }: cpz.Exwatcher) => {
             const symbol = this.getSymbol(asset, currency);
-
             const currentCandles: cpz.Candle[] = [];
-            Timeframe.validArray.forEach(async timeframe => {
-              const candles: [
-                number,
-                number,
-                number,
-                number,
-                number,
-                number
-              ][] = this.connector.ohlcvs[symbol][
-                Timeframe.get(timeframe).str
-              ].filter((c: any) => c[0] < date.valueOf());
-
-              if (candles.length > 0) {
-                const candle = candles[candles.length - 1];
-                if (this.candlesCurrent[id][timeframe]) {
-                  this.candlesCurrent[id][timeframe].open = candle[1];
-                  this.candlesCurrent[id][timeframe].high = candle[2];
-                  this.candlesCurrent[id][timeframe].low = candle[3];
-                  this.candlesCurrent[id][timeframe].close = candle[4];
-                  this.candlesCurrent[id][timeframe].volume = candle[5];
-                  this.candlesCurrent[id][timeframe].type =
-                    this.candlesCurrent[id][timeframe].volume === 0
-                      ? cpz.CandleType.previous
-                      : cpz.CandleType.loaded;
-                } else {
-                  this.candlesCurrent[id][timeframe] = {
-                    id: uuid(),
-                    exchange: this.exchange,
-                    asset,
-                    currency,
-                    timeframe,
-                    time: candle[0],
-                    timestamp: dayjs.utc(candle[0]).toISOString(),
-                    open: candle[1],
-                    high: candle[2],
-                    low: candle[3],
-                    close: candle[4],
-                    volume: candle[5],
-                    type:
-                      candle[5] === 0
-                        ? cpz.CandleType.previous
-                        : cpz.CandleType.loaded
-                  };
+            await Promise.all(
+              Timeframe.validArray.map(async timeframe => {
+                try {
+                  await this.connector.watchOHLCV(
+                    symbol,
+                    Timeframe.timeframes[timeframe].str
+                  );
+                } catch (e) {
+                  this.logger.error(symbol, timeframe, e);
                 }
+                const candles: [
+                  number,
+                  number,
+                  number,
+                  number,
+                  number,
+                  number
+                ][] = this.connector.ohlcvs[symbol][
+                  Timeframe.get(timeframe).str
+                ].filter((c: any) => c[0] < date.valueOf());
 
-                currentCandles.push(this.candlesCurrent[id][timeframe]);
-              }
-            });
+                if (candles.length > 0) {
+                  const candle = candles[candles.length - 1];
+                  if (this.candlesCurrent[id][timeframe]) {
+                    this.candlesCurrent[id][timeframe].open = candle[1];
+                    this.candlesCurrent[id][timeframe].high = candle[2];
+                    this.candlesCurrent[id][timeframe].low = candle[3];
+                    this.candlesCurrent[id][timeframe].close = candle[4];
+                    this.candlesCurrent[id][timeframe].volume = candle[5];
+                    this.candlesCurrent[id][timeframe].type =
+                      this.candlesCurrent[id][timeframe].volume === 0
+                        ? cpz.CandleType.previous
+                        : cpz.CandleType.loaded;
+                  } else {
+                    this.candlesCurrent[id][timeframe] = {
+                      id: uuid(),
+                      exchange: this.exchange,
+                      asset,
+                      currency,
+                      timeframe,
+                      time: candle[0],
+                      timestamp: dayjs.utc(candle[0]).toISOString(),
+                      open: candle[1],
+                      high: candle[2],
+                      low: candle[3],
+                      close: candle[4],
+                      volume: candle[5],
+                      type:
+                        candle[5] === 0
+                          ? cpz.CandleType.previous
+                          : cpz.CandleType.loaded
+                    };
+                  }
+
+                  currentCandles.push(this.candlesCurrent[id][timeframe]);
+                }
+              })
+            );
 
             if (currentCandles.length > 0) {
               await this.saveCurrentCandles(currentCandles);
@@ -656,6 +664,7 @@ class BaseExwatcher extends Service {
         .utc()
         .add(-1, cpz.TimeUnit.second)
         .startOf(cpz.TimeUnit.second);
+
       // Есть ли подходящие по времени таймфреймы
       const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
       let closedCandles: { [key: string]: cpz.Candle[] } = {};
@@ -664,6 +673,11 @@ class BaseExwatcher extends Service {
         this.activeSubscriptions.map(
           async ({ id, asset, currency }: cpz.Exwatcher) => {
             const symbol = this.getSymbol(asset, currency);
+            try {
+              await this.connector.watchTrades(symbol);
+            } catch (e) {
+              this.logger.error(symbol, e);
+            }
             if (this.connector.trades[symbol]) {
               // Запрашиваем все прошедшие трейды
               const trades: Trade[] = this.connector.trades[symbol].filter(
@@ -718,17 +732,24 @@ class BaseExwatcher extends Service {
                         +trades[0].price,
                         2
                       );
-                    this.candlesCurrent[id][timeframe].high = Math.max(
-                      this.candlesCurrent[id][timeframe].high,
-                      ...prices
+                    this.candlesCurrent[id][timeframe].high = round(
+                      Math.max(
+                        this.candlesCurrent[id][timeframe].high,
+                        ...prices
+                      ),
+                      2
                     );
-                    this.candlesCurrent[id][timeframe].low = Math.min(
-                      this.candlesCurrent[id][timeframe].low,
-                      ...prices
+                    this.candlesCurrent[id][timeframe].low = round(
+                      Math.min(
+                        this.candlesCurrent[id][timeframe].low,
+                        ...prices
+                      ),
+                      2
                     );
-                    this.candlesCurrent[id][timeframe].close = +trades[
-                      trades.length - 1
-                    ].price;
+                    this.candlesCurrent[id][timeframe].close = +round(
+                      trades[trades.length - 1].price,
+                      2
+                    );
                     this.candlesCurrent[id][timeframe].volume =
                       round(
                         this.candlesCurrent[id][timeframe].volume +
