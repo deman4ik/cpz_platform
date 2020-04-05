@@ -199,7 +199,11 @@ class ImporterRunnerService extends Service {
       if (lastJob) {
         const lastJobState = await lastJob.getState();
         if (["stuck", "completed", "failed"].includes(lastJobState))
-          await lastJob.remove();
+          try {
+            await lastJob.remove();
+          } catch (e) {
+            this.logger.warn(e);
+          }
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
@@ -269,7 +273,11 @@ class ImporterRunnerService extends Service {
       if (lastJob) {
         const lastJobState = await lastJob.getState();
         if (["stuck", "completed", "failed"].includes(lastJobState))
-          await lastJob.remove();
+          try {
+            await lastJob.remove();
+          } catch (e) {
+            this.logger.warn(e);
+          }
       }
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
