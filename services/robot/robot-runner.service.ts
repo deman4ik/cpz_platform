@@ -27,7 +27,7 @@ class RobotRunnerService extends Service {
         `${cpz.Service.DB_CANDLES}480`,
         `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`,
-        cpz.Service.BACKTESTER_RUNNER
+        cpz.Service.BACKTESTER_RUNNER,
       ],
       mixins: [
         Auth,
@@ -36,26 +36,26 @@ class RobotRunnerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS && {}
+            tls: process.env.REDIS_TLS && {},
           },
           settings: {
             lockDuration: 20000,
             lockRenewTime: 5000,
             stalledInterval: 30000,
-            maxStalledCount: 1
-          }
-        })
+            maxStalledCount: 1,
+          },
+        }),
       ],
       actions: {
         startup: {
           params: {
-            id: "string"
+            id: "string",
           },
           graphql: {
-            mutation: "robotStartup(id: ID!): ServiceStatus!"
+            mutation: "robotStartup(id: ID!): ServiceStatus!",
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.startUp
+          handler: this.startUp,
         },
         start: {
           params: {
@@ -63,54 +63,54 @@ class RobotRunnerService extends Service {
             dateFrom: {
               type: "string",
               pattern: ISO_DATE_REGEX,
-              optional: true
-            }
+              optional: true,
+            },
           },
           graphql: {
-            mutation: "robotStart(id: ID!, dateFrom: String): ServiceStatus!"
+            mutation: "robotStart(id: ID!, dateFrom: String): ServiceStatus!",
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.start
+          handler: this.start,
         },
         stop: {
           params: {
-            id: "string"
+            id: "string",
           },
           graphql: {
-            mutation: "robotStop(id: ID!): ServiceStatus!"
+            mutation: "robotStop(id: ID!): ServiceStatus!",
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.stop
+          handler: this.stop,
         },
         pause: {
           graphql: {
-            mutation: "robotPause(id: ID, exchange: String): Response!"
+            mutation: "robotPause(id: ID, exchange: String): Response!",
           },
           params: {
             id: { type: "string", optional: true },
-            exchange: { type: "string", optional: true }
+            exchange: { type: "string", optional: true },
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.pause
+          handler: this.pause,
         },
         resume: {
           graphql: {
-            mutation: "robotResume(id: ID): Response!"
+            mutation: "robotResume(id: ID): Response!",
           },
           params: {
-            id: { type: "string", optional: true }
+            id: { type: "string", optional: true },
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.resume
-        }
+          handler: this.resume,
+        },
       },
       events: {
         [cpz.Event.CANDLE_NEW]: this.handleNewCandle,
         [cpz.Event.TICK_NEW]: this.handleNewTick,
         [cpz.Event.BACKTESTER_FINISHED_HISTORY]: this.handleBacktesterFinished,
-        [cpz.Event.BACKTESTER_FAILED]: this.handleBacktesterFailed
+        [cpz.Event.BACKTESTER_FAILED]: this.handleBacktesterFailed,
       },
-      started: this.startedService
+      started: this.startedService,
     });
   }
 
@@ -139,24 +139,26 @@ class RobotRunnerService extends Service {
 
   async queueJob(job: cpz.RobotJob, status: string) {
     await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.upsert`, {
-      entity: job
+      entity: job,
     });
     const { robotId } = job;
     if (status === cpz.Status.started) {
       const lastJob = await this.getQueue(cpz.Queue.runRobot).getJob(robotId);
       if (lastJob) {
         const lastJobState = await lastJob.getState();
-        if (["stuck", "completed", "failed"].includes(lastJobState))
+        if (["stuck", "completed", "failed"].includes(lastJobState)) {
           try {
             await lastJob.remove();
           } catch (e) {
             this.logger.warn(e);
+            return;
           }
+        } else return;
       }
       await this.createJob(cpz.Queue.runRobot, job, {
         jobId: robotId,
         removeOnComplete: true,
-        removeOnFail: true
+        removeOnFail: true,
       });
     }
   }
@@ -176,9 +178,9 @@ class RobotRunnerService extends Service {
         asset,
         currency,
         timeframe,
-        settings: { requiredHistoryMaxBars }
+        settings: { requiredHistoryMaxBars },
       } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
-        id
+        id,
       });
       if (status === cpz.Status.paused) {
         const result = await this.resume(ctx);
@@ -194,7 +196,7 @@ class RobotRunnerService extends Service {
         return {
           success: true,
           id,
-          status
+          status,
         };
 
       const firstCandles: cpz.Candle[] = await ctx.call(
@@ -207,8 +209,8 @@ class RobotRunnerService extends Service {
             exchange,
             asset,
             currency,
-            type: { $ne: cpz.CandleType.previous }
-          }
+            type: { $ne: cpz.CandleType.previous },
+          },
         }
       );
       this.logger.info(firstCandles);
@@ -246,11 +248,11 @@ class RobotRunnerService extends Service {
           positions: [],
           posLastNumb: {},
           indicators: {},
-          initialized: false
-        }
+          initialized: false,
+        },
       });
       await ctx.call(`${cpz.Service.DB_ROBOTS}.clear`, {
-        robotId: id
+        robotId: id,
       });
 
       const backtesterStatus: {
@@ -265,8 +267,8 @@ class RobotRunnerService extends Service {
         dateTo,
         settings: {
           local: false,
-          populateHistory: true
-        }
+          populateHistory: true,
+        },
       });
       if (backtesterStatus.success === false) return backtesterStatus;
       return { success: true, id, status: cpz.Status.starting };
@@ -285,7 +287,7 @@ class RobotRunnerService extends Service {
     try {
       this.authAction(ctx);
       const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
-        id
+        id,
       });
       if (status === cpz.Status.paused) {
         const result = await this.resume(ctx);
@@ -301,12 +303,12 @@ class RobotRunnerService extends Service {
         return {
           success: true,
           id,
-          status
+          status,
         };
 
       await ctx.call(`${cpz.Service.DB_ROBOTS}.clear`, { robotId: id });
       await ctx.call(`${cpz.Service.ROBOT_WORKER}.startUp`, {
-        id
+        id,
       });
       return { success: true, id, status: cpz.Status.started };
     } catch (e) {
@@ -324,27 +326,27 @@ class RobotRunnerService extends Service {
     try {
       this.authAction(ctx);
       const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
-        id
+        id,
       });
       if (status === cpz.Status.stopping || status === cpz.Status.stopped)
         return {
           success: true,
           id,
-          status
+          status,
         };
 
       await this.queueJob(
         {
           id: uuid(),
           robotId: id,
-          type: cpz.RobotJobType.stop
+          type: cpz.RobotJobType.stop,
         },
         status
       );
       return {
         success: true,
         id,
-        status: cpz.Status.stopping
+        status: cpz.Status.stopping,
       };
     } catch (e) {
       this.logger.error(e);
@@ -364,14 +366,14 @@ class RobotRunnerService extends Service {
       let robotsToPause: { id: string; status: string }[] = [];
       if (id) {
         const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
-          id
+          id,
         });
         if (status === cpz.Status.started) robotsToPause.push({ id, status });
         else if (exchange) {
           const robots: cpz.RobotState[] = await ctx.call(
             `${cpz.Service.DB_ROBOTS}.find`,
             {
-              query: { status: cpz.Status.started, exchange }
+              query: { status: cpz.Status.started, exchange },
             }
           );
           robotsToPause = robots.map(({ id, status }) => ({ id, status }));
@@ -380,7 +382,7 @@ class RobotRunnerService extends Service {
         const robots: cpz.RobotState[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
-            query: { status: cpz.Status.started }
+            query: { status: cpz.Status.started },
           }
         );
         robotsToPause = robots.map(({ id, status }) => ({ id, status }));
@@ -393,7 +395,7 @@ class RobotRunnerService extends Service {
               {
                 id: uuid(),
                 robotId: id,
-                type: cpz.RobotJobType.pause
+                type: cpz.RobotJobType.pause,
               },
               status
             );
@@ -418,14 +420,14 @@ class RobotRunnerService extends Service {
       let robotIds: string[] = [];
       if (id) {
         const { status } = await ctx.call(`${cpz.Service.DB_ROBOTS}.get`, {
-          id
+          id,
         });
         if (status === cpz.Status.paused) robotIds.push(id);
       } else {
         const robots: cpz.RobotState[] = await ctx.call(
           `${cpz.Service.DB_ROBOTS}.find`,
           {
-            query: { status: cpz.Status.paused }
+            query: { status: cpz.Status.paused },
           }
         );
         robotIds = robots.map(({ id }) => id);
@@ -433,10 +435,10 @@ class RobotRunnerService extends Service {
 
       if (robotIds.length > 0)
         await Promise.all(
-          robotIds.map(async robotId => {
+          robotIds.map(async (robotId) => {
             await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
               id: robotId,
-              status: cpz.Status.started
+              status: cpz.Status.started,
             });
             await ctx.emit(`${cpz.Event.ROBOT_RESUMED}`, { robotId });
           })
@@ -466,16 +468,16 @@ class RobotRunnerService extends Service {
             timeframe,
             $or: [
               {
-                status: cpz.Status.started
+                status: cpz.Status.started,
               },
               {
-                status: cpz.Status.starting
+                status: cpz.Status.starting,
               },
               {
-                status: cpz.Status.paused
-              }
-            ]
-          }
+                status: cpz.Status.paused,
+              },
+            ],
+          },
         }
       );
       this.logger.info(
@@ -489,7 +491,7 @@ class RobotRunnerService extends Service {
                 id: uuid(),
                 robotId: id,
                 type: cpz.RobotJobType.candle,
-                data: candle
+                data: candle,
               },
               status
             )
@@ -521,17 +523,17 @@ class RobotRunnerService extends Service {
             currency,
             $or: [
               {
-                status: cpz.Status.started
+                status: cpz.Status.started,
               },
               {
-                status: cpz.Status.starting
+                status: cpz.Status.starting,
               },
               {
-                status: cpz.Status.paused
-              }
+                status: cpz.Status.paused,
+              },
             ],
-            hasAlerts: true
-          }
+            hasAlerts: true,
+          },
         }
       );
       if (robots.length > 0)
@@ -546,7 +548,7 @@ class RobotRunnerService extends Service {
                 id: uuid(),
                 robotId: id,
                 type: cpz.RobotJobType.tick,
-                data: tick
+                data: tick,
               },
               status
             )
@@ -574,11 +576,11 @@ class RobotRunnerService extends Service {
         try { */
       await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
-        status: cpz.Status.started
+        status: cpz.Status.started,
       });
       await ctx.emit(`${cpz.Event.ROBOT_STARTED}`, {
         robotId: id,
-        eventType: cpz.Event.ROBOT_STARTED
+        eventType: cpz.Event.ROBOT_STARTED,
       });
 
       this.logger.info(`Robot ${id} started!`);
@@ -606,12 +608,12 @@ class RobotRunnerService extends Service {
       await ctx.call(`${cpz.Service.DB_ROBOTS}.update`, {
         id,
         status: cpz.Status.failed,
-        error
+        error,
       });
       await ctx.emit(`${cpz.Event.ROBOT_FAILED}`, {
         robotId: id,
         eventType: cpz.Event.ROBOT_FAILED,
-        error
+        error,
       });
       this.logger.error(`Failed to start Robot ${id}`, error);
       /* } catch (e) {
