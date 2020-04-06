@@ -21,83 +21,83 @@ class ImporterRunnerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS && {},
+            tls: process.env.REDIS_TLS && {}
           },
           settings: {
             lockDuration: 120000,
             lockRenewTime: 10000,
             stalledInterval: 120000,
-            maxStalledCount: 1,
-          },
-        }),
+            maxStalledCount: 1
+          }
+        })
       ],
       dependencies: [cpz.Service.DB_IMPORTERS, cpz.Service.DB_MARKETS],
       actions: {
         startRecent: {
           params: {
             exchange: {
-              type: "string",
+              type: "string"
             },
             asset: {
-              type: "string",
+              type: "string"
             },
             currency: {
-              type: "string",
+              type: "string"
             },
             timeframes: {
               type: "array",
               enum: Timeframe.validArray,
               empty: false,
-              optional: true,
+              optional: true
             },
             amount: {
               type: "number",
               integer: true,
               positive: true,
-              optional: true,
-            },
+              optional: true
+            }
           },
           graphql: {
             mutation:
-              "importCandlesStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!",
+              "importCandlesStartRecent(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], amount: Int): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.startRecent,
+          handler: this.startRecent
         },
         startHistory: {
           params: {
             exchange: {
-              type: "string",
+              type: "string"
             },
             asset: {
-              type: "string",
+              type: "string"
             },
             currency: {
-              type: "string",
+              type: "string"
             },
             timeframes: {
               type: "array",
               enum: Timeframe.validArray,
               empty: false,
-              optional: true,
+              optional: true
             },
             dateFrom: {
               type: "string",
               pattern: ISO_DATE_REGEX,
-              optional: true,
+              optional: true
             },
             dateTo: {
               type: "string",
               pattern: ISO_DATE_REGEX,
-              optional: true,
-            },
+              optional: true
+            }
           },
           graphql: {
             mutation:
-              "importCandlesStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!",
+              "importCandlesStartHistory(exchange: String!, asset: String!, currency: String!, timeframes: [Int!], dateFrom: String, dateTo: String): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.startHistory,
+          handler: this.startHistory
         },
         clean: {
           params: {
@@ -107,34 +107,34 @@ class ImporterRunnerService extends Service {
               optional: true,
               positive: true,
               integer: true,
-              min: 1000,
+              min: 1000
             },
             status: {
               description: "Job status",
               type: "string",
               enum: ["completed", "wait", "active", "delayed", "failed"],
-              optional: true,
-            },
+              optional: true
+            }
           },
           graphql: {
             mutation:
-              "importCandlesCleanJobs(period: Int, status: String): Response",
+              "importCandlesCleanJobs(period: Int, status: String): Response"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.clean,
+          handler: this.clean
         },
         getStatus: {
           params: {
-            id: "string",
+            id: "string"
           },
           graphql: {
-            query: "importCandlesJobStatus(id: ID!): Response!",
+            query: "importCandlesJobStatus(id: ID!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.getStatus,
-        },
+          handler: this.getStatus
+        }
       },
-      started: this.startedService,
+      started: this.startedService
     });
   }
 
@@ -188,12 +188,12 @@ class ImporterRunnerService extends Service {
         params: {
           timeframes:
             ctx.params.timeframes || Timeframe.validArray.filter((t) => t > 1),
-          amount: ctx.params.amount || CANDLES_RECENT_AMOUNT,
+          amount: ctx.params.amount || CANDLES_RECENT_AMOUNT
         },
-        status: cpz.Status.queued,
+        status: cpz.Status.queued
       };
       await ctx.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-        entity: state,
+        entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
       if (lastJob) {
@@ -210,7 +210,7 @@ class ImporterRunnerService extends Service {
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
         removeOnComplete: true,
-        removeOnFail: true,
+        removeOnFail: true
       });
 
       return { success: true, id, status: state.status };
@@ -242,8 +242,8 @@ class ImporterRunnerService extends Service {
             query: {
               exchange: ctx.params.exchange,
               asset: ctx.params.asset,
-              currency: ctx.params.currency,
-            },
+              currency: ctx.params.currency
+            }
           }
         );
         if (!loadFrom) throw new Error("Failed to find market");
@@ -264,12 +264,12 @@ class ImporterRunnerService extends Service {
           timeframes:
             ctx.params.timeframes || Timeframe.validArray.filter((t) => t > 1),
           dateFrom,
-          dateTo: ctx.params.dateTo,
+          dateTo: ctx.params.dateTo
         },
-        status: cpz.Status.queued,
+        status: cpz.Status.queued
       };
       await ctx.call(`${cpz.Service.DB_IMPORTERS}.upsert`, {
-        entity: state,
+        entity: state
       });
       const lastJob = await this.getQueue(cpz.Queue.importCandles).getJob(id);
       if (lastJob) {
@@ -286,7 +286,7 @@ class ImporterRunnerService extends Service {
       await this.createJob(cpz.Queue.importCandles, state, {
         jobId: id,
         removeOnComplete: true,
-        removeOnFail: true,
+        removeOnFail: true
       });
 
       return { success: true, id, status: state.status };

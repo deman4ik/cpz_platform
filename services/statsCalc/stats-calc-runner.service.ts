@@ -211,7 +211,7 @@ class StatsCalcRunnerService extends Service {
         userId
       });
 
-      const exchanges = [...new Set(exchangesAssets.map(e => e.exchange))];
+      const exchanges = [...new Set(exchangesAssets.map((e) => e.exchange))];
       for (const exchange of exchanges) {
         await this.queueJob({
           id: uuid(),
@@ -221,7 +221,7 @@ class StatsCalcRunnerService extends Service {
         });
       }
 
-      const assets = [...new Set(exchangesAssets.map(e => e.asset))];
+      const assets = [...new Set(exchangesAssets.map((e) => e.asset))];
       for (const asset of assets) {
         await this.queueJob({
           id: uuid(),
