@@ -290,7 +290,7 @@ class PrivateConnectorWorkerService extends Service {
             order
           );
       } catch (err) {
-        this.logger.error(err);
+        this.logger.warn(err);
         throw Error(
           `Failed to create test order. ${this.getErrorMessage(err)}`
         );
@@ -323,7 +323,7 @@ class PrivateConnectorWorkerService extends Service {
             canceled
           );
       } catch (err) {
-        this.logger.error(err);
+        this.logger.warn(err);
         throw Error(
           `Failed to cancel test order. ${this.getErrorMessage(
             err
@@ -332,7 +332,7 @@ class PrivateConnectorWorkerService extends Service {
       }
       return { success: true };
     } catch (err) {
-      this.logger.error(err);
+      this.logger.warn(err);
 
       return { success: false, error: this.getErrorMessage(err) };
     }
@@ -377,7 +377,7 @@ class PrivateConnectorWorkerService extends Service {
       while (nextJobs.length > 0) {
         const groupedJobs: {
           [key: string]: cpz.ConnectorJob[];
-        } = groupBy(nextJobs, job => job.orderId);
+        } = groupBy(nextJobs, (job) => job.orderId);
 
         for (const orderJobs of Object.values(groupedJobs)) {
           const [nextJob] = orderJobs.sort((a, b) =>
@@ -894,7 +894,7 @@ class PrivateConnectorWorkerService extends Service {
 
       const similarOrders = orders
         .filter(
-          o =>
+          (o) =>
             o.side === direction &&
             o.timestamp >= creationDate &&
             o.symbol === this.getSymbol(asset, currency) &&

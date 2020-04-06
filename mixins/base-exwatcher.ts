@@ -249,7 +249,7 @@ class BaseExwatcher extends Service {
   async unsubscribeAll() {
     try {
       await Promise.all(
-        Object.keys(this.subscriptions).map(async id => {
+        Object.keys(this.subscriptions).map(async (id) => {
           this.subscriptions[id].status = cpz.ExwatcherStatus.unsubscribed;
           await this.saveSubscription(this.subscriptions[id]);
         })
@@ -409,7 +409,7 @@ class BaseExwatcher extends Service {
     this.logger.info(`Loading current candles ${id}`);
     if (!this.candlesCurrent[id]) this.candlesCurrent[id] = {};
     await Promise.all(
-      Timeframe.validArray.map(async timeframe => {
+      Timeframe.validArray.map(async (timeframe) => {
         const candle: cpz.Candle = await this.broker.call(
           `${cpz.Service.PUBLIC_CONNECTOR}.getCurrentCandle`,
           {
@@ -464,14 +464,14 @@ class BaseExwatcher extends Service {
             const symbol = this.getSymbol(asset, currency);
             const currentCandles: cpz.Candle[] = [];
             await Promise.all(
-              Timeframe.validArray.map(async timeframe => {
+              Timeframe.validArray.map(async (timeframe) => {
                 try {
                   await this.connector.watchOHLCV(
                     symbol,
                     Timeframe.timeframes[timeframe].str
                   );
                 } catch (e) {
-                  this.logger.error(symbol, timeframe, e);
+                  this.logger.warn(symbol, timeframe, e);
                 }
                 const candles: [
                   number,
@@ -568,7 +568,7 @@ class BaseExwatcher extends Service {
 
       if (currentTimeframes.length > 0) {
         // Сброс текущих свечей
-        currentTimeframes.forEach(timeframe => {
+        currentTimeframes.forEach((timeframe) => {
           closedCandles[timeframe] = [];
           this.activeSubscriptions.forEach(
             ({ id, asset, currency }: cpz.Exwatcher) => {
@@ -624,7 +624,7 @@ class BaseExwatcher extends Service {
 
       if (Object.keys(closedCandles).length > 0) {
         await Promise.all(
-          Object.keys(closedCandles).map(async timeframe => {
+          Object.keys(closedCandles).map(async (timeframe) => {
             const candles = closedCandles[timeframe];
             if (candles && Array.isArray(candles) && candles.length > 0) {
               this.logger.info(
@@ -641,7 +641,7 @@ class BaseExwatcher extends Service {
               );
               await this.saveCurrentCandles(candles);
               await Promise.all(
-                candles.map(async candle => {
+                candles.map(async (candle) => {
                   if (candle.type !== cpz.CandleType.previous)
                     await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
                 })
@@ -676,7 +676,7 @@ class BaseExwatcher extends Service {
             try {
               await this.connector.watchTrades(symbol);
             } catch (e) {
-              this.logger.error(symbol, e);
+              this.logger.warn(symbol, e);
             }
             if (this.connector.trades[symbol]) {
               // Запрашиваем все прошедшие трейды
@@ -695,10 +695,10 @@ class BaseExwatcher extends Service {
                       ({ timestamp }: Trade) =>
                         timestamp > this.lastTick[id].time
                     )
-                    .map(t => t.price);
+                    .map((t) => t.price);
                   if (
                     prices.length > 0 &&
-                    prices.some(d => d !== this.lastTick[id].price)
+                    prices.some((d) => d !== this.lastTick[id].price)
                   ) {
                     const { timestamp, price } = trades[trades.length - 1];
                     tick = {
@@ -724,9 +724,9 @@ class BaseExwatcher extends Service {
                   this.lastTick[id] = tick;
                 }
                 const currentCandles: cpz.Candle[] = [];
-                Timeframe.validArray.forEach(async timeframe => {
+                Timeframe.validArray.forEach(async (timeframe) => {
                   if (trades.length > 0) {
-                    const prices = trades.map(t => +t.price);
+                    const prices = trades.map((t) => +t.price);
                     if (this.candlesCurrent[id][timeframe].volume === 0)
                       this.candlesCurrent[id][timeframe].open = round(
                         +trades[0].price,
@@ -753,7 +753,9 @@ class BaseExwatcher extends Service {
                     this.candlesCurrent[id][timeframe].volume =
                       round(
                         this.candlesCurrent[id][timeframe].volume +
-                          +trades.map(t => t.amount).reduce((a, b) => a + b, 0),
+                          +trades
+                            .map((t) => t.amount)
+                            .reduce((a, b) => a + b, 0),
                         3
                       ) || this.candlesCurrent[id][timeframe].volume + 0;
                     this.candlesCurrent[id][timeframe].type =
@@ -779,7 +781,7 @@ class BaseExwatcher extends Service {
 
       if (currentTimeframes.length > 0) {
         // Сброс текущих свечей
-        currentTimeframes.forEach(timeframe => {
+        currentTimeframes.forEach((timeframe) => {
           closedCandles[timeframe] = [];
           this.activeSubscriptions.forEach(({ id }: cpz.Exwatcher) => {
             if (this.candlesCurrent[id] && this.candlesCurrent[id][timeframe]) {
@@ -806,7 +808,7 @@ class BaseExwatcher extends Service {
 
       if (Object.keys(closedCandles).length > 0) {
         await Promise.all(
-          Object.keys(closedCandles).map(async timeframe => {
+          Object.keys(closedCandles).map(async (timeframe) => {
             const candles = closedCandles[timeframe];
             if (candles && Array.isArray(candles) && candles.length > 0) {
               this.logger.info(
@@ -823,7 +825,7 @@ class BaseExwatcher extends Service {
               );
               await this.saveCurrentCandles(candles);
               await Promise.all(
-                candles.map(async candle => {
+                candles.map(async (candle) => {
                   if (candle.type !== cpz.CandleType.previous)
                     await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
                 })
