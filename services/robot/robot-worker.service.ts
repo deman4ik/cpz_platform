@@ -28,7 +28,7 @@ class RobotWorkerService extends Service {
         `${cpz.Service.DB_CANDLES}240`,
         `${cpz.Service.DB_CANDLES}480`,
         `${cpz.Service.DB_CANDLES}720`,
-        `${cpz.Service.DB_CANDLES}1440`
+        `${cpz.Service.DB_CANDLES}1440`,
       ],
       mixins: [
         QueueService({
@@ -36,23 +36,23 @@ class RobotWorkerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS && {}
+            tls: process.env.REDIS_TLS && {},
           },
           settings: {
             lockDuration: 20000,
             lockRenewTime: 5000,
             stalledInterval: 30000,
-            maxStalledCount: 10
-          }
-        })
+            maxStalledCount: 10,
+          },
+        }),
       ],
       actions: {
         startUp: {
           params: {
-            id: "string"
+            id: "string",
           },
-          handler: this.startUp
-        }
+          handler: this.startUp,
+        },
       },
       queues: {
         [cpz.Queue.runRobot]: {
@@ -60,13 +60,13 @@ class RobotWorkerService extends Service {
           async process(job: Job) {
             await this.processJobs(job.id);
             return { success: true, id: job.id };
-          }
-        }
+          },
+        },
       },
       events: {
-        [cpz.Event.ROBOT_WORKER_RELOAD_CODE]: this.loadCode
+        [cpz.Event.ROBOT_WORKER_RELOAD_CODE]: this.loadCode,
       },
-      started: this.startedService
+      started: this.startedService,
     });
   }
 
@@ -76,9 +76,9 @@ class RobotWorkerService extends Service {
       {
         query: {
           available: {
-            $gte: 5
-          }
-        }
+            $gte: 5,
+          },
+        },
       }
     );
     const baseIndicators: cpz.CodeFilesInDB[] = await this.broker.call(
@@ -86,9 +86,9 @@ class RobotWorkerService extends Service {
       {
         query: {
           available: {
-            $gte: 5
-          }
-        }
+            $gte: 5,
+          },
+        },
       }
     );
     if (process.env.CODE_FILES_LOCATION === "local") {
@@ -134,17 +134,24 @@ class RobotWorkerService extends Service {
           limit: 1,
           sort: "created_at",
           query: {
-            robotId
-          }
+            robotId,
+          },
         }
       );
       if (nextJob) {
         while (nextJob) {
           let status = await this.run(nextJob);
           if (status) {
-            await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
-              id: nextJob.id
-            });
+            try {
+              await this.broker.call(`${cpz.Service.DB_ROBOT_JOBS}.remove`, {
+                id: nextJob.id,
+              });
+            } catch (e) {
+              this.logger.warn(
+                `Failed to delete robots #${robotId} job #${nextJob.id}`,
+                e
+              );
+            }
             if (status !== cpz.Status.stopped && status !== cpz.Status.paused) {
               [nextJob] = await this.broker.call(
                 `${cpz.Service.DB_ROBOT_JOBS}.find`,
@@ -152,8 +159,8 @@ class RobotWorkerService extends Service {
                   limit: 1,
                   sort: "created_at",
                   query: {
-                    robotId
-                  }
+                    robotId,
+                  },
                 }
               );
             } else {
@@ -166,7 +173,7 @@ class RobotWorkerService extends Service {
       }
       this.logger.info(`Robot #${robotId} finished processing jobs`);
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Robot #${robotId} processing jobs error`, e);
       throw e;
     }
   }
@@ -192,8 +199,8 @@ class RobotWorkerService extends Service {
             query: {
               exchange: robot.exchange,
               asset: robot.asset,
-              currency: robot.currency
-            }
+              currency: robot.currency,
+            },
           }
         );
         robot.setStrategy(null);
@@ -205,7 +212,7 @@ class RobotWorkerService extends Service {
         robot.setStrategy(this._strategiesCode[robot.strategyName]);
         if (robot.hasBaseIndicators) {
           const baseIndicatorsCode = robot.baseIndicatorsFileNames.map(
-            fileName => {
+            (fileName) => {
               return { fileName, code: this._baseIndicatorsCode[fileName] };
             }
           );
@@ -222,8 +229,8 @@ class RobotWorkerService extends Service {
             query: {
               exchange: robot.exchange,
               asset: robot.asset,
-              currency: robot.currency
-            }
+              currency: robot.currency,
+            },
           }
         );
         if (
@@ -235,7 +242,7 @@ class RobotWorkerService extends Service {
         }
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
-          .map(candle => ({ ...candle, timeframe: robot.timeframe }));
+          .map((candle) => ({ ...candle, timeframe: robot.timeframe }));
         robot.handleHistoryCandles(historyCandles);
         const { success, error } = robot.handleCandle(<cpz.Candle>data);
         if (success) {
@@ -252,7 +259,7 @@ class RobotWorkerService extends Service {
         robot.initStrategy();
         if (robot.hasBaseIndicators) {
           const baseIndicatorsCode = robot.baseIndicatorsFileNames.map(
-            fileName => {
+            (fileName) => {
               return { fileName, code: this._baseIndicatorsCode[fileName] };
             }
           );
@@ -282,8 +289,8 @@ class RobotWorkerService extends Service {
               query: {
                 exchange: robot.exchange,
                 asset: robot.asset,
-                currency: robot.currency
-              }
+                currency: robot.currency,
+              },
             }
           );
           this.logger.info(market);
@@ -291,7 +298,7 @@ class RobotWorkerService extends Service {
         }
 
         await Promise.all(
-          robot.positionsToSave.map(async position => {
+          robot.positionsToSave.map(async (position) => {
             await this.broker.call(`${cpz.Service.DB_ROBOT_POSITIONS}.upsert`, {
               entity: {
                 ...position,
@@ -299,8 +306,8 @@ class RobotWorkerService extends Service {
                   position.status === cpz.RobotPositionStatus.closed &&
                   averageFee
                     ? +averageFee
-                    : null
-              }
+                    : null,
+              },
             });
           })
         );
@@ -313,7 +320,7 @@ class RobotWorkerService extends Service {
           await this.broker.emit<cpz.StatsCalcRobotEvent>(
             cpz.Event.STATS_CALC_ROBOT,
             {
-              robotId: id
+              robotId: id,
             }
           );
         }
@@ -330,11 +337,11 @@ class RobotWorkerService extends Service {
 
       return robot.status;
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Robot #${robotId} processing ${type} job error`, e);
       await this.broker.emit(cpz.Event.ROBOT_FAILED, {
         robotId,
         jobType: type,
-        error: e
+        error: e,
       });
     }
   }
