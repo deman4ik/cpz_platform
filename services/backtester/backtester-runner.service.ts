@@ -18,8 +18,8 @@ class BacktesterRunnerService extends Service {
             local: Boolean,
             populateHistory: Boolean
           }
-          `,
-        },
+          `
+        }
       },
       mixins: [
         Auth,
@@ -28,59 +28,59 @@ class BacktesterRunnerService extends Service {
             host: process.env.REDIS_HOST,
             port: process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
-            tls: process.env.REDIS_TLS && {},
+            tls: process.env.REDIS_TLS && {}
           },
           settings: {
             lockDuration: 120000,
             lockRenewTime: 10000,
             stalledInterval: 120000,
-            maxStalledCount: 1,
-          },
-        }),
+            maxStalledCount: 1
+          }
+        })
       ],
       actions: {
         start: {
           params: {
             id: {
               type: "string",
-              optional: true,
+              optional: true
             },
             robotId: {
-              type: "string",
+              type: "string"
             },
             dateFrom: {
               type: "string",
-              pattern: ISO_DATE_REGEX,
+              pattern: ISO_DATE_REGEX
             },
             dateTo: {
               type: "string",
-              pattern: ISO_DATE_REGEX,
+              pattern: ISO_DATE_REGEX
             },
             settings: {
               type: "object",
               props: {
                 local: {
                   type: "boolean",
-                  optional: true,
+                  optional: true
                 },
                 populateHistory: {
                   type: "boolean",
-                  optional: true,
-                },
+                  optional: true
+                }
               },
-              optional: true,
+              optional: true
             },
             robotSettings: {
               type: "object",
-              optional: true,
-            },
+              optional: true
+            }
           },
           graphql: {
             mutation:
-              "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: BacktestSettings, robotSettings: JSON): ServiceStatus!",
+              "backtestStart(id: String, robotId: String!, dateFrom: String!, dateTo: String!, settings: BacktestSettings, robotSettings: JSON): ServiceStatus!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.start,
+          handler: this.start
         },
         clean: {
           params: {
@@ -90,34 +90,34 @@ class BacktesterRunnerService extends Service {
               optional: true,
               positive: true,
               integer: true,
-              min: 1000,
+              min: 1000
             },
             status: {
               description: "Job status",
               type: "string",
               enum: ["completed", "wait", "active", "delayed", "failed"],
-              optional: true,
-            },
+              optional: true
+            }
           },
           graphql: {
             mutation:
-              "backtestCleanJobs(period: Int, status: String): Response!",
+              "backtestCleanJobs(period: Int, status: String): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.clean,
+          handler: this.clean
         },
         getStatus: {
           params: {
-            id: "string",
+            id: "string"
           },
           graphql: {
-            query: "backtestJobStatus(id: ID!): Response!",
+            query: "backtestJobStatus(id: ID!): Response!"
           },
           roles: [cpz.UserRoles.admin],
-          handler: this.getStatus,
-        },
+          handler: this.getStatus
+        }
       },
-      started: this.startedService,
+      started: this.startedService
     });
   }
 
@@ -170,7 +170,7 @@ class BacktesterRunnerService extends Service {
           success: false,
           id,
           status: cpz.Status.failed,
-          error: new Error("Wrong Backtester ID for history populating"),
+          error: new Error("Wrong Backtester ID for history populating")
         };
       const lastJob = await this.getQueue(cpz.Queue.backtest).getJob(id);
 
@@ -193,7 +193,7 @@ class BacktesterRunnerService extends Service {
           dateFrom,
           dateTo,
           settings,
-          robotSettings,
+          robotSettings
         },
         { jobId: id, removeOnComplete: true, removeOnFail: true }
       );
