@@ -127,7 +127,7 @@ class RobotWorkerService extends Service {
 
   async processJobs(robotId: string) {
     try {
-      this.logger.info(`Robot #${robotId} started processing jobs`);
+      // this.logger.info(`Robot #${robotId} started processing jobs`);
       let [nextJob]: cpz.RobotJob[] = await this.broker.call(
         `${cpz.Service.DB_ROBOT_JOBS}.find`,
         {
@@ -171,7 +171,7 @@ class RobotWorkerService extends Service {
           }
         }
       }
-      this.logger.info(`Robot #${robotId} finished processing jobs`);
+      //this.logger.info(`Robot #${robotId} finished processing jobs`);
     } catch (e) {
       this.logger.error(`Robot #${robotId} processing jobs error`, e);
       throw e;
@@ -180,7 +180,7 @@ class RobotWorkerService extends Service {
 
   async run(job: cpz.RobotJob) {
     const { type, robotId, data, id } = job;
-    this.logger.info(`Robot #${robotId} processing '${type}' job #${id}`);
+    //this.logger.info(`Robot #${robotId} processing '${type}' job #${id}`);
     try {
       const robotState: cpz.RobotState = await this.broker.call(
         `${cpz.Service.DB_ROBOTS}.get`,

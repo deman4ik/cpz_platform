@@ -115,7 +115,7 @@ class RobotRunnerService extends Service {
   }
 
   async jobCompleted(jobID: JobId, res: any) {
-    this.logger.info(`Robot #${jobID} completed job`);
+    //this.logger.info(`Robot #${jobID} completed job`);
   }
 
   async jobError(error: Error) {
@@ -213,10 +213,8 @@ class RobotRunnerService extends Service {
           }
         }
       );
-      this.logger.info(firstCandles);
       const firstCandle = firstCandles[0];
       if (!firstCandle) throw new Error("Not enough historical data");
-      const { unit } = Timeframe.get(timeframe);
       let historyDateFrom = firstCandle.timestamp;
       if (dateFrom)
         historyDateFrom =
@@ -536,10 +534,6 @@ class RobotRunnerService extends Service {
           }
         }
       );
-      if (robots.length > 0)
-        this.logger.info(
-          `New tick ${exchange}.${asset}.${currency} ${timestamp} ${price} required by ${robots.length}`
-        );
       await Promise.all(
         robots.map(
           async ({ id, status }) =>
