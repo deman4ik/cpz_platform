@@ -794,7 +794,6 @@ class AuthService extends Service {
       name?: string;
     }>
   ) {
-    this.logger.info("Register Telegram", ctx.params);
     const { telegramId, telegramUsername, name } = ctx.params;
 
     const [userExists]: cpz.User[] = await ctx.call(

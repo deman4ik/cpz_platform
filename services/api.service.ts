@@ -58,7 +58,7 @@ class ApiService extends Service {
               apiKey: process.env.ENGINE_API_KEY
             },
             formatError: (err: any) => {
-              this.logger.info(err.message, err.code, err.type, err.data);
+              this.logger.warn(err.message, err.code, err.type, err.data);
               // return new Error("Custom Error");
               return err;
             }
@@ -227,7 +227,6 @@ class ApiService extends Service {
 
   async register(req: any, res: any) {
     try {
-      this.logger.info(req.body);
       const userId = await req.$service.broker.call(
         `${cpz.Service.AUTH}.register`,
         req.body
