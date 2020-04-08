@@ -473,20 +473,22 @@ class BaseExwatcher extends Service {
                 } catch (e) {
                   this.logger.warn(symbol, timeframe, e);
                 }
-                const candles: [
-                  number,
-                  number,
-                  number,
-                  number,
-                  number,
-                  number
-                ][] = this.connector.ohlcvs[symbol][
-                  Timeframe.get(timeframe).str
-                ].filter((c: any) => c[0] < date.valueOf());
 
-                if (candles.length > 0) {
-                  const candle = candles[candles.length - 1];
-                  if (this.candlesCurrent[id][timeframe]) {
+                if (this.candlesCurrent[id][timeframe]) {
+                  const candle: [
+                    number,
+                    number,
+                    number,
+                    number,
+                    number,
+                    number
+                  ] = this.connector.ohlcvs[symbol][
+                    Timeframe.get(timeframe).str
+                  ].find(
+                    (c: any) => c[0] === this.candlesCurrent[id][timeframe].time
+                  );
+
+                  if (this.candlesCurrent[id][timeframe].time === candle[0]) {
                     this.candlesCurrent[id][timeframe].open = candle[1];
                     this.candlesCurrent[id][timeframe].high = candle[2];
                     this.candlesCurrent[id][timeframe].low = candle[3];
@@ -497,28 +499,44 @@ class BaseExwatcher extends Service {
                         ? cpz.CandleType.previous
                         : cpz.CandleType.loaded;
                   } else {
-                    this.candlesCurrent[id][timeframe] = {
-                      id: uuid(),
-                      exchange: this.exchange,
-                      asset,
-                      currency,
-                      timeframe,
-                      time: candle[0],
-                      timestamp: dayjs.utc(candle[0]).toISOString(),
-                      open: candle[1],
-                      high: candle[2],
-                      low: candle[3],
-                      close: candle[4],
-                      volume: candle[5],
-                      type:
-                        candle[5] === 0
-                          ? cpz.CandleType.previous
-                          : cpz.CandleType.loaded
-                    };
+                    this.logger.error(
+                      "Wrong candle!",
+                      this.candlesCurrent[id][timeframe],
+                      candle
+                    );
                   }
-
-                  currentCandles.push(this.candlesCurrent[id][timeframe]);
+                } else {
+                  const candles: [
+                    number,
+                    number,
+                    number,
+                    number,
+                    number,
+                    number
+                  ][] = this.connector.ohlcvs[symbol][
+                    Timeframe.get(timeframe).str
+                  ].filter((c: any) => c[0] < date.valueOf());
+                  const candle = candles[candles.length - 1];
+                  this.candlesCurrent[id][timeframe] = {
+                    id: uuid(),
+                    exchange: this.exchange,
+                    asset,
+                    currency,
+                    timeframe,
+                    time: candle[0],
+                    timestamp: dayjs.utc(candle[0]).toISOString(),
+                    open: candle[1],
+                    high: candle[2],
+                    low: candle[3],
+                    close: candle[4],
+                    volume: candle[5],
+                    type:
+                      candle[5] === 0
+                        ? cpz.CandleType.previous
+                        : cpz.CandleType.loaded
+                  };
                 }
+                currentCandles.push(this.candlesCurrent[id][timeframe]);
               })
             );
 
