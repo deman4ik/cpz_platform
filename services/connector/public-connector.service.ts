@@ -414,7 +414,7 @@ class PublicConnectorService extends Service {
     await this.initConnector(exchange);
     const timeframes: cpz.ExchangeTimeframes = {};
 
-    Object.keys(this.connectors[exchange].timeframes).forEach(key => {
+    Object.keys(this.connectors[exchange].timeframes).forEach((key) => {
       const timeframe = Timeframe.stringToTimeframe(key);
       if (timeframe) timeframes[key] = timeframe;
     });
@@ -514,7 +514,7 @@ class PublicConnectorService extends Service {
         type: cpz.CandleType.previous
       };
     }
-    let candles: cpz.ExchangeCandle[] = response.map(candle => {
+    let candles: cpz.ExchangeCandle[] = response.map((candle) => {
       try {
         if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
@@ -550,11 +550,11 @@ class PublicConnectorService extends Service {
           time: time.valueOf(),
           timestamp: time.toISOString(),
           open: round(+candles[0].open, 6),
-          high: round(Math.max(...candles.map(t => +t.high)), 6),
-          low: round(Math.min(...candles.map(t => +t.low)), 6),
+          high: round(Math.max(...candles.map((t) => +t.high)), 6),
+          low: round(Math.min(...candles.map((t) => +t.low)), 6),
           close: round(+candles[candles.length - 1].close, 6),
           volume: round(
-            +candles.map(t => t.volume).reduce((a, b) => a + b, 0) || 0,
+            +candles.map((t) => t.volume).reduce((a, b) => a + b, 0) || 0,
             6
           ),
           type: cpz.CandleType.created
@@ -605,7 +605,7 @@ class PublicConnectorService extends Service {
     if (!response || !Array.isArray(response) || response.length === 0)
       return candles;
 
-    candles = response.map(candle => {
+    candles = response.map((candle) => {
       try {
         if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
@@ -680,7 +680,7 @@ class PublicConnectorService extends Service {
     if (!response || !Array.isArray(response) || response.length === 0)
       return candles;
 
-    candles = response.map(candle => {
+    candles = response.map((candle) => {
       try {
         if (!candle || !Array.isArray(candle))
           throw new Error("Wrong response");
@@ -740,7 +740,7 @@ class PublicConnectorService extends Service {
 
       const call = async (bail: (e: Error) => void) => {
         try {
-          this.logger.info("getTrades", asset, currency, dateFrom);
+          // this.logger.info("getTrades", asset, currency, dateFrom);
           return await this.connectors[exchange].fetchTrades(
             this.getSymbol(asset, currency),
             since,
@@ -753,19 +753,19 @@ class PublicConnectorService extends Service {
         }
       };
       const response: ccxt.Trade[] = await retry(call, this.retryOptions);
-      this.logger.info(
+      /* this.logger.info(
         "getTrades response",
         asset,
         currency,
         dateFrom,
         response.length
-      );
+      );*/
       if (!response || !Array.isArray(response))
         throw new Errors.MoleculerRetryableError("Failed to fetch trades");
 
       if (response.length === 0) return [];
 
-      const trades = response.map(trade => {
+      const trades = response.map((trade) => {
         try {
           if (!trade || !trade.datetime) throw new Error("Wrong response");
           const time = dayjs.utc(trade.datetime);

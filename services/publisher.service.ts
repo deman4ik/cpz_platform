@@ -142,7 +142,7 @@ class PublisherService extends Service {
             } else {
               result = { success: true };
             }
-            this.logger.info(result);
+
             if (result && result.success) {
               await this.broker.call(`${cpz.Service.DB_NOTIFICATIONS}.update`, {
                 id: notification.id,

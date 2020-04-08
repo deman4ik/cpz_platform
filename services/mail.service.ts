@@ -109,15 +109,11 @@ class MailService extends Service {
   ) {
     try {
       const { list, email, name } = ctx.params;
-      const result = await this.mailgun
-        .lists(list)
-        .members()
-        .create({
-          subscribed: true,
-          address: email,
-          name
-        });
-      this.logger.info("result", result);
+      const result = await this.mailgun.lists(list).members().create({
+        subscribed: true,
+        address: email,
+        name
+      });
       return true;
     } catch (e) {
       if (e.message.includes("Address already exists")) return false;
@@ -139,7 +135,6 @@ class MailService extends Service {
         },
         { parentCtx: ctx }
       );
-      this.logger.info("subcribed", subcribed);
       if (subcribed) {
         await this.actions.send(
           {

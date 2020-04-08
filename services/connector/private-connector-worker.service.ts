@@ -281,7 +281,7 @@ class PrivateConnectorWorkerService extends Service {
       let order: Order;
       try {
         order = await retry(createOrderCall, this.retryOptions);
-        this.logger.info("Created order", order);
+        //  this.logger.info("Created order", order);
         if (!order)
           throw new Errors.MoleculerError(
             "Wrong response from exchange while creating test order",
@@ -314,7 +314,7 @@ class PrivateConnectorWorkerService extends Service {
       try {
         const canceled = await retry(cancelOrderCall, this.retryOptions);
 
-        this.logger.info("Canceled order", canceled);
+        //  this.logger.info("Canceled order", canceled);
         if (!canceled)
           throw new Errors.MoleculerError(
             "Wrong response from exchange while canceling test order",
@@ -986,7 +986,7 @@ class PrivateConnectorWorkerService extends Service {
         fee: ccxt.Fee;
         info: any;
       } = await retry(call, this.retryOptions);
-      this.logger.info(response);
+
       const {
         datetime: exTimestamp,
         status: orderStatus,

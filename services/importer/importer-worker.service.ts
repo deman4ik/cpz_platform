@@ -250,9 +250,9 @@ class ImporterWorkerService extends Service {
         let percent = 0;
         let processed = 0;
         for (const { dateFrom: loadDateFrom, dateTo: loadDateTo } of chunks) {
-          this.logger.info(
+          /* this.logger.info(
             `Job #${id} loading from ${loadDateFrom} to ${loadDateTo}`
-          );
+          );*/
           const trades = await this.importTrades({
             exchange,
             asset,
@@ -302,9 +302,9 @@ class ImporterWorkerService extends Service {
         let percent = 0;
         let processed = 0;
         for (const { dateFrom: loadDateFrom, dateTo: loadDateTo } of chunks) {
-          this.logger.info(
+          /*  this.logger.info(
             `Job #${id} loading from ${loadDateFrom} to ${loadDateTo}`
-          );
+          );*/
           const candlesInTimeframes = await this.importCandles({
             exchange,
             asset,
@@ -359,10 +359,7 @@ class ImporterWorkerService extends Service {
     currency,
     timeframes,
     dateFrom,
-    dateTo = dayjs
-      .utc()
-      .startOf(cpz.TimeUnit.minute)
-      .toISOString(),
+    dateTo = dayjs.utc().startOf(cpz.TimeUnit.minute).toISOString(),
     amount
   }: {
     exchange: string;
@@ -539,7 +536,7 @@ class ImporterWorkerService extends Service {
                   await this.broker.call(
                     `${cpz.Service.DB_CANDLES}${timeframe}.upsert`,
                     {
-                      entities: chunk.map(candle => ({
+                      entities: chunk.map((candle) => ({
                         id: uuid(),
                         ...candle
                       }))
