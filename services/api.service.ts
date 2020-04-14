@@ -52,11 +52,7 @@ class ApiService extends Service {
           // https://www.apollographql.com/docs/apollo-server/v2/api/apollo-server.html
           serverOptions: {
             tracing: true,
-            playground: true,
             introspection: true,
-            engine: {
-              apiKey: process.env.ENGINE_API_KEY
-            },
             formatError: (err: any) => {
               this.logger.warn(err.message, err.code, err.type, err.data);
               // return new Error("Custom Error");

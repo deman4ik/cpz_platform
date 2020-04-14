@@ -26,7 +26,7 @@ class BacktesterRunnerService extends Service {
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
+            port: +process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
             tls: process.env.REDIS_TLS && {}
           },
@@ -116,8 +116,8 @@ class BacktesterRunnerService extends Service {
           roles: [cpz.UserRoles.admin],
           handler: this.getStatus
         }
-      },
-      started: this.startedService
+      }
+      // started: this.startedService
     });
   }
 

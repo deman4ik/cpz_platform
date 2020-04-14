@@ -24,7 +24,7 @@ class BacktesterWorkerService extends Service {
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
+            port: +process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
             tls: process.env.REDIS_TLS && {}
           },
@@ -180,14 +180,14 @@ class BacktesterWorkerService extends Service {
         let baseIndicatorsCode;
         if (backtesterState.settings.local) {
           baseIndicatorsCode = await Promise.all(
-            robot.baseIndicatorsFileNames.map(async fileName => {
+            robot.baseIndicatorsFileNames.map(async (fileName) => {
               const code = await import(`../../indicators/${fileName}`);
               return { fileName, code };
             })
           );
         } else {
           baseIndicatorsCode = await Promise.all(
-            robot.baseIndicatorsFileNames.map(async fileName => {
+            robot.baseIndicatorsFileNames.map(async (fileName) => {
               const { file } = await this.broker.call(
                 `${cpz.Service.DB_INDICATORS}.get`,
                 {
@@ -230,7 +230,7 @@ class BacktesterWorkerService extends Service {
           );
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
-          .map(candle => ({ ...candle, timeframe }));
+          .map((candle) => ({ ...candle, timeframe }));
         const [firstCandle] = historyCandles;
         this.logger.info("History from", firstCandle.timestamp);
         robot.handleHistoryCandles(historyCandles);
@@ -281,7 +281,7 @@ class BacktesterWorkerService extends Service {
           }
         );
 
-        const historyCandles: cpz.Candle[] = requiredCandles.map(candle => ({
+        const historyCandles: cpz.Candle[] = requiredCandles.map((candle) => ({
           ...candle,
           timeframe
         }));
@@ -307,7 +307,7 @@ class BacktesterWorkerService extends Service {
 
           logs = [
             ...logs,
-            ...robot.logEventsToSend.map(log => ({
+            ...robot.logEventsToSend.map((log) => ({
               id: uuid(),
               backtestId: backtesterState.id,
               data: log.data
@@ -320,7 +320,7 @@ class BacktesterWorkerService extends Service {
               backtestId: backtesterState.id
             }))
           ];
-          robot.positionsToSave.forEach(pos => {
+          robot.positionsToSave.forEach((pos) => {
             const newPos = {
               ...pos,
               entryDate: pos.entryCandleTimestamp,
@@ -338,7 +338,7 @@ class BacktesterWorkerService extends Service {
 
           logs = [
             ...logs,
-            ...robot.logEventsToSend.map(log => ({
+            ...robot.logEventsToSend.map((log) => ({
               id: uuid(),
               backtestId: backtesterState.id,
               data: log.data
@@ -359,7 +359,7 @@ class BacktesterWorkerService extends Service {
             }))
           ];
 
-          robot.positionsToSave.forEach(pos => {
+          robot.positionsToSave.forEach((pos) => {
             const newPos = {
               ...pos,
               entryDate: pos.entryCandleTimestamp,

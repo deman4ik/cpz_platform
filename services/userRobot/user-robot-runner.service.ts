@@ -28,7 +28,7 @@ class UserRobotRunnerService extends Service {
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
+            port: +process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
             tls: process.env.REDIS_TLS && {}
           },
@@ -186,7 +186,7 @@ class UserRobotRunnerService extends Service {
   }
 
   async startedService() {
-    await this.getQueue(cpz.Queue.runUserRobot).on(
+    /* await this.getQueue(cpz.Queue.runUserRobot).on(
       "global:completed",
       this.jobCompleted.bind(this)
     );
@@ -197,7 +197,7 @@ class UserRobotRunnerService extends Service {
     await this.getQueue(cpz.Queue.runUserRobot).on(
       "fail",
       this.jobError.bind(this)
-    );
+    );*/
     this.cronJobs.start();
   }
 

@@ -34,7 +34,7 @@ class RobotRunnerService extends Service {
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
+            port: +process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
             tls: process.env.REDIS_TLS && {}
           },
@@ -109,13 +109,13 @@ class RobotRunnerService extends Service {
         [cpz.Event.TICK_NEW]: this.handleNewTick,
         [cpz.Event.BACKTESTER_FINISHED_HISTORY]: this.handleBacktesterFinished,
         [cpz.Event.BACKTESTER_FAILED]: this.handleBacktesterFailed
-      },
-      started: this.startedService
+      }
+      //started: this.startedService
     });
   }
 
   async jobCompleted(jobID: JobId, res: any) {
-    //this.logger.info(`Robot #${jobID} completed job`);
+    this.logger.info(`Robot #${jobID} completed job`);
   }
 
   async jobError(error: Error) {

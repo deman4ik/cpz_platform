@@ -102,7 +102,7 @@ const brokerConfig = {
         // Custom span object converter before sending
         spanConverter: null,
         // Default tags. They will be added into all span tags.
-        defaultTags: registry => ({
+        defaultTags: (registry) => ({
           namespace: registry.broker.namespace,
           nodeID: registry.broker.nodeID
         })
@@ -114,16 +114,16 @@ const brokerConfig = {
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
-  transporter: {
+  /*transporter: {
     type: "Redis",
     options: {
       host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
+      port: +process.env.REDIS_PORT,
       password: process.env.REDIS_PASSWORD,
       tls: process.env.REDIS_TLS && {},
       db: 1
     }
-  },
+  },*/
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
   cacher: false,
@@ -149,7 +149,7 @@ const brokerConfig = {
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err => err && !!err.retryable
+    check: (err) => err && !!err.retryable
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -193,7 +193,7 @@ const brokerConfig = {
     // Number of milliseconds to switch from open to half-open state
     halfOpenTime: 10 * 1000,
     // A function to check failed requests.
-    check: err => err && err.code >= 500
+    check: (err) => err && err.code >= 500
   },
 
   // Settings of bulkhead feature. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Bulkhead
@@ -231,7 +231,7 @@ const brokerConfig = {
         // Sending interval in seconds
         interval: 60 * 30,
 
-        defaultLabels: registry => ({
+        defaultLabels: (registry) => ({
           namespace: registry.broker.namespace,
           nodeID: registry.broker.nodeID
         })

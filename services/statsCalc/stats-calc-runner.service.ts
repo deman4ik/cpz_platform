@@ -15,7 +15,7 @@ class StatsCalcRunnerService extends Service {
         QueueService({
           redis: {
             host: process.env.REDIS_HOST,
-            port: process.env.REDIS_PORT,
+            port: +process.env.REDIS_PORT,
             password: process.env.REDIS_PASSWORD,
             tls: process.env.REDIS_TLS && {}
           },
@@ -63,9 +63,8 @@ class StatsCalcRunnerService extends Service {
         [cpz.Event.STATS_CALC_ROBOTS]: this.handleStatsCalcRobotsEvent,
         [cpz.Event.STATS_CALC_USER_ROBOT]: this.handleStatsCalcUserRobotEvent,
         [cpz.Event.STATS_CALC_USER_ROBOTS]: this.handleStatsCalcUserRobotsEvent
-      },
-      started: this.startedService,
-      stopped: this.stoppedService
+      }
+      //  started: this.startedService,
     });
   }
 
