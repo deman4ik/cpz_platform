@@ -103,25 +103,20 @@ class BaseExwatcher extends Service {
   async startedService() {
     if (this.exchange === "binance_futures") {
       this.connector = new ccxtpro.binance({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
         options: { defaultType: "future", OHLCVLimit: 100 }
       });
-      /* this.cronHandleChanges = cron.schedule(
-        "* * * * * *",
-        this.handleCandles.bind(this),
-        {
-          scheduled: false
-        }
-      );*/
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
-        this.handleTrades.bind(this),
+        this.handleCandles.bind(this),
         {
           scheduled: false
         }
       );
     } else if (this.exchange === "bitfinex") {
       this.connector = new ccxtpro.bitfinex({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
       });
       this.cronHandleChanges = cron.schedule(
@@ -133,6 +128,7 @@ class BaseExwatcher extends Service {
       );
     } else if (this.exchange === "kraken") {
       this.connector = new ccxtpro.kraken({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
       });
       this.cronHandleChanges = cron.schedule(
@@ -383,18 +379,14 @@ class BaseExwatcher extends Service {
       this.subscriptions[id].asset,
       this.subscriptions[id].currency
     );
-    /*  if (this.exchange === "binance_futures") {
+    if (this.exchange === "binance_futures") {
       for (const timeframe of Timeframe.validArray) {
         await this.connector.watchOHLCV(
           symbol,
           Timeframe.timeframes[timeframe].str
         );
       }
-    } else */ if (
-      this.exchange === "binance_futures" ||
-      this.exchange === "bitfinex" ||
-      this.exchange === "kraken"
-    ) {
+    } else if (this.exchange === "bitfinex" || this.exchange === "kraken") {
       await this.connector.watchTrades(symbol);
       await this.loadCurrentCandles(this.subscriptions[id]);
     } else {
