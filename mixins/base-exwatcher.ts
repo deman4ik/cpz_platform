@@ -103,6 +103,7 @@ class BaseExwatcher extends Service {
   async startedService() {
     if (this.exchange === "binance_futures") {
       this.connector = new ccxtpro.binance({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
         options: { defaultType: "future", OHLCVLimit: 100 }
       });
@@ -115,6 +116,7 @@ class BaseExwatcher extends Service {
       );
     } else if (this.exchange === "bitfinex") {
       this.connector = new ccxtpro.bitfinex({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
       });
       this.cronHandleChanges = cron.schedule(
@@ -126,6 +128,7 @@ class BaseExwatcher extends Service {
       );
     } else if (this.exchange === "kraken") {
       this.connector = new ccxtpro.kraken({
+        enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
       });
       this.cronHandleChanges = cron.schedule(
@@ -488,7 +491,10 @@ class BaseExwatcher extends Service {
                     (c: any) => c[0] === this.candlesCurrent[id][timeframe].time
                   );
 
-                  if (this.candlesCurrent[id][timeframe].time === candle[0]) {
+                  if (
+                    candle &&
+                    this.candlesCurrent[id][timeframe].time === candle[0]
+                  ) {
                     this.candlesCurrent[id][timeframe].open = candle[1];
                     this.candlesCurrent[id][timeframe].high = candle[2];
                     this.candlesCurrent[id][timeframe].low = candle[3];
@@ -499,7 +505,7 @@ class BaseExwatcher extends Service {
                         ? cpz.CandleType.previous
                         : cpz.CandleType.loaded;
                   } else {
-                    this.logger.error(
+                    this.logger.warn(
                       "Wrong candle!",
                       this.candlesCurrent[id][timeframe],
                       candle
