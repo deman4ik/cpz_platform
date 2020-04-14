@@ -104,7 +104,8 @@ class BaseExwatcher extends Service {
     if (this.exchange === "binance_futures") {
       this.connector = new ccxtpro.binance({
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
-        options: { defaultType: "future", OHLCVLimit: 100 }
+        options: { defaultType: "future", OHLCVLimit: 100 },
+        verbose: true
       });
       /* this.cronHandleChanges = cron.schedule(
         "* * * * * *",
