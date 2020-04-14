@@ -488,7 +488,10 @@ class BaseExwatcher extends Service {
                     (c: any) => c[0] === this.candlesCurrent[id][timeframe].time
                   );
 
-                  if (this.candlesCurrent[id][timeframe].time === candle[0]) {
+                  if (
+                    candle &&
+                    this.candlesCurrent[id][timeframe].time === candle[0]
+                  ) {
                     this.candlesCurrent[id][timeframe].open = candle[1];
                     this.candlesCurrent[id][timeframe].high = candle[2];
                     this.candlesCurrent[id][timeframe].low = candle[3];
@@ -499,7 +502,7 @@ class BaseExwatcher extends Service {
                         ? cpz.CandleType.previous
                         : cpz.CandleType.loaded;
                   } else {
-                    this.logger.error(
+                    this.logger.warn(
                       "Wrong candle!",
                       this.candlesCurrent[id][timeframe],
                       candle
