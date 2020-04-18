@@ -1,0 +1,74 @@
+name: CD
+
+on:
+  push:
+    branches: [k8s]
+
+jobs:
+  build:
+    name: Build, push, and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Update SHA
+        run: echo $GITHUB_SHA > $GITHUB_WORKSPACE/_meta
+
+      - name: Build container image
+        run: docker build -t registry.digitalocean.com/cpz/cpz-platform:$(echo $GITHUB_SHA | head -c7) .
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2-experiment
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig show cpz > $GITHUB_WORKSPACE/.kubeconfig
+
+      - name: Login to Docker
+        run: doctl registry login
+
+      - name: Push image to Docker Hub
+        run: docker push registry.digitalocean.com/cpz/cpz-platform
+
+      - name: Update deployment file IMAGE and TAG
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/cpz/cpz-platform:'${TAG}'|' $GITHUB_WORKSPACE/deployment.yaml
+
+      - name: Update CPZ-DB file ENV dev
+        if: contains(github.ref, 'k8s')
+        run: sed -i 's|<ENV>|DEV|' $GITHUB_WORKSPACE/deployments/CPZ-DB.yaml
+
+      - name: Update CPZ-DB file ENV prod
+        if: contains(github.ref, 'master')
+        run: sed -i 's|<ENV>|PROD|' $GITHUB_WORKSPACE/deployments/CPZ-DB.yaml
+
+      - name: Deploy CPZ-DB to DigitalOcean Kubernetes
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig apply -f $GITHUB_WORKSPACE/deployments/CPZ-DB.yaml
+
+      - name: Verify deployment CPZ-DB-DEV
+        if: contains(github.ref, 'k8s')
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig rollout status deployment/CPZ-DB-DEV
+
+      - name: Verify deployment CPZ-DB-PROD
+        if: contains(github.ref, 'master')
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig rollout status deployment/CPZ-DB-PROD
+
+      - name: Update CPZ-API file ENV dev
+        if: contains(github.ref, 'k8s')
+        run: sed -i 's|<ENV>|DEV|' $GITHUB_WORKSPACE/deployments/CPZ-API.yaml
+
+      - name: Update CPZ-API file ENV prod
+        if: contains(github.ref, 'master')
+        run: sed -i 's|<ENV>|PROD|' $GITHUB_WORKSPACE/deployments/CPZ-API.yaml
+
+      - name: Deploy CPZ-API to DigitalOcean Kubernetes
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig apply -f $GITHUB_WORKSPACE/deployments/CPZ-API.yaml
+
+      - name: Verify deployment CPZ-API-DEV
+        if: contains(github.ref, 'k8s')
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig rollout status deployment/CPZ-API-DEV
+
+      - name: Verify deployment CPZ-API-PROD
+        if: contains(github.ref, 'master')
+        run: kubectl --kubeconfig=$GITHUB_WORKSPACE/.kubeconfig rollout status deployment/CPZ-API-PROD
