@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: <APP>
+    app: CPZ-TELEGRAM-<ENV>
     env: <ENV>
-  name: <APP>
+  name: CPZ-TELEGRAM-<ENV>
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: <APP>
+      app: CPZ-TELEGRAM-<ENV>
       env: <ENV>
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: <APP>
+        app: CPZ-TELEGRAM-<ENV>
         env: <ENV>
     spec:
       imagePullSecrets:
@@ -32,137 +32,134 @@ spec:
             httpGet:
               path: /ready
               port: 3001
-          name: <APP>
+          name: CPZ-TELEGRAM
           env:
             - name: SERVICES
-              valueFrom:
-                secretKeyRef:
-                  name: <SECRET>
-                  key: <APP>_SERVICES
+              value: "dist/services/telegram/bot.service.js"
             - name: TRANSPORTER
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: TRANSPORTER
             - name: PROXY_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PROXY_ENDPOINT
             - name: PG_DBNAME
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PG_DBNAME
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PG_USER
             - name: PG_PWD
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PG_PWD
             - name: PG_HOST
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PG_HOST
             - name: PG_PORT
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PG_PORT
             - name: REDIS_HOST
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: REDIS_HOST
             - name: REDIS_PORT
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: REDIS_PORT
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: REDIS_PASSWORD
             - name: REDIS_TLS
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: REDIS_TLS
             - name: CODE_FILES_LOCATION
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: CODE_FILES_LOCATION
             - name: ENCRYPTION_PWD
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: ENCRYPTION_PWD
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: JWT_SECRET
             - name: JWT_TOKEN_EXPIRES
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: JWT_TOKEN_EXPIRES
             - name: REFRESH_TOKEN_EXPIRES
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: REFRESH_TOKEN_EXPIRES
             - name: MAILGUN_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: MAILGUN_API_KEY
             - name: MAILGUN_DOMAIN
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: MAILGUN_DOMAIN
             - name: LOGDNA_KEY
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: LOGDNA_KEY
             - name: BOT_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: BOT_TOKEN
             - name: BOT_HOST
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: BOT_HOST
             - name: NODE_ENV
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: NODE_ENV
             - name: CPZ_ENV
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: CPZ_ENV
             - name: NAMESPACE
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: NAMESPACE
             - name: PORT
               valueFrom:
                 secretKeyRef:
-                  name: <SECRET>
+                  name: CPZ-ENV-<ENV>
                   key: PORT
           ports:
             - containerPort: 3000
@@ -180,9 +177,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: <APP>
+    app: CPZ-TELEGRAM-<ENV>
     env: <ENV>
-  name: <APP>
+  name: CPZ-TELEGRAM-<ENV>
   namespace: default
 spec:
   ports:
@@ -193,6 +190,6 @@ spec:
     - port: 5000
       targetPort: 5000
   selector:
-    app: <APP>
+    app: CPZ-TELEGRAM-<ENV>
     env: <ENV>
   type: ClusterIP
