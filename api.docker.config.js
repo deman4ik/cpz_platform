@@ -1,6 +1,16 @@
 const HealthMiddleware = require("./middleware/health-check.middleware.js");
 
 const brokerConfig = {
+  transporter: {
+    type: "Redis",
+    options: {
+      host: process.env.REDIS_HOST,
+      port: +process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      tls: process.env.REDIS_TLS && {},
+      db: 1
+    }
+  },
   middlewares: [HealthMiddleware()],
   logger: [
     {

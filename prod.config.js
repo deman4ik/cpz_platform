@@ -114,7 +114,7 @@ const brokerConfig = {
 
   // Define transporter.
   // More info: https://moleculer.services/docs/0.13/networking.html
-  /*transporter: {
+  transporter: {
     type: "Redis",
     options: {
       host: process.env.REDIS_HOST,
@@ -123,7 +123,7 @@ const brokerConfig = {
       tls: process.env.REDIS_TLS && {},
       db: 1
     }
-  },*/
+  },
 
   // Define a cacher. More info: https://moleculer.services/docs/0.13/caching.html
   cacher: false,

@@ -24,14 +24,6 @@ spec:
       containers:
         - image: <IMAGE>
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            httpGet:
-              path: /live
-              port: 3001
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 3001
           name: <APP>
           env:
             - name: TRANSPORTER
