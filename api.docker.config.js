@@ -1,4 +1,7 @@
+const HealthMiddleware = require("./middleware/health-check.middleware.js");
+
 const brokerConfig = {
+  middlewares: [HealthMiddleware()],
   logger: [
     {
       type: "Console",
