@@ -27,7 +27,7 @@ export = function createService(options?: Redis.RedisOptions): ServiceSchema {
         const redlock = new Redlock(
           // you should have one client for each independent redis node
           // or cluster
-          [new Redis()],
+          [this.redisClient],
           {
             // the expected clock drift; for more details
             // see http://redis.io/topics/distlock
