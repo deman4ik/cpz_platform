@@ -50,10 +50,7 @@ const adapterOptions = {
     ssl: true,
     useUTC: true
   },
-  logging: false,
-  pool: {
-    min: 1
-  }
+  logging: false
 };
 
 const adapter = new SqlAdapter(
