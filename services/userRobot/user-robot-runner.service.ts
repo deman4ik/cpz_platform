@@ -124,13 +124,15 @@ class UserRobotRunnerService extends Service {
     try {
       const lock = await this.createLock(
         cpz.cronLock.USER_ROBOT_RUNNER_CHECK_JOBS,
-        12000
+        14000,
+        2,
+        5000
       );
 
       let timerId = setTimeout(async function tick() {
-        await lock.extend(4000);
+        await lock.extend(3500);
         timerId = setTimeout(tick, 3000);
-      }, 3000);
+      }, 13000);
       //  TODO: started or stopping
       const idledJobs: cpz.UserRobotJob[] = await this.broker.call(
         `${cpz.Service.DB_USER_ROBOT_JOBS}.getIdled`,

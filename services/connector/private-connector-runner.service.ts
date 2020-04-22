@@ -58,13 +58,16 @@ class PricateConnectorRunnerService extends Service {
   async checkOrders() {
     try {
       const lock = await this.createLock(
-        cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS
+        cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS,
+        14000,
+        2,
+        5000
       );
 
       let timerId = setTimeout(async function tick() {
-        await lock.extend(4000);
+        await lock.extend(3500);
         timerId = setTimeout(tick, 3000);
-      }, 3000);
+      }, 13000);
       const userExAccIds = await this.broker.call(
         `${cpz.Service.DB_CONNECTOR_JOBS}.getUserExAccsWithJobs`
       );

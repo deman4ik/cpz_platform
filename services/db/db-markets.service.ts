@@ -77,7 +77,7 @@ class MarketsService extends Service {
       const lock = await this.createLock(cpz.cronLock.MARKETS_UPDATE);
 
       let timerId = setTimeout(async function tick() {
-        await lock.extend(10000);
+        await lock.extend(9500);
         timerId = setTimeout(tick, 9000);
       }, 19000);
 

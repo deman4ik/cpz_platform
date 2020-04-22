@@ -57,10 +57,12 @@ class PublisherService extends Service {
     try {
       const lock = await this.createLock(
         cpz.cronLock.PUBLISHER_SEND_TELEGRAM,
-        4000
+        4000,
+        1,
+        2500
       );
       let timerId = setTimeout(async function tick() {
-        await lock.extend(4000);
+        await lock.extend(3500);
         timerId = setTimeout(tick, 3000);
       }, 3000);
       try {
@@ -162,7 +164,7 @@ class PublisherService extends Service {
       clearInterval(timerId);
       await lock.unlock();
     } catch (e) {
-      if (e instanceof this.LockError) this.logger.warn("LockError", e);
+      if (e instanceof this.LockError) this.logger.warn(e);
       else this.logger.error(e);
     }
   }
