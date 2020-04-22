@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config prod.config.js dist/services/db",
+      args: "--env --config --instances 3 prod.config.js dist/services/db",
       env: {
         NODE_ENV: "production",
         NODEID: "db"
@@ -103,7 +103,7 @@ module.exports = {
       name: "stats-calc",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/statsCalc/stats-calc-runner.service.js dist/services/statsCalc/stats-calc-worker.service.js",
+        "--env --config prod.config.js --instances 3 dist/services/statsCalc/stats-calc-runner.service.js dist/services/statsCalc/stats-calc-worker.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "stats-calc"
