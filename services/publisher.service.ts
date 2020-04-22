@@ -55,8 +55,10 @@ class PublisherService extends Service {
 
   async checkTelegramNotifications() {
     try {
-      const lock = await this.createLock(4000);
-      await lock.acquire(cpz.cronLock.PUBLISHER_SEND_TELEGRAM);
+      const lock = await this.createLock(
+        cpz.cronLock.PUBLISHER_SEND_TELEGRAM,
+        4000
+      );
       let timerId = setTimeout(async function tick() {
         await lock.extend(4000);
         timerId = setTimeout(tick, 3000);
@@ -158,14 +160,9 @@ class PublisherService extends Service {
       }
 
       clearInterval(timerId);
-      await lock.release();
+      await lock.unlock();
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError)
-        this.logger.warn("LockAcquisitionError", e);
-      else if (e instanceof this.LockReleaseError)
-        this.logger.warn("LockReleaseError", e);
-      else if (e instanceof this.LockExtendError)
-        this.logger.warn("LockExtendError", e);
+      if (e instanceof this.LockError) this.logger.warn("LockError", e);
       else this.logger.error(e);
     }
   }

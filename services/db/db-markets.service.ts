@@ -74,8 +74,8 @@ class MarketsService extends Service {
   async updateMarkets() {
     try {
       this.logger.info("Updating Markets");
-      const lock = await this.createLock();
-      await lock.acquire(cpz.cronLock.MARKETS_UPDATE);
+      const lock = await this.createLock(cpz.cronLock.MARKETS_UPDATE);
+
       let timerId = setTimeout(async function tick() {
         await lock.extend(10000);
         timerId = setTimeout(tick, 9000);
@@ -96,15 +96,10 @@ class MarketsService extends Service {
       }
 
       clearInterval(timerId);
-      await lock.release();
+      await lock.unlock();
       this.logger.info("Markets updated!");
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError)
-        this.logger.warn("LockAcquisitionError", e);
-      else if (e instanceof this.LockReleaseError)
-        this.logger.warn("LockReleaseError", e);
-      else if (e instanceof this.LockExtendError)
-        this.logger.warn("LockExtendError", e);
+      if (e instanceof this.LockError) this.logger.warn("LockError", e);
       else this.logger.error(e);
     }
   }
