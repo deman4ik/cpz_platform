@@ -164,7 +164,7 @@ class PublisherService extends Service {
       clearInterval(timerId);
       await lock.unlock();
     } catch (e) {
-      if (e instanceof this.LockError) this.logger.warn(e);
+      if (e instanceof this.LockError) return;
       else this.logger.error(e);
     }
   }

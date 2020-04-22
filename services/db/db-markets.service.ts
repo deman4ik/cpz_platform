@@ -99,7 +99,7 @@ class MarketsService extends Service {
       await lock.unlock();
       this.logger.info("Markets updated!");
     } catch (e) {
-      if (e instanceof this.LockError) this.logger.warn("LockError", e);
+      if (e instanceof this.LockError) return;
       else this.logger.error(e);
     }
   }

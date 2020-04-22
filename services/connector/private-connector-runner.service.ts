@@ -84,7 +84,7 @@ class PricateConnectorRunnerService extends Service {
       clearInterval(timerId);
       await lock.unlock();
     } catch (e) {
-      if (e instanceof this.LockError) this.logger.warn("LockError", e);
+      if (e instanceof this.LockError) return;
       else this.logger.error(e);
     }
   }
