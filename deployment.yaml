@@ -158,10 +158,6 @@ spec:
               protocol: TCP
             - containerPort: 5000
               protocol: TCP
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "900m"
 ---
 apiVersion: v1
 kind: Service
