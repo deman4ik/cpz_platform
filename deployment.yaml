@@ -26,6 +26,11 @@ spec:
           imagePullPolicy: IfNotPresent
           name: <APP>
           env:
+            - name: TRANSPORTER
+              valueFrom:
+                secretKeyRef:
+                  name: cpz-env-<ENV>
+                  key: TRANSPORTER
             - name: PROXY_ENDPOINT
               valueFrom:
                 secretKeyRef:

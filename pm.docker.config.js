@@ -30,7 +30,7 @@ module.exports = {
       name: "private-connector-worker",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env  --config docker.config.js dist/services/connector/private-connector-worker.service.js",
+        "--env --config docker.config.js dist/services/connector/private-connector-worker.service.js",
       env: {
         NODEID: "private-connector-worker"
       }
