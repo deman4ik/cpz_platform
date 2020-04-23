@@ -19,7 +19,7 @@ const CandlesService: ServiceSchema = {
       time: Sequelize.BIGINT,
       timestamp: {
         type: Sequelize.DATE,
-        get: function() {
+        get: function () {
           const value = this.getDataValue("timestamp");
           return (
             (value && value instanceof Date && value.toISOString()) || value
@@ -47,11 +47,6 @@ const CandlesService: ServiceSchema = {
           items: {
             type: "object",
             props: {
-              id: {
-                description: "Uniq Candle Id.",
-                type: "string",
-                empty: false
-              },
               exchange: { type: "string" },
               asset: { type: "string" },
               currency: { type: "string" },
@@ -73,7 +68,6 @@ const CandlesService: ServiceSchema = {
         try {
           const values = ctx.params.entities.map((candle: cpz.DBCandle) => {
             const val = {
-              id: candle.id,
               exchange: candle.exchange,
               asset: candle.asset,
               currency: candle.currency,
@@ -89,9 +83,9 @@ const CandlesService: ServiceSchema = {
             return Object.values(val);
           });
 
-          const query = `INSERT INTO candles60 (id, exchange, asset, currency, open, high, low, close, volume, time, timestamp, type) VALUES
+          const query = `INSERT INTO candles60 (exchange, asset, currency, open, high, low, close, volume, time, timestamp, type) VALUES
           ${values
-            .map(_ => {
+            .map((_) => {
               return "(?)";
             })
             .join(",")} 

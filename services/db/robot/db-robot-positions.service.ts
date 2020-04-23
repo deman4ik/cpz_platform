@@ -21,7 +21,7 @@ class RobotPositionsService extends Service {
           timeframe: Sequelize.INTEGER,
           volume: {
             type: Sequelize.NUMBER,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("volume");
               return (value && +value) || value;
             }
@@ -44,7 +44,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.NUMBER,
             field: "entry_price",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryPrice");
               return (value && +value) || value;
             }
@@ -53,7 +53,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.DATE,
             field: "entry_date",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryDate");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -74,7 +74,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.DATE,
             field: "entry_candle_timestamp",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryCandleTimestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -90,7 +90,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.NUMBER,
             field: "exit_price",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitPrice");
               return (value && +value) || value;
             }
@@ -99,7 +99,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.DATE,
             field: "exit_date",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitDate");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -120,7 +120,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.DATE,
             field: "exit_candle_timestamp",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitCandleTimestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -131,7 +131,7 @@ class RobotPositionsService extends Service {
           profit: {
             type: Sequelize.NUMBER,
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("profit");
               return (value && +value) || value;
             }
@@ -139,7 +139,7 @@ class RobotPositionsService extends Service {
           fee: {
             type: Sequelize.NUMBER,
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("fee");
               return (value && +value) || value;
             }
@@ -148,7 +148,7 @@ class RobotPositionsService extends Service {
             type: Sequelize.INTEGER,
             field: "bars_held",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("barsHeld");
               return (value && +value) || value;
             }
@@ -353,7 +353,7 @@ class RobotPositionsService extends Service {
             return "(?)";
           })
           .join(",")} 
-         ON CONFLICT ON CONSTRAINT robot_positions_pkey 
+         ON CONFLICT ON CONSTRAINT robot_positions_robot_id_code_key 
          DO UPDATE SET updated_at = now(),
          direction = excluded.direction,
          status = excluded.status,
