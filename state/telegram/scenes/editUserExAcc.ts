@@ -9,17 +9,16 @@ async function editUserExAccEnter(ctx: any) {
       exchange
     }: cpz.UserExchangeAccount = ctx.scene.state.userExAcc;
     ctx.scene.state.stage = "key";
-    if (ctx.scene.state.reply) {
-      await ctx.reply(
-        ctx.i18n.t("scenes.editUserExAcc.enterAPIKey", { name, exchange }),
-        Extra.HTML()
-      );
-    } else {
-      await ctx.editMessageText(
+    if (ctx.scene.state.edit) {
+      return ctx.editMessageText(
         ctx.i18n.t("scenes.editUserExAcc.enterAPIKey", { name, exchange }),
         Extra.HTML()
       );
     }
+    return ctx.reply(
+      ctx.i18n.t("scenes.editUserExAcc.enterAPIKey", { name, exchange }),
+      Extra.HTML()
+    );
   } catch (e) {
     this.logger.error(e);
     await ctx.reply(ctx.i18n.t("failed"));
@@ -47,6 +46,11 @@ async function editUserExAccSubmited(ctx: any) {
     } else {
       await editUserExAccEnter.call(this, ctx);
     }
+
+    await ctx.reply(
+      ctx.i18n.t("scenes.addUserExAcc.check", { exchange }),
+      Extra.HTML()
+    );
 
     const {
       key,
