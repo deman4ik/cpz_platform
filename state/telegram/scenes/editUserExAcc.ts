@@ -37,7 +37,7 @@ async function editUserExAccSubmited(ctx: any) {
     if (ctx.scene.state.stage === "key") {
       ctx.scene.state.key = ctx.message.text;
       ctx.scene.state.stage = "secret";
-      await ctx.reply(
+      return ctx.reply(
         ctx.i18n.t("scenes.editUserExAcc.enterAPISecret", { name, exchange }),
         Extra.HTML()
       );
