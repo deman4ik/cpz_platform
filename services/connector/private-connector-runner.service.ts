@@ -57,12 +57,17 @@ class PricateConnectorRunnerService extends Service {
 
   async checkOrders() {
     try {
-      const lock = await this.createLock();
-      await lock.acquire(cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS);
+      const lock = await this.createLock(
+        cpz.cronLock.PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS,
+        14000,
+        2,
+        5000
+      );
+
       let timerId = setTimeout(async function tick() {
-        await lock.extend(4000);
+        await lock.extend(3500);
         timerId = setTimeout(tick, 3000);
-      }, 3000);
+      }, 13000);
       const userExAccIds = await this.broker.call(
         `${cpz.Service.DB_CONNECTOR_JOBS}.getUserExAccsWithJobs`
       );
@@ -77,14 +82,9 @@ class PricateConnectorRunnerService extends Service {
         }
       }
       clearInterval(timerId);
-      await lock.release();
+      await lock.unlock();
     } catch (e) {
-      if (e instanceof this.LockAcquisitionError)
-        this.logger.warn("LockAcquisitionError", e);
-      else if (e instanceof this.LockReleaseError)
-        this.logger.warn("LockReleaseError", e);
-      else if (e instanceof this.LockExtendError)
-        this.logger.warn("LockExtendError", e);
+      if (e instanceof this.LockError) return;
       else this.logger.error(e);
     }
   }
