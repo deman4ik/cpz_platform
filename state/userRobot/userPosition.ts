@@ -204,12 +204,12 @@ class UserPosition implements cpz.UserPosition {
       this._entryPrice =
         round(
           average(
-            ...this._entryOrders.map(o => +o.price || 0).filter(p => p > 0)
+            ...this._entryOrders.map((o) => +o.price || 0).filter((p) => p > 0)
           ),
           6
         ) || null;
       this._entryExecuted =
-        round(sum(...this._entryOrders.map(o => +o.executed || 0)), 6) || 0;
+        round(sum(...this._entryOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
     }
     if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
@@ -234,12 +234,12 @@ class UserPosition implements cpz.UserPosition {
       this._exitPrice =
         round(
           average(
-            ...this._exitOrders.map(o => +o.price || 0).filter(p => p > 0)
+            ...this._exitOrders.map((o) => +o.price || 0).filter((p) => p > 0)
           ),
           6
         ) || null;
       this._exitExecuted =
-        round(sum(...this._exitOrders.map(o => +o.executed || 0)), 6) || 0;
+        round(sum(...this._exitOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
     }
     if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
@@ -263,16 +263,16 @@ class UserPosition implements cpz.UserPosition {
     const entryBalance = +round(
       sum(
         ...this._entryOrders
-          .filter(o => o.status === cpz.OrderStatus.closed)
-          .map(o => +o.price * +o.executed - (o.fee && +o.fee) || 0)
+          .filter((o) => o.status === cpz.OrderStatus.closed)
+          .map((o) => +o.price * +o.executed - (o.fee && +o.fee) || 0)
       ),
       6
     );
     const exitBalance = +round(
       sum(
         ...this._exitOrders
-          .filter(o => o.status === cpz.OrderStatus.closed)
-          .map(o => +o.price * +o.executed - (o.fee && +o.fee) || 0)
+          .filter((o) => o.status === cpz.OrderStatus.closed)
+          .map((o) => +o.price * +o.executed - (o.fee && +o.fee) || 0)
       ),
       6
     );
@@ -374,7 +374,7 @@ class UserPosition implements cpz.UserPosition {
       this._entryOrders &&
       Array.isArray(this._entryOrders) &&
       this._entryOrders.filter(
-        o =>
+        (o) =>
           o.status === cpz.OrderStatus.new || o.status === cpz.OrderStatus.open
       ).length > 0
     );
@@ -385,7 +385,7 @@ class UserPosition implements cpz.UserPosition {
       this._exitOrders &&
       Array.isArray(this._exitOrders) &&
       this._exitOrders.filter(
-        o =>
+        (o) =>
           o.status === cpz.OrderStatus.new || o.status === cpz.OrderStatus.open
       ).length > 0
     );
@@ -637,14 +637,16 @@ class UserPosition implements cpz.UserPosition {
 
   handleOrder(order: cpz.Order) {
     if (this._isActionEntry(order.action)) {
-      this._entryDate = order.exLastTradeAt || order.exTimestamp;
+      this._entryDate =
+        order.exLastTradeAt || order.exTimestamp || dayjs.utc().toISOString();
       this._entryCandleTimestamp = Timeframe.validTimeframeDatePrev(
         this._entryDate,
         this._robot.timeframe
       );
       this._updateEntry();
     } else {
-      this._exitDate = order.exLastTradeAt || order.exTimestamp;
+      this._exitDate =
+        order.exLastTradeAt || order.exTimestamp || dayjs.utc().toISOString();
       this._exitCandleTimestamp = Timeframe.validTimeframeDatePrev(
         this._exitDate,
         this._robot.timeframe
@@ -763,7 +765,7 @@ class UserPosition implements cpz.UserPosition {
           this._entryOrders &&
           Array.isArray(this._entryOrders) &&
           this._entryOrders.filter(
-            o =>
+            (o) =>
               (o.status === cpz.OrderStatus.new ||
                 o.status === cpz.OrderStatus.open) &&
               (!o.nextJob ||
@@ -773,7 +775,7 @@ class UserPosition implements cpz.UserPosition {
         // Entry has open orders
         if (orders && orders.length > 0) {
           // Cancel all open orders
-          orders.forEach(o => {
+          orders.forEach((o) => {
             this._connectorJobs.push({
               id: uuid(),
               type: cpz.OrderJobType.cancel,
@@ -794,7 +796,7 @@ class UserPosition implements cpz.UserPosition {
           this._entryOrders &&
           Array.isArray(this._entryOrders) &&
           this._entryOrders.filter(
-            o =>
+            (o) =>
               (o.status === cpz.OrderStatus.new ||
                 o.status === cpz.OrderStatus.open) &&
               (!o.nextJob ||
@@ -804,7 +806,7 @@ class UserPosition implements cpz.UserPosition {
         // Entry has open signal orders
         if (orders && orders.length > 0) {
           // Cancel all entry signal orders
-          orders.forEach(o => {
+          orders.forEach((o) => {
             this._connectorJobs.push({
               id: uuid(),
               type: cpz.OrderJobType.cancel,
@@ -850,7 +852,7 @@ class UserPosition implements cpz.UserPosition {
         this._exitOrders &&
         Array.isArray(this._exitOrders) &&
         this._exitOrders.filter(
-          o =>
+          (o) =>
             (o.status === cpz.OrderStatus.new ||
               o.status === cpz.OrderStatus.open) &&
             (!o.nextJob ||
@@ -860,7 +862,7 @@ class UserPosition implements cpz.UserPosition {
       // Exit has open signal orders
       if (orders && orders.length > 0) {
         // Cancel all exit signal orders
-        orders.forEach(o => {
+        orders.forEach((o) => {
           this._connectorJobs.push({
             id: uuid(),
             type: cpz.OrderJobType.cancel,
