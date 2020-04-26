@@ -223,6 +223,11 @@ describe("Test 'Timeframe' class", () => {
       const result = Timeframe.validTimeframeDatePrev(date, 1440);
       expect(result).toBe("2019-08-03T00:00:00.000Z");
     });
+    it("should return valid date for timeframe 480 and null input", () => {
+      const result = Timeframe.validTimeframeDatePrev(null, 480);
+      console.log(result);
+      expect(result).toBeTruthy();
+    });
   });
 
   describe("Test 'validTimeframeDateNext'", () => {
