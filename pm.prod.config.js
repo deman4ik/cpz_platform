@@ -73,7 +73,7 @@ module.exports = {
       name: "exwatcher-binance_futures",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/db/candles dist/services/exwatcher/binance-futures-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/binance-futures-watcher.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-binance_futures"
@@ -83,7 +83,7 @@ module.exports = {
       name: "exwatcher-bitfinex",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/db/candles dist/services/exwatcher/bitfinex-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/bitfinex-watcher.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-bitfinex"
@@ -93,7 +93,7 @@ module.exports = {
       name: "exwatcher-kraken",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
       args:
-        "--env --config prod.config.js dist/services/db/candles dist/services/exwatcher/kraken-watcher.service.js",
+        "--env --config prod.config.js dist/services/exwatcher/kraken-watcher.service.js",
       env: {
         NODE_ENV: "production",
         NODEID: "exwatcher-kraken"
