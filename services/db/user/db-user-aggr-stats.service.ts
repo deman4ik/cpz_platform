@@ -57,30 +57,33 @@ class UserAggrStatsService extends Service {
         statistics,
         equity
       }: cpz.UserAggrStatsDB = ctx.params;
+      const value = Object.values({
+        userId,
+        exchange,
+        asset,
+        type,
+        statistics,
+        equity
+      });
+      const query = `INSERT INTO user_aggr_stats
+      (  
+        user_id,
+        exchange,
+        asset,
+        type,
+        statistics,
+        equity
+         ) 
+         VALUES (?)
+          ON CONFLICT ON CONSTRAINT user_aggr_stats_user_id_exchange_asset_type_key 
+          DO UPDATE SET updated_at = now(),
+          statistics = excluded.statistics,
+          equity = excluded.equity`;
 
-      const [statsExists]: cpz.UserAggrStatsDB[] = await this.actions.find(
-        {
-          query: {
-            userId,
-            exchange: exchange || null,
-            asset: asset || null,
-            type: type || null
-          },
-          fields: ["id"]
-        },
-        { parentCtx: ctx }
-      );
-
-      if (statsExists) {
-        await this.adapter.updateById(statsExists.id, {
-          $set: {
-            statistics,
-            equity
-          }
-        });
-      } else {
-        await this.adapter.insert({ id: uuid(), ...ctx.params });
-      }
+      await this.adapter.db.query(query, {
+        type: Sequelize.QueryTypes.INSERT,
+        replacements: [value]
+      });
     } catch (e) {
       this.logger.error(e);
       throw e;
