@@ -62,8 +62,8 @@ class UserAggrStatsService extends Service {
         exchange,
         asset,
         type,
-        statistics,
-        equity
+        statistics: JSON.stringify(statistics),
+        equity: JSON.stringify(equity)
       });
       const query = `INSERT INTO user_aggr_stats
       (  
