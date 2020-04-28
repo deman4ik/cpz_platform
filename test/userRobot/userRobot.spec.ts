@@ -469,7 +469,7 @@ describe("Test User Robot", () => {
       status: cpz.OrderStatus.closed,
       exId: uuid(),
       exTimestamp: dayjs.utc().toISOString(),
-      exLastTradeAt: dayjs.utc().toISOString(),
+      exLastTradeAt: null,
       executed: userRobot.state.ordersToCreate[0].volume,
       remaining: 0
     };
@@ -485,6 +485,7 @@ describe("Test User Robot", () => {
       ]
     });
     userRobot.handleOrder(closeOrder);
+    expect(userRobot.state.positions[0].exitDate).toBe(closeOrder.exTimestamp);
     expect(userRobot.state.positions[0].status).toBe(
       cpz.UserPositionStatus.closed
     );

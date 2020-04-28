@@ -751,6 +751,9 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _tryToCancel() {
+    this._updateEntry();
+    this._updateExit();
+    this._setStatus();
     // Position entry not closed
     if (
       this._entryStatus &&
