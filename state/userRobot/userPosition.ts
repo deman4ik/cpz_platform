@@ -2,7 +2,7 @@ import { Errors } from "moleculer";
 import { cpz, GenericObject } from "../../@types";
 import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
-import { addPercent, sum, average, round, sortDesc } from "../../utils";
+import { addPercent, sum, average, round, sortAsc } from "../../utils";
 import { ORDER_OPEN_TIMEOUT } from "../../config/settings";
 import Timeframe from "../../utils/timeframe";
 
@@ -205,8 +205,8 @@ class UserPosition implements cpz.UserPosition {
   _updateEntry() {
     if (this._entryOrders && this._entryOrders.length > 0) {
       const order = this._entryOrders.sort((a, b) =>
-        sortDesc(a.createdAt, b.createdAt)
-      )[0];
+        sortAsc(a.createdAt, b.createdAt)
+      )[this._entryOrders.length - 1];
       this._entryDate = order.exLastTradeAt || order.exTimestamp;
       this._entryCandleTimestamp =
         (this._entryDate &&
@@ -247,8 +247,8 @@ class UserPosition implements cpz.UserPosition {
   _updateExit() {
     if (this._exitOrders && this._exitOrders.length > 0) {
       const order = this._exitOrders.sort((a, b) =>
-        sortDesc(a.createdAt, b.createdAt)
-      )[0];
+        sortAsc(a.createdAt, b.createdAt)
+      )[this._exitOrders.length - 1];
       this._exitDate = order.exLastTradeAt || order.exTimestamp;
       this._exitCandleTimestamp =
         (this._exitDate &&
