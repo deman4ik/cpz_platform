@@ -52,7 +52,7 @@ class UserRobotsService extends Service {
             type: Sequelize.DATE,
             allowNull: true,
             field: "started_at",
-            get: function() {
+            get: function () {
               const value = this.getDataValue("startedAt");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -63,7 +63,7 @@ class UserRobotsService extends Service {
             type: Sequelize.DATE,
             allowNull: true,
             field: "stopped_at",
-            get: function() {
+            get: function () {
               const value = this.getDataValue("stoppedAt");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -467,14 +467,14 @@ class UserRobotsService extends Service {
                 FROM user_orders o
                 WHERE o.user_position_id = p.id
                   AND (o.action = 'long'
-                       OR o.action = 'short')) eo) AS entry_orders,
+                       OR o.action = 'short') order by o.created_at asc) eo) AS entry_orders,
             (SELECT array_to_json(array_agg(eo))
              FROM
                (SELECT o.*
                 FROM user_orders o
                 WHERE o.user_position_id = p.id
                   AND (o.action = 'closeLong'
-                       OR o.action = 'closeShort')) eo) AS exit_orders
+                       OR o.action = 'closeShort') order by o.created_at asc) eo) AS exit_orders
           FROM user_positions p
           WHERE p.user_robot_id = ur.id
             AND p.status IN ('delayed',
@@ -565,10 +565,10 @@ class UserRobotsService extends Service {
         );
         if (positions && Array.isArray(positions) && positions.length > 0) {
           openPositions = positions.filter(
-            pos => pos.status === cpz.UserPositionStatus.open
+            (pos) => pos.status === cpz.UserPositionStatus.open
           );
           closedPositions = positions.filter(
-            pos =>
+            (pos) =>
               pos.status === cpz.UserPositionStatus.closed ||
               pos.status === cpz.UserPositionStatus.closedAuto
           );

@@ -1161,7 +1161,7 @@ declare namespace cpz {
     connectorJobs: ConnectorJob[];
     _log(...args: any): void;
     handleSignal(signal: SignalEvent): void;
-    handleOrder(order: Order): void;
+    //  handleOrder(order: Order): void;
   }
 
   const enum StatsCalcJobType {
