@@ -2,7 +2,7 @@ import { Errors } from "moleculer";
 import { cpz, GenericObject } from "../../@types";
 import { v4 as uuid } from "uuid";
 import dayjs from "../../lib/dayjs";
-import { addPercent, sum, average, round } from "../../utils";
+import { addPercent, sum, average, round, sortDesc } from "../../utils";
 import { ORDER_OPEN_TIMEOUT } from "../../config/settings";
 import Timeframe from "../../utils/timeframe";
 
@@ -109,6 +109,9 @@ class UserPosition implements cpz.UserPosition {
     this._ordersToCreate = [];
     this._connectorJobs = [];
     this._hasRecentTrade = false;
+    this._updateEntry();
+    this._updateExit();
+    this._setStatus();
   }
 
   get id() {
@@ -201,6 +204,17 @@ class UserPosition implements cpz.UserPosition {
 
   _updateEntry() {
     if (this._entryOrders && this._entryOrders.length > 0) {
+      const order = this._entryOrders.sort((a, b) =>
+        sortDesc(a.createdAt, b.createdAt)
+      )[0];
+      this._entryDate = order.exLastTradeAt || order.exTimestamp;
+      this._entryCandleTimestamp =
+        (this._entryDate &&
+          Timeframe.validTimeframeDatePrev(
+            this._entryDate,
+            this._robot.timeframe
+          )) ||
+        null;
       this._entryPrice =
         round(
           average(
@@ -211,26 +225,38 @@ class UserPosition implements cpz.UserPosition {
       this._entryExecuted =
         round(sum(...this._entryOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
-    }
-    if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
-      if (!this._entryExecuted) {
-        this._entryStatus = cpz.UserPositionOrderStatus.new;
-      } else if (this._entryExecuted && this._entryExecuted === 0) {
-        this._entryStatus = cpz.UserPositionOrderStatus.open;
-      } else if (
-        this._entryExecuted > 0 &&
-        this._entryExecuted !== this._entryVolume
-      ) {
-        this._entryStatus = cpz.UserPositionOrderStatus.partial;
-      } else if (this._entryExecuted === this._entryVolume) {
-        this._entryStatus = cpz.UserPositionOrderStatus.closed;
-        this._hasRecentTrade = true;
+
+      if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
+        if (!this._entryExecuted) {
+          this._entryStatus = cpz.UserPositionOrderStatus.new;
+        } else if (this._entryExecuted && this._entryExecuted === 0) {
+          this._entryStatus = cpz.UserPositionOrderStatus.open;
+        } else if (
+          this._entryExecuted > 0 &&
+          this._entryExecuted !== this._entryVolume
+        ) {
+          this._entryStatus = cpz.UserPositionOrderStatus.partial;
+        } else if (this._entryExecuted === this._entryVolume) {
+          this._entryStatus = cpz.UserPositionOrderStatus.closed;
+          this._hasRecentTrade = true;
+        }
       }
     }
   }
 
   _updateExit() {
     if (this._exitOrders && this._exitOrders.length > 0) {
+      const order = this._exitOrders.sort((a, b) =>
+        sortDesc(a.createdAt, b.createdAt)
+      )[0];
+      this._exitDate = order.exLastTradeAt || order.exTimestamp;
+      this._exitCandleTimestamp =
+        (this._exitDate &&
+          Timeframe.validTimeframeDatePrev(
+            this._exitDate,
+            this._robot.timeframe
+          )) ||
+        null;
       this._exitPrice =
         round(
           average(
@@ -241,20 +267,21 @@ class UserPosition implements cpz.UserPosition {
       this._exitExecuted =
         round(sum(...this._exitOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
-    }
-    if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
-      if (!this._exitExecuted) {
-        this._exitStatus = cpz.UserPositionOrderStatus.new;
-      } else if (this._exitExecuted && this._exitExecuted === 0) {
-        this._exitStatus = cpz.UserPositionOrderStatus.open;
-      } else if (
-        this._exitExecuted > 0 &&
-        this._exitExecuted !== this._exitVolume
-      ) {
-        this._exitStatus = cpz.UserPositionOrderStatus.partial;
-      } else if (this._exitExecuted === this._exitVolume) {
-        this._exitStatus = cpz.UserPositionOrderStatus.closed;
-        this._hasRecentTrade = true;
+
+      if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
+        if (!this._exitExecuted) {
+          this._exitStatus = cpz.UserPositionOrderStatus.new;
+        } else if (this._exitExecuted && this._exitExecuted === 0) {
+          this._exitStatus = cpz.UserPositionOrderStatus.open;
+        } else if (
+          this._exitExecuted > 0 &&
+          this._exitExecuted !== this._exitVolume
+        ) {
+          this._exitStatus = cpz.UserPositionOrderStatus.partial;
+        } else if (this._exitExecuted === this._exitVolume) {
+          this._exitStatus = cpz.UserPositionOrderStatus.closed;
+          this._hasRecentTrade = true;
+        }
       }
     }
   }
@@ -635,7 +662,7 @@ class UserPosition implements cpz.UserPosition {
     this.handleSignal(this._internalState.delayedSignal);
   }
 
-  handleOrder(order: cpz.Order) {
+  /*handleOrder(order: cpz.Order) {
     if (this._isActionEntry(order.action)) {
       this._entryDate =
         order.exLastTradeAt || order.exTimestamp || dayjs.utc().toISOString();
@@ -655,7 +682,7 @@ class UserPosition implements cpz.UserPosition {
     }
 
     this._setStatus();
-  }
+  }*/
 
   _tryToOpen() {
     if (
@@ -751,9 +778,6 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _tryToCancel() {
-    this._updateEntry();
-    this._updateExit();
-    this._setStatus();
     // Position entry not closed
     if (
       this._entryStatus &&

@@ -67,24 +67,24 @@ class UserRobot implements cpz.UserRobot {
         stoppedAt: this._stoppedAt
       },
       robot: this._robot,
-      positions: positions.map(pos => pos.state),
-      ordersToCreate: flattenArray(positions.map(pos => pos.ordersToCreate)),
-      connectorJobs: flattenArray(positions.map(pos => pos.connectorJobs)),
+      positions: positions.map((pos) => pos.state),
+      ordersToCreate: flattenArray(positions.map((pos) => pos.ordersToCreate)),
+      connectorJobs: flattenArray(positions.map((pos) => pos.connectorJobs)),
       recentTrades: positions
-        .filter(pos => pos.hasRecentTrade)
-        .map(pos => pos.tradeEvent),
+        .filter((pos) => pos.hasRecentTrade)
+        .map((pos) => pos.tradeEvent),
       eventsToSend: this._eventsToSend
     };
   }
 
   get positions() {
-    return Object.values(this._positions).map(pos => pos.state);
+    return Object.values(this._positions).map((pos) => pos.state);
   }
 
   get hasActivePositions() {
     return (
       this.positions.filter(
-        pos =>
+        (pos) =>
           pos.status === cpz.UserPositionStatus.new ||
           pos.status === cpz.UserPositionStatus.open
       ).length > 0
@@ -94,7 +94,7 @@ class UserRobot implements cpz.UserRobot {
   get hasCanceledPositions() {
     return (
       this.positions.filter(
-        pos => pos.status === cpz.UserPositionStatus.canceled
+        (pos) => pos.status === cpz.UserPositionStatus.canceled
       ).length > 0
     );
   }
@@ -102,7 +102,7 @@ class UserRobot implements cpz.UserRobot {
   get hasClosedPositions() {
     return (
       this.positions.filter(
-        pos =>
+        (pos) =>
           pos.status === cpz.UserPositionStatus.closed ||
           pos.status === cpz.UserPositionStatus.closedAuto
       ).length > 0
@@ -111,7 +111,7 @@ class UserRobot implements cpz.UserRobot {
 
   _setPositions(positions: cpz.UserPositionState[]) {
     if (positions && Array.isArray(positions) && positions.length > 0) {
-      positions.forEach(position => {
+      positions.forEach((position) => {
         this._positions[position.positionId] = new UserPosition({
           ...position,
           robot: this._robot,
@@ -144,7 +144,7 @@ class UserRobot implements cpz.UserRobot {
     this._status = cpz.Status.stopping;
     this._message = message || null;
     if (this.hasActivePositions)
-      Object.keys(this._positions).forEach(key => {
+      Object.keys(this._positions).forEach((key) => {
         this._positions[key].cancel();
         this._positions[key].executeJob();
       });
@@ -240,7 +240,7 @@ class UserRobot implements cpz.UserRobot {
         this._cancelPreviousParentPositions(signal.positionParentId);
       } else {
         const previousActivePositions = Object.values(this._positions).filter(
-          pos =>
+          (pos) =>
             pos.isActive &&
             pos.prefix === signal.positionPrefix &&
             pos.positionNumber <
@@ -252,7 +252,7 @@ class UserRobot implements cpz.UserRobot {
           previousActivePositions.length > 0
         ) {
           hasPreviousActivePositions = true;
-          previousActivePositions.forEach(p => {
+          previousActivePositions.forEach((p) => {
             this._positions[p.positionId].cancel();
             this._positions[p.positionId].executeJob();
           });
@@ -299,7 +299,7 @@ class UserRobot implements cpz.UserRobot {
     } else {
       if (!this._positions[signal.positionId]) {
         const previousPositions = Object.values(this._positions).filter(
-          pos =>
+          (pos) =>
             pos.isActive &&
             pos.prefix === signal.positionPrefix &&
             pos.positionNumber <
@@ -330,8 +330,8 @@ class UserRobot implements cpz.UserRobot {
 
   handleDelayedPositions() {
     this.positions
-      .filter(p => p.status === cpz.UserPositionStatus.delayed)
-      .forEach(pos => {
+      .filter((p) => p.status === cpz.UserPositionStatus.delayed)
+      .forEach((pos) => {
         if (
           !this._positions[pos.parentId] ||
           (this._positions[pos.parentId] &&
@@ -361,7 +361,7 @@ class UserRobot implements cpz.UserRobot {
         }
       );
 
-    this._positions[order.positionId].handleOrder(order);
+    // this._positions[order.positionId].handleOrder(order);
     this._positions[order.positionId].executeJob();
     this.handleDelayedPositions();
   }
