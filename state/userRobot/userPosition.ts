@@ -203,7 +203,12 @@ class UserPosition implements cpz.UserPosition {
   }
 
   _updateEntry() {
-    if (this._entryOrders && this._entryOrders.length > 0) {
+    if (
+      this._entryStatus !== cpz.UserPositionOrderStatus.closed &&
+      this._entryStatus !== cpz.UserPositionOrderStatus.canceled &&
+      this._entryOrders &&
+      this._entryOrders.length > 0
+    ) {
       const order = this._entryOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._entryOrders.length - 1];
@@ -226,26 +231,30 @@ class UserPosition implements cpz.UserPosition {
         round(sum(...this._entryOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
 
-      if (this._entryStatus !== cpz.UserPositionOrderStatus.canceled) {
-        if (!this._entryExecuted) {
-          this._entryStatus = cpz.UserPositionOrderStatus.new;
-        } else if (this._entryExecuted && this._entryExecuted === 0) {
-          this._entryStatus = cpz.UserPositionOrderStatus.open;
-        } else if (
-          this._entryExecuted > 0 &&
-          this._entryExecuted !== this._entryVolume
-        ) {
-          this._entryStatus = cpz.UserPositionOrderStatus.partial;
-        } else if (this._entryExecuted === this._entryVolume) {
-          this._entryStatus = cpz.UserPositionOrderStatus.closed;
-          this._hasRecentTrade = true;
-        }
+      if (!this._entryExecuted) {
+        this._entryStatus = cpz.UserPositionOrderStatus.new;
+      } else if (this._entryExecuted && this._entryExecuted === 0) {
+        this._entryStatus = cpz.UserPositionOrderStatus.open;
+      } else if (
+        this._entryExecuted > 0 &&
+        this._entryExecuted !== this._entryVolume
+      ) {
+        this._entryStatus = cpz.UserPositionOrderStatus.partial;
+      } else if (this._entryExecuted === this._entryVolume) {
+        this._hasRecentTrade = true;
+
+        this._entryStatus = cpz.UserPositionOrderStatus.closed;
       }
     }
   }
 
   _updateExit() {
-    if (this._exitOrders && this._exitOrders.length > 0) {
+    if (
+      this._exitStatus !== cpz.UserPositionOrderStatus.closed &&
+      this._exitStatus !== cpz.UserPositionOrderStatus.canceled &&
+      this._exitOrders &&
+      this._exitOrders.length > 0
+    ) {
       const order = this._exitOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._exitOrders.length - 1];
@@ -268,20 +277,18 @@ class UserPosition implements cpz.UserPosition {
         round(sum(...this._exitOrders.map((o) => +o.executed || 0)), 6) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
 
-      if (this._exitStatus !== cpz.UserPositionOrderStatus.canceled) {
-        if (!this._exitExecuted) {
-          this._exitStatus = cpz.UserPositionOrderStatus.new;
-        } else if (this._exitExecuted && this._exitExecuted === 0) {
-          this._exitStatus = cpz.UserPositionOrderStatus.open;
-        } else if (
-          this._exitExecuted > 0 &&
-          this._exitExecuted !== this._exitVolume
-        ) {
-          this._exitStatus = cpz.UserPositionOrderStatus.partial;
-        } else if (this._exitExecuted === this._exitVolume) {
-          this._exitStatus = cpz.UserPositionOrderStatus.closed;
-          this._hasRecentTrade = true;
-        }
+      if (!this._exitExecuted) {
+        this._exitStatus = cpz.UserPositionOrderStatus.new;
+      } else if (this._exitExecuted && this._exitExecuted === 0) {
+        this._exitStatus = cpz.UserPositionOrderStatus.open;
+      } else if (
+        this._exitExecuted > 0 &&
+        this._exitExecuted !== this._exitVolume
+      ) {
+        this._exitStatus = cpz.UserPositionOrderStatus.partial;
+      } else if (this._exitExecuted === this._exitVolume) {
+        this._hasRecentTrade = true;
+        this._exitStatus = cpz.UserPositionOrderStatus.closed;
       }
     }
   }
