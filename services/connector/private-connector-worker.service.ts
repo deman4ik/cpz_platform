@@ -736,7 +736,8 @@ class PrivateConnectorWorkerService extends Service {
           err instanceof ccxt.AuthenticationError ||
           err instanceof ccxt.InsufficientFunds ||
           err instanceof ccxt.InvalidNonce ||
-          err instanceof ccxt.InvalidOrder
+          err instanceof ccxt.InvalidOrder ||
+          err.message.includes("Margin is insufficient")
         ) {
           throw err;
         }
