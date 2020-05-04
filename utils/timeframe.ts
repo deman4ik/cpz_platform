@@ -77,14 +77,14 @@ class Timeframe {
   }
 
   public static get validArray(): cpz.Timeframe[] {
-    return Object.keys(this.timeframes).map(t => +t);
+    return Object.keys(this.timeframes).map((t) => +t);
   }
 
   static exists(timeframe: cpz.Timeframe | string): boolean {
     if (typeof timeframe === "number") return !!this.timeframes[timeframe];
     return (
-      Object.values(this.timeframes).filter(t => t.str === timeframe).length ===
-      1
+      Object.values(this.timeframes).filter((t) => t.str === timeframe)
+        .length === 1
     );
   }
 
@@ -94,7 +94,7 @@ class Timeframe {
   }
 
   static stringToTimeframe(str: string): cpz.Timeframe {
-    const timeframe = Object.values(this.timeframes).find(t => t.str === str);
+    const timeframe = Object.values(this.timeframes).find((t) => t.str === str);
     if (timeframe) return timeframe.value;
     return null;
   }
@@ -139,7 +139,7 @@ class Timeframe {
     inputDate: string | number,
     timeframe: cpz.Timeframe
   ): boolean {
-    const date = dayjs.utc(inputDate);
+    const date = dayjs.utc(inputDate || undefined);
     if (date.second() !== 0) return false;
     /* Количество часов 0-23 */
     const hour = date.hour();
@@ -153,7 +153,7 @@ class Timeframe {
     timeframe: cpz.Timeframe
   ): string {
     const { amountInUnit, unit } = Timeframe.get(timeframe);
-    let date = dayjs.utc(inputDate);
+    let date = dayjs.utc(inputDate || undefined);
     let newDate;
     if (timeframe > 1 && timeframe < 60) {
       const minute = date.minute();
@@ -188,7 +188,7 @@ class Timeframe {
     timeframe: cpz.Timeframe
   ): string {
     const { amountInUnit, unit } = Timeframe.get(timeframe);
-    let date = dayjs.utc(inputDate);
+    let date = dayjs.utc(inputDate || undefined);
     let newDate;
     if (timeframe > 1 && timeframe < 60) {
       const minute = date.minute();
@@ -217,10 +217,7 @@ class Timeframe {
       const minute = date.minute();
       newDate = date.startOf(unit).toISOString();
       if (hour !== 0 || minute !== 0) {
-        newDate = date
-          .add(1, unit)
-          .startOf(unit)
-          .toISOString();
+        newDate = date.add(1, unit).startOf(unit).toISOString();
       }
     } else {
       newDate = date.startOf(unit).toISOString();
@@ -230,7 +227,7 @@ class Timeframe {
   }
 
   static timeframesByDate(inputDate: string): cpz.Timeframe[] {
-    const date = dayjs.utc(inputDate);
+    const date = dayjs.utc(inputDate || undefined);
 
     if (date.second() !== 0) return [];
 
@@ -240,8 +237,8 @@ class Timeframe {
     const minute = date.minute();
 
     /* Проверяем все таймфреймы */
-    let currentTimeframes: cpz.Timeframe[] = this.validArray.filter(timeframe =>
-      this.checkTimeframeByDate(hour, minute, timeframe)
+    let currentTimeframes: cpz.Timeframe[] = this.validArray.filter(
+      (timeframe) => this.checkTimeframeByDate(hour, minute, timeframe)
     );
     /* Если есть хотя бы один подходящий таймфрейм */
     if (currentTimeframes.length > 0)
@@ -267,10 +264,7 @@ class Timeframe {
   static getPrevSince(inputDate: string, timeframe: cpz.Timeframe): number {
     const currentDate = Timeframe.validTimeframeDatePrev(inputDate, timeframe);
     const { amountInUnit, unit } = Timeframe.get(timeframe);
-    return dayjs
-      .utc(currentDate)
-      .add(-amountInUnit, unit)
-      .valueOf();
+    return dayjs.utc(currentDate).add(-amountInUnit, unit).valueOf();
   }
 
   static getCurrentSince(amount: number, timeframe: cpz.Timeframe): number {
@@ -284,10 +278,7 @@ class Timeframe {
       return currentDate.startOf(unit).valueOf();
 
     if (timeframe === 1) {
-      return currentDate
-        .add(-amount, unit)
-        .startOf(unit)
-        .valueOf();
+      return currentDate.add(-amount, unit).startOf(unit).valueOf();
     }
 
     return currentDate

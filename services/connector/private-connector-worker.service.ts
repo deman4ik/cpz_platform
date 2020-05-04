@@ -194,13 +194,18 @@ class PrivateConnectorWorkerService extends Service {
         apiKey: key,
         secret,
         password: pass,
-        fetchImplementation: this._fetch
+        fetchImplementation: this._fetch,
+        options: {
+          enableRateLimit: true
+        }
       };
       let connector: ccxt.Exchange;
       if (exchange === "bitfinex" || exchange === "kraken") {
         connector = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "futures" };
+        config.options.defaultType = "futures";
+        config.options.adjustForTimeDifference = true;
+
         connector = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
 
@@ -731,7 +736,8 @@ class PrivateConnectorWorkerService extends Service {
           err instanceof ccxt.AuthenticationError ||
           err instanceof ccxt.InsufficientFunds ||
           err instanceof ccxt.InvalidNonce ||
-          err instanceof ccxt.InvalidOrder
+          err instanceof ccxt.InvalidOrder ||
+          err.message.includes("Margin is insufficient")
         ) {
           throw err;
         }

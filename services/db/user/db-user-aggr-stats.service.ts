@@ -57,7 +57,6 @@ class UserAggrStatsService extends Service {
         statistics,
         equity
       }: cpz.UserAggrStatsDB = ctx.params;
-
       const [statsExists]: cpz.UserAggrStatsDB[] = await this.actions.find(
         {
           query: {
