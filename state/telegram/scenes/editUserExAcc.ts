@@ -83,7 +83,7 @@ async function editUserExAccSubmited(ctx: any) {
       await ctx.reply(
         ctx.i18n.t("scenes.editUserExAcc.failed", {
           exchange,
-          error: error || ctx.i18n.t("unknownError")
+          error: `${error}`
         }),
         Extra.HTML()
       );
