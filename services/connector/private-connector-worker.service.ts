@@ -476,9 +476,17 @@ class PrivateConnectorWorkerService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[id] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "future" };
+        config.options = {
+          defaultType: "future",
+          adjustForTimeDifference: true,
+          recvWindow: 10000000
+        };
         this.connectors[id] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
+        config.options = {
+          adjustForTimeDifference: true,
+          recvWindow: 10000000
+        };
         this.connectors[id] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
     }
