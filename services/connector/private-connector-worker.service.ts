@@ -802,7 +802,7 @@ class PrivateConnectorWorkerService extends Service {
           params: { ...order.params, exchangeParams: orderParams },
           signalPrice,
           exId,
-          exTimestamp,
+          exTimestamp: exTimestamp && dayjs.utc(exTimestamp).toISOString(),
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status,
           price: (average && +average) || (price && +price) || signalPrice,
@@ -1020,7 +1020,7 @@ class PrivateConnectorWorkerService extends Service {
       return {
         order: {
           ...order,
-          exTimestamp,
+          exTimestamp: exTimestamp && dayjs.utc(exTimestamp).toISOString(),
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status,
           price: (average && +average) || (price && +price),

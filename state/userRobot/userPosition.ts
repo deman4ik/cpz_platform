@@ -212,7 +212,9 @@ class UserPosition implements cpz.UserPosition {
       const order = this._entryOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._entryOrders.length - 1];
-      this._entryDate = order.exLastTradeAt || order.exTimestamp;
+      this._entryDate = dayjs
+        .utc(order.exLastTradeAt || order.exTimestamp)
+        .toISOString();
       this._entryCandleTimestamp =
         (this._entryDate &&
           Timeframe.validTimeframeDatePrev(
@@ -258,7 +260,9 @@ class UserPosition implements cpz.UserPosition {
       const order = this._exitOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._exitOrders.length - 1];
-      this._exitDate = order.exLastTradeAt || order.exTimestamp;
+      this._exitDate = dayjs
+        .utc(order.exLastTradeAt || order.exTimestamp)
+        .toISOString();
       this._exitCandleTimestamp =
         (this._exitDate &&
           Timeframe.validTimeframeDatePrev(
