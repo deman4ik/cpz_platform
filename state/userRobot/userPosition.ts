@@ -212,9 +212,14 @@ class UserPosition implements cpz.UserPosition {
       const order = this._entryOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._entryOrders.length - 1];
-      this._entryDate = dayjs
-        .utc(order.exLastTradeAt || order.exTimestamp)
-        .toISOString();
+      if (order && order.exLastTradeAt) {
+        this._entryDate = dayjs.utc(order.exLastTradeAt).toISOString();
+      } else if (order && order.exTimestamp) {
+        this._entryDate = dayjs.utc(order.exTimestamp).toISOString();
+      } else {
+        this._entryDate = dayjs.utc().toISOString();
+      }
+
       this._entryCandleTimestamp =
         (this._entryDate &&
           Timeframe.validTimeframeDatePrev(
@@ -260,9 +265,13 @@ class UserPosition implements cpz.UserPosition {
       const order = this._exitOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._exitOrders.length - 1];
-      this._exitDate = dayjs
-        .utc(order.exLastTradeAt || order.exTimestamp)
-        .toISOString();
+      if (order && order.exLastTradeAt) {
+        this._exitDate = dayjs.utc(order.exLastTradeAt).toISOString();
+      } else if (order && order.exTimestamp) {
+        this._exitDate = dayjs.utc(order.exTimestamp).toISOString();
+      } else {
+        this._exitDate = dayjs.utc().toISOString();
+      }
       this._exitCandleTimestamp =
         (this._exitDate &&
           Timeframe.validTimeframeDatePrev(
