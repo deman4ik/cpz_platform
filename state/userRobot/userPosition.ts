@@ -216,17 +216,15 @@ class UserPosition implements cpz.UserPosition {
         this._entryDate = dayjs.utc(order.exLastTradeAt).toISOString();
       } else if (order && order.exTimestamp) {
         this._entryDate = dayjs.utc(order.exTimestamp).toISOString();
-      } else {
-        this._entryDate = dayjs.utc().toISOString();
       }
 
-      this._entryCandleTimestamp =
-        (this._entryDate &&
-          Timeframe.validTimeframeDatePrev(
-            this._entryDate,
-            this._robot.timeframe
-          )) ||
-        null;
+      if (this._entryDate) {
+        this._entryCandleTimestamp = Timeframe.validTimeframeDatePrev(
+          this._entryDate,
+          this._robot.timeframe
+        );
+      }
+
       this._entryPrice =
         round(
           average(
@@ -269,16 +267,14 @@ class UserPosition implements cpz.UserPosition {
         this._exitDate = dayjs.utc(order.exLastTradeAt).toISOString();
       } else if (order && order.exTimestamp) {
         this._exitDate = dayjs.utc(order.exTimestamp).toISOString();
-      } else {
-        this._exitDate = dayjs.utc().toISOString();
       }
-      this._exitCandleTimestamp =
-        (this._exitDate &&
-          Timeframe.validTimeframeDatePrev(
-            this._exitDate,
-            this._robot.timeframe
-          )) ||
-        null;
+      if (this._exitDate) {
+        this._exitCandleTimestamp = Timeframe.validTimeframeDatePrev(
+          this._exitDate,
+          this._robot.timeframe
+        );
+      }
+
       this._exitPrice =
         round(
           average(
