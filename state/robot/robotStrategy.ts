@@ -176,6 +176,7 @@ class BaseStrategy implements cpz.Strategy {
             this._positions[key].lowestLow === null)
         ) {
           this._positions[key]._initHighLow(
+            candle.timestamp,
             this._candlesProps.high,
             this._candlesProps.low
           );

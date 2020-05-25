@@ -198,14 +198,14 @@ class Position implements cpz.RobotPosition {
     this._alerts = {};
   }
 
-  _initHighLow(highs: number[], lows: number[]) {
+  _initHighLow(timestamp: string, highs: number[], lows: number[]) {
     if (
       this._status === cpz.RobotPositionStatus.open &&
       (!this.highestHigh || !this.lowestLow)
     ) {
       const barsHeld = +round(
         dayjs
-          .utc(this._candle.timestamp)
+          .utc(timestamp)
           .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
           this._timeframe
       );
