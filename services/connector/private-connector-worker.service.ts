@@ -422,8 +422,7 @@ class PrivateConnectorWorkerService extends Service {
       if (
         e instanceof ccxt.AuthenticationError ||
         e instanceof ccxt.InsufficientFunds ||
-        e instanceof ccxt.InvalidNonce ||
-        this.getErrorMessage(e).includes("EOrder:Insufficient initial margin")
+        e instanceof ccxt.InvalidNonce
       ) {
         await this.broker.call(
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.invalidate`,
@@ -746,7 +745,8 @@ class PrivateConnectorWorkerService extends Service {
           err instanceof ccxt.InsufficientFunds ||
           err instanceof ccxt.InvalidNonce ||
           err instanceof ccxt.InvalidOrder ||
-          err.message.includes("Margin is insufficient")
+          err.message.includes("Margin is insufficient") ||
+          err.message.includes("EOrder:Insufficient initial margin")
         ) {
           throw err;
         }
