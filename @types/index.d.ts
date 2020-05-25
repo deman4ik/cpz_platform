@@ -702,6 +702,12 @@ declare namespace cpz {
     barsHeld?: number;
   }
 
+  interface RobotsPostionInternalState {
+    [key: string]: any;
+    highestHigh?: number;
+    lowestLow?: number;
+    stop?: number;
+  }
   interface RobotPositionState {
     id: string;
     robotId: string;
@@ -728,6 +734,7 @@ declare namespace cpz {
     profit?: number;
     barsHeld?: number;
     fee?: number;
+    internalState?: RobotsPostionInternalState;
   }
 
   class RobotPosition {
@@ -745,8 +752,12 @@ declare namespace cpz {
     hasAlertsToPublish: boolean;
     hasTradeToPublish: boolean;
     state: RobotPositionState;
+    internalState: RobotsPostionInternalState;
+    highestHigh: number;
+    lowestLow: number;
     alertsToPublish: SignalInfo[];
     tradeToPublish: SignalInfo;
+    _initHighLow(highs: number[], lows: number[]): void;
     _clearAlertsToPublish(): void;
     _clearTradeToPublish(): void;
     _clearAlerts(): void;

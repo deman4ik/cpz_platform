@@ -66,12 +66,12 @@ class BaseStrategy implements cpz.Strategy {
     this._eventsToSend = [];
     this._positionsToSave = [];
     if (state.variables) {
-      Object.keys(state.variables).forEach(key => {
+      Object.keys(state.variables).forEach((key) => {
         this[key] = state.variables[key];
       });
     }
     if (state.strategyFunctions) {
-      Object.getOwnPropertyNames(state.strategyFunctions).forEach(key => {
+      Object.getOwnPropertyNames(state.strategyFunctions).forEach((key) => {
         this[key] = state.strategyFunctions[key];
       });
     }
@@ -111,7 +111,7 @@ class BaseStrategy implements cpz.Strategy {
 
   get hasAlerts() {
     let hasAlerts = false;
-    Object.values(this._positions).forEach(position => {
+    Object.values(this._positions).forEach((position) => {
       if (position.hasAlerts) {
         hasAlerts = true;
       }
@@ -124,9 +124,9 @@ class BaseStrategy implements cpz.Strategy {
   }
 
   _createAlertEvents() {
-    Object.values(this._positions).forEach(position => {
+    Object.values(this._positions).forEach((position) => {
       if (position.hasAlertsToPublish) {
-        position.alertsToPublish.forEach(signal =>
+        position.alertsToPublish.forEach((signal) =>
           this._createSignalEvent(signal, cpz.Event.SIGNAL_ALERT)
         );
         position._clearAlertsToPublish();
@@ -136,7 +136,7 @@ class BaseStrategy implements cpz.Strategy {
   }
 
   _createTradeEvents() {
-    Object.values(this._positions).forEach(position => {
+    Object.values(this._positions).forEach((position) => {
       if (position.hasTradeToPublish) {
         this._createSignalEvent(
           position.tradeToPublish,
@@ -169,7 +169,17 @@ class BaseStrategy implements cpz.Strategy {
 
   _positionsHandleCandle(candle: cpz.Candle) {
     if (Object.keys(this._positions).length > 0) {
-      Object.keys(this._positions).forEach(key => {
+      Object.keys(this._positions).forEach((key) => {
+        if (
+          this._positions[key].isActive &&
+          (this._positions[key].highestHigh === null ||
+            this._positions[key].lowestLow === null)
+        ) {
+          this._positions[key]._initHighLow(
+            this._candlesProps.high,
+            this._candlesProps.low
+          );
+        }
         this._positions[key]._handleCandle(candle);
       });
     }
@@ -211,7 +221,7 @@ class BaseStrategy implements cpz.Strategy {
 
   get hasActivePositions() {
     return (
-      Object.values(this._positions).filter(position => position.isActive)
+      Object.values(this._positions).filter((position) => position.isActive)
         .length > 0
     );
   }
@@ -227,7 +237,7 @@ class BaseStrategy implements cpz.Strategy {
   _getPosition(prefix: string = "p", parentId?: string) {
     const positions = Object.values(this._positions)
       .filter(
-        pos =>
+        (pos) =>
           pos.prefix === prefix &&
           ((!parentId && pos.isActive) || pos.parentId === parentId)
       )
@@ -243,12 +253,12 @@ class BaseStrategy implements cpz.Strategy {
   }
 
   get positions() {
-    return Object.values(this._positions).map(pos => pos.state);
+    return Object.values(this._positions).map((pos) => pos.state);
   }
 
   _setPositions(positions: any) {
     if (positions && Array.isArray(positions) && positions.length > 0) {
-      positions.forEach(position => {
+      positions.forEach((position) => {
         this._positions[position.code] = new Position(position);
         this._positions[position.code]._log = this._log.bind(this);
       });
@@ -257,8 +267,8 @@ class BaseStrategy implements cpz.Strategy {
 
   get validPositions() {
     return Object.values(this._positions)
-      .filter(position => position.status !== cpz.RobotPositionStatus.closed)
-      .map(pos => pos.state);
+      .filter((position) => position.status !== cpz.RobotPositionStatus.closed)
+      .map((pos) => pos.state);
   }
 
   _checkAlerts() {
@@ -269,7 +279,7 @@ class BaseStrategy implements cpz.Strategy {
           this._positions[b].code.split("_")[1]
         )
       )
-      .forEach(key => {
+      .forEach((key) => {
         if (this._positions[key].hasAlerts) {
           this._positions[key]._checkAlerts();
           if (this._positions[key].hasTradeToPublish) {
@@ -290,7 +300,7 @@ class BaseStrategy implements cpz.Strategy {
   }
 
   _clearAlerts() {
-    Object.keys(this._positions).forEach(key => {
+    Object.keys(this._positions).forEach((key) => {
       if (this._positions[key].hasAlerts) {
         this._positions[key]._clearAlerts();
       }
@@ -300,9 +310,9 @@ class BaseStrategy implements cpz.Strategy {
   /** INDICATORS */
   _handleIndicators(indicators: { [key: string]: cpz.IndicatorState }) {
     this._indicators = indicators;
-    Object.keys(this._indicators).forEach(key => {
+    Object.keys(this._indicators).forEach((key) => {
       if (this._indicators[key].variables)
-        Object.keys(this._indicators[key].variables).forEach(variable => {
+        Object.keys(this._indicators[key].variables).forEach((variable) => {
           this._indicators[key][variable] = this._indicators[key].variables[
             variable
           ];

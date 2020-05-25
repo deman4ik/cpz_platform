@@ -152,7 +152,8 @@ class RobotPositionsService extends Service {
               const value = this.getDataValue("barsHeld");
               return (value && +value) || value;
             }
-          }
+          },
+          internalState: { type: Sequelize.JSONB, field: "internal_state" }
         },
         options: {
           freezeTableName: true,
@@ -201,7 +202,8 @@ class RobotPositionsService extends Service {
                 alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
                 fee: { type: "number", optional: true },
-                barsHeld: { type: "number", integer: true, optional: true }
+                barsHeld: { type: "number", integer: true, optional: true },
+                internalSate: "object"
               },
               optional: true
             },
@@ -234,7 +236,8 @@ class RobotPositionsService extends Service {
                   alerts: { type: "object", optional: true },
                   profit: { type: "number", optional: true },
                   fee: { type: "number", optional: true },
-                  barsHeld: { type: "number", integer: true, optional: true }
+                  barsHeld: { type: "number", integer: true, optional: true },
+                  internalSate: "object"
                 }
               },
               optional: true
@@ -291,7 +294,8 @@ class RobotPositionsService extends Service {
           alerts,
           profit,
           fee,
-          barsHeld
+          barsHeld,
+          internalState
         }: cpz.RobotPositionState) =>
           Object.values({
             id,
@@ -318,7 +322,8 @@ class RobotPositionsService extends Service {
             alerts: JSON.stringify(alerts),
             profit,
             fee,
-            barsHeld
+            barsHeld,
+            internalState: JSON.stringify(internalState)
           })
       );
       const query = `INSERT INTO robot_positions
@@ -346,7 +351,8 @@ class RobotPositionsService extends Service {
         alerts,
         profit,
         fee,
-        bars_held
+        bars_held,
+        internal_state
         ) 
         VALUES ${entities
           .map((_: any) => {
@@ -372,7 +378,8 @@ class RobotPositionsService extends Service {
          alerts = excluded.alerts,
          profit = excluded.profit,
          fee = excluded.fee,
-         bars_held = excluded.bars_held;`;
+         bars_held = excluded.bars_held,
+         internal_state = excluded.internal_state;`;
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,

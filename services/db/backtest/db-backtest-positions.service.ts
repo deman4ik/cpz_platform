@@ -20,7 +20,7 @@ class BacktestPositionsService extends Service {
           timeframe: Sequelize.INTEGER,
           volume: {
             type: Sequelize.NUMBER,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("volume");
               return (value && +value) || value;
             }
@@ -43,7 +43,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.STRING,
             field: "entry_price",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryPrice");
               return (value && +value) || value;
             }
@@ -52,7 +52,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.DATE,
             field: "entry_date",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryDate");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -73,7 +73,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.DATE,
             field: "entry_candle_timestamp",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("entryCandleTimestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -89,7 +89,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.NUMBER,
             field: "exit_price",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitPrice");
               return (value && +value) || value;
             }
@@ -98,7 +98,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.DATE,
             field: "exit_date",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitDate");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -119,7 +119,7 @@ class BacktestPositionsService extends Service {
             type: Sequelize.STRING,
             field: "exit_candle_timestamp",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("exitCandleTimestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -130,7 +130,7 @@ class BacktestPositionsService extends Service {
           profit: {
             type: Sequelize.NUMBER,
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("profit");
               return (value && +value) || value;
             }
@@ -139,11 +139,12 @@ class BacktestPositionsService extends Service {
             type: Sequelize.INTEGER,
             field: "bars_held",
             allowNull: true,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("barsHeld");
               return (value && +value) || value;
             }
-          }
+          },
+          internalState: { type: Sequelize.JSONB, field: "internal_state" }
         },
         options: {
           freezeTableName: true,
@@ -181,7 +182,8 @@ class BacktestPositionsService extends Service {
                 exitCandleTimestamp: { type: "string", optional: true },
                 alerts: { type: "object", optional: true },
                 profit: { type: "number", optional: true },
-                barsHeld: { type: "number", integer: true, optional: true }
+                barsHeld: { type: "number", integer: true, optional: true },
+                internalState: "object"
               },
               optional: true
             },
@@ -213,7 +215,8 @@ class BacktestPositionsService extends Service {
                   exitCandleTimestamp: { type: "string", optional: true },
                   alerts: { type: "object", optional: true },
                   profit: { type: "number", optional: true },
-                  barsHeld: { type: "number", integer: true, optional: true }
+                  barsHeld: { type: "number", integer: true, optional: true },
+                  internalState: "object"
                 }
               },
               optional: true
@@ -269,7 +272,8 @@ class BacktestPositionsService extends Service {
           exitCandleTimestamp,
           alerts,
           profit,
-          barsHeld
+          barsHeld,
+          internalState
         }: cpz.BacktesterPositionState) =>
           Object.values({
             id,
@@ -295,7 +299,8 @@ class BacktestPositionsService extends Service {
             exitCandleTimestamp,
             alerts: JSON.stringify(alerts),
             profit,
-            barsHeld
+            barsHeld,
+            internalState: JSON.stringify(internalState)
           })
       );
 
@@ -323,7 +328,8 @@ class BacktestPositionsService extends Service {
         exit_candle_timestamp,
         alerts,
         profit,
-        bars_held
+        bars_held,
+        internal_state
         ) 
         VALUES ${entities
           .map((_: any) => {
@@ -348,7 +354,8 @@ class BacktestPositionsService extends Service {
          exit_candle_timestamp = excluded.exit_candle_timestamp,
          alerts = excluded.alerts,
          profit = excluded.profit,
-         bars_held = excluded.bars_held;`;
+         bars_held = excluded.bars_held,
+         internal_state = excluded.internal_state;`;
 
       await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.INSERT,
