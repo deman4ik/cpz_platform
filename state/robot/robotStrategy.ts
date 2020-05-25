@@ -171,6 +171,9 @@ class BaseStrategy implements cpz.Strategy {
     if (Object.keys(this._positions).length > 0) {
       Object.keys(this._positions).forEach((key) => {
         if (
+          this._candlesProps &&
+          this._candlesProps.high &&
+          this._candlesProps.low &&
           this._positions[key].isActive &&
           (this._positions[key].highestHigh === null ||
             this._positions[key].lowestLow === null)
