@@ -203,7 +203,7 @@ class RobotPositionsService extends Service {
                 profit: { type: "number", optional: true },
                 fee: { type: "number", optional: true },
                 barsHeld: { type: "number", integer: true, optional: true },
-                internalSate: "object"
+                internalState: "object"
               },
               optional: true
             },
@@ -237,7 +237,7 @@ class RobotPositionsService extends Service {
                   profit: { type: "number", optional: true },
                   fee: { type: "number", optional: true },
                   barsHeld: { type: "number", integer: true, optional: true },
-                  internalSate: "object"
+                  internalState: "object"
                 }
               },
               optional: true

@@ -1,6 +1,6 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { cpz } from "../../@types";
-import Telegraf, { Extra } from "telegraf";
+import { Telegraf, Extra } from "telegraf";
 import Stage from "telegraf/stage";
 const { enter, leave } = Stage;
 import Scene from "telegraf/scenes/base";
