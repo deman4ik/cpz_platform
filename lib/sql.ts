@@ -53,8 +53,8 @@ const adapterOptions = {
   logging: false,
   pool: {
     min: 1,
-    max: 20,
-    acquire: 60000
+    max: 10,
+    acquire: 120000
   }
 };
 
