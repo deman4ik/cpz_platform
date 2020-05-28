@@ -228,12 +228,22 @@ class UserPosition implements cpz.UserPosition {
       this._entryPrice =
         round(
           average(
-            ...this._entryOrders.map((o) => +o.price || 0).filter((p) => p > 0)
+            ...this._entryOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.price || 0)
+              .filter((p) => p > 0)
           ),
           6
         ) || null;
       this._entryExecuted =
-        round(sum(...this._entryOrders.map((o) => +o.executed || 0)), 6) || 0;
+        round(
+          sum(
+            ...this._entryOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.executed || 0)
+          ),
+          6
+        ) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
 
       if (!this._entryExecuted) {
@@ -278,12 +288,22 @@ class UserPosition implements cpz.UserPosition {
       this._exitPrice =
         round(
           average(
-            ...this._exitOrders.map((o) => +o.price || 0).filter((p) => p > 0)
+            ...this._exitOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.price || 0)
+              .filter((p) => p > 0)
           ),
           6
         ) || null;
       this._exitExecuted =
-        round(sum(...this._exitOrders.map((o) => +o.executed || 0)), 6) || 0;
+        round(
+          sum(
+            ...this._exitOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.executed || 0)
+          ),
+          6
+        ) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
 
       if (!this._exitExecuted) {
