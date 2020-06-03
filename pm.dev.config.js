@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "db",
       script: "./node_modules/moleculer/bin/moleculer-runner.js",
-      args: "--env --config dev.config.js --instances=3 dist/services/db",
+      args: "--env --config dev.config.js dist/services/db",
       env: {
         NODE_ENV: "production",
         NODEID: "db"
