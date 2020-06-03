@@ -38,7 +38,7 @@ class StatsCalcWorkerService extends Service {
       ],
       queues: {
         [cpz.Queue.statsCalc]: {
-          concurrency: 100,
+          concurrency: 10,
           async process(job: Job<cpz.StatsCalcJob>) {
             await this.run(job.data);
             return { success: true, id: job.id };
@@ -105,7 +105,7 @@ class StatsCalcWorkerService extends Service {
       }
     );
     const { statistics, equity } = await this.calcStatistics(
-      positions.map(pos => ({
+      positions.map((pos) => ({
         ...pos,
         profit:
           pos.fee && +pos.fee > 0
@@ -150,12 +150,12 @@ class StatsCalcWorkerService extends Service {
         allPositions.length > 0
       ) {
         const positions = allPositions.filter(
-          pos =>
+          (pos) =>
             dayjs.utc(pos.entryDate).valueOf() >=
             dayjs.utc(userSignal.subscribedAt).valueOf()
         );
         if (positions.length > 0) {
-          const signalPositions = positions.map(pos => {
+          const signalPositions = positions.map((pos) => {
             let profit: number = 0;
             if (pos.direction === cpz.PositionDirection.long) {
               profit = +round(
@@ -205,7 +205,7 @@ class StatsCalcWorkerService extends Service {
       const minSubscriptionDate = dayjs
         .utc(
           Math.min(
-            ...userSignals.map(us => dayjs.utc(us.subscribedAt).valueOf())
+            ...userSignals.map((us) => dayjs.utc(us.subscribedAt).valueOf())
           )
         )
         .toISOString();
@@ -231,13 +231,13 @@ class StatsCalcWorkerService extends Service {
       ) {
         for (const userSignal of userSignals) {
           const positions = allPositions.filter(
-            pos =>
+            (pos) =>
               dayjs.utc(pos.entryDate).valueOf() >=
               dayjs.utc(userSignal.subscribedAt).valueOf()
           );
 
           if (positions.length > 0) {
-            const signalPositions = positions.map(pos => {
+            const signalPositions = positions.map((pos) => {
               let profit: number = 0;
               if (pos.direction === cpz.PositionDirection.long) {
                 profit = +round(
@@ -290,7 +290,7 @@ class StatsCalcWorkerService extends Service {
       Array.isArray(userSignalPositions) &&
       userSignalPositions.length > 0
     ) {
-      const signalPositions = userSignalPositions.map(pos => {
+      const signalPositions = userSignalPositions.map((pos) => {
         let profit: number = 0;
         if (pos.direction === cpz.PositionDirection.long) {
           profit = +round(
