@@ -24,7 +24,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Save DigitalOcean kubeconfig
-        run: doctl kubernetes cluster kubeconfig show cpz > $GITHUB_WORKSPACE/.kubeconfig
+        run: doctl kubernetes cluster kubeconfig show cpz-cluster > $GITHUB_WORKSPACE/.kubeconfig
 
       - name: Login to Docker
         run: doctl registry login
