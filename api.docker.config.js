@@ -8,7 +8,19 @@ const brokerConfig = {
       port: +process.env.REDIS_PORT,
       password: process.env.REDIS_PASSWORD,
       tls: process.env.REDIS_TLS && {},
-      db: 1
+      db: 4
+    }
+  },
+  registry: {
+    discoverer: {
+      type: "Redis",
+      options: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD,
+        tls: process.env.REDIS_TLS && {},
+        db: 5
+      }
     }
   },
   middlewares: [HealthMiddleware()],

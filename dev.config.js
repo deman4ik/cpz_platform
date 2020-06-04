@@ -121,7 +121,7 @@ const brokerConfig = {
       port: process.env.REDIS_PORT,
       password: process.env.REDIS_PASSWORD,
       tls: process.env.REDIS_TLS && {},
-      db: 1
+      db: 4
     }
   },
 
@@ -133,7 +133,7 @@ const brokerConfig = {
         port: process.env.REDIS_PORT,
         password: process.env.REDIS_PASSWORD,
         tls: process.env.REDIS_TLS && {},
-        db: 2
+        db: 5
       }
     }
   },

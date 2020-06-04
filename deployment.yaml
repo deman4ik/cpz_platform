@@ -14,7 +14,6 @@ spec:
       env: <ENV>
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: <APP>
         env: <ENV>
@@ -158,6 +157,10 @@ spec:
               protocol: TCP
             - containerPort: 5000
               protocol: TCP
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
