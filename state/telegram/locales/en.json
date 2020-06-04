@@ -47,14 +47,14 @@
     "robotSignal": {
       "subscribeSignals": "🚥 Subscribe to Signals",
       "unsubscribeSignals": "❌ Unsubscribe from Signals",
-      "changeVolume": "⚙️ Change Volume",
+      "changeVolume": "⚙️ Change Amount",
       "unsubscribedSignals": "You unsubsribed from <b>#${code}</b> signals =(",
       "unsubscribedFailed": "Failed to unsubscribe from <b>#${code}</b> signals - ${error}"
     },
     "subscribeSignals": {
-      "enterVolume": "🚥 Subscribing to #${code} robot.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "🚥 Subscribing to #${code} robot.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "subscribedSignals": "🚥 Succesfully subsribed to <b>#${code}</b> signals with volume ${volume} ${asset}!\n\n⚠️ Use all signals at your own risk!"
+      "enterVolume": "🚥 Subscribing to #${code} robot.\n\n<b>Please enter desired trading amount in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "🚥 Subscribing to #${code} robot.\n\nWrong amount format.\nMinimum value is ${minVolume} ${asset}",
+      "subscribedSignals": "🚥 Succesfully subsribed to <b>#${code}</b> signals with amount ${volume} ${asset}!\n\n⚠️ Use all signals at your own risk!"
     },
     "robots": {
       "info": "🤖 Robots - Automated Trading Mode",
@@ -91,14 +91,14 @@
     "addUserRobot": {
       "selectExAcc": "✅ Adding robot #${code}.\n\nSelect your ${exchange} API Key:",
       "noneExAccs": "✅ Adding robot #${code}.\n\nYou have not registered any ${exchange} API Keys.",
-      "enterVolume": "✅ Adding robot #${code}.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "✅ Adding robot #${code}.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "✅ Succesfully added <b>#${code}</b> robot with trading volume ${volume} ${asset}!"
+      "enterVolume": "✅ Adding robot #${code}.\n\n<b>Please enter desired trading amount in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "✅ Adding robot #${code}.\n\nWrong amount format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "✅ Succesfully added <b>#${code}</b> robot with trading amount ${volume} ${asset}!"
     },
     "editUserRobot": {
-      "enterVolume": "⚙️ Editing robot #${code} settings.\n\n<b>Please enter desired trading volume in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
-      "wrongVolume": "⚙️ Editing robot #${code} settings.\n\nWrong volume format.\nMinimum value is ${minVolume} ${asset}",
-      "success": "⚙️ Succesfully edited <b>#${code}</b> robot. New trading volume ${volume} ${asset}!"
+      "enterVolume": "⚙️ Editing robot #${code} settings.\n\n<b>Please enter desired trading amount in ${asset}.</b>\n\nMinimum value is ${minVolume} ${asset}",
+      "wrongVolume": "⚙️ Editing robot #${code} settings.\n\nWrong amount format.\nMinimum value is ${minVolume} ${asset}",
+      "success": "⚙️ Succesfully edited <b>#${code}</b> robot. New trading amount ${volume} ${asset}!"
     },
     "deleteUserRobot": {
       "confirm": "❌ Deleting <b>#${code}</b> robot...\n\n⚠️ Are you sure you want to delete <b>#${code}</b> robot?\n\n You will lost all your trading history for this robot!",
@@ -170,8 +170,8 @@
   },
   "userTrade": {
     "new": "🤖✅ New Robot Trade!\n\n🤖 Robot: <b>#${code}</b>\n\n",
-    "open": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n<b>Volume:</b> ${volume} ${asset}",
-    "closed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Volume:</b> ${volume} ${asset}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n"
+    "open": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n<b>Amount:</b> ${volume} ${asset}",
+    "closed": "-------\n<b>Position:</b> ${code}\n\n<b>Entry:</b> ${entryAction}\n<b>Entry Date:</b> ${entryDate}\n<b>Entry Price:</b> ${entryPrice}$\n\n<b>Exit:</b> ${exitAction}\n<b>Exit Date:</b> ${exitDate}\n<b>Exit Price:</b> ${exitPrice}$\n\n<b>Amount:</b> ${volume} ${asset}\n\n<b>Bars Held:</b> ${barsHeld}\n<b>Profit:</b> ${profit}$\n"
   },
   "robot": {
     "menuInfo": "ℹ️ Robot Info",
@@ -181,7 +181,7 @@
     "name": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n\n",
     "info": "🤖\nRobot: <b>#${code}</b> ${subscribed}\n<b>Description:</b> ${description}\n<b>Maximum signals:</b> ${signalsCount} per day\n\n",
     "profit": "<b>Performance:</b> ${profit}$ / ${lastProfit}$\n\n",
-    "volume": "<b>Volume:</b> ${volume} ${asset}\n\n",
+    "volume": "<b>Amount:</b> ${volume} ${asset}\n\n",
     "subscribedAt": "<b>Subscribed at:</b> ${subscribedAt}\n\n",
     "startedAt": "<b>Started at:</b> ${startedAt}\n\n",
     "stoppedAt": "<b>Stopped at:</b> ${stoppedAt}\n\n",

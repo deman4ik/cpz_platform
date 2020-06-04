@@ -38,7 +38,7 @@ class StatsCalcWorkerService extends Service {
       ],
       queues: {
         [cpz.Queue.statsCalc]: {
-          concurrency: 100,
+          concurrency: 10,
           async process(job: Job<cpz.StatsCalcJob>) {
             await this.run(job.data);
             return { success: true, id: job.id };

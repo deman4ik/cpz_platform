@@ -141,7 +141,7 @@ async function addUserExAccSubmited(ctx: any) {
       await ctx.reply(
         ctx.i18n.t("scenes.addUserExAcc.failed", {
           exchange,
-          error: error || ctx.i18n.t("unknownError")
+          error: `${error}`
         }),
         Extra.HTML()
       );

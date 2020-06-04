@@ -212,23 +212,38 @@ class UserPosition implements cpz.UserPosition {
       const order = this._entryOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._entryOrders.length - 1];
-      this._entryDate = order.exLastTradeAt || order.exTimestamp;
-      this._entryCandleTimestamp =
-        (this._entryDate &&
-          Timeframe.validTimeframeDatePrev(
-            this._entryDate,
-            this._robot.timeframe
-          )) ||
-        null;
+      if (order && order.exLastTradeAt) {
+        this._entryDate = dayjs.utc(order.exLastTradeAt).toISOString();
+      } else if (order && order.exTimestamp) {
+        this._entryDate = dayjs.utc(order.exTimestamp).toISOString();
+      }
+
+      if (this._entryDate) {
+        this._entryCandleTimestamp = Timeframe.validTimeframeDatePrev(
+          this._entryDate,
+          this._robot.timeframe
+        );
+      }
+
       this._entryPrice =
         round(
           average(
-            ...this._entryOrders.map((o) => +o.price || 0).filter((p) => p > 0)
+            ...this._entryOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.price || 0)
+              .filter((p) => p > 0)
           ),
           6
         ) || null;
       this._entryExecuted =
-        round(sum(...this._entryOrders.map((o) => +o.executed || 0)), 6) || 0;
+        round(
+          sum(
+            ...this._entryOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.executed || 0)
+          ),
+          6
+        ) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
 
       if (!this._entryExecuted) {
@@ -258,23 +273,37 @@ class UserPosition implements cpz.UserPosition {
       const order = this._exitOrders.sort((a, b) =>
         sortAsc(a.createdAt, b.createdAt)
       )[this._exitOrders.length - 1];
-      this._exitDate = order.exLastTradeAt || order.exTimestamp;
-      this._exitCandleTimestamp =
-        (this._exitDate &&
-          Timeframe.validTimeframeDatePrev(
-            this._exitDate,
-            this._robot.timeframe
-          )) ||
-        null;
+      if (order && order.exLastTradeAt) {
+        this._exitDate = dayjs.utc(order.exLastTradeAt).toISOString();
+      } else if (order && order.exTimestamp) {
+        this._exitDate = dayjs.utc(order.exTimestamp).toISOString();
+      }
+      if (this._exitDate) {
+        this._exitCandleTimestamp = Timeframe.validTimeframeDatePrev(
+          this._exitDate,
+          this._robot.timeframe
+        );
+      }
+
       this._exitPrice =
         round(
           average(
-            ...this._exitOrders.map((o) => +o.price || 0).filter((p) => p > 0)
+            ...this._exitOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.price || 0)
+              .filter((p) => p > 0)
           ),
           6
         ) || null;
       this._exitExecuted =
-        round(sum(...this._exitOrders.map((o) => +o.executed || 0)), 6) || 0;
+        round(
+          sum(
+            ...this._exitOrders
+              .filter((o) => o.status === cpz.OrderStatus.closed)
+              .map((o) => +o.executed || 0)
+          ),
+          6
+        ) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
 
       if (!this._exitExecuted) {

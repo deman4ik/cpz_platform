@@ -203,7 +203,7 @@ class PrivateConnectorWorkerService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         connector = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options.defaultType = "futures";
+        config.options.defaultType = "future";
         config.options.adjustForTimeDifference = true;
 
         connector = new ccxt.binance(config);
@@ -476,9 +476,17 @@ class PrivateConnectorWorkerService extends Service {
       if (exchange === "bitfinex" || exchange === "kraken") {
         this.connectors[id] = new ccxt[exchange](config);
       } else if (exchange === "binance_futures") {
-        config.options = { defaultType: "future" };
+        config.options = {
+          defaultType: "future",
+          adjustForTimeDifference: true,
+          recvWindow: 10000000
+        };
         this.connectors[id] = new ccxt.binance(config);
       } else if (exchange === "binance_spot") {
+        config.options = {
+          adjustForTimeDifference: true,
+          recvWindow: 10000000
+        };
         this.connectors[id] = new ccxt.binance(config);
       } else throw new Error("Unsupported exchange");
     }
@@ -737,7 +745,8 @@ class PrivateConnectorWorkerService extends Service {
           err instanceof ccxt.InsufficientFunds ||
           err instanceof ccxt.InvalidNonce ||
           err instanceof ccxt.InvalidOrder ||
-          err.message.includes("Margin is insufficient")
+          err.message.includes("Margin is insufficient") ||
+          err.message.includes("EOrder:Insufficient initial margin")
         ) {
           throw err;
         }
@@ -794,7 +803,7 @@ class PrivateConnectorWorkerService extends Service {
           params: { ...order.params, exchangeParams: orderParams },
           signalPrice,
           exId,
-          exTimestamp,
+          exTimestamp: exTimestamp && dayjs.utc(exTimestamp).toISOString(),
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status,
           price: (average && +average) || (price && +price) || signalPrice,
@@ -1012,7 +1021,7 @@ class PrivateConnectorWorkerService extends Service {
       return {
         order: {
           ...order,
-          exTimestamp,
+          exTimestamp: exTimestamp && dayjs.utc(exTimestamp).toISOString(),
           exLastTradeAt: this.getCloseOrderDate(<string>exchange, response),
           status,
           price: (average && +average) || (price && +price),

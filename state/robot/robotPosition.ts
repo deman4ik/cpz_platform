@@ -33,6 +33,7 @@ class Position implements cpz.RobotPosition {
   private _profit: number;
   private _barsHeld: number;
   private _fee: number;
+  private _internalState: cpz.RobotsPostionInternalState;
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
   private _tradeToPublish: cpz.SignalInfo;
@@ -64,6 +65,11 @@ class Position implements cpz.RobotPosition {
     this._profit = state.profit || 0;
     this._barsHeld = state.barsHeld || 0;
     this._fee = state.fee;
+    this._internalState = state.internalState || {
+      highestHigh: null,
+      lowestLow: null,
+      stop: null
+    };
     this._alertsToPublish = [];
     this._tradeToPublish = null;
     this._candle = null;
@@ -133,6 +139,18 @@ class Position implements cpz.RobotPosition {
     return this._tradeToPublish;
   }
 
+  public get internalState() {
+    return this._internalState;
+  }
+
+  public get highestHigh() {
+    return this._internalState.highestHigh;
+  }
+
+  public get lowestLow() {
+    return this._internalState.lowestLow;
+  }
+
   public get state() {
     return {
       id: this._id,
@@ -158,7 +176,8 @@ class Position implements cpz.RobotPosition {
       exitCandleTimestamp: this._exitCandleTimestamp,
       alerts: this._alerts,
       profit: this._profit,
-      barsHeld: this._barsHeld
+      barsHeld: this._barsHeld,
+      internalState: this._internalState
     };
   }
 
@@ -177,6 +196,23 @@ class Position implements cpz.RobotPosition {
    */
   _clearAlerts() {
     this._alerts = {};
+  }
+
+  _initHighLow(timestamp: string, highs: number[], lows: number[]) {
+    if (
+      this._status === cpz.RobotPositionStatus.open &&
+      (!this.highestHigh || !this.lowestLow)
+    ) {
+      const barsHeld = +round(
+        dayjs
+          .utc(timestamp)
+          .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
+          this._timeframe
+      );
+
+      this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
+      this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
+    }
   }
 
   _calcStats() {
@@ -201,6 +237,20 @@ class Position implements cpz.RobotPosition {
 
   _handleCandle(candle: cpz.Candle) {
     this._candle = candle;
+    if (
+      this._status === cpz.RobotPositionStatus.open &&
+      this._internalState.highestHigh !== null &&
+      this._internalState.lowestLow !== null
+    ) {
+      this._internalState.highestHigh = Math.max(
+        this._internalState.highestHigh,
+        this._candle.high
+      );
+      this._internalState.lowestLow = Math.min(
+        this._internalState.lowestLow,
+        this._candle.low
+      );
+    }
   }
 
   _checkOpen() {
@@ -272,6 +322,8 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long
         ? cpz.PositionDirection.long
         : cpz.PositionDirection.short;
+    this._internalState.lowestLow = Infinity;
+    this._internalState.highestHigh = -Infinity;
     this._createTradeSignal({
       ...alert,
       candleTimestamp: this._candle.timestamp
@@ -426,6 +478,18 @@ class Position implements cpz.RobotPosition {
     this._addAlert(cpz.TradeAction.closeLong, price, cpz.OrderType.stop);
   }
 
+  public sellAtTrailingStop(price = +this._candle.close) {
+    this._checkClose();
+    this._internalState.stop = this._internalState.stop
+      ? Math.max(this._internalState.stop, price)
+      : price;
+    this._addAlert(
+      cpz.TradeAction.closeLong,
+      this._internalState.stop,
+      cpz.OrderType.stop
+    );
+  }
+
   public shortAtStop(price = +this._candle.close) {
     this._checkOpen();
     this._addAlert(cpz.TradeAction.short, price, cpz.OrderType.stop);
@@ -434,6 +498,18 @@ class Position implements cpz.RobotPosition {
   public coverAtStop(price = +this._candle.close) {
     this._checkClose();
     this._addAlert(cpz.TradeAction.closeShort, price, cpz.OrderType.stop);
+  }
+
+  public coverAtTrailingStop(price = +this._candle.close) {
+    this._checkClose();
+    this._internalState.stop = this._internalState.stop
+      ? Math.min(this._internalState.stop, price)
+      : price;
+    this._addAlert(
+      cpz.TradeAction.closeShort,
+      this._internalState.stop,
+      cpz.OrderType.stop
+    );
   }
 
   public buyAtLimit(price = +this._candle.close) {
