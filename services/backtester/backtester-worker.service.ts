@@ -103,7 +103,7 @@ class BacktesterWorkerService extends Service {
     };
     try {
       this.logger.info(`Job #${job.id} start backtest`);
-      this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
+      await this.broker.emit(`${cpz.Event.BACKTESTER_STARTED}`, {
         id: backtesterState.id
       });
       const [existedBacktest] = await this.broker.call(
@@ -180,14 +180,14 @@ class BacktesterWorkerService extends Service {
         let baseIndicatorsCode;
         if (backtesterState.settings.local) {
           baseIndicatorsCode = await Promise.all(
-            robot.baseIndicatorsFileNames.map(async fileName => {
+            robot.baseIndicatorsFileNames.map(async (fileName) => {
               const code = await import(`../../indicators/${fileName}`);
               return { fileName, code };
             })
           );
         } else {
           baseIndicatorsCode = await Promise.all(
-            robot.baseIndicatorsFileNames.map(async fileName => {
+            robot.baseIndicatorsFileNames.map(async (fileName) => {
               const { file } = await this.broker.call(
                 `${cpz.Service.DB_INDICATORS}.get`,
                 {
@@ -230,7 +230,7 @@ class BacktesterWorkerService extends Service {
           );
         const historyCandles = requiredCandles
           .sort((a: cpz.DBCandle, b: cpz.DBCandle) => sortAsc(a.time, b.time))
-          .map(candle => ({ ...candle, timeframe }));
+          .map((candle) => ({ ...candle, timeframe }));
         const [firstCandle] = historyCandles;
         this.logger.info("History from", firstCandle.timestamp);
         robot.handleHistoryCandles(historyCandles);
@@ -281,7 +281,7 @@ class BacktesterWorkerService extends Service {
           }
         );
 
-        const historyCandles: cpz.Candle[] = requiredCandles.map(candle => ({
+        const historyCandles: cpz.Candle[] = requiredCandles.map((candle) => ({
           ...candle,
           timeframe
         }));
@@ -307,7 +307,7 @@ class BacktesterWorkerService extends Service {
 
           logs = [
             ...logs,
-            ...robot.logEventsToSend.map(log => ({
+            ...robot.logEventsToSend.map((log) => ({
               id: uuid(),
               backtestId: backtesterState.id,
               data: log.data
@@ -320,7 +320,7 @@ class BacktesterWorkerService extends Service {
               backtestId: backtesterState.id
             }))
           ];
-          robot.positionsToSave.forEach(pos => {
+          robot.positionsToSave.forEach((pos) => {
             const newPos = {
               ...pos,
               entryDate: pos.entryCandleTimestamp,
@@ -338,7 +338,7 @@ class BacktesterWorkerService extends Service {
 
           logs = [
             ...logs,
-            ...robot.logEventsToSend.map(log => ({
+            ...robot.logEventsToSend.map((log) => ({
               id: uuid(),
               backtestId: backtesterState.id,
               data: log.data
@@ -359,7 +359,7 @@ class BacktesterWorkerService extends Service {
             }))
           ];
 
-          robot.positionsToSave.forEach(pos => {
+          robot.positionsToSave.forEach((pos) => {
             const newPos = {
               ...pos,
               entryDate: pos.entryCandleTimestamp,
@@ -456,11 +456,11 @@ class BacktesterWorkerService extends Service {
         .diff(dayjs.utc(backtesterState.startedAt), "minute");
 
       this.logger.info(`Backtest finished after ${duration} minutes!`);
-      this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED}`, {
+      await this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED}`, {
         id: backtesterState.id
       });
       if (backtesterState.settings.populateHistory)
-        this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED_HISTORY}`, {
+        await this.broker.emit(`${cpz.Event.BACKTESTER_FINISHED_HISTORY}`, {
           id: backtesterState.id
         });
       return { success: true, duration };
@@ -471,12 +471,12 @@ class BacktesterWorkerService extends Service {
       await this.broker.call(`${cpz.Service.DB_BACKTESTS}.upsert`, {
         entity: backtesterState
       });
-      this.broker.emit(`${cpz.Event.BACKTESTER_FAILED}`, {
+      await this.broker.emit(`${cpz.Event.BACKTESTER_FAILED}`, {
         id: backtesterState.id,
         error: e
       });
       if (backtesterState.settings.populateHistory)
-        this.broker.emit(`${cpz.Event.BACKTESTER_FAILED_HISTORY}`, {
+        await this.broker.emit(`${cpz.Event.BACKTESTER_FAILED_HISTORY}`, {
           id: backtesterState.id,
           error: e
         });
