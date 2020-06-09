@@ -18,6 +18,7 @@ class BaseStrategy implements cpz.Strategy {
   _posLastNumb: { [key: string]: number };
   _positions: { [key: string]: cpz.RobotPosition };
   _parametersSchema: ValidationSchema;
+  _backtest?: boolean;
   _candle: cpz.Candle;
   _candles: cpz.Candle[];
   _candlesProps: cpz.CandleProps;
@@ -44,6 +45,7 @@ class BaseStrategy implements cpz.Strategy {
     this._positions = {};
     this._setPositions(state.positions);
     this._parametersSchema = state.parametersSchema;
+    this._backtest = state.backtest;
     this._candle = null;
     this._candles = []; // [{}]
     this._candlesProps = {
@@ -212,7 +214,8 @@ class BaseStrategy implements cpz.Strategy {
       volume: this._robotSettings.volume,
       prefix,
       code,
-      parentId: parentId
+      parentId: parentId,
+      backtest: this._backtest
     });
     this._positions[code]._log = this._log.bind(this);
     this._positions[code]._handleCandle(this._candle);

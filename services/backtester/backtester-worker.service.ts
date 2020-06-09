@@ -143,7 +143,8 @@ class BacktesterWorkerService extends Service {
         currency,
         timeframe,
         strategyName,
-        settings: { ...robotState.settings, ...robotSettings }
+        settings: { ...robotState.settings, ...robotSettings },
+        backtest: true
       });
       robot._log = this.logger.info.bind(this);
 

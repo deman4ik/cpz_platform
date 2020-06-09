@@ -656,6 +656,7 @@ declare namespace cpz {
     robotId: string;
     parametersSchema: ValidationSchema;
     strategyFunctions: { [key: string]: () => any };
+    backtest?: boolean;
     log?(...args: any): void;
   }
 
@@ -734,6 +735,7 @@ declare namespace cpz {
     profit?: number;
     barsHeld?: number;
     fee?: number;
+    backtest?: boolean;
     internalState?: RobotsPostionInternalState;
   }
 
@@ -856,6 +858,7 @@ declare namespace cpz {
     stoppedAt?: string;
     statistics?: RobotStats;
     equity?: RobotEquity;
+    backtest?: boolean;
   }
 
   interface UserSignalInfo extends AlertInfo {
