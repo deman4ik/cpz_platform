@@ -203,15 +203,16 @@ class Position implements cpz.RobotPosition {
       this._status === cpz.RobotPositionStatus.open &&
       (!this.highestHigh || !this.lowestLow)
     ) {
-      const barsHeld = +round(
+      let barsHeld = +round(
         dayjs
           .utc(timestamp)
           .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
           this._timeframe
       );
-
-      this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
-      this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
+      if (barsHeld) {
+        this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
+        this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
+      }
     }
   }
 
@@ -399,13 +400,13 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      return +Math.max(+this._candle.open, +price);
+      return +Math.max(+this._candle.close, +price);
     }
     if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      return +Math.min(+this._candle.open, +price);
+      return +Math.min(+this._candle.close, +price);
     }
     throw new Error(`Unknown action ${action}`);
   }
@@ -416,13 +417,13 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.closeShort
     ) {
       if (+this._candle.high >= +price)
-        return +Math.max(+this._candle.open, +price);
+        return +Math.max(+this._candle.close, +price);
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
       if (+this._candle.low <= +price)
-        return +Math.min(+this._candle.open, +price);
+        return +Math.min(+this._candle.close, +price);
     } else {
       throw new Error(`Unknown action ${action}`);
     }
@@ -435,13 +436,13 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.closeShort
     ) {
       if (+this._candle.high <= +price)
-        return +Math.min(+this._candle.open, +price);
+        return +Math.min(+this._candle.close, +price);
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
       if (+this._candle.low >= +price)
-        return +Math.max(+this._candle.open, +price);
+        return +Math.max(+this._candle.close, +price);
     } else {
       throw new Error(`Unknown action ${action}`);
     }
