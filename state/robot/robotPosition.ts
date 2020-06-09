@@ -385,10 +385,10 @@ class Position implements cpz.RobotPosition {
     }
     if (nextPrice) {
       if (action === cpz.TradeAction.long || action === cpz.TradeAction.short) {
-        this._open(alert);
+        this._open({ ...alert, price: nextPrice });
         return true;
       }
-      this._close(alert);
+      this._close({ ...alert, price: nextPrice });
       return true;
     }
     return false;
