@@ -989,7 +989,7 @@ class PrivateConnectorWorkerService extends Service {
         lastTradeTimestamp: number;
         status: "open" | "closed" | "canceled";
         symbol: string;
-        type: "market" | "limit";
+        type: string;
         side: "buy" | "sell";
         price: number;
         average?: number;
