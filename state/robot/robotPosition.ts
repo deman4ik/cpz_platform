@@ -33,6 +33,7 @@ class Position implements cpz.RobotPosition {
   private _profit: number;
   private _barsHeld: number;
   private _fee: number;
+  private _backtest?: boolean;
   private _internalState: cpz.RobotsPostionInternalState;
   private _candle?: cpz.Candle;
   private _alertsToPublish: cpz.SignalInfo[];
@@ -65,6 +66,7 @@ class Position implements cpz.RobotPosition {
     this._profit = state.profit || 0;
     this._barsHeld = state.barsHeld || 0;
     this._fee = state.fee;
+    this._backtest = state.backtest;
     this._internalState = state.internalState || {
       highestHigh: null,
       lowestLow: null,
@@ -400,13 +402,15 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      return +Math.max(+this._candle.open, +price);
+      if (!this._backtest) return +Math.max(+this._candle.close, +price);
+      else return +Math.max(+this._candle.open, +price);
     }
     if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      return +Math.min(+this._candle.open, +price);
+      if (!this._backtest) return +Math.min(+this._candle.close, +price);
+      else return +Math.min(+this._candle.open, +price);
     }
     throw new Error(`Unknown action ${action}`);
   }
@@ -416,14 +420,18 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      if (+this._candle.high >= +price)
-        return +Math.max(+this._candle.open, +price);
+      if (+this._candle.high >= +price) {
+        if (!this._backtest) return +Math.max(+this._candle.close, +price);
+        else return +Math.max(+this._candle.open, +price);
+      }
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      if (+this._candle.low <= +price)
-        return +Math.min(+this._candle.open, +price);
+      if (+this._candle.low <= +price) {
+        if (!this._backtest) return +Math.min(+this._candle.close, +price);
+        else return +Math.min(+this._candle.open, +price);
+      }
     } else {
       throw new Error(`Unknown action ${action}`);
     }
@@ -435,14 +443,18 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long ||
       action === cpz.TradeAction.closeShort
     ) {
-      if (+this._candle.high <= +price)
-        return +Math.min(+this._candle.open, +price);
+      if (+this._candle.high <= +price) {
+        if (!this._backtest) return +Math.min(+this._candle.close, +price);
+        else return +Math.min(+this._candle.open, +price);
+      }
     } else if (
       action === cpz.TradeAction.short ||
       action === cpz.TradeAction.closeLong
     ) {
-      if (+this._candle.low >= +price)
-        return +Math.max(+this._candle.open, +price);
+      if (+this._candle.low >= +price) {
+        if (!this._backtest) return +Math.max(+this._candle.close, +price);
+        else return +Math.max(+this._candle.open, +price);
+      }
     } else {
       throw new Error(`Unknown action ${action}`);
     }

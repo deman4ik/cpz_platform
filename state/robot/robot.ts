@@ -36,6 +36,7 @@ class Robot {
   _stoppedAt: string;
   _eventsToSend: cpz.Events<cpz.RobotEventData | cpz.SignalEvent>[];
   _postionsToSave: cpz.RobotPositionState[];
+  _backtest: boolean;
   _error: any;
   _log = console.log;
 
@@ -86,6 +87,7 @@ class Robot {
     /* Дата и время запуска */
     this._startedAt = state.startedAt;
     this._stoppedAt = state.stoppedAt;
+    this._backtest = state.backtest;
     this._eventsToSend = [];
     this._postionsToSave = [];
     this._indicatorInstances = {};
@@ -291,8 +293,8 @@ class Robot {
       // Функции стратегии
       const strategyFunctions: { [key: string]: () => any } = {};
       Object.getOwnPropertyNames(strategyCode)
-        .filter(key => typeof strategyCode[key] === "function")
-        .forEach(key => {
+        .filter((key) => typeof strategyCode[key] === "function")
+        .forEach((key) => {
           strategyFunctions[key] = strategyCode[key];
         });
       // Схема параметров
@@ -308,6 +310,7 @@ class Robot {
         currency: this._currency,
         timeframe: this._timeframe,
         robotId: this._id,
+        backtest: this._backtest,
         posLastNumb: strategyState.posLastNumb,
         positions: strategyState.positions,
         parametersSchema,
@@ -332,7 +335,7 @@ class Robot {
   setIndicators() {
     try {
       // Идем по всем свойствам в объекте индикаторов
-      Object.keys(this._indicators).forEach(key => {
+      Object.keys(this._indicators).forEach((key) => {
         // Считываем индикатор по ключу
         const indicator = this._indicators[key];
         // В зависимости от типа индикатора
@@ -348,8 +351,8 @@ class Robot {
             // Берем все функции индикатора
             const indicatorFunctions: { [key: string]: () => any } = {};
             Object.getOwnPropertyNames(indicatorCode)
-              .filter(ownProp => typeof indicatorCode[ownProp] === "function")
-              .forEach(ownProp => {
+              .filter((ownProp) => typeof indicatorCode[ownProp] === "function")
+              .forEach((ownProp) => {
                 indicatorFunctions[ownProp] = indicatorCode[ownProp];
               });
 
@@ -460,7 +463,7 @@ class Robot {
    */
   initIndicators() {
     try {
-      Object.keys(this._indicators).forEach(key => {
+      Object.keys(this._indicators).forEach((key) => {
         if (!this._indicatorInstances[key].initialized) {
           this._indicatorInstances[key]._checkParameters();
           this._indicatorInstances[key].init();
@@ -481,7 +484,7 @@ class Robot {
   async calcIndicators() {
     try {
       await Promise.all(
-        Object.keys(this._indicators).map(async key => {
+        Object.keys(this._indicators).map(async (key) => {
           this._indicatorInstances[key]._eventsToSend = [];
           this._indicatorInstances[key]._handleCandles(
             this._candle,
@@ -555,7 +558,7 @@ class Robot {
       close: [],
       volume: []
     };
-    this._candles.forEach(candle => {
+    this._candles.forEach((candle) => {
       this._candlesProps.open.push(candle.open);
       this._candlesProps.high.push(candle.high);
       this._candlesProps.low.push(candle.low);
@@ -618,7 +621,7 @@ class Robot {
    */
   getIndicatorsState() {
     try {
-      Object.keys(this._indicators).forEach(ind => {
+      Object.keys(this._indicators).forEach((ind) => {
         this._eventsToSend = [
           ...this._eventsToSend,
           ...this._indicatorInstances[ind]._eventsToSend
@@ -631,8 +634,8 @@ class Robot {
         ].parameters;
         // Все свойства инстанса стратегии
         Object.keys(this._indicatorInstances[ind])
-          .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
-          .forEach(key => {
+          .filter((key) => !key.startsWith("_")) // публичные (не начинаются с "_")
+          .forEach((key) => {
             if (typeof this._indicatorInstances[ind][key] !== "function")
               this._indicators[ind].variables[key] = this._indicatorInstances[
                 ind
@@ -662,8 +665,8 @@ class Robot {
       this._hasAlerts = this._strategyInstance.hasAlerts;
       // Все свойства инстанса стратегии
       Object.keys(this._strategyInstance)
-        .filter(key => !key.startsWith("_")) // публичные (не начинаются с "_")
-        .forEach(key => {
+        .filter((key) => !key.startsWith("_")) // публичные (не начинаются с "_")
+        .forEach((key) => {
           if (typeof this._strategyInstance[key] !== "function")
             this._strategy.variables[key] = this._strategyInstance[key]; // сохраняем каждое свойство
         });
