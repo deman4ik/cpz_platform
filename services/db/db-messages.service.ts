@@ -21,7 +21,7 @@ class MessagesService extends Service {
           id: { type: Sequelize.UUID, primaryKey: true },
           timestamp: {
             type: Sequelize.DATE,
-            get: function() {
+            get: function () {
               const value = this.getDataValue("timestamp");
               return (
                 (value && value instanceof Date && value.toISOString()) || value
@@ -43,6 +43,9 @@ class MessagesService extends Service {
         supportMessage: {
           params: {
             message: "string"
+          },
+          graphql: {
+            mutation: "supportMessage(message: String!): Response!"
           },
           roles: [cpz.UserRoles.user],
           handler: this.supportMessage
