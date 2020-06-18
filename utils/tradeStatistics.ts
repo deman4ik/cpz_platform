@@ -14,7 +14,7 @@ function calcConsec(profits: number[]) {
   let maxConsecLoss = 0;
   let consecWin = 0;
   let consecLos = 0;
-  profits.forEach(profit => {
+  profits.forEach((profit) => {
     if (profit > 0) {
       consecWin += 1;
       consecLos = 0;
@@ -67,7 +67,7 @@ function calcStatistics(
     return { statistics, equity };
 
   const allPositions = positions
-    .map(pos => ({
+    .map((pos) => ({
       ...pos,
       profit: +pos.profit,
       barsHeld: +pos.barsHeld
@@ -391,13 +391,10 @@ function calcStatistics(
     short: shortMaxDrawdownPos && shortMaxDrawdownPos.exitDate
   };
 
-  const allRecoveryFactor = Math.abs(divideRound(allNetProfit, allMaxDrawdown));
-  const longRecoveryFactor = Math.abs(
-    divideRound(longNetProfit, longMaxDrawdown)
-  );
-  const shortRecoveryFactor = Math.abs(
-    divideRound(shortNetProfit, shortMaxDrawdown)
-  );
+  const allRecoveryFactor = divideRound(allNetProfit, allMaxDrawdown) * -1;
+  const longRecoveryFactor = divideRound(longNetProfit, longMaxDrawdown) * -1;
+  const shortRecoveryFactor =
+    divideRound(shortNetProfit, shortMaxDrawdown) * -1;
 
   statistics.recoveryFactor = {
     all: allRecoveryFactor,
@@ -437,7 +434,7 @@ function calcStatistics(
     chunkLength = equityChart.length / maxEquityLength;
   }
   const equityChunks = chunkArray(equityChart, chunkLength);
-  equity.changes = equityChunks.map(chunk => ({
+  equity.changes = equityChunks.map((chunk) => ({
     x: chunk[chunk.length - 1].x,
     y: chunk[chunk.length - 1].y
   }));

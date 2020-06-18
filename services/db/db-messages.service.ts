@@ -92,8 +92,10 @@ class MessagesService extends Service {
         },
         tags: ["support"]
       });
+      return { success: true };
     } catch (e) {
       this.logger.error(e);
+      return { success: false, error: e.message };
     }
   }
 
