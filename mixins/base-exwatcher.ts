@@ -105,7 +105,7 @@ class BaseExwatcher extends Service {
       this.connector = new ccxtpro.binance({
         enableRateLimit: true,
         fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
-        options: { defaultType: "future", OHLCVLimit: 100 }
+        options: { defaultType: "future", OHLCVLimit: 100, tradesLimit: 1000 }
       });
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
@@ -117,7 +117,8 @@ class BaseExwatcher extends Service {
     } else if (this.exchange === "bitfinex") {
       this.connector = new ccxtpro.bitfinex({
         enableRateLimit: true,
-        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
+        options: { OHLCVLimit: 100, tradesLimit: 1000 }
       });
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
@@ -129,7 +130,8 @@ class BaseExwatcher extends Service {
     } else if (this.exchange === "kraken") {
       this.connector = new ccxtpro.kraken({
         enableRateLimit: true,
-        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT)
+        fetchImplementation: createFetchMethod(process.env.PROXY_ENDPOINT),
+        options: { OHLCVLimit: 100, tradesLimit: 1000 }
       });
       this.cronHandleChanges = cron.schedule(
         "* * * * * *",
