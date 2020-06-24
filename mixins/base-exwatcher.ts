@@ -487,11 +487,11 @@ class BaseExwatcher extends Service {
                     number,
                     number,
                     number
-                  ] = this.connector.ohlcvs[symbol][
-                    Timeframe.get(timeframe).str
-                  ].find(
+                  ] = Object.values(
+                    this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
+                  ).find(
                     (c: any) => c[0] === this.candlesCurrent[id][timeframe].time
-                  );
+                  ) as [number, number, number, number, number, number];
 
                   if (
                     candle &&
@@ -521,9 +521,16 @@ class BaseExwatcher extends Service {
                     number,
                     number,
                     number
-                  ][] = this.connector.ohlcvs[symbol][
-                    Timeframe.get(timeframe).str
-                  ].filter((c: any) => c[0] < date.valueOf());
+                  ][] = Object.values(
+                    this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
+                  ).filter((c: any) => c[0] < date.valueOf()) as [
+                    number,
+                    number,
+                    number,
+                    number,
+                    number,
+                    number
+                  ][];
                   const candle = candles[candles.length - 1];
                   this.candlesCurrent[id][timeframe] = {
                     id: uuid(),
@@ -621,10 +628,12 @@ class BaseExwatcher extends Service {
                   number,
                   number,
                   number
-                ] = this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str][
+                ] = Object.values(
+                  this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
+                )[
                   this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
                     .length - 1
-                ];
+                ] as [number, number, number, number, number, number];
                 if (candle[0] === date.valueOf()) {
                   this.candlesCurrent[id][timeframe].open = candle[1];
                   this.candlesCurrent[id][timeframe].high = candle[2];
@@ -706,11 +715,13 @@ class BaseExwatcher extends Service {
             }
             if (this.connector.trades[symbol]) {
               // Запрашиваем все прошедшие трейды
-              const trades: Trade[] = this.connector.trades[symbol].filter(
+              const trades: Trade[] = Object.values(
+                this.connector.trades[symbol]
+              ).filter(
                 ({ timestamp }: Trade) =>
                   timestamp < date.valueOf() &&
                   (!this.lastDate || timestamp >= this.lastDate)
-              );
+              ) as Trade[];
               // Если были трейды
               if (trades.length > 0) {
                 // Если было изменение цены
