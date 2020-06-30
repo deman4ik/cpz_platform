@@ -1300,7 +1300,7 @@ describe("Test User Robot", () => {
     );
   });
 
-  it("Should create new delayed position if open signal first", () => {
+  it("Should create new position and close parent if open signal first", () => {
     const signalOpen: cpz.SignalEvent = {
       id: uuid(),
       robotId,
@@ -1354,18 +1354,26 @@ describe("Test User Robot", () => {
       positionCode: "p_2",
       positionParentId: signalOpen.positionId,
       candleTimestamp: dayjs.utc("2019-10-26T01:10:00.000Z").toISOString(),
-      action: cpz.TradeAction.short,
+      action: cpz.TradeAction.long,
       orderType: cpz.OrderType.market,
       price: 7000
     };
     userRobot.handleSignal(signalOpenNew);
     expect(userRobot.state.positions.length).toBe(2);
-    expect(userRobot.state.positions[1].status).toBe(
-      cpz.UserPositionStatus.delayed
+    expect(userRobot.state.positions[0].exitAction).toBe(
+      cpz.TradeAction.closeShort
     );
+    expect(userRobot.state.positions[1].status).toBe(
+      cpz.UserPositionStatus.new
+    );
+    expect(userRobot.state.connectorJobs.length).toBe(2);
+    expect(userRobot.state.connectorJobs[0].type).toBe(cpz.OrderJobType.create);
+    expect(userRobot.state.ordersToCreate[0].price).toBe(7702);
+    expect(userRobot.state.connectorJobs[1].type).toBe(cpz.OrderJobType.create);
+    expect(userRobot.state.ordersToCreate[1].price).toBe(7702);
   });
 
-  it("Should create new delayed position after close signal", () => {
+  it("Should create new position after close signal", () => {
     const signalOpen: cpz.SignalEvent = {
       id: uuid(),
       robotId,
@@ -1447,7 +1455,7 @@ describe("Test User Robot", () => {
     );
     expect(userRobot.state.positions.length).toBe(2);
     expect(userRobot.state.positions[1].status).toBe(
-      cpz.UserPositionStatus.delayed
+      cpz.UserPositionStatus.new
     );
   });
 
@@ -1531,13 +1539,13 @@ describe("Test User Robot", () => {
     userRobot.handleSignal(signalOpenNew3);
     expect(userRobot.state.positions.length).toBe(3);
     expect(userRobot.state.positions[0].nextJob).toBe(
+      cpz.UserPositionJob.close
+    );
+    expect(userRobot.state.positions[1].nextJob).toBe(
       cpz.UserPositionJob.cancel
     );
-    expect(userRobot.state.positions[1].status).toBe(
-      cpz.UserPositionStatus.canceled
-    );
     expect(userRobot.state.positions[2].status).toBe(
-      cpz.UserPositionStatus.delayed
+      cpz.UserPositionStatus.new
     );
   });
 

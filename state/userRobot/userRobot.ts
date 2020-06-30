@@ -237,7 +237,16 @@ class UserRobot implements cpz.UserRobot {
         this._positions[signal.positionParentId].isActive;
       let hasPreviousActivePositions = false;
       if (hasActiveParent) {
-        this._cancelPreviousParentPositions(signal.positionParentId);
+        this._positions[signal.positionParentId].handleSignal({
+          ...signal,
+          positionId: signal.positionParentId,
+          action:
+            this._positions[signal.positionParentId].direction ===
+            cpz.PositionDirection.long
+              ? cpz.TradeAction.closeLong
+              : cpz.TradeAction.closeShort
+        });
+        this._positions[signal.positionParentId].executeJob();
       } else {
         const previousActivePositions = Object.values(this._positions).filter(
           (pos) =>
@@ -259,7 +268,7 @@ class UserRobot implements cpz.UserRobot {
         }
       }
 
-      const delay = hasActiveParent || hasPreviousActivePositions;
+      const delay = hasPreviousActivePositions;
 
       this._positions[signal.positionId] = new UserPosition({
         id: uuid(),
@@ -320,8 +329,13 @@ class UserRobot implements cpz.UserRobot {
           this._positions[previousPosition.positionId].executeJob();
         }
       } else {
-        this._positions[signal.positionId].handleSignal(signal);
-        this._positions[signal.positionId].executeJob();
+        if (
+          this._positions[signal.positionId].isActive &&
+          !this._positions[signal.positionId].exitStatus
+        ) {
+          this._positions[signal.positionId].handleSignal(signal);
+          this._positions[signal.positionId].executeJob();
+        }
       }
     }
 

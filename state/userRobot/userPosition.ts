@@ -154,6 +154,14 @@ class UserPosition implements cpz.UserPosition {
     );
   }
 
+  get entryStatus() {
+    return this._entryStatus;
+  }
+
+  get exitStatus() {
+    return this._exitStatus;
+  }
+
   get hasRecentTrade() {
     return this._hasRecentTrade;
   }
