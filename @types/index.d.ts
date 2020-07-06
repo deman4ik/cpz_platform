@@ -759,7 +759,7 @@ declare namespace cpz {
     lowestLow: number;
     alertsToPublish: SignalInfo[];
     tradeToPublish: SignalInfo;
-    _initHighLow(timestamp: string, highs: number[], lows: number[]): void;
+    // _initHighLow(timestamp: string, highs: number[], lows: number[]): void;
     _clearAlertsToPublish(): void;
     _clearTradeToPublish(): void;
     _clearAlerts(): void;

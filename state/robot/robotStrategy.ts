@@ -172,7 +172,7 @@ class BaseStrategy implements cpz.Strategy {
   _positionsHandleCandle(candle: cpz.Candle) {
     if (Object.keys(this._positions).length > 0) {
       Object.keys(this._positions).forEach((key) => {
-        if (
+        /*   if (
           this._candlesProps &&
           this._candlesProps.high &&
           this._candlesProps.low &&
@@ -185,7 +185,7 @@ class BaseStrategy implements cpz.Strategy {
             this._candlesProps.high,
             this._candlesProps.low
           );
-        }
+        }*/
         this._positions[key]._handleCandle(candle);
       });
     }
