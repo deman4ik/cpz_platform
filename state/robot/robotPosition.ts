@@ -200,23 +200,23 @@ class Position implements cpz.RobotPosition {
     this._alerts = {};
   }
 
-  _initHighLow(timestamp: string, highs: number[], lows: number[]) {
+  /*_initHighLow(timestamp: string, highs: number[], lows: number[]) {
     if (
       this._status === cpz.RobotPositionStatus.open &&
       (!this.highestHigh || !this.lowestLow)
     ) {
-      let barsHeld = +round(
-        dayjs
-          .utc(timestamp)
-          .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
-          this._timeframe
-      );
-      if (barsHeld === 0) barsHeld = 1;
+      let barsHeld =
+        +round(
+          dayjs
+            .utc(timestamp)
+            .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
+            this._timeframe
+        ) + 1;
 
       this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
       this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
     }
-  }
+  }*/
 
   _calcStats() {
     if (this._direction === cpz.PositionDirection.long) {
@@ -240,17 +240,13 @@ class Position implements cpz.RobotPosition {
 
   _handleCandle(candle: cpz.Candle) {
     this._candle = candle;
-    if (
-      this._status === cpz.RobotPositionStatus.open &&
-      this._internalState.highestHigh !== null &&
-      this._internalState.lowestLow !== null
-    ) {
+    if (this._status === cpz.RobotPositionStatus.open) {
       this._internalState.highestHigh = Math.max(
-        this._internalState.highestHigh,
+        this._internalState.highestHigh || -Infinity,
         this._candle.high
       );
       this._internalState.lowestLow = Math.min(
-        this._internalState.lowestLow,
+        this._internalState.lowestLow || Infinity,
         this._candle.low
       );
     }
@@ -325,8 +321,6 @@ class Position implements cpz.RobotPosition {
       action === cpz.TradeAction.long
         ? cpz.PositionDirection.long
         : cpz.PositionDirection.short;
-    this._internalState.lowestLow = Infinity;
-    this._internalState.highestHigh = -Infinity;
     this._createTradeSignal({
       ...alert,
       candleTimestamp: this._candle.timestamp
