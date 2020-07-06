@@ -311,8 +311,8 @@ class UserRobot implements cpz.UserRobot {
           (pos) =>
             pos.isActive &&
             pos.prefix === signal.positionPrefix &&
-            pos.positionNumber <
-              +signal.positionCode.split(`${signal.positionPrefix}_`)[1] &&
+            /*  pos.positionNumber <
+              +signal.positionCode.split(`${signal.positionPrefix}_`)[1] && */
             ((pos.direction === cpz.PositionDirection.long &&
               signal.action === cpz.TradeAction.closeLong) ||
               (pos.direction === cpz.PositionDirection.short &&
