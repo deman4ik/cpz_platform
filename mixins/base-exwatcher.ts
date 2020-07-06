@@ -5,7 +5,6 @@ import dayjs from "../lib/dayjs";
 import ccxtpro from "ccxt.pro";
 import cron from "node-cron";
 import Timeframe from "../utils/timeframe";
-import RedisLock from "./redislock";
 import { uniqueElementsBy, round } from "../utils/helpers";
 import { createFetchMethod } from "../utils/fetch";
 
@@ -34,7 +33,6 @@ class BaseExwatcher extends Service {
         `${cpz.Service.DB_CANDLES}720`,
         `${cpz.Service.DB_CANDLES}1440`
       ],
-      mixins: [RedisLock()],
       events: {
         [cpz.Event.IMPORTER_FINISHED]: this.handleImporterFinishedEvent,
         [cpz.Event.IMPORTER_FAILED]: this.handleImporterFailedEvent
