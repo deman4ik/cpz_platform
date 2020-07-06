@@ -211,10 +211,10 @@ class Position implements cpz.RobotPosition {
           .diff(dayjs.utc(this._entryCandleTimestamp), cpz.TimeUnit.minute) /
           this._timeframe
       );
-      if (barsHeld) {
-        this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
-        this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
-      }
+      if (barsHeld === 0) barsHeld = 1;
+
+      this._internalState.highestHigh = Math.max(...highs.slice(-barsHeld));
+      this._internalState.lowestLow = Math.min(...lows.slice(-barsHeld));
     }
   }
 
