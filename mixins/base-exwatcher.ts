@@ -754,25 +754,25 @@ class BaseExwatcher extends Service {
                     if (this.candlesCurrent[id][timeframe].volume === 0)
                       this.candlesCurrent[id][timeframe].open = round(
                         +trades[0].price,
-                        2
+                        6
                       );
                     this.candlesCurrent[id][timeframe].high = round(
                       Math.max(
                         this.candlesCurrent[id][timeframe].high,
                         ...prices
                       ),
-                      2
+                      6
                     );
                     this.candlesCurrent[id][timeframe].low = round(
                       Math.min(
                         this.candlesCurrent[id][timeframe].low,
                         ...prices
                       ),
-                      2
+                      6
                     );
                     this.candlesCurrent[id][timeframe].close = +round(
                       trades[trades.length - 1].price,
-                      2
+                      6
                     );
                     this.candlesCurrent[id][timeframe].volume =
                       round(
@@ -780,7 +780,7 @@ class BaseExwatcher extends Service {
                           +trades
                             .map((t) => t.amount)
                             .reduce((a, b) => a + b, 0),
-                        3
+                        6
                       ) || this.candlesCurrent[id][timeframe].volume + 0;
                     this.candlesCurrent[id][timeframe].type =
                       this.candlesCurrent[id][timeframe].volume === 0
