@@ -201,7 +201,7 @@ WHERE uo.user_robot_id = ur.id
                         'canceled')
   AND up.position_id IS NOT NULL
   AND ur.status = 'started'
-  and uo.updated_at > :date;
+  and uo.updated_at < :date;
     `;
       const rawData = await this.adapter.db.query(query, {
         type: Sequelize.QueryTypes.SELECT,
