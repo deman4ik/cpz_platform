@@ -262,10 +262,12 @@ class UserRobotRunnerService extends Service {
       this.jobError.bind(this)
     );
     this.cronJobs.start();
+    this.cronOrders.start();
   }
 
   async stoppedService() {
     this.cronJobs.stop();
+    this.cronOrders.stop();
   }
 
   async queueJob(job: cpz.UserRobotJob, status: string) {
