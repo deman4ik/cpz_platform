@@ -108,6 +108,14 @@ class UserRobotRunnerService extends Service {
     }
   );
 
+  cronOrders: cron.ScheduledTask = cron.schedule(
+    "* */1 * * * *",
+    this.checkOrders.bind(this),
+    {
+      scheduled: false
+    }
+  );
+
   retryOptions = {
     retries: 5,
     minTimeout: 500,
@@ -163,6 +171,61 @@ class UserRobotRunnerService extends Service {
               removeOnComplete: true,
               removeOnFail: true
             });
+          } catch (e) {
+            this.logger.error(e);
+          }
+        }
+      }
+
+      clearInterval(timerId);
+      await lock.unlock();
+    } catch (e) {
+      if (e instanceof this.LockError) return;
+      else this.logger.error(e);
+    }
+  }
+
+  async checkOrders() {
+    try {
+      const lock = await this.createLock(
+        cpz.cronLock.USER_ROBOT_RUNNER_CHECK_ORDERS,
+        14000,
+        2,
+        5000
+      );
+
+      let timerId = setTimeout(async function tick() {
+        await lock.extend(3500);
+        timerId = setTimeout(tick, 3000);
+      }, 13000);
+      //  TODO: started or stopping
+      const idledOrders: cpz.Order[] = await this.broker.call(
+        `${cpz.Service.DB_USER_ORDERS}.getIdled`,
+        {
+          date: dayjs.utc().add(-30, cpz.TimeUnit.second).toISOString()
+        }
+      );
+
+      if (idledOrders && Array.isArray(idledOrders) && idledOrders.length > 0) {
+        this.logger.info(`Requeue ${idledOrders.length} orders`);
+        for (const order of idledOrders) {
+          try {
+            const { status }: cpz.UserRobotDB = await this.broker.call(
+              `${cpz.Service.DB_USER_ROBOTS}.get`,
+              {
+                id: order.userRobotId
+              }
+            );
+            if (status)
+              await this.queueJob(
+                {
+                  id: uuid(),
+                  userRobotId: order.userRobotId,
+                  type: cpz.UserRobotJobType.order,
+                  data: order
+                },
+                status
+              );
           } catch (e) {
             this.logger.error(e);
           }
