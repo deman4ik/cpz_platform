@@ -153,6 +153,7 @@ declare namespace cpz {
   const enum cronLock {
     PRIVATE_CONNECTOR_RUNNER_CHECK_ORDERS = "cron:private-connector-runner:check-orders",
     USER_ROBOT_RUNNER_CHECK_JOBS = "cron:user-robot-runner:check-jobs",
+    USER_ROBOT_RUNNER_CHECK_ORDERS = "cron:user-robot-runner:check-orders",
     PUBLISHER_SEND_TELEGRAM = "cron:publisher:send-telegram",
     MARKETS_UPDATE = "cron:db-markets:update"
   }
