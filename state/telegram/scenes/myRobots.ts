@@ -18,9 +18,7 @@ function getRobotsListMenu(ctx: any) {
     const buttons = currentRobots.map(({ name, id, status }) => [
       m.callbackButton(
         `${name} ${
-          status === cpz.Status.started ||
-          status === cpz.Status.starting ||
-          status === cpz.Status.paused
+          status === cpz.Status.started || status === cpz.Status.starting
             ? "🟢"
             : "🛑"
         }`,

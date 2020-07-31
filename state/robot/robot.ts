@@ -6,7 +6,6 @@ import BaseStrategy from "./robotStrategy";
 import BaseIndicator from "./robotIndicator";
 import TulipIndicatorClass from "../../lib/tulip/tulipIndicators";
 import { combineRobotSettings } from "../settings";
-import { calcStatistics } from "../../utils/tradeStatistics";
 
 class Robot {
   [key: string]: any;

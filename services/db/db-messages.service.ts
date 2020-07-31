@@ -59,7 +59,7 @@ class MessagesService extends Service {
             mutation:
               "replySupportMessage(to: String!, message: String!): Response!"
           },
-          roles: [cpz.UserRoles.admin],
+          roles: [cpz.UserRoles.admin, cpz.UserRoles.manager],
           handler: this.replySupportMessage
         }
       }
