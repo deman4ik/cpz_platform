@@ -729,56 +729,65 @@ class PrivateConnectorWorkerService extends Service {
         type
       );
       let response: Order;
-      try {
-        response = await this.connectors[userExAccId].createOrder(
-          this.getSymbol(asset, currency),
-          type,
-          direction,
-          order.volume,
-          type === cpz.OrderType.market ? undefined : signalPrice,
-          orderParams
+      if (order.error && order.exTimestamp) {
+        const existedOrder = await this.checkIfOrderExists(
+          order,
+          dayjs.utc(order.exTimestamp).valueOf()
         );
-      } catch (err) {
-        this.logger.error(err, order);
-        if (
-          err instanceof ccxt.AuthenticationError ||
-          err instanceof ccxt.InsufficientFunds ||
-          err instanceof ccxt.InvalidNonce ||
-          err instanceof ccxt.InvalidOrder ||
-          err.message.includes("Margin is insufficient") ||
-          err.message.includes("EOrder:Insufficient initial margin")
-        ) {
+        if (existedOrder) response = existedOrder;
+      }
+      if (!response) {
+        try {
+          response = await this.connectors[userExAccId].createOrder(
+            this.getSymbol(asset, currency),
+            type,
+            direction,
+            order.volume,
+            type === cpz.OrderType.market ? undefined : signalPrice,
+            orderParams
+          );
+        } catch (err) {
+          this.logger.error(err, order);
+          if (
+            err instanceof ccxt.AuthenticationError ||
+            err instanceof ccxt.InsufficientFunds ||
+            err instanceof ccxt.InvalidNonce ||
+            err instanceof ccxt.InvalidOrder ||
+            err.message.includes("Margin is insufficient") ||
+            err.message.includes("EOrder:Insufficient initial margin")
+          ) {
+            throw err;
+          }
+          if (
+            err instanceof ccxt.ExchangeError ||
+            err instanceof ccxt.NetworkError
+          ) {
+            const existedOrder = await this.checkIfOrderExists(
+              order,
+              creationDate
+            );
+            if (existedOrder) response = existedOrder;
+            else
+              return {
+                order: {
+                  ...order,
+                  exId: null,
+                  exTimestamp: dayjs.utc(creationDate).toISOString(),
+                  status: cpz.OrderStatus.new,
+                  error: this.getErrorMessage(err)
+                },
+                nextJob: {
+                  type: cpz.OrderJobType.create,
+                  priority: cpz.Priority.high,
+                  nextJobAt: dayjs
+                    .utc()
+                    .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
+                    .toISOString()
+                }
+              };
+          }
           throw err;
         }
-        if (
-          err instanceof ccxt.ExchangeError ||
-          err instanceof ccxt.NetworkError
-        ) {
-          const existedOrder = await this.checkIfOrderExists(
-            order,
-            creationDate
-          );
-          if (existedOrder) response = existedOrder;
-          else
-            return {
-              order: {
-                ...order,
-                exId: null,
-                exTimestamp: null,
-                status: cpz.OrderStatus.new,
-                error: this.getErrorMessage(err)
-              },
-              nextJob: {
-                type: cpz.OrderJobType.create,
-                priority: cpz.Priority.high,
-                nextJobAt: dayjs
-                  .utc()
-                  .add(ORDER_CHECK_TIMEOUT, cpz.TimeUnit.second)
-                  .toISOString()
-              }
-            };
-        }
-        throw err;
       }
       const {
         id: exId,
