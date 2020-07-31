@@ -182,6 +182,7 @@ declare namespace cpz {
 
   const enum UserRoles {
     admin = "admin",
+    manager = "manager",
     vip = "vip",
     user = "user",
     anonymous = "anonymous"
