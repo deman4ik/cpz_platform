@@ -70,7 +70,7 @@
   "dependencies": {
     "async-retry": "^1.3.1",
     "bcrypt": "^4.0.1",
-    "ccxt": "^1.32.39",
+    "ccxt": "^1.32.46",
     "ccxt.pro": "github:kroitor/ccxt.pro",
     "cookies": "^0.8.0",
     "dayjs": "^1.8.31",

@@ -384,30 +384,36 @@ class PrivateConnectorWorkerService extends Service {
           [key: string]: cpz.ConnectorJob[];
         } = groupBy(nextJobs, (job) => job.orderId);
 
-        for (const orderJobs of Object.values(groupedJobs)) {
-          const [nextJob] = orderJobs.sort((a, b) =>
-            sortDesc(
-              dayjs.utc(a.nextJobAt).valueOf(),
-              dayjs.utc(b.nextJobAt).valueOf()
-            )
-          );
-          await this.run(exchangeAcc, nextJob);
-          for (const { id } of orderJobs) {
-            await this.broker.call(`${cpz.Service.DB_CONNECTOR_JOBS}.remove`, {
-              id
-            });
-          }
-          nextJobs = await this.broker.call(
-            `${cpz.Service.DB_CONNECTOR_JOBS}.find`,
-            {
-              sort: "priority -next_job_at",
-              query: {
-                userExAccId,
-                nextJobAt: { $lte: dayjs.utc().toISOString() }
-              }
+        await Promise.all(
+          Object.values(groupedJobs).map(async (orderJobs) => {
+            const [nextJob] = orderJobs.sort((a, b) =>
+              sortDesc(
+                dayjs.utc(a.nextJobAt).valueOf(),
+                dayjs.utc(b.nextJobAt).valueOf()
+              )
+            );
+            await this.run(exchangeAcc, nextJob);
+            for (const { id } of orderJobs) {
+              await this.broker.call(
+                `${cpz.Service.DB_CONNECTOR_JOBS}.remove`,
+                {
+                  id
+                }
+              );
             }
-          );
-        }
+          })
+        );
+
+        nextJobs = await this.broker.call(
+          `${cpz.Service.DB_CONNECTOR_JOBS}.find`,
+          {
+            sort: "priority -next_job_at",
+            query: {
+              userExAccId,
+              nextJobAt: { $lte: dayjs.utc().toISOString() }
+            }
+          }
+        );
       }
 
       await this.broker.call(`${cpz.Service.DB_USER_EXCHANGE_ACCS}.update`, {
@@ -422,7 +428,9 @@ class PrivateConnectorWorkerService extends Service {
       if (
         e instanceof ccxt.AuthenticationError ||
         e instanceof ccxt.InsufficientFunds ||
-        e instanceof ccxt.InvalidNonce
+        e instanceof ccxt.InvalidNonce ||
+        e.message.includes("Margin is insufficient") ||
+        e.message.includes("EOrder:Insufficient initial margin")
       ) {
         await this.broker.call(
           `${cpz.Service.DB_USER_EXCHANGE_ACCS}.invalidate`,
@@ -468,6 +476,7 @@ class PrivateConnectorWorkerService extends Service {
         orders: ordersCache,
         enableRateLimit: true,
         fetchImplementation: this._fetch,
+        timeout: 30000,
         nonce() {
           return this.milliseconds();
         }
@@ -762,12 +771,15 @@ class PrivateConnectorWorkerService extends Service {
             err instanceof ccxt.ExchangeError ||
             err instanceof ccxt.NetworkError
           ) {
-            const existedOrder = await this.checkIfOrderExists(
-              order,
-              creationDate
-            );
-            if (existedOrder) response = existedOrder;
-            else
+            if (err instanceof ccxt.RequestTimeout) {
+              const existedOrder = await this.checkIfOrderExists(
+                order,
+                creationDate
+              );
+              if (existedOrder) response = existedOrder;
+            }
+
+            if (!response)
               return {
                 order: {
                   ...order,
