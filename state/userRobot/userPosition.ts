@@ -254,6 +254,14 @@ class UserPosition implements cpz.UserPosition {
         ) || 0;
       this._entryRemaining = this._entryVolume - this._entryExecuted;
 
+      if (this._entryRemaining < 0)
+        throw new Errors.MoleculerError(
+          "Wrong entry remaining value",
+          409,
+          "ERR_CONFLICT",
+          { userPositionId: this._id }
+        );
+
       if (!this._entryExecuted) {
         this._entryStatus = cpz.UserPositionOrderStatus.new;
       } else if (this._entryExecuted && this._entryExecuted === 0) {
@@ -314,6 +322,13 @@ class UserPosition implements cpz.UserPosition {
         ) || 0;
       this._exitRemaining = this._exitVolume - this._exitExecuted;
 
+      if (this._exitRemaining < 0)
+        throw new Errors.MoleculerError(
+          "Wrong exit remaining value",
+          409,
+          "ERR_CONFLICT",
+          { userPositionId: this._id }
+        );
       if (!this._exitExecuted) {
         this._exitStatus = cpz.UserPositionOrderStatus.new;
       } else if (this._exitExecuted && this._exitExecuted === 0) {
@@ -615,6 +630,13 @@ class UserPosition implements cpz.UserPosition {
         type: cpz.OrderJobType.create
       }
     };
+    if (order.volume < 0)
+      throw new Errors.MoleculerError(
+        "Wrong order volume value",
+        409,
+        "ERR_CONFLICT",
+        { userPositionId: this._id }
+      );
 
     order.remaining = order.volume;
 

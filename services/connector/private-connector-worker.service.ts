@@ -16,6 +16,9 @@ import {
 import { ORDER_CHECK_TIMEOUT } from "../../config";
 import { v4 as uuid } from "uuid";
 
+interface ClientOrder extends Order {
+  clientOrderId: string;
+}
 /**
  * Private Exchange Connector Worker Service
  *
@@ -141,6 +144,7 @@ class PrivateConnectorWorkerService extends Service {
 
   getOrderParams(
     exchange: string,
+    id: string,
     params: GenericObject<any>,
     type: cpz.OrderType
   ) {
@@ -148,7 +152,8 @@ class PrivateConnectorWorkerService extends Service {
       const { kraken } = params;
       return {
         leverage: (kraken && kraken.leverage) || 3,
-        trading_agreement: "agree"
+        trading_agreement: "agree",
+        clientOrderId: id
       };
     }
     if (exchange === "bitfinex") {
@@ -158,6 +163,11 @@ class PrivateConnectorWorkerService extends Service {
         };
       return {
         type: "limit"
+      };
+    }
+    if (exchange === "binance_futures" && id) {
+      return {
+        clientOrderId: id
       };
     }
     return {};
@@ -262,7 +272,7 @@ class PrivateConnectorWorkerService extends Service {
       }
 
       const type = cpz.OrderType.limit;
-      const orderParams = this.getOrderParams(<string>exchange, {}, type);
+      const orderParams = this.getOrderParams(<string>exchange, null, {}, type);
 
       const createOrderCall = async (bail: (e: Error) => void) => {
         try {
@@ -372,7 +382,7 @@ class PrivateConnectorWorkerService extends Service {
         );
       if (exchangeAcc.status !== cpz.UserExchangeAccStatus.enabled)
         throw new Errors.MoleculerError(
-          "User Excahnge Account is not enabled",
+          "User Exchange Account is not enabled",
           500,
           "ERR_INVALID_STATUS",
           { userExAccId }
@@ -734,6 +744,7 @@ class PrivateConnectorWorkerService extends Service {
 
       const orderParams = this.getOrderParams(
         <string>exchange,
+        order.id,
         order.params,
         type
       );
@@ -856,6 +867,7 @@ class PrivateConnectorWorkerService extends Service {
   async checkIfOrderExists(order: cpz.Order, creationDate: number) {
     try {
       const {
+        id,
         userExAccId,
         exchange,
         asset,
@@ -930,12 +942,13 @@ class PrivateConnectorWorkerService extends Service {
 
       const similarOrders = orders
         .filter(
-          (o) =>
-            o.side === direction &&
-            o.timestamp >= creationDate &&
-            o.symbol === this.getSymbol(asset, currency) &&
-            o.amount === volume &&
-            o.type === type
+          (o: ClientOrder) =>
+            (o.clientOrderId && o.clientOrderId === id) ||
+            (o.side === direction &&
+              o.timestamp >= creationDate &&
+              o.symbol === this.getSymbol(asset, currency) &&
+              o.amount === volume &&
+              o.type === type)
         )
         .sort((a, b) => sortAsc(a.timestamp, b.timestamp));
       if (
