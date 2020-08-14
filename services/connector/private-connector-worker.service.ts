@@ -152,8 +152,8 @@ class PrivateConnectorWorkerService extends Service {
       const { kraken } = params;
       return {
         leverage: (kraken && kraken.leverage) || 3,
-        trading_agreement: "agree",
-        clientOrderId: id
+        trading_agreement: "agree"
+        // clientOrderId: id
       };
     }
     if (exchange === "bitfinex") {
@@ -165,11 +165,11 @@ class PrivateConnectorWorkerService extends Service {
         type: "limit"
       };
     }
-    if (exchange === "binance_futures" && id) {
+    /*if (exchange === "binance_futures" && id) {
       return {
         clientOrderId: id
       };
-    }
+    }*/
     return {};
   }
 
@@ -942,13 +942,13 @@ class PrivateConnectorWorkerService extends Service {
 
       const similarOrders = orders
         .filter(
-          (o: ClientOrder) =>
-            (o.clientOrderId && o.clientOrderId === id) ||
-            (o.side === direction &&
-              o.timestamp >= creationDate &&
-              o.symbol === this.getSymbol(asset, currency) &&
-              o.amount === volume &&
-              o.type === type)
+          (o) =>
+            //  (o.clientOrderId && o.clientOrderId === id) ||
+            o.side === direction &&
+            o.timestamp >= creationDate &&
+            o.symbol === this.getSymbol(asset, currency) &&
+            o.amount === volume &&
+            o.type === type
         )
         .sort((a, b) => sortAsc(a.timestamp, b.timestamp));
       if (
