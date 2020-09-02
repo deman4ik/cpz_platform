@@ -200,7 +200,7 @@ WHERE uo.user_robot_id = ur.id
   AND up.status NOT IN ('closed',
                         'canceled')
   AND up.position_id IS NOT NULL
-  AND ur.status = 'started'
+  AND ur.status in ('started','stopping')
   and uo.updated_at < :date;
     `;
       const rawData = await this.adapter.db.query(query, {
