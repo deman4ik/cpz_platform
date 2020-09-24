@@ -505,102 +505,135 @@ class BaseExwatcher extends Service {
         .startOf(cpz.TimeUnit.second);
       // Есть ли подходящие по времени таймфреймы
       const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
-      const closedCandles: { [key: string]: cpz.Candle[] } = {};
+      const closedCandles: Map<string, cpz.Candle> = new Map();
 
       await Promise.all(
         this.activeSubscriptions.map(
           async ({ id, asset, currency }: cpz.Exwatcher) => {
-            const symbol = this.getSymbol(asset, currency);
-            const currentCandles: cpz.Candle[] = [];
-            await Promise.all(
-              Timeframe.validArray.map(async (timeframe) => {
-                if (this.candlesCurrent[id][timeframe]) {
-                  const candle: [
-                    number,
-                    number,
-                    number,
-                    number,
-                    number,
-                    number
-                  ] = this.connector.ohlcvs[symbol][
-                    Timeframe.get(timeframe).str
-                  ].find(
-                    (c: any) => c[0] === this.candlesCurrent[id][timeframe].time
-                  );
+            try {
+              const symbol = this.getSymbol(asset, currency);
+              const currentCandles: cpz.Candle[] = [];
+              await Promise.all(
+                Timeframe.validArray.map(async (timeframe) => {
+                  if (this.candlesCurrent[id][timeframe]) {
+                    const candleTime = dayjs
+                      .utc(
+                        Timeframe.validTimeframeDatePrev(
+                          date.toISOString(),
+                          timeframe
+                        )
+                      )
+                      .valueOf();
 
-                  if (
-                    candle &&
-                    this.candlesCurrent[id][timeframe].time === candle[0]
-                  ) {
-                    this.candlesCurrent[id][timeframe].open = candle[1];
-                    this.candlesCurrent[id][timeframe].high = candle[2];
-                    this.candlesCurrent[id][timeframe].low = candle[3];
-                    this.candlesCurrent[id][timeframe].close = candle[4];
-                    this.candlesCurrent[id][timeframe].volume = candle[5];
-                    this.candlesCurrent[id][timeframe].type =
-                      this.candlesCurrent[id][timeframe].volume === 0
-                        ? cpz.CandleType.previous
-                        : cpz.CandleType.loaded;
+                    const candle: [
+                      number,
+                      number,
+                      number,
+                      number,
+                      number,
+                      number
+                    ] = this.connector.ohlcvs[symbol][
+                      Timeframe.get(timeframe).str
+                    ].find((c: any) => c[0] === candleTime);
+
+                    if (candle) {
+                      if (
+                        this.candlesCurrent[id][timeframe].time != candleTime
+                      ) {
+                        const prevCandle: [
+                          number,
+                          number,
+                          number,
+                          number,
+                          number,
+                          number
+                        ] = this.connector.ohlcvs[symbol][
+                          Timeframe.get(timeframe).str
+                        ].find(
+                          (c: any) =>
+                            c[0] === this.candlesCurrent[id][timeframe].time
+                        );
+                        if (prevCandle) {
+                          this.candlesCurrent[id][timeframe].open =
+                            prevCandle[1];
+                          this.candlesCurrent[id][timeframe].high =
+                            prevCandle[2];
+                          this.candlesCurrent[id][timeframe].low =
+                            prevCandle[3];
+                          this.candlesCurrent[id][timeframe].close =
+                            prevCandle[4];
+                          this.candlesCurrent[id][timeframe].volume =
+                            prevCandle[5];
+                          this.candlesCurrent[id][timeframe].type =
+                            this.candlesCurrent[id][timeframe].volume === 0
+                              ? cpz.CandleType.previous
+                              : cpz.CandleType.loaded;
+                        }
+                        const closedCandle = {
+                          ...this.candlesCurrent[id][timeframe]
+                        };
+                        this.log.debug("Closing", closedCandle);
+                        closedCandles.set(`${id}.${timeframe}`, closedCandle);
+                        this.candlesCurrent[id][timeframe].time = candle[0];
+                        this.candlesCurrent[id][
+                          timeframe
+                        ].timestamp = dayjs.utc(candle[0]).toISOString();
+                      }
+
+                      this.candlesCurrent[id][timeframe].open = candle[1];
+                      this.candlesCurrent[id][timeframe].high = candle[2];
+                      this.candlesCurrent[id][timeframe].low = candle[3];
+                      this.candlesCurrent[id][timeframe].close = candle[4];
+                      this.candlesCurrent[id][timeframe].volume = candle[5];
+                      this.candlesCurrent[id][timeframe].type =
+                        this.candlesCurrent[id][timeframe].volume === 0
+                          ? cpz.CandleType.previous
+                          : cpz.CandleType.loaded;
+                    }
                   } else {
-                    this.logger.warn(
-                      "Wrong candle!",
-                      this.candlesCurrent[id][timeframe],
-                      candle
-                    );
+                    const candles: [
+                      number,
+                      number,
+                      number,
+                      number,
+                      number,
+                      number
+                    ][] = this.connector.ohlcvs[symbol][
+                      Timeframe.get(timeframe).str
+                    ].filter((c: any) => c[0] < date.valueOf());
+                    const candle = candles[candles.length - 1];
+                    if (candle) {
+                      this.candlesCurrent[id][timeframe] = {
+                        id: uuid(),
+                        exchange: this.exchange,
+                        asset,
+                        currency,
+                        timeframe,
+                        time: candle[0],
+                        timestamp: dayjs.utc(candle[0]).toISOString(),
+                        open: candle[1],
+                        high: candle[2],
+                        low: candle[3],
+                        close: candle[4],
+                        volume: candle[5],
+                        type:
+                          candle[5] === 0
+                            ? cpz.CandleType.previous
+                            : cpz.CandleType.loaded
+                      };
+                    }
                   }
-                } else {
-                  const candles: [
-                    number,
-                    number,
-                    number,
-                    number,
-                    number,
-                    number
-                  ][] = this.connector.ohlcvs[symbol][
-                    Timeframe.get(timeframe).str
-                  ].filter((c: any) => c[0] < date.valueOf());
-                  const candle = candles[candles.length - 1];
-                  this.candlesCurrent[id][timeframe] = {
-                    id: uuid(),
-                    exchange: this.exchange,
-                    asset,
-                    currency,
-                    timeframe,
-                    time: candle[0],
-                    timestamp: dayjs.utc(candle[0]).toISOString(),
-                    open: candle[1],
-                    high: candle[2],
-                    low: candle[3],
-                    close: candle[4],
-                    volume: candle[5],
-                    type:
-                      candle[5] === 0
-                        ? cpz.CandleType.previous
-                        : cpz.CandleType.loaded
-                  };
-                }
-                currentCandles.push(this.candlesCurrent[id][timeframe]);
-              })
-            );
+                  if (this.candlesCurrent[id][timeframe])
+                    currentCandles.push(this.candlesCurrent[id][timeframe]);
+                })
+              );
 
-            let tick: cpz.ExchangePrice;
-            if (
-              this.candlesCurrent[id][1440] &&
-              this.lastTick[id] &&
-              this.candlesCurrent[id][1440].close !== this.lastTick[id].price
-            ) {
-              const { time, timestamp, close } = this.candlesCurrent[id][1440];
-              tick = {
-                exchange: this.exchange,
-                asset,
-                currency,
-                time,
-                timestamp,
-                price: close
-              };
-              this.lastTick[id] = tick;
-            } else {
-              if (this.candlesCurrent[id][1440]) {
+              let tick: cpz.ExchangePrice;
+              if (
+                this.candlesCurrent[id][1440] &&
+                this.lastTick[id] &&
+                this.candlesCurrent[id][1440].close !== this.lastTick[id].price
+              ) {
                 const { time, timestamp, close } = this.candlesCurrent[
                   id
                 ][1440];
@@ -613,13 +646,30 @@ class BaseExwatcher extends Service {
                   price: close
                 };
                 this.lastTick[id] = tick;
+              } else if (!this.lastTick[id]) {
+                if (this.candlesCurrent[id][1440]) {
+                  const { time, timestamp, close } = this.candlesCurrent[
+                    id
+                  ][1440];
+                  tick = {
+                    exchange: this.exchange,
+                    asset,
+                    currency,
+                    time,
+                    timestamp,
+                    price: close
+                  };
+                  this.lastTick[id] = tick;
+                }
               }
-            }
-            if (currentCandles.length > 0 && tick) {
-              this.saveCurrentCandles(currentCandles);
-            }
-            if (tick) {
-              await this.publishTick(tick);
+              if (currentCandles.length > 0 && tick) {
+                this.saveCurrentCandles(currentCandles);
+              }
+              if (tick) {
+                await this.publishTick(tick);
+              }
+            } catch (err) {
+              this.loggger.error(err);
             }
           }
         )
@@ -628,84 +678,52 @@ class BaseExwatcher extends Service {
       if (currentTimeframes.length > 0) {
         // Сброс текущих свечей
         currentTimeframes.forEach((timeframe) => {
-          closedCandles[timeframe] = [];
           this.activeSubscriptions.forEach(
             ({ id, asset, currency }: cpz.Exwatcher) => {
               const symbol = this.getSymbol(asset, currency);
               if (
                 this.candlesCurrent[id] &&
-                this.candlesCurrent[id][timeframe]
+                this.candlesCurrent[id][timeframe] &&
+                !closedCandles.has(`${id}.${timeframe}`)
               ) {
-                closedCandles[timeframe].push({
-                  ...this.candlesCurrent[id][timeframe]
-                });
-                this.candlesCurrent[id][timeframe].id = uuid();
+                const candle = { ...this.candlesCurrent[id][timeframe] };
+                closedCandles.set(`${id}.${timeframe}`, candle);
+                this.log.debug("Closing by current timeframe", candle);
+                const { close } = candle;
                 this.candlesCurrent[id][timeframe].time = date
-                  .startOf(cpz.TimeUnit.minute)
+                  .startOf("minute")
                   .valueOf();
                 this.candlesCurrent[id][timeframe].timestamp = date
-                  .startOf(cpz.TimeUnit.minute)
+                  .startOf("minute")
                   .toISOString();
-
-                const candle: [
-                  number,
-                  number,
-                  number,
-                  number,
-                  number,
-                  number
-                ] = this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str][
-                  this.connector.ohlcvs[symbol][Timeframe.get(timeframe).str]
-                    .length - 1
-                ];
-                if (candle[0] === date.valueOf()) {
-                  this.candlesCurrent[id][timeframe].open = candle[1];
-                  this.candlesCurrent[id][timeframe].high = candle[2];
-                  this.candlesCurrent[id][timeframe].low = candle[3];
-                  this.candlesCurrent[id][timeframe].close = candle[4];
-                  this.candlesCurrent[id][timeframe].volume = candle[5];
-                } else {
-                  this.candlesCurrent[id][timeframe].open = candle[4];
-                  this.candlesCurrent[id][timeframe].high = candle[4];
-                  this.candlesCurrent[id][timeframe].low = candle[4];
-                  this.candlesCurrent[id][timeframe].close = candle[4];
-                  this.candlesCurrent[id][timeframe].volume = 0;
-                }
+                this.candlesCurrent[id][timeframe].high = close;
+                this.candlesCurrent[id][timeframe].low = close;
+                this.candlesCurrent[id][timeframe].open = close;
+                this.candlesCurrent[id][timeframe].volume = 0;
                 this.candlesCurrent[id][timeframe].type =
-                  this.candlesCurrent[id][timeframe].volume === 0
-                    ? cpz.CandleType.previous
-                    : cpz.CandleType.loaded;
+                  cpz.CandleType.previous;
               }
             }
           );
         });
       }
 
-      if (Object.keys(closedCandles).length > 0) {
+      if (closedCandles.size > 0) {
+        const candles = [...closedCandles.values()];
+        this.log.info(
+          `New candles\n${candles
+            .map(
+              ({ exchange, asset, currency, timeframe, timestamp }) =>
+                `${exchange}.${asset}.${currency}.${timeframe}.${timestamp}`
+            )
+            .join("\n")} `
+        );
+        this.saveCurrentCandles(candles);
+
         await Promise.all(
-          Object.keys(closedCandles).map(async (timeframe) => {
-            const candles = closedCandles[timeframe];
-            if (candles && Array.isArray(candles) && candles.length > 0) {
-              this.logger.info(
-                `New ${uniqueElementsBy(
-                  candles,
-                  (a, b) =>
-                    a.exchange === b.exchange &&
-                    a.asset === b.asset &&
-                    a.currency === b.currency
-                ).map(
-                  ({ exchange, asset, currency }) =>
-                    `${exchange}.${asset}.${currency}.${timeframe}`
-                )} candles`
-              );
-              this.saveCurrentCandles(candles);
-              await Promise.all(
-                candles.map(async (candle) => {
-                  if (candle.type !== cpz.CandleType.previous)
-                    await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
-                })
-              );
-            }
+          candles.map(async (candle) => {
+            if (candle.type !== cpz.CandleType.previous)
+              await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
           })
         );
       }
@@ -726,7 +744,7 @@ class BaseExwatcher extends Service {
 
       // Есть ли подходящие по времени таймфреймы
       const currentTimeframes = Timeframe.timeframesByDate(date.toISOString());
-      let closedCandles: { [key: string]: cpz.Candle[] } = {};
+      const closedCandles: Map<string, cpz.Candle> = new Map();
 
       await Promise.all(
         this.activeSubscriptions.map(
@@ -781,6 +799,31 @@ class BaseExwatcher extends Service {
                 const currentCandles: cpz.Candle[] = [];
                 Timeframe.validArray.forEach(async (timeframe) => {
                   if (trades.length > 0) {
+                    const candleTime = dayjs
+                      .utc(
+                        Timeframe.validTimeframeDatePrev(
+                          date.toISOString(),
+                          timeframe
+                        )
+                      )
+                      .valueOf();
+                    if (
+                      this.candlesCurrent[id][timeframe].time !== candleTime
+                    ) {
+                      const candle = { ...this.candlesCurrent[id][timeframe] };
+                      closedCandles.set(`${id}.${timeframe}`, candle);
+                      const { close } = candle;
+                      this.candlesCurrent[id][timeframe].time = candleTime;
+                      this.candlesCurrent[id][timeframe].timestamp = dayjs
+                        .utc(candleTime)
+                        .toISOString();
+                      this.candlesCurrent[id][timeframe].high = close;
+                      this.candlesCurrent[id][timeframe].low = close;
+                      this.candlesCurrent[id][timeframe].open = close;
+                      this.candlesCurrent[id][timeframe].volume = 0;
+                      this.candlesCurrent[id][timeframe].type =
+                        cpz.CandleType.previous;
+                    }
                     const prices = trades.map((t) => +t.price);
                     if (this.candlesCurrent[id][timeframe].volume === 0)
                       this.candlesCurrent[id][timeframe].open = round(
@@ -837,13 +880,14 @@ class BaseExwatcher extends Service {
       if (currentTimeframes.length > 0) {
         // Сброс текущих свечей
         currentTimeframes.forEach((timeframe) => {
-          closedCandles[timeframe] = [];
           this.activeSubscriptions.forEach(({ id }: cpz.Exwatcher) => {
-            if (this.candlesCurrent[id] && this.candlesCurrent[id][timeframe]) {
-              closedCandles[timeframe].push({
-                ...this.candlesCurrent[id][timeframe]
-              });
-              this.candlesCurrent[id][timeframe].id = uuid();
+            if (
+              this.candlesCurrent[id] &&
+              this.candlesCurrent[id][timeframe] &&
+              !closedCandles.has(`${id}.${timeframe}`)
+            ) {
+              const candle = { ...this.candlesCurrent[id][timeframe] };
+              closedCandles.set(`${id}.${timeframe}`, candle);
               const { close } = this.candlesCurrent[id][timeframe];
               this.candlesCurrent[id][timeframe].time = date
                 .startOf("minute")
@@ -861,31 +905,22 @@ class BaseExwatcher extends Service {
         });
       }
 
-      if (Object.keys(closedCandles).length > 0) {
+      if (closedCandles.size > 0) {
+        const candles = [...closedCandles.values()];
+        this.log.info(
+          `New candles\n${candles
+            .map(
+              ({ exchange, asset, currency, timeframe, timestamp }) =>
+                `${exchange}.${asset}.${currency}.${timeframe}.${timestamp}\n`
+            )
+            .join("\n")} `
+        );
+        this.saveCurrentCandles(candles);
+
         await Promise.all(
-          Object.keys(closedCandles).map(async (timeframe) => {
-            const candles = closedCandles[timeframe];
-            if (candles && Array.isArray(candles) && candles.length > 0) {
-              this.logger.info(
-                `New ${uniqueElementsBy(
-                  candles,
-                  (a, b) =>
-                    a.exchange === b.exchange &&
-                    a.asset === b.asset &&
-                    a.currency === b.currency
-                ).map(
-                  ({ exchange, asset, currency }) =>
-                    `${exchange}.${asset}.${currency}.${timeframe}`
-                )} candles`
-              );
-              this.saveCurrentCandles(candles);
-              await Promise.all(
-                candles.map(async (candle) => {
-                  if (candle.type !== cpz.CandleType.previous)
-                    await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
-                })
-              );
-            }
+          candles.map(async (candle) => {
+            if (candle.type !== cpz.CandleType.previous)
+              await this.broker.emit(cpz.Event.CANDLE_NEW, candle);
           })
         );
       }
