@@ -102,7 +102,7 @@ const brokerConfig = {
         // Custom span object converter before sending
         spanConverter: null,
         // Default tags. They will be added into all span tags.
-        defaultTags: registry => ({
+        defaultTags: (registry) => ({
           namespace: registry.broker.namespace,
           nodeID: registry.broker.nodeID
         })
@@ -143,13 +143,13 @@ const brokerConfig = {
     // Count of retries
     retries: 10,
     // First delay in milliseconds.
-    delay: 100,
+    delay: 500,
     // Maximum delay in milliseconds.
-    maxDelay: 1000,
+    maxDelay: 5000,
     // Backoff factor for delay. 2 means exponential backoff.
     factor: 2,
     // A function to check failed requests.
-    check: err => err && !!err.retryable
+    check: (err) => err && !!err.retryable
   },
 
   // Limit of calling level. If it reaches the limit, broker will throw an MaxCallLevelError error. (Infinite loop protection)
@@ -158,7 +158,7 @@ const brokerConfig = {
   // Number of seconds to send heartbeat packet to other nodes.
   heartbeatInterval: 15,
   // Number of seconds to wait before setting node to unavailable status.
-  heartbeatTimeout: 60,
+  heartbeatTimeout: 240,
 
   // Tracking requests and waiting for running requests before shutdowning. More info: https://moleculer.services/docs/0.13/fault-tolerance.html
   tracking: {
@@ -193,7 +193,7 @@ const brokerConfig = {
     // Number of milliseconds to switch from open to half-open state
     halfOpenTime: 10 * 1000,
     // A function to check failed requests.
-    check: err => err && err.code >= 500
+    check: (err) => err && err.code >= 500
   },
 
   // Settings of bulkhead feature. More info: https://moleculer.services/docs/0.13/fault-tolerance.html#Bulkhead
@@ -231,7 +231,7 @@ const brokerConfig = {
         // Sending interval in seconds
         interval: 60 * 30,
 
-        defaultLabels: registry => ({
+        defaultLabels: (registry) => ({
           namespace: registry.broker.namespace,
           nodeID: registry.broker.nodeID
         })

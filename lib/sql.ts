@@ -51,10 +51,11 @@ const adapterOptions = {
     useUTC: true
   },
   logging: false,
+  native: true,
   pool: {
     min: 1,
-    max: 10,
-    acquire: 120000
+    max: 100,
+    acquire: 240000
   }
 };
 
