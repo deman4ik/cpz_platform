@@ -432,7 +432,7 @@ class BaseExwatcher extends Service {
         throw new Error("Exchange is not supported");
       }
     } catch (err) {
-      this.log.error(`CCXT Subscribe Error ${id}`, err);
+      this.logger.error(`CCXT Subscribe Error ${id}`, err);
       if (err instanceof ccxtpro.NetworkError) {
         await this.initConnector();
       }
@@ -572,7 +572,7 @@ class BaseExwatcher extends Service {
                         const closedCandle = {
                           ...this.candlesCurrent[id][timeframe]
                         };
-                        this.log.debug("Closing", closedCandle);
+                        this.logger.debug("Closing", closedCandle);
                         closedCandles.set(`${id}.${timeframe}`, closedCandle);
                         this.candlesCurrent[id][timeframe].time = candle[0];
                         this.candlesCurrent[id][
@@ -688,7 +688,7 @@ class BaseExwatcher extends Service {
               ) {
                 const candle = { ...this.candlesCurrent[id][timeframe] };
                 closedCandles.set(`${id}.${timeframe}`, candle);
-                this.log.debug("Closing by current timeframe", candle);
+                this.logger.debug("Closing by current timeframe", candle);
                 const { close } = candle;
                 this.candlesCurrent[id][timeframe].time = date
                   .startOf("minute")
@@ -710,7 +710,7 @@ class BaseExwatcher extends Service {
 
       if (closedCandles.size > 0) {
         const candles = [...closedCandles.values()];
-        this.log.info(
+        this.logger.info(
           `New candles\n${candles
             .map(
               ({ exchange, asset, currency, timeframe, timestamp }) =>
@@ -907,7 +907,7 @@ class BaseExwatcher extends Service {
 
       if (closedCandles.size > 0) {
         const candles = [...closedCandles.values()];
-        this.log.info(
+        this.logger.info(
           `New candles\n${candles
             .map(
               ({ exchange, asset, currency, timeframe, timestamp }) =>
