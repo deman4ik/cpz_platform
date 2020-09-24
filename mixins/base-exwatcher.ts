@@ -1,6 +1,5 @@
 import { Service, ServiceBroker, Context } from "moleculer";
 import { cpz } from "../@types";
-import { v4 as uuid } from "uuid";
 import dayjs from "../lib/dayjs";
 import ccxtpro from "ccxt.pro";
 import cron from "node-cron";
@@ -472,8 +471,7 @@ class BaseExwatcher extends Service {
           }
         );
         this.candlesCurrent[id][timeframe] = {
-          ...candle,
-          id: uuid()
+          ...candle
         };
         this.saveCurrentCandles([this.candlesCurrent[id][timeframe]]);
       })
@@ -604,7 +602,6 @@ class BaseExwatcher extends Service {
                     const candle = candles[candles.length - 1];
                     if (candle) {
                       this.candlesCurrent[id][timeframe] = {
-                        id: uuid(),
                         exchange: this.exchange,
                         asset,
                         currency,
