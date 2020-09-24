@@ -5,7 +5,7 @@ import dayjs from "../lib/dayjs";
 import ccxtpro from "ccxt.pro";
 import cron from "node-cron";
 import Timeframe from "../utils/timeframe";
-import { uniqueElementsBy, round } from "../utils/helpers";
+import { uniqueElementsBy, round, groupBy } from "../utils/helpers";
 import { createFetchMethod } from "../utils/fetch";
 
 interface Trade {
@@ -82,6 +82,8 @@ class BaseExwatcher extends Service {
   exchange: string;
   subscriptions: { [key: string]: cpz.Exwatcher } = {};
   candlesCurrent: { [key: string]: { [key: string]: cpz.Candle } } = {};
+  candlesToSave: Map<string, cpz.Candle> = new Map();
+  candlesSaveTimer: NodeJS.Timer;
   lastTick: { [key: string]: cpz.ExchangePrice } = {};
   cronCheck: cron.ScheduledTask = cron.schedule(
     "*/30 * * * * *",
@@ -99,6 +101,25 @@ class BaseExwatcher extends Service {
   }
 
   async startedService() {
+    await this.initConnector();
+    await this.resubscribe();
+    this.cronHandleChanges.start();
+    this.cronCheck.start();
+    this.candlesSaveTimer = setTimeout(this.handleCandlesToSave.bind(this), 0);
+  }
+
+  async stoppedService() {
+    try {
+      this.cronHandleChanges.stop();
+      this.cronCheck.stop();
+      await this.unsubscribeAll();
+      await this.connector.close();
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  async initConnector() {
     if (this.exchange === "binance_futures") {
       this.connector = new ccxtpro.binance({
         enableRateLimit: true,
@@ -139,21 +160,6 @@ class BaseExwatcher extends Service {
         }
       );
     } else throw new Error("Unsupported exchange");
-
-    await this.resubscribe();
-    this.cronHandleChanges.start();
-    this.cronCheck.start();
-  }
-
-  async stoppedService() {
-    try {
-      this.cronHandleChanges.stop();
-      this.cronCheck.stop();
-      await this.unsubscribeAll();
-      await this.connector.close();
-    } catch (e) {
-      this.logger.error(e);
-    }
   }
 
   async handleImporterFinishedEvent(
@@ -208,6 +214,8 @@ class BaseExwatcher extends Service {
             this.addSubscription(asset, currency)
           )
         );
+
+      await this.watch();
     } catch (e) {
       this.logger.error(e);
     }
@@ -374,23 +382,61 @@ class BaseExwatcher extends Service {
     return `${asset}/${currency}`;
   }
 
-  async subscribeCCXT(id: string) {
-    const symbol = this.getSymbol(
-      this.subscriptions[id].asset,
-      this.subscriptions[id].currency
+  async watch(): Promise<void> {
+    await Promise.all(
+      this.activeSubscriptions.map(
+        async ({ asset, currency }: cpz.Exwatcher) => {
+          const symbol = this.getSymbol(asset, currency);
+          if (this.exchange === "binance_futures") {
+            await Promise.all(
+              Timeframe.validArray.map(async (timeframe) => {
+                try {
+                  await this.connector.watchOHLCV(
+                    symbol,
+                    Timeframe.timeframes[timeframe].str
+                  );
+                } catch (e) {
+                  this.logger.warn(symbol, timeframe, e);
+                }
+              })
+            );
+          } else {
+            try {
+              await this.connector.watchTrades(symbol);
+            } catch (e) {
+              this.logger.warn(symbol, e);
+            }
+          }
+        }
+      )
     );
-    if (this.exchange === "binance_futures") {
-      for (const timeframe of Timeframe.validArray) {
-        await this.connector.watchOHLCV(
-          symbol,
-          Timeframe.timeframes[timeframe].str
-        );
+  }
+
+  async subscribeCCXT(id: string) {
+    try {
+      const symbol = this.getSymbol(
+        this.subscriptions[id].asset,
+        this.subscriptions[id].currency
+      );
+      if (this.exchange === "binance_futures") {
+        for (const timeframe of Timeframe.validArray) {
+          await this.connector.watchOHLCV(
+            symbol,
+            Timeframe.timeframes[timeframe].str
+          );
+        }
+      } else if (this.exchange === "bitfinex" || this.exchange === "kraken") {
+        await this.connector.watchTrades(symbol);
+        await this.loadCurrentCandles(this.subscriptions[id]);
+      } else {
+        throw new Error("Exchange is not supported");
       }
-    } else if (this.exchange === "bitfinex" || this.exchange === "kraken") {
-      await this.connector.watchTrades(symbol);
-      await this.loadCurrentCandles(this.subscriptions[id]);
-    } else {
-      throw new Error("Exchange is not supported");
+    } catch (err) {
+      this.log.error(`CCXT Subscribe Error ${id}`, err);
+      if (err instanceof ccxtpro.NetworkError) {
+        await this.initConnector();
+      }
+      throw err;
     }
   }
 
@@ -429,7 +475,7 @@ class BaseExwatcher extends Service {
           ...candle,
           id: uuid()
         };
-        await this.saveCurrentCandles([this.candlesCurrent[id][timeframe]]);
+        this.saveCurrentCandles([this.candlesCurrent[id][timeframe]]);
       })
     );
   }
@@ -468,15 +514,6 @@ class BaseExwatcher extends Service {
             const currentCandles: cpz.Candle[] = [];
             await Promise.all(
               Timeframe.validArray.map(async (timeframe) => {
-                try {
-                  await this.connector.watchOHLCV(
-                    symbol,
-                    Timeframe.timeframes[timeframe].str
-                  );
-                } catch (e) {
-                  this.logger.warn(symbol, timeframe, e);
-                }
-
                 if (this.candlesCurrent[id][timeframe]) {
                   const candle: [
                     number,
@@ -546,10 +583,6 @@ class BaseExwatcher extends Service {
               })
             );
 
-            if (currentCandles.length > 0) {
-              await this.saveCurrentCandles(currentCandles);
-            }
-
             let tick: cpz.ExchangePrice;
             if (
               this.candlesCurrent[id][1440] &&
@@ -582,7 +615,9 @@ class BaseExwatcher extends Service {
                 this.lastTick[id] = tick;
               }
             }
-
+            if (currentCandles.length > 0 && tick) {
+              this.saveCurrentCandles(currentCandles);
+            }
             if (tick) {
               await this.publishTick(tick);
             }
@@ -663,7 +698,7 @@ class BaseExwatcher extends Service {
                     `${exchange}.${asset}.${currency}.${timeframe}`
                 )} candles`
               );
-              await this.saveCurrentCandles(candles);
+              this.saveCurrentCandles(candles);
               await Promise.all(
                 candles.map(async (candle) => {
                   if (candle.type !== cpz.CandleType.previous)
@@ -697,11 +732,7 @@ class BaseExwatcher extends Service {
         this.activeSubscriptions.map(
           async ({ id, asset, currency }: cpz.Exwatcher) => {
             const symbol = this.getSymbol(asset, currency);
-            try {
-              await this.connector.watchTrades(symbol);
-            } catch (e) {
-              this.logger.warn(symbol, e);
-            }
+
             if (this.connector.trades[symbol]) {
               // Запрашиваем все прошедшие трейды
               const trades: Trade[] = this.connector.trades[symbol].filter(
@@ -790,8 +821,8 @@ class BaseExwatcher extends Service {
                   }
                 });
 
-                if (currentCandles.length > 0) {
-                  await this.saveCurrentCandles(currentCandles);
+                if (currentCandles.length > 0 && tick) {
+                  this.saveCurrentCandles(currentCandles);
                 }
 
                 if (tick) {
@@ -847,7 +878,7 @@ class BaseExwatcher extends Service {
                     `${exchange}.${asset}.${currency}.${timeframe}`
                 )} candles`
               );
-              await this.saveCurrentCandles(candles);
+              this.saveCurrentCandles(candles);
               await Promise.all(
                 candles.map(async (candle) => {
                   if (candle.type !== cpz.CandleType.previous)
@@ -865,24 +896,64 @@ class BaseExwatcher extends Service {
     }
   }
 
-  async saveCurrentCandles(candles: cpz.Candle[]): Promise<void> {
+  getCandleMapKey(candle: cpz.Candle): string {
+    return `${this.exchange}.${candle.asset}.${candle.currency}.${candle.timeframe}.${candle.time}`;
+  }
+
+  async handleCandlesToSave() {
     try {
-      for (const candle of candles) {
-        try {
-          const result = await this.broker.call(
-            `${cpz.Service.DB_CANDLES}${candle.timeframe}.upsert`,
-            {
-              entities: [candle]
+      if (this.candlesToSave.size > 0) {
+        const grouped: { [key: string]: cpz.Candle[] } = groupBy(
+          [...this.candlesToSave.values()],
+          "timeframe"
+        );
+
+        for (const [timeframe, candles] of [...Object.entries(grouped)]) {
+          try {
+            this.logger.debug(
+              `Saving candles ${candles
+                .map(
+                  ({ asset, currency, timeframe, timestamp }) =>
+                    `${asset}.${currency}.${timeframe}.${timestamp}`
+                )
+                .join(" ")}`
+            );
+            for (const candle of candles) {
+              try {
+                const result = await this.broker.call(
+                  `${cpz.Service.DB_CANDLES}${candle.timeframe}.upsert`,
+                  {
+                    entities: [candle]
+                  }
+                );
+                if (!result) this.logger.error("Failed to save candle", candle);
+              } catch (e) {
+                this.logger.error(e);
+              }
             }
-          );
-          if (!result) this.logger.error("Failed to save candle", candle);
-        } catch (e) {
-          this.logger.error(e);
+
+            candles.forEach((candle) => {
+              this.candlesToSave.delete(this.getCandleMapKey(candle));
+            });
+          } catch (e) {
+            this.logger.error(e);
+          }
         }
       }
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(`Failed to save candles`, error);
     }
+
+    this.candlesSaveTimer = setTimeout(
+      this.handleCandlesToSave.bind(this),
+      2000
+    );
+  }
+
+  async saveCurrentCandles(candles: cpz.Candle[]): Promise<void> {
+    candles.forEach(({ ...props }) => {
+      this.candlesToSave.set(this.getCandleMapKey({ ...props }), { ...props });
+    });
   }
 }
 

@@ -64,7 +64,7 @@ function underscoreToCamelCase(string: string): string {
  * @param {Array} part
  */
 function arraysDiff<T>(full: T[], part: T[]): T[] {
-  return full.filter(v => !part.includes(v));
+  return full.filter((v) => !part.includes(v));
 }
 
 /**
@@ -111,7 +111,7 @@ function chunkArrayIncrEnd<T>(array: T[], chunkSize: number): T[][] {
  */
 function chunkNumberToArray(number: number, chunkSize: number): number[] {
   const array = [...Array(number + 1).keys()].slice(1);
-  return chunkArray(array, chunkSize).map(val => val.length);
+  return chunkArray(array, chunkSize).map((val) => val.length);
 }
 
 /**
@@ -124,7 +124,7 @@ function chunkNumberToArray(number: number, chunkSize: number): number[] {
  */
 function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
   return arr.reduce((acc, v) => {
-    if (!acc.some(x => fn(v, x))) acc.push(v);
+    if (!acc.some((x) => fn(v, x))) acc.push(v);
     return acc;
   }, []);
 }
@@ -134,7 +134,7 @@ function uniqueElementsBy<T>(arr: T[], fn: (a: T, b: T) => boolean): T[] {
  *
  * @param ms miliseconds
  */
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Find last element where property is max
@@ -146,7 +146,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function findLastByMaxProp(arr: { [key: string]: any }[], propName: string) {
   return arr
     .filter(
-      el =>
+      (el) =>
         el[propName] ===
         arr.reduce((max, p) => (p[propName] > max ? p[propName] : max), 0)
     )
@@ -163,7 +163,7 @@ function findLastByMaxProp(arr: { [key: string]: any }[], propName: string) {
 function findLastByMinProp(arr: { [key: string]: any }[], propName: string) {
   return arr
     .filter(
-      el =>
+      (el) =>
         el[propName] ===
         arr.reduce((min, p) => (p[propName] < min ? p[propName] : min), 0)
     )
@@ -195,7 +195,7 @@ function deepMapKeys(
   f: (key: string) => string
 ): { [key: string]: any } {
   return Array.isArray(obj)
-    ? obj.map(val => deepMapKeys(val, f))
+    ? obj.map((val) => deepMapKeys(val, f))
     : typeof obj === "object"
     ? Object.keys(obj).reduce(
         (acc: { [key: string]: any }, current: string) => {
@@ -214,7 +214,7 @@ function deepMapKeys(
 function underscoreToCamelCaseKeys(obj: {
   [key: string]: any;
 }): { [key: string]: any } {
-  return deepMapKeys(obj, key => underscoreToCamelCase(key));
+  return deepMapKeys(obj, (key) => underscoreToCamelCase(key));
 }
 
 function datesToISOString(data: { [key: string]: any } | any[]) {
@@ -244,7 +244,7 @@ const equals = (a: any, b: any): boolean => {
   if (a.prototype !== b.prototype) return false;
   let keys = Object.keys(a);
   if (keys.length !== Object.keys(b).length) return false;
-  return keys.every(k => equals(a[k], b[k]));
+  return keys.every((k) => equals(a[k], b[k]));
 };
 
 function flatten(
@@ -292,10 +292,10 @@ function addPercent(numb: number, perc: number) {
 
 const groupBy = (
   arr: { [key: string]: any }[],
-  fn: (...params: any[]) => any | string
+  fn: ((...params: any[]) => any) | string
 ) =>
   arr
-    .map(typeof fn === "function" ? fn : val => val[fn])
+    .map(typeof fn === "function" ? fn : (val) => val[fn])
     .reduce((acc, val, i) => {
       acc[val] = (acc[val] || []).concat(arr[i]);
       return acc;
