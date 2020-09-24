@@ -567,13 +567,13 @@ class Robot {
   }
 
   handleCandle(candle: cpz.Candle) {
-    if (this._lastCandle && candle.id === this._lastCandle.id) {
+    if (this._lastCandle && candle.time === this._lastCandle.time) {
       return {
         success: false,
-        error: `Robot #${this._id} candle already processed`
+        error: `Robot #${this._id} candle ${candle.timestamp} already processed`
       };
     }
-    if (this._candles.filter(({ time }) => time === candle.time).length === 0) {
+    if (!this._candles.find(({ time }) => time === candle.time)) {
       this._candles = [...this._candles, candle];
     }
     this._candles = this._candles.slice(-this._settings.requiredHistoryMaxBars);
