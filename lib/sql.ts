@@ -47,7 +47,7 @@ const adapterOptions = {
   host: process.env.PG_HOST,
   port: process.env.PG_PORT,
   dialectOptions: {
-    ssl: true,
+    ssl: "require",
     useUTC: true
   },
   logging: false,
