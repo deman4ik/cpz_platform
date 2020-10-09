@@ -204,9 +204,13 @@ class RobotWorkerService extends Service {
           }
         );
         robot.setStrategy(null);
-        robot.handleCurrentCandle(currentCandle);
+        const { success, error } = robot.handleCurrentCandle(currentCandle);
 
-        robot.checkAlerts();
+        if (success) {
+          robot.checkAlerts();
+        } else {
+          this.logger.error(error);
+        }
       } else if (type === cpz.RobotJobType.candle) {
         // New candle - running strategy
         robot.setStrategy(this._strategiesCode[robot.strategyName]);

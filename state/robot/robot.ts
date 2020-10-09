@@ -598,7 +598,14 @@ class Robot {
   }
 
   handleCurrentCandle(candle: cpz.Candle) {
-    this._candle = candle;
+    if (candle.time > this._lastCandle.time) {
+      this._candle = candle;
+      return { success: true };
+    }
+    return {
+      success: false,
+      error: `Robot #${this._id} wrong current candle ${candle.timestamp} when last candle was ${this._lastCandle.timestamp}`
+    };
   }
 
   clearEvents() {
